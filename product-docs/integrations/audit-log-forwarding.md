@@ -36,7 +36,7 @@ Every recorded change is fanned out to each active audit sink whose domain scope
 
 Choose a **Transport** per sink:
 
-- **HTTP** — POST each event as JSON to a collector URL (Splunk HEC, Elastic, Sumo Logic, etc.). Authentication is carried by static **HTTP headers**.
+- **HTTP** — POST each event as JSON to a collector URL (Splunk HEC, Elastic, Sumo Logic, etc.). Authentication is either static **HTTP headers** or **OAuth 2.0 client credentials**, where CISO Assistant obtains a bearer token and renews it before expiry. See [Microsoft Sentinel](sentinel.md) for a worked OAuth example.
 - **Kafka** — produce each event to a **Topic** on your own broker, or to a managed bus such as Azure Event Hubs (Kafka endpoint). Connection and SASL settings live under **Security & authentication**.
 
 ## Event formats
@@ -54,7 +54,7 @@ Choose an **Event format** per sink:
 2. Open the **Audit log forwarding** tab in **Settings** and click **Add audit sink**.
 3. Pick the **Transport** and **Event format**.
 4. Fill in the transport details:
-   - **HTTP** — the collector **URL** and any **HTTP headers** (a JSON object of static auth headers, e.g. an `Authorization` header for a Splunk HEC token).
+   - **HTTP** — the collector **URL** and any **HTTP headers** (a JSON object of static auth headers, e.g. an `Authorization` header for a Splunk HEC token). Set **Body envelope** to **JSON array** for collectors that expect a batch rather than a single object. Under **Authentication**, choose **Static headers** or **OAuth 2.0 client credentials** — the latter adds **Token endpoint**, **Client ID**, **Client secret** and **Scope**.
    - **Kafka** — **Bootstrap servers** (a comma-separated `host:port` list) and the **Topic**. Open **Security & authentication** for **Security protocol**, **SASL mechanism**, **SASL username**, and **SASL password**.
 5. Optionally set **Target Domains** to limit forwarding to specific domains. Leave empty to forward events from all domains.
 6. Save.
@@ -63,7 +63,7 @@ Audit sinks are administrator-managed and apply instance-wide; they are not owne
 
 ### Secrets
 
-Authentication secrets — the HTTP headers and the Kafka SASL password — are write-only. They are never returned to the browser after saving. When editing an existing sink, those fields show *"A value is already set. Leave blank to keep it, or enter a new one to replace it."* — leave them blank to keep the stored value.
+Authentication secrets — the HTTP headers, the OAuth client secret and the Kafka SASL password — are write-only. They are never returned to the browser after saving. When editing an existing sink, those fields show *"A value is already set. Leave blank to keep it, or enter a new one to replace it."* — leave them blank to keep the stored value.
 
 ***
 
@@ -137,6 +137,7 @@ The field-level diff and the originating domain (`folder_id`) ride in `unmapped`
 
 ## Related
 
+- [Microsoft Sentinel](sentinel.md) — worked setup and validation for the Logs Ingestion API.
 - [Audit log](../features/audit-log.md) — the source record being forwarded.
 - [Outgoing webhooks](webhooks.md) — the delivery pipeline this reuses, for per-object event subscriptions.
 - [Feature flags](../configuration/settings/feature-flags.md) — enabling the capability.

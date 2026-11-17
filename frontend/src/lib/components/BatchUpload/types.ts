@@ -23,13 +23,7 @@ export interface FileEntry {
 }
 
 export type BatchOutcome =
-	| 'created'
-	| 'revision_added'
-	| 'replaced'
-	| 'renamed'
-	| 'skipped'
-	| 'duplicate'
-	| 'error';
+	'created' | 'revision_added' | 'replaced' | 'renamed' | 'skipped' | 'duplicate' | 'error';
 
 export interface BatchSummary {
 	total: number;

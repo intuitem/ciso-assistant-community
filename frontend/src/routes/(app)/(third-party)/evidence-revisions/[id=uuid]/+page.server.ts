@@ -1,15 +1,15 @@
-import { handleErrorResponse } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
-import { m } from '$paraglide/messages';
+import { handleErrorResponse } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { m } from '#paraglide/messages.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { nestedDeleteFormAction } from '#lib/utils/actions.js';
 
 export const load: PageServerLoad = async (event) => {
 	return await loadDetail({

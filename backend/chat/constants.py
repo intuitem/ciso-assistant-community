@@ -77,4 +77,5 @@ LANG_MAP = {
     "zh": "Chinese",
     "lt": "Lithuanian",
     "ko": "Korean",
+    "nb": "Norwegian Bokmål",
 }

@@ -1,15 +1,17 @@
 <script lang="ts">
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import type { PageData, ActionData } from './$types';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -37,12 +39,52 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	// The review queue opens on what the table shows: same filters, same search.
+	let tableFilters: Record<string, any> = $state({});
+	let tableSearch = $state('');
+	const reviewHref = $derived.by(() => {
+		const params = new URLSearchParams();
+		for (const [field, values] of Object.entries(tableFilters)) {
+			if (Array.isArray(values)) {
+				for (const v of values) if (v?.value) params.append(v.param ?? field, v.value);
+			}
+		}
+		if (tableSearch) params.set('search', tableSearch);
+		const search = params.toString();
+		return `/evidences/review${search ? `?${search}` : ''}`;
+	});
+
+	// `THIRD_PARTY_URL_MODEL` overlaps `URL_MODEL`, and for those models this route wins over
+	// `(internal)/[model=urlmodel]` — for internal users too. So the intent lands here.
+	$effect(() => {
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
 </script>
 
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				onFilterChange={(filters) => (tableFilters = filters)}
+				onQueryChange={(query) => (tableSearch = new URLSearchParams(query).get('search') ?? '')}
+			>
+				{#snippet optButton()}
+					{#if URLModel === 'evidences' && !page.data.user?.is_third_party}
+						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							<a
+								href={reviewHref}
+								class="inline-block p-3 btn-mini-secondary w-12 text-center focus:relative"
+								title={m.reviewEvidences()}
+								aria-label={m.reviewEvidences()}
+								data-testid="review-evidences-button"><i class="fa-solid fa-clipboard-check"></i></a
+							>
+						</span>
+					{/if}
+				{/snippet}
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
@@ -58,39 +100,15 @@
 								{#if ['applied-controls', 'assets'].includes(URLModel)}
 									<a
 										href="{URLModel}/export/"
-										class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
 									>
 								{/if}
 							{:else if URLModel === 'risk-matrices'}
 								<a
-									href="/libraries?object_type=risk_matrix"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'frameworks'}
-								<a
-									href="/libraries?object_type=frameworks"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'requirement-mapping-sets'}
-								<a
-									href="/libraries?object_type=requirement_mapping_set"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
-									data-testid="add-button"
-									id="add-button"
-									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
-								>
-							{:else if URLModel === 'risk-matrices'}
-								<a
 									href="/libraries?object_type=risk_matrices"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -98,7 +116,7 @@
 							{:else if URLModel === 'frameworks'}
 								<a
 									href="/libraries?object_type=frameworks"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -106,7 +124,31 @@
 							{:else if URLModel === 'requirement-mapping-sets'}
 								<a
 									href="/libraries?object_type=requirement_mapping_sets"
-									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'risk-matrices'}
+								<a
+									href="/libraries?object_type=risk_matrices"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'frameworks'}
+								<a
+									href="/libraries?object_type=frameworks"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'requirement-mapping-sets'}
+								<a
+									href="/libraries?object_type=requirement_mapping_sets"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
@@ -114,6 +156,15 @@
 							{/if}
 						</span>
 					</div>
+				{/snippet}
+				{#snippet badge(key, row)}
+					{#if URLModel === 'compliance-assessments' && key === 'perimeter' && row.meta?.entity_assessments?.length}
+						<a
+							href="/entity-assessments/{row.meta.entity_assessments[0].id}"
+							class="badge inline-block bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-md border border-teal-200 rotate-[-6deg] font-semibold uppercase tracking-wide hover:bg-teal-200"
+							title={row.meta.entity_assessments[0].str}>tprm</a
+						>
+					{/if}
 				{/snippet}
 			</ModelTable>
 		{/key}

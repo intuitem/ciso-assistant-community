@@ -1,15 +1,16 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
 	import LegalIdentifierField from '../LegalIdentifierField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -41,6 +42,7 @@
 		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
 	let defaultCriticality = $derived(
 		getCriticality(
 			$formData.default_dependency,
@@ -73,6 +75,26 @@
 		helpText={m.moreOnTerminologiesHelpText()}
 		multiple
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}
+		field="tier"
+		cacheLock={cacheLocks['tier']}
+		bind:cachedValue={formDataCache['tier']}
+		label={m.tier()}
+		helpText={m.tierHelpText()}
+		nullable
+	/>
+	{#if ($formData.tier ?? null) !== (object.tier?.id ?? object.tier ?? null)}
+		<TextField
+			{form}
+			field="tier_note"
+			label={m.tierNote()}
+			helpText={m.tierNoteHelpText()}
+			cacheLock={cacheLocks['tier_note']}
+			bind:cachedValue={formDataCache['tier_note']}
+		/>
+	{/if}
 {/if}
 <LegalIdentifierField
 	{form}
@@ -92,6 +114,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
 		field="parent_entity"
 		optionsSelf={object}
 		nullable
@@ -99,6 +122,13 @@
 		bind:cachedValue={formDataCache['parent_entity']}
 		label={m.parentEntity()}
 		helpText={m.parentEntityHelpText()}
+	/>
+	<TextArea
+		{form}
+		field="address"
+		label={m.address()}
+		cacheLock={cacheLocks['address']}
+		bind:cachedValue={formDataCache['address']}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -118,15 +148,17 @@
 		bind:cachedValue={formDataCache['currency']}
 		nullable
 	/>
-	<AutocompleteSelect
-		{form}
-		field="dora_provider_person_type"
-		options={model.selectOptions?.dora_provider_person_type}
-		label={m.doraProviderPersonType()}
-		cacheLock={cacheLocks['dora_provider_person_type']}
-		bind:cachedValue={formDataCache['dora_provider_person_type']}
-		nullable
-	/>
+	{#if doraEnabled}
+		<AutocompleteSelect
+			{form}
+			field="dora_provider_person_type"
+			options={model.selectOptions?.dora_provider_person_type}
+			label={m.doraProviderPersonType()}
+			cacheLock={cacheLocks['dora_provider_person_type']}
+			bind:cachedValue={formDataCache['dora_provider_person_type']}
+			nullable
+		/>
+	{/if}
 	<TextField
 		{form}
 		field="reference_link"
@@ -151,45 +183,47 @@
 	/>
 </Dropdown>
 
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-scale-balanced"
-	header={m.doraSpecific()}
->
-	<AutocompleteSelect
-		{form}
-		field="dora_entity_type"
-		options={model.selectOptions?.dora_entity_type}
-		label={m.doraEntityType()}
-		cacheLock={cacheLocks['dora_entity_type']}
-		bind:cachedValue={formDataCache['dora_entity_type']}
-		nullable
-	/>
-	<AutocompleteSelect
-		{form}
-		field="dora_entity_hierarchy"
-		options={model.selectOptions?.dora_entity_hierarchy}
-		label={m.doraEntityHierarchy()}
-		cacheLock={cacheLocks['dora_entity_hierarchy']}
-		bind:cachedValue={formDataCache['dora_entity_hierarchy']}
-		nullable
-	/>
-	<NumberField
-		{form}
-		field="dora_assets_value"
-		label={m.doraAssetsValue()}
-		cacheLock={cacheLocks['dora_assets_value']}
-		bind:cachedValue={formDataCache['dora_assets_value']}
-	/>
-	<TextField
-		{form}
-		field="dora_competent_authority"
-		label={m.doraCompetentAuthority()}
-		cacheLock={cacheLocks['dora_competent_authority']}
-		bind:cachedValue={formDataCache['dora_competent_authority']}
-	/>
-</Dropdown>
+{#if doraEnabled}
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-scale-balanced"
+		header={m.doraSpecific()}
+	>
+		<AutocompleteSelect
+			{form}
+			field="dora_entity_type"
+			options={model.selectOptions?.dora_entity_type}
+			label={m.doraEntityType()}
+			cacheLock={cacheLocks['dora_entity_type']}
+			bind:cachedValue={formDataCache['dora_entity_type']}
+			nullable
+		/>
+		<AutocompleteSelect
+			{form}
+			field="dora_entity_hierarchy"
+			options={model.selectOptions?.dora_entity_hierarchy}
+			label={m.doraEntityHierarchy()}
+			cacheLock={cacheLocks['dora_entity_hierarchy']}
+			bind:cachedValue={formDataCache['dora_entity_hierarchy']}
+			nullable
+		/>
+		<NumberField
+			{form}
+			field="dora_assets_value"
+			label={m.doraAssetsValue()}
+			cacheLock={cacheLocks['dora_assets_value']}
+			bind:cachedValue={formDataCache['dora_assets_value']}
+		/>
+		<TextField
+			{form}
+			field="dora_competent_authority"
+			label={m.doraCompetentAuthority()}
+			cacheLock={cacheLocks['dora_competent_authority']}
+			bind:cachedValue={formDataCache['dora_competent_authority']}
+		/>
+	</Dropdown>
+{/if}
 
 <Dropdown
 	open={false}
@@ -279,7 +313,7 @@
 		<i class="fa-solid fa-equals"></i>
 		<div class="flex flex-col mb-5">
 			<label for="default_criticality" class="text-sm font-semibold">
-				{m.criticality()}
+				{m.defaultCriticality()}
 			</label>
 			<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 				{defaultCriticality}

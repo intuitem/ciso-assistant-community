@@ -1,25 +1,26 @@
 <script lang="ts">
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { superForm } from 'sveltekit-superforms';
+	} from '#lib/components/Modals/stores.js';
+	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { z } from 'zod';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { browser } from '$app/env';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 
 	interface Props {
@@ -31,7 +32,6 @@
 		incidentRef?: { id: string; name: string } | null;
 		reportId?: string | null;
 		validation?: { valid: boolean; errors: string[] } | null;
-		userOptions?: { id: string; label: string; email: string }[];
 	}
 
 	let {
@@ -42,8 +42,7 @@
 		formAction,
 		incidentRef = null,
 		reportId = null,
-		validation = null,
-		userOptions = []
+		validation = null
 	}: Props = $props();
 
 	const schema = modelSchema('dora-incident-reports');
@@ -68,7 +67,7 @@
 			// In create mode: redirect to the new report's all-in-one page
 			// In edit mode: stay on page (no redirect)
 			if (mode === 'create' && updatedForm.message?.redirect) {
-				goto(getSecureRedirect(updatedForm.message.redirect));
+				gotoOrLoad(getSecureRedirect(updatedForm.message.redirect));
 			}
 		}
 	});
@@ -179,7 +178,7 @@
 		if (browser) {
 			const url = new URL(window.location.href);
 			const next = getSecureRedirect(url.searchParams.get('next'));
-			if (next) goto(next);
+			if (next) gotoOrLoad(next);
 			else history.back();
 		}
 	}
@@ -335,12 +334,36 @@
 		modalStore.trigger(modal);
 	}
 
+	// Fill contact fields from a lazily searched user picker (server-side search
+	// via /users/autocomplete instead of fetching every user up front).
+	const contactFillSchema = z.object({
+		primary_fill: z.array(z.string()).optional().nullable(),
+		secondary_fill: z.array(z.string()).optional().nullable()
+	});
+	const contactFillForm = superForm(defaults(zod(contactFillSchema)), {
+		SPA: true,
+		validators: zod(contactFillSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+	let primaryFillOptions: any[] | undefined = $state();
+	let secondaryFillOptions: any[] | undefined = $state();
+
 	// Fill contact fields from a selected user
-	function fillContact(prefix: 'primary' | 'secondary', userId: string) {
-		const user = userOptions.find((u) => u.id === userId);
+	function fillContact(prefix: 'primary' | 'secondary', userId: string, options?: any[]) {
+		if (!userId) return;
+		const user: any = (options ?? []).find((o: any) => String(o.value) === String(userId));
 		if (!user) return;
-		$formData[`${prefix}_contact_name`] = user.label;
-		$formData[`${prefix}_contact_email`] = user.email;
+		$formData[`${prefix}_contact_name`] =
+			`${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+			user.str ||
+			user.email ||
+			user.label;
+		$formData[`${prefix}_contact_email`] = user.email || '';
 	}
 </script>
 
@@ -398,10 +421,8 @@
 				>
 				<button
 					class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 text-xs"
-					onclick={() => (showValidationErrors = false)}
+					onclick={() => (showValidationErrors = false)}><i class="fa-solid fa-xmark"></i></button
 				>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
 			</div>
 			<ul class="space-y-1">
 				{#each validation.errors as error}
@@ -517,22 +538,23 @@
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
 						<div class="space-y-3">
-							<div class="flex items-center justify-between">
+							<div class="flex items-center justify-between gap-2">
 								<h3 class="font-medium text-sm text-surface-600-400">{m.doraPrimaryContact()}</h3>
-								<select
-									class="select text-xs w-auto max-w-48"
-									onchange={(e) => {
-										fillContact('primary', e.currentTarget.value);
-										e.currentTarget.value = '';
-									}}
-								>
-									<option value="">{safeTranslate('fillFromUser')}</option>
-									{#each userOptions as user}
-										<option value={user.id}>{user.label}</option>
-									{/each}
-								</select>
+								<AutocompleteSelect
+									form={contactFillForm}
+									field="primary_fill"
+									optionsEndpoint="users"
+									lazy
+									includeAllOptionFields
+									baseClass="w-56"
+									placeholder={safeTranslate('fillFromUser')}
+									bind:cachedOptions={primaryFillOptions}
+									onChange={(value) => fillContact('primary', value, primaryFillOptions)}
+								/>
 							</div>
+
 							<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
+
 							<TextField
 								form={_form}
 								field="primary_contact_email"
@@ -546,20 +568,19 @@
 							/>
 						</div>
 						<div class="space-y-3">
-							<div class="flex items-center justify-between">
+							<div class="flex items-center justify-between gap-2">
 								<h3 class="font-medium text-sm text-surface-600-400">{m.doraSecondaryContact()}</h3>
-								<select
-									class="select text-xs w-auto max-w-48"
-									onchange={(e) => {
-										fillContact('secondary', e.currentTarget.value);
-										e.currentTarget.value = '';
-									}}
-								>
-									<option value="">{safeTranslate('fillFromUser')}</option>
-									{#each userOptions as user}
-										<option value={user.id}>{user.label}</option>
-									{/each}
-								</select>
+								<AutocompleteSelect
+									form={contactFillForm}
+									field="secondary_fill"
+									optionsEndpoint="users"
+									lazy
+									includeAllOptionFields
+									baseClass="w-56"
+									placeholder={safeTranslate('fillFromUser')}
+									bind:cachedOptions={secondaryFillOptions}
+									onChange={(value) => fillContact('secondary', value, secondaryFillOptions)}
+								/>
 							</div>
 							<TextField
 								form={_form}
@@ -589,6 +610,7 @@
 					</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
+
 						<TextField
 							form={_form}
 							field="competent_authority_code"
@@ -902,6 +924,7 @@
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField form={_form} field="root_causes_other" label={m.rootCausesOther()} />
+
 						<TextField
 							form={_form}
 							field="root_cause_addressing_date_time"
@@ -1204,7 +1227,7 @@
 									</a>
 								{:else}
 									<span
-										class="btn preset-filled-surface-500 font-semibold px-6 opacity-50 cursor-not-allowed"
+										class="btn preset-tonal-surface font-semibold px-6 opacity-50 cursor-not-allowed"
 										title={m.schemaInvalid()}
 									>
 										<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}

@@ -11,8 +11,17 @@ import structlog
 from datetime import timedelta
 
 from django.apps import apps
+from django.core.exceptions import FieldDoesNotExist, FieldError
 from django.db.models import Q, Count
 from django.utils import timezone
+
+from .risk_levels import (
+    LEVEL_FIELDS,
+    known_level_names,
+    level_label,
+    matrices_for_scenarios,
+    resolve_levels_by_matrix,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -22,9 +31,7 @@ LIST_PAGE_SIZE = 20
 SUMMARY_THRESHOLD = 30
 
 
-def execute_tool_query(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Execute a structured query from tool call arguments.
 
@@ -34,9 +41,12 @@ def execute_tool_query(
         domain: folder/domain name filter
         status, treatment, result: status-like filters
         priority, category, effort, severity: categorization filters
+        risk_level, risk_level_scope: risk scenario rating filters
         date_filter: "overdue", "due_this_month", "expiring_this_month", "created_recently"
         search: text search in name/description/ref_id
         page: page number (default 1)
+
+    scope: ReadScope — every row returned is one the user could read via the API.
 
     parsed_context: optional ParsedContext from page_context.py — when provided,
         queries are auto-scoped to the parent object (e.g., risk scenarios for
@@ -57,14 +67,13 @@ def execute_tool_query(
     except LookupError:
         return None
 
-    # Base queryset filtered by accessible folders
-    qs = model_class.objects.all()
-    if model_name == "Folder":
-        qs = qs.filter(id__in=accessible_folder_ids)
-    elif hasattr(model_class, "folder_id"):
-        qs = qs.filter(folder_id__in=accessible_folder_ids)
-    elif hasattr(model_class, "compliance_assessment"):
-        qs = qs.filter(compliance_assessment__folder_id__in=accessible_folder_ids)
+    qs = scope.queryset(model_class)
+    if model_name == "RiskScenario":
+        qs = qs.select_related("risk_assessment__risk_matrix")
+    if model_name == "RequirementAssessment":
+        # Non-assessable nodes are headings. Progress, the donut and flash mode
+        # all ignore them, so counting them here would disagree with the page.
+        qs = qs.filter(requirement__assessable=True)
 
     filters_applied = []
 
@@ -79,12 +88,18 @@ def execute_tool_query(
     # Domain/folder filter
     domain = arguments.get("domain")
     if domain:
-        folder_ids = _resolve_domain(domain, accessible_folder_ids)
+        folder_ids = _resolve_domain(domain, scope.folder_ids)
         if folder_ids:
-            if hasattr(model_class, "folder_id"):
+            if model_name == "Folder":
+                qs = qs.filter(id__in=folder_ids)
+            elif hasattr(model_class, "folder_id"):
                 qs = qs.filter(folder_id__in=folder_ids)
             elif hasattr(model_class, "compliance_assessment"):
                 qs = qs.filter(compliance_assessment__folder_id__in=folder_ids)
+            else:
+                # No folder to filter on — say so rather than silently widening
+                folder_ids = []
+        if folder_ids:
             filters_applied.append(f"domain = {domain}")
         else:
             # Domain not found — return empty result rather than unfiltered
@@ -98,60 +113,143 @@ def execute_tool_query(
                 "objects": [],
             }
 
-    # Status filter — validate against model's actual choices
-    status = arguments.get("status")
-    if status and hasattr(model_class, "status"):
-        field = model_class._meta.get_field("status")
-        valid_statuses = {c[0] for c in field.choices} if field.choices else None
-        if valid_statuses is None or status in valid_statuses:
-            qs = qs.filter(status=status)
-            filters_applied.append(f"status = {status}")
+    # Choice-field filters. All accept several values so a question like
+    # "non-compliant or partially compliant" is one authoritative count rather
+    # than two counts the model has to add up itself.
+    # Severity is resolved per model: Incident's 1..6 is not core.Severity's -1..4.
+    for field in (
+        "status",
+        "treatment",
+        "result",
+        "priority",
+        "category",
+        "effort",
+        "severity",
+    ):
+        raw = arguments.get(field)
+        if raw is None or raw == "":
+            continue
+        # a value the named field does not know may be one of another choice
+        # field's ("category: primary" is an asset's type); never drop a filter
+        # silently, which would answer with the unfiltered set
+        matched: dict[str, list] = {}
+        for candidate in _as_list(raw):
+            resolved = (
+                (field, _resolve_choice_value(model_class, field, candidate))
+                if _has_field(model_class, field)
+                else (field, None)
+            )
+            if resolved[1] is None:
+                resolved = _resolve_on_other_choice_field(
+                    model_class, field, candidate, scope
+                )
+            if resolved and resolved[1] is not None:
+                values = matched.setdefault(resolved[0], [])
+                if resolved[1] not in values:
+                    values.append(resolved[1])
+        if not matched:
+            return _unresolved_filter_result(
+                model_class,
+                field,
+                raw,
+                model_name,
+                display_name,
+                url_slug,
+                action,
+                filters_applied,
+                scope,
+            )
+        for name, values in matched.items():
+            qs = qs.filter(**{f"{name}__in": values})
+            labels = [_choice_label(model_class, name, v) for v in values]
+            filters_applied.append(f"{name} = {' or '.join(labels)}")
 
-    # Treatment filter (RiskScenario)
-    treatment = arguments.get("treatment")
-    if treatment and hasattr(model_class, "treatment"):
-        qs = qs.filter(treatment=treatment)
-        filters_applied.append(f"treatment = {treatment}")
+    # Negation: "not active" excludes rather than listing every other status
+    excluded = arguments.get("exclude_status")
+    if excluded and _has_field(model_class, "status"):
+        values = [
+            v
+            for v in (
+                _resolve_choice_value(model_class, "status", c)
+                for c in _as_list(excluded)
+            )
+            if v is not None
+        ]
+        if not values:
+            return _unresolved_filter_result(
+                model_class,
+                "status",
+                excluded,
+                model_name,
+                display_name,
+                url_slug,
+                action,
+                filters_applied,
+                scope,
+            )
+        qs = qs.exclude(status__in=values)
+        labels = [_choice_label(model_class, "status", v) for v in values]
+        filters_applied.append(f"status is not {' or '.join(labels)}")
 
-    # Result filter (RequirementAssessment)
-    result_filter = arguments.get("result")
-    if result_filter and hasattr(model_class, "result"):
-        qs = qs.filter(result=result_filter)
-        filters_applied.append(f"result = {result_filter}")
+    # Objects related to a named one, through any relation of the model
+    linked_to = arguments.get("linked_to")
+    if linked_to:
+        link_q = _linked_to_q(model_class, str(linked_to).strip(), scope)
+        if link_q is None:
+            return {
+                "model_name": model_name,
+                "display_name": display_name,
+                "url_slug": url_slug,
+                "query_type": action,
+                "filters_applied": filters_applied
+                + [f"linked to '{linked_to}' (unknown)"],
+                "total_count": 0,
+                "objects": [],
+                "note": f"No object named '{linked_to}' is related to {display_name}. "
+                "Valid values: the exact name or ref_id of a related object.",
+            }
+        qs = qs.filter(link_q).distinct()
+        filters_applied.append(f"linked to '{linked_to}'")
 
-    # Priority filter
-    priority = arguments.get("priority")
-    if priority is not None and hasattr(model_class, "priority"):
-        try:
-            priority = int(priority)
-        except TypeError, ValueError:
-            priority = None
-        if priority is not None:
-            qs = qs.filter(priority=priority)
-            filters_applied.append(f"priority = P{priority}")
-
-    # Category filter
-    category = arguments.get("category")
-    if category and hasattr(model_class, "category"):
-        qs = qs.filter(category=category)
-        filters_applied.append(f"category = {category}")
-
-    # Effort filter
-    effort = arguments.get("effort")
-    if effort and hasattr(model_class, "effort"):
-        qs = qs.filter(effort=effort)
-        filters_applied.append(f"effort = {effort}")
-
-    # Severity filter
-    severity = arguments.get("severity")
-    if severity is not None and hasattr(model_class, "severity"):
-        try:
-            severity = int(severity)
-        except TypeError, ValueError:
-            severity = None
-        if severity is not None:
-            qs = qs.filter(severity=severity)
-            filters_applied.append(f"severity = {severity}")
+    # Risk level — resolved against the risk matrix wording
+    risk_level = arguments.get("risk_level")
+    if risk_level and model_name == "RiskScenario":
+        level_scope = arguments.get("risk_level_scope") or "current"
+        level_field = LEVEL_FIELDS.get(level_scope, "current_level")
+        terms = _as_list(risk_level)
+        matrices = matrices_for_scenarios(qs)
+        per_matrix: dict[str, set[int]] = {}
+        for term in terms:
+            for matrix_id, levels in resolve_levels_by_matrix(term, matrices).items():
+                per_matrix.setdefault(matrix_id, set()).update(levels)
+        wanted = " or ".join(str(t) for t in terms)
+        if per_matrix:
+            level_q = Q()
+            for matrix_id, levels in per_matrix.items():
+                level_q |= Q(
+                    risk_assessment__risk_matrix_id=matrix_id,
+                    **{f"{level_field}__in": sorted(levels)},
+                )
+            qs = qs.filter(level_q)
+            filters_applied.append(f"{level_scope} risk level = {wanted}")
+        else:
+            known = known_level_names(matrices)
+            return {
+                "model_name": model_name,
+                "display_name": display_name,
+                "url_slug": url_slug,
+                "query_type": action,
+                "filters_applied": filters_applied
+                + [f"{level_scope} risk level = {wanted} (unknown)"],
+                "total_count": 0,
+                "objects": [],
+                "note": (
+                    f"'{wanted}' is not a level of the risk matrix in use. "
+                    f"Levels available: {', '.join(known)}."
+                    if known
+                    else f"'{wanted}' is not a level of the risk matrix in use."
+                ),
+            }
 
     # Date filter
     date_filter = arguments.get("date_filter")
@@ -161,23 +259,62 @@ def execute_tool_query(
             qs = qs.filter(date_q["q"])
             filters_applied.append(date_q["label"])
 
-    # Generic relationship filters — derived from model metadata
-    for rel_name in arguments.get("has_related", []):
-        if _is_valid_relation(model_class, rel_name):
-            qs = qs.filter(**{f"{rel_name}__isnull": False}).distinct()
-            filters_applied.append(f"has {rel_name}")
-
-    for rel_name in arguments.get("has_no_related", []):
-        if _is_valid_relation(model_class, rel_name):
-            qs = qs.filter(**{f"{rel_name}__isnull": True})
-            filters_applied.append(f"no {rel_name}")
+    # Generic relationship filters — derived from model metadata. Small models
+    # also put an object's name here ("production_line_control"): that is a
+    # link to it. Anything else is reported, never silently dropped.
+    for key, negate in (("has_related", False), ("has_no_related", True)):
+        for rel_name in arguments.get(key, []):
+            if _is_valid_relation(model_class, rel_name):
+                qs = qs.filter(**{f"{rel_name}__isnull": negate})
+                if not negate:
+                    qs = qs.distinct()
+                filters_applied.append(f"{'no' if negate else 'has'} {rel_name}")
+                continue
+            name = str(rel_name).replace("_", " ").strip()
+            link_q = _linked_to_q(model_class, name, scope)
+            if link_q is None:
+                relations = sorted(
+                    f.name
+                    for f in model_class._meta.get_fields()
+                    if f.is_relation and not f.auto_created
+                )
+                return {
+                    "model_name": model_name,
+                    "display_name": display_name,
+                    "url_slug": url_slug,
+                    "query_type": action,
+                    "filters_applied": filters_applied
+                    + [f"{key} {rel_name} (unknown)"],
+                    "total_count": 0,
+                    "objects": [],
+                    "note": f"'{rel_name}' is neither a relation of {display_name} "
+                    f"nor the name of a related object. Valid values: {', '.join(relations)}.",
+                }
+            qs = (qs.exclude(link_q) if negate else qs.filter(link_q)).distinct()
+            filters_applied.append(f"{'not ' if negate else ''}linked to '{name}'")
 
     # Compound relation filter — filter on properties of related objects
     related_filter = arguments.get("related_filter")
     if related_filter and isinstance(related_filter, dict):
         rf_q = _build_related_filter(related_filter, model_class)
         if rf_q:
-            qs = qs.filter(rf_q["q"]).distinct()
+            try:
+                qs = qs.filter(rf_q["q"]).distinct()
+            except FieldError:
+                relation = related_filter["relation"]
+                target = model_class._meta.get_field(relation).related_model
+                fields = [f.name for f in target._meta.concrete_fields if f.choices]
+                return {
+                    "model_name": model_name,
+                    "display_name": display_name,
+                    "url_slug": url_slug,
+                    "query_type": action,
+                    "filters_applied": filters_applied + [f"{rf_q['label']} (unknown)"],
+                    "total_count": 0,
+                    "objects": [],
+                    "note": f"'{related_filter['condition']}' does not apply to {relation}. "
+                    f"Their fields with values: {', '.join(fields) or 'none'}.",
+                }
             filters_applied.append(rf_q["label"])
 
     # Text search — also searches through related object names (e.g., framework name)
@@ -193,9 +330,37 @@ def execute_tool_query(
         # Search through FK names for richer matching
         if hasattr(model_class, "framework"):
             search_q |= Q(framework__name__icontains=search)
+        # and the curated relations shown with each object ("critical" is a tier)
+        for field_name, _ in SERIALIZED_RELATIONS.get(model_name, ()):
+            target = model_class._meta.get_field(field_name).related_model
+            if _has_field(target, "name"):
+                search_q |= Q(
+                    **{
+                        f"{field_name}__in": scope.queryset(target).filter(
+                            name__icontains=search
+                        )
+                    }
+                )
+        # nameless objects are named by what they point to ("A.7.6" is a requirement)
+        if not _has_field(model_class, "name"):
+            for rel in model_class._meta.concrete_fields:
+                if not rel.many_to_one or rel.related_model._meta.label == "iam.Folder":
+                    continue
+                for field in ("name", "ref_id"):
+                    if _has_field(rel.related_model, field):
+                        search_q |= Q(**{f"{rel.name}__{field}__icontains": search})
         if search_q:
-            qs = qs.filter(search_q)
-            filters_applied.append(f"search = '{search}'")
+            matched = qs.filter(search_q).distinct()
+            # nothing carries the text: it may name a related object ("assessments of Acme")
+            link_q = (
+                None if matched.exists() else _linked_to_q(model_class, search, scope)
+            )
+            if link_q is not None:
+                qs = qs.filter(link_q).distinct()
+                filters_applied.append(f"linked to '{search}'")
+            else:
+                qs = matched
+                filters_applied.append(f"search = '{search}'")
 
     total_count = qs.count()
     try:
@@ -214,6 +379,23 @@ def execute_tool_query(
         "total_pages": total_pages,
         "has_more": offset + LIST_PAGE_SIZE < total_count,
     }
+
+    # A small count or summary also carries its items: models pick "count" or
+    # "summary" for "which X are Y?" and the answer then has no names to give.
+    if action in ("count", "summary") and 0 < total_count <= LIST_PAGE_SIZE:
+        result = _build_summary(
+            qs,
+            model_class,
+            model_name,
+            display_name,
+            url_slug,
+            filters_applied,
+            total_count,
+        )
+        result["objects"] = _serialize_objects(qs, model_class, model_name, scope)
+        result["query_type"] = "summary_with_list"
+        result.update(pagination)
+        return result
 
     # Execute based on action
     if action == "summary":
@@ -255,7 +437,7 @@ def execute_tool_query(
 
     # List query — always paginated, include summary on first page of large sets
     objects = _serialize_objects(
-        qs[offset : offset + LIST_PAGE_SIZE], model_class, model_name
+        qs[offset : offset + LIST_PAGE_SIZE], model_class, model_name, scope
     )
 
     if total_count > SUMMARY_THRESHOLD and page == 1:
@@ -348,10 +530,175 @@ def format_query_result(result: dict) -> str:
         if has_more:
             parts.append('\n(User can ask for "next page" or "page N" to see more)')
 
+    if result.get("note"):
+        parts.append(result["note"])
+
     return "\n".join(parts)
 
 
 # --- Internal helpers ---
+
+
+def _unresolved_filter_result(
+    model_class,
+    field_name: str,
+    value,
+    model_name: str,
+    display_name: str,
+    url_slug: str,
+    action: str,
+    filters_applied: list[str],
+    scope,
+) -> dict:
+    """Empty result for an unrecognised filter value — never the unfiltered set."""
+    if _has_field(model_class, field_name):
+        labels = [
+            str(label)
+            for _, label in (model_class._meta.get_field(field_name).flatchoices or [])
+        ]
+        note = f"'{value}' is not a valid {field_name} for {display_name}."
+        if labels:
+            note += f" Valid values: {', '.join(labels)}."
+    else:
+        fields = "; ".join(
+            [
+                f"{f.name}: {', '.join(str(label) for _, label in f.flatchoices)}"
+                for f in model_class._meta.concrete_fields
+                # a vocabulary, not a catalogue (countries, currencies)
+                if f.choices and len(f.flatchoices) <= 20
+            ]
+            + [
+                f"{lookup.removesuffix('__name')}: {', '.join(names)}"
+                for lookup, names in _named_values(model_class, scope).items()
+            ]
+        )
+        note = f"{display_name} have no {field_name}, and '{value}' is no value of their other fields."
+        if fields:
+            note += f" Valid values: {fields}."
+    return {
+        "model_name": model_name,
+        "display_name": display_name,
+        "url_slug": url_slug,
+        "query_type": action,
+        "filters_applied": filters_applied + [f"{field_name} = {value} (unknown)"],
+        "total_count": 0,
+        "objects": [],
+        "note": note,
+    }
+
+
+def _as_list(value) -> list:
+    """Accept a scalar, a list, or a comma-separated string from the model."""
+    if isinstance(value, (list, tuple, set)):
+        return [v for v in value if v not in (None, "")]
+    if isinstance(value, str) and "," in value:
+        return [v.strip() for v in value.split(",") if v.strip()]
+    return [value]
+
+
+def _choice_label(model_class, field_name: str, value) -> str:
+    try:
+        labels = dict(model_class._meta.get_field(field_name).choices or [])
+    except Exception:
+        labels = {}
+    return str(labels.get(value, value))
+
+
+def _resolve_choice_value(model_class, field_name: str, value):
+    """Match a stored value (3, "3") or its label ("high"); None if neither."""
+    try:
+        field = model_class._meta.get_field(field_name)
+    except Exception:
+        return None
+
+    choices = list(field.choices or [])
+    if not choices:
+        try:
+            return int(value)
+        except TypeError, ValueError:
+            return None
+
+    for stored, label in choices:
+        if value == stored or str(value).strip() == str(stored):
+            return stored
+        if str(value).strip().casefold() == str(label).strip().casefold():
+            return stored
+
+    logger.info(
+        "Dropping unresolvable %s value for %s: %r",
+        field_name,
+        model_class.__name__,
+        value,
+    )
+    return None
+
+
+def _linked_to_q(model_class, name: str, scope):
+    """Q matching objects related to a readable object named or ref'd `name`,
+    through any relation of the model; None when no such object exists."""
+    Folder = apps.get_model("iam", "Folder")
+    q, found = Q(), False
+    for rel in model_class._meta.get_fields():
+        target = getattr(rel, "related_model", None)
+        if not rel.is_relation or target is None or target is Folder:
+            continue
+        match = Q()
+        for field in ("name", "ref_id"):
+            if _has_field(target, field):
+                match |= Q(**{f"{field}__iexact": name})
+        if not match:
+            continue
+        # only objects the user can read may select results
+        targets = scope.queryset(target).filter(match)
+        if targets.exists():
+            q |= Q(**{f"{rel.name}__in": targets})
+            found = True
+    return q if found else None
+
+
+def _has_field(model_class, field_name: str) -> bool:
+    try:
+        model_class._meta.get_field(field_name)
+        return True
+    except FieldDoesNotExist:
+        return False
+
+
+def _named_values(model_class, scope) -> dict[str, list[str]]:
+    """Names the curated relations can take ("tier": critical, important...),
+    readable ones only, when there are few enough to be a vocabulary."""
+    out = {}
+    for field_name, _ in SERIALIZED_RELATIONS.get(model_class.__name__, ()):
+        field = model_class._meta.get_field(field_name)
+        if not field.many_to_one or not _has_field(field.related_model, "name"):
+            continue
+        names = list(
+            scope.queryset(field.related_model).values_list("name", flat=True)[:21]
+        )
+        if 0 < len(names) <= 20:
+            out[f"{field_name}__name"] = names
+    return out
+
+
+def _resolve_on_other_choice_field(model_class, skip: str, value, scope):
+    """(field, stored value) when exactly one other choice field, or one curated
+    relation's name, has this value or label."""
+    wanted = str(value).strip().casefold()
+    hits = [
+        (lookup, name)
+        for lookup, names in _named_values(model_class, scope).items()
+        for name in names
+        if wanted == name.casefold()
+    ] + [
+        (f.name, stored)
+        for f in model_class._meta.concrete_fields
+        if f.choices and f.name != skip
+        for stored, label in f.flatchoices
+        # a bare number is ambiguous across scales (priority 1 is not severity 1)
+        if wanted == str(label).strip().casefold()
+        or (isinstance(stored, str) and wanted == stored.casefold())
+    ]
+    return hits[0] if len({name for name, _ in hits}) == 1 else None
 
 
 def _is_valid_relation(model_class, field_name: str) -> bool:
@@ -401,6 +748,19 @@ def _build_related_filter(related_filter: dict, model_class) -> dict | None:
     if condition == "overdue":
         from django.utils import timezone
 
+        related_model = model_class._meta.get_field(relation).related_model
+        if hasattr(related_model, "overdue_q"):
+            return {
+                "q": Q(
+                    **{
+                        f"{relation}__in": related_model.objects.filter(
+                            related_model.overdue_q()
+                        )
+                    }
+                ),
+                "label": f"{relation} overdue",
+            }
+
         today = timezone.now().date()
         # Try eta first, then expiry_date
         return {
@@ -448,6 +808,9 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     now = timezone.now()
 
     if date_filter == "overdue":
+        if hasattr(model_class, "overdue_q"):
+            # Model defines its own "overdue" from a due date (e.g. the SLA)
+            return {"q": model_class.overdue_q(), "label": "overdue (due date passed)"}
         if hasattr(model_class, "eta_missed_q"):
             # Model defines its own "overdue" logic
             return {"q": model_class.eta_missed_q(), "label": "overdue (ETA missed)"}
@@ -482,6 +845,23 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     return None
 
 
+_LINE_SKIP = {"id", "name", "ref_id", "description"}
+_FIELD_LABELS = {
+    "folder": "domain",
+    "inherent_risk_level": "inherent_risk",
+    "current_risk_level": "current_risk",
+    "residual_risk_level": "residual_risk",
+}
+
+# Relations shown with each object, where typical questions need them
+# ("supporting assets of X", "critical vendors"). model name -> (field, label).
+SERIALIZED_RELATIONS: dict[str, tuple[tuple[str, str], ...]] = {
+    "Asset": (("parent_assets", "supports"), ("child_assets", "supported_by")),
+    "Entity": (("tier", "tier"),),
+    "EntityAssessment": (("entity", "entity"),),
+}
+
+
 def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
     """Format a list of serialized objects into display lines with markdown links."""
     from django.conf import settings
@@ -500,26 +880,12 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
         else:
             name_part = f"[{ref_id}] {name}" if ref_id else name
 
-        extras = []
-        for key in (
-            "status",
-            "treatment",
-            "category",
-            "priority",
-            "severity",
-            "result",
-            "type",
-        ):
-            if obj.get(key):
-                extras.append(f"{key}={obj[key]}")
-        if obj.get("current_risk_level") is not None:
-            extras.append(f"current_risk={obj['current_risk_level']}")
-        if obj.get("residual_risk_level") is not None:
-            extras.append(f"residual_risk={obj['residual_risk_level']}")
-        if obj.get("eta"):
-            extras.append(f"eta={obj['eta']}")
-        if obj.get("folder"):
-            extras.append(f"domain={obj['folder']}")
+        # every field the serializer chose, so a new one needs no change here
+        extras = [
+            f"{_FIELD_LABELS.get(key, key)}={value}"
+            for key, value in obj.items()
+            if key not in _LINE_SKIP and value not in (None, "", [])
+        ]
 
         line = f"  - {name_part}"
         if extras:
@@ -530,8 +896,13 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
     return lines
 
 
-def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
+def _serialize_objects(queryset, model_class, model_name: str, scope) -> list[dict]:
     """Serialize queryset objects into dicts for the LLM context."""
+    choice_fields = [
+        f
+        for f in model_class._meta.concrete_fields
+        if f.choices and f.name != "priority"
+    ]
     objects = []
     for obj in queryset:
         data = {
@@ -546,45 +917,14 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
             desc = obj.description
             data["description"] = desc[:200] + "..." if len(desc) > 200 else desc
 
-        # Status/treatment/result
-        if hasattr(obj, "status") and obj.status:
-            data["status"] = (
-                obj.get_status_display()
-                if hasattr(obj, "get_status_display")
-                else obj.status
-            )
-        if hasattr(obj, "treatment") and obj.treatment:
-            data["treatment"] = (
-                obj.get_treatment_display()
-                if hasattr(obj, "get_treatment_display")
-                else obj.treatment
-            )
-        if hasattr(obj, "result") and obj.result:
-            data["result"] = (
-                obj.get_result_display()
-                if hasattr(obj, "get_result_display")
-                else obj.result
-            )
-
-        # Categorization
-        if hasattr(obj, "category") and obj.category:
-            data["category"] = (
-                obj.get_category_display()
-                if hasattr(obj, "get_category_display")
-                else obj.category
-            )
+        # every choice field, from the model's own metadata (status, result,
+        # type, conclusion...), with its display label
+        for field in choice_fields:
+            value = getattr(obj, field.attname)
+            if value not in (None, ""):
+                data[field.name] = str(dict(field.flatchoices).get(value, value))
         if hasattr(obj, "priority") and obj.priority:
             data["priority"] = f"P{obj.priority}"
-        if hasattr(obj, "severity") and obj.severity:
-            data["severity"] = (
-                obj.get_severity_display()
-                if hasattr(obj, "get_severity_display")
-                else str(obj.severity)
-            )
-        if hasattr(obj, "type") and obj.type:
-            data["type"] = (
-                obj.get_type_display() if hasattr(obj, "get_type_display") else obj.type
-            )
 
         # Dates
         if hasattr(obj, "eta") and obj.eta:
@@ -592,19 +932,18 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
         if hasattr(obj, "expiry_date") and obj.expiry_date:
             data["expiry_date"] = str(obj.expiry_date)
 
-        # Risk levels
-        if (
-            hasattr(obj, "current_level")
-            and obj.current_level is not None
-            and obj.current_level >= 0
-        ):
-            data["current_risk_level"] = obj.current_level
-        if (
-            hasattr(obj, "residual_level")
-            and obj.residual_level is not None
-            and obj.residual_level >= 0
-        ):
-            data["residual_risk_level"] = obj.residual_level
+        # Risk levels, labelled with the matrix wording rather than the index
+        if model_name == "RiskScenario":
+            matrix = getattr(getattr(obj, "risk_assessment", None), "risk_matrix", None)
+            for level_scope, level_field in LEVEL_FIELDS.items():
+                level = getattr(obj, level_field, None)
+                if level is not None and level >= 0:
+                    data[f"{level_scope}_risk_level"] = level_label(matrix, level)
+
+        for field_name, label in SERIALIZED_RELATIONS.get(model_name, ()):
+            related = _readable_related(obj, field_name, scope)
+            if related:
+                data[label] = related
 
         # Folder
         if hasattr(obj, "folder") and obj.folder:
@@ -615,48 +954,86 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
     return objects
 
 
+def _readable_related(obj, field_name: str, scope) -> str:
+    """Names of the related objects the user can read; others are not named."""
+    value = getattr(obj, field_name, None)
+    if value is None:
+        return ""
+    if hasattr(value, "all"):  # many-to-many or reverse relation
+        rows = scope.queryset(value.model).filter(
+            pk__in=value.values_list("pk", flat=True)
+        )
+    else:
+        rows = scope.queryset(type(value)).filter(pk=value.pk)
+    return ", ".join(sorted(str(r) for r in rows))
+
+
+def _choice_breakdown(qs, model_class, field: str, order_by: str) -> dict:
+    """Count per value of a choice field, keyed by the human label."""
+    try:
+        labels = dict(model_class._meta.get_field(field).choices or [])
+    except Exception:
+        labels = {}
+    counts = qs.values(field).annotate(count=Count("id")).order_by(order_by)
+    breakdown = {}
+    for item in counts:
+        if not item["count"]:
+            continue
+        value = item[field]
+        label = labels.get(value) or value or "--"
+        breakdown[str(label)] = breakdown.get(str(label), 0) + item["count"]
+    return breakdown
+
+
+def _risk_level_breakdowns(qs) -> dict:
+    """Count risk scenarios per level label, highest level first, per scope."""
+    matrices = {str(m.id): m for m in matrices_for_scenarios(qs)}
+    if not matrices:
+        return {}
+
+    breakdowns = {}
+    for scope, level_field in LEVEL_FIELDS.items():
+        counts = qs.values("risk_assessment__risk_matrix_id", level_field).annotate(
+            count=Count("id")
+        )
+        buckets: dict[str, list] = {}
+        for item in counts:
+            level = item[level_field]
+            matrix = matrices.get(str(item["risk_assessment__risk_matrix_id"]))
+            label = level_label(matrix, level)
+            bucket = buckets.setdefault(label, [level if level is not None else -1, 0])
+            bucket[0] = max(bucket[0], level if level is not None else -1)
+            bucket[1] += item["count"]
+
+        if not buckets or set(buckets) == {"--"}:
+            continue
+        breakdowns[f"{scope.capitalize()} risk level breakdown"] = {
+            label: count
+            for label, (_, count) in sorted(
+                buckets.items(), key=lambda kv: kv[1][0], reverse=True
+            )
+        }
+    return breakdowns
+
+
 def _build_summary(
     qs, model_class, model_name, display_name, url_slug, filters_applied, total_count
 ) -> dict:
     """Build a summary/breakdown of the queryset."""
     summary = {}
 
-    if hasattr(model_class, "status"):
-        status_counts = (
-            qs.values("status").annotate(count=Count("id")).order_by("-count")
-        )
-        if status_counts:
-            summary["Status breakdown"] = {
-                (item["status"] or "--"): item["count"] for item in status_counts
-            }
-
-    if hasattr(model_class, "treatment"):
-        treatment_counts = (
-            qs.values("treatment").annotate(count=Count("id")).order_by("-count")
-        )
-        if treatment_counts:
-            summary["Treatment breakdown"] = {
-                (item["treatment"] or "--"): item["count"] for item in treatment_counts
-            }
-
-    if hasattr(model_class, "result"):
-        result_counts = (
-            qs.values("result").annotate(count=Count("id")).order_by("-count")
-        )
-        if result_counts:
-            summary["Result breakdown"] = {
-                (item["result"] or "--"): item["count"] for item in result_counts
-            }
-
-    if hasattr(model_class, "priority"):
-        priority_counts = (
-            qs.values("priority").annotate(count=Count("id")).order_by("priority")
-        )
-        if priority_counts:
-            summary["Priority breakdown"] = {
-                (f"P{item['priority']}" if item["priority"] else "--"): item["count"]
-                for item in priority_counts
-            }
+    for field, title, order_by in (
+        ("status", "Status breakdown", "-count"),
+        ("treatment", "Treatment breakdown", "-count"),
+        ("result", "Result breakdown", "-count"),
+        ("priority", "Priority breakdown", "priority"),
+        ("severity", "Severity breakdown", "-severity"),
+    ):
+        if not hasattr(model_class, field):
+            continue
+        breakdown = _choice_breakdown(qs, model_class, field, order_by)
+        if breakdown:
+            summary[title] = breakdown
 
     if hasattr(model_class, "category"):
         cat_counts = (
@@ -673,6 +1050,9 @@ def _build_summary(
             summary["Type breakdown"] = {
                 (item["type"] or "--"): item["count"] for item in type_counts
             }
+
+    if model_name == "RiskScenario":
+        summary.update(_risk_level_breakdowns(qs))
 
     if hasattr(model_class, "folder"):
         folder_counts = (

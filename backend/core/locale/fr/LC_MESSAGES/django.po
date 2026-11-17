@@ -1220,8 +1220,6 @@ msgid "Partially compliant"
 msgstr "Partiellement conforme"
 
 #: core/models.py:5977
-#, fuzzy
-#| msgid "Non compliant"
 msgid "Non-compliant"
 msgstr "Non conforme"
 
@@ -1650,17 +1648,33 @@ msgstr "Aucun réponse"
 msgid "Observation:"
 msgstr "Observation"
 
-#: core/templates/snippets/req_node.html:71
+#: core/templates/snippets/req_node.html:73
 msgid "Associated evidence:"
 msgstr "Preuves associées :"
 
-#: core/templates/snippets/req_node.html:94
-msgid "Applied controls:"
-msgstr "Mesures appliquées :"
+#: core/templates/core/audit_report.html:168
+msgid "Table of contents"
+msgstr "Sommaire"
 
-#: core/templates/snippets/req_node.html:95
-msgid "Evidence of applied controls:"
-msgstr "Preuves des mesures appliquées :"
+#: core/templates/core/audit_report.html
+msgid "Generated on"
+msgstr "Généré le"
+
+#: core/templates/core/audit_report.html
+msgid "Compliant without evidence"
+msgstr "Conforme sans preuve"
+
+#: core/templates/snippets/req_node.html:96
+msgid "No evidence"
+msgstr "Aucune preuve"
+
+#: core/templates/snippets/evidence_list.html
+msgid "File not found"
+msgstr "Fichier introuvable"
+
+#: core/templates/snippets/evidence_list.html:13
+msgid "No file attached"
+msgstr "Aucun fichier joint"
 
 #: core/templates/snippets/ri_list_nested.html:43
 msgid "ID"

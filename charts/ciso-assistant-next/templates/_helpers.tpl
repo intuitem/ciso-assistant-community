@@ -118,6 +118,18 @@ Uses the Qdrant REST port (6333, fixed by the subchart's service).
 {{- end -}}
 
 {{/*
+Backend / Huey env var pointing Django's cache at the memcached container of the same pod.
+MEMCACHED_LOCATION is left to its backend default (unix:/run/memcached/memcached.sock),
+the socket the memcached container creates in the shared memcached-socket volume.
+*/}}
+{{- define "ciso-assistant.memcachedEnv" -}}
+{{- if .Values.memcached.enabled -}}
+- name: ENABLE_MEMCACHED
+  value: "True"
+{{- end -}}
+{{- end -}}
+
+{{/*
 Path of the merged CA bundle produced by the init container (system roots + extra CA).
 */}}
 {{- define "ciso-assistant.extraCerts.bundlePath" -}}
@@ -226,5 +238,47 @@ Frontend pod volume: the raw CA secret.
     items:
       - key: {{ .Values.global.extraCerts.fileName }}
         path: {{ .Values.global.extraCerts.fileName }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Name of the secret holding the OIDC signing key (existing one, or the chart-managed one).
+*/}}
+{{- define "ciso-assistant.idpOidcSecretName" -}}
+{{- default (printf "%s-backend-oidc" (include "ciso-assistant.fullname" .)) .Values.backend.config.oidcProvider.existingSecret -}}
+{{- end -}}
+
+{{/*
+RSA private key signing the OIDC tokens issued to service accounts.
+Reuses the key already stored in the release secret, so it stays stable across upgrades.
+Note: `lookup` is a no-op when manifests are rendered without cluster access (helm template,
+GitOps tooling), which regenerates the key on every render. Set backend.config.oidcProvider.privateKey
+or existingSecret in that case.
+*/}}
+{{- define "ciso-assistant.idpOidcPrivateKey" -}}
+{{- if .Values.backend.config.oidcProvider.privateKey -}}
+{{- .Values.backend.config.oidcProvider.privateKey -}}
+{{- else -}}
+{{- $secret := lookup "v1" "Secret" .Release.Namespace (include "ciso-assistant.idpOidcSecretName" .) -}}
+{{- $existing := "" -}}
+{{- if $secret -}}
+{{- $existing = index (default dict $secret.data) "idp-oidc-private-key" | default "" -}}
+{{- end -}}
+{{- if $existing -}}
+{{- b64dec $existing -}}
+{{- else -}}
+{{- genPrivateKey "rsa" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether a user-supplied env list already defines one of the given variables.
+Expects "env" and "names".
+*/}}
+{{- define "ciso-assistant.definesEnv" -}}
+{{- $names := .names -}}
+{{- range .env -}}
+{{- if has (default "" .name) $names -}}true{{- end -}}
 {{- end -}}
 {{- end -}}

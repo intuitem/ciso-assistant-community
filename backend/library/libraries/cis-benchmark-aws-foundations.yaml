@@ -1,0 +1,651 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-aws-foundations
+locale: en
+ref_id: cis-benchmark-aws-foundations
+name: CIS Amazon Web Services Foundations Benchmark
+description: CIS Amazon Web Services Foundations Benchmark v7.0.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-03-25
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-aws-foundations
+    ref_id: cis-benchmark-aws-foundations
+    name: CIS Amazon Web Services Foundations Benchmark
+    description: CIS Amazon Web Services Foundations Benchmark v7.0.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.1'
+      name: Organizations
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.1
+      name: Ensure centralized root access in AWS Organizations
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.2
+      name: Ensure authorization guardrails for all AWS Organization accounts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.3
+      name: Ensure Organizations management account is not used for workloads
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.4
+      name: Ensure Organizational Units are structured by environment and sensitivity
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.5
+      name: Ensure delegated admin manages AWS Organizations policies
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.1
+      ref_id: 2.1.6
+      name: Ensure delegated admins manage AWS Organizations-integrated services
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.2'
+      name: Maintain current AWS account contact details
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.3'
+      name: Ensure security contact information is registered
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.4'
+      name: Ensure no 'root' user account access key exists
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.5'
+      name: Ensure MFA is enabled for the 'root' user account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.6'
+      name: Ensure hardware MFA is enabled for the 'root' user account
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.7'
+      name: Eliminate use of the 'root' user for administrative and daily tasks
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.8'
+      name: Ensure IAM password policy requires minimum length of 14 or greater
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.9'
+      name: Ensure IAM password policy prevents password reuse
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.10'
+      name: Ensure multi-factor authentication (MFA) is enabled for all IAM users
+        that have a console password
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.11'
+      name: Ensure credentials unused for 45 days or more are disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.12'
+      name: Ensure access keys are rotated every 90 days or less
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.13'
+      name: Ensure IAM users receive permissions only through groups
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.14'
+      name: Ensure IAM policies that allow full "*:*" administrative privileges are
+        not attached
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.15'
+      name: Ensure a support role has been created to manage incidents with AWS Support
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.16'
+      name: Ensure IAM instance roles are used for AWS resource access from instances
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.17'
+      name: Ensure that all expired SSL/TLS certificates stored in AWS IAM are removed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.18'
+      name: Ensure that IAM External Access Analyzer is enabled for all regions
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.19'
+      name: Ensure IAM users are managed centrally via identity federation or AWS
+        Organizations for multi-account environments
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.20'
+      name: Ensure access to AWSCloudShellFullAccess is restricted
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2.21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:2
+      ref_id: '2.21'
+      name: 'Ensure AWS resource policies do not allow unrestricted access using "Principal":
+        "*"'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Storage
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3
+      ref_id: '3.1'
+      name: Simple Storage Service (S3)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1
+      ref_id: 3.1.1
+      name: Ensure S3 Bucket Policy is set to deny HTTP requests
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1
+      ref_id: 3.1.2
+      name: Ensure MFA Delete is enabled on S3 buckets
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1
+      ref_id: 3.1.3
+      name: Ensure all data in Amazon S3 has been discovered, classified, and secured
+        when necessary
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.1
+      ref_id: 3.1.4
+      name: Ensure that S3 is configured with 'Block Public Access' enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3
+      ref_id: '3.2'
+      name: Relational Database Service (RDS)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2
+      ref_id: 3.2.1
+      name: Ensure that encryption-at-rest is enabled for RDS instances
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2
+      ref_id: 3.2.2
+      name: Ensure the Auto Minor Version Upgrade feature is enabled for RDS instances
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2
+      ref_id: 3.2.3
+      name: Ensure that RDS instances are not publicly accessible
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.2
+      ref_id: 3.2.4
+      name: Ensure Multi-AZ deployments are used for enhanced availability in Amazon
+        RDS
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3
+      ref_id: '3.3'
+      name: Elastic File System (EFS)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:3.3
+      ref_id: 3.3.1
+      name: Ensure that encryption is enabled for EFS file systems
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Logging
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.1'
+      name: Ensure CloudTrail is enabled in all regions
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.2'
+      name: Ensure CloudTrail log file validation is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.3'
+      name: Ensure AWS Config is enabled in all regions
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.4'
+      name: Ensure that server access logging is enabled on the CloudTrail S3 bucket
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.5'
+      name: Ensure CloudTrail logs are encrypted at rest using KMS CMKs
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.6'
+      name: Ensure rotation for customer-created symmetric CMKs is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.7'
+      name: Ensure VPC flow logging is enabled in all VPCs
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.8'
+      name: Ensure that object-level logging for write events is enabled for S3 buckets
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.9'
+      name: Ensure that object-level logging for read events is enabled for S3 buckets
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:4
+      ref_id: '4.10'
+      name: Ensure all AWS-managed web front-end services have access logging enabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Monitoring
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.1'
+      name: Ensure unauthorized API calls are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.2'
+      name: Ensure management console sign-in without MFA is monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.3'
+      name: Ensure usage of the 'root' account is monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.4'
+      name: Ensure IAM policy changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.5'
+      name: Ensure CloudTrail configuration changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.6'
+      name: Ensure AWS Management Console authentication failures are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.7'
+      name: Ensure disabling or scheduled deletion of customer created CMKs is monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.8'
+      name: Ensure S3 bucket policy changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.9'
+      name: Ensure AWS Config configuration changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.10'
+      name: Ensure security group changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.11'
+      name: Ensure Network Access Control List (NACL) changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.12'
+      name: Ensure changes to network gateways are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.13'
+      name: Ensure route table changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.14'
+      name: Ensure VPC changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.15'
+      name: Ensure AWS Organizations changes are monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:5
+      ref_id: '5.16'
+      name: Ensure AWS Security Hub is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Networking
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.1'
+      name: Elastic Compute Cloud (EC2)
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.1
+      ref_id: 6.1.1
+      name: Ensure EBS volume encryption is enabled in all regions
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.1
+      ref_id: 6.1.2
+      name: Ensure CIFS access is restricted to trusted networks to prevent unauthorized
+        access
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.2'
+      name: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration
+        ports
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.3'
+      name: Ensure no security groups allow ingress from 0.0.0.0/0 to remote server
+        administration ports
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.4'
+      name: Ensure no security groups allow ingress from ::/0 to remote server administration
+        ports
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.5'
+      name: Ensure the default security group of every VPC restricts all traffic
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.6'
+      name: Ensure routing tables for VPC peering are "least access"
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.7'
+      name: Ensure that the EC2 Metadata Service only allows IMDSv2
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-aws-foundations:6
+      ref_id: '6.8'
+      name: Ensure VPC Endpoints are used for access to AWS Services
+      implementation_groups:
+      - M

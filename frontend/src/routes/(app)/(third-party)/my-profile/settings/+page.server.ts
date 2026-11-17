@@ -1,14 +1,14 @@
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { error, fail } from '@sveltejs/kit';
+import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
+import { error, fail, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from '#lib/utils/schemas.js';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { z } from 'zod';
-import { AuthTokenCreateSchema } from '$lib/utils/schemas';
+import { AuthTokenCreateSchema } from '#lib/utils/schemas.js';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
@@ -53,7 +53,8 @@ export const load: PageServerLoad = async (event) => {
 			const webauthnData = await webauthnRes.json();
 			webauthnCreationOptions = webauthnData.data?.creation_options ?? null;
 		}
-	} catch {
+	} catch (err) {
+		if (isRedirect(err)) throw err;
 		console.error('Could not fetch WebAuthn creation options');
 	}
 
@@ -61,7 +62,8 @@ export const load: PageServerLoad = async (event) => {
 	const registerWebAuthnForm = await superValidate(zod(registerWebAuthnSchema));
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
 	const personalAccessTokenDeleteForm = await superValidate(zod(z.object({ id: z.string() })));
-	const patAllowed = !event.locals.user.is_third_party;
+	const patUser = await event.locals.getUser();
+	const patAllowed = patUser != null && !patUser.is_third_party;
 	let personalAccessTokens = [];
 
 	if (patAllowed) {
@@ -74,9 +76,27 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens = await personalAccessTokensResponse.json();
 	}
 
+	// null on failure, so the page can tell an error from "no apps"
+	const connectedApps = await event
+		.fetch(`${BASE_API_URL}/iam/connected-apps/`)
+		.then((res) => (res.ok ? res.json() : null))
+		.catch(() => null);
+
+	// Third parties get the same narrow nav whatever the flags say, so there is
+	// nothing for them to personalise — same reasoning as `patAllowed`.
+	// Null on failure rather than throwing: the modules section just doesn't
+	// render, instead of taking the whole settings page down.
+	const moduleVisibility = patAllowed
+		? await event
+				.fetch(`${BASE_API_URL}/settings/feature-flags/effective/`)
+				.then((res) => (res.ok ? res.json() : null))
+				.catch(() => null)
+		: null;
+
 	return {
 		authenticators,
 		totp,
+		moduleVisibility,
 		activateTOTPForm,
 		recoveryCodes,
 		webauthnCredentials,
@@ -86,6 +106,7 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
+		connectedApps,
 		title: m.settings()
 	};
 };
@@ -179,8 +200,8 @@ export const actions: Actions = {
 		return { recoveryCodes: response.data };
 	},
 	createPAT: async (event) => {
-		const patAllowed = !event.locals.user.is_third_party;
-		if (!patAllowed) {
+		const patUser = await event.locals.getUser();
+		if (!patUser || patUser.is_third_party) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
@@ -289,8 +310,8 @@ export const actions: Actions = {
 		return { form };
 	},
 	deletePAT: async (event) => {
-		const patAllowed = !event.locals.user.is_third_party;
-		if (!patAllowed) {
+		const patUser = await event.locals.getUser();
+		if (!patUser || patUser.is_third_party) {
 			return fail(403, { error: 'Forbidden' });
 		}
 
@@ -313,6 +334,24 @@ export const actions: Actions = {
 		}
 
 		setFlash({ type: 'success', message: m.successfullyDeletedPersonalAccessToken() }, event);
+		return message(form, { status: response.status });
+	},
+	revokeConnectedApp: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(z.object({ id: z.string() })));
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${BASE_API_URL}/iam/connected-apps/${encodeURIComponent(form.data.id)}/`;
+		const response = await event.fetch(endpoint, { method: 'DELETE' });
+
+		if (!response.ok) {
+			console.error('Could not revoke connected app');
+			return fail(response.status, { form });
+		}
+
+		setFlash({ type: 'success', message: m.connectedAppRevoked() }, event);
 		return message(form, { status: response.status });
 	}
 };

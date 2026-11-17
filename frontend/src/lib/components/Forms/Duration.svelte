@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 

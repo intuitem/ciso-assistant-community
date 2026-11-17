@@ -1,11 +1,15 @@
 import type { PageServerLoad } from './$types';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { headData } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { headData } from '#lib/utils/table.js';
+import { discardBody } from '#lib/utils/responses.js';
+import type { urlModel } from '#lib/utils/types.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { loadValidationFlowFormData } from '#lib/utils/load.js';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async (event) => {
+	const { fetch, params } = event;
 	const URLModel = 'requirement-assessments';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const requirementAssessment = await fetch(baseEndpoint).then((res) => res.json());
@@ -18,7 +22,7 @@ export const load = (async ({ fetch, params }) => {
 	const requirementsListData = await fetch(
 		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
 	)
-		.then((res) => (res.ok ? res.json() : null))
+		.then((res) => (res.ok ? res.json() : discardBody(res).then(() => null)))
 		.catch((error) => {
 			console.error('Failed to fetch requirement viewer role:', error);
 			return null;
@@ -27,19 +31,13 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
-		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
-		const response = await fetch(keyEndpoint);
-		if (response.ok) {
-			const table: TableSource = {
-				head: headData(key),
-				body: [],
-				meta: []
-			};
-			tables[key] = table;
-		} else {
-			console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-		}
+	for (const key of ['applied-controls', 'task-templates', 'evidences', 'findings'] as urlModel[]) {
+		const table: TableSource = {
+			head: headData(key),
+			body: [],
+			meta: []
+		};
+		tables[key] = table;
 	}
 
 	return {
@@ -49,6 +47,20 @@ export const load = (async ({ fetch, params }) => {
 		parent,
 		tables,
 		title: requirementAssessment.name,
-		viewerRole
+		viewerRole,
+		...(viewerRole === 'auditor'
+			? {
+					...(await loadValidationFlowFormData({
+						event,
+						folderId: requirementAssessment.folder?.id,
+						targetField: 'requirement_assessments',
+						targetIds: [params.id]
+					})),
+					validationFlows: await fetchAllPages(
+						fetch,
+						`${BASE_API_URL}/validation-flows/?requirement_assessments=${params.id}`
+					).catch(() => [])
+				}
+			: {})
 	};
 }) satisfies PageServerLoad;

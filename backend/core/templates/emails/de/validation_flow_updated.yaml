@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Freigabe '${validation_ref_id}' wurde ${new_status}"
+body: |
+  Hallo,
+
+  Der Freigabeantrag '${validation_ref_id}' wurde aktualisiert:
+
+  - Neuer Status: ${new_status}
+  - Aktualisiert von: ${actor_name}
+  - Bereich: ${folder_name}
+  - Hinweise: ${event_notes}
+
+  Freigabeantrag anzeigen: [Freigabe öffnen](${validation_url})
+
+  Vielen Dank.

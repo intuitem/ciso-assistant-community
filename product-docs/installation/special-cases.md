@@ -13,7 +13,7 @@ chcon -Rt svirt_sandbox_file_t ./db
 
 ### Recompute assessment results after the semantic compute_result upgrade
 
-Audits produced before the semantic [`compute_result`](../configuration/authoring/framework-builder.md#questions-and-choices) aggregation may have stored results that were collapsed under the older boolean logic (any non-empty `compute_result` was treated as truthy, so a "Non-compliant" choice could still aggregate to **Compliant**). This applies to audits backed by questionnaires from either path: the [framework builder UI](../configuration/authoring/framework-builder.md) or [Excel-imported frameworks](../configuration/authoring/framework.md).
+Audits produced before the semantic [`compute_result`](../configuration/authoring/library-builder.md#add-questions-and-choices) aggregation may have stored results that were collapsed under the older boolean logic (any non-empty `compute_result` was treated as truthy, so a "Non-compliant" choice could still aggregate to **Compliant**). This applies to audits backed by questionnaires from either path: the [library builder](../configuration/authoring/library-builder.md) or [Excel-imported frameworks](../configuration/authoring/excel.md).
 
 The `recompute_assessment_results` Django management command realigns stored results with the current rule.
 

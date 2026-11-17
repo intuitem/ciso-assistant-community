@@ -6,22 +6,33 @@
 		open?: boolean;
 		icon: string;
 		style: string;
+		// When true, the chevron sits right after the header instead of being
+		// pushed to the far right.
+		compact?: boolean;
 		children?: import('svelte').Snippet;
 	}
 
-	let { header, open = false, icon, style, children }: Props = $props();
+	let { header, open = false, icon, style, compact = false, children }: Props = $props();
 	let value = $derived([open.toString()]);
 </script>
 
 <Accordion {value} onValueChange={(e) => (value = e.value)} collapsible>
 	<Accordion.Item value="true">
-		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+		<Accordion.ItemTrigger class="flex items-center cursor-pointer {compact ? 'w-fit' : 'w-full'}">
 			<i class="{icon} mr-2"></i>
-			<p class="font-medium flex-1 text-left">{header}</p>
+			<p class="font-medium text-left {compact ? '' : 'flex-1'}">{header}</p>
 			<Accordion.ItemIndicator
-				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90 {compact
+					? 'ml-2'
+					: ''}"
 			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="14px"
+					height="14px"
+					viewBox="0 0 448 512"
+					fill="currentColor"
+				>
 					<path
 						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
 					/>

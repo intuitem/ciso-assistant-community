@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, urlParamModelVerboseName } from '#lib/utils/crud.js';
 
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -13,10 +13,15 @@ import {
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
 	handleErrorResponse
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 
-import { loadDetail } from '$lib/utils/load';
+import { loadDetail } from '#lib/utils/load.js';
+import {
+	fetchNeighbour,
+	fetchOccurrenceHistory,
+	type OccurrenceSummary
+} from '#lib/utils/taskOccurrences.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -28,7 +33,34 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
-	return data;
+	// A recurrent task's occurrence shows the same history as its task, plus the
+	// occurrences just before and after it for the previous / next buttons. Those
+	// are asked for separately: the viewed occurrence can sit outside the history.
+	const node = data.data;
+	const dueDate = typeof node?.due_date === 'string' ? node.due_date.slice(0, 10) : null;
+	const taskTemplateId = node?.task_template?.id;
+	let history: OccurrenceSummary[] = [];
+	let previousOccurrence: OccurrenceSummary | null = null;
+	let nextOccurrence: OccurrenceSummary | null = null;
+	// Any of the requests failing: the page says so rather than showing a
+	// history with holes or greying out a button that has somewhere to go.
+	let occurrencesFailed = false;
+	if (node?.is_recurrent && taskTemplateId) {
+		const [occurrences, previous, next] = await Promise.all([
+			fetchOccurrenceHistory(event.fetch, taskTemplateId),
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, dueDate, true) : null,
+			dueDate ? fetchNeighbour(event.fetch, taskTemplateId, dueDate, false) : null
+		]);
+		history = [...occurrences.pastOccurrences, ...occurrences.upcomingOccurrences].map(
+			({ id, due_date, status }) => ({ id, due_date, status })
+		);
+		previousOccurrence = previous?.occurrence ?? null;
+		nextOccurrence = next?.occurrence ?? null;
+		occurrencesFailed =
+			occurrences.occurrencesFailed || previous?.failed === true || next?.failed === true;
+	}
+
+	return { ...data, history, previousOccurrence, nextOccurrence, occurrencesFailed };
 };
 
 const updateStatus = async (status: string, { fetch, params, cookies }) => {

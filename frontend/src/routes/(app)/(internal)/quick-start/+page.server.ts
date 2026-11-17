@@ -1,6 +1,6 @@
-import { defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { quickStartSchema } from '$lib/utils/schemas';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { quickStartSchema } from '#lib/utils/schemas.js';
 import { type Actions } from '@sveltejs/kit';
 import { fail, message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';

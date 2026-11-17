@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { ConflictStrategy } from './types';
 
 	interface Option {

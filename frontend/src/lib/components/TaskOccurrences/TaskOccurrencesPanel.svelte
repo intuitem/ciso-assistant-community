@@ -1,0 +1,169 @@
+<script lang="ts">
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import OccurrenceHistory from './OccurrenceHistory.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { daysUntil, formatOccurrenceDate as formatDate } from '#lib/utils/taskOccurrences.js';
+	import { OCCURRENCE_STYLES, isOccurrenceLate, occurrenceState } from '#lib/utils/taskStatus.js';
+	import { scheduleLabel, type TaskSchedule } from '#lib/utils/taskSchedule.js';
+
+	interface Occurrence {
+		id: string;
+		due_date: string | null;
+		status: string;
+		expected_evidence?: { id: string; str: string }[];
+		evidence_reviewed?: string[];
+	}
+
+	interface Props {
+		taskTemplateId: string;
+		isRecurrent: boolean;
+		schedule?: TaskSchedule | null;
+		past?: Occurrence[];
+		upcoming?: Occurrence[];
+		/** Total upcoming occurrences on the server; `upcoming` is only a window of them. */
+		upcomingCount?: number;
+		/** The occurrences could not be loaded: not the same as there being none. */
+		failed: boolean;
+	}
+
+	let {
+		taskTemplateId,
+		isRecurrent,
+		schedule = null,
+		past = [],
+		upcoming = [],
+		upcomingCount = undefined,
+		failed
+	}: Props = $props();
+
+	const cadence = $derived(scheduleLabel(schedule));
+
+	const byDueDate = (a: Occurrence, b: Occurrence) =>
+		(a.due_date ?? '').localeCompare(b.due_date ?? '');
+
+	const sortedPast = $derived([...past].sort(byDueDate));
+	const sortedUpcoming = $derived([...upcoming].sort(byDueDate));
+	const next = $derived(sortedUpcoming[0]);
+	// From the server total, not the fetched window: a daily task can have far more
+	// upcoming occurrences than the window holds.
+	const laterCount = $derived(Math.max((upcomingCount ?? sortedUpcoming.length) - 1, 0));
+
+	// Past occurrences alone give no "you are here": the current one is upcoming by
+	// definition (due today counts as not yet past), so it was missing from the strip
+	// entirely. Showing both makes the row a timeline that runs through today.
+	const timeline = $derived([...sortedPast, ...sortedUpcoming]);
+
+	const dueLabel = $derived.by(() => {
+		const days = daysUntil(next?.due_date ?? null);
+		if (days === null) return '';
+		if (days < 0) return m.overdue();
+		if (days === 0) return m.today();
+		return m.dueInDays({ count: days });
+	});
+</script>
+
+<div class="card shadow-lg bg-surface-50-950 p-6 space-y-6">
+	{#if failed}
+		<!-- "Has not run yet" would be a statement about the task; this one is not. -->
+		<div class="space-y-2">
+			<p class="font-semibold">{isRecurrent ? m.occurrenceHistory() : m.dueDate()}</p>
+			<p class="text-sm text-surface-600-400" data-testid="occurrence-history-unavailable">
+				{m.occurrenceHistoryUnavailable()}
+			</p>
+		</div>
+	{:else if !isRecurrent}
+		<!-- A one-time task has exactly one occurrence; showing it as a list of one
+		     makes the reader look for the others. -->
+		{@const only = sortedUpcoming[0] ?? sortedPast[sortedPast.length - 1]}
+		<!-- A one-time task has a due date, not a "next" anything, and nothing to
+		     list: the eye button below already reaches its single occurrence. -->
+		<p class="font-semibold">{m.dueDate()}</p>
+		{#if only}
+			{@const late = isOccurrenceLate(only)}
+			<div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+				<span class="text-2xl font-semibold">{formatDate(only.due_date)}</span>
+				<span class="badge preset-tonal inline-flex items-center gap-1.5">
+					<span
+						class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[
+							occurrenceState(only.status, late)
+						]}"
+					></span>
+					<!-- In words too: the red square alone does not say late to everyone. -->
+					{safeTranslate(only.status)}{late ? ` · ${m.overdue()}` : ''}
+				</span>
+				<Anchor
+					href="/task-nodes/{only.id}"
+					aria-label={m.view()}
+					title={m.view()}
+					class="btn-icon btn-sm preset-filled-primary-500 ml-auto"
+					><i class="fa-solid fa-eye"></i></Anchor
+				>
+			</div>
+		{:else}
+			<p class="text-sm text-surface-600-400">{m.noOccurrenceHistory()}</p>
+		{/if}
+	{:else}
+		<div class="space-y-3">
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<p class="font-semibold">{m.nextOccurrence()}</p>
+					{#if cadence}
+						<p class="text-sm text-surface-600-400">{cadence}</p>
+					{/if}
+				</div>
+				<Anchor href="/task-nodes?task_template={taskTemplateId}" class="text-sm anchor"
+					>{m.allOccurrences()}</Anchor
+				>
+			</div>
+			{#if next}
+				<div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+					<div>
+						<span class="text-2xl font-semibold">{formatDate(next.due_date)}</span>
+						<span class="ml-2 text-sm text-surface-600-400">{dueLabel}</span>
+					</div>
+					<span class="badge preset-tonal inline-flex items-center gap-1.5">
+						<span
+							class="inline-block h-3 w-3 rounded-sm {OCCURRENCE_STYLES[
+								occurrenceState(next.status, isOccurrenceLate(next))
+							]}"
+						></span>
+						{safeTranslate(next.status)}
+					</span>
+					{#if next.expected_evidence?.length}
+						<span class="text-sm text-surface-600-400">
+							<i class="fa-solid fa-paperclip mr-1"></i>
+							{next.evidence_reviewed?.length ?? 0} / {next.expected_evidence.length}
+							{m.expectedEvidence()}
+						</span>
+					{/if}
+					<Anchor
+						href="/task-nodes/{next.id}"
+						aria-label={m.view()}
+						title={m.view()}
+						class="btn-icon btn-sm preset-filled-primary-500 ml-auto"
+						><i class="fa-solid fa-eye"></i></Anchor
+					>
+				</div>
+				{#if laterCount > 0}
+					<p class="text-sm text-surface-600-400">{m.moreUpcoming({ count: laterCount })}</p>
+				{/if}
+			{:else}
+				<p class="text-sm text-surface-600-400">{m.noDataAvailable()}</p>
+			{/if}
+		</div>
+
+		<div class="space-y-2">
+			<p class="font-semibold">{m.occurrenceHistory()}</p>
+			{#if timeline.length}
+				<OccurrenceHistory
+					occurrences={timeline}
+					markedId={next?.id ?? null}
+					markedLabel={m.nextOccurrence()}
+				/>
+			{:else}
+				<p class="text-sm text-surface-600-400">{m.noOccurrenceHistory()}</p>
+			{/if}
+		</div>
+	{/if}
+</div>

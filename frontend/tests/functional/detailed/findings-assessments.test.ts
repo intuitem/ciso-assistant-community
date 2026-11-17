@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages.js';
+import { m } from '#paraglide/messages.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { expect, test, TestContent } from '../../utils/test-utils.js';
@@ -60,10 +60,6 @@ test('user can create findings inside a follow up', async ({
 	});
 
 	await test.step('create 2 findings inside follow up', async () => {
-		await findingsAssessmentsPage.viewItemDetail(
-			testObjectsData.findingsAssessmentsPage.build.name
-		);
-
 		await expect(summaryTotal).toHaveText('N/A');
 		await expect(summaryUnresolvedHOC).toHaveText('N/A');
 

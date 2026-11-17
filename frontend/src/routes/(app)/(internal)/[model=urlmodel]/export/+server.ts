@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { URL_MODEL_MAP } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';

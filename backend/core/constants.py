@@ -252,6 +252,38 @@ COUNTRY_CHOICES = [
     ("x28", "Other Countries"),
 ]
 
+EU_COUNTRIES_SET = {
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE",
+}
+# The GDPR applies across the EEA, so transfers there need no chapter V mechanism
+EEA_COUNTRIES_SET = EU_COUNTRIES_SET | {"IS", "LI", "NO"}
+
 CURRENCY_CHOICES = [
     ("AED", "UAE Dirham"),
     ("AFN", "Afghani"),
@@ -420,3 +452,9 @@ CURRENCY_CHOICES = [
     ("XPF", "CFP Franc"),
     ("CNH", "Off-shore Yuan Renminbi"),
 ]
+
+
+# superseded by the TTP catalog; still linkable, but flagged in pickers
+LEGACY_TTP_LIBRARIES = {
+    "urn:intuitem:risk:library:mitre-attack",
+}

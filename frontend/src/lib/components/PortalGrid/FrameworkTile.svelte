@@ -1,9 +1,9 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { donutValues } from '$lib/utils/portalResults';
-	import { onActivateKey } from '$lib/utils/portalActions';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { donutValues } from '#lib/utils/portalResults.js';
+	import { onActivateKey } from '#lib/utils/portalActions.js';
 
 	let { item, onTrigger }: { item: any; onTrigger?: (item: any) => void } = $props();
 

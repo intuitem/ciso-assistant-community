@@ -5,5 +5,10 @@ it to pre-bake the models offline (see backend/Dockerfile) without pulling the r
 of the app. Single source of truth shared by the runtime code and the image bake.
 """
 
+import threading
+
 DEFAULT_EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# local models share one device; concurrent inference aborts the process on Metal (MPS)
+INFERENCE_LOCK = threading.Lock()

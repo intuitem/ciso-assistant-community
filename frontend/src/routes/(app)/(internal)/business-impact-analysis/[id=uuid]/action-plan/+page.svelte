@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { tableSourceMapper } from '$lib/utils/table';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { tableSourceMapper } from '#lib/utils/table.js';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	let { data } = $props();
 
 	const appliedControlsHead = {
@@ -17,7 +17,9 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		cost: 'cost',
-		findings_count: 'associated_findings'
+		findings_count: 'associated_findings',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 	const appliedControlsColumns = [
 		'name',
@@ -71,8 +73,8 @@
 			<Anchor
 				breadcrumbAction="push"
 				href={`/applied-controls/flash-mode?findings_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-				class="btn text-white bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+				class="btn btn-quiet h-fit"
+				><i class="fa-solid fa-bolt mr-2 text-orange-500"></i> {m.flashMode()}</Anchor
 			>
 		</div>
 	</div>
@@ -85,6 +87,8 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
 			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
+			columnSelector={true}
+			columnStateKey="applied-controls:bia-action-plan"
 			fields={[
 				'name',
 				'status',

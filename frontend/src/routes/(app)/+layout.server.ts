@@ -1,28 +1,35 @@
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
+import { countOpenTasks } from '#lib/utils/vendorTasks.js';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
-// get `locals.user` and pass it to the `page` store
-export const load = loadFlash(async ({ locals, url, cookies, request }) => {
-	if (!locals.user && !url.pathname.includes('/login')) {
+export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) => {
+	const user = await locals.getUser();
+	if (!user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
 	}
 
+	const [settings, featureflags] = await Promise.all([
+		locals.getSettings(),
+		locals.getFeatureFlags()
+	]);
+
 	if (
-		locals.user &&
-		locals.settings?.enforce_mfa &&
-		!locals.user.has_mfa_enabled &&
-		!locals.user.is_superuser &&
-		locals.user.is_local &&
-		!locals.user.is_sso &&
-		!url.pathname.startsWith('/setup-mfa')
+		user &&
+		settings?.enforce_mfa &&
+		!user.has_mfa_enabled &&
+		!user.is_superuser &&
+		user.is_local &&
+		!user.is_sso &&
+		!url.pathname.startsWith('/setup-mfa') &&
+		!url.pathname.startsWith('/reauthenticate')
 	) {
 		redirect(302, '/setup-mfa');
 	}
 
-	if (locals.user) {
+	if (user) {
 		const referer = request.headers.get('referer') ?? '';
 		const fromLogin = loginPageRegex.test(referer);
 		if (fromLogin) {
@@ -34,5 +41,7 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 			});
 		}
 	}
-	return { user: locals.user, settings: locals.settings, featureflags: locals.featureflags };
+	const openTasks =
+		user?.is_third_party && featureflags?.tasks !== false ? await countOpenTasks(fetch) : 0;
+	return { user, settings, featureflags, openTasks };
 }) satisfies LayoutServerLoad;

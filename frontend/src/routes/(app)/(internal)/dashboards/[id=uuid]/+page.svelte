@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DashboardGrid from '$lib/components/Dashboard/DashboardGrid.svelte';
-	import { m } from '$paraglide/messages';
+	import DashboardGrid from '#lib/components/Dashboard/DashboardGrid.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -12,11 +12,11 @@
 	const widgets = $derived(data.widgets || []);
 </script>
 
-<div class="p-6 space-y-4">
+<div class="p-6 space-y-4 dashboard-print">
 	<!-- Header -->
 	<div class="flex justify-between items-center">
 		<div class="flex items-center gap-4">
-			<a href="/dashboards" class="btn preset-tonal">
+			<a href="/dashboards" class="btn preset-tonal no-print">
 				<i class="fa-solid fa-arrow-left"></i>
 				{m.back()}
 			</a>
@@ -25,7 +25,11 @@
 				<span class="text-surface-500">- {dashboard.description}</span>
 			{/if}
 		</div>
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-2 no-print">
+			<button class="btn preset-tonal" onclick={() => window.print()}>
+				<i class="fa-solid fa-file-pdf"></i>
+				{m.exportPdf()}
+			</button>
 			<a
 				href="/dashboards/{dashboard.id}/edit?next=/dashboards/{dashboard.id}"
 				class="btn preset-tonal"
@@ -56,3 +60,24 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	@media print {
+		.no-print,
+		:global(body:has(.dashboard-print) .sidebar),
+		:global(body:has(.dashboard-print) #page-header),
+		:global(body:has(.dashboard-print) header:not(main *)) {
+			display: none !important;
+		}
+
+		:global(body:has(.dashboard-print) main) {
+			padding: 0 !important;
+			margin: 0 !important;
+		}
+
+		:global(body:has(.dashboard-print)) {
+			print-color-adjust: exact;
+			-webkit-print-color-adjust: exact;
+		}
+	}
+</style>

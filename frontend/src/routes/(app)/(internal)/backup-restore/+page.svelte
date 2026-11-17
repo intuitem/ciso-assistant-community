@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
+	import { isAccessAllowed } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
 
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	interface Props {
 		data: PageData;
 	}
@@ -96,7 +97,7 @@
 
 	const authorizedExtensions = ['.bak'];
 	const user = page.data.user;
-	const canBackup: boolean = Object.hasOwn(user.permissions, 'backup');
+	const canBackup: boolean = isAccessAllowed(user, 'backup', user.root_folder_id);
 </script>
 
 {#if canBackup}
@@ -115,7 +116,7 @@
 				>
 					{#if isExporting}
 						<i class="fa-solid fa-spinner fa-spin"></i>
-						{m.exporting ? m.exporting() : 'Exporting...'}
+						{m.exporting()}
 					{:else}
 						{m.exportDatabase()}
 					{/if}

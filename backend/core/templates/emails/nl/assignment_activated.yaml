@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Uw opdracht voor '${assessment_name}' is gestart"
+body: |
+  Hallo,
+
+  Uw opdracht voor de volgende audit is gestart en wacht op uw invoer:
+
+  - Audit: ${assessment_name}
+  - Kader: ${framework_name}
+  - Vervaldatum: ${due_date}
+
+  Meld u aan op uw CISO Assistant-portaal om met uw beoordeling te beginnen: [Naar CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
+
+  Bedankt.

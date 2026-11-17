@@ -1,0 +1,174 @@
+urn: urn:intuitem:risk:library:workflow-derogation-to-exception
+locale: en
+ref_id: workflow-derogation-to-exception
+name: Derogation — approved request becomes an exception
+description: >
+  The join that makes a request more than a ticket. Wakes when a derogation request is
+  closed, checks the decision was "accepted", and writes the exception the request asked
+  for — dated, severity-graded, and attached to the control it derogates from.
+
+  Reactive, not supervised: the decision was already made by a person, and this only
+  records its consequence. Nothing here renders a judgement.
+
+  After import: enable the trigger. Internal-event triggers register disabled, so nothing
+  fires until you say so.
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-10
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-derogation-to-exception:workflow:derogation-to-exception
+    schema_version: 1
+    ref_id: derogation-to-exception
+    name: Derogation — approved request becomes an exception
+    description: >
+      Reads the approved request, creates the security exception from its answers, links
+      it to the control the requester named, and notes the exception back on the request
+      so the register and the justification point at each other.
+    graph:
+      variables:
+      - key: request_id
+        type: string
+      - key: request_ref
+        type: string
+      - key: resolution
+        type: string
+      - key: form_ref
+        type: string
+      - key: decided_by
+        type: string
+      nodes:
+      - ref: on_close
+        type: trigger
+        label: A derogation request is closed
+        trigger_config:
+          type: internal_event
+          event_key: quickformresponse.closed
+
+      # Conditions read declared variables, not the raw payload, so the capture comes
+      # first and the guards read what it wrote.
+      - ref: capture
+        type: action
+        label: Capture the decision
+        action_config:
+          type: set_variables
+          variables:
+            request_id: '{{payload.id}}'
+            request_ref: '{{payload.ref_id}}'
+            resolution: '{{payload.resolution}}'
+            form_ref: '{{payload.quick_form_ref}}'
+            decided_by: '{{payload.decided_by}}'
+
+      # Two guards: the right form, and an actual approval. `quick_form_ref` rather than
+      # the id — a primary key does not survive being exported somewhere else.
+      - ref: was_approved
+        type: condition
+        label: Approved, and on the derogation form?
+        branches:
+        - name: Yes — record the exception
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: resolution
+              op: eq
+              value: accepted
+            - variable: form_ref
+              op: eq
+              value: DER
+        - name: Anything else — stop
+          is_default: true
+
+      # The payload carries the decision, not the answers, so the request is read back
+      # for the fields the exception needs.
+      - ref: read_request
+        type: action
+        label: Read the answers
+        action_config:
+          type: read_objects
+          model: quick_form_response
+          mode: first
+          filters:
+            operator: and
+            conditions:
+            - field: id
+              op: eq
+              value: '{{request_id}}'
+
+      # WHAT THIS CANNOT DO YET, and why it matters more than it looks:
+      #
+      # An individual answer cannot be addressed from a template. The engine's
+      # placeholder pattern is `[\w.]+`, and an answer is keyed by its question's
+      # node_id — `2-q3` from the builder, `qf_page:request:question:expiration` from a
+      # library. Both contain characters the pattern does not accept, so
+      # `{{...answers.<key>}}` never matches and is emitted as literal text rather than
+      # failing. Until that is addressed, a reactive workflow can act on the *decision*
+      # and on *outcomes* (whose ref_ids are clean words), but not on the answers.
+      #
+      # So the exception below is named, referenced and approved — but not dated, and
+      # not attached to the control the requester named. Those two lines are written and
+      # commented out; uncomment them once answers are addressable.
+      - ref: make_exception
+        type: action
+        label: Write the exception
+        action_config:
+          type: create_object
+          model: security_exception
+          fields:
+            # The request's title question is mirrored onto its name, so this one
+            # answer does reach us — through the column rather than the answers map.
+            name: '{{nodes.read_request.object.name}}'
+            ref_id: '{{request_ref}}'
+            # Approved, because a person approved the request that produced it. Leaving
+            # it draft would let the register disagree with the decision.
+            status: approved
+            # And named: the reviewer who closed the request is the approver of the
+            # record it produced. Without this the register says nobody approved it.
+            approver: '{{decided_by}}'
+            description: >-
+              Raised from derogation request {{request_ref}}, approved on review.
+              The justification, the compensating measures and the requested end date
+              are on the request.
+            observation: >-
+              Created automatically from {{request_ref}}. Set the expiration date and
+              attach this to the control the request names — the workflow cannot yet
+              read those answers.
+            # expiration_date: '{{nodes.read_request.object.answers.<expiration>}}'
+
+      # - ref: link_control
+      #   type: action
+      #   label: Attach it to the control
+      #   action_config:
+      #     type: update_object
+      #     model: applied_control
+      #     id: '{{nodes.read_request.object.answers.<control>}}'
+      #     m2m:
+      #       security_exceptions: {mode: add, values: ['{{nodes.make_exception.id}}']}
+
+      # Both directions, so the register can be read back to its justification.
+      - ref: note_back
+        type: action
+        label: Note the exception on the request
+        action_config:
+          type: update_object
+          model: quick_form_response
+          id: '{{request_id}}'
+          fields:
+            observation: >-
+              Approved. Security exception {{request_ref}} was raised in the register.
+
+      - ref: done
+        type: end
+      edges:
+      - {source: on_close, target: capture}
+      - {source: capture, target: was_approved}
+      - source: was_approved
+        target: read_request
+        source_branch: Yes — record the exception
+      - source: was_approved
+        target: done
+        source_branch: Anything else — stop
+      - {source: read_request, target: make_exception}
+      - {source: make_exception, target: note_back}
+      - {source: note_back, target: done}

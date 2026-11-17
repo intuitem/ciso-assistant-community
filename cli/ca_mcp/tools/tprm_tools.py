@@ -1,6 +1,7 @@
 """TPRM (Third-Party Risk Management) MCP tools for CISO Assistant"""
 
 from ..client import (
+    found_line,
     make_get_request,
     make_post_request,
     make_patch_request,
@@ -13,6 +14,7 @@ from ..resolvers import (
     resolve_contract_id,
     resolve_entity_assessment_id,
     resolve_representative_id,
+    resolve_terminology_ids,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -67,7 +69,7 @@ async def get_entities(
         if not entities:
             return empty_response("entities", filters)
 
-        result = f"Found {len(entities)} entities"
+        result = found_line(entities, "entities")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -146,7 +148,7 @@ async def get_entity_assessments(
         if not assessments:
             return empty_response("entity assessments", filters)
 
-        result = f"Found {len(assessments)} entity assessments"
+        result = found_line(assessments, "entity assessments")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -204,7 +206,7 @@ async def get_representatives(entity: str = None):
         if not representatives:
             return empty_response("representatives", filters)
 
-        result = f"Found {len(representatives)} representatives"
+        result = found_line(representatives, "representatives")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -275,7 +277,7 @@ async def get_solutions(
         if not solutions:
             return empty_response("solutions", filters)
 
-        result = f"Found {len(solutions)} solutions"
+        result = found_line(solutions, "solutions")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -352,7 +354,7 @@ async def get_contracts(
         if not contracts:
             return empty_response("contracts", filters)
 
-        result = f"Found {len(contracts)} contracts"
+        result = found_line(contracts, "contracts")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -405,6 +407,8 @@ async def create_entity(
     default_penetration: int = 0,
     default_maturity: int = 1,
     default_trust: int = 1,
+    relationship: list = None,
+    address: str = None,
 ) -> str:
     """Create a third-party entity (vendor, supplier, partner)
 
@@ -421,6 +425,8 @@ async def create_entity(
         default_penetration: Penetration level 0-4
         default_maturity: Maturity level 1-4
         default_trust: Trust level 1-4
+        relationship: List of relationship types (names or UUIDs of visible entity.relationship terminologies, e.g. "supplier", "client", "partner", or custom ones). Never creates one
+        address: Postal address, as it should appear on formal documents
     """
     try:
         folder_id = resolve_folder_id(folder_id)
@@ -447,6 +453,13 @@ async def create_entity(
         payload["default_penetration"] = default_penetration
         payload["default_maturity"] = default_maturity
         payload["default_trust"] = default_trust
+
+        if relationship is not None:
+            payload["relationship"] = resolve_terminology_ids(
+                relationship, "entity.relationship"
+            )
+        if address is not None:
+            payload["address"] = address
 
         res = make_post_request("/entities/", payload)
 
@@ -538,6 +551,8 @@ async def create_representative(
 ) -> str:
     """Create a representative (contact) for a third-party entity
 
+    Representatives have no folder: their visibility follows their entity.
+
     Args:
         email: Email address (required, unique)
         entity_id: Entity ID/name (required)
@@ -599,6 +614,8 @@ async def create_solution(
     assets: list = None,
 ) -> str:
     """Create a solution (product/service) from a third-party entity
+
+    Solutions have no folder: their visibility follows their provider entity.
 
     Args:
         name: Solution name (required)
@@ -761,6 +778,8 @@ async def update_entity(
     default_penetration: int = None,
     default_maturity: int = None,
     default_trust: int = None,
+    relationship: list = None,
+    address: str = None,
 ) -> str:
     """Update a third-party entity
 
@@ -778,6 +797,8 @@ async def update_entity(
         default_penetration: Penetration level 0-4
         default_maturity: Maturity level 1-4
         default_trust: Trust level 1-4
+        relationship: List of relationship types (names or UUIDs of visible entity.relationship terminologies; replaces existing). Never creates one
+        address: Postal address, as it should appear on formal documents
     """
     try:
         resolved_entity_id = resolve_entity_id(entity_id)
@@ -808,6 +829,12 @@ async def update_entity(
             payload["default_maturity"] = default_maturity
         if default_trust is not None:
             payload["default_trust"] = default_trust
+        if relationship is not None:
+            payload["relationship"] = resolve_terminology_ids(
+                relationship, "entity.relationship"
+            )
+        if address is not None:
+            payload["address"] = address
 
         if not payload:
             return "Error: No fields provided to update"

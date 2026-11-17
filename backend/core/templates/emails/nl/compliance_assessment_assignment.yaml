@@ -1,0 +1,16 @@
+subject: "CISO Assistant: U bent toegewezen aan '${assessment_name}'"
+body: |
+  Hallo,
+
+  U bent als auteur toegewezen aan de volgende audit:
+
+  - Naam: ${assessment_name}
+  - Beschrijving: ${assessment_description}
+  - Kader: ${framework_name}
+  - Status: ${assessment_status}
+  - Vervaldatum: ${assessment_due_date}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze audit te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

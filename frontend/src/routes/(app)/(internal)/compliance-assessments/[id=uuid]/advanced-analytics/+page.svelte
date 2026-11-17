@@ -1,12 +1,15 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { roundScore } from '#lib/utils/helpers.js';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import StackedBarsNormalized from '#lib/components/Chart/StackedBarsNormalized.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -116,96 +119,100 @@
 	}
 
 	function initTimelineChart(el: HTMLElement, timeline: any[]) {
-		let chart: any;
-		let resizeHandler: (() => void) | null = null;
+		let dispose: (() => void) | undefined;
+		let active = true;
 
 		import('echarts').then((echarts) => {
-			if (!el.isConnected) return;
-			chart = echarts.init(
-				el,
-				document.documentElement.classList.contains('dark') ? 'dark' : null,
-				{ renderer: 'svg' }
-			);
-			const dates = timeline.map((t: any) => t.date);
-			const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
-			const areaSeries = RESULT_KEYS.map((key) => ({
-				name: safeTranslate(key),
-				type: 'line',
-				stack: 'total',
-				smooth: true,
-				showSymbol: false,
-				areaStyle: { opacity: 0.5 },
-				lineStyle: { width: 1.5 },
-				emphasis: { focus: 'series' },
-				yAxisIndex: 0,
-				data: timeline.map((t: any) => t.per_result[key] || 0),
-				itemStyle: { color: complianceResultColorMap[key] }
-			}));
-			const series: any[] = [...areaSeries];
-			if (hasScores) {
-				series.push({
-					name: safeTranslate('score'),
+			if (!active || !el.isConnected) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const dates = timeline.map((t: any) => t.date);
+				const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
+				const areaSeries = RESULT_KEYS.map((key) => ({
+					name: safeTranslate(key),
 					type: 'line',
+					stack: 'total',
 					smooth: true,
-					showSymbol: true,
-					lineStyle: { width: 2.5 },
+					showSymbol: false,
+					areaStyle: { opacity: 0.5 },
+					lineStyle: { width: 1.5 },
 					emphasis: { focus: 'series' },
-					yAxisIndex: 1,
-					data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
-					itemStyle: { color: '#6366f1' },
-					symbol: 'circle',
-					symbolSize: 5
-				});
-			}
-			chart.setOption({
-				backgroundColor: 'transparent',
-				tooltip: {
-					trigger: 'axis',
-					backgroundColor: '#1e293b',
-					borderColor: '#334155',
-					textStyle: { color: '#f1f5f9', fontSize: 12 }
-				},
-				legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
-				grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
-				xAxis: {
-					type: 'category',
-					data: dates,
-					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
-					axisLabel: { color: '#94a3b8', fontSize: 10 }
-				},
-				yAxis: [
-					{
-						type: 'value',
-						splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
+					yAxisIndex: 0,
+					data: timeline.map((t: any) => t.per_result[key] || 0),
+					itemStyle: { color: complianceResultColorMap[key] }
+				}));
+				const series: any[] = [...areaSeries];
+				if (hasScores) {
+					series.push({
+						name: safeTranslate('score'),
+						type: 'line',
+						smooth: true,
+						showSymbol: true,
+						lineStyle: { width: 2.5 },
+						emphasis: { focus: 'series' },
+						yAxisIndex: 1,
+						data: timeline.map((t: any) => (t.score >= 0 ? roundScore(t.score) : null)),
+						itemStyle: { color: '#6366f1' },
+						symbol: 'circle',
+						symbolSize: 5
+					});
+				}
+				return {
+					backgroundColor: 'transparent',
+					tooltip: {
+						trigger: 'axis',
+						backgroundColor: '#1e293b',
+						borderColor: '#334155',
+						textStyle: { color: '#f1f5f9', fontSize: 12 }
+					},
+					legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+					grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
+					xAxis: {
+						type: 'category',
+						data: dates,
+						axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
 						axisLabel: { color: '#94a3b8', fontSize: 10 }
 					},
-					...(hasScores
-						? [
-								{
-									type: 'value',
-									position: 'right',
-									splitLine: { show: false },
-									axisLabel: { color: '#6366f1', fontSize: 10 },
-									axisLine: { show: true, lineStyle: { color: '#6366f1' } },
-									name: safeTranslate('score'),
-									nameTextStyle: { color: '#6366f1', fontSize: 10 }
-								}
-							]
-						: [])
-				],
-				series
+					yAxis: [
+						{
+							type: 'value',
+							splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
+							axisLabel: { color: '#94a3b8', fontSize: 10 }
+						},
+						...(hasScores
+							? [
+									{
+										type: 'value',
+										position: 'right',
+										splitLine: { show: false },
+										axisLabel: { color: '#6366f1', fontSize: 10 },
+										axisLine: { show: true, lineStyle: { color: '#6366f1' } },
+										name: safeTranslate('score'),
+										nameTextStyle: { color: '#6366f1', fontSize: 10 }
+									}
+								]
+							: [])
+					],
+					series
+				};
 			});
-			resizeHandler = () => chart.resize();
-			window.addEventListener('resize', resizeHandler);
 		});
 
 		return {
 			destroy() {
-				if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-				if (chart) chart.dispose();
+				active = false;
+				dispose?.();
 			}
 		};
 	}
+
+	const shown = (value: number | null) => (value == null ? value : roundScore(value));
+	const below = (value: number | null, target: number | null | undefined) =>
+		value != null && target != null && value < target;
+	// Chip colour: amber when under the audit's (or group's) target
+	const chip = (base: string, value: number | null, target: number | null | undefined) =>
+		below(value, target) ? 'bg-amber-100 text-amber-800 ring-1 ring-amber-300' : base;
+
+	let openGroups: Record<string, boolean> = $state({});
 </script>
 
 <div class="flex flex-col gap-5 pb-8">
@@ -454,35 +461,43 @@
 							scoredSections.some((s: any) => s.documentation_score !== null)}
 						<div class="mt-5 border-t border-surface-100-900 pt-5">
 							<div class="grid {showDocRadar ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-5">
-								<div class="h-[400px]">
-									<RadarChart
-										name="section_scores_radar"
-										title={m.implementationScore()}
-										labels={scoredSections.map((s: any) => ({
-											name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
-											max: isSum ? baseMax * (s.total_weight || 1) : baseMax
-										}))}
-										values={scoredSections.map((s: any) => s.implementation_score)}
-										height="h-full"
-									/>
-								</div>
-								{#if showDocRadar}
-									{@const docScoredSections = scoredSections.filter(
-										(s: any) => s.documentation_score !== null
-									)}
-									<div class="h-[400px]">
-										<RadarChart
-											name="section_doc_scores_radar"
-											title={m.documentationScore()}
-											labels={docScoredSections.map((s: any) => ({
-												name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
-												max: isSum ? baseMax * (s.total_weight || 1) : baseMax
-											}))}
-											values={docScoredSections.map((s: any) => s.documentation_score)}
-											height="h-full"
-										/>
-									</div>
-								{/if}
+								<ScorePair>
+									{#snippet implementation()}
+										<div class="h-[400px]">
+											<RadarChart
+												name="section_scores_radar"
+												title={m.implementationScore()}
+												labels={scoredSections.map((s: any) => ({
+													name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+													max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+												}))}
+												values={scoredSections.map((s: any) => roundScore(s.implementation_score))}
+												height="h-full"
+											/>
+										</div>
+									{/snippet}
+									{#snippet documentation()}
+										{#if showDocRadar}
+											{@const docScoredSections = scoredSections.filter(
+												(s: any) => s.documentation_score !== null
+											)}
+											<div class="h-[400px]">
+												<RadarChart
+													name="section_doc_scores_radar"
+													title={m.documentationScore()}
+													labels={docScoredSections.map((s: any) => ({
+														name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+														max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+													}))}
+													values={docScoredSections.map((s: any) =>
+														roundScore(s.documentation_score)
+													)}
+													height="h-full"
+												/>
+											</div>
+										{/if}
+									{/snippet}
+								</ScorePair>
 							</div>
 						</div>
 					{/if}
@@ -496,10 +511,16 @@
 										{#if data.compliance_assessment.show_documentation_score}
 											<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
 										{/if}
-										<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
-										{#if data.compliance_assessment.show_documentation_score}
-											<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
-										{/if}
+										<ScorePair>
+											{#snippet implementation()}
+												<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
+											{/snippet}
+											{#snippet documentation()}
+												{#if data.compliance_assessment.show_documentation_score}
+													<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
+												{/if}
+											{/snippet}
+										</ScorePair>
 									</tr>
 								</thead>
 								<tbody>
@@ -520,35 +541,41 @@
 													{#if section.maturity_score !== null}
 														<span
 															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-															>{section.maturity_score}</span
+															>{shown(section.maturity_score)}</span
 														>
 													{:else}
 														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
-											<td class="py-2.5 pr-4 text-right">
-												{#if section.implementation_score !== null}
-													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-														>{section.implementation_score}</span
-													>
-												{:else}
-													<span class="text-surface-400">&mdash;</span>
-												{/if}
-											</td>
-											{#if data.compliance_assessment.show_documentation_score}
-												<td class="py-2.5 pr-4 text-right">
-													{#if section.documentation_score !== null}
-														<span
-															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-															>{section.documentation_score}</span
-														>
-													{:else}
-														<span class="text-surface-400">&mdash;</span>
+											<ScorePair>
+												{#snippet implementation()}
+													<td class="py-2.5 pr-4 text-right">
+														{#if section.implementation_score !== null}
+															<span
+																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+																>{shown(section.implementation_score)}</span
+															>
+														{:else}
+															<span class="text-surface-400">&mdash;</span>
+														{/if}
+													</td>
+												{/snippet}
+												{#snippet documentation()}
+													{#if data.compliance_assessment.show_documentation_score}
+														<td class="py-2.5 pr-4 text-right">
+															{#if section.documentation_score !== null}
+																<span
+																	class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+																	>{shown(section.documentation_score)}</span
+																>
+															{:else}
+																<span class="text-surface-400">&mdash;</span>
+															{/if}
+														</td>
 													{/if}
-												</td>
-											{/if}
+												{/snippet}
+											</ScorePair>
 										</tr>
 									{/each}
 								</tbody>
@@ -694,24 +721,33 @@
 					{#if coverage.with_evidence > 0}
 						<div class="border-t border-surface-100-900 pt-4">
 							<div class="flex flex-wrap gap-2">
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
-								>
-									<span class="w-2 h-2 rounded-full bg-blue-400"></span>
-									{m.directEvidence()}
-									<span class="font-semibold text-surface-800-200"
-										>{coverage.direct_only + coverage.both}</span
+								{#if coverage.direct_only > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
-								</span>
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
-								>
-									<span class="w-2 h-2 rounded-full bg-amber-400"></span>
-									{m.indirectEvidence()}
-									<span class="font-semibold text-surface-800-200"
-										>{coverage.indirect_only + coverage.both}</span
+										<span class="w-2 h-2 rounded-full bg-blue-400"></span>
+										{m.directEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.direct_only}</span>
+									</span>
+								{/if}
+								{#if coverage.indirect_only > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
-								</span>
+										<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+										{m.indirectEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.indirect_only}</span>
+									</span>
+								{/if}
+								{#if coverage.both > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
+									>
+										<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+										{m.bothEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.both}</span>
+									</span>
+								{/if}
 							</div>
 						</div>
 					{/if}
@@ -860,7 +896,10 @@
 			{#await data.stream.igBreakdown}
 				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
 			{:then igData}
-				{@const groups = igData.groups}
+				<!-- Groups out of the audit's scope are left out once some are selected -->
+				{@const groups = igData.groups?.some((g: any) => g.selected)
+					? igData.groups.filter((g: any) => g.selected && g.total_assessable > 0)
+					: igData.groups}
 				{#if groups && groups.length > 0}
 					{@const chartInfo = (() => {
 						const chartData = groups.map((g: any) => RESULT_KEYS.map((k) => g.results[k] || 0));
@@ -887,10 +926,18 @@
 									{#if data.compliance_assessment.show_documentation_score}
 										<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
 									{/if}
-									<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
-									{#if data.compliance_assessment.show_documentation_score}
-										<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
-									{/if}
+									<th class="pb-2 pr-4 text-right font-medium">{m.lowestScore()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.target()}</th>
+									<ScorePair>
+										{#snippet implementation()}
+											<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
+										{/snippet}
+										{#snippet documentation()}
+											{#if data.compliance_assessment.show_documentation_score}
+												<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
+											{/if}
+										{/snippet}
+									</ScorePair>
 								</tr>
 							</thead>
 							<tbody>
@@ -900,7 +947,27 @@
 											? 'bg-surface-50-950/50'
 											: ''}"
 									>
-										<td class="py-2.5 pr-4 text-surface-700-300">{group.name || group.ref_id}</td>
+										<td class="py-2.5 pr-4 text-surface-700-300">
+											{#if group.requirements?.length}
+												<button
+													type="button"
+													class="inline-flex items-center gap-2 hover:text-primary-600"
+													aria-expanded={!!openGroups[group.ref_id]}
+													onclick={() => (openGroups[group.ref_id] = !openGroups[group.ref_id])}
+												>
+													<i
+														class="fa-solid fa-chevron-right text-[10px] transition-transform {openGroups[
+															group.ref_id
+														]
+															? 'rotate-90'
+															: ''}"
+													></i>
+													{group.name || group.ref_id}
+												</button>
+											{:else}
+												{group.name || group.ref_id}
+											{/if}
+										</td>
 										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
 											>{group.total_assessable}</td
 										>
@@ -919,8 +986,11 @@
 											<td class="py-2.5 pr-4 text-right">
 												{#if group.maturity_score !== null}
 													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-														>{group.maturity_score}</span
+														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+															'bg-violet-50 text-violet-700',
+															group.maturity_score,
+															group.target_score
+														)} text-xs font-medium px-2 py-0.5">{shown(group.maturity_score)}</span
 													>
 												{:else}
 													<span class="text-surface-400">&mdash;</span>
@@ -928,28 +998,108 @@
 											</td>
 										{/if}
 										<td class="py-2.5 pr-4 text-right">
-											{#if group.implementation_score !== null}
+											{#if group.min_maturity_score != null}
 												<span
-													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-													>{group.implementation_score}</span
+													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+														'bg-surface-100-900 text-surface-700-300',
+														group.min_maturity_score,
+														group.target_score
+													)} text-xs font-medium px-2 py-0.5"
+													>{shown(group.min_maturity_score)}</span
 												>
 											{:else}
 												<span class="text-surface-400">&mdash;</span>
 											{/if}
 										</td>
-										{#if data.compliance_assessment.show_documentation_score}
-											<td class="py-2.5 pr-4 text-right">
-												{#if group.documentation_score !== null}
-													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-														>{group.documentation_score}</span
-													>
-												{:else}
-													<span class="text-surface-400">&mdash;</span>
+										<td class="py-2.5 pr-4 text-right tabular-nums text-surface-600-400"
+											>{group.target_score ?? '—'}</td
+										>
+										<ScorePair>
+											{#snippet implementation()}
+												<td class="py-2.5 pr-4 text-right">
+													{#if group.implementation_score !== null}
+														<span
+															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+																'bg-indigo-50 text-indigo-700',
+																group.implementation_score,
+																group.target_score
+															)} text-xs font-medium px-2 py-0.5"
+															>{shown(group.implementation_score)}</span
+														>
+													{:else}
+														<span class="text-surface-400">&mdash;</span>
+													{/if}
+												</td>
+											{/snippet}
+											{#snippet documentation()}
+												{#if data.compliance_assessment.show_documentation_score}
+													<td class="py-2.5 pr-4 text-right">
+														{#if group.documentation_score !== null}
+															<span
+																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full {chip(
+																	'bg-emerald-50 text-emerald-700',
+																	group.documentation_score,
+																	group.target_score
+																)} text-xs font-medium px-2 py-0.5"
+																>{shown(group.documentation_score)}</span
+															>
+														{:else}
+															<span class="text-surface-400">&mdash;</span>
+														{/if}
+													</td>
 												{/if}
-											</td>
-										{/if}
+											{/snippet}
+										</ScorePair>
 									</tr>
+									{#if openGroups[group.ref_id]}
+										{#each group.requirements as req}
+											<tr class="border-t border-surface-100-900 text-xs">
+												<td class="py-1.5 pr-4 pl-6">
+													<a class="anchor" href="/requirement-assessments/{req.id}">{req.name}</a>
+													{#if req.result}
+														<span class="ml-1 text-surface-500">· {safeTranslate(req.result)}</span>
+													{/if}
+													{#if req.description}
+														<span
+															class="block max-w-xl truncate text-surface-500"
+															title={req.description}>{req.description}</span
+														>
+													{/if}
+												</td>
+												<td></td>
+												<td></td>
+												{#if data.compliance_assessment.show_documentation_score}
+													<td class="py-1.5 pr-4 text-right">
+														{#if req.maturity_score !== null}
+															<span
+																class="inline-flex justify-center min-w-[2.5rem] rounded-full px-2 py-0.5 {chip(
+																	'bg-violet-50 text-violet-700',
+																	req.maturity_score,
+																	group.target_score
+																)}">{shown(req.maturity_score)}</span
+															>
+														{:else}<span class="text-surface-400">&mdash;</span>{/if}
+													</td>
+												{/if}
+												<td></td>
+												<td></td>
+												<ScorePair>
+													{#snippet implementation()}
+														<td class="py-1.5 pr-4 text-right tabular-nums"
+															>{shown(req.implementation_score) ?? '—'}</td
+														>
+													{/snippet}
+													{#snippet documentation()}
+														{#if data.compliance_assessment.show_documentation_score}
+															<td class="py-1.5 pr-4 text-right tabular-nums"
+																>{shown(req.documentation_score) ?? '—'}</td
+															>
+														{/if}
+													{/snippet}
+												</ScorePair>
+											</tr>
+										{/each}
+									{/if}
 								{/each}
 							</tbody>
 						</table>

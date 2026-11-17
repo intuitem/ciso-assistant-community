@@ -35,6 +35,14 @@ spec:
       - name: {{ .Values.frontend.name }}
         image: {{ default .Values.global.image.registry .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ default (include "ciso-assistant.defaultTag" .) .Values.frontend.image.tag }}
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.frontend.image.imagePullPolicy }}
+        {{- with .Values.frontend.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.frontend.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         env:
           {{- with .Values.frontend.env }}
             {{- toYaml . | nindent 10 }}
@@ -45,6 +53,12 @@ spec:
             value: x-forwarded-proto
           - name: HOST_HEADER
             value: x-forwarded-host
+          {{- if .Values.ingress.enabled }}
+          - name: ADDRESS_HEADER
+            value: x-forwarded-for
+          - name: XFF_DEPTH
+            value: {{ .Values.frontend.config.xffDepth | quote }}
+          {{- end }}
           - name: PUBLIC_BACKEND_API_URL
             value: {{ include "ciso-assistant.backendApiUrl" . }}
           - name: PUBLIC_BACKEND_API_EXPOSED_URL

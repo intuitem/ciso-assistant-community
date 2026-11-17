@@ -58,7 +58,7 @@ This makes it easy to update later with `git pull`.
 Before you begin, make sure you have:
 
 1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server)
-2. **Python 3.12+** installed
+2. **Python 3.14+** installed
 3. **uv** package manager (recommended) - Install with:
    ```bash
    # macOS/Linux

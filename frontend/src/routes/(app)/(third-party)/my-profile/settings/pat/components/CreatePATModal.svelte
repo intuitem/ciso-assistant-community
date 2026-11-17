@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { copy } from '@svelte-put/copy';
 
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { AuthTokenCreateSchema } from '$lib/utils/schemas';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { AuthTokenCreateSchema } from '#lib/utils/schemas.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { page } from '$app/state';
 	import { superForm } from 'sveltekit-superforms';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -48,7 +48,8 @@
 	});
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 

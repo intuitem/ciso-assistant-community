@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { browser } from '$app/environment';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { browser } from '$app/env';
 	import {
 		getModalStore,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	type CommentParentType =
-		| 'requirement_assessment'
-		| 'risk_scenario'
-		| 'applied_control'
-		| 'finding';
+		'requirement_assessment' | 'risk_scenario' | 'applied_control' | 'finding' | 'task_template';
 
 	interface CommentAuthor {
 		id: string;
@@ -109,13 +107,10 @@
 	async function fetchComments() {
 		loading = true;
 		try {
-			const res = await fetch(`/fe-api/comments?${parentType}=${parentId}&ordering=created_at`);
-			if (res.ok) {
-				const data = await res.json();
-				comments = data.results ?? [];
-			} else {
-				comments = [];
-			}
+			comments = await fetchAllPages<Comment>(
+				fetch,
+				`/fe-api/comments?${parentType}=${parentId}&ordering=created_at`
+			);
 		} catch {
 			comments = [];
 		} finally {

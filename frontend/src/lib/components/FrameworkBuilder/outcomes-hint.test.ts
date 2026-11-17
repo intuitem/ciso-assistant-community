@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { locales, setLocale } from '$paraglide/runtime';
-import { m } from '$paraglide/messages';
+import { locales, setLocale } from '#paraglide/runtime.js';
+import { m } from '#paraglide/messages.js';
 
 // `OutcomesEditor.svelte` renders the CEL `"true"` literal as a real <code>
 // element by splitting `builderOutcomeRulesHint` on a NUL sentinel substituted

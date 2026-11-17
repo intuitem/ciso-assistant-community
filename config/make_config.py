@@ -194,9 +194,36 @@ def get_config():
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
-    # Debug mode for local development
+    # MCP server, opt-in: it publishes a tool surface external AI agents can drive
+    enable_mcp = questionary.confirm(
+        "Would you like to expose the MCP server for AI assistants "
+        "(Claude, Copilot Studio, ChatGPT)? It is served at /mcp behind your proxy.",
+        default=False,
+    ).ask()
+
+    # what apps may do is set in the app: the mcp and mcp_write feature flags
+    config["mcp"] = {"enabled": bool(enable_mcp)}
+
+    # Shared cache, opt-in: one more container for the operator to run. MCP
+    # sign-in needs it, so it comes with MCP.
+    if enable_mcp:
+        print(
+            "[yellow]memcached is included: AI app sign-in needs a cache "
+            "shared by the backend workers.[/yellow]"
+        )
+        config["memcached"] = {"enabled": True}
+    else:
+        config["memcached"] = {
+            "enabled": questionary.confirm(
+                "Would you like to run memcached as a cache shared by the backend workers? "
+                "Without it, each worker counts login rate limits on its own.",
+                default=False,
+            ).ask()
+        }
+
+    # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
-        "Enable debug mode?", default=True if config["db"] == "sqlite" else False
+        "Enable debug mode?", default=False
     ).ask()
 
     return config

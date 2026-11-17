@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Document '${document_name}' (version ${version_number}) : ${decision}"
+body: |
+  Bonjour,
+
+  Une révision que vous avez rédigée a changé de statut :
+
+  - Document : ${document_name}
+  - Version : ${version_number}
+  - Statut : ${decision}
+  - Par : ${actor_name}
+  - Commentaires du relecteur : ${reviewer_comments}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour la consulter : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

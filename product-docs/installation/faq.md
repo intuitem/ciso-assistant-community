@@ -68,9 +68,69 @@ If you want to trigger the migration to make sure that all increments have been 
 docker compose exec backend uv run python manage.py migrate
 ```
 
+### `poetry: command not found` after upgrading
+
+Since v3.18.0, the backend image uses [uv](https://docs.astral.sh/uv/) instead of Poetry to manage Python dependencies, and Poetry is no longer installed. If your `docker-compose.yml` predates that release, the `huey` service (or any custom command) still calls `poetry run` and keeps restarting:
+
+```
+huey      | /bin/sh: line 1: poetry: command not found
+huey exited with code 127 (restarting)
+```
+
+In your `docker-compose.yml`, replace `poetry run` with `uv run` in the `entrypoint` of the `huey` service:
+
+```yaml
+entrypoint:
+  - /bin/sh
+  - -c
+  - |
+    uv run python manage.py run_huey -w 2 --scheduler-interval 60
+```
+
+then run `docker compose up -d`.
+
+The same applies to any command you run by hand, for example:
+
+```
+docker compose exec backend uv run python manage.py migrate
+```
+
 ### Healthcheck fails during the installation
 
 most likely because the initialization took longer than expected. Make sure you provide the expected specs or tune the docker compose to give the app more time to finish the init phase.
+
+### Update the backend healthcheck in your docker-compose
+
+The backend image now runs on a hardened base. `curl` is still installed for the time being, so an existing healthcheck keeps working, but it will be removed in a future release. If you maintain your own `docker-compose.yml`, or generated `config/docker-compose-custom.yml` with `config/make_config.py` before this change, replace the `test` line of the `backend` service's `healthcheck` in the file you actually start, and keep its other settings (`interval`, `retries`, `start_period`) as they are:
+
+```yaml
+healthcheck:
+  test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://backend:8000/api/health/', timeout=5)"]
+```
+
+then run `docker compose up -d` (for a generated config, `docker compose -f docker-compose-custom.yml up -d` from `config/`). The check uses the Python standard library, which is always present in the image.
+
+If you skip this and `curl` is gone from a later image, the healthcheck fails on every attempt and nothing else comes up, because `frontend`, `caddy`, `huey` and `mcp` all wait for the backend to be healthy:
+
+```
+dependency failed to start: container backend is unhealthy
+```
+
+You can confirm that case from the health log, which shows `curl: not found`:
+
+```bash
+docker inspect --format '{{json .State.Health}}' backend
+```
+
+### All users are locked out
+
+Login rate limiting relies on your reverse proxy passing the client IP address. If you enabled the optional `memcached` container and it is stopped, every login is refused, even with the correct password, until it is back. Users who are already logged in can keep working, except for actions that ask for their password again:
+
+```
+docker compose up -d memcached
+```
+
+If all users are blocked at the same time after a few wrong passwords, the backend probably sees the same IP address for everyone. See [Shared cache and login rate limiting](shared-cache.md#troubleshooting).
 
 ### Don't want / Can't run the init script
 
@@ -91,12 +151,12 @@ docker compose exec backend uv run python manage.py createsuperuser
 
 ### "Payload too large" when uploading a file to the frontend
 
-By default, the `BODY_SIZE_LIMIT` environment variable is set to 20 MB in the frontend Dockerfile:
+By default, the `BODY_SIZE_LIMIT` environment variable is set to 50 MB in the frontend Dockerfile:
 
 ```docker
 # frontend/Dockerfile
 
-ENV BODY_SIZE_LIMIT=20000000
+ENV BODY_SIZE_LIMIT=50000000
 ```
 
 In order to upload larger files, this value must be increased. How to do so depends on you rmode of deployment. Here are relevant docs:

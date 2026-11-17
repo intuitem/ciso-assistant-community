@@ -4,9 +4,11 @@
 	interface Props {
 		model?: string;
 		objectId?: string;
+		folderId?: string;
 	}
 
-	let { model, objectId }: Props = $props();
+	let { model, objectId, folderId }: Props = $props();
 	void model;
 	void objectId;
+	void folderId;
 </script>

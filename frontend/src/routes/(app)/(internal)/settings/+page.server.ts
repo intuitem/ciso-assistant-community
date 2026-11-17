@@ -1,9 +1,10 @@
-import { handleErrorResponse } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { handleErrorResponse } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import {
 	FeatureFlagsSchema,
 	GeneralSettingsSchema,
@@ -12,7 +13,7 @@ import {
 	SecIntelFeedsSchema,
 	webhookEndpointSchema,
 	auditSinkSchema
-} from '$lib/utils/schemas';
+} from '#lib/utils/schemas.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -31,13 +32,24 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagDefaults = await fetch(`${BASE_API_URL}/settings/feature-flags/defaults/`)
 		.then((res) => (res.ok ? res.json() : {}))
 		.catch(() => ({}));
-	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
+	const webhookEndpoints = await fetchAllPages(fetch, `${BASE_API_URL}/webhooks/endpoints/`).catch(
+		() => []
+	);
 
-	const auditSinks = await fetch(`${BASE_API_URL}/webhooks/audit-sinks/`)
-		.then((res) => (res.ok ? res.json() : { results: [] }))
-		.then((res) => res.results ?? []);
+	const auditSinks = await fetchAllPages(fetch, `${BASE_API_URL}/webhooks/audit-sinks/`).catch(
+		() => []
+	);
+
+	// Only present when ENABLE_CUSTOM_MAILER is set on the backend and the user
+	// may view it; the tab is hidden otherwise.
+	const mailerSettings = await fetch(`${BASE_API_URL}/settings/mailer/`)
+		.then((res) => (res.ok ? res.json() : null))
+		.catch(() => null);
+	const mailerHealth = mailerSettings
+		? await fetch(`${BASE_API_URL}/settings/mailer/health/`)
+				.then((res) => (res.ok ? res.json() : []))
+				.catch(() => [])
+		: [];
 
 	const selectOptions: Record<string, any> = {};
 
@@ -150,6 +162,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		auditSinks,
 		auditSinkCreateForm,
 		scimTokens,
+		mailerSettings,
+		mailerHealth,
 		title: m.settings()
 	};
 };
@@ -167,8 +181,8 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		url: '',
 		kafka_config: {}
 	};
-	// Secrets (headers, sasl password) are omitted when blank so the backend
-	// preserves/merges the stored value instead of wiping it on edit.
+	// Secrets (headers, sasl password, client secret) are omitted when blank so
+	// the backend preserves/merges the stored value instead of wiping it on edit.
 	if (f.transport === 'kafka') {
 		const config: Record<string, string> = {};
 		if (f.security_protocol) config.security_protocol = f.security_protocol;
@@ -178,8 +192,21 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		payload.kafka_config = { bootstrap_servers: f.bootstrap_servers, topic: f.topic, config };
 	} else {
 		payload.url = f.url;
+		payload.body_wrapper = f.body_wrapper;
+		payload.auth_type = f.auth_type;
 		if (typeof f.headers === 'string' && f.headers.trim()) {
 			payload.headers = JSON.parse(f.headers);
+		}
+		if (f.auth_type === 'oauth2_client_credentials') {
+			const oauth: Record<string, string> = {
+				token_url: f.token_url,
+				client_id: f.client_id
+			};
+			if (f.scope) oauth.scope = f.scope;
+			if (f.client_secret) oauth.client_secret = f.client_secret;
+			payload.oauth_config = oauth;
+		} else {
+			payload.oauth_config = {};
 		}
 	}
 	return payload;
@@ -533,8 +560,13 @@ export const actions: Actions = {
 			body: JSON.stringify({ name: 'SCIM provisioning token' })
 		});
 		if (!response.ok) {
-			setFlash({ type: 'error', message: m.scimTokenGenerationFailed() }, event);
-			return fail(response.status, { error: 'Failed to generate SCIM token' });
+			let detail: string | undefined;
+			try {
+				detail = (await response.json())?.error;
+			} catch {}
+			const message = (detail && safeTranslate(detail)) || m.scimTokenGenerationFailed();
+			setFlash({ type: 'error', message }, event);
+			return fail(response.status, { error: message });
 		}
 		const data = await response.json();
 		return { token: data.token, id: data.id, name: data.name };

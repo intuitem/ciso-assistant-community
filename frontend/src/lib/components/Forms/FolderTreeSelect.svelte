@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import type { CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
+	import { keepOnlyEnclaveOf } from './folder-tree';
 
 	const PERSONAL_SENTINEL = '__personal__';
 
@@ -17,6 +18,8 @@
 		nullable?: boolean;
 		disabled?: boolean;
 		hidden?: boolean;
+		/** Force the required marker when the schema cannot express the condition. */
+		required?: boolean;
 		cacheLock?: CacheLock;
 		cachedValue?: any;
 		// Called whenever the selected value changes
@@ -32,6 +35,8 @@
 		/**
 		 * Defaults to ['DO', 'GL']
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
+		 * With 'GL', Global is the root of the tree; without it, Global is left
+		 * out and the domains sit at the top level.
 		 */
 		contentTypes?: string[];
 		/**
@@ -40,6 +45,17 @@
 		 * folder as a setting reference, where write access on it isn't required).
 		 */
 		writePermission?: string | null;
+		/**
+		 * When set, only these folders are shown and can be picked. A folder kept
+		 * only to reach an allowed one below it shows greyed out, as folders
+		 * without write access do.
+		 */
+		allowedIds?: string[] | null;
+		/**
+		 * With 'EN' in contentTypes, list only the enclave holding the value the form
+		 * opened with (an object already filed there), not every third-party workspace.
+		 */
+		onlyCurrentEnclave?: boolean;
 	}
 
 	let {
@@ -50,6 +66,7 @@
 		nullable = false,
 		disabled = false,
 		hidden = false,
+		required = false,
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
@@ -59,7 +76,9 @@
 		mount: mountCallback = () => null,
 		optionsSelf = null,
 		contentTypes = ['DO', 'GL'],
-		writePermission = undefined
+		writePermission = undefined,
+		allowedIds = null,
+		onlyCurrentEnclave = false
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
@@ -79,9 +98,13 @@
 	let isOpen = $state(false);
 	let searchQuery = $state('');
 	let searchInputEl = $state<HTMLInputElement | null>(null);
+	let triggerEl = $state<HTMLDivElement | null>(null);
 	let sortAsc = $state(true);
 	let selectedName = $state('');
 	let selectedPath = $state<string[]>([]);
+	// Which value the displayed name was resolved for, so a value set from outside
+	// (e.g. a domain derived from the picked entity) refreshes the label.
+	let resolvedFor = $state<string | null>(null);
 	let isLoading = $state(false);
 
 	let debouncedQuery = $state('');
@@ -93,11 +116,29 @@
 		return () => clearTimeout(t);
 	});
 
-	// Include the GL root as a flat first entry
+	// Only the allowed folders, and the ones leading to them (greyed out: not
+	// writable). A tree of thousands of folders narrows to the few on offer.
+	function restrict(n: TreeNode, allowed: Set<string>): TreeNode | null {
+		const children = (n.children ?? [])
+			.map((c) => restrict(c, allowed))
+			.filter((c): c is TreeNode => c !== null);
+		const isAllowed = !!n.uuid && allowed.has(String(n.uuid));
+		if (!isAllowed && !children.length) return null;
+		return { ...n, writable: n.writable !== false && isAllowed, children };
+	}
+	const shownTree = $derived(
+		orgTree && allowedIds ? restrict(orgTree, new Set(allowedIds.map(String))) : orgTree
+	);
+
+	// Search walks the root on its own, then its children: results show the
+	// path below Global, which every folder shares.
 	const topNodes = $derived(
-		orgTree ? [{ ...orgTree, children: undefined }, ...(orgTree.children ?? [])] : []
+		shownTree ? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])] : []
 	);
 	const hasNodes = $derived(topNodes.length > 0);
+	// A node of a type that is not accepted hides its whole subtree, so Global
+	// can only be drawn as the root when it is accepted.
+	const showRoot = $derived(!!shownTree && contentTypes.includes(shownTree.content_type));
 
 	//  optionsSelf exclusion
 	const excludedId = $derived(
@@ -120,10 +161,18 @@
 			}));
 	}
 
+	// What the tree draws: Global as the root with the domains under it, or the
+	// domains alone when Global is not accepted or is the excluded node.
+	const rootNode = $derived(
+		shownTree && showRoot && shownTree.uuid !== excludedId
+			? { ...shownTree, children: pruneExcluded(shownTree.children ?? []) }
+			: null
+	);
 	const sortedTopNodes = $derived.by(() => {
+		const domains = shownTree?.children ?? [];
 		const sorted = sortAsc
-			? [...topNodes].sort((a, b) => a.name.localeCompare(b.name))
-			: [...topNodes].sort((a, b) => b.name.localeCompare(a.name));
+			? [...domains].sort((a, b) => a.name.localeCompare(b.name))
+			: [...domains].sort((a, b) => b.name.localeCompare(a.name));
 		return pruneExcluded(sorted);
 	});
 
@@ -150,8 +199,9 @@
 	$effect(() => {
 		const v = $value;
 		if (v && orgTree) {
-			// Only traverse when the name isn't already known (edit mode / cache restore)
-			if (selectedName) return;
+			// Only traverse when the name isn't already known for this value
+			// (edit mode / cache restore)
+			if (selectedName && resolvedFor === String(v)) return;
 			function findNode(n: TreeNode, anc: string[]): { name: string; path: string[] } | null {
 				if (n.uuid === String(v)) return { name: n.name, path: anc };
 				for (const c of n.children ?? []) {
@@ -164,10 +214,18 @@
 			if (result) {
 				selectedName = result.name;
 				selectedPath = result.path;
+				resolvedFor = String(v);
+			} else if (selectedName || resolvedFor) {
+				// The value moved to a folder outside the tree (an enclave, say): showing
+				// the previous name would misreport what the hidden input holds.
+				selectedName = '';
+				selectedPath = [];
+				resolvedFor = null;
 			}
 		} else if (!v) {
 			selectedName = '';
 			selectedPath = [];
+			resolvedFor = null;
 		}
 	});
 
@@ -182,6 +240,7 @@
 		$value = id;
 		selectedName = name;
 		selectedPath = path;
+		resolvedFor = String(id);
 		isOpen = false;
 		searchQuery = '';
 		onChange($value);
@@ -192,6 +251,7 @@
 		$value = null;
 		selectedName = '';
 		selectedPath = [];
+		resolvedFor = null;
 		isOpen = false;
 		onChange(null);
 	}
@@ -199,7 +259,19 @@
 	function toggleDropdown() {
 		if (disabled) return;
 		if (isOpen) searchQuery = '';
+		// Placed before it renders, so it never shows at the viewport's corner.
+		else place();
 		isOpen = !isOpen;
+	}
+
+	// Escape closes the dropdown, and only the dropdown: a modal holding the
+	// select must not close with it and lose what was typed.
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key !== 'Escape' || !isOpen) return;
+		event.preventDefault();
+		event.stopPropagation();
+		isOpen = false;
+		searchQuery = '';
 	}
 
 	function handleClickOutside(event: MouseEvent) {
@@ -214,9 +286,46 @@
 		if (isOpen) {
 			document.addEventListener('click', handleClickOutside);
 			// Focus search input on next tick so the element is in the DOM
-			queueMicrotask(() => searchInputEl?.focus());
+			queueMicrotask(() => searchInputEl?.focus({ preventScroll: true }));
 			return () => document.removeEventListener('click', handleClickOutside);
 		}
+	});
+
+	//  Dropdown placement: fixed and positioned against the trigger, so no
+	//  scrolling container (a modal, a card) can clip it, while it stays in the
+	//  select's DOM (click-outside detection, locators scoped to the field). It
+	//  opens upwards when the room below is short and the room above is larger.
+	const DROPDOWN_MAX_HEIGHT = 352; // 22rem
+	const DROPDOWN_MIN_WIDTH = 256;
+	const GAP = 4;
+	const MARGIN = 8;
+	let dropdownStyle = $state('');
+
+	function place() {
+		const rect = triggerEl?.getBoundingClientRect();
+		if (!rect) return;
+		const below = window.innerHeight - rect.bottom - GAP - MARGIN;
+		const above = rect.top - GAP - MARGIN;
+		const upwards = below < DROPDOWN_MAX_HEIGHT && above > below;
+		const maxHeight = Math.min(DROPDOWN_MAX_HEIGHT, Math.max(upwards ? above : below, 120));
+		const width = Math.max(rect.width, DROPDOWN_MIN_WIDTH);
+		const left = Math.max(MARGIN, Math.min(rect.left, window.innerWidth - width - MARGIN));
+		const vertical = upwards
+			? `bottom: ${window.innerHeight - rect.top + GAP}px`
+			: `top: ${rect.bottom + GAP}px`;
+		dropdownStyle = `left: ${left}px; width: ${width}px; max-height: ${maxHeight}px; ${vertical}`;
+	}
+
+	$effect(() => {
+		if (!isOpen) return;
+		place();
+		// Capture: a scroll inside any container (the modal) moves the trigger.
+		window.addEventListener('scroll', place, true);
+		window.addEventListener('resize', place);
+		return () => {
+			window.removeEventListener('scroll', place, true);
+			window.removeEventListener('resize', place);
+		};
 	});
 
 	//  Mount: fetch org_tree immediately; also handle cache lock independently
@@ -236,7 +345,8 @@
 				if (res.ok) return res.json();
 			})
 			.then((data) => {
-				if (data) orgTree = data;
+				if (!data) return;
+				orgTree = onlyCurrentEnclave ? (keepOnlyEnclaveOf(data, $value) ?? undefined) : data;
 			})
 			.catch((e) => console.error('FolderTreeSelect: failed to fetch org_tree', e))
 			.finally(() => (isLoading = false));
@@ -257,13 +367,18 @@
 {#if hidden}
 	<input type="hidden" name={field} value={$value ?? ''} />
 {:else}
-	<div data-testid="form-input-{field.replace(/_/g, '-')}" class="{selectorClass} relative">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		data-testid="form-input-{field.replace(/_/g, '-')}"
+		class="{selectorClass} relative"
+		onkeydown={handleKeydown}
+	>
 		<!-- Needed for multipart/form-data forms (e.g. with file attachments) -->
 		<input type="hidden" name={field} value={$value ?? ''} />
 		{#if label !== undefined}
 			<label class="block text-sm font-semibold mb-1" for="folder-tree-select-btn-{field}">
 				{label}
-				{#if $constraints?.required}
+				{#if required || $constraints?.required}
 					<span class="text-red-500">*</span>
 				{/if}
 			</label>
@@ -278,7 +393,7 @@
 		{/if}
 
 		<!-- Trigger button -->
-		<div class="relative">
+		<div class="relative" bind:this={triggerEl}>
 			<button
 				id="folder-tree-select-btn-{field}"
 				type="button"
@@ -331,9 +446,10 @@
 
 		<!-- Dropdown -->
 		{#if isOpen}
+			<!-- Fixed, above modals (z-999): see place(). -->
 			<div
-				class="absolute left-0 top-full mt-1 w-full min-w-64 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50 flex flex-col"
-				style="max-height: 22rem"
+				class="fixed bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-[1000] flex flex-col"
+				style={dropdownStyle}
 			>
 				<!-- Header: sort toggle + search input -->
 				<div class="p-2 border-b border-surface-100-900 space-y-2 flex-shrink-0">
@@ -344,7 +460,7 @@
 							></i>
 							<input
 								type="text"
-								class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 bg-surface-50-950 text-surface-900-100 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+								class="input w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 rounded focus:outline-hidden focus:ring-1 focus:ring-indigo-300"
 								placeholder={m.searchPlaceholder()}
 								bind:value={searchQuery}
 								bind:this={searchInputEl}
@@ -448,16 +564,29 @@
 								</button>
 							</li>
 						{/if}
-						{#each sortedTopNodes as node (node.uuid ?? node.name)}
+						{#if rootNode}
+							<!-- The displayed path starts below Global, as it does in search results -->
 							<FolderTreeNode
-								{node}
+								node={rootNode}
 								{sortAsc}
 								{contentTypes}
 								focusId={$value ? String($value) : null}
-								onSelect={handleSelect}
+								onSelect={(id, name, path) => handleSelect(id, name, path.slice(1))}
 								depth={0}
+								expanded={true}
 							/>
-						{/each}
+						{:else}
+							{#each sortedTopNodes as node (node.uuid ?? node.name)}
+								<FolderTreeNode
+									{node}
+									{sortAsc}
+									{contentTypes}
+									focusId={$value ? String($value) : null}
+									onSelect={handleSelect}
+									depth={0}
+								/>
+							{/each}
+						{/if}
 					{/if}
 				</ul>
 			</div>

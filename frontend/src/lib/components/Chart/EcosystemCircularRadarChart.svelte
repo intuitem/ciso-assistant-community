@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart, isDarkTheme } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -110,11 +111,11 @@
 							formatter: function (params) {
 								const parts = params.value[3].split('-');
 								return (
-									parts[0] +
+									escapeHtml(parts[0]) +
 									' - ' +
-									safeTranslate(parts[1] || '') +
+									escapeHtml(safeTranslate(parts[1] || '')) +
 									`<br/>${m.criticalitySemiColon()} ` +
-									params.value[0]
+									escapeHtml(params.value[0])
 								);
 							}
 						},

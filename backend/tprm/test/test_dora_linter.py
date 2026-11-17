@@ -103,6 +103,16 @@ class TestLintSubcontractingChainsMissingLEI(LintSubcontractingChainsBase):
         self.assertIn("no legal identifier", errors[0]["message"])
         self.assertEqual(errors[0]["object_id"], str(no_id_sub.id))
 
+    def test_subcontractor_with_legacy_string_identifiers_errors(self):
+        """Legacy non-dict legal_identifiers is reported, not a crash."""
+        bad_sub = Entity.objects.create(name="Legacy Sub", folder=self.folder)
+        Entity.objects.filter(pk=bad_sub.pk).update(legal_identifiers="LEI123")
+        SolutionSubcontractor.objects.create(
+            solution=self.solution, subcontractor=bad_sub
+        )
+        results = lint_subcontracting_chains()
+        self.assertEqual(len(self._errors(results)), 1)
+
     def test_subcontractor_with_empty_string_lei_errors(self):
         """legal_identifiers with empty-string values also fails."""
         empty_id_sub = Entity.objects.create(

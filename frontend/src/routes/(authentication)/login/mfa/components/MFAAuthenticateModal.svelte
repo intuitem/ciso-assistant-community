@@ -1,18 +1,19 @@
 <script lang="ts">
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { mfaAuthenticateSchema } from '../utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { m } from '$paraglide/messages';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { startAuthentication } from '@simplewebauthn/browser';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -66,7 +67,11 @@
 			const formData = new FormData();
 			formData.set('credential', JSON.stringify(credential));
 
-			const response = await fetch(`?/mfaAuthenticateWebAuthn`, {
+			const next = page.url.searchParams.get('next');
+			const action = next
+				? `?/mfaAuthenticateWebAuthn&next=${encodeURIComponent(next)}`
+				: '?/mfaAuthenticateWebAuthn';
+			const response = await fetch(action, {
 				method: 'POST',
 				body: formData
 			});

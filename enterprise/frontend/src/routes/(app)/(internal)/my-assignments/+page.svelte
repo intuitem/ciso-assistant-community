@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { listViewFields } from '$lib/utils/table';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -71,7 +71,7 @@
 		if (filterMode === 'filter' && selectedActorIds.length > 0) {
 			selectedActorIds.forEach((id) => params.append('actor', id));
 		}
-		goto(`/my-assignments?${params.toString()}`, { invalidateAll: true });
+		goto(`/my-assignments?${params.toString()}`, { refreshAll: true });
 	}
 
 	function applyFilter() {
@@ -80,7 +80,7 @@
 		if (filterMode === 'filter' && selectedActorIds.length > 0) {
 			selectedActorIds.forEach((id) => params.append('actor', id));
 		}
-		goto(`/my-assignments?${params.toString()}`, { invalidateAll: true });
+		goto(`/my-assignments?${params.toString()}`, { refreshAll: true });
 	}
 
 	function handleFilterModeChange(mode: FilterMode) {
@@ -111,13 +111,17 @@
 		</h2>
 	</div>
 	<div class="flex gap-2">
-		<button type="button" class="btn btn-sm variant-ghost-surface" onclick={toggleTeamAssignments}>
+		<button
+			type="button"
+			class="btn btn-sm preset-outlined-surface-500"
+			onclick={toggleTeamAssignments}
+		>
 			<i class="fa-solid {data.includeTeams ? 'fa-user' : 'fa-users'} mr-2"></i>
 			{data.includeTeams ? m.directAssignmentsOnly() : m.includeTeamAssignments()}
 		</button>
 		<button
 			type="button"
-			class="btn btn-sm variant-ghost-surface"
+			class="btn btn-sm preset-outlined-surface-500"
 			onclick={() => (showEmptySections = !showEmptySections)}
 		>
 			<i class="fa-solid {showEmptySections ? 'fa-eye-slash' : 'fa-eye'} mr-2"></i>
@@ -179,7 +183,7 @@
 						</div>
 						<button
 							type="button"
-							class="btn variant-filled-primary"
+							class="btn preset-filled-primary-500"
 							onclick={applyFilter}
 							disabled={selectedActorIds.length === 0}
 						>
@@ -199,35 +203,37 @@
 	</div>
 {:then counts}
 	<div class="grid grid-cols-12 gap-4 p-2">
-		<div
-			class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 dark:from-pink-950/40 dark:to-pink-950/10 p-2 rounded"
-		>
-			<div class="font-bold mb-2">
-				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
-				{#if counts.appliedControls > 0}
-					<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
-				{/if}
+		{#if showEmptySections || counts.appliedControls > 0}
+			<div
+				class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 dark:from-pink-950/40 dark:to-pink-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
+					{#if counts.appliedControls > 0}
+						<span class="badge preset-tonal-surface ml-2">{counts.appliedControls}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							ref_id: 'ref_id',
+							name: 'name',
+							status: 'status',
+							priority: 'priority',
+							eta: 'eta',
+							folder: 'folder'
+						},
+						body: [],
+						filters: APPLIED_CONTROL_FILTERS
+					}}
+					URLModel="applied-controls"
+					baseEndpoint="/applied-controls?{ownerParams}"
+				/>
 			</div>
-			<ModelTable
-				source={{
-					head: {
-						ref_id: 'ref_id',
-						name: 'name',
-						status: 'status',
-						priority: 'priority',
-						eta: 'eta',
-						folder: 'folder'
-					},
-					body: [],
-					filters: APPLIED_CONTROL_FILTERS
-				}}
-				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?{ownerParams}"
-			/>
-		</div>
-		<div class="col-span-5 p-2 flex items-center justify-center">
-			<ActivityTracker metrics={data.data.metrics} />
-		</div>
+			<div class="col-span-5 p-2 flex items-center justify-center">
+				<ActivityTracker metrics={data.data.metrics} />
+			</div>
+		{/if}
 		{#if showEmptySections || counts.tasks > 0}
 			<div
 				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
@@ -235,7 +241,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-note-sticky mr-2"></i>{m.tasks()}
 					{#if counts.tasks > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.tasks}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.tasks}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -261,7 +267,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-certificate mr-2"></i>{m.complianceAssessments()}
 					{#if counts.complianceAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.complianceAssessments}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.complianceAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -288,7 +294,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-magnifying-glass-chart mr-2"></i>{m.riskAssessments()}
 					{#if counts.riskAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.riskAssessments}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.riskAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -314,7 +320,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clone mr-2"></i>{m.riskScenarios()}
 					{#if counts.riskScenarios > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.riskScenarios}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.riskScenarios}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -341,7 +347,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bug mr-2"></i>{m.incidents()}
 					{#if counts.incidents > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.incidents}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.incidents}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -368,7 +374,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-circle-exclamation mr-2"></i>{m.securityExceptions()}
 					{#if counts.securityExceptions > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.securityExceptions}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.securityExceptions}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -395,7 +401,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clipboard-list mr-2"></i>{m.findingsAssessments()}
 					{#if counts.findingsAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.findingsAssessments}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.findingsAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -414,14 +420,14 @@
 				/>
 			</div>
 		{/if}
-		{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
+		{#if approverParams && (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
 			<div
 				class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 dark:from-orange-950/40 dark:to-orange-950/10 p-2 rounded"
 			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-check-circle mr-2"></i>{m.validationFlows()}
 					{#if counts.validationFlows > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.validationFlows}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.validationFlows}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -441,6 +447,31 @@
 				/>
 			</div>
 		{/if}
+		{#if approverParams && (showEmptySections || counts.riskAcceptances > 0)}
+			<div
+				class="col-span-6 bg-linear-to-br from-yellow-200 to-yellow-50 dark:from-yellow-950/40 dark:to-yellow-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-signature mr-2"></i>{m.riskAcceptances()}
+					{#if counts.riskAcceptances > 0}
+						<span class="badge preset-tonal-surface ml-2">{counts.riskAcceptances}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							name: 'name',
+							expiry_date: 'expiry_date',
+							folder: 'folder'
+						},
+						body: []
+					}}
+					hideFilters={true}
+					URLModel="risk-acceptances"
+					baseEndpoint="/risk-acceptances?{approverParams}&state=submitted"
+				/>
+			</div>
+		{/if}
 		{#if showEmptySections || counts.findings > 0}
 			<div
 				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
@@ -448,7 +479,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.findings()}
 					{#if counts.findings > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.findings}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.findings}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -474,7 +505,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bullseye mr-2"></i>{m.organisationObjectives()}
 					{#if counts.organisationObjectives > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.organisationObjectives}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.organisationObjectives}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -501,7 +532,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-user-shield mr-2"></i>{m.rightRequests()}
 					{#if counts.rightRequests > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.rightRequests}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.rightRequests}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -528,7 +559,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-chart-line mr-2"></i>{m.metricInstances()}
 					{#if counts.metricInstances > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.metricInstances}</span>
+						<span class="badge preset-tonal-surface ml-2">{counts.metricInstances}</span>
 					{/if}
 				</div>
 				<ModelTable

@@ -1,6 +1,6 @@
 import { type Actions } from '@sveltejs/kit';
 
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
 
 export const actions: Actions = {
 	default: async (event) => {

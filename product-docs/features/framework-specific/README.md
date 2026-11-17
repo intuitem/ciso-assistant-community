@@ -9,7 +9,7 @@ Most of CISO Assistant is framework-agnostic — the same audit, applied-control
 This section catalogues those capabilities:
 
 - [ISO 27001](iso.md) — Statement of Applicability report; organisation issues and objectives (context of the organisation).
-- [CCB CyFun](cyfun.md) — self-assessment Excel export in the format expected by Belgium's Centre for Cybersecurity.
+- [CCB CyFun](cyfun.md) — self-assessment Excel import and export in the format published by Belgium's Centre for Cybersecurity.
 - [DORA](dora.md) — Register of Information report and structured incident reports aligned with the Digital Operational Resilience Act.
 - [MonServiceSécurisé](monservicesecurise.md) — controls export in the format expected by the French ANSSI portal.
 

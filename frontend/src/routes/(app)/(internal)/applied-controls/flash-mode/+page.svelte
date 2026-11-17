@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { page } from '$app/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { page } from '$app/state';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		data: PageData;

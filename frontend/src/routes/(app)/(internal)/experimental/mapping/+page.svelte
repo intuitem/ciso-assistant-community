@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import type { PageData } from './$types';
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
-	const mapping_sets = data.data.results;
+	const mapping_sets = $derived(data.data);
 </script>
 
 <div>

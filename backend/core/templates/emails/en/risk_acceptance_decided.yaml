@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Risk acceptance '${acceptance_name}': ${decision}"
+body: |
+  Hello,
+
+  A risk acceptance covering risk scenarios you own has a new state:
+
+  - Name: ${acceptance_name}
+  - State: ${decision}
+  - Decided by: ${actor_name}
+  - Justification: ${justification}
+  - Risk scenarios: ${risk_scenarios}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

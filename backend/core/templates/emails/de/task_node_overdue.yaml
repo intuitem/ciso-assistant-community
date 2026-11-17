@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Überfällige Aufgaben (${task_count})"
+body: |
+  Hallo,
+
+  Folgende Aufgaben sind überfällig und noch offen:
+
+  ${task_list}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Aufgaben abzuschließen oder zu aktualisieren: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

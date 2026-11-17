@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Opdracht ingediend voor '${assessment_name}'"
+body: |
+  Hallo,
+
+  Er is een opdracht ter beoordeling ingediend voor de volgende audit:
+
+  - Audit: ${assessment_name}
+  - Ingediend door: ${actor_names}
+  - Beoordeelde eisen: ${requirement_count}
+
+  Meld u aan op uw CISO Assistant-portaal om de inzending te beoordelen: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

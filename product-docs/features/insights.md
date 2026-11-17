@@ -40,7 +40,7 @@ Underlying endpoint: `/applied-controls/impact_effort/`.
 
 ### Timeline view
 
-`/insights/timeline-view` — a **Gantt chart** plotting applied controls, compliance assessments, risk assessments, business impact analyses, findings assessments, and security exceptions on a single timeline, with swimlanes by domain.
+`/insights/timeline-view` — a **Gantt chart** plotting applied controls, compliance assessments, risk assessments, business impact analyses, findings binders, and security exceptions on a single timeline, with swimlanes by domain.
 
 Controls:
 

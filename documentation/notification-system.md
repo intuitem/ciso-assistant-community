@@ -16,18 +16,19 @@ Event Trigger (serializer / periodic cron)
         v
   check_email_configuration()
   - notifications_enable_mailing enabled?
-  - EMAIL_HOST / EMAIL_PORT / DEFAULT_FROM_EMAIL set?
+  - core.mailer.mailing_enabled()? (a mailer and DEFAULT_FROM_EMAIL set)
   - Recipient email present?
         |
         v
   Email Template Rendering (YAML + string.Template)
         |
         v
-  django.core.mail.send_mail()
-  - Primary server -> Rescue server (fallback)
+  core.mailer.send()
+  - Tries the mailers in settings.MAILERS in order
+  - Fails over only when a mailer cannot be opened (connection, TLS or login fails)
 ```
 
-There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
+This document covers the email path. Most notification tasks also write an **in-app** inbox row by calling `notify()` (`backend/notifications/service.py`) before sending their emails. Types, channels and title context are declared in `backend/notifications/registry.py`, and rows are stored in the `Notification` model. Frontend toast notifications are independent and handled client-side only.
 
 ---
 
@@ -38,18 +39,31 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EMAIL_HOST` | Yes | SMTP server hostname |
-| `EMAIL_PORT` | Yes | SMTP server port |
+| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 25 otherwise, STARTTLS included) |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_HOST_PASSWORD` | No | SMTP password |
-| `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
+| `EMAIL_USE_TLS` | No | STARTTLS (`true`/`false`, default `false`) |
+| `EMAIL_USE_SSL` | No | Implicit TLS, typically port 465 (`true`/`false`, default `false`). Mutually exclusive with `EMAIL_USE_TLS` |
+| `EMAIL_SSL_CERTFILE`, `EMAIL_SSL_KEYFILE` | No | Client certificate and key for relays that require one. Also `_RESCUE` |
 | `DEFAULT_FROM_EMAIL` | Yes | Sender address (fallback: `noreply@ciso.assistant`) |
-| `EMAIL_HOST_RESCUE` | No | Fallback SMTP server |
+| `EMAIL_HOST_RESCUE` | No | Second SMTP server, used when the first cannot be reached (all mail, not only password resets) |
 | `EMAIL_PORT_RESCUE` | No | Fallback SMTP port |
 | `EMAIL_HOST_USER_RESCUE` | No | Fallback SMTP username |
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
-| `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
+| `EMAIL_USE_TLS_RESCUE` | No | Fallback STARTTLS setting |
+| `EMAIL_USE_SSL_RESCUE` | No | Fallback implicit TLS setting |
+| `ENABLE_CUSTOM_MAILER` | No | `true` shows the Mailer settings tab and lets a stored configuration replace the environment mailers (`global_settings.MailerConfiguration`). Off by default; off also ignores any stored configuration |
+| `EMAIL_TRANSPORT` | No | `smtp` (password, default), `smtp-oauth2` (bearer token) or `graph` (Microsoft Graph over HTTPS). Also `_RESCUE` |
+| `EMAIL_GRAPH_TENANT_ID` | With `graph` | Entra tenant GUID or verified domain; with `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET` and `EMAIL_HOST_USER` (the mailbox). No host: the endpoints are Microsoft's and follow `HTTPS_PROXY` |
+| `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
+| `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |
+| `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE`, or `EMAIL_OAUTH2_ISSUER` + `EMAIL_OAUTH2_PRIVATE_KEY`, `EMAIL_OAUTH2_AUDIENCE` | jwt_bearer | Signing identity for the JWT bearer grant (Google service accounts) |
 
-Source: `backend/ciso_assistant/settings.py` (lines 258-275)
+The variables are turned into Django's `MAILERS` setting by `backend/ciso_assistant/mailers.py`. Every send goes through `backend/core/mailer.py`.
+
+### Testing the configuration
+
+`python manage.py send_test_email <address>` sends a test message through `core.mailer.send_test()`, which reports the mailer that delivered and the ones skipped on the way instead of raising, then prints the delivery health rows (`global_settings.MailerHealth`, one per mailer, updated by the service on every send). The Mailer settings tab calls the same function with the unsaved form values.
 
 ### Global Setting (UI toggle)
 
@@ -88,6 +102,8 @@ Worker command: `uv run python manage.py run_huey -w 2 -k process`
 | `backend/global_settings/models.py` | `GlobalSettings` stores `notifications_enable_mailing` |
 | `backend/core/templates/emails/en/` | English YAML email templates |
 | `backend/core/templates/emails/fr/` | French YAML email templates |
+| `backend/core/templates/emails/de/` | German YAML email templates |
+| `backend/core/templates/emails/nl/` | Dutch YAML email templates |
 | `backend/core/templates/registration/` | HTML templates for password reset / welcome emails |
 
 ---
@@ -133,7 +149,7 @@ The `ciso_assistant_url` variable is always injected via `get_default_context()`
 ### How to Add a New Template
 
 1. Create `backend/core/templates/emails/en/{template_name}.yaml` with `subject` and `body` keys
-2. Create `backend/core/templates/emails/fr/{template_name}.yaml` (French translation)
+2. Create the `fr`, `de` and `nl` translations next to it (`backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`); a missing locale falls back to English
 3. Use `${variable_name}` for dynamic content
 4. `${ciso_assistant_url}` is automatically available
 
@@ -178,12 +194,22 @@ These are triggered from serializer `create()` / `update()` methods when users a
 |-------|-----------------|---------------|----------|
 | AppliedControl owner assigned | `AppliedControlWriteSerializer.create/update` | `send_applied_control_assignment_notification` | `applied_control_assignment` |
 | ComplianceAssessment author assigned | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_assignment_notification` | `compliance_assessment_assignment` |
+| ComplianceAssessment reviewer added | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_reviewer_assignment_notification` | `compliance_assessment_reviewer_assignment` |
 | TaskTemplate assigned_to set | `TaskTemplateWriteSerializer.create/update` | `send_task_template_assignment_notification` | `task_template_assignment` |
 | RiskScenario owner assigned | `RiskScenarioWriteSerializer.create/update` | `send_risk_scenario_assignment_notification` | `risk_scenario_assignment` |
 | ValidationFlow created | `ValidationFlowWriteSerializer.create` | `send_validation_flow_created_notification` | `validation_flow_created` |
 | ValidationFlow status changed | `ValidationFlowWriteSerializer.update` | `send_validation_flow_updated_notification` | `validation_flow_updated` |
+| ValidationFlow approver changed while submitted | `ValidationFlowWriteSerializer.update` | `send_validation_flow_created_notification` (old approver's row deleted) | `validation_flow_created` |
 | SecurityException owner assigned | `SecurityExceptionWriteSerializer.create/update` | `send_security_exception_assignment_notification` | `security_exception_assignment` |
 | SecurityException status changed | `SecurityExceptionWriteSerializer.update` | `send_security_exception_status_notification` | `security_exception_status_changed` |
+| Incident owner assigned | `IncidentWriteSerializer.create/update` | `send_incident_assignment_notification` | `incident_assignment` |
+| DocumentRevision submitted for review | `DocumentRevisionViewSet.submit_for_review` | `send_document_review_requested_notification` (container reviewers, minus the submitter) | `document_review_requested` |
+| DocumentRevision validated / change requested / published | `DocumentRevisionViewSet.approve/request_changes/publish` | `send_document_revision_reviewed_notification` (the author, unless they acted) | `document_revision_reviewed` |
+| Evidence approved / rejected | `EvidenceWriteSerializer.update` | `send_evidence_reviewed_notification` | `evidence_reviewed` |
+| RiskAcceptance submitted | `RiskAcceptanceViewSet.submit` | `send_risk_acceptance_submitted_notification` | `risk_acceptance_submitted` |
+| RiskAcceptance accepted / rejected / revoked | `RiskAcceptanceViewSet.accept/reject/revoke` | `send_risk_acceptance_decided_notification` | `risk_acceptance_decided` |
+
+**Generic assignment notifications** (`AssignmentNotificationMixin` in `core/serializers.py`): a write serializer declares `assignment_notifications = {"<m2m field>": "object_assignment" | "object_review_assignment"}`. The mixin wraps `save()`, diffs the field's members and queues `send_object_assignment_notification` after commit; recipients are re-resolved when the task runs. The model name comes from the paraglide key matching the model (`paraglide_model_key`), localized by the frontend in the inbox and by `_MODEL_LABELS` (`core/email_utils.py`) in email. Wired: owners of assets, evidences, findings, right requests, solutions, contracts, CRQ scenarios, metric instances; assignees of objectives, processings, data breaches; authors (`object_assignment`) and reviewers (`object_review_assignment`) of risk assessments, findings binders, entity assessments, EBIOS RM studies, BIAs, CRQ studies, technical postures. Models with a dedicated type above do not use it.
 
 **Pattern for assignment notifications in serializers:**
 
@@ -213,7 +239,20 @@ def _send_assignment_notifications(self, obj, actor_ids):
 
 Note: `ComplianceAssessmentWriteSerializer.update` and `SecurityExceptionWriteSerializer.update` (status change) use `transaction.on_commit()` to defer notification until the DB transaction is committed. The SecurityException status notification goes to both the exception owners and its approver.
 
-### 3. Password Reset / Welcome Emails
+### 3. Requirement Assignment Review Workflow (Event-Triggered)
+
+These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` validates the `(from_status, to_status)` pair against `TRANSITIONS`, then `_send_transition_notification` (`backend/core/views.py:18676`) dispatches the matching task.
+
+| Transition | Task Function | Template | Recipient |
+|------------|---------------|----------|-----------|
+| `* → in_progress` | `send_assignment_activated_notification` | `assignment_activated` | Assignee |
+| `in_progress/changes_requested → submitted` | `send_assignment_submitted_notification` | `assignment_submitted` | Reviewers (falls back to authors) |
+| `submitted → closed`, `submitted → changes_requested`, `closed → submitted` | `send_assignment_reviewed_notification` (decision = `closed`/`changes_requested`/`reopened`) | `assignment_reviewed` | Assignee |
+| `in_progress → draft`, `changes_requested → draft` | `send_assignment_reopened_notification` | `assignment_reopened` | Assignee |
+
+`submitted → draft` and `closed → draft` are valid transitions but send **no** notification: the assignee had already handed the work back or finished, so a reopening only notifies when it interrupts active work (`in_progress` or `changes_requested`).
+
+### 4. Password Reset / Welcome Emails
 
 These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) with Django HTML templates instead of YAML.
 
@@ -223,9 +262,9 @@ These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) wit
 | User creation (welcome) | `registration/first_connexion_email.html` | `User.save()` / management command `welcome_mail` |
 | User creation (SSO) | `registration/first_connexion_email_sso.html` | SSO user provisioning |
 
-These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
+All of these, like the notification emails, go through `core.mailer` and therefore the rescue server.
 
-### 4. Non-Notification Periodic Tasks
+### 5. Non-Notification Periodic Tasks
 
 These tasks perform automated actions without sending emails:
 
@@ -276,6 +315,17 @@ This means assigning a Team as owner of a control can notify multiple people in 
 | `security_exception_status_changed.yaml` | `send_security_exception_status_notification` |
 | `security_exception_expiring_soon.yaml` | `send_security_exception_expiring_soon_notification` |
 | `expired_security_exceptions.yaml` | `send_notification_email_expired_security_exception` |
+| `incident_assignment.yaml` | `send_incident_assignment_notification` |
+| `compliance_assessment_reviewer_assignment.yaml` | `send_compliance_assessment_reviewer_assignment_notification` |
+| `document_review_requested.yaml` | `send_document_review_requested_notification` |
+| `document_revision_reviewed.yaml` | `send_document_revision_reviewed_notification` |
+| `evidence_reviewed.yaml` | `send_evidence_reviewed_notification` |
+| `risk_acceptance_submitted.yaml` | `send_risk_acceptance_submitted_notification` |
+| `risk_acceptance_decided.yaml` | `send_risk_acceptance_decided_notification` |
+| `assignment_activated.yaml` | `send_assignment_activated_notification` |
+| `assignment_submitted.yaml` | `send_assignment_submitted_notification` |
+| `assignment_reviewed.yaml` | `send_assignment_reviewed_notification` |
+| `assignment_reopened.yaml` | `send_assignment_reopened_notification` |
 
 ### French (`fr/`)
 
@@ -289,7 +339,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Create email templates**:
    - `backend/core/templates/emails/en/{template_name}.yaml`
-   - `backend/core/templates/emails/fr/{template_name}.yaml`
+   - `backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`
 
 2. **Add a Huey task** in `backend/core/tasks.py`:
    ```python
@@ -309,7 +359,7 @@ All English templates have a matching French translation. Both directories conta
        }
 
        for email in recipient_emails:
-           if email and check_email_configuration(email, [obj]):
+           if email and check_email_configuration(email):
                rendered = render_email_template("my_template_name", context)
                if rendered:
                    send_notification_email(rendered["subject"], rendered["body"], email)
@@ -383,7 +433,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
 
-2. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
+2. **Incident status/severity notifications**: Owners are already notified when assigned (`incident_assignment`). Notifying them when an incident's severity or status changes is still missing.
 
 3. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
 

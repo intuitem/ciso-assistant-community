@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import FrameworkTile from '$lib/components/PortalGrid/FrameworkTile.svelte';
-	import CertificationTile from '$lib/components/PortalGrid/CertificationTile.svelte';
-	import { onActivateKey } from '$lib/utils/portalActions';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import FrameworkTile from '#lib/components/PortalGrid/FrameworkTile.svelte';
+	import CertificationTile from '#lib/components/PortalGrid/CertificationTile.svelte';
+	import { onActivateKey } from '#lib/utils/portalActions.js';
 
 	let { sections = [], onTrigger }: { sections: any[]; onTrigger?: (item: any) => void } = $props();
 </script>

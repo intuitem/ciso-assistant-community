@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Ihre Aufgabe für '${assessment_name}' wurde ${decision}"
+body: |
+  Hallo,
+
+  Ihre Aufgabe für das folgende Audit wurde geprüft:
+
+  - Audit: ${assessment_name}
+  - Entscheidung: ${decision}
+  ${reviewer_observation}
+
+  Weitere Informationen finden Sie in Ihrem CISO-Assistant-Portal: [CISO Assistant öffnen](${ciso_assistant_url}/auditee-dashboard)
+
+  Vielen Dank.

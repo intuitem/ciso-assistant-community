@@ -1,13 +1,14 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import TextArea from '../TextArea.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -77,7 +78,7 @@
 	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	optionsLabelField="translated_name"
-	label={m.qualifications()}
+	label={safeTranslate('qualifications')}
 	helpText={m.fearedEventQualificationHelpText()}
 />
 <Checkbox

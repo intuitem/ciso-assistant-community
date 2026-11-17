@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
 from core.validators import validate_file_size, validate_file_name
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, User
 
 
 class ChatSession(AbstractBaseModel, FolderMixin):
@@ -103,6 +103,8 @@ class ChatMessage(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         verbose_name = _("Chat message")
         verbose_name_plural = _("Chat messages")
@@ -118,6 +120,7 @@ class IndexedDocument(AbstractBaseModel, FolderMixin):
     class SourceType(models.TextChoices):
         CHAT = "chat", _("Chat upload")
         EVIDENCE = "evidence", _("Evidence attachment")
+        DOCUMENT = "document", _("Managed document")
         CUSTOM = "custom", _("Custom upload")
 
     class Status(models.TextChoices):
@@ -126,8 +129,10 @@ class IndexedDocument(AbstractBaseModel, FolderMixin):
         INDEXED = "indexed", _("Indexed")
         FAILED = "failed", _("Failed")
 
+    # Evidence attachments are indexed in place: match EvidenceRevision.attachment.
     file = models.FileField(
         upload_to="rag_documents/",
+        max_length=500,
         validators=[validate_file_size, validate_file_name],
         verbose_name=_("File"),
     )
@@ -304,6 +309,8 @@ class QuestionnaireQuestion(AbstractBaseModel):
             "produce a clean fill."
         ),
     )
+
+    IAM_SCOPE_FIELD = "questionnaire_run"
 
     class Meta:
         verbose_name = _("Questionnaire question")
@@ -499,6 +506,8 @@ class AgentAction(AbstractBaseModel):
     approved_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Approved at")
     )
+
+    IAM_SCOPE_FIELD = "agent_run"
 
     class Meta:
         verbose_name = _("Agent action")

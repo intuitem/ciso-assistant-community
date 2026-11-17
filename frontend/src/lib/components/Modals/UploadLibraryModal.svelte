@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { LibraryUploadSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import { LibraryUploadSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 
 	import { page } from '$app/state';
-	import FileInput from '$lib/components/Forms/FileInput.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import FileInput from '#lib/components/Forms/FileInput.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { tableHandlers } from '$lib/utils/stores';
+	import { tableHandlers } from '#lib/utils/stores.js';
 	import { getModalStore } from './stores';
 
 	const modalStore = getModalStore();

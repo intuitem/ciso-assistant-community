@@ -3,6 +3,8 @@ This module defines metrics for the CISO Assistant backend using the Prometheus 
 It provides counters and gauges to track various instance statistics for monitoring and observability.
 """
 
+from importlib import import_module
+
 from prometheus_client import Gauge, Info, REGISTRY
 from django.conf import settings
 
@@ -23,6 +25,12 @@ def get_or_create_info(name, description):
     if name not in _metrics:
         _metrics[name] = Info(name, description)
     return _metrics[name]
+
+
+def instance_status_extensions() -> list:
+    """The modules listed in settings.INSTANCE_STATUS_EXTENSIONS, which add their
+    own fields to the `status` command and their own gauges to the metrics."""
+    return [import_module(path) for path in settings.INSTANCE_STATUS_EXTENSIONS]
 
 
 # Define Prometheus metrics for instance metrics
@@ -81,18 +89,6 @@ nb_risk_scenarios_gauge = get_or_create_gauge(
 nb_risk_acceptances_gauge = get_or_create_gauge(
     "ciso_assistant_nb_risk_acceptances",
     "Number of risk acceptances in the CISO Assistant instance",
-)
-nb_seats_gauge = get_or_create_gauge(
-    "ciso_assistant_nb_seats",
-    "Number of seats in the CISO Assistant instance",
-)
-nb_editors_gauge = get_or_create_gauge(
-    "ciso_assistant_nb_editors",
-    "Number of editors in the CISO Assistant instance",
-)
-expiration_gauge = get_or_create_gauge(
-    "ciso_assistant_license_expiration",
-    "Expiration date of the CISO Assistant license",
 )
 created_at_gauge = get_or_create_gauge(
     "ciso_assistant_created_at",

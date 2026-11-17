@@ -76,7 +76,10 @@ def parse(yaml_path: Path) -> dict:
     library_urn = data.get("urn") or ""
     library_ref_id = data.get("ref_id") or ""
 
-    framework = data.get("objects", {}).get("framework") or {}
+    objects = data.get("objects", {})
+    framework = (
+        (objects.get("frameworks") or [None])[0] or objects.get("framework") or {}
+    )
     framework_urn = framework.get("urn") or ""
     framework_ref_id = framework.get("ref_id") or ""
     framework_name = framework.get("name") or ""

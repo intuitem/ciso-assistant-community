@@ -1,0 +1,155 @@
+{
+  "_about": "Typical questions a user asks the in-app chat from the main pages, on the seed_demo dataset (Halvard Devices). Golden answers were written by Claude from the seeded data on 2026-10-15; re-check them when the demo builders change. `object` is resolved to the page's id by ref_id at run time.",
+  "questions": [
+    {
+      "id": "analytics-open-incidents",
+      "page": "/analytics",
+      "title": "Analytics",
+      "question": "Which incidents are still open?",
+      "golden": "Two incidents are open: INC-DORA-04 'Tokenisation vault misconfiguration breaks instalment collections' (ongoing) and INC.2026.003 'Lost laptop — Eindhoven hardware design office' (new). The other nine are resolved, closed or dismissed.",
+      "facts": ["INC-DORA-04 / tokenisation vault misconfiguration is open (ongoing)", "INC.2026.003 / lost laptop is open (new)", "no other incident is listed as open"]
+    },
+    {
+      "id": "analytics-done-audits",
+      "page": "/analytics",
+      "title": "Analytics",
+      "question": "Which audits are already finished?",
+      "golden": "Two audits are done: AUD.2025.04 'ISO 27001:2022 — Brno plant readiness review' and AUD.2026.06 'NIS2 — important entity gap analysis'.",
+      "facts": ["AUD.2025.04 Brno plant readiness review is done", "AUD.2026.06 NIS2 gap analysis is done", "no other audit is listed as done"]
+    },
+    {
+      "id": "analytics-critical-findings",
+      "page": "/analytics",
+      "title": "Analytics",
+      "question": "List the critical findings and their status.",
+      "golden": "Three findings are critical: OT-01 'Flat network between the plant office LAN and the assembly cells' (confirmed), TH-01 'Dormant admin account used from a new country' (closed) and RD-03 'Lookout clip links can be enumerated without authorisation' (resolved).",
+      "facts": ["OT-01 flat network, confirmed", "TH-01 dormant admin account, closed", "RD-03 Lookout clip links, resolved", "no other finding is listed as critical"]
+    },
+    {
+      "id": "controls-to-do",
+      "page": "/applied-controls",
+      "title": "Applied controls",
+      "question": "Which controls are still to do?",
+      "golden": "Four controls are to do: AC.002 Privileged session recording, AC.006 Secure firmware development training, AC.011 Data retention schedule and AC.017 PLC change management.",
+      "facts": ["AC.002 Privileged session recording", "AC.006 Secure firmware development training", "AC.011 Data retention schedule", "AC.017 PLC change management", "no other control is listed as to do"]
+    },
+    {
+      "id": "controls-p1-not-active",
+      "page": "/applied-controls",
+      "title": "Applied controls",
+      "question": "Which priority 1 controls are not active yet?",
+      "golden": "Four P1 controls are not active: AC.001 Quarterly access review (in progress), AC.002 Privileged session recording (to do), AC.010 Vulnerability handling and disclosure (in progress) and AC.014 Staged OTA update rollout (in progress).",
+      "facts": ["AC.001 Quarterly access review", "AC.002 Privileged session recording", "AC.010 Vulnerability handling and disclosure", "AC.014 Staged OTA update rollout", "no active control and no non-P1 control is listed"]
+    },
+    {
+      "id": "controls-on-hold",
+      "page": "/applied-controls",
+      "title": "Applied controls",
+      "question": "Is any control on hold?",
+      "golden": "Yes, one: AC.007 IT/OT network segmentation is on hold.",
+      "facts": ["AC.007 IT/OT network segmentation is on hold", "it is the only one"]
+    },
+    {
+      "id": "risk-highest",
+      "page": "/risk-assessments",
+      "object": {"api": "risk-assessments", "ref_id": "RA.2026.01"},
+      "title": "2026 enterprise risk review",
+      "question": "What are the highest risks in this assessment?",
+      "golden": "RS.01 'Ransomware halts the Brno assembly line' is the highest, at very high current risk. Three are high: RS.02 'Customer credentials replayed against the online store', RS.08 'Vendor remote access used to reach assembly PLCs' and RS.09 'Skimming script injected into the checkout page'.",
+      "facts": ["RS.01 ransomware on the Brno assembly line, very high", "RS.02 credential replay, high", "RS.08 vendor remote access to PLCs, high", "RS.09 checkout skimming, high"]
+    },
+    {
+      "id": "risk-accepted",
+      "page": "/risk-assessments",
+      "object": {"api": "risk-assessments", "ref_id": "RA.2026.01"},
+      "title": "2026 enterprise risk review",
+      "question": "Which risks are accepted rather than mitigated?",
+      "golden": "Only one: RS.06 'Volumetric attack saturates the store during a launch' (low current risk) is accepted. All the others are mitigated.",
+      "facts": ["RS.06 volumetric attack on the store is accepted", "it is the only accepted risk"]
+    },
+    {
+      "id": "risk-controls-of-scenario",
+      "page": "/risk-assessments",
+      "object": {"api": "risk-assessments", "ref_id": "RA.2026.01"},
+      "title": "2026 enterprise risk review",
+      "question": "Which controls address the ransomware risk on the Brno assembly line?",
+      "golden": "For RS.01, the existing control is AC.003 Backup restore test; the additional (planned) controls are AC.007 IT/OT network segmentation and AC.017 PLC change management.",
+      "facts": ["AC.003 Backup restore test (existing)", "AC.007 IT/OT network segmentation", "AC.017 PLC change management"]
+    },
+    {
+      "id": "audit-progress",
+      "page": "/compliance-assessments",
+      "object": {"api": "compliance-assessments", "ref_id": "AUD.2026.01"},
+      "title": "ISO 27001:2022 — annual certification audit",
+      "question": "How far along is this audit?",
+      "golden": "99 of the 123 assessable requirements are assessed (about 80%); 24 are still not assessed. Results so far: 50 compliant, 25 partially compliant, 12 non-compliant and 12 not applicable.",
+      "facts": ["99 of 123 assessed, or about 80%", "24 not assessed", "50 compliant", "25 partially compliant", "12 non-compliant", "12 not applicable"]
+    },
+    {
+      "id": "audit-non-compliant",
+      "page": "/compliance-assessments",
+      "object": {"api": "compliance-assessments", "ref_id": "AUD.2026.01"},
+      "title": "ISO 27001:2022 — annual certification audit",
+      "question": "Which requirements are non-compliant?",
+      "golden": "12 requirements are non-compliant: 5.1 Leadership and commitment, 7.3 Awareness, 9.2.2 Internal audit programme, A.5.5 Contact with authorities, A.5.15 Access control, A.5.25 Assessment and decision on information security events, A.5.35 Independent review of information security, A.6.8 Information security event reporting, A.7.10 Storage media, A.8.6 Capacity management, A.8.16 Monitoring activities and A.8.26 Application security requirements.",
+      "facts": ["5.1", "7.3", "9.2.2", "A.5.5", "A.5.15", "A.5.25", "A.5.35", "A.6.8", "A.7.10", "A.8.6", "A.8.16", "A.8.26", "no compliant or partially compliant requirement is listed"]
+    },
+    {
+      "id": "audit-one-requirement",
+      "page": "/compliance-assessments",
+      "object": {"api": "compliance-assessments", "ref_id": "AUD.2026.01"},
+      "title": "ISO 27001:2022 — annual certification audit",
+      "question": "Is A.5.15 compliant in this audit?",
+      "golden": "No. A.5.15 Access control is non-compliant in this audit.",
+      "facts": ["A.5.15 Access control is non-compliant"]
+    },
+    {
+      "id": "assets-primary",
+      "page": "/assets",
+      "title": "Assets",
+      "question": "What are our primary assets?",
+      "golden": "Six primary assets: Customer and device accounts, Device firmware and signing keys, Order fulfilment, Product designs and source code, Production line control, and Store checkout and payments.",
+      "facts": ["Customer and device accounts", "Device firmware and signing keys", "Order fulfilment", "Product designs and source code", "Production line control", "Store checkout and payments", "no supporting asset is listed as primary"]
+    },
+    {
+      "id": "assets-supporting-of",
+      "page": "/assets",
+      "title": "Assets",
+      "question": "Which supporting assets does Production line control rely on?",
+      "golden": "Three: Assembly cell PLCs, Brno plant edge K3s cluster and Plant SCADA server.",
+      "facts": ["Assembly cell PLCs", "Brno plant edge K3s cluster", "Plant SCADA server", "no other asset is listed"]
+    },
+    {
+      "id": "assets-without-controls",
+      "page": "/assets",
+      "title": "Assets",
+      "question": "Which primary assets have no applied controls?",
+      "golden": "Only Order fulfilment has no applied control linked to it.",
+      "facts": ["Order fulfilment", "it is the only one"]
+    },
+    {
+      "id": "entities-critical",
+      "page": "/entities",
+      "title": "Entities",
+      "question": "Which third parties are critical?",
+      "golden": "Four entities are in the critical tier: Kestrava Cloud B.V., Pellion Payments SA, Shenwa Contract Manufacturing Co., Ltd. and Linterra Automation GmbH.",
+      "facts": ["Kestrava Cloud B.V.", "Pellion Payments SA", "Shenwa Contract Manufacturing", "Linterra Automation GmbH", "no entity from another tier is listed as critical"]
+    },
+    {
+      "id": "entities-blockers",
+      "page": "/entities",
+      "title": "Entities",
+      "question": "Which vendor assessments ended with a blocker?",
+      "golden": "Two: 'Linterra: remote access and IEC 62443-2-4 review' (Linterra Automation GmbH) and 'Fennick: companion app SDK privacy review' (Fennick Analytics Ltd).",
+      "facts": ["Linterra remote access / IEC 62443-2-4 review", "Fennick companion app SDK privacy review", "no other assessment is listed as blocker"]
+    },
+    {
+      "id": "entities-assessments-in-progress",
+      "page": "/entities",
+      "title": "Entities",
+      "question": "Which vendor assessments are in progress?",
+      "golden": "Three are in progress: 'Kestrava: annual assurance 2026', 'Shenwa: factory security audit 2026' and 'Mireo: GDPR processor assessment'. 'Pellion: PCI DSS and DORA third-party review' is in review.",
+      "facts": ["Kestrava annual assurance 2026", "Shenwa factory security audit 2026", "Mireo GDPR processor assessment", "no done or planned assessment is listed as in progress"]
+    }
+  ]
+}

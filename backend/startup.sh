@@ -15,8 +15,8 @@ while ! python manage.py showmigrations iam >/dev/null; do
   echo "database not ready; waiting"
   sleep 15
 done
-python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
-python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
+python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}" || { echo "ERROR: database migration failed (see traceback above); backend not started, fix the error then restart the container" >&2; exit 1; }
+python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}" || echo "WARNING: storing built-in libraries failed (see traceback above); backend starting anyway, new or updated libraries may be missing" >&2
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
   python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
 fi
