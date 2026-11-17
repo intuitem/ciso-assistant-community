@@ -155,6 +155,15 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         ]
         read_only_fields = ["id", "last_sync_at", "webhook_url_full"]
 
+    def _check_m2m_visibility(self, validated_data: dict) -> None:
+        # Providers are a global catalog, listed to every authenticated user
+        # and served without RBAC: no role holds view on them, so the link
+        # check could never pass. ``provider_id`` already only accepts active
+        # providers; every other link is checked as usual.
+        super()._check_m2m_visibility(
+            {k: v for k, v in validated_data.items() if k != "provider"}
+        )
+
     def get_webhook_url_full(self, obj: IntegrationConfiguration) -> str:
         """Construct the full, absolute webhook URL"""
         if not obj.pk:

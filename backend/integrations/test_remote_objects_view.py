@@ -12,7 +12,7 @@ def _call(query_string=""):
         factory.get(f"/integrations/configs/x/remote-objects/?{query_string}")
     )
     view = IntegrationConfigurationViewSet()
-    view.get_object = MagicMock()
+    view._get_configuration = MagicMock()
     client = MagicMock()
     client.list_remote_objects.return_value = []
     with patch(

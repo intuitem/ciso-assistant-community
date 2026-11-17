@@ -115,6 +115,22 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     serializers_module = "integrations.serializers"
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
+    # A configuration has no name or description of its own to search on.
+    search_fields = ["provider__name"]
+
+    def _get_configuration(self) -> IntegrationConfiguration:
+        """get_object() without the filter backends.
+
+        The picker's ``search`` and ``id`` parameters address the remote
+        system. The filter backends would apply them to the configurations
+        instead: a text search on the configuration, and the ``id`` lookup
+        every filterset carries. Scoping and object permissions are unchanged.
+        """
+        configuration = generics.get_object_or_404(
+            self.get_queryset(), pk=self.kwargs["pk"]
+        )
+        self.check_object_permissions(self.request, configuration)
+        return configuration
 
     def create(self, request, *args, **kwargs):
         try:
@@ -180,7 +196,7 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     def _list_remote_objects(self, request, pk):
         from integrations.syncable import get_spec
 
-        instance = self.get_object()
+        instance = self._get_configuration()
         model_key = request.query_params.get("model_key", "applied_control")
         if get_spec(model_key) is None:
             return Response(
