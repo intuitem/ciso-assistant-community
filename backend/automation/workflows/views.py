@@ -206,7 +206,7 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def updatable_models(self, request):
         """The update_object registry. `allowed_values` travels with it so the
         builder offers the same fenced values the backend enforces."""
-        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS, _writable_values
 
         return Response(
             [
@@ -214,8 +214,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "key": key,
                     "fields": entry.fields,
                     "allowed_values": {
-                        field: sorted(values)
-                        for field, values in entry.allowed_values.items()
+                        field: values
+                        for field in entry.fields
+                        if (values := sorted(_writable_values(entry, field) or []))
                     },
                     "m2m_fields": {
                         name: endpoint

@@ -1512,12 +1512,14 @@ class ReadObjectsAction(BaseAction):
 
 @dataclass(frozen=True)
 class UpdateEntry:
-    """One UPDATABLE_MODELS entry, drawn on one line: automation may record
-    that time passed and may attach work, but may not render the judgment.
+    """One UPDATABLE_MODELS entry. Assessment verdicts (results, scores,
+    treatments) stay off the registry; lifecycle statuses are the customer's
+    process, so any of the column's choices may be written, except the
+    decisions a review records (evidence approved or rejected).
 
-    ``fields`` is what a run may write; ``allowed_values`` narrows a field to
-    the values that are facts rather than decisions. Plain columns only —
-    anything whose transition lives outside save() stays off the registry.
+    ``fields`` is what a run may write; ``allowed_values`` narrows a field when
+    a value would bypass logic outside save(). Plain columns only — anything
+    whose transition lives outside save() stays off the registry.
     """
 
     model: type[Model]
@@ -1572,6 +1574,25 @@ def _record_document_edit(revision, updated, before, instance):
     record_document_edit(revision, run_identity(instance), before.get("content"))
 
 
+# Approving or rejecting is a review: EvidenceRevision.record_review stamps the
+# reviewer, enforces four-eyes and notifies the owners, all outside save().
+_EVIDENCE_STATUSES = frozenset({"draft", "missing", "in_review", "expired"})
+
+
+def _reopen_evidence_review(evidence, updated, before, instance):
+    """What EvidenceWriteSerializer.update does on any other status change:
+    leaving approved or rejected undoes the decision, so the file is queued
+    for review again."""
+    if "status" not in updated or before.get("status") == evidence.status:
+        return
+    revision = evidence.last_revision
+    if (
+        revision is not None
+        and revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+    ):
+        revision.clear_review()
+
+
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
     # leave a note; `status` and `resolution` are absent on purpose — the request
@@ -1608,9 +1629,9 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     "evidence": UpdateEntry(
         model=Evidence,
         fields=["status", "expiry_date", "description"],
-        # A lapsed date and a missing file are facts; approving is not.
-        allowed_values={"status": frozenset({"expired", "missing"})},
+        allowed_values={"status": _EVIDENCE_STATUSES},
         m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
+        after_save=_reopen_evidence_review,
     ),
     "incident": UpdateEntry(
         model=Incident,
@@ -1652,8 +1673,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "expiration_date",
             "observation",
         ],
-        # Granting or refusing an exception stays human; expiring it is a date.
-        allowed_values={"status": frozenset({"expired", "deprecated"})},
         m2m_fields={"owners": _ACTOR, "evidences": _EVIDENCES},
     ),
     "entity": UpdateEntry(
@@ -1679,22 +1698,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "ref_id",
             "observation",
         ],
-        # All but `dismissed`: that one is a person judging it harmless.
-        allowed_values={
-            "status": frozenset(
-                {
-                    "--",
-                    "identified",
-                    "confirmed",
-                    "assigned",
-                    "in_progress",
-                    "mitigated",
-                    "resolved",
-                    "closed",
-                    "deprecated",
-                }
-            )
-        },
         m2m_fields={
             "owner": _ACTOR,
             "applied_controls": _CONTROLS,
