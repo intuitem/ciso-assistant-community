@@ -708,6 +708,41 @@ def _role_client(email, role_code, folder):
 
 
 @pytest.mark.django_db
+def test_listed_is_deletable_follows_status_and_caller(app_config):
+    """The list answers `is_deletable` per caller and per status, on a page mixing
+    statuses: drafts for anyone, everything past a draft for an administrator."""
+    form = _load(LIBRARY_V1)
+    folder = Folder.objects.create(
+        name="qf-deletable", parent_folder=Folder.get_root_folder()
+    )
+    for index, status in enumerate(
+        [
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.CLOSED,
+        ]
+    ):
+        QuickFormResponse.objects.create(
+            name=f"deletable-{index}", quick_form=form, folder=folder, status=status
+        )
+
+    def listed(client):
+        res = client.get(f"/api/quick-form-responses/?folder={folder.id}")
+        assert res.status_code == 200, res.json()
+        return {(row["status"], row["is_deletable"]) for row in res.json()["results"]}
+
+    _, analyst = _role_client("qf-deleter@test.local", "BI-RL-ANA", folder)
+    assert listed(analyst) == {
+        ("draft", True),
+        ("submitted", False),
+        ("closed", False),
+    }
+    _, admin = _admin_client()
+    assert listed(admin) == {("draft", True), ("submitted", True), ("closed", True)}
+
+
+@pytest.mark.django_db
 def test_requester_cannot_decide_on_their_own_request(app_config):
     """Separation of duties: whoever submitted a request may not close it, whatever
     folder rights they hold — unless an admin turns on self-validation."""

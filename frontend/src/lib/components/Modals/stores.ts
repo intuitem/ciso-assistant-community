@@ -2,6 +2,7 @@
 
 import { writable } from 'svelte/store';
 import { getContext, setContext } from 'svelte';
+import { m } from '#paraglide/messages.js';
 
 const MODAL_STORE_KEY = 'modalStore';
 
@@ -109,8 +110,16 @@ function modalService() {
 	};
 }
 
-/** Styled, awaitable replacement for window.confirm. Dismissal resolves to false. */
+/** Styled, awaitable replacement for window.confirm. Dismissal resolves to false.
+ * The buttons are labelled here: the modal's own defaults are untranslated. */
 export const confirmModal = (modalStore: ModalStore, body: string, title?: string) =>
 	new Promise<boolean>((resolve) =>
-		modalStore.trigger({ type: 'confirm', title, body, response: (r) => resolve(r === true) })
+		modalStore.trigger({
+			type: 'confirm',
+			title,
+			body,
+			buttonTextConfirm: m.confirm(),
+			buttonTextCancel: m.cancel(),
+			response: (r) => resolve(r === true)
+		})
 	);

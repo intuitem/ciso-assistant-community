@@ -6778,7 +6778,7 @@
 	"quickFormClose": "Clore",
 	"quickFormIncomplete": "Répondez à toutes les questions obligatoires de chaque page visible avant de soumettre.",
 	"quickFormAnsweredProgress": "{answered} questions répondues sur {total}",
-	"onlyDraftsCanBeDeleted": "Seuls les brouillons peuvent être supprimés. Abandonnez plutôt cette demande pour en garder une trace.",
+	"onlyDraftsCanBeDeleted": "Seuls les brouillons peuvent être supprimés. Une demande soumise peut être abandonnée par son demandeur, ce qui en garde une trace, ou supprimée par un administrateur.",
 	"closedRequestsAreAdminOnly": "Seul un administrateur peut supprimer une demande clôturée.",
 	"quickFormComplete": "Toutes les questions obligatoires sont répondues.",
 	"quickFormReopenPrompt": "Note pour les répondants (optionnel)",

@@ -345,7 +345,12 @@
 	async function removeStep(i: number) {
 		if (!draft) return;
 		const step = draft.steps[i];
-		const owned = draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
+		// Scaffolds hang off the step key: while another step keeps the key, they stay
+		// with that step and only this one goes.
+		const keyShared = draft.steps.some((s, idx) => idx !== i && s.key === step.key);
+		const owned = keyShared
+			? []
+			: draft.scaffolded_objects.filter((s) => s.step_ref_id === step.key);
 		const msg =
 			owned.length > 0
 				? m.lbPresetDeleteStepWithObjectsConfirm({
@@ -361,6 +366,11 @@
 		const matches = draft.steps.flatMap((s, idx) => (s.key === step.key ? [idx] : []));
 		const at = matches.includes(i) ? i : matches.length === 1 ? matches[0] : -1;
 		if (at < 0) return;
+		// The warning named no scaffolds, or the key is still in use: keep them.
+		if (keyShared || matches.length > 1) {
+			draft.steps = draft.steps.filter((_, idx) => idx !== at);
+			return;
+		}
 		// Drop owned scaffolds
 		const ownedRefs = new Set(
 			draft.scaffolded_objects
