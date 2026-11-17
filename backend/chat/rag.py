@@ -70,13 +70,22 @@ def has_bm25(client) -> bool:
 
 
 def _query_library(client, query, query_vector, query_filter, limit, hybrid):
-    if not hybrid:
-        return client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=query_vector,
-            limit=limit,
-            query_filter=query_filter,
-        ).points
+    if hybrid:
+        try:
+            return _query_library_hybrid(
+                client, query, query_vector, query_filter, limit
+            )
+        except Exception as e:
+            logger.warning("qdrant_hybrid_search_failed", error=e)
+    return client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vector,
+        limit=limit,
+        query_filter=query_filter,
+    ).points
+
+
+def _query_library_hybrid(client, query, query_vector, query_filter, limit):
     return client.query_points(
         collection_name=COLLECTION_NAME,
         prefetch=[
@@ -286,7 +295,7 @@ def search(
                     limit=fetch_limit,
                     query_filter=user_filter,
                 )
-                all_results.extend(user_results.points)
+                all_results.append(user_results.points)
             except Exception as e:
                 logger.error("qdrant_user_search_failed", error=e)
 
@@ -313,7 +322,7 @@ def search(
         hybrid = has_bm25(client)
         for library_filter in library_filters:
             try:
-                all_results.extend(
+                all_results.append(
                     _query_library(
                         client, query, query_vector, library_filter, fetch_limit, hybrid
                     )
@@ -321,14 +330,14 @@ def search(
             except Exception as e:
                 logger.error("qdrant_library_search_failed", error=e)
 
-    # Merge and deduplicate
-    seen_ids = set()
-    merged = []
-    for r in sorted(all_results, key=lambda x: x.score, reverse=True):
-        rid = str(r.id)
-        if rid not in seen_ids:
-            seen_ids.add(rid)
-            merged.append(r)
+    # Partitions score on different scales (cosine, RRF): merge by rank
+    fused, points = {}, {}
+    for result_list in all_results:
+        for rank, r in enumerate(result_list):
+            rid = str(r.id)
+            points.setdefault(rid, r)
+            fused[rid] = fused.get(rid, 0.0) + 1 / (60 + rank)
+    merged = [points[rid] for rid in sorted(fused, key=fused.get, reverse=True)]
 
     # Re-rank with cross-encoder for better relevance
     reranker = _get_reranker()

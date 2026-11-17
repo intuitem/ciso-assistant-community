@@ -454,6 +454,29 @@ def _library_point_id(entry: dict) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"library:{entry['urn']}"))
 
 
+def _library_payload(entry: dict) -> dict:
+    return {
+        "text": _build_library_entry_text(entry),
+        "source_type": "library",
+        "object_type": entry["object_type"],
+        "urn": entry["urn"],
+        "ref_id": entry.get("ref_id", ""),
+        "name": entry.get("name", ""),
+        "framework": entry["framework"],
+        "framework_ref_id": entry.get("framework_ref_id", ""),
+        "provider": entry.get("provider", ""),
+        "locale": entry.get("locale", "en"),
+    }
+
+
+def _library_point_current(point, entry: dict, hybrid: bool) -> bool:
+    from .rag import BM25_VECTOR
+
+    if point is None or point.payload != _library_payload(entry):
+        return False
+    return not hybrid or BM25_VECTOR in (point.vector or {})
+
+
 @db_task()
 def index_library_knowledge_base():
     """
@@ -515,9 +538,12 @@ def index_library_knowledge_base():
         ids = [_library_point_id(e) for e in batch]
         try:
             indexed = {
-                str(p.id): p.payload.get("text")
+                str(p.id): p
                 for p in client.retrieve(
-                    COLLECTION_NAME, ids=ids, with_payload=["text"]
+                    COLLECTION_NAME,
+                    ids=ids,
+                    with_payload=True,
+                    with_vectors=[BM25_VECTOR] if hybrid else False,
                 )
             }
         except Exception as e:
@@ -526,7 +552,7 @@ def index_library_knowledge_base():
         batch = [
             e
             for e, point_id in zip(batch, ids)
-            if indexed.get(point_id) != _build_library_entry_text(e)
+            if not _library_point_current(indexed.get(point_id), e, hybrid)
         ]
         if not batch:
             continue
@@ -555,18 +581,7 @@ def index_library_knowledge_base():
                         if hybrid
                         else embedding
                     ),
-                    payload={
-                        "text": text,
-                        "source_type": "library",
-                        "object_type": entry["object_type"],
-                        "urn": entry["urn"],
-                        "ref_id": entry.get("ref_id", ""),
-                        "name": entry.get("name", ""),
-                        "framework": entry["framework"],
-                        "framework_ref_id": entry.get("framework_ref_id", ""),
-                        "provider": entry.get("provider", ""),
-                        "locale": entry.get("locale", "en"),
-                    },
+                    payload=_library_payload(entry),
                 )
             )
 

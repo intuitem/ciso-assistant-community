@@ -69,7 +69,8 @@ def test_named_framework_reaches_the_reranker(client, monkeypatch):
 def test_library_reindex_skips_unchanged_entries(client, monkeypatch, tmp_path):
     from chat import tasks
 
-    (tmp_path / "lib.yaml").write_text(
+    yaml = tmp_path / "lib.yaml"
+    yaml.write_text(
         """
 urn: urn:test:lib
 name: Test lib
@@ -96,3 +97,49 @@ objects:
     assert first > 0
     assert embedder.calls == first
     assert client.count(rag.COLLECTION_NAME).count == first
+
+    yaml.write_text("locale: fr\n" + yaml.read_text())
+    tasks.index_library_knowledge_base.call_local()
+    assert embedder.calls == 2 * first
+
+
+def test_rank_merge_keeps_library_hits_without_reranker(client, monkeypatch):
+    from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+    monkeypatch.setattr(
+        rag,
+        "_user_partition_filter",
+        lambda *_: Filter(
+            must=[FieldCondition(key="source_type", match=MatchValue(value="model"))]
+        ),
+    )
+    client.upsert(
+        rag.COLLECTION_NAME,
+        points=[
+            PointStruct(id=i, vector=[1.0, 0.0], payload={"source_type": "model"})
+            for i in range(1, 11)
+        ]
+        + [
+            PointStruct(
+                id=11,
+                vector=[0.6, 0.8],
+                payload={"source_type": "library", "framework": "DORA"},
+            )
+        ],
+    )
+    user = User.objects.create(email="rag-merge@test.local")
+
+    results = rag.search("q", user, top_k=3)
+
+    assert "library" in {r["source_type"] for r in results}
+
+
+def test_named_frameworks_reads_graph_nodes(monkeypatch):
+    from chat import knowledge_graph, tools, views
+
+    graph = knowledge_graph.DiGraph()
+    graph.add_node("urn:fw:dora", node_type="framework", name="DORA")
+    monkeypatch.setattr(knowledge_graph, "get_graph", lambda: graph)
+    monkeypatch.setattr(tools, "_detect_framework_names", lambda _: ["urn:fw:dora"])
+
+    assert views._named_frameworks("DORA incident reporting") == ["DORA"]

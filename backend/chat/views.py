@@ -556,15 +556,8 @@ class ChatSessionViewSet(BaseModelViewSet):
             graph_context = ""
             frameworks = []
             if not (parsed_context and parsed_context.object_id):
-                from .knowledge_graph import get_graph
-                from .tools import _detect_framework_names
-
                 graph_context = _get_graph_context(user_content)
-                graph = get_graph()
-                frameworks = [
-                    graph.nodes[urn]["name"]
-                    for urn in _detect_framework_names(user_content)
-                ]
+                frameworks = _named_frameworks(user_content)
 
             results = search(
                 user_content,
@@ -2415,6 +2408,14 @@ def _enrich_context(parsed_context, scope) -> str:
                 parts.append(line + ")")
 
     return "\n".join(parts)
+
+
+def _named_frameworks(user_message: str) -> list[str]:
+    from .knowledge_graph import get_graph
+    from .tools import _detect_framework_names
+
+    graph = get_graph()
+    return [graph[urn]["name"] for urn in _detect_framework_names(user_message)]
 
 
 def _get_graph_context(user_message: str) -> str:
