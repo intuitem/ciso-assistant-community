@@ -2024,11 +2024,21 @@ def _resolve_reference(model, value, instance, label, constraints=None):
 
     `constraints` narrows the search to what the field itself accepts, so a
     category resolves among categories and not among every terminology.
+
+    Only rows the run identity may view are candidates, as in _rows_for: the
+    action's own check is the add permission where the row lands, which says
+    nothing about what it links to. A row the identity cannot view reads as
+    one that does not exist, and never makes a name ambiguous.
     """
+    from . import authz
+    from .engine import run_identity
+
     value = str(value or "").strip()
     if not value:
         raise FatalActionError(f"{label} is required")
-    queryset = model.objects.filter(**(constraints or {}))
+    queryset = model.objects.filter(**(constraints or {})).filter(
+        id__in=authz.viewable_ids(run_identity(instance), model)
+    )
     if UUID_RE.match(value):
         matches = list(queryset.filter(id=value)[:2])
     elif value.lower().startswith("urn:") and get_model_field(model, "urn"):
