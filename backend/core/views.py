@@ -14656,7 +14656,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         req.result,
                         req.extended_result,
                         req.status,
-                        req.score,
+                        None
+                        if req.result == RequirementAssessment.Result.NOT_APPLICABLE
+                        else req.score,
                         req.observation,
                         ",".join(c.name for c in viewable(req.applied_controls.all())),
                     ]
@@ -14735,11 +14737,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     for c in viewable(req.applied_controls.all())
                 ),
             }
+            is_na = req.result == RequirementAssessment.Result.NOT_APPLICABLE
+            score = None if is_na else req.score
             if show_documentation_score:
-                entry["implementation_score"] = req.score
-                entry["documentation_score"] = req.documentation_score
+                entry["implementation_score"] = score
+                entry["documentation_score"] = (
+                    None if is_na else req.documentation_score
+                )
             else:
-                entry["score"] = req.score
+                entry["score"] = score
 
             if has_questions:
                 # Round-tripped so re-import keeps the override state.

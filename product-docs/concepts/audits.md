@@ -195,6 +195,8 @@ These tiles show to whoever sees the audit's **Result**. When the audit has thre
 
 <figure><img src="../.gitbook/assets/audit-export-options.png" alt=""><figcaption><p><strong>Export options</strong> on an ISO 27001 audit, with the <strong>Audit</strong> and <strong>Action plan</strong> groups</p></figcaption></figure>
 
+Exports leave the score of a _Not applicable_ requirement empty. Per-category scores in the reports follow the audit's scoring rules: N/A requirements are left out, or count at the target when **anchor N/A to target** is enabled.
+
 Framework-specific exports, such as the [CyFun self-assessment](../features/framework-specific/cyfun.md#exporting-an-audit-to-the-workbook), are added to the list. Third-party respondents only get the posture and attestation PDFs and the bundle.
 
 The **Bundle with evidences** report opens with a table of contents, is written in the export language, and flags evidences whose file is missing instead of silently leaving them out.

@@ -1033,17 +1033,17 @@ def gen_audit_context(
 
         return category_result_counts
 
-    def aggregate_category_scores(data):
+    def aggregate_category_scores(data, audit):
         """
-        Aggregate scores per category from the tree structure, using existing score values.
-        Each scoreable item has a standard max_score of 100.
-
-        Args:
-            data (dict): Tree structure containing assessment data with score values
+        Aggregate scores per top-level category from a tree annotated by
+        annotate_tree_with_aggregated_scores, so N/A follows the audit's rules.
 
         Returns:
             dict: Dictionary with category URNs as keys and score information as values
         """
+        anchor_na = audit.anchor_na_to_target
+        ca_min = audit.min_score if audit.min_score is not None else 0
+        ca_max = audit.max_score if audit.max_score is not None else 100
 
         def recursive_score_calculation(node_data):
             # Initialize score tracking for this node
@@ -1055,17 +1055,19 @@ def gen_audit_context(
                 "not_applicable_count": 0,
             }
 
+            is_na = node_data.get("result") == "not_applicable"
             if node_data.get("assessable", False) and node_data.get("ra_id"):
                 scores["assessable_count"] = 1
-                if node_data.get("result") == "not_applicable":
+                if is_na:
                     scores["not_applicable_count"] = 1
 
-            # Check if the current node is scoreable
-            if node_data.get("is_scored", False):
-                scores["item_count"] = 1
-
-                if node_data.get("score") is not None:
-                    scores["total_score"] = node_data["score"]
+            if not node_data.get("children"):
+                if (node_data.get("is_scored", False) and not is_na) or (
+                    anchor_na and is_na and node_data.get("assessable", False)
+                ):
+                    scores["item_count"] = 1
+                if node_data.get("aggregated_score") is not None:
+                    scores["total_score"] = node_data["aggregated_score"]
                     scores["scored_count"] = 1
 
             # Recursively process children
@@ -1088,10 +1090,10 @@ def gen_audit_context(
             # TODO: we need a new param to control on which depth we want to report now that we have the depth map
             scores = recursive_score_calculation(node_data)
 
-            # Calculate average score for the category
             average_score = 0
-            if scores["scored_count"] > 0:
-                average_score = scores["total_score"] / scores["scored_count"]
+            ratio = node_data.get("_aggregated_ratio")
+            if ratio is not None:
+                average_score = ca_min + ratio * (ca_max - ca_min)
 
             category_scores[node_data["urn"]] = {
                 "name": node_data["node_content"].split(":")[0],
@@ -1152,7 +1154,7 @@ def gen_audit_context(
     agg_drifts = list()
 
     # Calculate category scores
-    category_scores = aggregate_category_scores(tree)
+    category_scores = aggregate_category_scores(tree, audit)
 
     max_score = next(
         (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
@@ -1361,8 +1363,10 @@ def gen_audit_context(
                 # The label is localised; the colour must key off the raw value.
                 "result_key": ra.result or "",
                 "extended_result": safe_translate(lang, ra.extended_result),
-                "score": ra.score,
-                "max_score": audit.framework.max_score if ra.is_scored else None,
+                "score": None if ra.result == "not_applicable" else ra.score,
+                "max_score": audit.framework.max_score
+                if ra.is_scored and ra.result != "not_applicable"
+                else None,
                 "observation": ra.observation or "-",
                 "answers": _answer_rows(ra),
                 "evidences": [e.name for e in seen(ra.evidences.all())],
