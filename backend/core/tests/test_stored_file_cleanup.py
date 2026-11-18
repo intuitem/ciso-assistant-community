@@ -2,6 +2,7 @@
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import transaction
 from django.utils import timezone
 
 from automation.models import PostureAssessment, PostureRun
@@ -226,24 +227,32 @@ CASES = {
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("label", CASES)
-def test_deleting_the_row_removes_its_file(settings, tmp_path, label):
+def test_deleting_the_row_removes_its_file(
+    settings, tmp_path, label, django_capture_on_commit_callbacks
+):
     settings.MEDIA_ROOT = str(tmp_path)
     row, _parent, stored = CASES[label]()
-    row.delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        row.delete()
     _gone(stored)
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("label", CASES)
-def test_deleting_the_parent_removes_its_file(settings, tmp_path, label):
+def test_deleting_the_parent_removes_its_file(
+    settings, tmp_path, label, django_capture_on_commit_callbacks
+):
     settings.MEDIA_ROOT = str(tmp_path)
     _row, parent, stored = CASES[label]()
-    parent.delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        parent.delete()
     _gone(stored)
 
 
 @pytest.mark.django_db
-def test_an_index_row_does_not_remove_the_evidence_file(settings, tmp_path):
+def test_an_index_row_does_not_remove_the_evidence_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
     settings.MEDIA_ROOT = str(tmp_path)
     folder = _domain()
     evidence = Evidence.objects.create(name="Policy", folder=folder)
@@ -251,13 +260,27 @@ def test_an_index_row_does_not_remove_the_evidence_file(settings, tmp_path):
         evidence=evidence, attachment=_upload("policy.txt")
     )
     storage, name = _stored(revision, "attachment")
-    IndexedDocument.objects.create(
-        folder=folder,
-        file=name,
-        filename="policy.txt",
-        content_type="text/plain",
-        source_type=IndexedDocument.SourceType.EVIDENCE,
-    ).delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        IndexedDocument.objects.create(
+            folder=folder,
+            file=name,
+            filename="policy.txt",
+            content_type="text/plain",
+            source_type=IndexedDocument.SourceType.EVIDENCE,
+        ).delete()
     assert storage.exists(name)
-    evidence.delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        evidence.delete()
     assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_a_rolled_back_delete_keeps_the_file(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    document, _folder, stored = _public_document()
+    storage, name = stored[0]
+    with pytest.raises(RuntimeError):
+        with transaction.atomic():
+            document.delete()
+            raise RuntimeError("nope")
+    assert storage.exists(name)
