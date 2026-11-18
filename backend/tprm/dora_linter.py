@@ -1085,7 +1085,11 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
             if (
                 len(
                     {
-                        (s.dora_data_sensitiveness, s.dora_reliance_level)
+                        (
+                            s.storage_of_data,
+                            s.dora_data_sensitiveness,
+                            s.dora_reliance_level,
+                        )
                         for s in solutions
                     }
                 )
@@ -1100,9 +1104,10 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                     "message": (
                         f"Solutions {names} on contract '{contract.name}' produce the "
                         f"same b_02.02 row for function '{function.name}' (same ICT "
-                        f"service type and data locations) but differ in data "
-                        f"sensitiveness or level of reliance. Only one row will be "
-                        f"exported. Set distinct data locations or align these values."
+                        f"service type and data locations as exported) but differ in "
+                        f"storage of data, data sensitiveness or level of reliance. "
+                        f"Only one row will be exported. Set specific countries as "
+                        f"data locations, or align these values."
                     ),
                     "field": "dora_data_sensitiveness",
                     "object_type": "contracts",
@@ -1110,7 +1115,6 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                     "object_name": contract.name,
                 }
             )
-            contract_has_error = True
 
         if contract_has_error:
             contracts_with_errors += 1
@@ -1224,21 +1228,6 @@ def lint_solutions() -> List[Dict[str, Any]]:
             )
             solution_has_error = True
 
-        # Check data_location_storage (only required when storage_of_data is enabled)
-        if solution.storage_of_data and not solution.data_location_storage:
-            results.append(
-                {
-                    "severity": "warning",
-                    "category": "Solutions",
-                    "message": f"Solution '{solution.name}' must have location of data at rest (data storage location) set",
-                    "field": "data_location_storage",
-                    "object_type": "solutions",
-                    "object_id": str(solution.id),
-                    "object_name": solution.name,
-                }
-            )
-
-        # Warn if data locations are set but storage_of_data flag is not checked
         if not solution.storage_of_data and (
             solution.data_location_storage or solution.data_location_processing
         ):
@@ -1254,33 +1243,33 @@ def lint_solutions() -> List[Dict[str, Any]]:
                 }
             )
 
-        # Check data_location_processing (only required when storage_of_data is enabled)
-        if solution.storage_of_data and not solution.data_location_processing:
+        for field in ("data_location_storage", "data_location_processing"):
+            value = getattr(solution, field)
+            label = Solution._meta.get_field(field).verbose_name.lower()
+            if solution.storage_of_data and value in REGION_CODES | {""}:
+                message = f"Solution '{solution.name}' stores data, so its {label} must be a country"
+                if value:
+                    message += (
+                        f"; a region ({value}) would be reported as 'Not applicable'"
+                    )
+                severity = "error"
+                solution_has_error = True
+            elif value in REGION_CODES:
+                message = f"Solution '{solution.name}' has a region ({value}) as {label}; it would be reported as 'Not applicable' in the register. Set a country for a precise entry."
+                severity = "warning"
+            else:
+                continue
             results.append(
                 {
-                    "severity": "warning",
+                    "severity": severity,
                     "category": "Solutions",
-                    "message": f"Solution '{solution.name}' must have location of data processing set",
-                    "field": "data_location_processing",
+                    "message": message,
+                    "field": field,
                     "object_type": "solutions",
                     "object_id": str(solution.id),
                     "object_name": solution.name,
                 }
             )
-
-        for field in ("data_location_storage", "data_location_processing"):
-            if getattr(solution, field) in REGION_CODES:
-                results.append(
-                    {
-                        "severity": "warning",
-                        "category": "Solutions",
-                        "message": f"Solution '{solution.name}' has a region ({getattr(solution, field)}) as {Solution._meta.get_field(field).verbose_name.lower()}; the register will report it as 'Not applicable'. Set a country for a precise entry.",
-                        "field": field,
-                        "object_type": "solutions",
-                        "object_id": str(solution.id),
-                        "object_name": solution.name,
-                    }
-                )
 
         # Check provider_entity country (mandatory)
         if solution.provider_entity:

@@ -255,7 +255,7 @@ class TestLintSubcontractingChainsDraftExcluded(LintSubcontractingChainsBase):
 
 
 class TestLintSolutionsRegionDataLocation(LintSubcontractingChainsBase):
-    def test_region_data_location_warns_not_applicable(self):
+    def _location_results(self, storage_of_data, storage, processing):
         from core.models import Asset
         from tprm.dora_linter import lint_solutions
 
@@ -263,17 +263,33 @@ class TestLintSolutionsRegionDataLocation(LintSubcontractingChainsBase):
             name="Payments", folder=self.folder, is_business_function=True
         )
         self.solution.assets.add(asset)
-        self.solution.storage_of_data = True
-        self.solution.data_location_storage = "EU"
-        self.solution.data_location_processing = "FR"
+        self.solution.storage_of_data = storage_of_data
+        self.solution.data_location_storage = storage
+        self.solution.data_location_processing = processing
         self.solution.save()
-
-        warnings = [
-            w
-            for w in self._warnings(lint_solutions())
-            if "Not applicable" in w["message"]
+        return [
+            (r["severity"], r["field"])
+            for r in lint_solutions()
+            if r["field"] in ("data_location_storage", "data_location_processing")
         ]
-        self.assertEqual([w["field"] for w in warnings], ["data_location_storage"])
+
+    def test_stored_data_needs_a_country_not_a_region(self):
+        self.assertEqual(
+            self._location_results(True, "EU", "FR"),
+            [("error", "data_location_storage")],
+        )
+
+    def test_stored_data_needs_a_country_not_a_blank(self):
+        self.assertEqual(
+            self._location_results(True, "FR", ""),
+            [("error", "data_location_processing")],
+        )
+
+    def test_region_without_stored_data_only_warns(self):
+        self.assertEqual(
+            self._location_results(False, "EEA", ""),
+            [("warning", "data_location_storage")],
+        )
 
 
 class TestLintB0202KeyCollision(LintSubcontractingChainsBase):
@@ -314,6 +330,16 @@ class TestLintB0202KeyCollision(LintSubcontractingChainsBase):
 
     def test_same_values_on_same_key_do_not_warn(self):
         self.assertEqual(self._collisions(), [])
+
+    def test_differing_storage_of_data_on_same_key_warns(self):
+        self.other.storage_of_data = False
+        self.other.data_location_storage = ""
+        self.other.data_location_processing = "EEA"
+        self.other.save()
+        self.solution.storage_of_data = True
+        self.solution.data_location_processing = "EU"
+        self.solution.save()
+        self.assertEqual(len(self._collisions()), 1)
 
     def test_distinct_locations_do_not_warn(self):
         self.other.data_location_storage = "FR"
