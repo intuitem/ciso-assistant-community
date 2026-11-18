@@ -24,6 +24,7 @@ from core.models import (
     ComplianceAssessment,
     Framework,
     RequirementAssessment,
+    RequirementNode,
     StoredLibrary,
     round_score,
 )
@@ -233,6 +234,33 @@ class TestRequirementRows:
         assert row["implementation_score"] == 4
         assert row["documentation_score"] == 2
         assert row["maturity_score"] == 3
+
+    def test_rows_are_out_of_the_requirement_own_scale(self, layered_audit):
+        RequirementNode.objects.filter(
+            framework=layered_audit.framework, ref_id="A-1"
+        ).update(min_score=0, max_score=10)
+        _set(layered_audit, "A-1", score=8, documentation_score=4)
+
+        context = _context(layered_audit)
+        row = _rows(context)["A-1"]
+
+        assert row["max_score"] == 10
+        assert (row["implementation_score"], row["maturity_score"]) == (8, 6)
+        payload, images = audit_context_for_typst(
+            context, layered_audit, "auditor", "en", "full"
+        )
+        pdf = render_pdf(
+            localized_template(REPORT_PROFILES["full"]["template"], "en"),
+            payload,
+            images=images,
+        )
+        assert "Implementation: 8/10" in _text(pdf)
+
+    def test_rows_are_out_of_the_audit_scale_when_it_differs(self, layered_audit):
+        layered_audit.max_score = 10
+        layered_audit.save()
+
+        assert _rows(_context(layered_audit))["B-1"]["max_score"] == 10
 
     def test_not_applicable_rows_leave_every_score_empty(self, layered_audit):
         _set(layered_audit, "B-1", result=NA)

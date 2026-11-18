@@ -1446,6 +1446,22 @@ def gen_audit_context(
             for layer in shown_layers
         }
 
+    def row_max_score(ra):
+        """The top of the scale the requirement's scores are on: its own
+        maximum, else the audit's, else the framework's."""
+        return next(
+            (
+                bound
+                for bound in (
+                    ra.requirement.max_score,
+                    audit.max_score,
+                    audit.framework.max_score,
+                )
+                if bound is not None
+            ),
+            None,
+        )
+
     # Build flat list of requirement assessments for Word template
     requirement_assessments_list = []
     for ra in [
@@ -1466,7 +1482,7 @@ def gen_audit_context(
                 "result_key": ra.result or "",
                 "extended_result": safe_translate(lang, ra.extended_result),
                 "score": None if ra.result == "not_applicable" else ra.score,
-                "max_score": audit.framework.max_score
+                "max_score": row_max_score(ra)
                 if ra.is_scored and ra.result != "not_applicable"
                 else None,
                 **row_layers(ra),
