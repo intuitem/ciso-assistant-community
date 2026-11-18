@@ -9,6 +9,7 @@ import pytest
 from openpyxl import Workbook
 
 from data_wizard.arm_helpers import find_measure_sheets, find_sheet, process_arm_file
+from data_wizard.tests.test_templates import ebios_4x4_matrix  # noqa: F401
 
 FR_SHEETS = {
     "1 - Missions": [
@@ -174,6 +175,17 @@ class TestSheetResolution:
         [
             (FR_SHEETS, ["1 - Référentiel de sécurité X"]),
             (EN_SHEETS, ["1 - X reference standard"]),
+            (
+                {
+                    **FR_SHEETS,
+                    "1 - Mesures de sécurité isolée": [
+                        ["", "Réf.", "Nom"],
+                        [],
+                        ["1", "M1", "MFA"],
+                    ],
+                },
+                ["1 - Mesures de sécurité isolée", "1 - Référentiel de sécurité X"],
+            ),
         ],
     )
     def test_measure_sheets_detected_by_headers(self, sheets, expected):
@@ -296,6 +308,7 @@ FULL_EXPORT_SHEETS = {
         ["", "✓/❒", "Nom", "Abrév.", "Description"],
         [],
         ["1", "✔", "Hameçonnage", "AE1", ""],
+        ["2", "", "Catalogue", "AE2", ""],
     ],
 }
 
@@ -351,6 +364,16 @@ PER_TABLE_EXPORTS = {
         ["1", "✔", "• Paie", "Fuite de données", "G3 - Grave"],
         ["2", "", "• Paie", "NA", ""],
         ["3", "", "• " + "Long" * 60, "Fuite de données", "G2 - Significative"],
+    ],
+    "Atelier 1/Base de biens supports.xlsx": [
+        ["", "Nom", "Abrév.", "Bien support parent"],
+        [],
+        ["1", "Catalogue", "", ""],
+    ],
+    "Atelier 1/Base de biens supports - projet.xlsx": [
+        ["", "Nom", "Abrév.", "Bien support parent"],
+        [],
+        ["1", "Serveur RH", "", ""],
     ],
     "Atelier 2/Base de couples SR OV.xlsx": [
         ["", "Identification", None, "Évènements redoutés", "Cotation", None],
@@ -423,28 +446,81 @@ class TestPerTableArchive:
         assert stakeholder["name"] == "Prestataire"
         assert stakeholder["category_raw"] == "Partenaires"
         assert stakeholder["current_dependency"] == 4
+        assert "stakeholders" not in data["missing_sheets"]
+
+    def test_project_table_preferred_over_catalogue(self, data):
+        assert [a["name"] for a in data["supporting_assets"]] == ["Serveur RH"]
+        exports = dict(reversed(PER_TABLE_EXPORTS.items()))
+        reversed_data = process_arm_file(build_archive(exports))
+        assert [a["name"] for a in reversed_data["supporting_assets"]] == ["Serveur RH"]
 
     @pytest.mark.parametrize(
-        "content",
+        "content,code",
         [
-            b"not a zip",
-            build_archive({"notes.xlsx": PER_TABLE_EXPORTS["notes.xlsx"]}),
-            build_archive(
-                {
-                    f"{study}/Base de couples SR OV.xlsx": PER_TABLE_EXPORTS[
-                        "Atelier 2/Base de couples SR OV.xlsx"
-                    ]
-                    for study in ("Etude 1", "Etude 2")
-                }
+            (b"not a zip", "not_zip"),
+            (
+                build_archive({"notes.xlsx": PER_TABLE_EXPORTS["notes.xlsx"]}),
+                "no_table",
             ),
-            build_archive(
-                {f"notes{i}.xlsx": PER_TABLE_EXPORTS["notes.xlsx"] for i in range(101)}
+            (
+                build_archive(
+                    {
+                        f"{study}/Base de couples SR OV.xlsx": PER_TABLE_EXPORTS[
+                            "Atelier 2/Base de couples SR OV.xlsx"
+                        ]
+                        for study in ("Etude 1", "Etude 2")
+                    }
+                ),
+                "duplicate_table",
+            ),
+            (
+                build_archive(
+                    {
+                        f"notes{i}.xlsx": PER_TABLE_EXPORTS["notes.xlsx"]
+                        for i in range(101)
+                    }
+                ),
+                "too_large",
             ),
         ],
         ids=["not_zip", "no_arm_table", "same_table_twice", "too_many_files"],
     )
-    def test_invalid_archive_is_rejected(self, content):
+    def test_invalid_archive_is_rejected(self, content, code):
         from data_wizard.arm_helpers import ARMArchiveError
 
-        with pytest.raises(ARMArchiveError):
+        with pytest.raises(ARMArchiveError) as error:
             process_arm_file(content)
+        assert error.value.code == code
+
+
+@pytest.mark.django_db
+def test_gravity_outside_matrix_is_not_rated(
+    api_client,
+    domain_folder,
+    all_accessible,
+    ebios_4x4_matrix,  # noqa: F811
+):
+    from data_wizard.tests.test_load_file_view import _post
+    from ebios_rm.models import FearedEvent
+
+    exports = {
+        "Base d'évènements redoutés - projet.xlsx": [
+            ["", "✓/❒", "Valeurs métier", "Évènement redouté", "Gravité retenue"],
+            [],
+            ["1", "✔", "", "Fuite", "G3 - Grave"],
+            ["2", "✔", "", "Arrêt", "G5 - Critique"],
+        ]
+    }
+    response = _post(
+        api_client,
+        build_archive(exports),
+        "etude.zip",
+        "EbiosRMStudyARM",
+        domain_folder.id,
+        HTTP_X_MATRIX_ID=str(ebios_4x4_matrix.id),
+    )
+    assert response.json()["results"]["errors"] == []
+    assert dict(FearedEvent.objects.values_list("name", "gravity")) == {
+        "Fuite": 2,
+        "Arrêt": -1,
+    }

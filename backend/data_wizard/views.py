@@ -89,7 +89,11 @@ from core.utils import (
     parse_answers_cell,
     unescape_excel_formula,
 )
-from data_wizard.arm_helpers import ARMArchiveError, process_arm_file
+from data_wizard.arm_helpers import (
+    ARM_ARCHIVE_ERRORS,
+    ARMArchiveError,
+    process_arm_file,
+)
 from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
@@ -7045,11 +7049,7 @@ class LoadFileView(APIView):
             except ARMArchiveError as e:
                 logger.warning("Invalid ARM archive", error=e)
                 results["failed"] = 1
-                results["errors"].append(
-                    {
-                        "error": "The file is not a valid ARM export. A zip must hold the tables of a single study."
-                    }
-                )
+                results["errors"].append({"error": ARM_ARCHIVE_ERRORS[e.code]})
                 return results
 
             results["warnings"] = [
@@ -7442,9 +7442,17 @@ class LoadFileView(APIView):
                 # =========================================================
                 # Step 4: Create Feared Events
                 # =========================================================
+                impact_levels = (
+                    len(risk_matrix.json_definition.get("impact", []))
+                    if risk_matrix
+                    else 0
+                )
                 for fe_data in arm_data.get("feared_events", []):
                     try:
                         fe_name = fe_data["name"]
+                        gravity = fe_data.get("gravity", -1)
+                        if gravity >= impact_levels:
+                            gravity = -1
                         # Find linked assets
                         linked_asset_ids = []
                         for asset_name in fe_data.get("asset_names", []):
@@ -7476,9 +7484,7 @@ class LoadFileView(APIView):
                                     existing_fe.justification = fe_data.get(
                                         "justification", existing_fe.justification
                                     )
-                                    existing_fe.gravity = fe_data.get(
-                                        "gravity", existing_fe.gravity
-                                    )
+                                    existing_fe.gravity = gravity
                                     existing_fe.is_selected = fe_data.get(
                                         "is_selected", existing_fe.is_selected
                                     )
@@ -7493,7 +7499,7 @@ class LoadFileView(APIView):
                             ebios_rm_study=study,
                             name=fe_name,
                             justification=fe_data.get("justification", ""),
-                            gravity=fe_data.get("gravity", -1),
+                            gravity=gravity,
                             is_selected=fe_data.get("is_selected", False),
                         )
 

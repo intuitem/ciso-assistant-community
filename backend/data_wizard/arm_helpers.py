@@ -235,12 +235,9 @@ CONTROL_STATUS = {
 def find_measure_sheets(workbook) -> list[str]:
     """Return workshop 1 sheet names holding security measures."""
     sheet, sheet_name = find_sheet(workbook, "complementary_measures")
-    if sheet is not None:
-        return [sheet_name]
-
-    matches = []
+    matches = [sheet_name] if sheet is not None else []
     for name in workbook.sheetnames:
-        if not name.startswith("1 - "):
+        if not name.startswith("1 - ") or name in matches:
             continue
         headers = {normalize_label(cell.value) for cell in workbook[name][1]}
         if all(
@@ -302,8 +299,18 @@ MAX_ARCHIVE_SIZE = 50 * 1024 * 1024
 MAX_ARCHIVE_MEMBERS = 100
 
 
+ARM_ARCHIVE_ERRORS = {
+    "not_zip": "The file is not a valid ARM export or zip archive.",
+    "too_large": f"The zip exceeds the import limit of {MAX_ARCHIVE_MEMBERS} files or {MAX_ARCHIVE_SIZE // (1024 * 1024)} MB.",
+    "no_table": "The zip holds no recognized ARM table.",
+    "duplicate_table": "The zip holds the same ARM table more than once. Upload one zip per study.",
+}
+
+
 class ARMArchiveError(Exception):
-    pass
+    def __init__(self, code: str):
+        super().__init__(code)
+        self.code = code
 
 
 def identify_table(sheet) -> str | None:
@@ -331,10 +338,11 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
     workbook = Workbook()
     workbook.remove(workbook.active)
     unrecognized = []
+    project_tables = set()
     try:
         archive = ZipFile(BytesIO(file_content))
     except BadZipFile as e:
-        raise ARMArchiveError("Not a zip archive") from e
+        raise ARMArchiveError("not_zip") from e
     with archive:
         members = [
             m
@@ -347,7 +355,7 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
             len(members) > MAX_ARCHIVE_MEMBERS
             or sum(m.file_size for m in members) > MAX_ARCHIVE_SIZE
         ):
-            raise ARMArchiveError("Archive is too large")
+            raise ARMArchiveError("too_large")
         for member in members:
             file_name = PurePosixPath(member.filename).name
             try:
@@ -363,13 +371,20 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
                 unrecognized.append(file_name)
                 continue
             target_name = SHEET_VARIANTS[key][0]
+            is_project = " - projet" in normalize_label(file_name)
             if target_name in workbook.sheetnames:
-                raise ARMArchiveError(f"Table {key} appears more than once")
+                if is_project == (target_name in project_tables):
+                    raise ARMArchiveError("duplicate_table")
+                if not is_project:
+                    continue
+                workbook.remove(workbook[target_name])
             target = workbook.create_sheet(target_name)
+            if is_project:
+                project_tables.add(target_name)
             for row in sheet.iter_rows(values_only=True):
                 target.append(row or [None])
     if not workbook.sheetnames:
-        raise ARMArchiveError("No ARM table found")
+        raise ARMArchiveError("no_table")
     return workbook, unrecognized
 
 
@@ -678,7 +693,7 @@ def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dic
         )
         event["gravity"] = max(event["gravity"], gravity)
         event["is_selected"] = event["is_selected"] or is_selected
-        if justification and justification not in event["justification"]:
+        if justification and justification not in event["justification"].split("\n"):
             event["justification"] = (
                 f"{event['justification']}\n{justification}".strip()
             )
@@ -1062,7 +1077,7 @@ def extract_elementary_actions(workbook) -> list[dict]:
     elementary_actions = []
     for row in get_sheet_rows(workbook, "elementary_actions"):
         name = get_col(row, "name")
-        if not name:
+        if not name or "✔" not in str(get_col(row, "selected_check") or ""):
             continue
         elementary_actions.append(
             {
@@ -1133,6 +1148,8 @@ def process_arm_file(file_content: bytes) -> dict:
     ]
     if not result["applied_controls"]:
         result["missing_sheets"].append("security_measures")
+    if result["stakeholders"] and "stakeholders" in result["missing_sheets"]:
+        result["missing_sheets"].remove("stakeholders")
 
     logger.info(
         f"Extracted from ARM file: "
