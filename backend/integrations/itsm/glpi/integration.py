@@ -17,6 +17,9 @@ from .mapper import GLPIFieldMapper
 logger = get_logger(__name__)
 
 
+_UNREACHABLE = object()
+
+
 def _modified_at(remote_data: dict[str, Any] | None) -> datetime | None:
     try:
         return datetime.fromisoformat((remote_data or {}).get("updated"))
@@ -100,9 +103,9 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return model_settings.get("table_name") or DEFAULT_ITEM_TYPE
 
         old, new = item_type(configuration.settings), item_type(new_settings)
-        linked = SyncMapping.objects.filter(configuration=configuration).exclude(
-            remote_id=""
-        )
+        # Links whose item is still being created count too: its id would be
+        # stored under the new type.
+        linked = SyncMapping.objects.filter(configuration=configuration)
         if old != new and linked.exists():
             return [
                 f"The item type cannot change from {old} to {new} while objects "
@@ -126,9 +129,9 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
 
         # GLPI signs the body followed by the timestamp. The timestamp is set
         # when the event is queued and reused on retries, so it cannot bound a
-        # replay window without rejecting legitimate late deliveries. Events
-        # older than the state already synced are dropped in
-        # handle_webhook_event instead.
+        # replay window without rejecting legitimate late deliveries. An event
+        # is therefore only a signal: handle_webhook_event reads the item back
+        # from GLPI instead of trusting what the delivery carries.
         expected = hmac.new(
             secret.encode("utf-8"),
             request.body + timestamp.encode("utf-8"),
@@ -146,10 +149,28 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     def _extract_remote_data(self, payload: dict[str, Any]) -> dict[str, Any]:
         return GLPIClient.normalize_item(payload.get("item") or {})
 
+    def _is_linked(self, remote_id: str) -> bool:
+        return SyncMapping.objects.filter(
+            configuration=self.configuration, remote_id=remote_id
+        ).exists()
+
+    def _read_current(self, remote_id: str):
+        """The item as GLPI holds it now: its data, None once it is gone, or
+        _UNREACHABLE when GLPI cannot be asked."""
+        try:
+            return self.client.read_item(remote_id)
+        except Exception:
+            logger.warning(
+                "Could not read the GLPI item back for a webhook",
+                remote_id=remote_id,
+                exc_info=True,
+            )
+            return _UNREACHABLE
+
     def _is_outdated(self, remote_id: str, remote_data: dict[str, Any]) -> bool:
         """True when the event carries an older GLPI modification date than the
-        state last synced for this item: a delivery that arrives after a newer
-        change, or a replayed one. Applying it would bring old values back."""
+        state last synced for this item. Only used when the item cannot be read
+        back: applying such an event would bring old values back."""
         incoming = _modified_at(remote_data)
         if incoming is None:
             return False
@@ -175,23 +196,41 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             )
             return False
 
-        if event_type == "update":
-            remote_data = self._extract_remote_data(payload)
-            if self._is_outdated(remote_id, remote_data):
-                logger.info(
-                    "Ignoring GLPI webhook older than the synced state",
-                    remote_id=remote_id,
-                )
-                return True
-            return self.pull_changes(remote_id, remote_data)
-        if event_type == "delete":
-            return self._handle_remote_deletion(remote_id)
         if event_type == "new":
             # Local objects are not created from GLPI items.
             return True
+        if event_type not in ("update", "delete"):
+            logger.warning("Unknown GLPI webhook event", webhook_event=event_type)
+            return False
+        if not self._is_linked(remote_id):
+            # Most items in GLPI have nothing to do with CISO Assistant.
+            return False
 
-        logger.warning("Unknown GLPI webhook event", webhook_event=event_type)
-        return False
+        # GLPI renders the delivery when the change happens and sends it later,
+        # possibly after newer changes or more than once. What is applied is
+        # the item as GLPI holds it now.
+        current = self._read_current(remote_id)
+
+        if event_type == "delete":
+            if isinstance(current, dict) and not current["fields"].get("is_deleted"):
+                logger.info(
+                    "Ignoring GLPI delete webhook: the item still exists",
+                    remote_id=remote_id,
+                )
+                return True
+            return self._handle_remote_deletion(remote_id)
+
+        if isinstance(current, dict):
+            return self.pull_changes(remote_id, current)
+
+        remote_data = self._extract_remote_data(payload)
+        if self._is_outdated(remote_id, remote_data):
+            logger.info(
+                "Ignoring GLPI webhook older than the synced state",
+                remote_id=remote_id,
+            )
+            return True
+        return self.pull_changes(remote_id, remote_data)
 
     # --- Schema cache ---------------------------------------------------------
     # The schema comes from the instance's OpenAPI document, a multi-megabyte

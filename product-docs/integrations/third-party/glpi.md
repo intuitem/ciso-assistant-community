@@ -43,7 +43,7 @@ The instance URL must resolve to a public address. If your GLPI is on a private 
 
 ### Map the fields
 
-1. **Target Table:** pick the GLPI item type to sync with: tickets, changes or problems. Once objects are linked through the configuration, the item type can no longer be changed: unlink them first.
+1. **Target Table:** pick the GLPI item type to sync with: tickets, changes or problems. Once objects are linked through the configuration, the item type can no longer be changed: unlink them first. GLPI webhooks are tied to an item type, so after changing it, replace them with webhooks for the new type.
 2. **Field Mapping:** CISO Assistant reads the fields your GLPI version exposes and pre-fills the usual mapping:
 
 | CISO Assistant | GLPI |
@@ -103,7 +103,7 @@ GLPI refuses to call addresses it considers unsafe, which includes private netwo
 * **Creating an applied control:** open the `Integrations` section at the bottom of the form, select the GLPI configuration and tick `Create remote object`. A GLPI item is created and linked.
 * **Linking an existing item:** in the applied control's edit form, open `Integrations`, select the GLPI configuration and pick the item. You can search by name or by GLPI id. Items in the trash and items already linked are not offered.
 * **Updating an applied control** pushes the changed fields to the linked item.
-* **Updating the item in GLPI** updates the applied control. GLPI sends webhooks from a queue, so changes arrive with a short delay (about a minute with GLPI's default settings). If they never arrive, check that the `queuedwebhook` automatic action is enabled and running in GLPI, and look at the webhook queue.
+* **Updating the item in GLPI** updates the applied control. The webhook only signals the change: CISO Assistant then reads the item from GLPI, so it always applies its current state. GLPI sends webhooks from a queue, so changes arrive with a short delay (about a minute with GLPI's default settings). If they never arrive, check that the `queuedwebhook` automatic action is enabled and running in GLPI, and look at the webhook queue.
 
 The applied control page shows the linked GLPI id, the last sync time and its status.
 

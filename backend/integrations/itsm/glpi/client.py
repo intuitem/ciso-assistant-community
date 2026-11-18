@@ -274,6 +274,17 @@ class GLPIClient(BaseIntegrationClient):
             raise
         return self.normalize_item(item)
 
+    def read_item(self, remote_id: str) -> dict[str, Any] | None:
+        """Current state of an item, None once GLPI no longer has it. Other
+        failures are raised."""
+        try:
+            item = self._request("GET", self._item_path(remote_id)).json()
+        except requests.exceptions.HTTPError as error:
+            if error.response is not None and error.response.status_code == 404:
+                return None
+            raise
+        return self.normalize_item(item)
+
     @staticmethod
     def normalize_item(item: dict[str, Any]) -> dict[str, Any]:
         """Shape shared by API reads and webhook payloads, so the cached
