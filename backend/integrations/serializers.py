@@ -262,8 +262,8 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
         registered = IntegrationRegistry.get_provider(provider.name)
-        if config and registered and "settings" in data:
-            errors = registered.orchestrator_class.settings_change_errors(
+        if registered and "settings" in data:
+            errors = registered.orchestrator_class.settings_errors(
                 config, data["settings"] or {}
             )
             if errors:

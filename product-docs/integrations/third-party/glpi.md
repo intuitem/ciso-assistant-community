@@ -18,7 +18,7 @@ The GLPI integration synchronizes applied controls from CISO Assistant with assi
 * CISO Assistant must be able to reach GLPI over HTTPS. For incoming sync, GLPI must be able to reach CISO Assistant.
 
 {% hint style="info" %}
-The instance URL must resolve to a public address. If your GLPI is on a private network, start the CISO Assistant backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`.
+The instance URL must resolve to a public address. If your GLPI is on a private network, start the CISO Assistant backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`. This setting applies to the whole backend, not only to GLPI, and it also lifts the HTTPS requirement: keep the GLPI URL on HTTPS.
 {% endhint %}
 
 ## Part 1: Outgoing sync
@@ -38,7 +38,7 @@ The instance URL must resolve to a public address. If your GLPI is on a private 
    * **Instance URL:** the base URL of your GLPI instance, for example `https://glpi.example.com`.
    * **Client ID** and **Client secret:** the values from the OAuth client.
    * **Username** and **Password:** the GLPI user the integration acts as.
-3. Press **Test Connection**. A successful test proves both the OAuth client and the user's API access.
+3. Press **Test Connection**. A successful test proves both the OAuth client and the user's API access. It does not check the user's rights on tickets, changes or problems: make sure its GLPI profile can read, create and update the item type you sync with.
 4. **Save**. The mapping section appears once the configuration is saved.
 
 ### Map the fields
@@ -103,7 +103,7 @@ GLPI refuses to call addresses it considers unsafe, which includes private netwo
 * **Creating an applied control:** open the `Integrations` section at the bottom of the form, select the GLPI configuration and tick `Create remote object`. A GLPI item is created and linked.
 * **Linking an existing item:** in the applied control's edit form, open `Integrations`, select the GLPI configuration and pick the item. You can search by name or by GLPI id. Items in the trash and items already linked are not offered.
 * **Updating an applied control** pushes the changed fields to the linked item.
-* **Updating the item in GLPI** updates the applied control. GLPI sends webhooks from a queue, so changes arrive with a short delay (about a minute with GLPI's default settings).
+* **Updating the item in GLPI** updates the applied control. GLPI sends webhooks from a queue, so changes arrive with a short delay (about a minute with GLPI's default settings). If they never arrive, check that the `queuedwebhook` automatic action is enabled and running in GLPI, and look at the webhook queue.
 
 The applied control page shows the linked GLPI id, the last sync time and its status.
 
@@ -111,4 +111,6 @@ The applied control page shows the linked GLPI id, the last sync time and its st
 
 * GLPI stores the item description as rich text. CISO Assistant sends plain paragraphs and reads formatted content back as plain text.
 * Items created directly in GLPI are not imported into CISO Assistant.
+* Removing the ETA of an applied control does not remove the date in GLPI: its API cannot clear it.
+* With the default mapping, the `In progress` status is not sent to a change: GLPI changes have no matching status. Pick one in **Value Mapping** if you want it synced.
 * Assets are not synchronized with GLPI yet.

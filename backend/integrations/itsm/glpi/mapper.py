@@ -84,6 +84,12 @@ class GLPIFieldMapper(BaseFieldMapper):
         },
     }
 
+    # Ticket defaults with no counterpart on another item type. A change has
+    # no status 2: GLPI stores it anyway and the change shows a broken status.
+    _DEFAULTS_NOT_IN_ITEM_TYPE: dict[str, dict[str, set[str]]] = {
+        "Change": {"status": {"in_progress"}},
+    }
+
     # Pull-only aliases for remote values a one-to-one value_map cannot express:
     # GLPI has more statuses and priorities than the local model.
     _PULL_ALIASES: dict[str, dict[str, str]] = {
@@ -129,8 +135,15 @@ class GLPIFieldMapper(BaseFieldMapper):
                 for field, mapping in value_map.items()
             }
         elif use_defaults:
+            missing = self._DEFAULTS_NOT_IN_ITEM_TYPE.get(
+                self.model_settings.get("table_name") or "", {}
+            )
             self.value_map_to_remote = {
-                field: dict(mapping)
+                field: {
+                    local: remote
+                    for local, remote in mapping.items()
+                    if local not in missing.get(field, ())
+                }
                 for field, mapping in self._DEFAULT_VALUE_MAP_TO_REMOTE.items()
             }
         else:

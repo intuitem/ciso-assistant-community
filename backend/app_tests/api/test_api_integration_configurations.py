@@ -275,3 +275,40 @@ def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_fo
     # Other settings still save, and so does the same type.
     response = save(table_name="Ticket", enable_outgoing_sync=True)
     assert response.status_code == 200, response.content
+
+
+def test_glpi_refuses_settings_for_other_models(admin_client, root_folder):
+    credentials = {
+        "instance_url": "https://glpi.example.com",
+        "client_id": "cid",
+        "client_secret": "csecret",
+        "username": "sync",
+        "password": "pw",
+    }
+    payload = {
+        "provider_id": str(IntegrationProvider.objects.get(name="glpi").id),
+        "folder_id": str(root_folder.id),
+        "credentials": credentials,
+        "settings": {
+            "table_name": "Ticket",
+            "models": {"asset": {"table_name": "Ticket"}},
+        },
+    }
+
+    response = admin_client.post(CONFIGS_URL, payload, format="json")
+    assert response.status_code == 400, response.content
+    assert "asset" in str(response.json())
+
+    payload["settings"] = {"table_name": "Ticket"}
+    created = admin_client.post(CONFIGS_URL, payload, format="json")
+    assert created.status_code == 201, created.content
+
+    response = admin_client.patch(
+        f"{CONFIGS_URL}{created.json()['id']}/",
+        {
+            "credentials": credentials,
+            "settings": {"models": {"asset": {"table_name": "Ticket"}}},
+        },
+        format="json",
+    )
+    assert response.status_code == 400, response.content

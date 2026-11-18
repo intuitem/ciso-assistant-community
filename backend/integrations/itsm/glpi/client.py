@@ -42,7 +42,7 @@ MAX_LIST_FETCH = 500
 # Rows requested per page while scanning.
 LIST_PAGE_SIZE = 100
 
-# Newest first; ids are immutable, so pages stay stable during a scan.
+# Newest first.
 LIST_ORDERING = "id:desc"
 
 # Refresh a cached token this long before GLPI expires it.
@@ -164,7 +164,7 @@ class GLPIClient(BaseIntegrationClient):
             timeout=30,
             allow_redirects=False,
         )
-        response.raise_for_status()
+        self._raise_for_status(response)
         body = response.json()
         token = body["access_token"]
         lifetime = max(int(body.get("expires_in") or 0) - TOKEN_EXPIRY_MARGIN, 0)
@@ -190,8 +190,21 @@ class GLPIClient(BaseIntegrationClient):
             )
             if response.status_code != 401 or attempt == 1:
                 break
-        response.raise_for_status()
+        self._raise_for_status(response)
         return response
+
+    @staticmethod
+    def _raise_for_status(response: requests.Response) -> None:
+        # Redirects are not followed, and raise_for_status() lets them pass: a
+        # write answered with one (an http URL sent to https, a proxy) was not
+        # applied and must not count as done.
+        if 300 <= response.status_code < 400:
+            raise requests.exceptions.HTTPError(
+                f"GLPI answered with a redirect ({response.status_code}); "
+                "check the instance URL",
+                response=response,
+            )
+        response.raise_for_status()
 
     def _collection_path(self, table: str | None = None) -> str:
         table = table or self.table
@@ -316,6 +329,7 @@ class GLPIClient(BaseIntegrationClient):
         # Mapped items are filtered out client-side, so keep paging until the
         # page fills or the source (or the scan budget) runs out.
         results = []
+        seen: set[str] = set()
         start = 0
         try:
             while True:
@@ -331,6 +345,11 @@ class GLPIClient(BaseIntegrationClient):
                 ).json()
                 for record in records:
                     remote_id = str(record.get("id"))
+                    # An item created during the scan shifts the offsets, so
+                    # the next page can start with one already returned.
+                    if remote_id in seen:
+                        continue
+                    seen.add(remote_id)
                     if ids or remote_id not in used_ids:
                         results.append(
                             {

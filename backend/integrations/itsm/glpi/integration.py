@@ -65,14 +65,34 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     client_class = GLPIClient
     mapper_class = GLPIFieldMapper
 
+    # Only applied controls sync with GLPI. A webhook does not name its item
+    # type, so a second model under the same configuration could not tell its
+    # items from the tickets.
+    def _check_model(self, model_key: str) -> None:
+        if model_key != self.DEFAULT_MODEL_KEY:
+            raise ValueError(f"GLPI does not sync '{model_key}' objects")
+
     def _get_mapper(self, model_key="applied_control"):
+        self._check_model(model_key)
         return GLPIFieldMapper(self.configuration, model_key)
 
     def _get_client(self, model_key="applied_control"):
+        self._check_model(model_key)
         return GLPIClient(self.configuration, model_key)
 
     @classmethod
-    def settings_change_errors(cls, configuration, new_settings):
+    def settings_errors(cls, configuration, new_settings):
+        other_models = sorted(
+            set(new_settings.get("models") or {}) - {cls.DEFAULT_MODEL_KEY}
+        )
+        if other_models:
+            return [
+                "GLPI only syncs applied controls. Remove the settings for: "
+                + ", ".join(other_models)
+            ]
+        if configuration is None:
+            return []
+
         # Item ids are only unique within an item type: under another type,
         # existing links would address unrelated items with the same id.
         def item_type(settings):

@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
 from integrations.models import IntegrationConfiguration
 
@@ -140,6 +141,21 @@ def test_default_mapping_pushes_a_ticket_payload():
     }
 
 
+@pytest.mark.parametrize(
+    "item_type, sent",
+    [("Ticket", 2), ("Problem", 2), ("Change", None)],
+)
+def test_default_status_only_uses_values_the_item_type_has(item_type, sent):
+    mapper = GLPIFieldMapper(_configuration({"table_name": item_type}))
+    control = SimpleNamespace(status="in_progress")
+
+    assert mapper.to_remote_partial(control, ["status"]).get("status") == sent
+    # The statuses every type shares are still sent.
+    assert mapper.to_remote_partial(SimpleNamespace(status="on_hold"), ["status"]) == {
+        "status": 4
+    }
+
+
 def test_push_drops_choices_without_a_remote_value():
     mapper = GLPIFieldMapper(_configuration())
     control = SimpleNamespace(status="--", priority=None)
@@ -249,6 +265,30 @@ def test_rejected_token_is_renewed_once(mock_post, mock_request):
     )
 
 
+@pytest.mark.parametrize("status", [301, 307])
+@patch("integrations.itsm.glpi.client.requests.request")
+def test_a_redirected_write_is_a_failure(mock_request, status):
+    redirect = requests.Response()
+    redirect.status_code = status
+    redirect.headers["Location"] = "https://glpi.example.com/elsewhere"
+    mock_request.return_value = redirect
+    client = _client()
+    client._get_token = MagicMock(return_value="tok")
+
+    with pytest.raises(requests.exceptions.HTTPError):
+        client.update_remote_object("3", {"name": "x"})
+    assert client.test_connection() is False
+
+
+def test_only_applied_controls_get_a_client_or_a_mapper():
+    orchestrator = GLPIOrchestrator(_configuration())
+    with pytest.raises(ValueError):
+        orchestrator.mapper_for("asset")
+    with pytest.raises(ValueError):
+        orchestrator.client_for("asset")
+    assert isinstance(orchestrator.mapper_for("applied_control"), GLPIFieldMapper)
+
+
 def test_item_type_and_ids_cannot_alter_the_request_path():
     with pytest.raises(ValueError):
         _client({"table_name": "../Setup/Webhook"})._collection_path()
@@ -279,6 +319,20 @@ def test_list_hides_trashed_and_mapped_items(mock_request, mock_sync):
     params = mock_request.call_args[1]["params"]
     assert params["filter"] == "is_deleted==false"
     assert params["sort"] == "id:desc"
+
+
+@patch("integrations.itsm.glpi.client.SyncMapping")
+@patch("integrations.itsm.glpi.client.requests.request")
+def test_list_does_not_offer_an_item_twice_when_pages_shift(mock_request, mock_sync):
+    first = [{"id": i, "name": f"T{i}"} for i in range(LIST_PAGE_SIZE + 1, 1, -1)]
+    # A ticket created between the two requests pushes #2 onto the next page.
+    second = [{"id": 2, "name": "T2"}, {"id": 1, "name": "T1"}]
+
+    results = _list(mock_request, mock_sync, {"limit": 500}, [first, second])
+
+    ids = [r["id"] for r in results]
+    assert len(ids) == len(set(ids)) == LIST_PAGE_SIZE + 1
+    assert ids[-2:] == ["2", "1"]
 
 
 @patch("integrations.itsm.glpi.client.SyncMapping")
