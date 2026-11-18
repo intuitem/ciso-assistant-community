@@ -10,6 +10,7 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
 )
+from core.views import _preview_suggestions_for_compliance_assessment
 from iam.models import Folder
 
 from .fixtures import *
@@ -116,6 +117,13 @@ class TestRequirementAssessment:
             preview = requirement_assessment.preview_suggested_applied_controls()
             assert (
                 preview[0]["applied_control"].description
+                == "Este control garantiza que los servicios de los proveedores se supervisen."
+            )
+            audit_preview = _preview_suggestions_for_compliance_assessment(
+                compliance_assessment
+            )
+            assert (
+                audit_preview[0]["applied_control"].description
                 == "Este control garantiza que los servicios de los proveedores se supervisen."
             )
             created = requirement_assessment.create_applied_controls_from_suggestions()
