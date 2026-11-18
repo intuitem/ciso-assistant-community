@@ -95,6 +95,7 @@
 					xAxis: {
 						type: 'time',
 						axisLabel: {
+							hideOverlap: true,
 							formatter: function (value) {
 								return new Date(value).toLocaleDateString();
 							}

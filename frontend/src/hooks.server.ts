@@ -25,7 +25,7 @@ installJsonConsole();
 const fallbackLocaleStore = new WeakMap<Request, string>();
 
 defineCustomServerStrategy('custom-fallback', {
-	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
+	getLocale: (request) => (request && fallbackLocaleStore.get(request)) ?? DEFAULT_LANGUAGE
 });
 
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);

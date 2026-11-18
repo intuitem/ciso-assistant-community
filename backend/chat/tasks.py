@@ -194,6 +194,7 @@ def catch_up_indexing():
     logger.info(
         "Checked documents for indexing", evidence=evidence, documents=documents
     )
+    index_library_knowledge_base()
 
 
 @db_periodic_task(crontab(hour="3", minute="15"))
@@ -449,6 +450,33 @@ def _build_library_entry_text(entry: dict) -> str:
     return "\n".join(parts)
 
 
+def _library_point_id(entry: dict) -> str:
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"library:{entry['urn']}"))
+
+
+def _library_payload(entry: dict) -> dict:
+    return {
+        "text": _build_library_entry_text(entry),
+        "source_type": "library",
+        "object_type": entry["object_type"],
+        "urn": entry["urn"],
+        "ref_id": entry.get("ref_id", ""),
+        "name": entry.get("name", ""),
+        "framework": entry["framework"],
+        "framework_ref_id": entry.get("framework_ref_id", ""),
+        "provider": entry.get("provider", ""),
+        "locale": entry.get("locale", "en"),
+    }
+
+
+def _library_point_current(point, entry: dict, hybrid: bool) -> bool:
+    from .rag import BM25_VECTOR
+
+    if point is None or point.payload != _library_payload(entry):
+        return False
+    return not hybrid or BM25_VECTOR in (point.vector or {})
+
+
 @db_task()
 def index_library_knowledge_base():
     """
@@ -456,12 +484,19 @@ def index_library_knowledge_base():
     threats, and reference controls into Qdrant as shared knowledge.
 
     Uses source_type="library" — accessible to all authenticated users
-    without folder-based permission filtering.
+    without folder-based permission filtering. Entries already indexed with
+    the same text are skipped.
     """
     import time
 
     from .providers import get_embedder
-    from .rag import COLLECTION_NAME, get_qdrant_client
+    from .rag import (
+        BM25_MODEL,
+        BM25_VECTOR,
+        COLLECTION_NAME,
+        get_qdrant_client,
+        has_bm25,
+    )
 
     t0 = time.time()
     library_dir = _get_library_dir()
@@ -492,13 +527,35 @@ def index_library_knowledge_base():
     embedder = get_embedder()
     client = get_qdrant_client()
 
-    from qdrant_client.models import PointStruct
+    from qdrant_client.models import Document, PointStruct
 
+    hybrid = has_bm25(client)
     BATCH_SIZE = 100
     total_indexed = 0
 
     for batch_start in range(0, len(all_entries), BATCH_SIZE):
         batch = all_entries[batch_start : batch_start + BATCH_SIZE]
+        ids = [_library_point_id(e) for e in batch]
+        try:
+            indexed = {
+                str(p.id): p
+                for p in client.retrieve(
+                    COLLECTION_NAME,
+                    ids=ids,
+                    with_payload=True,
+                    with_vectors=[BM25_VECTOR] if hybrid else False,
+                )
+            }
+        except Exception as e:
+            logger.error("library_lookup_failed", batch_start=batch_start, error=e)
+            indexed = {}
+        batch = [
+            e
+            for e, point_id in zip(batch, ids)
+            if not _library_point_current(indexed.get(point_id), e, hybrid)
+        ]
+        if not batch:
+            continue
         texts = [_build_library_entry_text(e) for e in batch]
 
         try:
@@ -512,24 +569,19 @@ def index_library_knowledge_base():
             continue
 
         points = []
-        for entry, embedding in zip(batch, embeddings):
-            point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"library:{entry['urn']}"))
+        for entry, text, embedding in zip(batch, texts, embeddings):
             points.append(
                 PointStruct(
-                    id=point_id,
-                    vector=embedding,
-                    payload={
-                        "text": _build_library_entry_text(entry),
-                        "source_type": "library",
-                        "object_type": entry["object_type"],
-                        "urn": entry["urn"],
-                        "ref_id": entry.get("ref_id", ""),
-                        "name": entry.get("name", ""),
-                        "framework": entry["framework"],
-                        "framework_ref_id": entry.get("framework_ref_id", ""),
-                        "provider": entry.get("provider", ""),
-                        "locale": entry.get("locale", "en"),
-                    },
+                    id=_library_point_id(entry),
+                    vector=(
+                        {
+                            "": embedding,
+                            BM25_VECTOR: Document(text=text, model=BM25_MODEL),
+                        }
+                        if hybrid
+                        else embedding
+                    ),
+                    payload=_library_payload(entry),
                 )
             )
 
