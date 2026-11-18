@@ -5,6 +5,8 @@
 		verbose_name?: string;
 		/** Objects in the group when `objects` holds only some of them. */
 		count?: number;
+		/** There are more objects than `count`: counting stopped there. */
+		capped?: boolean;
 		objects: CascadeObject[];
 	};
 </script>
@@ -40,7 +42,7 @@
 		>
 			<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
 			<span class="text-xs text-surface-600-400">
-				{total}
+				{total}{group.capped ? '+' : ''}
 			</span>
 		</button>
 
@@ -53,7 +55,9 @@
 				{/each}
 				{#if total > group.objects.length}
 					<li class="py-1 text-xs text-surface-600-400">
-						{m.andNMoreObjects({ count: total - group.objects.length })}
+						{m.andNMoreObjects({
+							count: `${total - group.objects.length}${group.capped ? '+' : ''}`
+						})}
 					</li>
 				{/if}
 			</ul>

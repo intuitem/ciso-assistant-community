@@ -1,6 +1,8 @@
 import pytest
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
@@ -395,7 +397,81 @@ def test_move_preview_caps_the_names_but_not_the_count(
     assert res.status_code == 200, res.content
     assets = _group(res.json(), "Asset")
     assert assets["count"] == 3
+    assert assets["capped"] is False
     assert len(assets["objects"]) == 2
+
+
+def test_move_preview_stops_counting_at_the_cap(
+    admin_client: APIClient, domain_tree: dict[str, Folder], monkeypatch
+) -> None:
+    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_COUNT_CAP", 2)
+
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    payload = res.json()
+    assets = _group(payload, "Asset")
+    assert (assets["count"], assets["capped"]) == (2, True)
+    domains = _group(payload, "Folder.DO")
+    assert (domains["count"], domains["capped"]) == (2, False)
+    assert payload["carried"]["capped"] is True
+
+
+def test_move_preview_stops_counting_hidden_objects_at_the_cap(
+    app_ready: Folder, domain_tree: dict[str, Folder], monkeypatch
+) -> None:
+    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_COUNT_CAP", 2)
+    client = _scoped_client(
+        "non-recursive-cap@cascade.test",
+        "BI-RL-DMA",
+        domain_tree["target"],
+        app_ready,
+        is_recursive=False,
+    )
+
+    res = client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    carried = res.json()["carried"]
+    assert (carried["hidden_count"], carried["hidden_capped"]) == (2, True)
+
+
+def test_move_preview_queries_do_not_grow_with_the_selection(
+    admin_client: APIClient, app_ready: Folder
+) -> None:
+    """Neither the listed domains nor the named role assignments may cost a query
+    each."""
+    domains = []
+    for i in range(4):
+        domain = Folder.objects.create(
+            name=f"QC-{i}",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        Asset.objects.create(name=f"QC-ASSET-{i}", folder=domain)
+        RoleAssignment.objects.create(
+            user=User.objects.create_user(f"qc-{i}@cascade.test"),
+            role=Role.objects.get(name="BI-RL-ANA"),
+            folder=domain,
+        )
+        domains.append(domain)
+
+    def queries(selected: list[Folder]) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            res = admin_client.post(
+                MOVE_PREVIEW_URL,
+                {"ids": [str(d.id) for d in selected]},
+                format="json",
+            )
+        assert res.status_code == 200, res.content
+        return len(ctx.captured_queries)
+
+    queries(domains[:1])
+    assert queries(domains) == queries(domains[:1])
 
 
 def test_move_preview_lists_a_policy_once(

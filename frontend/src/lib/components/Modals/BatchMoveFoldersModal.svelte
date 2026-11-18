@@ -12,7 +12,14 @@
 	 * and what they carry along. */
 	type MovePreview = {
 		subjects: { id: string; name: string; below_selected: boolean }[];
-		carried: { count: number; hidden_count: number; grouped_objects: CascadeGroup[] };
+		/** `capped` / `hidden_capped`: counting stopped at the server's cap. */
+		carried: {
+			count: number;
+			capped?: boolean;
+			hidden_count: number;
+			hidden_capped?: boolean;
+			grouped_objects: CascadeGroup[];
+		};
 	};
 
 	interface Props {
@@ -43,6 +50,14 @@
 		(preview?.subjects ?? []).filter((s) => s.below_selected).map((s) => s.name)
 	);
 	const carriedTotal = $derived(preview ? preview.carried.count + preview.carried.hidden_count : 0);
+	const carriedLabel = $derived(
+		preview?.carried.capped || preview?.carried.hidden_capped
+			? `${carriedTotal}+`
+			: String(carriedTotal)
+	);
+	const hiddenLabel = $derived(
+		preview ? `${preview.carried.hidden_count}${preview.carried.hidden_capped ? '+' : ''}` : ''
+	);
 	const canConfirm = $derived(
 		preview !== null &&
 			preview.subjects.length > 0 &&
@@ -119,7 +134,7 @@
 			{#if carriedTotal > 0}
 				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-3">
-						{m.batchMoveCarriedNotice({ count: carriedTotal })}
+						{m.batchMoveCarriedNotice({ count: carriedLabel })}
 					</div>
 					<div class="max-h-64 overflow-y-auto space-y-1">
 						<CascadeGroupList groups={preview.carried.grouped_objects} idPrefix="mov" />
@@ -128,7 +143,7 @@
 								class="px-3 pt-2 text-xs text-surface-600-400"
 								data-testid="cascade-hidden-objects"
 							>
-								{m.cascadeHiddenObjects({ count: preview.carried.hidden_count })}
+								{m.cascadeHiddenObjects({ count: hiddenLabel })}
 							</p>
 						{/if}
 					</div>

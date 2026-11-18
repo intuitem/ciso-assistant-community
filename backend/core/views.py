@@ -10097,6 +10097,9 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     # Names returned per group; the count still covers every object in it.
     MOVE_PREVIEW_NAMES_PER_GROUP = 50
+    # Counts stop past this many rows, so a large subtree is never scanned in full:
+    # a count over it is returned as the cap and flagged as capped.
+    MOVE_PREVIEW_COUNT_CAP = 1000
     # The object's own fields that may name it in the move preview. `__str__` is not
     # used: on some models it embeds a related person (a comment's author, an
     # answer's owner) the caller may not be allowed to see.
@@ -10116,8 +10119,10 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         moved to a common target, it leaves that subtree. `carried` groups the
         folders and everything filed under the moved subtrees, each group with its
         `count` and at most `MOVE_PREVIEW_NAMES_PER_GROUP` names; what the caller may
-        not view is counted in `hidden_count`, never named. 400 if `ids` is empty or
-        longer than `BATCH_SIZE_LIMIT`, 403 if none is changeable.
+        not view is counted in `hidden_count`, never named. Counts stop at
+        `MOVE_PREVIEW_COUNT_CAP`, with `capped` (per group and overall) or
+        `hidden_capped` set when there are more. 400 if `ids` is empty or longer
+        than `BATCH_SIZE_LIMIT`, 403 if none is changeable.
         """
         ids = request.data.get("ids")
         if not isinstance(ids, list) or not ids:
@@ -10130,135 +10135,165 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        perm = Permission.objects.get(codename="change_folder")
+        user = request.user
         subjects = sorted(
-            (
-                folder
-                for folder in self.get_queryset().filter(
-                    id__in=ids,
-                    builtin=False,
-                    content_type=Folder.ContentType.DOMAIN,
-                )
-                if RoleAssignment.is_access_allowed(
-                    user=request.user, perm=perm, folder=folder
-                )
-            ),
+            self.get_queryset()
+            .filter(
+                id__in=ids,
+                builtin=False,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            .filter(id__in=RoleAssignment.get_changeable_object_ids(user, Folder)),
             key=lambda folder: folder.name.lower(),
         )
         if not subjects:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         subject_ids = {folder.id for folder in subjects}
-        subtree_ids = set(subject_ids)
-        below_selected = set()
-        for folder_id in Folder.descendants.through.objects.filter(
-            from_folder_id__in=subject_ids
-        ).values_list("to_folder_id", flat=True):
-            subtree_ids.add(folder_id)
-            if folder_id in subject_ids:
-                below_selected.add(folder_id)
-
-        # Per model, not per folder: view_folder alone does not let a role read what
-        # a domain holds.
-        granted = RoleAssignment.get_permissions_per_folder(
-            request.user, is_recursive=True
+        closure = Folder.descendants.through.objects
+        below_selected = set(
+            closure.filter(
+                from_folder_id__in=subject_ids, to_folder_id__in=subject_ids
+            ).values_list("to_folder_id", flat=True)
+        )
+        # The moved subtrees stay a subquery: spelled out, they could put thousands
+        # of ids in every query below.
+        descendant_ids = closure.filter(from_folder_id__in=subject_ids).values(
+            "to_folder_id"
         )
 
-        def viewable_folder_ids(model) -> set:
-            codename = f"view_{model._meta.model_name}"
-            return {
-                folder_id
-                for folder_id in subtree_ids
-                if codename in granted.get(str(folder_id), ())
-            }
+        content_models = self._folder_content_models(exempt=frozenset())
+        content_types = ContentType.objects.get_for_models(Folder, *content_models)
+        view_permissions = {
+            (permission.content_type_id, permission.codename): permission
+            for permission in Permission.objects.filter(
+                content_type__in=content_types.values(), codename__startswith="view_"
+            )
+        }
 
-        viewable_ids_by_model = {}
+        def view_permission(model) -> Permission | None:
+            return view_permissions.get(
+                (content_types[model].id, f"view_{model._meta.model_name}")
+            )
 
-        def can_view(model, pk) -> bool:
-            if model not in viewable_ids_by_model:
-                viewable_ids_by_model[model] = {
-                    str(object_id)
-                    for object_id in RoleAssignment.get_viewable_object_ids(
-                        request.user, model
-                    )
-                }
-            return str(pk) in viewable_ids_by_model[model]
+        cap = self.MOVE_PREVIEW_COUNT_CAP
 
-        def display_name(obj) -> str:
-            if not isinstance(obj, RoleAssignment):
-                fields = {field.name for field in obj._meta.concrete_fields}
-                for field in self.MOVE_PREVIEW_NAME_FIELDS:
-                    if field in fields and (value := getattr(obj, field)):
-                        return str(value)
-                return f"{capfirst(obj._meta.verbose_name)} {str(obj.pk)[:8]}"
+        def capped_count(queryset) -> int:
+            """The row count, read no further than `cap + 1` rows."""
+            return queryset.order_by()[: cap + 1].count()
+
+        def own_name(obj) -> str:
+            fields = {field.name for field in obj._meta.concrete_fields}
+            for field in self.MOVE_PREVIEW_NAME_FIELDS:
+                if field in fields and (value := getattr(obj, field)):
+                    return str(value)
+            return f"{capfirst(obj._meta.verbose_name)} {str(obj.pk)[:8]}"
+
+        def readable_ids(model, pks) -> set:
+            """Which of `pks` the caller may view, checked for these ids only."""
+            pks = {pk for pk in pks if pk}
+            if not pks:
+                return set()
+            return set(
+                RoleAssignment.get_viewable_object_ids(user, model).filter(id__in=pks)
+            )
+
+        def assignment_names(assignments) -> list[str]:
             # The assignment is viewable, its role and principal not necessarily:
             # name only what the caller could read on its own.
-            role = (
-                obj.role.name
-                if obj.role_id and can_view(Role, obj.role_id)
-                else str(_("Role assignment"))
+            roles = readable_ids(Role, (a.role_id for a in assignments))
+            users = readable_ids(User, (a.user_id for a in assignments))
+            user_groups = readable_ids(
+                UserGroup, (a.user_group_id for a in assignments)
             )
-            if obj.user_id and can_view(User, obj.user_id):
-                return f"{role} → {obj.user.email}"
-            if obj.user_group_id and can_view(UserGroup, obj.user_group_id):
-                return f"{role} → {obj.user_group.name}"
-            return role
+            names = []
+            for assignment in assignments:
+                role = (
+                    assignment.role.name
+                    if assignment.role_id in roles
+                    else str(_("Role assignment"))
+                )
+                if assignment.user_id in users:
+                    names.append(f"{role} → {assignment.user.email}")
+                elif assignment.user_group_id in user_groups:
+                    names.append(f"{role} → {assignment.user_group.name}")
+                else:
+                    names.append(role)
+            return names
 
         groups = []
         hidden_count = 0
 
-        def add_group(key, verbose_name, queryset, viewable) -> None:
+        def add_group(key, verbose_name, model, queryset, order_field) -> None:
             nonlocal hidden_count
-            if viewable != subtree_ids:
-                hidden_count += queryset.exclude(folder_id__in=viewable).count()
-            if not viewable:
+            total = capped_count(queryset)
+            if not total:
                 return
-            named = queryset.filter(folder_id__in=viewable)
-            count = named.count()
+            # Per model, not per folder: view_folder alone does not let a role read
+            # what a domain holds.
+            permission = view_permission(model)
+            if permission is None:
+                hidden_count += total
+                return
+            allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, permission)
+            visible = queryset.filter(folder_id__in=allowed_folder_ids)
+            count = capped_count(visible)
+            if total <= cap:
+                hidden_count += total - count
+            elif hidden_count <= cap:
+                hidden_count += capped_count(
+                    queryset.exclude(folder_id__in=allowed_folder_ids)
+                )
             if not count:
                 return
+            rows = visible.order_by(order_field)
+            if model is RoleAssignment:
+                rows = rows.select_related("role", "user", "user_group")
+            rows = list(rows[: self.MOVE_PREVIEW_NAMES_PER_GROUP])
+            names = (
+                assignment_names(rows)
+                if model is RoleAssignment
+                else [own_name(obj) for obj in rows]
+            )
             objects = [
-                {"id": str(obj.pk), "name": display_name(obj)}
-                for obj in named[: self.MOVE_PREVIEW_NAMES_PER_GROUP]
+                {"id": str(obj.pk), "name": name} for obj, name in zip(rows, names)
             ]
             objects.sort(key=lambda o: (o["name"] or "").lower())
             groups.append(
                 {
                     "model": key,
                     "verbose_name": str(verbose_name),
-                    "count": count,
+                    "count": min(count, cap),
+                    "capped": count > cap,
                     "objects": objects,
                 }
             )
 
         # Every folder below a moved domain moves with it, enclaves included. A
         # folder's own folder is itself, so view_folder is checked on that folder.
-        viewable_folders = viewable_folder_ids(Folder)
         carried_folders = (
-            Folder.objects.filter(id__in=subtree_ids - subject_ids)
+            Folder.objects.filter(id__in=descendant_ids)
+            .exclude(id__in=subject_ids)
             .annotate(folder_id=F("id"))
-            .order_by("name")
         )
         for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
             add_group(
                 f"Folder.{content_type}",
                 label,
+                Folder,
                 carried_folders.filter(content_type=content_type),
-                viewable_folders,
+                "name",
             )
-        for model in self._folder_content_models(exempt=frozenset()):
+        in_subtree = Q(folder_id__in=subject_ids) | Q(folder_id__in=descendant_ids)
+        for model in content_models:
             # By name where there is one, so the capped names are the first ones.
             has_name = any(field.name == "name" for field in model._meta.fields)
-            queryset = model._base_manager.filter(folder_id__in=subtree_ids).order_by(
-                "name" if has_name else "pk"
-            )
-            if model is RoleAssignment:
-                queryset = queryset.select_related("role", "user", "user_group")
             add_group(
                 model.__name__,
                 model._meta.verbose_name,
-                queryset,
-                viewable_folder_ids(model),
+                model,
+                model._base_manager.filter(in_subtree),
+                "name" if has_name else "pk",
             )
 
         groups.sort(key=lambda g: g["verbose_name"].lower())
@@ -10274,7 +10309,9 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 ],
                 "carried": {
                     "count": sum(g["count"] for g in groups),
-                    "hidden_count": hidden_count,
+                    "capped": any(g["capped"] for g in groups),
+                    "hidden_count": min(hidden_count, cap),
+                    "hidden_capped": hidden_count > cap,
                     "grouped_objects": groups,
                 },
             }
