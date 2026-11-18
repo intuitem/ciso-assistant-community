@@ -1,6 +1,7 @@
 """Integration configurations through the real API stack: creating one, and the
-remote object picker's lookup. The view-level tests mock ``get_object`` and so
-never see what the viewset's filter backends do with the picker's parameters."""
+remote object picker. Requests go through routing, the filter backends and
+permissions, so the tests see what the viewset does with the picker's
+parameters. Only the remote system is stubbed."""
 
 from unittest.mock import MagicMock, patch
 
@@ -147,6 +148,31 @@ def test_picker_hydration_ids_are_remote_ids(admin_client, jira_config, remote_i
 
     assert response.status_code == 200, response.content
     assert remote.list_remote_objects.call_args[1]["query_params"]["id"] == remote_ids
+
+
+def test_picker_limit_is_clamped_and_defaulted(admin_client, jira_config):
+    cases = [
+        ({"limit": "20"}, 20),
+        ({"limit": "5000"}, 100),
+        ({"limit": "0"}, 1),
+        ({"limit": "abc"}, 50),
+        ({}, 50),
+    ]
+    for query, expected in cases:
+        response, remote = _list_remote_objects(admin_client, jira_config, query)
+
+        assert response.status_code == 200, response.content
+        sent = remote.list_remote_objects.call_args[1]["query_params"]
+        assert sent["limit"] == expected, query
+
+
+def test_picker_rejects_an_unknown_model_key(admin_client, jira_config):
+    response, remote = _list_remote_objects(
+        admin_client, jira_config, {"model_key": "nonsense"}
+    )
+
+    assert response.status_code == 400
+    remote.list_remote_objects.assert_not_called()
 
 
 def test_picker_stays_closed_without_access_to_the_configuration(
