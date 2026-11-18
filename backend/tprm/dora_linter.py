@@ -914,6 +914,11 @@ def lint_contracts() -> List[Dict[str, Any]]:
     return results
 
 
+def _export_location(code: str) -> str:
+    """Location as written to c0150/c0160: regions and blanks become qx2007."""
+    return code if code and code not in REGION_CODES else "qx2007"
+
+
 def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
     """
     Validate contracts for DORA b_02.02 (ICT services supporting functions) requirements.
@@ -1073,6 +1078,50 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                     }
                 )
                 contract_has_error = True
+
+        # The export keeps one row per b_02.02 primary key; c0170/c0180 of the others are dropped.
+        rows = {}
+        for solution in contract.solutions.all():
+            for function in solution.assets.filter(
+                id__in=business_function_asset_ids, is_business_function=True
+            ):
+                key = (
+                    function.ref_id or str(function.id),
+                    solution.dora_ict_service_type or "",
+                    _export_location(solution.data_location_storage),
+                    _export_location(solution.data_location_processing),
+                )
+                rows.setdefault(key, (function, []))[1].append(solution)
+        for function, solutions in rows.values():
+            if (
+                len(
+                    {
+                        (s.dora_data_sensitiveness, s.dora_reliance_level)
+                        for s in solutions
+                    }
+                )
+                < 2
+            ):
+                continue
+            names = ", ".join(f"'{s.name}'" for s in solutions)
+            results.append(
+                {
+                    "severity": "warning",
+                    "category": "B_02.02 Contracts",
+                    "message": (
+                        f"Solutions {names} on contract '{contract.name}' produce the "
+                        f"same b_02.02 row for function '{function.name}' (same ICT "
+                        f"service type and data locations) but differ in data "
+                        f"sensitiveness or level of reliance. Only one row will be "
+                        f"exported. Set distinct data locations or align these values."
+                    ),
+                    "field": "dora_data_sensitiveness",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
 
         if contract_has_error:
             contracts_with_errors += 1

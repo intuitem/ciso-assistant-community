@@ -274,3 +274,49 @@ class TestLintSolutionsRegionDataLocation(LintSubcontractingChainsBase):
             if "Not applicable" in w["message"]
         ]
         self.assertEqual([w["field"] for w in warnings], ["data_location_storage"])
+
+
+class TestLintB0202KeyCollision(LintSubcontractingChainsBase):
+    def setUp(self):
+        from core.models import Asset
+
+        super().setUp()
+        self.function = Asset.objects.create(
+            name="Payments", folder=self.folder, is_business_function=True
+        )
+        self.other = Solution.objects.create(
+            name="Other Solution",
+            provider_entity=self.direct_provider,
+            dora_ict_service_type="eba_TA:S09",
+        )
+        self.contract.solutions.add(self.other)
+        for solution, location in ((self.solution, "EU"), (self.other, "EEA")):
+            solution.assets.add(self.function)
+            solution.data_location_storage = location
+            solution.dora_data_sensitiveness = "eba_ZZ:x791"
+            solution.save()
+
+    def _collisions(self):
+        from tprm.dora_linter import lint_b_02_02_contracts
+
+        return [
+            w
+            for w in self._warnings(lint_b_02_02_contracts())
+            if "same b_02.02 row" in w["message"]
+        ]
+
+    def test_differing_values_on_same_key_warn(self):
+        self.other.dora_data_sensitiveness = "eba_ZZ:x792"
+        self.other.save()
+        warnings = self._collisions()
+        self.assertEqual(len(warnings), 1)
+        self.assertEqual(warnings[0]["object_id"], str(self.contract.id))
+
+    def test_same_values_on_same_key_do_not_warn(self):
+        self.assertEqual(self._collisions(), [])
+
+    def test_distinct_locations_do_not_warn(self):
+        self.other.data_location_storage = "FR"
+        self.other.dora_data_sensitiveness = "eba_ZZ:x792"
+        self.other.save()
+        self.assertEqual(self._collisions(), [])
