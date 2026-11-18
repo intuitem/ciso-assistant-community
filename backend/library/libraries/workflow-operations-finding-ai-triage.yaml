@@ -10,10 +10,17 @@ description: 'Walks every finding in a findings binder, asks the configured AI p
   WORKFLOW_AI_MAX_CALLS_PER_RUN (50 by default, about 25 findings). Needs an AI provider configured in
   Global settings — without one the AI steps fail and the run stops rather than guessing.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-09-12
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Prüfmappe – KI-Erstbewertung
+    description: |-
+      Durchläuft alle Feststellungen einer Prüfmappe, lässt sie vom konfigurierten KI-Anbieter bewerten und einen Vermerk zur Erstbewertung entwerfen. Anschließend werden Schweregrad und Priorität jeder Feststellung gesetzt. Mit binder_id der gewünschten Prüfmappe ausführen. Das Ausführungsprotokoll erfasst die Anzahl der bearbeiteten Feststellungen. Das Modell wählt nur die Verzweigung aus; Schweregrad und Priorität sind darin als feste Werte hinterlegt. Damit bleibt die maschinell vorgeschlagene Einstufung über die im jeweiligen Schleifendurchlauf gewählte Verzweigung nachvollziehbar. Jede Feststellung erfordert zwei KI-Aufrufe. Der Umfang eines Laufs wird daher durch WORKFLOW_AI_MAX_CALLS_PER_RUN begrenzt (standardmäßig 50, entsprechend etwa 25 Feststellungen). Erfordert einen unter „Globale Einstellungen“ konfigurierten KI-Anbieter. Ohne diesen schlagen die KI-Schritte fehl und der Lauf wird beendet.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-finding-ai-triage:workflow:finding-ai-triage

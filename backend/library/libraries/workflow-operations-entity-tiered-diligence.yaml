@@ -6,10 +6,17 @@ description: 'Routes a new third party by how much you depend on it: a critical 
   and two weeks, everything else gets the core implementation group and six weeks. Set framework_urn to
   the questionnaire you send vendors — leave it empty and the assessments are created without one.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Neue Drittpartei – abgestufte Prüfung
+    description: |-
+      Steuert die Prüfung einer neuen Drittpartei nach dem Grad Ihrer Abhängigkeit: Eine kritische Drittpartei erhält den vollständigen Fragebogen und zwei Wochen Frist; alle anderen erhalten die Kern-Implementierungsgruppe und sechs Wochen. framework_urn auf den Fragebogen setzen, den Sie Anbietern senden. Bleibt die Variable leer, werden die Prüfungen ohne Fragebogen angelegt.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-entity-tiered-diligence:workflow:entity-tiered-diligence
