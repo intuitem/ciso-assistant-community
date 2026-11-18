@@ -248,7 +248,7 @@ FULL_EXPORT_SHEETS = {
     "2 - Base de couples SR OV": [
         ["", "Identification", None, "Évènements redoutés", "Cotation", None],
         ["", "Source de risque", "Objectif visé", None, "Motivation", "Ressources"],
-        ["1", "SR1", "OV1", "• ER1", "Assez motivé", "++"],
+        ["1", "SR1", "OV1", "• ER1", "Assez motivé", ""],
         ["2", "SR1", "OV1", "• ER2", "Assez motivé", "++"],
     ],
     "2 - Échelle de motivation": [
@@ -415,8 +415,24 @@ class TestPerTableArchive:
         assert stakeholder["category_raw"] == "Partenaires"
         assert stakeholder["current_dependency"] == 4
 
-    def test_invalid_archive_is_rejected(self):
+    @pytest.mark.parametrize(
+        "content",
+        [
+            b"not a zip",
+            build_archive({"notes.xlsx": PER_TABLE_EXPORTS["notes.xlsx"]}),
+            build_archive(
+                {
+                    f"{study}/Base de couples SR OV.xlsx": PER_TABLE_EXPORTS[
+                        "Atelier 2/Base de couples SR OV.xlsx"
+                    ]
+                    for study in ("Etude 1", "Etude 2")
+                }
+            ),
+        ],
+        ids=["not_zip", "no_arm_table", "same_table_twice"],
+    )
+    def test_invalid_archive_is_rejected(self, content):
         from data_wizard.arm_helpers import ARMArchiveError
 
         with pytest.raises(ARMArchiveError):
-            process_arm_file(b"not a zip")
+            process_arm_file(content)

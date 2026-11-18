@@ -299,6 +299,7 @@ TABLE_SIGNATURES = [
 ]
 
 MAX_ARCHIVE_SIZE = 50 * 1024 * 1024
+MAX_ARCHIVE_MEMBERS = 100
 
 
 class ARMArchiveError(Exception):
@@ -342,7 +343,10 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
             and m.filename.lower().endswith(".xlsx")
             and not PurePosixPath(m.filename).name.startswith(("._", "~$"))
         ]
-        if sum(m.file_size for m in members) > MAX_ARCHIVE_SIZE:
+        if (
+            len(members) > MAX_ARCHIVE_MEMBERS
+            or sum(m.file_size for m in members) > MAX_ARCHIVE_SIZE
+        ):
             raise ARMArchiveError("Archive is too large")
         for member in members:
             file_name = PurePosixPath(member.filename).name
@@ -361,11 +365,12 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
             rows = list(sheet.iter_rows(values_only=True))
             target_name = SHEET_VARIANTS[key][0]
             if target_name in workbook.sheetnames:
-                target, rows = workbook[target_name], rows[2:]
-            else:
-                target = workbook.create_sheet(target_name)
+                raise ARMArchiveError(f"Table {key} appears more than once")
+            target = workbook.create_sheet(target_name)
             for row in rows:
                 target.append(row or [None])
+    if not workbook.sheetnames:
+        raise ARMArchiveError("No ARM table found")
     return workbook, unrecognized
 
 
@@ -793,26 +798,27 @@ def extract_roto_couples(workbook) -> list[dict]:
 
         feared_events = parse_bullet_list(get_col(row, "feared_events") or "")
         key = (normalize_label(risk_origin), normalize_label(target_objective))
+        retenu = get_col(row, "retained") or ""
+        couple = {
+            "risk_origin": risk_origin.strip(),
+            "target_objective": target_objective.strip(),
+            "motivation": cotation(row, "motivation"),
+            "resources": cotation(row, "resources"),
+            "activity": cotation(row, "activity"),
+            "is_selected": "✔" in str(retenu) or "✓" in str(retenu),
+            "justification": (get_col(row, "justification") or "").strip(),
+            "feared_event_names": feared_events,
+        }
         if key in seen:
-            seen[key]["feared_event_names"] += feared_events
+            existing = seen[key]
+            existing["feared_event_names"] += feared_events
+            existing["is_selected"] = existing["is_selected"] or couple["is_selected"]
+            for field in ("motivation", "resources", "activity", "justification"):
+                existing[field] = existing[field] or couple[field]
             continue
 
-        retenu = get_col(row, "retained") or ""
-        is_selected = "✔" in str(retenu) or "✓" in str(retenu)
-
-        roto_couples.append(
-            {
-                "risk_origin": risk_origin.strip(),
-                "target_objective": target_objective.strip(),
-                "motivation": cotation(row, "motivation"),
-                "resources": cotation(row, "resources"),
-                "activity": cotation(row, "activity"),
-                "is_selected": is_selected,
-                "justification": (get_col(row, "justification") or "").strip(),
-                "feared_event_names": feared_events,
-            }
-        )
-        seen[key] = roto_couples[-1]
+        roto_couples.append(couple)
+        seen[key] = couple
         logger.debug(
             f"[RoTo Extract] Row {row_idx}: ADDED '{risk_origin.strip()}' - '{target_objective.strip()}'"
         )

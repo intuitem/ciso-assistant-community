@@ -7046,7 +7046,9 @@ class LoadFileView(APIView):
                 logger.warning("Invalid ARM archive", error=e)
                 results["failed"] = 1
                 results["errors"].append(
-                    {"error": "The file is not a valid ARM export or zip archive"}
+                    {
+                        "error": "The file is not a valid ARM export. A zip must hold the tables of a single study."
+                    }
                 )
                 return results
 
