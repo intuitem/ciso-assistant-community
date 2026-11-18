@@ -377,6 +377,7 @@ export const AppliedControlDuplicateSchema = z.object({
 export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = z.object({
+	ref_id: z.string().optional(),
 	...NameDescriptionMixin,
 	folder: z.string(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -668,6 +669,7 @@ export const CampaignSchema = z.object({
 });
 
 export const EvidenceSchema = z.object({
+	ref_id: z.string().optional(),
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
 	folder: z.string(),
@@ -741,6 +743,8 @@ export const GeneralSettingsSchema = z.object({
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	evidence_four_eyes: z.boolean().default(false).optional(),
+	auto_ref_id: z.boolean().default(false).optional(),
+	auto_ref_id_prefixes: z.record(z.string(), z.string()).default({}).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	show_get_started: z.boolean().default(true).optional(),
 	personal_folders: z.boolean().default(false).optional(),
@@ -998,6 +1002,7 @@ export const tierSchema = z.object({
 });
 
 export const EntityAssessmentSchema = z.object({
+	ref_id: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),

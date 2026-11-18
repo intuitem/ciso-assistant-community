@@ -100,6 +100,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import UploadedFile
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.base_models import auto_ref_id_enabled
 from core.constants import LEGACY_TTP_LIBRARIES
 from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
@@ -1464,6 +1465,19 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             filterset=GenericFilterSet,
             fields=self.filterset_fields or [],
         )
+
+    def get_object_unfiltered(self):
+        """get_object() without the filter backends.
+
+        For a detail action whose own query parameters share a name with a list
+        filter (``search``, ``id``): get_object() would apply them to the lookup
+        of the object itself. Scoping and object permissions are unchanged."""
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        obj = generics.get_object_or_404(
+            self.get_queryset(), **{self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        )
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     @action(detail=True, name="Get the object's relation neighbourhood")
     def neighborhood(self, request, pk=None):
@@ -7373,7 +7387,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             name=data["name"],
             description=data["description"],
             folder=new_folder,
-            ref_id=applied_control.ref_id,
+            # A copy gets its own number when they are automatic.
+            ref_id=None if auto_ref_id_enabled() else applied_control.ref_id,
             category=applied_control.category,
             csf_function=applied_control.csf_function,
             priority=applied_control.priority,
@@ -8815,7 +8830,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     model = RiskAcceptance
     serializer_class = RiskAcceptanceWriteSerializer
     filterset_class = RiskAcceptanceFilterSet
-    search_fields = ["name", "description", "justification"]
+    search_fields = ["name", "description", "justification", "ref_id"]
 
     def perform_create(self, serializer):
         instance = super().perform_create(serializer)
@@ -12743,6 +12758,8 @@ class EvidenceViewSet(BaseModelViewSet):
     API endpoint that allows evidences to be viewed or edited.
     """
 
+    search_fields = ["name", "description", "ref_id"]
+
     model = Evidence
     filterset_class = EvidenceFilterSet
 
@@ -13711,7 +13728,7 @@ class OrganisationObjectiveViewSet(ExportMixin, BaseModelViewSet):
             name=data["name"],
             description=data["description"],
             folder=new_folder,
-            ref_id=objective.ref_id,
+            ref_id=None if auto_ref_id_enabled() else objective.ref_id,
             observation=objective.observation,
             status=objective.status,
             health=objective.health,
@@ -23843,9 +23860,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         """Options for one object-reference question on this request."""
         from core.object_references import ReferenceError_, options_for
 
-        response = self.get_object()
-        if response is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # `search` narrows the options below, not the request being looked up.
+        response = self.get_object_unfiltered()
         question = Question.objects.filter(
             page__quick_form_id=response.quick_form_id,
             urn=request.query_params.get("question"),

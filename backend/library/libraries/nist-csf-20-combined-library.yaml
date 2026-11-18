@@ -12,7 +12,7 @@ copyright: Threat scenarios and reference controls are original content informed
   NIST SP 800-30 Rev.1, NIST CSF 2.0, and MITRE ATT&CK. NIST CSF 2.0 framework content
   is public domain per NIST policy. MITRE ATT&CK is used under CC BY 4.0. Packaged
   for use with the intuitem/CISO Assistant platform.
-version: 2
+version: 3
 publication_date: 2026-06-14
 provider: NIST CSF
 packager: Paul Flatt
@@ -23,6 +23,12 @@ translations:
       \ supportant le preset de parcours NIST CSF 2.0. D\xE9finit huit sc\xE9narios\
       \ de menaces et trente mesures de r\xE9f\xE9rence align\xE9s sur les sous-cat\xE9\
       gories du CSF 2.0."
+  de:
+    name: NIST CSF 2.0 – Bedrohungen und Maßnahmen für die Journey
+    description: |-
+      Bibliothek mit Bedrohungen und Referenzmaßnahmen für die organisationsbezogene Journey-Vorlage zu NIST CSF 2.0. Sie definiert acht Bedrohungsszenarien zu allen sechs CSF-2.0-Funktionen (Govern, Identify, Protect, Detect, Respond, Recover) und dreißig Referenzmaßnahmen, die den NIST-CSF-2.0-Unterkategorien zugeordnet sind. Grundlage sind NIST SP 800-30 Rev.1 und MITRE ATT&CK.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung der Herausgeber; keine unabhängige menschliche Prüfung. Die deutschen Ergänzungen umfassen die Bibliotheksmetadaten und Bedrohungstexte.
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:function:nist-csf-2.0:rc-gv-01
@@ -534,6 +540,19 @@ objects:
           les et responsabilit\xE9s.\nDocumenter une politique de cybers\xE9curit\xE9\
           \ approuv\xE9e au niveau ex\xE9cutif ou du conseil.\nConduire des revues\
           \ de gouvernance au moins annuellement."
+      de:
+        name: Unzureichende Cybersicherheits-Governance und Rechenschaftspflicht
+        description: Fehlen definierte Cybersicherheitsrollen, Rechenschaftspflichten der Leitung, dokumentierte
+          Richtlinien oder eine organisationsweite Risikomanagementstrategie, führt dies zu unkoordinierten
+          Sicherheitsentscheidungen und unbehandelten Unternehmensrisiken. Sicherheitsinvestitionen passen nicht
+          mehr zu den Geschäftszielen, Compliance-Pflichten werden versäumt und Zuständigkeiten bei der Vorfallbehandlung
+          bleiben unklar. Diese Bedrohung begünstigt Versäumnisse in allen anderen CSF-Funktionen.
+        annotation: Legen Sie Grundsätze der Cybersicherheits-Governance mit Rollen, Zuständigkeiten und Rechenschaftspflichten
+          fest, etwa für CISO, Risikoverantwortliche und Asset-Verantwortliche. Dokumentieren Sie eine organisationsweite
+          Cybersicherheitsrichtlinie und eine Erklärung zum Risikoappetit, die von der Geschäftsleitung oder
+          dem obersten Leitungsorgan genehmigt werden. Richten Sie die Cybersicherheitsstrategie an den Geschäftszielen
+          sowie gesetzlichen und regulatorischen Pflichten aus. Überprüfen Sie die Governance regelmäßig, mindestens
+          jährlich.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-identify
     ref_id: T-ID-01
     name: Unknown or Unmanaged Assets Exploited
@@ -565,6 +584,19 @@ objects:
           \ de d\xE9couverte pour\nidentifier les actifs non g\xE9r\xE9s. Assigner\
           \ des propri\xE9taires d'actifs et d\xE9finir\ndes niveaux de criticit\xE9\
           ."
+      de:
+        name: Ausnutzung unbekannter oder unverwalteter Assets
+        description: Angreifer zielen auf Schatten-IT, unverwaltete Endgeräte, undokumentierte Cloud-Instanzen
+          oder Altsysteme ab, die außerhalb des Asset-Inventars sowie der Schwachstellen- und Patchmanagementprozesse
+          der Organisation liegen. Ohne umfassende Asset-Übersicht kann die Organisation ihre Gefährdung nicht
+          bewerten, keine Maßnahmen anwenden und auf Vorfälle mit nicht erfassten Ressourcen nicht wirksam reagieren.
+          Häufig erfolgt die Ausnutzung über aus dem Internet erreichbare Dienste, vergessene VPNs und unverwaltete
+          SaaS-Konten.
+        annotation: Führen Sie ein umfassendes Asset-Inventar für Hardware, Software, Cloud-Ressourcen, Daten
+          und Abhängigkeiten von Dritten, abgestimmt auf ID.AM. Binden Sie Erkennungswerkzeuge wie Netzwerkscans
+          oder Cloud-Asset-Management ein, um unverwaltete Assets zu finden. Benennen Sie Asset-Verantwortliche
+          und legen Sie Kritikalitätsstufen fest. Berücksichtigen Sie die Erkennung von Schatten-IT in regelmäßigen
+          Risikobewertungen.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-phishing
     ref_id: T-PR-01
     name: Credential Theft via Phishing or Social Engineering
@@ -598,6 +630,19 @@ objects:
           \ des contr\xF4les anti-hame\xE7onnage\npour la messagerie (DMARC, DKIM,\
           \ SPF). Conduire des simulations de phishing et des\nformations de sensibilisation\
           \ bas\xE9es sur les r\xF4les."
+      de:
+        name: Zugangsdaten-Diebstahl durch Phishing oder Social Engineering
+        description: Beschäftigte oder privilegierte Nutzer werden durch Phishing-E-Mails, Spear-Phishing, Smishing
+          oder sprachbasiertes Social Engineering dazu verleitet, Zugangsdaten offenzulegen, betrügerische MFA-Anfragen
+          zu bestätigen (MFA Fatigue) oder Schadcode auszuführen. Kompromittierte Zugangsdaten verschaffen Angreifern
+          authentisierten Zugriff auf E-Mail, Kollaborationsplattformen, Geschäftsanwendungen und Identitätssysteme.
+          Dabei werden Schutzmaßnahmen am Netzwerkübergang oft vollständig umgangen.
+        annotation: Setzen Sie phishingresistente MFA, etwa FIDO2/Passkeys, für alle Nutzer durch und priorisieren
+          Sie privilegierte Konten und Fernzugriffskonten. Verwenden Sie E-Mail-Filter mit Phishing-Schutz (DMARC,
+          DKIM, SPF). Führen Sie regelmäßig Phishing-Simulationen und rollenbezogene Sicherheitsschulungen durch.
+          Nutzen Sie Richtlinien für bedingten Zugriff, um Zugriffe von unverwalteten Geräten und ungewöhnlichen
+          Standorten einzuschränken. Überwachen Sie Identitätsprotokolle auf zeitlich unmögliche Standortwechsel
+          und auffällige Anmeldemuster.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-vuln
     ref_id: T-PR-02
     name: Exploitation of Unpatched Software or Systems
@@ -632,6 +677,18 @@ objects:
           \ des d\xE9lais de correction\nd\xE9finis selon la criticit\xE9. Utiliser\
           \ des outils d'analyse automatis\xE9s et des flux\nde renseignement sur\
           \ les menaces pour identifier les CVE activement exploit\xE9es."
+      de:
+        name: Ausnutzung ungepatchter Software oder Systeme
+        description: Angreifer nutzen öffentlich bekannte Schwachstellen (CVEs) in ungepatchten Betriebssystemen,
+          Geschäftsanwendungen, Netzwerkgeräten oder aus dem Internet erreichbaren Diensten aus, um erstmals
+          Zugang zu erlangen, Berechtigungen auszuweiten oder sich lateral zu bewegen. Dies kann opportunistisch
+          durch automatisierte Scans oder gezielt erfolgen. Ungepatchte Schwachstellen in aus dem Internet erreichbaren
+          Assets zählen zu den häufigsten Eintrittswegen bei Ransomware-Angriffen und Datenkompromittierungen.
+        annotation: Richten Sie ein Schwachstellenmanagement mit nach Kritikalität festgelegten Patchfristen
+          ein, beispielsweise 48 Stunden für kritische CVEs und 14 Tage für hohe Kritikalität. Priorisieren
+          Sie aus dem Internet erreichbare und privilegierte Systeme. Nutzen Sie automatisierte Schwachstellenscanner
+          und Bedrohungsinformationen, um aktiv ausgenutzte CVEs zu identifizieren. Setzen Sie Anwendungsfreigabelisten
+          und Vorgaben zur Systemhärtung ein, um die ausnutzbare Angriffsfläche zu verringern.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-protect-supplychain
     ref_id: T-PR-03
     name: Supply Chain or Third-Party Compromise
@@ -667,6 +724,20 @@ objects:
           valuations de risque.\nAppliquer le principe du moindre privil\xE8ge pour\
           \ tous les acc\xE8s tiers. Surveiller\nles connexions tierces et examiner\
           \ les obligations de notification dans les contrats."
+      de:
+        name: Kompromittierung der Lieferkette oder Dritter
+        description: Ein vertrauenswürdiger Anbieter, Managed Service Provider (MSP), eine SaaS-Plattform oder
+          ein Softwarelieferant wird kompromittiert und eröffnet Angreifern einen legitimen, vertrauenswürdigen
+          Zugang zu Systemen, Daten oder Netzwerken der Organisation. Lieferkettenangriffe können Softwareaktualisierungen,
+          gemeinsam verwendete Fernzugangsdaten oder API-Integrationen ausnutzen. Von MSPs bereitgestellte Werkzeuge
+          mit umfassenden administrativen Zugriffsrechten stellen einen besonders risikoreichen Angriffsweg
+          dar.
+        annotation: Führen Sie ein Register kritischer Lieferanten und Abhängigkeiten von Dritten mit zugehörigen
+          Risikoeinstufungen. Bewerten Sie die Sicherheit von Lieferanten entsprechend deren Zugriffsrechten
+          und Kritikalität. Wenden Sie das Prinzip der geringsten Berechtigungen auf alle Zugriffe Dritter an
+          und vermeiden Sie dauerhafte privilegierte Lieferantenzugriffe. Überwachen Sie Verbindungen zu Dritten
+          und prüfen Sie vertragliche Pflichten der Lieferanten zur Vorfallmeldung. Abonnieren Sie Sicherheitshinweise
+          der Softwareanbieter und reagieren Sie zügig auf Meldungen über kompromittierte Lieferketten.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-detect-lateral
     ref_id: T-DE-01
     name: Undetected Intrusion and Lateral Movement
@@ -703,6 +774,20 @@ objects:
           \ des capacit\xE9s SIEM/XDR avec\ndes r\xE8gles de d\xE9tection couvrant\
           \ les anomalies d'authentification et les techniques\nde mouvement lat\xE9\
           ral connues. Mettre en \u0153uvre la segmentation r\xE9seau."
+      de:
+        name: Unentdecktes Eindringen und laterale Bewegung
+        description: Nach dem ersten Eindringen bleibt ein Angreifer dauerhaft präsent und bewegt sich über
+          längere Zeit, oft Wochen oder Monate, zwischen internen Systemen, ohne erkannt zu werden. Während
+          dieser Verweildauer erweitert er seine Berechtigungen, erkundet die Umgebung, richtet weitere Mechanismen
+          für dauerhaften Zugriff ein und schleust Daten aus. Lückenhafte Protokollierung, fehlende zentrale
+          Protokollkorrelation oder fehlende Verhaltenserkennung erhöhen die Verweildauer und die Auswirkungen
+          einer Kompromittierung erheblich.
+        annotation: Setzen Sie zentrale Protokollsammlung und SIEM-/XDR-Funktionen mit Erkennungsregeln für
+          Authentisierungsanomalien, ungewöhnliche interne Zugriffsmuster und bekannte Techniken der lateralen
+          Bewegung ein. Protokollieren Sie Aktivitäten von Endgeräten, Identitätssystemen, Netzwerken und Cloud-Diensten
+          umfassend und mit ausreichender Aufbewahrungsdauer; empfohlen sind mindestens 12 Monate. Begrenzen
+          Sie die Ausbreitung durch Netzwerksegmentierung. Führen Sie regelmäßig Threat Hunting durch und prüfen
+          Sie die Erkennungsabdeckung anhand der für Ihre Branche relevanten MITRE-ATT&CK-Techniken.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-respond-ransomware
     ref_id: T-RS-01
     name: Ransomware Deployment and Business Disruption
@@ -741,6 +826,21 @@ objects:
           \ les sc\xE9narios de\nran\xE7ongiciel. Maintenir des sauvegardes hors ligne\
           \ ou immuables test\xE9es contre les\nRTO/RPO d\xE9finis. Mettre en \u0153\
           uvre des contr\xF4les EDR et de contr\xF4le des applications."
+      de:
+        name: Ransomware-Einsatz und Betriebsunterbrechung
+        description: Nach einer ersten Kompromittierung, typischerweise durch Phishing, ungepatchte Schwachstellen
+          oder kompromittierte Fernzugänge, wird Ransomware auf Endgeräten, Servern und gemeinsam genutzten
+          Speichersystemen verbreitet. Sie verschlüsselt geschäftskritische Daten, kann sensible Informationen
+          zur doppelten Erpressung ausschleusen und verursacht erhebliche Betriebsstörungen. Ohne getesteten
+          Vorfallreaktionsplan und widerstandsfähige Backups kann die Wiederherstellung Tage bis Wochen dauern
+          und erhebliche finanzielle Schäden sowie Reputationsschäden verursachen.
+        annotation: Erstellen, dokumentieren und testen Sie einen Vorfallreaktionsplan für Ransomware-Szenarien
+          einschließlich Handlungsanleitungen zur Eindämmung, Beseitigung und Kommunikation. Legen Sie Eskalationswege
+          zur Geschäftsleitung und Rechtsabteilung vorab fest. Halten Sie Offline- oder unveränderliche Backups
+          aller kritischen Systeme und Daten vor und testen Sie diese anhand definierter RTO-/RPO-Ziele. Setzen
+          Sie Ransomware-Schutz wie EDR, Anwendungskontrolle und geschützte Backup-Zugriffe um. Registrieren
+          Sie sich hinsichtlich Vorfallmeldepflichten bei den zuständigen nationalen Cybersicherheitsstellen,
+          etwa CERT NZ oder ACSC.
   - urn: urn:intuitem:risk:threat:nist-csf-2.0:t-recover-bcdr
     ref_id: T-RC-01
     name: Failure to Recover from a Significant Cyber Incident
@@ -777,6 +877,20 @@ objects:
           \ en \u0153uvre une strat\xE9gie\nde sauvegarde 3-2-1. Tester les proc\xE9\
           dures de restauration au moins annuellement.\nConduire des exercices sur\
           \ table simulant la reprise apr\xE8s un incident de ran\xE7ongiciel."
+      de:
+        name: Fehlgeschlagene Wiederherstellung nach schwerem Cybervorfall
+        description: Unzureichende, ungetestete oder undokumentierte Backup- und Wiederherstellungsverfahren
+          führen nach einem schweren Cybervorfall zu verlängerten Ausfallzeiten, dauerhaftem Datenverlust oder
+          fehlgeschlagener Wiederherstellung. Ursachen können nicht gegen Ransomware-Verschlüsselung isolierte
+          Backups, fehlende Wiederanlaufanleitungen, nicht definierte RTO-/RPO-Ziele, fehlende getestete Geschäftsfortführungspläne
+          oder zu wenig Personal sein, das die Wiederherstellungsverfahren unter Vorfallbedingungen beherrscht.
+        annotation: 'Definieren und dokumentieren Sie RTO- und RPO-Ziele für alle kritischen Systeme und Daten-Assets.
+          Setzen Sie eine 3-2-1-Backup-Strategie um: drei Kopien, zwei Medienarten und eine Kopie außer Haus
+          oder offline. Testen Sie die Wiederherstellung aus Backups mindestens jährlich sowie nach wesentlichen
+          Infrastrukturänderungen. Erstellen und pflegen Sie Geschäftsfortführungs- und Wiederanlaufpläne für
+          Cybervorfälle. Führen Sie Planspiele zur Wiederherstellung nach Ransomware oder zerstörerischen Angriffen
+          durch. Stellen Sie sicher, dass Wiederherstellungsverfahren bei einem netzwerkweiten Vorfall offline
+          zugänglich sind.'
   framework:
     urn: urn:intuitem:risk:framework:nist-csf-2.0-journey
     ref_id: NIST-CSF-2.0-journey
