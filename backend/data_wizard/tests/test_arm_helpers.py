@@ -246,10 +246,18 @@ FULL_EXPORT_SHEETS = {
         ["1", "5.1", "Politiques", "", "", ""],
     ],
     "2 - Base de couples SR OV": [
-        ["", "Identification", None, "Évènements redoutés", "Cotation", None],
+        [
+            "",
+            "Identification",
+            None,
+            "Évènements redoutés",
+            "Cotation",
+            None,
+            "Justification",
+        ],
         ["", "Source de risque", "Objectif visé", None, "Motivation", "Ressources"],
         ["1", "SR1", "OV1", "• ER1", "Assez motivé", ""],
-        ["2", "SR1", "OV1", "• ER2", "Assez motivé", "++"],
+        ["2", "SR1", "OV1", "• ER2", "Assez motivé", "++", 2026],
     ],
     "2 - Échelle de motivation": [
         ["", "✓/❒", "Niveau", "Nom"],
@@ -324,6 +332,7 @@ class TestFullExportLayout:
     def test_roto_cotation_from_scale_or_plus_signs(self, data):
         [roto] = data["roto_couples"]
         assert (roto["motivation"], roto["resources"]) == (3, 2)
+        assert roto["justification"] == "2026"
 
     def test_elementary_actions(self, data):
         assert [a["ref_id"] for a in data["elementary_actions"]] == ["AE1"]
@@ -428,8 +437,11 @@ class TestPerTableArchive:
                     for study in ("Etude 1", "Etude 2")
                 }
             ),
+            build_archive(
+                {f"notes{i}.xlsx": PER_TABLE_EXPORTS["notes.xlsx"] for i in range(101)}
+            ),
         ],
-        ids=["not_zip", "no_arm_table", "same_table_twice"],
+        ids=["not_zip", "no_arm_table", "same_table_twice", "too_many_files"],
     )
     def test_invalid_archive_is_rejected(self, content):
         from data_wizard.arm_helpers import ARMArchiveError

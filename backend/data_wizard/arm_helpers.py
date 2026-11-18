@@ -362,12 +362,11 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
             if key is None:
                 unrecognized.append(file_name)
                 continue
-            rows = list(sheet.iter_rows(values_only=True))
             target_name = SHEET_VARIANTS[key][0]
             if target_name in workbook.sheetnames:
                 raise ARMArchiveError(f"Table {key} appears more than once")
             target = workbook.create_sheet(target_name)
-            for row in rows:
+            for row in sheet.iter_rows(values_only=True):
                 target.append(row or [None])
     if not workbook.sheetnames:
         raise ARMArchiveError("No ARM table found")
@@ -806,7 +805,7 @@ def extract_roto_couples(workbook) -> list[dict]:
             "resources": cotation(row, "resources"),
             "activity": cotation(row, "activity"),
             "is_selected": "✔" in str(retenu) or "✓" in str(retenu),
-            "justification": (get_col(row, "justification") or "").strip(),
+            "justification": str(get_col(row, "justification") or "").strip(),
             "feared_event_names": feared_events,
         }
         if key in seen:
