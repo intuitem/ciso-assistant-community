@@ -121,7 +121,7 @@
 			onConfirm(selectedValues);
 		} else {
 			// "--" means "unset": send undefined so the backend receives null
-			onConfirm(selectedValue === '--' ? undefined : selectedValue);
+			onConfirm(selectedValue === '--' && !inputType ? undefined : selectedValue);
 		}
 		parent.onClose();
 	}

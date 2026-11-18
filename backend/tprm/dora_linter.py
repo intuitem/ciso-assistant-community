@@ -7,7 +7,7 @@ It checks for mandatory and recommended fields before generating the actual repo
 
 from typing import List, Dict, Any
 from tprm.models import Entity, Contract, Solution, SolutionSubcontractor
-from tprm.dora_export import IDENTIFIER_PRIORITY, get_entity_identifier
+from tprm.dora_export import IDENTIFIER_PRIORITY, ga_location, get_entity_identifier
 from core.models import Asset
 from core.constants import REGION_CODES
 from django.db.models import Q
@@ -914,11 +914,6 @@ def lint_contracts() -> List[Dict[str, Any]]:
     return results
 
 
-def _export_location(code: str) -> str:
-    """Location as written to c0150/c0160: regions and blanks become qx2007."""
-    return code if code and code not in REGION_CODES else "qx2007"
-
-
 def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
     """
     Validate contracts for DORA b_02.02 (ICT services supporting functions) requirements.
@@ -1050,14 +1045,21 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
         # c0060 is a PK/typed dimension in b_02.02 (Nullable=No per the DORA
         # data model) and must not be empty per OneGate protocol §4.6. Solutions
         # without it produce an empty key column that the XBRL filer rejects.
+        # The export keeps one row per b_02.02 primary key; c0170/c0180 of the others are dropped.
+        rows = {}
         for solution in contract.solutions.all():
-            if business_function_asset_ids:
-                has_biz_fn = solution.assets.filter(
-                    id__in=business_function_asset_ids, is_business_function=True
-                ).exists()
-            else:
-                has_biz_fn = solution.assets.filter(is_business_function=True).exists()
-            if not has_biz_fn:
+            functions = solution.assets.filter(
+                id__in=business_function_asset_ids, is_business_function=True
+            )
+            for function in functions:
+                key = (
+                    function.ref_id or str(function.id),
+                    solution.dora_ict_service_type or "",
+                    ga_location(solution.data_location_storage),
+                    ga_location(solution.data_location_processing),
+                )
+                rows.setdefault(key, (function, []))[1].append(solution)
+            if not functions:
                 continue
             if not solution.dora_ict_service_type:
                 results.append(
@@ -1079,19 +1081,6 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                 )
                 contract_has_error = True
 
-        # The export keeps one row per b_02.02 primary key; c0170/c0180 of the others are dropped.
-        rows = {}
-        for solution in contract.solutions.all():
-            for function in solution.assets.filter(
-                id__in=business_function_asset_ids, is_business_function=True
-            ):
-                key = (
-                    function.ref_id or str(function.id),
-                    solution.dora_ict_service_type or "",
-                    _export_location(solution.data_location_storage),
-                    _export_location(solution.data_location_processing),
-                )
-                rows.setdefault(key, (function, []))[1].append(solution)
         for function, solutions in rows.values():
             if (
                 len(

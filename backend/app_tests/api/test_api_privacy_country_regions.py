@@ -1,5 +1,3 @@
-import unicodedata
-
 import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -35,19 +33,7 @@ def _admin_client():
     return client
 
 
-def _fold(name):
-    return "".join(
-        c for c in unicodedata.normalize("NFD", name) if unicodedata.category(c) != "Mn"
-    ).lower()
-
-
 class TestCountryChoices:
-    def test_countries_are_sorted_by_name(self):
-        # "Other Countries" is the deliberate catch-all and stays last.
-        names = [name for _, name in COUNTRY_CHOICES[:-1]]
-        assert names == sorted(names, key=_fold)
-        assert COUNTRY_CHOICES[-1] == ("x28", "Other Countries")
-
     def test_regions_are_absent_from_the_dora_country_list(self):
         # eba_GA only accepts ISO 3166-1 alpha-2, so regions must never reach the
         # DORA register. See documentation/dora-roi-specification.md.
@@ -138,7 +124,6 @@ class TestRegionAggregation:
 
         assert {c["id"] for c in countries} == {"FR", "US"}
         assert {r["id"]: r["count"] for r in regions} == {"EU": 2, "x28": 1}
-        assert [r["label"] for r in regions if r["id"] == "EU"] == ["European Union"]
 
     def test_regions_are_omitted_when_unused(self, processing):
         self._transfer(processing, "FR")

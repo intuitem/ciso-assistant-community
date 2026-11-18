@@ -497,14 +497,14 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         choices=DATA_LOCATION_CHOICES,
         blank=True,
         verbose_name=_("Location of data at rest"),
-        help_text=_("Country where data is stored"),
+        help_text=_("Country or region where data is stored"),
     )
     data_location_processing = models.CharField(
         max_length=3,
         choices=DATA_LOCATION_CHOICES,
         blank=True,
         verbose_name=_("Location of data processing"),
-        help_text=_("Country where data is processed/managed"),
+        help_text=_("Country or region where data is processed/managed"),
     )
     dora_data_sensitiveness = models.CharField(
         max_length=20,

@@ -155,6 +155,11 @@ def get_provider_chain(entity):
     return chain
 
 
+def ga_location(code: str) -> str:
+    """c0150/c0160 value: regions and blanks are reported as Not applicable."""
+    return f"eba_GA:{code}" if code and code not in REGION_CODES else "eba_GA:qx2007"
+
+
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
 ) -> tuple[str, str, str]:
@@ -662,27 +667,11 @@ def generate_b_02_02_ict_services(
                     "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
                 )
 
-                # c0150: Location of data at rest
-                data_location_storage = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
-                )
-                if (
-                    solution.data_location_storage
-                    and solution.data_location_storage not in REGION_CODES
-                ):
-                    data_location_storage = f"eba_GA:{solution.data_location_storage}"
-
-                # c0160: Location of data processing
-                data_location_processing = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
-                )
-                if (
+                # c0150/c0160: key fields, cannot be empty (Rule 805)
+                data_location_storage = ga_location(solution.data_location_storage)
+                data_location_processing = ga_location(
                     solution.data_location_processing
-                    and solution.data_location_processing not in REGION_CODES
-                ):
-                    data_location_processing = (
-                        f"eba_GA:{solution.data_location_processing}"
-                    )
+                )
 
                 # c0170: Data sensitiveness
                 data_sensitiveness = solution.dora_data_sensitiveness or ""

@@ -41,7 +41,7 @@
 	);
 
 	// Regions and "Other Countries" have no feature in the map topology.
-	type Region = { id: string; label: string; count: number; color: string };
+	type Region = { id: string; count: number; color: string };
 	const regions: Region[] = $derived(data.data.country_regions ?? []);
 
 	function regionLabel(region: Region): string {
@@ -53,7 +53,7 @@
 			case 'x28':
 				return m.otherCountries();
 			default:
-				return region.label;
+				return region.id;
 		}
 	}
 </script>

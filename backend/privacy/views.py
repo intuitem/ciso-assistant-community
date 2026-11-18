@@ -321,11 +321,9 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 
     # The map topology is keyed on ISO alpha-2, so regions and "Other Countries"
     # have no feature to paint; surface their counts next to it instead.
-    labels = dict(PRIVACY_COUNTRY_CHOICES)
     regions = [
         {
             "id": code,
-            "label": labels.get(code, code),
             "count": country_counts[code],
             "color": "#A7CC74" if code in GDPR_INTERNAL_LOCATIONS else "#F4B83D",
         }
