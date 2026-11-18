@@ -347,3 +347,92 @@ def test_glpi_cannot_be_linked_to_objects_it_does_not_sync(admin_client, root_fo
         )
     assert response.status_code == 400, response.content
     get_client.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "provider, credentials, host_key, secret_key",
+    [
+        ("jira", JIRA_CREDENTIALS, "server_url", "api_token"),
+        (
+            "servicenow",
+            {
+                "instance_url": "https://example.service-now.com",
+                "username": "sync",
+                "password": "pw",
+            },
+            "instance_url",
+            "password",
+        ),
+    ],
+)
+def test_saved_secret_stays_with_its_connection(
+    admin_client, root_folder, provider, credentials, host_key, secret_key
+):
+    config = IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name=provider),
+        folder=root_folder,
+        credentials=dict(credentials),
+        settings={"table_name": "incident"},
+    )
+    url = f"{CONFIGS_URL}{config.id}/"
+    shown = {k: v for k, v in credentials.items() if k != secret_key}
+
+    def save(**changes):
+        return admin_client.patch(
+            url,
+            {"credentials": {**shown, **changes}, "settings": config.settings},
+            format="json",
+        )
+
+    # What the settings page sends when nothing about the connection changed.
+    assert save().status_code == 200
+
+    response = save(**{host_key: "https://elsewhere.example"})
+    assert response.status_code == 400, response.content
+    assert "credentials" in response.json()
+    config.refresh_from_db()
+    assert config.credentials == credentials
+
+    moved = {host_key: "https://elsewhere.example", secret_key: "new-secret"}
+    assert save(**moved).status_code == 200
+    config.refresh_from_db()
+    assert config.credentials == {**credentials, **moved}
+
+
+def test_glpi_saved_secrets_stay_with_their_connection(admin_client, root_folder):
+    stored = {
+        "instance_url": "https://glpi.example.com",
+        "client_id": "cid",
+        "client_secret": "csecret",
+        "username": "sync",
+        "password": "pw",
+    }
+    config = IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name="glpi"),
+        folder=root_folder,
+        credentials=dict(stored),
+        settings={"table_name": "Ticket"},
+    )
+    url = f"{CONFIGS_URL}{config.id}/"
+    shown = {k: stored[k] for k in ("instance_url", "client_id", "username")}
+
+    def save(**changes):
+        return admin_client.patch(
+            url,
+            {"credentials": {**shown, **changes}, "settings": config.settings},
+            format="json",
+        )
+
+    assert save().status_code == 200
+    elsewhere = {"instance_url": "https://elsewhere.example"}
+
+    # Neither secret, then only one of the two: the other would follow along.
+    assert save(**elsewhere).status_code == 400
+    assert save(**elsewhere, password="new-pw").status_code == 400
+    config.refresh_from_db()
+    assert config.credentials == stored
+
+    moved = {**elsewhere, "client_secret": "new-secret", "password": "new-pw"}
+    assert save(**moved).status_code == 200
+    config.refresh_from_db()
+    assert config.credentials == {**stored, **moved}

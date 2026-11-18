@@ -28,6 +28,25 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
 SECRET_CREDENTIAL_KEYS = ("api_token", "password", "client_secret")
 
 
+def with_stored_credentials(submitted: dict, stored: dict | None, keys) -> dict | None:
+    """``submitted`` completed with the stored values of the ``keys`` it leaves
+    empty, or None when that would send a stored value to another connection.
+
+    A stored value is only reusable for the connection it was stored for: every
+    other submitted value must match what is stored, including keys the row
+    lacks or stores empty, otherwise an empty stored host would let a stored
+    secret be sent to any host. Empty stored values (e.g. a stale
+    ``password: null`` written by older saves) are not secrets to reuse and pin
+    nothing."""
+    stored = {k: v for k, v in (stored or {}).items() if v}
+    reused = {k for k in keys if k in stored and not submitted.get(k)}
+    if reused and any(
+        v != stored.get(k) for k, v in submitted.items() if k not in reused
+    ):
+        return None
+    return {**submitted, **{k: stored[k] for k in reused}}
+
+
 class ConnectionTestSerializer(serializers.Serializer):
     provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
@@ -63,23 +82,13 @@ class ConnectionTestSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"provider": "Provider does not match configuration."}
                 )
-            # Empty stored values (e.g. a stale ``password: null`` written by
-            # older saves) are not secrets to replay and must not pin the test.
-            stored = {k: v for k, v in (config.credentials or {}).items() if v}
-            # a stored secret is only replayable to the connection it was stored
-            # for: every submitted key must match what is stored, including keys
-            # the row lacks or stores empty, otherwise an empty stored host would
-            # let the stored secret be replayed to any host.
-            backfilled = {k for k in stored if not credentials.get(k)}
-            if backfilled and any(
-                v != stored.get(k)
-                for k, v in credentials.items()
-                if k not in backfilled
-            ):
+            # The test may leave any stored value out, not only the secrets.
+            stored = config.credentials or {}
+            credentials = with_stored_credentials(credentials, stored, stored)
+            if credentials is None:
                 raise serializers.ValidationError(
                     {"credentials": "reenterSecretToTestModifiedConnection"}
                 )
-            credentials.update({k: stored[k] for k in backfilled})
 
         is_valid, errors = IntegrationRegistry.validate_configuration(
             provider,
@@ -239,10 +248,16 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         # credentials and breaks the connection-test secret pinning.
         credentials = dict(data.get("credentials") or {})
         if config:
-            stored = config.credentials or {}
-            for key in SECRET_CREDENTIAL_KEYS:
-                if not credentials.get(key) and stored.get(key):
-                    credentials[key] = stored[key]
+            credentials = with_stored_credentials(
+                credentials, config.credentials, SECRET_CREDENTIAL_KEYS
+            )
+            if credentials is None:
+                raise serializers.ValidationError(
+                    {
+                        "credentials": "The connection details changed. "
+                        "Enter the secret again to save them."
+                    }
+                )
         if "credentials" in data:
             data["credentials"] = credentials
 

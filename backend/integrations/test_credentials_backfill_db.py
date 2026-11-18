@@ -40,16 +40,28 @@ def jira_config(db):
     )
 
 
-def _save(config, credentials):
-    serializer = IntegrationConfigurationSerializer(
+def _serializer(config, credentials):
+    return IntegrationConfigurationSerializer(
         config,
         data={"credentials": credentials, "settings": {"table_name": "PROJ:Task"}},
         partial=True,
     )
+
+
+def _save(config, credentials):
+    serializer = _serializer(config, credentials)
     assert serializer.is_valid(), serializer.errors
     saved = serializer.save()
     saved.refresh_from_db()
     return saved
+
+
+def _refused(config, credentials):
+    serializer = _serializer(config, credentials)
+    assert not serializer.is_valid()
+    assert "credentials" in serializer.errors
+    config.refresh_from_db()
+    return config
 
 
 def _test_connection(config, api_token):
@@ -104,3 +116,68 @@ def test_empty_token_still_replays_the_stored_one_on_older_rows(jira_config):
     jira_config.save(update_fields=["credentials"])
     out = _test_connection(jira_config, "")
     assert out["credentials"]["api_token"] == "OLD"
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        {"server_url": "https://elsewhere.example"},
+        {"email": "someone@elsewhere.example"},
+    ],
+)
+def test_save_does_not_carry_the_stored_token_to_another_connection(
+    jira_config, changed
+):
+    submitted = {"server_url": STORED["server_url"], "email": STORED["email"]}
+    config = _refused(jira_config, {**submitted, **changed})
+    assert config.credentials == STORED
+
+    # Same request with the secret left empty rather than omitted.
+    _refused(jira_config, {**submitted, **changed, "api_token": ""})
+
+
+def test_save_to_another_connection_with_its_own_secret(jira_config):
+    moved = {
+        "server_url": "https://elsewhere.example",
+        "email": STORED["email"],
+        "api_token": "NEW",
+    }
+    assert _save(jira_config, moved).credentials == moved
+
+
+def test_save_cannot_point_a_row_without_a_host_at_one(jira_config):
+    """An empty stored host must not let the stored token go to any host."""
+    jira_config.credentials = {**STORED, "server_url": ""}
+    jira_config.save(update_fields=["credentials"])
+    _refused(
+        jira_config,
+        {"server_url": "https://elsewhere.example", "email": STORED["email"]},
+    )
+
+
+def test_save_keeps_the_stored_secret_on_rows_saved_by_older_versions(jira_config):
+    jira_config.credentials = {**STORED, "password": None}
+    jira_config.save(update_fields=["credentials"])
+    saved = _save(
+        jira_config, {"server_url": STORED["server_url"], "email": STORED["email"]}
+    )
+    assert saved.credentials["api_token"] == "OLD"
+
+
+def test_one_of_two_stored_secrets_cannot_follow_a_new_host(jira_config):
+    """A provider with two secrets: supplying one does not release the other."""
+    jira_config.credentials = {
+        "instance_url": "https://victim.example",
+        "username": "sync",
+        "password": "OLD-PASSWORD",
+        "api_token": "OLD-TOKEN",
+    }
+    jira_config.save(update_fields=["credentials"])
+    _refused(
+        jira_config,
+        {
+            "instance_url": "https://elsewhere.example",
+            "username": "sync",
+            "password": "NEW-PASSWORD",
+        },
+    )
