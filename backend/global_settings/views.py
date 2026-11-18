@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 
+from core.base_models import auto_ref_id_models, backfill_auto_ref_ids
 from core.permissions import IsGlobalAdmin
 from core.utils import get_report_timezone, get_report_timezone_choices
 from core.serializers import SerializerFactory
@@ -203,6 +204,16 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             for provider in IntegrationProvider.objects.filter(is_active=True)
         ]
 
+        # Read-only: the prefix table of the settings form lists these.
+        settings.value["auto_ref_id_defaults"] = [
+            {
+                "model": model_name,
+                "label": str(model._meta.verbose_name),
+                "prefix": model.auto_ref_id_prefix,
+            }
+            for model_name, model in sorted(auto_ref_id_models().items())
+        ]
+
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get available languages")
@@ -312,6 +323,19 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 user.save(update_fields=["preferences"])
                 updated += 1
         return Response({"updated": updated, "language": lang})
+
+    @action(detail=True, methods=["post"], name="Fill blank reference IDs")
+    def backfill_ref_ids(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_globalsettings")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=perm, folder=Folder.get_root_folder()
+        ):
+            return Response({"error": "permissionDenied"}, status=403)
+        if not GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL, value__auto_ref_id=True
+        ).exists():
+            return Response({"error": "autoRefIdDisabled"}, status=400)
+        return Response({"updated": backfill_auto_ref_ids()})
 
     @action(detail=True, methods=["post"], name="Force date format for all users")
     def force_date_format(self, request, pk=None):

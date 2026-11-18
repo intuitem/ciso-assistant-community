@@ -9,10 +9,17 @@ description: >
   security exception is opened in draft so the reviewer decides rather than transcribes.
   The workflow never accepts or rejects — that verdict stays human.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-09-08
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Ausnahmeantrag – einordnen und vorbereiten
+    description: |-
+      Ausgearbeitetes Beispiel für die Erstbewertung eingehender Anträge. Nach Einreichung eines Ausnahmeantrags bestimmen die aus seinen Antworten berechneten Ergebnisse das weitere Vorgehen: Bei hoher Exposition werden eine kurze Frist gesetzt und der Antrag eskaliert. Bei geringer Exposition erfolgt keine solche Anpassung. In beiden Fällen wird die Sicherheitsausnahme als Entwurf angelegt, damit der Prüfer entscheiden kann und die Angaben nicht übertragen muss. Der Workflow nimmt Anträge weder an noch lehnt er sie ab; diese Entscheidung bleibt einer Person vorbehalten.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-derogation-triage:workflow:derogation-triage
