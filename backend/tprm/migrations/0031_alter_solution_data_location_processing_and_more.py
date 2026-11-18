@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0029_tier_compliance_target"),
+        ("tprm", "0030_entityassessment_ref_id"),
     ]
 
     operations = [
