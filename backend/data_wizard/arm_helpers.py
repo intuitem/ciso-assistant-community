@@ -338,7 +338,7 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
     workbook = Workbook()
     workbook.remove(workbook.active)
     unrecognized = []
-    project_tables = set()
+    table_kinds = {}
     try:
         archive = ZipFile(BytesIO(file_content))
     except BadZipFile as e:
@@ -372,15 +372,15 @@ def workbook_from_archive(file_content: bytes) -> tuple[Workbook, list[str]]:
                 continue
             target_name = SHEET_VARIANTS[key][0]
             is_project = " - projet" in normalize_label(file_name)
+            kinds = table_kinds.setdefault(target_name, set())
+            if is_project in kinds:
+                raise ARMArchiveError("duplicate_table")
+            kinds.add(is_project)
             if target_name in workbook.sheetnames:
-                if is_project == (target_name in project_tables):
-                    raise ARMArchiveError("duplicate_table")
                 if not is_project:
                     continue
                 workbook.remove(workbook[target_name])
             target = workbook.create_sheet(target_name)
-            if is_project:
-                project_tables.add(target_name)
             for row in sheet.iter_rows(values_only=True):
                 target.append(row or [None])
     if not workbook.sheetnames:
@@ -685,7 +685,7 @@ def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dic
             normalize_label(name),
             {
                 "name": name.strip(),
-                "justification": justification,
+                "justification": [],
                 "gravity": gravity,
                 "asset_names": [],
                 "is_selected": is_selected,
@@ -693,14 +693,15 @@ def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dic
         )
         event["gravity"] = max(event["gravity"], gravity)
         event["is_selected"] = event["is_selected"] or is_selected
-        if justification and justification not in event["justification"].split("\n"):
-            event["justification"] = (
-                f"{event['justification']}\n{justification}".strip()
-            )
+        if justification and justification not in event["justification"]:
+            event["justification"].append(justification)
         for asset_name in asset_names(get_col(row, "business_values")):
             if asset_name not in event["asset_names"]:
                 event["asset_names"].append(asset_name)
-    return list(feared_events.values())
+    return [
+        {**event, "justification": "\n".join(event["justification"])}
+        for event in feared_events.values()
+    ]
 
 
 def extract_applied_controls(workbook) -> list[dict]:
@@ -1077,7 +1078,8 @@ def extract_elementary_actions(workbook) -> list[dict]:
     elementary_actions = []
     for row in get_sheet_rows(workbook, "elementary_actions"):
         name = get_col(row, "name")
-        if not name or "✔" not in str(get_col(row, "selected_check") or ""):
+        selected_value = str(get_col(row, "selected_check") or "")
+        if not name or ("✔" not in selected_value and "✓" not in selected_value):
             continue
         elementary_actions.append(
             {

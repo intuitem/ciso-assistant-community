@@ -309,6 +309,7 @@ FULL_EXPORT_SHEETS = {
         [],
         ["1", "✔", "Hameçonnage", "AE1", ""],
         ["2", "", "Catalogue", "AE2", ""],
+        ["3", "✓", "Rebond", "AE3", ""],
     ],
 }
 
@@ -348,7 +349,7 @@ class TestFullExportLayout:
         assert roto["justification"] == "2026"
 
     def test_elementary_actions(self, data):
-        assert [a["ref_id"] for a in data["elementary_actions"]] == ["AE1"]
+        assert [a["ref_id"] for a in data["elementary_actions"]] == ["AE1", "AE3"]
 
 
 PER_TABLE_EXPORTS = {
@@ -359,11 +360,25 @@ PER_TABLE_EXPORTS = {
         ["2", "✔", "Long" * 60, "", "Processus", "", ""],
     ],
     "Atelier 1/Base d'évènements redoutés - projet.xlsx": [
-        ["", "✓/❒", "Valeurs métier", "Évènement redouté", "Gravité retenue"],
+        [
+            "",
+            "✓/❒",
+            "Valeurs métier",
+            "Évènement redouté",
+            "Gravité retenue",
+            "Impacts",
+        ],
         [],
-        ["1", "✔", "• Paie", "Fuite de données", "G3 - Grave"],
+        ["1", "✔", "• Paie", "Fuite de données", "G3 - Grave", "Légal\nFinancier"],
         ["2", "", "• Paie", "NA", ""],
-        ["3", "", "• " + "Long" * 60, "Fuite de données", "G2 - Significative"],
+        [
+            "3",
+            "",
+            "• " + "Long" * 60,
+            "Fuite de données",
+            "G2 - Significative",
+            "Légal",
+        ],
     ],
     "Atelier 1/Base de biens supports.xlsx": [
         ["", "Nom", "Abrév.", "Bien support parent"],
@@ -430,6 +445,7 @@ class TestPerTableArchive:
         assert event["gravity"] == 2
         assert event["is_selected"]
         assert event["asset_names"] == ["Paie", ("Long" * 60)[:200]]
+        assert event["justification"] == "Légal\nFinancier\nLégal"
 
     def test_long_asset_name_is_truncated_and_kept_in_description(self, data):
         long_asset = data["primary_assets"][1]
@@ -476,6 +492,21 @@ class TestPerTableArchive:
             (
                 build_archive(
                     {
+                        name: PER_TABLE_EXPORTS[
+                            "Atelier 1/Base de biens supports" + suffix + ".xlsx"
+                        ]
+                        for name, suffix in [
+                            ("a/Base de biens supports.xlsx", ""),
+                            ("b/Base de biens supports - projet.xlsx", " - projet"),
+                            ("c/Base de biens supports.xlsx", ""),
+                        ]
+                    }
+                ),
+                "duplicate_table",
+            ),
+            (
+                build_archive(
+                    {
                         f"notes{i}.xlsx": PER_TABLE_EXPORTS["notes.xlsx"]
                         for i in range(101)
                     }
@@ -483,7 +514,13 @@ class TestPerTableArchive:
                 "too_large",
             ),
         ],
-        ids=["not_zip", "no_arm_table", "same_table_twice", "too_many_files"],
+        ids=[
+            "not_zip",
+            "no_arm_table",
+            "same_table_twice",
+            "same_catalogue_twice",
+            "too_many_files",
+        ],
     )
     def test_invalid_archive_is_rejected(self, content, code):
         from data_wizard.arm_helpers import ARMArchiveError
