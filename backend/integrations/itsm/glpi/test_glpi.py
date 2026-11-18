@@ -459,6 +459,7 @@ def _linked_orchestrator(current):
     orchestrator = GLPIOrchestrator(_configuration())
     orchestrator._is_linked = MagicMock(return_value=True)
     orchestrator._read_current = MagicMock(return_value=current)
+    orchestrator._is_outdated = MagicMock(return_value=False)
     orchestrator.pull_changes = MagicMock(return_value=True)
     orchestrator._handle_remote_deletion = MagicMock(return_value=True)
     return orchestrator
@@ -478,20 +479,43 @@ def test_update_webhook_applies_what_glpi_holds_now():
 
     # A late, replayed or reordered delivery cannot bring old values back.
     orchestrator.pull_changes.assert_called_once_with("4", now)
+    orchestrator._handle_remote_deletion.assert_not_called()
 
 
-def test_delete_webhook_is_checked_against_glpi():
-    item = {"id": 4, "name": "T"}
+@pytest.mark.parametrize("event", ["update", "delete"])
+@pytest.mark.parametrize(
+    "current", [None, {"key": "4", "fields": {"id": 4, "is_deleted": True}}]
+)
+def test_an_item_gone_from_glpi_flags_the_link(event, current):
+    """Purged (None) or in the trash, whichever delivery brings the news."""
+    orchestrator = _linked_orchestrator(current)
 
-    # Trashed or purged: the link is flagged.
-    for current in ({"key": "4", "fields": {"id": 4, "is_deleted": True}}, None):
-        orchestrator = _linked_orchestrator(current)
-        assert orchestrator.handle_webhook_event("delete", {"item": item}) is True
-        orchestrator._handle_remote_deletion.assert_called_once_with("4")
+    assert orchestrator.handle_webhook_event(event, {"item": {"id": 4}}) is True
 
-    # Still there (restored since, or a replayed delivery): nothing to flag.
+    orchestrator._handle_remote_deletion.assert_called_once_with("4")
+    orchestrator.pull_changes.assert_not_called()
+
+
+def test_delete_webhook_for_an_item_that_still_exists_is_ignored():
+    """Restored since, or a replayed delivery."""
     orchestrator = _linked_orchestrator({"key": "4", "fields": {"id": 4}})
-    assert orchestrator.handle_webhook_event("delete", {"item": item}) is True
+
+    assert orchestrator.handle_webhook_event("delete", {"item": {"id": 4}}) is True
+
+    orchestrator._handle_remote_deletion.assert_not_called()
+    orchestrator.pull_changes.assert_not_called()
+
+
+@pytest.mark.parametrize("event", ["update", "delete"])
+def test_nothing_is_done_when_glpi_cannot_be_read_back(event):
+    from .integration import _UNREACHABLE
+
+    orchestrator = _linked_orchestrator(_UNREACHABLE)
+    item = {"id": 4, "name": "Delivered", "date_mod": "2026-11-17T16:05:00+00:00"}
+
+    assert orchestrator.handle_webhook_event(event, {"item": item}) is False
+
+    orchestrator.pull_changes.assert_not_called()
     orchestrator._handle_remote_deletion.assert_not_called()
 
 
@@ -539,10 +563,22 @@ def test_read_item_tells_a_missing_item_from_a_failure(mock_request):
         client.read_item("4")
 
 
-# When GLPI cannot be read back, the delivery is all there is: it is applied
-# unless it is older than what was already synced.
+@patch("integrations.itsm.glpi.client.requests.request")
+@patch("integrations.itsm.glpi.client.requests.post")
+def test_a_failed_token_request_is_not_a_missing_item(mock_post, mock_request):
+    refused = requests.Response()
+    refused.status_code = 404
+    mock_post.return_value = refused
+
+    with pytest.raises(requests.exceptions.RequestException):
+        _client().read_item("4")
+    mock_request.assert_not_called()
+
+
+# Two workers can read the same item back and finish in the other order: a
+# state older than the one already synced is not applied.
 @pytest.mark.parametrize(
-    "synced, incoming, applied",
+    "synced, read_back, applied",
     [
         ("2026-11-17T16:05:00+00:00", "2026-11-17T16:01:47+00:00", False),
         ("2026-11-17T16:01:47+00:00", "2026-11-17T16:01:47+00:00", True),
@@ -553,16 +589,15 @@ def test_read_item_tells_a_missing_item_from_a_failure(mock_request):
         ("2026-11-17 16:05:00", "2026-11-17T16:01:47+00:00", True),
     ],
 )
-def test_unreadable_item_falls_back_to_the_delivery(synced, incoming, applied):
-    from .integration import _UNREACHABLE
-
-    orchestrator = _linked_orchestrator(_UNREACHABLE)
-    item = {"id": 4, "name": "Old name", "date_mod": incoming}
+def test_a_state_older_than_the_synced_one_is_not_applied(synced, read_back, applied):
+    current = {"key": "4", "fields": {"id": 4, "name": "N"}, "updated": read_back}
+    orchestrator = _linked_orchestrator(current)
+    del orchestrator._is_outdated  # the real check
     stored = {"key": "4", "fields": {}, "updated": synced} if synced else None
 
     with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
         lookup = mapping.objects.filter.return_value.values_list.return_value
         lookup.first.return_value = stored
-        assert orchestrator.handle_webhook_event("update", {"item": item}) is True
+        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
 
     assert orchestrator.pull_changes.called is applied

@@ -116,6 +116,11 @@ def parse_schema(document: dict[str, Any]) -> tuple[list, dict, dict]:
     return tables, columns, choices
 
 
+class GLPIAuthenticationError(requests.exceptions.RequestException):
+    """The token request failed. Kept apart from HTTPError so that its status
+    is never read as the answer to the call that needed the token."""
+
+
 class GLPIClient(BaseIntegrationClient):
     """Client for the GLPI high-level REST API (GLPI 11 and later)."""
 
@@ -164,7 +169,13 @@ class GLPIClient(BaseIntegrationClient):
             timeout=30,
             allow_redirects=False,
         )
-        self._raise_for_status(response)
+        try:
+            self._raise_for_status(response)
+        except requests.exceptions.HTTPError as error:
+            raise GLPIAuthenticationError(
+                f"GLPI refused the token request ({response.status_code})",
+                response=response,
+            ) from error
         body = response.json()
         token = body["access_token"]
         lifetime = max(int(body.get("expires_in") or 0) - TOKEN_EXPIRY_MARGIN, 0)

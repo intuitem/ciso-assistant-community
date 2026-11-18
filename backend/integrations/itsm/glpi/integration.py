@@ -172,16 +172,16 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return self.client.read_item(remote_id)
         except Exception:
             logger.warning(
-                "Could not read the GLPI item back for a webhook",
+                "GLPI webhook not applied: the item could not be read back",
                 remote_id=remote_id,
                 exc_info=True,
             )
             return _UNREACHABLE
 
     def _is_outdated(self, remote_id: str, remote_data: dict[str, Any]) -> bool:
-        """True when the event carries an older GLPI modification date than the
-        state last synced for this item. Only used when the item cannot be read
-        back: applying such an event would bring old values back."""
+        """True when this state of the item is older than the one already
+        synced: two workers can read the item back around the same time and
+        finish in the other order."""
         incoming = _modified_at(remote_data)
         if incoming is None:
             return False
@@ -218,30 +218,29 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return False
 
         # GLPI renders the delivery when the change happens and sends it later,
-        # possibly after newer changes or more than once. What is applied is
-        # the item as GLPI holds it now.
+        # possibly after newer changes or more than once. So the delivery only
+        # says that something happened: what is acted on is the item as GLPI
+        # holds it now, and nothing is done when GLPI cannot be asked.
         current = self._read_current(remote_id)
+        if current is _UNREACHABLE:
+            return False
 
-        if event_type == "delete":
-            if isinstance(current, dict) and not current["fields"].get("is_deleted"):
-                logger.info(
-                    "Ignoring GLPI delete webhook: the item still exists",
-                    remote_id=remote_id,
-                )
-                return True
+        if current is None or current["fields"].get("is_deleted"):
+            # Purged, or in the trash.
             return self._handle_remote_deletion(remote_id)
-
-        if isinstance(current, dict):
-            return self.pull_changes(remote_id, current)
-
-        remote_data = self._extract_remote_data(payload)
-        if self._is_outdated(remote_id, remote_data):
+        if event_type == "delete":
             logger.info(
-                "Ignoring GLPI webhook older than the synced state",
+                "Ignoring GLPI delete webhook: the item still exists",
                 remote_id=remote_id,
             )
             return True
-        return self.pull_changes(remote_id, remote_data)
+        if self._is_outdated(remote_id, current):
+            logger.info(
+                "Ignoring a GLPI state older than the synced one",
+                remote_id=remote_id,
+            )
+            return True
+        return self.pull_changes(remote_id, current)
 
     # --- Schema cache ---------------------------------------------------------
     # The schema comes from the instance's OpenAPI document, a multi-megabyte
