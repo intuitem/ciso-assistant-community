@@ -1,11 +1,14 @@
 import pytest
 from django.contrib.auth import get_user_model
+from django.utils.translation import override
 from core.models import (
     StoredLibrary,
     Framework,
     ComplianceAssessment,
     Perimeter,
+    ReferenceControl,
     RequirementAssessment,
+    RequirementNode,
 )
 from iam.models import Folder
 
@@ -70,4 +73,53 @@ class TestRequirementAssessment:
             assert (
                 requirement_assessment.applied_controls.all().count()
                 == applied_controls_count
+            )
+
+    @pytest.mark.usefixtures("domain_perimeter_fixture")
+    def test_suggested_applied_control_description_is_translated(self):
+        folder = Folder.objects.get(name="test folder")
+        framework = Framework.objects.create(name="test framework", folder=folder)
+        reference_control = ReferenceControl.objects.create(
+            name="Monitor supplier services",
+            description="This control ensures supplier services are monitored.",
+            ref_id="A.5.22",
+            category="process",
+            folder=folder,
+            translations={
+                "es": {
+                    "description": "Este control garantiza que los servicios de los proveedores se supervisen.",
+                }
+            },
+        )
+        requirement = RequirementNode.objects.create(
+            framework=framework,
+            urn="urn:test:a522",
+            ref_id="A.5.22",
+            name="Supplier services",
+            assessable=True,
+            folder=folder,
+        )
+        requirement.reference_controls.add(reference_control)
+        compliance_assessment = ComplianceAssessment.objects.create(
+            name="test compliance assessment",
+            framework=framework,
+            folder=folder,
+            perimeter=Perimeter.objects.get(name="test perimeter"),
+        )
+        requirement_assessment = RequirementAssessment.objects.create(
+            requirement=requirement,
+            compliance_assessment=compliance_assessment,
+            folder=folder,
+        )
+
+        with override("es"):
+            preview = requirement_assessment.preview_suggested_applied_controls()
+            assert (
+                preview[0]["applied_control"].description
+                == "Este control garantiza que los servicios de los proveedores se supervisen."
+            )
+            created = requirement_assessment.create_applied_controls_from_suggestions()
+            assert (
+                created[0].description
+                == "Este control garantiza que los servicios de los proveedores se supervisen."
             )
