@@ -68,6 +68,8 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         "allow_self_validation": False,
         "evidence_four_eyes": False,
         "auto_lock_overdue_assessments": False,
+        "auto_ref_id": False,
+        "auto_ref_id_prefixes": {},
         "show_warning_external_links": True,
         "show_get_started": True,
         "personal_folders": False,

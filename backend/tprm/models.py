@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from django.utils.translation import get_language, gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from core.base_models import (
+    AutoRefIdMixin,
     ActorSyncManager,
     ActorSyncMixin,
     NameDescriptionMixin,
@@ -139,6 +140,7 @@ class Tier(NameDescriptionMixin, FolderMixin):
 
 
 class Entity(
+    AutoRefIdMixin,
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
@@ -149,6 +151,9 @@ class Entity(
     """
 
     objects = ActorSyncManager()
+
+    auto_ref_id_prefix = "ENT"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
@@ -325,7 +330,9 @@ class Entity(
         return sorted({e.strip() for e in emails if e and e.strip()})
 
 
-class EntityAssessment(Assessment, FilteringLabelMixin, CustomFieldsMixin):
+class EntityAssessment(
+    AutoRefIdMixin, Assessment, FilteringLabelMixin, CustomFieldsMixin
+):
     class Conclusion(models.TextChoices):
         BLOCKER = "blocker", _("Blocker")
         WARNING = "warning", _("Warning")
@@ -334,6 +341,12 @@ class EntityAssessment(Assessment, FilteringLabelMixin, CustomFieldsMixin):
 
     # Superseded by the entity's tier (qualification, not posture); kept, hidden
     # in the UI, until integrations move over.
+    auto_ref_id_prefix = "ENA"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     penetration = models.IntegerField(default=0, verbose_name=_("Penetration"))
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
@@ -414,7 +427,7 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     IAM_SCOPE_FIELD = "entity"
 
 
-class Solution(NameDescriptionMixin, FilteringLabelMixin):
+class Solution(AutoRefIdMixin, NameDescriptionMixin, FilteringLabelMixin):
     """
     A solution represents a product or service that is offered by an entity
     """
@@ -433,6 +446,9 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         null=True,
         blank=True,
     )
+    auto_ref_id_prefix = "SOL"
+    auto_ref_id_parent = "provider_entity"
+
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
@@ -666,7 +682,7 @@ class SolutionSubcontractor(AbstractBaseModel):
             )
 
 
-class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Contract(AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     """
     A contract represents an agreement between multiple entities
     """
@@ -731,6 +747,9 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         null=True,
         verbose_name=_("End date"),
     )
+    auto_ref_id_prefix = "CTR"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=255,
         blank=True,
