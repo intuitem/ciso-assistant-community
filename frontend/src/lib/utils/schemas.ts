@@ -277,6 +277,7 @@ export const RiskScenarioSchema = z.object({
 	current_impact: z.number().optional(),
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
+	target_treatment_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	treatment: z.string().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	strength_of_knowledge: z.number().default(-1).optional(),

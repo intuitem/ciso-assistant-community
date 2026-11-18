@@ -5,7 +5,6 @@
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import Select from '#lib/components/Forms/Select.svelte';
-	import TextArea from '#lib/components/Forms/TextArea.svelte';
 	import TextField from '#lib/components/Forms/TextField.svelte';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { getSecureRedirect } from '#lib/utils/helpers.js';
@@ -228,6 +227,12 @@
 							label={m.treatmentStatus()}
 						/>
 					</div>
+					<TextField
+						form={_form}
+						type="date"
+						field="target_treatment_date"
+						label={m.targetTreatmentDate()}
+					/>
 				</div>
 			</div>
 		</div>

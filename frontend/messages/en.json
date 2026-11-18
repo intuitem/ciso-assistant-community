@@ -8207,5 +8207,16 @@
 	"reviewToastApproved": "Approved: {name}",
 	"reviewToastRejected": "Rejected: {name}",
 	"reviewUndoError": "The decision could not be undone.",
-	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again."
+	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again.",
+	"targetTreatmentDate": "Target treatment date",
+	"controlsEtaAfterTargetDate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} control with an ETA after the target treatment date",
+				"countPlural=other": "{count} controls with an ETA after the target treatment date"
+			}
+		}
+	]
 }

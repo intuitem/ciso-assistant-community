@@ -340,6 +340,12 @@
 						{safeTranslate(data.scenario.treatment)}
 					</p>
 				</div>
+				<div>
+					<p class="text-sm font-semibold text-surface-400-600">{m.targetTreatmentDate()}</p>
+					<p class="text-sm font-semibold">
+						{formatDate(new Date(data.scenario.target_treatment_date), false, getLocale())}
+					</p>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -551,7 +557,15 @@
 	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-surface-50-950 shadow-lg">
 		<div class="flex flex-col w-full lg:w-1/2">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
-			<p class="text-sm font-semibold text-surface-400-600">{m.extraAppliedControls()}</p>
+			<p class="flex items-center gap-2 text-sm font-semibold text-surface-400-600">
+				{m.extraAppliedControls()}
+				{#if data.scenario.late_extra_controls_count > 0}
+					<span class="badge preset-tonal-warning text-xs">
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+						{m.controlsEtaAfterTargetDate({ count: data.scenario.late_extra_controls_count })}
+					</span>
+				{/if}
+			</p>
 			<ModelTable
 				source={data.tables['risk_scenarios']}
 				URLModel="applied-controls"

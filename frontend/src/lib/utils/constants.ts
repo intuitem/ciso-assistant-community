@@ -276,6 +276,7 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'revoked_at',
 	'start_date',
 	'subjects_notified_on',
+	'target_treatment_date',
 	'timestamp',
 	'updated_at',
 	'validation_deadline'

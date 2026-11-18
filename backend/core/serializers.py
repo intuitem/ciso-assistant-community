@@ -1810,6 +1810,16 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
+    late_extra_controls_count = serializers.SerializerMethodField()
+
+    def get_late_extra_controls_count(self, obj: RiskScenario) -> int:
+        target_treatment_date = obj.target_treatment_date
+        if target_treatment_date is None:
+            return 0
+
+        late_extra_controls = obj.applied_controls.filter(eta__gt=target_treatment_date)
+        late_extra_controls_count = late_extra_controls.count()
+        return late_extra_controls_count
 
     class Meta:
         model = RiskScenario
@@ -1839,6 +1849,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "name",
             "description",
             "risk_assessment",
+            "target_treatment_date",
             "treatment",
             "threats",
             "vulnerabilities",
