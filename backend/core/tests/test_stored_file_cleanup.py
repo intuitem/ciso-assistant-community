@@ -284,3 +284,22 @@ def test_a_rolled_back_delete_keeps_the_file(settings, tmp_path):
             document.delete()
             raise RuntimeError("nope")
     assert storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_queryset_delete_of_rows_sharing_a_file_removes_it(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    folder = _domain()
+    first = PublicDocument.objects.create(
+        name="One", folder=folder, file=_upload("shared.pdf")
+    )
+    storage, name = _stored(first, "file")
+    second = PublicDocument(name="Two", folder=folder)
+    second.file = name
+    second.save()
+    assert second.file.name == name
+    with django_capture_on_commit_callbacks(execute=True):
+        PublicDocument.objects.filter(pk__in=(first.pk, second.pk)).delete()
+    assert not storage.exists(name)
