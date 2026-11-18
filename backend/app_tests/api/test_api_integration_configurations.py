@@ -220,3 +220,58 @@ def test_picker_stays_closed_without_access_to_the_configuration(
 
     assert response.status_code == 404
     remote.list_remote_objects.assert_not_called()
+
+
+def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_folder):
+    from django.contrib.contenttypes.models import ContentType
+
+    from core.models import AppliedControl
+    from integrations.models import SyncMapping
+
+    config = IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name="glpi"),
+        folder=root_folder,
+        credentials={
+            "instance_url": "https://glpi.example.com",
+            "client_id": "cid",
+            "client_secret": "csecret",
+            "username": "sync",
+            "password": "pw",
+        },
+        settings={"table_name": "Ticket"},
+    )
+    url = f"{CONFIGS_URL}{config.id}/"
+
+    # What the settings form sends: the secrets stay on the server.
+    shown = {
+        "instance_url": "https://glpi.example.com",
+        "client_id": "cid",
+        "username": "sync",
+    }
+
+    def save(**settings):
+        return admin_client.patch(
+            url, {"credentials": shown, "settings": settings}, format="json"
+        )
+
+    # Nothing linked yet: the type is free to change.
+    assert save(table_name="Change").status_code == 200
+    assert save(table_name="Ticket").status_code == 200
+
+    control = AppliedControl.objects.create(name="Linked", folder=root_folder)
+    SyncMapping.objects.create(
+        configuration=config,
+        content_type=ContentType.objects.get_for_model(AppliedControl),
+        local_object_id=control.id,
+        remote_id="7",
+    )
+
+    response = save(table_name="Change")
+    assert response.status_code == 400, response.content
+    assert "Ticket to Change" in str(response.json())
+    config.refresh_from_db()
+    assert config.settings["table_name"] == "Ticket"
+
+    # Other settings still save, and so does the same type.
+    response = save(table_name="Ticket", enable_outgoing_sync=True)
+    assert response.status_code == 200, response.content

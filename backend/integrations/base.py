@@ -246,6 +246,14 @@ class BaseSyncOrchestrator(ABC):
         self._client_cache: dict[str, BaseIntegrationClient] = {}
         self._mapper_cache: dict[str, BaseFieldMapper] = {}
 
+    @classmethod
+    def settings_change_errors(
+        cls, configuration: IntegrationConfiguration, new_settings: dict
+    ) -> list[str]:
+        """Reasons to refuse new settings on a saved configuration. None by
+        default; a provider overrides it when a change would break its links."""
+        return []
+
     @abstractmethod
     def _get_client(self, model_key: str) -> BaseIntegrationClient:
         """Return the appropriate client for this integration + model"""

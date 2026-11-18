@@ -43,7 +43,7 @@ The instance URL must resolve to a public address. If your GLPI is on a private 
 
 ### Map the fields
 
-1. **Target Table:** pick the GLPI item type to sync with: tickets, changes or problems.
+1. **Target Table:** pick the GLPI item type to sync with: tickets, changes or problems. Once objects are linked through the configuration, the item type can no longer be changed: unlink them first.
 2. **Field Mapping:** CISO Assistant reads the fields your GLPI version exposes and pre-fills the usual mapping:
 
 | CISO Assistant | GLPI |

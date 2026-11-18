@@ -261,6 +261,14 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
             # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
+        registered = IntegrationRegistry.get_provider(provider.name)
+        if config and registered and "settings" in data:
+            errors = registered.orchestrator_class.settings_change_errors(
+                config, data["settings"] or {}
+            )
+            if errors:
+                raise serializers.ValidationError({"provider_specific_errors": errors})
+
         return super().validate(data)
 
 

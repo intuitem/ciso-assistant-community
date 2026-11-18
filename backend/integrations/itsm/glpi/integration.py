@@ -1,18 +1,28 @@
 import hashlib
 import hmac
+from datetime import datetime
 from typing import Any
 
 from django.utils import timezone
 from structlog import get_logger
 
 from integrations.base import BaseITSMOrchestrator
-from integrations.models import IntegrationSchemaCache
+from integrations.models import IntegrationSchemaCache, SyncMapping
 from integrations.registry import IntegrationRegistry
+from integrations.settings_access import get_model_settings
 
-from .client import GLPIClient
+from .client import DEFAULT_ITEM_TYPE, GLPIClient
 from .mapper import GLPIFieldMapper
 
 logger = get_logger(__name__)
+
+
+def _modified_at(remote_data: dict[str, Any] | None) -> datetime | None:
+    try:
+        return datetime.fromisoformat((remote_data or {}).get("updated"))
+    except TypeError, ValueError:
+        return None
+
 
 GLPI_CONFIG_SCHEMA = {
     "required": ["credentials", "settings"],
@@ -61,6 +71,25 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     def _get_client(self, model_key="applied_control"):
         return GLPIClient(self.configuration, model_key)
 
+    @classmethod
+    def settings_change_errors(cls, configuration, new_settings):
+        # Item ids are only unique within an item type: under another type,
+        # existing links would address unrelated items with the same id.
+        def item_type(settings):
+            model_settings = get_model_settings(settings, cls.DEFAULT_MODEL_KEY)
+            return model_settings.get("table_name") or DEFAULT_ITEM_TYPE
+
+        old, new = item_type(configuration.settings), item_type(new_settings)
+        linked = SyncMapping.objects.filter(configuration=configuration).exclude(
+            remote_id=""
+        )
+        if old != new and linked.exists():
+            return [
+                f"The item type cannot change from {old} to {new} while objects "
+                "are linked through this configuration. Unlink them first."
+            ]
+        return []
+
     # --- Webhooks -------------------------------------------------------------
     # GLPI webhooks (Setup > Webhooks) post {"event": ..., "item": {...}}, the
     # item being the same representation the API returns.
@@ -77,7 +106,9 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
 
         # GLPI signs the body followed by the timestamp. The timestamp is set
         # when the event is queued and reused on retries, so it cannot bound a
-        # replay window without rejecting legitimate late deliveries.
+        # replay window without rejecting legitimate late deliveries. Events
+        # older than the state already synced are dropped in
+        # handle_webhook_event instead.
         expected = hmac.new(
             secret.encode("utf-8"),
             request.body + timestamp.encode("utf-8"),
@@ -95,6 +126,26 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     def _extract_remote_data(self, payload: dict[str, Any]) -> dict[str, Any]:
         return GLPIClient.normalize_item(payload.get("item") or {})
 
+    def _is_outdated(self, remote_id: str, remote_data: dict[str, Any]) -> bool:
+        """True when the event carries an older GLPI modification date than the
+        state last synced for this item: a delivery that arrives after a newer
+        change, or a replayed one. Applying it would bring old values back."""
+        incoming = _modified_at(remote_data)
+        if incoming is None:
+            return False
+        synced = _modified_at(
+            SyncMapping.objects.filter(
+                configuration=self.configuration, remote_id=remote_id
+            )
+            .values_list("remote_data", flat=True)
+            .first()
+        )
+        try:
+            return synced is not None and incoming < synced
+        except TypeError:
+            # One date carries an offset and the other does not.
+            return False
+
     def handle_webhook_event(self, event_type: str, payload: dict[str, Any]) -> bool:
         remote_id = self._extract_remote_id(payload)
         if not remote_id:
@@ -105,7 +156,14 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return False
 
         if event_type == "update":
-            return self.pull_changes(remote_id, self._extract_remote_data(payload))
+            remote_data = self._extract_remote_data(payload)
+            if self._is_outdated(remote_id, remote_data):
+                logger.info(
+                    "Ignoring GLPI webhook older than the synced state",
+                    remote_id=remote_id,
+                )
+                return True
+            return self.pull_changes(remote_id, remote_data)
         if event_type == "delete":
             return self._handle_remote_deletion(remote_id)
         if event_type == "new":

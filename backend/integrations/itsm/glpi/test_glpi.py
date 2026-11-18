@@ -383,6 +383,7 @@ def test_webhook_without_signature_or_secret_is_refused():
 
 def test_webhook_events_are_dispatched():
     orchestrator = GLPIOrchestrator(_configuration())
+    orchestrator._is_outdated = MagicMock(return_value=False)
     orchestrator.pull_changes = MagicMock(return_value=True)
     orchestrator._handle_remote_deletion = MagicMock(return_value=True)
     item = {"id": 4, "name": "T", "date_mod": "2026-11-17T16:01:47+00:00"}
@@ -402,3 +403,29 @@ def test_webhook_events_are_dispatched():
     assert orchestrator.pull_changes.call_count == 1
 
     assert orchestrator.handle_webhook_event("update", {"item": {}}) is False
+
+
+@pytest.mark.parametrize(
+    "synced, incoming, applied",
+    [
+        ("2026-11-17T16:05:00+00:00", "2026-11-17T16:01:47+00:00", False),
+        ("2026-11-17T16:01:47+00:00", "2026-11-17T16:01:47+00:00", True),
+        ("2026-11-17T16:01:47+00:00", "2026-11-17T16:05:00+00:00", True),
+        (None, "2026-11-17T16:01:47+00:00", True),
+        ("2026-11-17T16:05:00+00:00", None, True),
+        ("2026-11-17T16:05:00+00:00", "not a date", True),
+        ("2026-11-17 16:05:00", "2026-11-17T16:01:47+00:00", True),
+    ],
+)
+def test_update_older_than_the_synced_state_is_ignored(synced, incoming, applied):
+    orchestrator = GLPIOrchestrator(_configuration())
+    orchestrator.pull_changes = MagicMock(return_value=True)
+    item = {"id": 4, "name": "Old name", "date_mod": incoming}
+    stored = {"key": "4", "fields": {}, "updated": synced} if synced else None
+
+    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
+        lookup = mapping.objects.filter.return_value.values_list.return_value
+        lookup.first.return_value = stored
+        assert orchestrator.handle_webhook_event("update", {"item": item}) is True
+
+    assert orchestrator.pull_changes.called is applied
