@@ -5,10 +5,17 @@ name: Non-compliant requirement — open and link a remediation control
 description: When a requirement is assessed non-compliant, create an applied control for it, link the
   control to that requirement, and tell the owner. The assessment result itself is never touched.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Nicht konforme Anforderung – Maßnahme anlegen
+    description: |-
+      Erstellt eine angewendete Maßnahme, verknüpft sie mit der Anforderung und benachrichtigt die zuständige Person, sobald eine Anforderung als nicht konform bewertet wird. Das Bewertungsergebnis selbst wird nicht verändert.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-compliance-requirement-remediation:workflow:requirement-remediation
