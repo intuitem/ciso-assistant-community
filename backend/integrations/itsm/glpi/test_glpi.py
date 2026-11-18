@@ -142,14 +142,14 @@ def test_default_mapping_pushes_a_ticket_payload():
 
 
 @pytest.mark.parametrize(
-    "item_type, sent",
-    [("Ticket", 2), ("Problem", 2), ("Change", None)],
+    "item_type, payload",
+    [("Ticket", {"status": 2}), ("Problem", {"status": 2}), ("Change", {})],
 )
-def test_default_status_only_uses_values_the_item_type_has(item_type, sent):
+def test_default_status_only_uses_values_the_item_type_has(item_type, payload):
     mapper = GLPIFieldMapper(_configuration({"table_name": item_type}))
     control = SimpleNamespace(status="in_progress")
 
-    assert mapper.to_remote_partial(control, ["status"]).get("status") == sent
+    assert mapper.to_remote_partial(control, ["status"]) == payload
     # The statuses every type shares are still sent.
     assert mapper.to_remote_partial(SimpleNamespace(status="on_hold"), ["status"]) == {
         "status": 4
@@ -278,6 +278,24 @@ def test_a_redirected_write_is_a_failure(mock_request, status):
     with pytest.raises(requests.exceptions.HTTPError):
         client.update_remote_object("3", {"name": "x"})
     assert client.test_connection() is False
+
+
+@pytest.mark.parametrize(
+    "settings, refused",
+    [
+        ({}, False),
+        ({"table_name": "Change"}, False),
+        ({"models": {"applied_control": {"table_name": "Problem"}}}, False),
+        ({"table_name": "Tickets"}, True),
+        ({"table_name": ["Ticket"]}, True),
+        ({"models": {"applied_control": {"table_name": "../Session"}}}, True),
+        ({"models": {"asset": {"table_name": "Ticket"}}}, True),
+        ({"models": [{}]}, True),
+        ({"models": {"applied_control": True}}, True),
+    ],
+)
+def test_settings_are_checked_before_a_configuration_is_created(settings, refused):
+    assert bool(GLPIOrchestrator.settings_errors(None, settings)) is refused
 
 
 def test_only_applied_controls_get_a_client_or_a_mapper():

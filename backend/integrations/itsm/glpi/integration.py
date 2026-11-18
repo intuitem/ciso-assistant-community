@@ -11,7 +11,7 @@ from integrations.models import IntegrationSchemaCache, SyncMapping
 from integrations.registry import IntegrationRegistry
 from integrations.settings_access import get_model_settings
 
-from .client import DEFAULT_ITEM_TYPE, GLPIClient
+from .client import DEFAULT_ITEM_TYPE, ITEM_TYPES, GLPIClient
 from .mapper import GLPIFieldMapper
 
 logger = get_logger(__name__)
@@ -85,13 +85,24 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
 
     @classmethod
     def settings_errors(cls, configuration, new_settings):
-        other_models = sorted(
-            set(new_settings.get("models") or {}) - {cls.DEFAULT_MODEL_KEY}
-        )
+        models = new_settings.get("models") or {}
+        if not isinstance(models, dict) or not isinstance(
+            models.get(cls.DEFAULT_MODEL_KEY) or {}, dict
+        ):
+            return ["'models' must map a model to its settings."]
+        other_models = sorted(set(models) - {cls.DEFAULT_MODEL_KEY})
         if other_models:
             return [
                 "GLPI only syncs applied controls. Remove the settings for: "
                 + ", ".join(other_models)
+            ]
+        chosen = get_model_settings(new_settings, cls.DEFAULT_MODEL_KEY).get(
+            "table_name"
+        )
+        if chosen and (not isinstance(chosen, str) or chosen not in ITEM_TYPES):
+            return [
+                f"Unknown GLPI item type '{chosen}'. Use one of: "
+                + ", ".join(ITEM_TYPES)
             ]
         if configuration is None:
             return []

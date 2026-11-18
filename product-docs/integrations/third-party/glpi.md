@@ -111,6 +111,7 @@ The applied control page shows the linked GLPI id, the last sync time and its st
 
 * GLPI stores the item description as rich text. CISO Assistant sends plain paragraphs and reads formatted content back as plain text.
 * Items created directly in GLPI are not imported into CISO Assistant.
+* Links store GLPI item ids. Only change the instance URL when the new address serves the same GLPI instance, otherwise unlink the objects first.
 * Removing the ETA of an applied control does not remove the date in GLPI: its API cannot clear it.
 * With the default mapping, the `In progress` status is not sent to a change: GLPI changes have no matching status. Pick one in **Value Mapping** if you want it synced.
 * Assets are not synchronized with GLPI yet.
