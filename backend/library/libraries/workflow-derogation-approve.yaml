@@ -8,10 +8,17 @@ description: >
   only when its answers said no compensating control is in place — the outcome
   suggests, the reviewer commits, the workflow executes.
 copyright: © intuitem
-version: 2
+version: 3
 publication_date: 2026-09-09
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Ausnahme genehmigen – Ersatzmaßnahme zuordnen
+    description: |-
+      Ausgearbeitetes Beispiel für eine beaufsichtigte Aktion: Ein Prüfer führt die Schrittfolge für einen bereits gelesenen Antrag aus. Sie startet nicht selbstständig. Die Aktion wird bei einem Antrag nur angeboten, wenn aus dessen Antworten hervorgeht, dass keine kompensierende Maßnahme vorhanden ist. Das Ergebnis schlägt die Aktion vor, der Prüfer bestätigt sie und der Workflow führt sie aus.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-derogation-approve:workflow:derogation-approve
