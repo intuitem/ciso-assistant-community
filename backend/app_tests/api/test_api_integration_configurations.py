@@ -99,6 +99,42 @@ def test_user_without_role_cannot_create_a_configuration(
     assert not IntegrationConfiguration.objects.exists()
 
 
+# The provider link skips the visibility check, so the field's own queryset is
+# its only gate.
+def test_inactive_provider_cannot_be_linked_on_create(
+    admin_client, root_folder, jira_provider
+):
+    jira_provider.is_active = False
+    jira_provider.save()
+
+    response = admin_client.post(
+        CONFIGS_URL, _create_payload(root_folder, jira_provider), format="json"
+    )
+
+    assert response.status_code == 400, response.content
+    assert "provider_id" in response.json()
+    assert not IntegrationConfiguration.objects.exists()
+
+
+def test_inactive_provider_cannot_be_linked_on_update(
+    admin_client, root_folder, jira_config
+):
+    servicenow = IntegrationProvider.objects.get(name="servicenow")
+    servicenow.is_active = False
+    servicenow.save()
+
+    response = admin_client.patch(
+        f"{CONFIGS_URL}{jira_config.id}/",
+        {"provider_id": str(servicenow.id)},
+        format="json",
+    )
+
+    assert response.status_code == 400, response.content
+    assert "provider_id" in response.json()
+    jira_config.refresh_from_db()
+    assert jira_config.provider.name == "jira"
+
+
 def test_configurations_can_be_searched_by_provider(admin_client, jira_config):
     response = admin_client.get(CONFIGS_URL, {"search": "jira"})
     assert response.status_code == 200
