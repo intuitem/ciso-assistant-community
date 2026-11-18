@@ -8,7 +8,7 @@ the exports add the documentation and maturity scores.
 import csv
 import io
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 from django.urls import reverse
 from openpyxl import load_workbook
@@ -133,7 +133,7 @@ def _rows(context):
 
 
 def _text(pdf):
-    return "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    return "".join(page.extract_text() for page in PdfReader(io.BytesIO(pdf)).pages)
 
 
 @pytest.mark.django_db
@@ -431,3 +431,103 @@ class TestExports:
         rows = {row[header.index("ref_id")]: row for row in data}
         assert rows["A-1"][header.index("maturity_score")] == 3
         assert rows["B-1"][header.index("maturity_score")] is None
+
+
+@pytest.mark.django_db
+class TestReaderVisibilityInExports:
+    """Exports carry only the score layers the requesting reader may see."""
+
+    @pytest.fixture
+    def respondent_reader(self, monkeypatch, layered_audit):
+        monkeypatch.setattr(
+            "core.views.audit_reader_role", lambda user, audit: "respondent"
+        )
+        layered_audit.field_visibility = {
+            **layered_audit.field_visibility,
+            "documentation_score": AUDITOR_ONLY,
+        }
+        layered_audit.save()
+        return layered_audit
+
+    def _csv_header(self, client, audit):
+        url = reverse(
+            "compliance-assessments-compliance-assessment-csv",
+            kwargs={"pk": str(audit.pk)},
+        )
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        return response.content.decode("utf-8-sig").splitlines()[0].split(";")
+
+    def _xlsx_header(self, client, audit):
+        url = reverse("compliance-assessments-xlsx", kwargs={"pk": str(audit.pk)})
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        return next(load_workbook(io.BytesIO(response.content)).active.values)
+
+    def test_csv_drops_documentation_and_maturity(
+        self,
+        admin_client,  # noqa: F811
+        respondent_reader,
+    ):
+        header = self._csv_header(admin_client, respondent_reader)
+
+        assert "score" in header
+        assert "documentation_score" not in header
+        assert "maturity_score" not in header
+
+    def test_xlsx_drops_documentation_and_maturity(
+        self,
+        admin_client,  # noqa: F811
+        respondent_reader,
+    ):
+        header = self._xlsx_header(admin_client, respondent_reader)
+
+        assert "score" in header
+        assert "documentation_score" not in header
+        assert "maturity_score" not in header
+
+    def test_respondent_who_sees_documentation_keeps_it(
+        self,
+        admin_client,  # noqa: F811
+        respondent_reader,
+    ):
+        respondent_reader.field_visibility = {
+            **respondent_reader.field_visibility,
+            "documentation_score": EVERYONE_EDIT,
+        }
+        respondent_reader.save()
+
+        assert self._csv_header(admin_client, respondent_reader)[-2:] == [
+            "documentation_score",
+            "maturity_score",
+        ]
+        assert self._xlsx_header(admin_client, respondent_reader)[-1] == (
+            "maturity_score"
+        )
+
+    def test_word_report_headlines_the_implementation_score(
+        self,
+        monkeypatch,
+        admin_client,  # noqa: F811
+        respondent_reader,
+    ):
+        import core.views
+
+        captured = {}
+        render = core.views.render_docx_report
+
+        def capture(doc, context):
+            captured.update(context)
+            return render(doc, context)
+
+        monkeypatch.setattr("core.views.render_docx_report", capture)
+        url = reverse(
+            "compliance-assessments-word-report",
+            kwargs={"pk": str(respondent_reader.pk)},
+        )
+
+        assert admin_client.get(url).status_code == status.HTTP_200_OK
+        assert captured["score_layers"] == ["implementation_score"]
+        b = captured["category_scores"][CAT_B]
+        assert "maturity_score" not in b and "documentation_score" not in b
+        assert b["average_score"] == 5

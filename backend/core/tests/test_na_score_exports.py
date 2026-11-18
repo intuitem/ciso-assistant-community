@@ -38,6 +38,10 @@ def na_audit(app_config):  # noqa: F811
     audit = _make_audit(_load_framework(), name="NA score exports")
     audit.min_score = 0
     audit.max_score = 100
+    audit.field_visibility = dict.fromkeys(
+        ("score", "is_scored"),
+        {"auditor": "edit", "respondent": "edit"},
+    )
     audit.save()
     audit.create_requirement_assessments()
     _set(audit, "REQ-1.1", is_scored=True, score=80, result="compliant")

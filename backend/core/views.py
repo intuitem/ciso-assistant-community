@@ -543,6 +543,21 @@ def escape_csv_row(row):
     ]
 
 
+def audit_reader_role(user, audit):
+    """The viewer role a user reads the audit with."""
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders and audit.folder_id in respondent_folders:
+        return "respondent"
+    return "auditor"
+
+
+def export_shows_documentation_score(user, audit):
+    """Whether an audit export may carry the documentation and maturity scores."""
+    return audit.show_documentation_score and "documentation_score" in (
+        visible_layers(audit, audit_reader_role(user, audit))
+    )
+
+
 def export_documentation_and_maturity(audit, ra):
     """The documentation score as recorded and the maturity score as the audit
     counts it (Framework Insights' requirement figures), for an audit export.
@@ -14656,7 +14671,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             compliance_assessment = ComplianceAssessment.objects.get(id=pk)
             # Appended, so the existing columns keep their place; `score` stays
             # the implementation score.
-            show_documentation_score = compliance_assessment.show_documentation_score
+            show_documentation_score = export_shows_documentation_score(
+                request.user, compliance_assessment
+            )
             if show_documentation_score:
                 columns += ["documentation_score", "maturity_score"]
             writer.writerow(columns)
@@ -14718,7 +14735,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
-        show_documentation_score = audit.show_documentation_score
+        show_documentation_score = export_shows_documentation_score(request.user, audit)
         requirement_assessments = audit.get_requirement_assessments(
             include_non_assessable=True
         )
@@ -14912,6 +14929,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             user_lang,
             tz=get_report_timezone(),
             readable=ViewableFilter(request.user).allows,
+            score_layers=visible_layers(
+                audit_obj, audit_reader_role(request.user, audit_obj)
+            ),
         )
 
         # Custom overrides support any language; auto-generated strings only en/fr.
@@ -14976,12 +14996,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         audit = self.get_object()
-        respondent_folders = get_respondent_scoped_folder_ids(request.user)
-        role = (
-            "respondent"
-            if respondent_folders and audit.folder_id in respondent_folders
-            else "auditor"
-        )
+        role = audit_reader_role(request.user, audit)
 
         framework = audit.framework
         # Object-level permission is not enough: a respondent sees only their
