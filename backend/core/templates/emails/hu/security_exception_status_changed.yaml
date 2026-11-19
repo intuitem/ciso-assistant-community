@@ -1,0 +1,19 @@
+subject: "CISO Assistant: A(z) „${exception_name}” biztonsági kivétel új állapota: ${new_status}"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő biztonsági kivétel állapota megváltozott:
+
+  - Név: ${exception_name}
+  - Hivatkozási azonosító: ${exception_ref_id}
+  - Új állapot: ${new_status}
+  - Módosította: ${actor_name}
+  - Tartomány: ${folder_name}
+
+  Észrevétel:
+
+  ${exception_observation}
+
+  A biztonsági kivétel megtekintéséhez jelentkezzen be a CISO Assistantba: [A biztonsági kivétel megtekintése](${exception_url})
+
+  Köszönjük.
