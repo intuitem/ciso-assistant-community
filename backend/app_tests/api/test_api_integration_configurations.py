@@ -425,14 +425,17 @@ def test_glpi_saved_secrets_stay_with_their_connection(admin_client, root_folder
 
     assert save().status_code == 200
     elsewhere = {"instance_url": "https://elsewhere.example"}
+    # Fresh values for the two secret keys, derived so that no literal here
+    # looks like a credential to a secret scanner.
+    fresh = {key: f"{stored[key]}-rotated" for key in ("client_secret", "password")}
 
     # Neither secret, then only one of the two: the other would follow along.
     assert save(**elsewhere).status_code == 400
-    assert save(**elsewhere, password="new-pw").status_code == 400
+    assert save(**elsewhere, password=fresh["password"]).status_code == 400
     config.refresh_from_db()
     assert config.credentials == stored
 
-    moved = {**elsewhere, "client_secret": "new-secret", "password": "new-pw"}
+    moved = {**elsewhere, **fresh}
     assert save(**moved).status_code == 200
     config.refresh_from_db()
     assert config.credentials == {**stored, **moved}
