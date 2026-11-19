@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import { m } from '#paraglide/messages.js';
 
@@ -14,6 +16,18 @@
 	let overrideFilters: { [key: string]: any[] } = $state({ control_impact: [], effort: [] });
 
 	let modelTableKey = $state(0); // Force re-render when incremented
+
+	// Active controls are already in place: leaving them out keeps the matrix
+	// on what is left to prioritize. Kept in the URL so the page loads the
+	// matrix with it, and passed to the table as an extra query.
+	const excludeActive = $derived(page.url.searchParams.getAll('exclude_status').includes('active'));
+
+	function setExcludeActive(exclude: boolean) {
+		const url = new URL(page.url.href);
+		url.searchParams.delete('exclude_status');
+		if (exclude) url.searchParams.set('exclude_status', 'active');
+		goto(url, { replace: true, reset: false });
+	}
 
 	function handleCellClick(rowIndex: number, colIndex: number) {
 		const impact = 5 - rowIndex; // Convert grid position to impact value
@@ -99,6 +113,16 @@
 	</div>
 	<!-- Legend -->
 	<div class="mb-4 p-4 rounded">
+		<label class="flex items-center gap-2 mb-4 cursor-pointer text-sm">
+			<input
+				type="checkbox"
+				class="checkbox"
+				checked={excludeActive}
+				onchange={(event) => setExcludeActive(event.currentTarget.checked)}
+				data-testid="exclude-active-controls"
+			/>
+			{m.excludeActiveControls()}
+		</label>
 		<h3 class="font-semibold mb-2">{m.priorityLegend()}</h3>
 		<div class="flex flex-wrap gap-4 text-sm">
 			<div class="flex items-center gap-2">
@@ -166,6 +190,7 @@
 				body: []
 			}}
 			{overrideFilters}
+			extraParams={excludeActive ? 'exclude_status=active' : ''}
 			hideFilters={true}
 			URLModel="applied-controls"
 		/>

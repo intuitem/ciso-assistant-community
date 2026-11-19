@@ -8224,5 +8224,7 @@
 	"europeanUnion": "Union européenne",
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
-	"notShownOnMap": "Non représenté sur la carte"
+	"notShownOnMap": "Non représenté sur la carte",
+	"timelineScenarioFilterHelpText": "N'affiche que les mesures appliquées liées à ces scénarios",
+	"excludeActiveControls": "Exclure les mesures actives"
 }
