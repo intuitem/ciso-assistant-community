@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Önhöz rendelve: ${object_type} „${object_name}”"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő elemet:
+
+  - Típus: ${object_type}
+  - Név: ${object_name}
+  - Tartomány: ${folder_name}
+
+  A megtekintéséhez jelentkezzen be a CISO Assistantba: [Az elem megtekintése](${object_url})
+
+  Köszönjük.
