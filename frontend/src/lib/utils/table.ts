@@ -4226,7 +4226,7 @@ export interface BatchActionConfig {
 	adminOnly?: boolean;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
-	inputType?: 'date';
+	inputType?: 'date' | 'text';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -4908,6 +4908,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-shield-halved',
 			field: 'is_sensitive',
 			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{
+			type: 'change_field',
+			label: 'changeRetention',
+			icon: 'fa-solid fa-hourglass-half',
+			field: 'retention',
+			inputType: 'text'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
