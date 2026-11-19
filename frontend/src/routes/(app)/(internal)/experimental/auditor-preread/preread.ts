@@ -32,6 +32,9 @@ export interface Guidance {
 	pitfalls: { id: string; text: string }[];
 }
 
+/** Why an evidence will not hold on the audit day; judged by the backend only. */
+export type EvidenceIssue = 'no_file' | 'unusable' | 'to_validate' | 'expires_before_audit';
+
 export interface FiledEvidence {
 	id: string;
 	name: string | null;
@@ -44,6 +47,9 @@ export interface FiledEvidence {
 	manual: boolean;
 	status: string | null;
 	expiry_date: string | null;
+	issue?: EvidenceIssue | null;
+	/** Older than the request's freshness window. */
+	stale?: boolean;
 	/** On pairings made by hand: what else they answer in this domain. */
 	reach?: { requirements: string[]; audits: number };
 }
@@ -68,6 +74,9 @@ export interface PrereadItem {
 		direct: boolean;
 		via_controls: string[];
 		via_tasks: (string | null)[];
+		issue?: EvidenceIssue | null;
+		/** Older than the tightest window of the requests still open. */
+		stale?: boolean;
 	}[];
 	applied_controls: { id: string; name: string | null; status: string; eta: string | null }[];
 	findings: { severity: 'error' | 'warning'; msgid: string; msg: string }[];
@@ -274,32 +283,6 @@ export const STAGES: Record<number, string> = lazy({
 	1: m.prereadStage1Long,
 	2: m.prereadStage2Long
 });
-
-/** Why an evidence will not hold on the day, as the backend judges it; null when it does. */
-export function evidenceIssue(
-	e: { has_file: boolean; status?: string | null; expiry_date?: string | null },
-	dueDate?: string | null,
-	today = new Date().toISOString().slice(0, 10)
-): 'no_file' | 'unusable' | 'to_validate' | 'expires_before_audit' | null {
-	if (!e.has_file) return 'no_file';
-	if (['rejected', 'expired', 'missing'].includes(e.status ?? '')) return 'unusable';
-	if (e.expiry_date && e.expiry_date < today) return 'unusable';
-	if (['draft', 'in_review'].includes(e.status ?? '')) return 'to_validate';
-	if (dueDate && e.expiry_date && e.expiry_date < dueDate) return 'expires_before_audit';
-	return null;
-}
-
-export const tooOld = (updatedAt: string | null, days: number, now = Date.now()) =>
-	!!updatedAt && now - Date.parse(updatedAt) > days * 86_400_000;
-
-/** Unpaired evidence against the tightest window of the requests that cannot be paired. */
-export function isStale(updatedAt: string | null, guidance: Guidance | null, now = Date.now()) {
-	const windows = (guidance?.requests ?? [])
-		.filter((r) => !r.reference_control)
-		.map((r) => r.fresh_days ?? 0)
-		.filter(Boolean);
-	return windows.length > 0 && tooOld(updatedAt, Math.min(...windows), now);
-}
 
 export interface RequestRow {
 	/** Every requirement asking for it; one row per document, however many ask. */

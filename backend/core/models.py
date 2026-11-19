@@ -14656,9 +14656,12 @@ class EvidenceRequestLink(AbstractBaseModel):
         ]
 
 
-class AuditPreparation(AbstractBaseModel, FolderMixin):
+class AuditPreparation(AbstractBaseModel):
     """Experimental: what an organisation decides while preparing one audit
     with the auditor pre-read. Created on the first stored decision."""
+
+    # Scoped by its audit's domain, so it follows the audit if it moves.
+    IAM_SCOPE_FIELD = "compliance_assessment"
 
     class Stage(models.TextChoices):
         STAGE_1 = "stage_1", _("Stage 1")
@@ -14692,9 +14695,11 @@ class AuditPreparation(AbstractBaseModel, FolderMixin):
         related_name="+",
     )
 
-    def save(self, *args, **kwargs):
-        self.folder = self.compliance_assessment.folder
-        super().save(*args, **kwargs)
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(
+                {"end_date": _("The audit cannot end before it starts")}
+            )
 
 
 class AuditPreparationSetAside(AbstractBaseModel):
@@ -14755,3 +14760,9 @@ class AuditPreparationSession(AbstractBaseModel):
                 fields=["preparation", "session"], name="unique_preparation_session"
             )
         ]
+
+    def clean(self):
+        if self.start_time and self.end_time and self.start_time > self.end_time:
+            raise ValidationError(
+                {"end_time": _("The session cannot end before it starts")}
+            )

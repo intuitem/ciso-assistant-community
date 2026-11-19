@@ -10,11 +10,7 @@
 	import { z } from 'zod';
 	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
-	import {
-		canPerformAction,
-		hasPermissionAnywhere,
-		isAccessAllowed
-	} from '#lib/utils/access-control.js';
+	import { hasPermissionAnywhere, isAccessAllowed } from '#lib/utils/access-control.js';
 	import { m } from '#paraglide/messages.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import type { PageData } from './$types';
@@ -25,9 +21,6 @@
 		SECTIONS,
 		STAGES,
 		interviewPlan,
-		evidenceIssue,
-		isStale,
-		tooOld,
 		worstOf,
 		requestList,
 		requestListTsv,
@@ -150,7 +143,7 @@
 	// Section counts ignore the section filter itself, so each chip says what it would show.
 	// Several requirements of a projected framework share one entry (4.2 a, 4.2 b).
 	const lettered = $derived.by(() => {
-		const keys = data.preread.items.map((i: any) => i.guide_key).filter(Boolean);
+		const keys = items.map((i) => i.guide_key).filter(Boolean);
 		return new Set(keys).size < keys.length;
 	});
 	const beforeSection = $derived(
@@ -309,11 +302,15 @@
 		to_validate: 'text-warning-700-300',
 		expires_before_audit: 'text-warning-700-300'
 	};
-	const today = new Date().toISOString().slice(0, 10);
-	const expiryLabel = (date: string) =>
-		(date < today ? m.prereadExpiredOn : m.prereadExpires)({
-			date: new Date(date).toLocaleDateString(getLocale())
-		});
+	// Past tense once the backend judged it lapsed by date.
+	const expiryLabel = (e: {
+		issue?: string | null;
+		status?: string | null;
+		expiry_date: string | null;
+	}) =>
+		(e.issue === 'unusable' && !['rejected', 'missing'].includes(e.status ?? '')
+			? m.prereadExpiredOn
+			: m.prereadExpires)({ date: new Date(e.expiry_date ?? '').toLocaleDateString(getLocale()) });
 	function reachText(r: { requirements: string[]; audits: number }) {
 		const parts = [];
 		if (r.requirements.length)
@@ -1117,9 +1114,8 @@
 															{#if filed?.length}
 																<ul class="pl-7 flex flex-col gap-1 text-xs">
 																	{#each filed as e (e.id)}
-																		{@const old =
-																			r.fresh_days && tooOld(e.updated_at, r.fresh_days)}
-																		{@const issue = evidenceIssue(e, data.audit.due_date)}
+																		{@const old = e.stale}
+																		{@const issue = e.issue}
 																		<li class="flex flex-wrap items-baseline gap-x-2">
 																			{#if issue === 'no_file' || issue === 'unusable'}
 																				<i
@@ -1148,7 +1144,7 @@
 																			{#if issue && issue !== 'no_file'}
 																				<span class={ISSUE[issue]}
 																					>{safeTranslate(e.status ?? '')}{#if e.expiry_date}
-																						· {expiryLabel(e.expiry_date)}{/if}</span
+																						· {expiryLabel(e)}{/if}</span
 																				>
 																			{/if}
 																			{#if e.has_file === false && e.name && canAddFile}
@@ -1294,7 +1290,7 @@
 																selected.applied_controls.find((c) => c.id === id)?.name ??
 																m.prereadControlHiddenLower()
 														)}
-														{@const stale = isStale(e.updated_at, g)}
+														{@const stale = e.stale}
 														<li class="flex flex-col gap-0.5 p-2.5 text-sm">
 															<span class="flex items-baseline gap-2">
 																{#if e.name}
@@ -1334,10 +1330,9 @@
 																		})}</span
 																	>
 																{/each}
-																{#if evidenceIssue(e, data.audit.due_date) && e.has_file}<span
-																		class={ISSUE[evidenceIssue(e, data.audit.due_date) ?? '']}
+																{#if e.issue && e.has_file}<span class={ISSUE[e.issue]}
 																		>{safeTranslate(e.status)}{#if e.expiry_date}
-																			· {expiryLabel(e.expiry_date)}{/if}</span
+																			· {expiryLabel(e)}{/if}</span
 																	>{/if}
 																{#if !e.has_file && e.name && canAddFile}<button
 																		class="anchor text-warning-700-300"
@@ -1704,7 +1699,7 @@
 									<td class="min-w-64">{r.label}</td>
 									<td class="whitespace-nowrap">
 										{#if r.filed?.length}
-											{@const old = r.fresh_days && tooOld(r.filed[0].updated_at, r.fresh_days)}
+											{@const old = r.filed[0].stale}
 											<span
 												class="tabular-nums {old ? 'text-warning-700-300' : 'text-success-700-300'}"
 												title={r.filed.map((e) => e.name ?? m.prereadEvidenceHidden()).join('\n')}

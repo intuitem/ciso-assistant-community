@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-	evidenceIssue,
 	interviewPlan,
 	requestList,
 	sectionOf,
@@ -149,42 +148,6 @@ describe('auditor pre-read lists', () => {
 		const lines = requestListTsv(requestList(items)).split('\n');
 		expect(lines).toHaveLength(3);
 		expect(lines[1].split('\t')).toHaveLength(8);
-	});
-});
-
-describe('isStale', () => {
-	const g = {
-		questions: [],
-		requests: [{ id: 'r1', label: 'r', kind: 'record', fresh_days: 40 }],
-		sampling: [],
-		interviewees: [],
-		pitfalls: []
-	};
-	const now = Date.parse('2026-11-15T00:00:00Z');
-	it('flags unpaired evidence older than the tightest unpairable window', async () => {
-		const { isStale } = await import('./preread');
-		expect(isStale('2026-09-01T00:00:00Z', g, now)).toBe(true);
-		expect(isStale('2026-11-01T00:00:00Z', g, now)).toBe(false);
-		expect(isStale('2020-01-01T00:00:00Z', { ...g, requests: [] }, now)).toBe(false);
-		const paired = [{ ...g.requests[0], reference_control: 'u' }];
-		expect(isStale('2020-01-01T00:00:00Z', { ...g, requests: paired }, now)).toBe(false);
-	});
-});
-
-describe('evidenceIssue', () => {
-	const ok = { has_file: true, status: 'approved', expiry_date: null };
-	it('mirrors the backend rule: file first, then status, then dates', () => {
-		expect(evidenceIssue(ok)).toBeNull();
-		expect(evidenceIssue({ ...ok, has_file: false, status: 'rejected' })).toBe('no_file');
-		for (const status of ['rejected', 'expired', 'missing'])
-			expect(evidenceIssue({ ...ok, status })).toBe('unusable');
-		expect(evidenceIssue({ ...ok, expiry_date: '2026-01-01' }, null, '2026-06-01')).toBe(
-			'unusable'
-		);
-		expect(evidenceIssue({ ...ok, status: 'in_review' })).toBe('to_validate');
-		const soon = { ...ok, expiry_date: '2026-07-01' };
-		expect(evidenceIssue(soon, '2026-09-01', '2026-06-01')).toBe('expires_before_audit');
-		expect(evidenceIssue(soon, null, '2026-06-01')).toBeNull();
 	});
 });
 

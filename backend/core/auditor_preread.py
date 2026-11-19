@@ -208,6 +208,21 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
     return best
 
 
+def evidence_issue(e, today, due_date=None) -> str | None:
+    """Why an evidence will not hold on the audit day, or None. The page shows
+    this verdict as is: the backend is the only judge."""
+    expiry = e.get("expiry_date")
+    if not e["has_file"]:
+        return "no_file"
+    if e.get("status") in NOT_USABLE or (expiry and expiry < today):
+        return "unusable"
+    if e.get("status") in NOT_VALIDATED:
+        return "to_validate"
+    if due_date and expiry and expiry < due_date:
+        return "expires_before_audit"
+    return None
+
+
 def readiness(
     ra_result,
     guidance,
@@ -222,6 +237,7 @@ def readiness(
 
     `filed` maps a request id to the evidences paired with it, through its
     reference control or by hand; unpaired requests fall back to the count.
+    Marks each evidence dict with `stale` (older than the window it must meet).
     """
     filed = filed or {}
     if ra_result == RequirementAssessment.Result.NOT_APPLICABLE:
@@ -237,31 +253,32 @@ def readiness(
 
     # An evidence without a file, or rejected, lapsed or marked missing, holds
     # its request (no "not on file") but provides nothing until it is fixed.
+    def issue(e):
+        return evidence_issue(e, today, due_date)
+
     def usable(e):
-        expiry = e.get("expiry_date")
-        return (
-            e["has_file"]
-            and e.get("status") not in NOT_USABLE
-            and not (expiry and expiry < today)
-        )
+        return issue(e) not in ("no_file", "unusable")
 
     every = [*evidences, *(e for evs in filed.values() for e in evs)]
+    all_evidences = evidences
     evidences = [e for e in evidences if usable(e)]
     provided = {r: [e for e in evs if usable(e)] for r, evs in filed.items()}
     counted = [*evidences, *(e for evs in provided.values() for e in evs)]
     nothing_provided = not counted
-    if any(not e["has_file"] for e in every):
-        reasons.append(MISSING_FILE)
-    if any(e["has_file"] and not usable(e) for e in every):
-        reasons.append(UNUSABLE_EVIDENCE)
+    for code, reason in (
+        ("no_file", MISSING_FILE),
+        ("unusable", UNUSABLE_EVIDENCE),
+    ):
+        if any(issue(e) == code for e in every):
+            reasons.append(reason)
     if nothing_provided and not every:
         reasons.append(NOTHING_LINKED)
-    if any(e.get("status") in NOT_VALIDATED for e in counted):
-        reasons.append(EVIDENCE_TO_VALIDATE)
-    if due_date and any(
-        e.get("expiry_date") and e["expiry_date"] < due_date for e in counted
+    for code, reason in (
+        ("to_validate", EVIDENCE_TO_VALIDATE),
+        ("expires_before_audit", EXPIRES_BEFORE_AUDIT),
     ):
-        reasons.append(EXPIRES_BEFORE_AUDIT)
+        if any(issue(e) == code for e in counted):
+            reasons.append(reason)
     if ra_result == RequirementAssessment.Result.NON_COMPLIANT:
         reasons.append(NON_COMPLIANT)
     if any(f["severity"] == "error" for f in findings):
@@ -286,6 +303,9 @@ def readiness(
         for r in matchable
         if r.get("fresh_days")
     )
+    for r in matchable:
+        for e in filed.get(r["id"], []):
+            e["stale"] = bool(r.get("fresh_days")) and too_old([e], r["fresh_days"])
     # Requests without a pairing take whatever evidence is left; it may answer
     # them (own naming, no reference control), so it is to confirm, not missing.
     open_requests = unmatched + [r for r in matchable if not filed.get(r["id"])]
@@ -293,6 +313,11 @@ def readiness(
     # of the open requests applies to the newest of them.
     windows = [r["fresh_days"] for r in open_requests if r.get("fresh_days")]
     stale = stale or bool(rest and windows and too_old(rest, min(windows)))
+    # A paired evidence is judged on its request's row instead.
+    for e in all_evidences:
+        e["stale"] = (
+            e.get("id") not in paired and bool(windows) and too_old([e], min(windows))
+        )
     if stale:
         reasons.append(STALE_EVIDENCE)
     # Any unpaired evidence may answer the open requests, one document often
@@ -425,16 +450,17 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
     prior = defaultdict(list)
     on_framework = Finding.objects.filter(
         Q(requirement_node__framework=framework)
-        | Q(requirement_assessment__requirement__framework=framework)
+        | Q(requirement_assessment__requirement__framework=framework),
+        folder_id=compliance_assessment.folder_id,
     )
     visible_findings = set(
         on_framework.filter(
             id__in=RoleAssignment.get_viewable_object_ids(user, Finding)
         ).values_list("id", flat=True)
     )
-    for f in on_framework.select_related("findings_assessment").order_by(
-        "-findings_assessment__reported_at", "ref_id"
-    ):
+    for f in on_framework.select_related(
+        "findings_assessment", "requirement_assessment"
+    ).order_by("-findings_assessment__reported_at", "ref_id"):
         node_id = f.requirement_node_id or f.requirement_assessment.requirement_id
         shown = f.id in visible_findings
         prior[node_id].append(
@@ -477,6 +503,12 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         (a.entry, a.request): {"reason": a.reason}
         for a in (prep.set_asides.all() if prep else [])
     }
+    # Like a pairing, a set-aside holds wherever the same document is asked.
+    for pair, info in list(set_asides.items()):
+        if rc := rc_of.get(pair):
+            for other, u in rc_of.items():
+                if u == rc:
+                    set_asides.setdefault(other, info)
     items = []
     for ra in compliance_assessment.requirement_assessments.select_related(
         "requirement"
@@ -566,6 +598,8 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                 key=lambda e: e["updated_at"] or datetime.min.replace(tzinfo=UTC),
                 reverse=True,
             )
+        for e in [*evidences, *(f for evs in filed.values() for f in evs)]:
+            e["issue"] = evidence_issue(e, today, due_date)
         # A request set aside for this audit no longer counts either way.
         aside = {rid: info for (k, rid), info in set_asides.items() if k == key}
         judged = node_guidance and {
@@ -687,7 +721,8 @@ def _previous_set_asides(compliance_assessment, guide) -> list:
     """Set-asides of the latest other preparation in the domain on the same guide."""
     for prep in (
         AuditPreparation.objects.filter(
-            folder_id=compliance_assessment.folder_id, set_asides__isnull=False
+            compliance_assessment__folder_id=compliance_assessment.folder_id,
+            set_asides__isnull=False,
         )
         .exclude(compliance_assessment=compliance_assessment)
         .select_related("compliance_assessment__framework")
@@ -778,6 +813,13 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
             prep, _created = AuditPreparation.objects.get_or_create(
                 compliance_assessment=compliance_assessment
             )
+
+            def guide():
+                fit = resolve_guide(compliance_assessment.framework, prep.guide or None)
+                if not fit or not fit["applies"]:
+                    raise _Rejected(PREPARATION_ERRORS[0])
+                return fit["guide"]
+
             if "fields" in data:
                 fields = data["fields"] or {}
                 allowed = {
@@ -815,10 +857,21 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                 found = _guide_request(compliance_assessment, aside)
                 if isinstance(found, str):
                     raise _Rejected(found)
-                _ra, _fit, key, request = found
-                rows = prep.set_asides.filter(entry=key, request=request["id"])
+                _ra, fit, key, request = found
                 if aside.get("remove"):
-                    rows.delete()
+                    # Restored everywhere the same document is asked.
+                    rc = request.get("reference_control")
+                    refs = _request_references(load_audit_guides()[fit["guide"]])
+                    same = [p for p, u in refs.items() if rc and u == rc]
+                    prep.set_asides.filter(
+                        reduce(
+                            or_,
+                            (
+                                Q(entry=e, request=r)
+                                for e, r in same or [(key, request["id"])]
+                            ),
+                        )
+                    ).delete()
                 elif not (aside.get("reason") or "").strip():
                     raise _Rejected(PREPARATION_ERRORS[2])
                 else:
@@ -832,8 +885,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                         },
                     )
             elif data.get("carry_over"):
-                fit = resolve_guide(compliance_assessment.framework, prep.guide or None)
-                for a in _previous_set_asides(compliance_assessment, fit["guide"]):
+                for a in _previous_set_asides(compliance_assessment, guide()):
                     AuditPreparationSetAside.objects.get_or_create(
                         preparation=prep,
                         entry=a["entry"],
@@ -842,8 +894,13 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                     )
             elif "role" in data:
                 role = data["role"] or {}
-                actors = _ids(Actor, role.get("actors"))
-                if not role.get("role") or actors is None:
+                actors = _ids(Actor, role.get("actors"), user)
+                people = {
+                    w
+                    for e in load_audit_guides()[guide()].values()
+                    for w in e.get("interviewees") or []
+                }
+                if role.get("role") not in people or actors is None:
                     raise _Rejected(PREPARATION_ERRORS[1])
                 row, _ = AuditPreparationRole.objects.get_or_create(
                     preparation=prep, role=role["role"]
@@ -851,8 +908,9 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                 row.actors.set(actors)
             elif "session" in data:
                 session = data["session"] or {}
-                attendees = _ids(Actor, session.get("attendees"))
-                if not session.get("session") or attendees is None:
+                attendees = _ids(Actor, session.get("attendees"), user)
+                sessions = {x["id"] for x in load_audit_sessions().get(guide(), [])}
+                if session.get("session") not in sessions or attendees is None:
                     raise _Rejected(PREPARATION_ERRORS[1])
                 row, _ = AuditPreparationSession.objects.get_or_create(
                     preparation=prep, session=session["session"]
@@ -910,7 +968,9 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
         | Q(task_nodes__task_template__requirement_assessments=ra)
         | Q(task_nodes__task_template__applied_controls__requirement_assessments=ra)
     )
-    evidence = linked.filter(id=data.get("evidence")).distinct().first()
+    # Unpairing works wherever the pairing shows, linked here or not.
+    pool = viewable if data.get("remove") else linked
+    evidence = pool.filter(id=data.get("evidence")).distinct().first()
     if evidence is None and data.get("attach") and not data.get("remove"):
         evidence = viewable.filter(id=data.get("evidence")).first()
         if evidence is not None:

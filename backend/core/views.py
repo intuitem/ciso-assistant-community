@@ -15857,10 +15857,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """Experimental: what a certification auditor will ask per requirement."""
         from core.auditor_preread import auditor_preread
 
+        audit = self.get_object()
+        # Preparation work: respondents who only answer the audit do not see it.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_auditpreparation"),
+            folder=audit.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         return Response(
-            auditor_preread(
-                self.get_object(), request.user, request.query_params.get("guide")
-            )
+            auditor_preread(audit, request.user, request.query_params.get("guide"))
         )
 
     @action(detail=True, methods=["post"], url_path="auditor_preread/pair")
@@ -15872,7 +15878,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Pairing is preparation work; attaching the evidence to the
         # requirement on the way also edits the requirement.
         needed = ["change_auditpreparation"]
-        if request.data.get("attach"):
+        if request.data.get("attach") and not request.data.get("remove"):
             needed.append("change_requirementassessment")
         if not all(
             RoleAssignment.is_access_allowed(

@@ -289,6 +289,10 @@ def test_evidence_through_applied_control_is_counted_and_attributed():
     assert by_name["Review export"]["via_controls"] == []
     assert by_name["Drill notes"]["via_tasks"] == ["Offboarding drill"]
     assert by_name["Drill notes"]["has_file"] is False
+    # The backend judges each evidence; the page only shows the verdict.
+    assert by_name["Review export"]["issue"] == "to_validate"  # new evidence is a draft
+    assert by_name["Drill notes"]["issue"] == "no_file"
+    assert all("stale" in e for e in item["evidences"])
     assert by_name["JML procedure"]["via_tasks"] == []
     # The control implements the request's reference control: its task's
     # evidence answers the request too.
@@ -347,7 +351,6 @@ def test_guide_projects_on_a_copy_and_pairs_by_hand():
     attach = {**pair, "request": "r2", "evidence": other.id, "attach": True}
     assert pair_request(audit, user, attach) is None
     assert ra.evidences.filter(id=other.id).exists()
-    assert pair_request(audit, user, {**pair, "remove": True, "attach": True, "evidence": Evidence.objects.create(name="x", folder=folder).id}) == "unknownEvidence"  # fmt: skip
     ra.evidences.remove(other)
     EvidenceRequestLink.objects.filter(evidence=other).delete()
 
@@ -407,6 +410,18 @@ def test_guide_projects_on_a_copy_and_pairs_by_hand():
 
     assert manual_in(twin) == [True]
     assert manual_in(away) == []
+    # A set-aside, like a pairing, holds wherever the same document is asked,
+    # and is restored from any of them.
+    aside = {"requirement_assessment": a51.id, "request": asking["a.5.1"], "reason": "Group policy"}  # fmt: skip
+    assert update_preparation(audit, user, {"set_aside": aside}) is None
+    by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
+    assert by_id[c52.id]["set_aside"][asking["5.2"]]["reason"] == "Group policy"
+    back = {"requirement_assessment": c52.id, "request": asking["5.2"], "remove": True}
+    assert update_preparation(audit, user, {"set_aside": back}) is None
+    by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
+    assert not by_id[a51.id]["set_aside"] and not by_id[c52.id]["set_aside"]
+    # Unpaired where the pairing shows, though the document is not linked there.
+    c52.evidences.remove(doc)
     unpair = {"requirement_assessment": c52.id, "request": asking["5.2"], "evidence": doc.id, "remove": True}  # fmt: skip
     assert pair_request(audit, user, unpair) is None
     by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
@@ -451,7 +466,7 @@ def test_preparation_is_lazy_and_drives_readiness():
     fields = {"stage": "stage_2", "start_date": "2026-11-30", "end_date": "2026-12-02", "auditors": "A. Auditor"}  # fmt: skip
     assert update_preparation(audit, user, {"fields": fields}) is None
     prep = AuditPreparation.objects.get()
-    assert prep.folder == folder and prep.end_date == date(2026, 12, 2)
+    assert prep.end_date == date(2026, 12, 2)
 
     # Set aside: the requests stop counting, and their reason is shown.
     review = Evidence.objects.create(name="Review", folder=folder)
@@ -474,6 +489,9 @@ def test_preparation_is_lazy_and_drives_readiness():
     session = {"session": "access", "date": "2026-12-01", "start_time": "09:00", "location": "Room 2", "attendees": [actor.id]}  # fmt: skip
     assert update_preparation(audit, user, {"session": session}) is None
     assert update_preparation(audit, user, {"role": {"role": "ciso", "actors": ["00000000-0000-0000-0000-000000000000"]}}) == "unknownObject"  # fmt: skip
+    assert update_preparation(audit, user, {"role": {"role": "nobody", "actors": []}}) == "unknownObject"  # fmt: skip
+    backwards = {**session, "start_time": "10:00", "end_time": "09:00"}
+    assert update_preparation(audit, user, {"session": backwards}) == "invalidField"
     prep_payload = auditor_preread(audit, user)["preparation"]
     assert [a["id"] for a in prep_payload["roles"]["ciso"]] == [actor.id]
     assert prep_payload["sessions"]["access"]["location"] == "Room 2"
@@ -517,8 +535,21 @@ def test_findings_count_for_every_viewer():
         status="identified",
         folder=folder,
     )
+    # A finding of another domain on the same requirement is not this audit's.
+    other = Folder.objects.create(parent_folder=root, name="other")
+    Finding.objects.create(
+        name="Elsewhere",
+        findings_assessment=FindingsAssessment.objects.create(
+            name="Other", category="audit", folder=other
+        ),
+        requirement_node=node,
+        severity=3,
+        status="identified",
+        folder=other,
+    )
     nobody = User.objects.create_user(email="nobody@test.local")
     item = auditor_preread(audit, nobody)["items"][0]
     assert OPEN_FINDING in item["reasons"]
     assert item["prior_findings"][0]["name"] is None
     assert item["prior_findings"][0]["source"] is False
+    assert len(item["prior_findings"]) == 1
