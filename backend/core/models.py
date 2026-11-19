@@ -3580,56 +3580,80 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "nombre"}},
+            "translations": {
+                "fr": {"name": "nombre"},
+                "hu": {"name": "darabszám"},
+            },
         },
         {
             "name": "users",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "utilisateurs"}},
+            "translations": {
+                "fr": {"name": "utilisateurs"},
+                "hu": {"name": "felhasználó"},
+            },
         },
         {
             "name": "bytes",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "octets"}},
+            "translations": {
+                "fr": {"name": "octets"},
+                "hu": {"name": "bájt"},
+            },
         },
         {
             "name": "percentage",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "pourcentage"}},
+            "translations": {
+                "fr": {"name": "pourcentage"},
+                "hu": {"name": "százalék"},
+            },
         },
         {
             "name": "score",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "score"}},
+            "translations": {
+                "fr": {"name": "score"},
+                "hu": {"name": "pontszám"},
+            },
         },
         {
             "name": "days",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "jours"}},
+            "translations": {
+                "fr": {"name": "jours"},
+                "hu": {"name": "nap"},
+            },
         },
         {
             "name": "hours",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "heures"}},
+            "translations": {
+                "fr": {"name": "heures"},
+                "hu": {"name": "óra"},
+            },
         },
         {
             "name": "events per second",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "événements par seconde"}},
+            "translations": {
+                "fr": {"name": "événements par seconde"},
+                "hu": {"name": "esemény másodpercenként"},
+            },
         },
     ]
     field_path = models.CharField(
@@ -11591,7 +11615,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     ),
                     "status": "create",
                 }
@@ -11644,7 +11668,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     )
                     if not dry_run:
                         applied_control.save()
