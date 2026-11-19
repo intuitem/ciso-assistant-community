@@ -1,10 +1,11 @@
 """The findings report, rendered by Typst."""
 
+from io import BytesIO
 import io
 from datetime import datetime, timezone
 
 import openpyxl
-import pymupdf
+from pypdf import PdfReader
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
@@ -100,8 +101,8 @@ def test_many_findings_do_not_get_a_page_each(assessment):
     not become 30 pages."""
     _findings(assessment, [2] * 30)
     pdf, _ = _render(assessment)
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
-    assert doc.page_count < 12, f"{doc.page_count} pages for 30 findings"
+    doc = PdfReader(BytesIO(pdf)).pages
+    assert len(doc) < 12, f"{len(doc)} pages for 30 findings"
 
 
 @pytest.mark.django_db
@@ -109,7 +110,7 @@ def test_cover_carries_traceability(assessment):
     _findings(assessment, [2])
     pdf, payload = _render(assessment)
     assert payload["generated_at"]
-    cover = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert str(assessment.id) in cover
 
 
@@ -175,7 +176,7 @@ def test_every_optional_block_compiles(assessment, lang):
     assert finding["labels"], "fixture must exercise the label branch"
     assert finding["observation"], "fixture must exercise the observation branch"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "tag-F-001" in text
 
 
@@ -220,7 +221,7 @@ def test_actors_are_named_and_observations_are_whole(assessment):
     assert payload["assessment"]["authors"] == "Ada Author"
     assert payload["groups"][0]["findings"][0]["owners"] == "Olu Owner"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "…" not in text, "observation was truncated"
     assert text.count("word") >= 60, "observation was cut short"
 
@@ -247,7 +248,7 @@ def test_assessment_category_and_status_are_localised(
     assert payload["assessment"]["category_key"] == "pentest"
     assert payload["assessment"]["status_key"] == "in_progress"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert category in text and status in text
 
 
@@ -262,7 +263,7 @@ def test_recommendation_and_priority_reach_the_report(assessment, lang):
     assert finding["recommendation"] == "Rotate the key."
     assert finding["priority"] == "P1"
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Rotate the key." in text
     assert "P1" in text
 

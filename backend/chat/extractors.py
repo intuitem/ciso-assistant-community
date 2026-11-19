@@ -6,9 +6,13 @@ Each extractor handles a specific file type and produces semantically meaningful
 import csv
 import io
 import structlog
+import threading
 from dataclasses import dataclass
 
 logger = structlog.get_logger(__name__)
+
+# PDFium is not thread-safe and huey workers default to threads
+_PDFIUM_LOCK = threading.Lock()
 
 CHUNK_SIZE = 500  # Target tokens per chunk (approx 4 chars per token)
 CHUNK_OVERLAP = 50  # Token overlap between chunks
@@ -56,17 +60,23 @@ def get_extractor(content_type: str):
 def extract_pdf(file) -> list[Chunk]:
     """Extract text from PDF, splitting by pages/paragraphs."""
     try:
-        import fitz  # PyMuPDF
+        import pypdfium2 as pdfium
     except ImportError:
-        logger.warning("PyMuPDF not installed, cannot extract PDF")
+        logger.warning("pypdfium2 not installed, cannot extract PDF")
         return []
 
-    chunks = []
     file.seek(0)
-    doc = fitz.open(stream=file.read(), filetype="pdf")
+    data = file.read()
+    with _PDFIUM_LOCK:
+        pdf = pdfium.PdfDocument(data)
+        try:
+            pages = [page.get_textpage().get_text_bounded() for page in pdf]
+        finally:
+            pdf.close()
 
-    for page_num, page in enumerate(doc):
-        text = page.get_text().strip()
+    chunks = []
+    for page_num, page_text in enumerate(pages):
+        text = page_text.strip()
         if not text:
             continue
 
@@ -104,7 +114,6 @@ def extract_pdf(file) -> list[Chunk]:
                 )
             )
 
-    doc.close()
     return chunks
 
 

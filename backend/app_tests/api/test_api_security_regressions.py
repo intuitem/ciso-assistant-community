@@ -49,6 +49,7 @@ from ebios_rm.models import EbiosRMStudy, FearedEvent
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder, Role, RoleAssignment, SCIMToken, User, UserGroup
+from integrations.models import IntegrationProvider
 from portals.models import FrameworkSnapshot, Portal
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 from tprm.models import Entity, EntityAssessment
@@ -665,8 +666,14 @@ def _serializer_classes():
     return [s for s in found if getattr(getattr(s, "Meta", None), "model", None)]
 
 
-# system lookups with no domain to scope them by
-UNSCOPED_LINK_TARGETS = {ContentType, Permission, WebhookEventType}
+# system lookups with no domain to scope them by. Integration providers are a
+# seeded catalog, listed to every authenticated user and held by no role.
+UNSCOPED_LINK_TARGETS = {
+    ContentType,
+    Permission,
+    WebhookEventType,
+    IntegrationProvider,
+}
 
 
 @pytest.mark.django_db

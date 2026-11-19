@@ -115,6 +115,8 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     serializers_module = "integrations.serializers"
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
+    # A configuration has no name or description of its own to search on.
+    search_fields = ["provider__name"]
 
     def create(self, request, *args, **kwargs):
         try:
@@ -180,7 +182,9 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
     def _list_remote_objects(self, request, pk):
         from integrations.syncable import get_spec
 
-        instance = self.get_object()
+        # `search` and `id` address the remote system, not the configuration
+        # being looked up.
+        instance = self.get_object_unfiltered()
         model_key = request.query_params.get("model_key", "applied_control")
         if get_spec(model_key) is None:
             return Response(

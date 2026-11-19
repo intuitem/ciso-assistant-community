@@ -5,10 +5,17 @@ name: Critical finding — open and link a remediation control
 description: 'A high-severity finding opens an applied control, links it to the finding, and notifies
   the responders. Triage stays human: the finding''s own status is left alone.'
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Kritische Feststellung – Maßnahme anlegen
+    description: |-
+      Bei einer Feststellung mit hohem Schweregrad wird eine angewendete Maßnahme angelegt, mit der Feststellung verknüpft und das zuständige Team benachrichtigt. Die Erstbewertung bleibt einer Person vorbehalten; der Status der Feststellung wird nicht verändert.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-risk-critical-finding-control:workflow:critical-finding-control

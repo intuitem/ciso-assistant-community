@@ -26,7 +26,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from iam.authentication import KnoxTokenAuthentication, is_self_registered
 from iam.mcp_access import is_mcp_request, mcp_writes_enabled, refusal_reason
 from iam.models import AppGrant, ConnectedAppUse, ConnectionProfile
-from iam.oidc_adapter import MCP_SCOPES, public_url
+from iam.oidc_adapter import LOOPBACK_HOSTS, MCP_SCOPES, public_url
 
 WRITE_ACTIONS = ("create", "update", "delete")
 
@@ -203,6 +203,10 @@ class CISOAuthorizationView(AuthorizationView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["self_registered"] = is_self_registered(context["client"])
+        # this request's URI: a loopback app's port differs from its registered one
+        redirect_uri = self._request_info.get("redirect_uri") or ""
+        context["redirect_uri"] = redirect_uri
+        context["redirect_local"] = urlsplit(redirect_uri).hostname in LOOPBACK_HOSTS
         form = context["form"]
         if form.mcp_request and form.writes:
             context["write_choices"] = [

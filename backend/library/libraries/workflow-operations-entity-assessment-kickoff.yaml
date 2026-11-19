@@ -5,10 +5,17 @@ name: Third party added — start its assessment
 description: Creates an entity assessment for a newly registered third party, so due diligence starts
   with the relationship rather than after it.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Neue Drittpartei – Prüfung starten
+    description: |-
+      Erstellt für eine neu erfasste Drittpartei eine Drittparteiprüfung, damit die Due-Diligence-Prüfung mit Beginn der Geschäftsbeziehung startet.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-operations-entity-assessment-kickoff:workflow:entity-assessment-kickoff

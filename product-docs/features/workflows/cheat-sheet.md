@@ -219,7 +219,7 @@ See [Read objects](actions.md#read-objects).
 - `timeline_entry` type: only `detection`, `mitigation`, `observation`.
 - `entity_score`: one reading per provider per day. Turn upsert on to correct same-day re-runs.
 - `task_template`: creates the occurrence too. Upsert re-dates it.
-- `validation_flow`: the requester is the run identity.
+- `validation_flow`: the requester is the run identity, unless `requester` names a user who can view and change validation flows in the domain.
 - `right_request`: opens in **New**.
 
 See [Create object](actions.md#create-object).
@@ -240,8 +240,7 @@ See [Create or update in bulk](actions.md#create-or-update-in-bulk).
 
 | Object | Status restriction |
 |---|---|
-| Evidence | `expired`, `missing` only |
-| Security exception | `expired`, `deprecated` only |
+| Evidence | Never `approved` or `rejected`: a review decides those |
 | Audit, risk assessment, entity assessment, findings binder | Planning states: `planned`, `in_progress`, `in_review`, `done`, `deprecated` |
 | Requirement assessment | Status, dates, observation. Never result or score |
 | Document revision | Content and change summary while still a draft |
