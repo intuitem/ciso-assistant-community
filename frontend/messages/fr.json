@@ -8431,13 +8431,8 @@
 	"prereadStartTitle": "Par où commencer",
 	"prereadStartConfirm": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Rattachez les preuves déjà au dossier : {count} exigence à confirmer",
 				"countPlural=other": "Rattachez les preuves déjà au dossier : {count} exigences à confirmer"
@@ -8446,13 +8441,8 @@
 	],
 	"prereadStartFindings": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Traitez les constats encore ouverts des audits précédents : {count} exigence",
 				"countPlural=other": "Traitez les constats encore ouverts des audits précédents : {count} exigences"
@@ -8462,13 +8452,8 @@
 	"prereadStartDocuments": "Réunissez d'abord les documents les plus demandés : un même document répond souvent à plusieurs exigences",
 	"prereadAnswers": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "répond à {count} exigence",
 				"countPlural=other": "répond à {count} exigences"
@@ -8478,13 +8463,8 @@
 	"prereadSeeAllRequests": "Toute la liste des preuves demandées",
 	"prereadStartStage1": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Puis parcourez l'étape 1, la revue documentaire : {count} exigence",
 				"countPlural=other": "Puis parcourez l'étape 1, la revue documentaire : {count} exigences"

@@ -8434,13 +8434,8 @@
 	"prereadStartTitle": "Where to start",
 	"prereadStartConfirm": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Pair the evidence already on file: {count} requirement to confirm",
 				"countPlural=other": "Pair the evidence already on file: {count} requirements to confirm"
@@ -8449,13 +8444,8 @@
 	],
 	"prereadStartFindings": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Follow up the findings still open from earlier audits: {count} requirement",
 				"countPlural=other": "Follow up the findings still open from earlier audits: {count} requirements"
@@ -8465,13 +8455,8 @@
 	"prereadStartDocuments": "Gather the most requested documents first: one document often answers several requirements",
 	"prereadAnswers": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "answers {count} requirement",
 				"countPlural=other": "answers {count} requirements"
@@ -8481,13 +8466,8 @@
 	"prereadSeeAllRequests": "Full list of requested evidence",
 	"prereadStartStage1": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Then go through Stage 1, the document review: {count} requirement",
 				"countPlural=other": "Then go through Stage 1, the document review: {count} requirements"
