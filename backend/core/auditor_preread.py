@@ -99,7 +99,9 @@ def _localized(item: dict, texts: dict) -> dict:
     for part, field in TEXT_FIELD.items():
         if part in item:
             out[part] = [
-                {**x, field: texts[x["id"]]} if x["id"] in texts else x
+                {**x, field: texts[x["id"]]}
+                if isinstance(texts.get(x["id"]), str)
+                else x
                 for x in item[part]
             ]
     if "sampling" in item:

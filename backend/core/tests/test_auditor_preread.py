@@ -897,3 +897,10 @@ def test_a_guide_that_can_apply_ranks_first():
         return {"exact": False, "own": False, "builtin": False, "coverage": coverage, "matched": matched, "total": 100}  # fmt: skip
 
     assert _rank(fit(0.95, 95)) > _rank(fit(1.0, 1))
+
+
+def test_non_text_translation_falls_back_to_english():
+    from core.auditor_preread import _localized
+
+    item = {"questions": [{"id": "q1", "text": "Show me."}]}
+    assert _localized(item, {"q1": {"text": "x"}})["questions"][0]["text"] == "Show me."

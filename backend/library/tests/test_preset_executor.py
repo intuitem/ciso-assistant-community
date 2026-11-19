@@ -496,6 +496,21 @@ class TestPresetExecutorExistingDomain:
         ]
         binder = FindingsAssessment.objects.get(folder=journey.folder)
         assert str(binder.compliance_assessment_id) == ca_id
+        # Applied again on the same domain, another audit's binder is not reused.
+        other = FindingsAssessment.objects.create(
+            name="Stage 1 (other)", category="audit", folder=journey.folder
+        )
+        executor = PresetExecutor(preset_library, user, request)
+        assert (
+            executor._find_existing(
+                journey.folder,
+                "findings_assessment",
+                {"category": "audit", "audit": "iso_audit"},
+                "Stage 1",
+                {"iso_audit": str(other.id)},
+            )
+            is None
+        )
 
     def test_compliance_assessment_implementation_groups_are_applied(self):
         """A compliance_assessment preset item with implementation_groups should

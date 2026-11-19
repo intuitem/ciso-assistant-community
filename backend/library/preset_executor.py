@@ -3,7 +3,7 @@ import re
 import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils.translation import get_language
 
 _PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
@@ -446,7 +446,14 @@ class PresetExecutor:
         "responsibility_matrix": ResponsibilityMatrix,
     }
 
-    def _find_existing(self, folder: Folder, obj_type: str, item: dict, name: str):
+    def _find_existing(
+        self,
+        folder: Folder,
+        obj_type: str,
+        item: dict,
+        name: str,
+        object_refs: dict | None = None,
+    ):
         """Return a compatible existing object for this preset item, if any.
 
         Uses type-specific filters beyond just name to avoid false matches
@@ -468,6 +475,12 @@ class PresetExecutor:
             queryset = queryset.filter(risk_matrix=matrix)
         elif obj_type == "findings_assessment":
             queryset = queryset.filter(category=item.get("category", "pentest"))
+            # Never take over another audit's findings.
+            if audit_id := (object_refs or {}).get(item.get("audit") or ""):
+                queryset = queryset.filter(
+                    Q(compliance_assessment__isnull=True)
+                    | Q(compliance_assessment_id=audit_id)
+                )
         elif obj_type == "metric_instance":
             metric_def_urn = item.get("metric_definition")
             metric_def = (
@@ -581,7 +594,7 @@ class PresetExecutor:
                 continue
 
             # Reuse existing compatible object if found in this folder
-            existing = self._find_existing(folder, obj_type, item, name)
+            existing = self._find_existing(folder, obj_type, item, name, object_refs)
             if existing:
                 logger.info(
                     "Reusing existing object",
