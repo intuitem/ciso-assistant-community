@@ -70,6 +70,7 @@ from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
@@ -4980,7 +4981,7 @@ class RequirementMapping(models.Model):
 ########################### Domain objects #########################
 
 
-class Perimeter(NameDescriptionMixin, FolderMixin):
+class Perimeter(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("Undefined")),
         ("in_design", _("Design")),
@@ -4989,6 +4990,9 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
+
+    auto_ref_id_prefix = "PER"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -5032,7 +5036,9 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
+class SecurityException(
+    AutoRefIdMixin, NameDescriptionMixin, FolderMixin, CustomFieldsMixin
+):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -5041,6 +5047,9 @@ class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
+
+    auto_ref_id_prefix = "EXC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
@@ -5127,6 +5136,7 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
+    AutoRefIdMixin,
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
@@ -5285,6 +5295,9 @@ class Asset(
     overridden_children_capabilities = models.ManyToManyField(
         AssetCapability, blank=True, verbose_name=_("Overridden children capabilities")
     )
+    auto_ref_id_prefix = "AST"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -6573,7 +6586,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin):
         ]
 
 
-class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Evidence(AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
@@ -6582,6 +6595,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
 
+    auto_ref_id_prefix = "EVD"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     owner = models.ManyToManyField(
         "core.Actor",
         verbose_name="Owner",
@@ -6930,7 +6949,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024 / 1024:.1f} MB"
 
 
-class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Incident(AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"
@@ -6954,6 +6973,9 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         YES = "yes", "Yes"
         NO = "no", "No"
         UNCERTAIN = "uncertain", "Uncertain"
+
+    auto_ref_id_prefix = "INC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -7512,6 +7534,7 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
+    AutoRefIdMixin,
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
@@ -7576,6 +7599,9 @@ class AppliedControl(
         blank=True,
         verbose_name=_("Reference Control"),
     )
+    auto_ref_id_prefix = "AC"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -7922,6 +7948,7 @@ class AppliedControl(
 
 
 class OrganisationIssue(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     FolderMixin,
 ):
@@ -7951,6 +7978,9 @@ class OrganisationIssue(
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
         INACTIVE = "inactive", _("Inactive")
+
+    auto_ref_id_prefix = "ISS"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -8000,6 +8030,7 @@ class OrganisationIssue(
 
 
 class OrganisationObjective(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     FolderMixin,
 ):
@@ -8042,6 +8073,9 @@ class OrganisationObjective(
         related_name="assigned_organisation_objectives",
         blank=True,
     )
+    auto_ref_id_prefix = "OBJ"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -8101,6 +8135,7 @@ class Policy(AppliedControl):
 
 
 class Vulnerability(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     ETADueDateMixin,
     FolderMixin,
@@ -8120,6 +8155,9 @@ class Vulnerability(
     RESOLVED_STATUSES = frozenset(
         {Status.MITIGATED, Status.FIXED, Status.NOTEXPLOITABLE, Status.UNAFFECTED}
     )
+
+    auto_ref_id_prefix = "VUL"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -8448,15 +8486,19 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs) -> None:
+    def resolve_auto_ref_id_parent(self) -> None:
+        """An assessment left on the root folder lands in its perimeter's domain."""
         if self.perimeter and (
             not self.folder or self.folder == Folder.get_root_folder()
         ):
             self.folder = self.perimeter.folder
+
+    def save(self, *args, **kwargs) -> None:
+        self.resolve_auto_ref_id_parent()
         return super().save(*args, **kwargs)
 
 
-class RiskAssessment(Assessment, FilteringLabelMixin):
+class RiskAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -8466,6 +8508,9 @@ class RiskAssessment(Assessment, FilteringLabelMixin):
     risk_tolerance = models.SmallIntegerField(
         default=-1, verbose_name=_("Risk tolerance")
     )
+    auto_ref_id_prefix = "RA"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -8937,7 +8982,9 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
+class RiskScenario(
+    AutoRefIdMixin, NameDescriptionMixin, FilteringLabelMixin, FolderMixin
+):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -9119,6 +9166,12 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         verbose_name=_("Treatment status"),
     )
 
+    auto_ref_id_prefix = "R"
+    auto_ref_id_parent = "risk_assessment"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.risk_assessment, prefix)
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -9167,16 +9220,23 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         return self.risk_assessment.is_locked
 
     @classmethod
-    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+    def get_default_ref_id(
+        cls, risk_assessment: RiskAssessment, prefix: str | None = None
+    ):
         """return associated risk assessment id"""
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         scenarios_ref_ids = list(
             cls.objects.filter(risk_assessment=risk_assessment).values_list(
                 "ref_id", flat=True
             )
         )
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_scenarios + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in scenarios_ref_ids if r}
+        )
 
     def parent_perimeter(self):
         return self.risk_assessment.perimeter
@@ -9506,7 +9566,7 @@ def rescale_score(value, old_range, new_range, integer=True):
     return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-class ComplianceAssessment(Assessment, FilteringLabelMixin):
+class ComplianceAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
         SUM = "sum", "Sum"
@@ -9518,6 +9578,9 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
     )
+    auto_ref_id_prefix = "AUD"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -11530,7 +11593,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     ),
                     "status": "create",
                 }
@@ -11583,7 +11646,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     )
                     if not dry_run:
                         applied_control.save()
@@ -12482,16 +12545,14 @@ class QuickFormResponse(
         """A draft can be deleted by whoever holds it. A submitted or in-review
         request cannot: it is abandoned by dropping it, which leaves a record.
 
-        A closed request is a record and is administrator-only — the decision has
-        been made and neither the requester nor the reviewer may erase it. Without a
-        user this returns the conservative answer, which is what the UI shows when it
+        An administrator may delete any request, e.g. to clean up test answers;
+        nobody else may erase a submitted, in-review or closed one. Without a user
+        this returns the conservative answer, which is what the UI shows when it
         does not know who is asking.
         """
         if self.status == self.Status.DRAFT:
             return True
-        if self.status == self.Status.CLOSED and user is not None:
-            return user.is_admin()
-        return False
+        return user is not None and user.is_admin()
 
     class Meta:
         verbose_name = _("Quick form response")
@@ -13019,7 +13080,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         self._defer_cel_evaluation()
 
 
-class FindingsAssessment(Assessment, FilteringLabelMixin):
+class FindingsAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
         pass
 
@@ -13047,6 +13108,9 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
         related_name="findings_assessments",
         verbose_name=_("Evidences"),
     )
+
+    auto_ref_id_prefix = "FA"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -13161,7 +13225,13 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
         self.upsert_daily_metrics()
 
 
-class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
+class Finding(
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    FilteringLabelMixin,
+    ETADueDateMixin,
+):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         IDENTIFIED = "identified", _("Identified")
@@ -13219,6 +13289,9 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name=_("Owner"),
         related_name="findings",
     )
+
+    auto_ref_id_prefix = "F"
+    auto_ref_id_parent = "findings_assessment"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -13302,7 +13375,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin):
+class RiskAcceptance(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", "Created"),
         ("submitted", "Submitted"),
@@ -13311,6 +13384,12 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         ("revoked", "Revoked"),
     ]
 
+    auto_ref_id_prefix = "RAC"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     risk_scenarios = models.ManyToManyField(
         RiskScenario,
         verbose_name=_("Risk scenarios"),
@@ -13417,7 +13496,11 @@ class TaskTemplateManager(models.Manager):
 
 
 class TaskTemplate(
-    NameDescriptionMixin, FolderMixin, FilteringLabelMixin, CommitmentMixin
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    FilteringLabelMixin,
+    CommitmentMixin,
 ):
     # A recurrent template is a definition, not a single promise: commitment lives
     # on one-time tasks only (hidden entirely otherwise).
@@ -13487,6 +13570,9 @@ class TaskTemplate(
     task_date = models.DateField(null=True, blank=True, verbose_name="Date")
 
     is_recurrent = models.BooleanField(default=False)
+
+    auto_ref_id_prefix = "TSK"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name="reference id"

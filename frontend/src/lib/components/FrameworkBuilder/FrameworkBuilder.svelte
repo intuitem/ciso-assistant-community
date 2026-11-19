@@ -615,7 +615,7 @@
 									)}
 									placeholder={m.builderTranslateDescription()}
 									rows="2"
-									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 									onblur={(e) => {
 										builder.updateFramework({
 											translations: withTranslation(
@@ -645,7 +645,7 @@
 								? m.builderFormDescriptionPlaceholder()
 								: m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
 							}}
@@ -709,7 +709,7 @@
 										? m.builderFormAnnotationPlaceholder()
 										: m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
-									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
 									}}
@@ -802,7 +802,8 @@
 												type="number"
 												value={quickFormScore().min}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) => setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
+												onchange={(e) =>
+													setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
 											/>
 										</label>
 										<label class="block">
@@ -811,7 +812,7 @@
 												type="number"
 												value={quickFormScore().max}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) =>
+												onchange={(e) =>
 													setQuickFormScore({ max: intOr(e.currentTarget.value, 100) })}
 											/>
 										</label>
@@ -896,7 +897,7 @@
 														type="number"
 														value={$frameworkStore.min_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																min_score: parseInt(e.currentTarget.value) || 0
 															});
@@ -909,7 +910,7 @@
 														type="number"
 														value={$frameworkStore.max_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																max_score: parseInt(e.currentTarget.value) || 100
 															});
@@ -962,7 +963,7 @@
 															step="any"
 															value={$frameworkStore.target_score ?? ''}
 															class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-															onblur={(e) => setTargetScore(e.currentTarget.value)}
+															onchange={(e) => setTargetScore(e.currentTarget.value)}
 														/>
 													</label>
 												</div>
@@ -1013,7 +1014,7 @@
 																			type="number"
 																			value={entry.score}
 																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																			onblur={(e) => {
+																			onchange={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].score = parseInt(e.currentTarget.value) || 0;
 																				setScaleEntries(entries);
@@ -1301,7 +1302,7 @@
 					{#each $rootNodesStore as bn, i (bn.node.id)}
 						<div
 							class:opacity-50={rootDrag.draggedIndex === i}
-							draggable="true"
+							draggable="false"
 							onmousedown={rootDrag.recordMousedown}
 							ondragstart={(e) => rootDrag.handleDragStart(e, i)}
 							ondragover={rootDrag.handleDragOver}

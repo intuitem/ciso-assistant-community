@@ -67,7 +67,7 @@
 			index
 				? 'opacity-50'
 				: ''}"
-			draggable="true"
+			draggable="false"
 			onmousedown={drag.recordMousedown}
 			ondragstart={(e) => drag.handleDragStart(e, index)}
 			ondragover={drag.handleDragOver}
@@ -144,7 +144,7 @@
 							value={group.description}
 							placeholder={m.builderGroupDescriptionPlaceholder()}
 							rows="2"
-							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
 								items[index].description = e.currentTarget.value;
 								persist();

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     NameDescriptionMixin,
 )
@@ -202,7 +203,9 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class MetricInstance(
+    AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -216,6 +219,9 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         on_delete=models.PROTECT,
         verbose_name=_("Metric definition"),
     )
+    auto_ref_id_prefix = "MET"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -937,16 +943,24 @@ class BuiltinMetricSample(AbstractBaseModel):
         # Same definitions as the analytics summary (core.helpers.get_metrics), so its
         # figures can carry a trend. Lazy import: core.helpers imports core.models.
         from core.helpers import (
+            CONTROLS_NOT_PENDING,
             FINDING_CLOSED_STATUSES,
+            INACTIVE_ASSESSMENT,
             _compute_progress_by_assessment,
+            exclude_inactive_parent,
             filter_top_risk_levels,
             overdue_task_templates,
         )
 
-        summary_scenarios = scope(RiskScenario.objects.all())
+        summary_scenarios = exclude_inactive_parent(
+            scope(RiskScenario.objects.all()), "risk_assessment"
+        )
+        requirement_assessments = exclude_inactive_parent(
+            scope(RequirementAssessment.objects.all()), "compliance_assessment"
+        )
         assessed = list(
             _compute_progress_by_assessment(
-                audits_qs.values_list("id", flat=True)
+                audits_qs.exclude(INACTIVE_ASSESSMENT).values_list("id", flat=True)
             ).values()
         )
         return {
@@ -955,20 +969,20 @@ class BuiltinMetricSample(AbstractBaseModel):
                 Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
             ).count(),
             "controls_eta_missed": controls.filter(eta__lt=today)
-            .exclude(status="active")
+            .exclude(status__in=CONTROLS_NOT_PENDING)
             .count(),
             "controls_p1_pending": controls.filter(priority=1)
-            .exclude(status="active")
+            .exclude(status__in=CONTROLS_NOT_PENDING)
             .count(),
             "audits_avg_assessed": math.ceil(sum(assessed) / len(assessed))
             if assessed
             else 0,
-            "non_compliant_items": scope(RequirementAssessment.objects.all())
-            .filter(result=RequirementAssessment.Result.NON_COMPLIANT)
-            .count(),
-            "partially_compliant_items": scope(RequirementAssessment.objects.all())
-            .filter(result=RequirementAssessment.Result.PARTIALLY_COMPLIANT)
-            .count(),
+            "non_compliant_items": requirement_assessments.filter(
+                result=RequirementAssessment.Result.NON_COMPLIANT
+            ).count(),
+            "partially_compliant_items": requirement_assessments.filter(
+                result=RequirementAssessment.Result.PARTIALLY_COMPLIANT
+            ).count(),
             "total_risk_scenarios": summary_scenarios.count(),
             "risk_scenarios_high_current": filter_top_risk_levels(
                 summary_scenarios, "current_level"
@@ -979,7 +993,9 @@ class BuiltinMetricSample(AbstractBaseModel):
             "incidents_open": incidents.exclude(
                 status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED]
             ).count(),
-            "findings_open": scope(Finding.objects.all())
+            "findings_open": exclude_inactive_parent(
+                scope(Finding.objects.all()), "findings_assessment"
+            )
             .exclude(status__in=FINDING_CLOSED_STATUSES)
             .count(),
             "evidence_expired": scope(Evidence.objects.all())

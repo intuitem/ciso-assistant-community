@@ -1,6 +1,5 @@
 import { expect, type Page } from '@playwright/test';
-
-const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
+import { BACKEND_API_URL } from './api.js';
 
 /** Reauthenticates with `password`, generates a PAT and checks the API accepts it. */
 export async function generateWorkingPat(page: Page, password: string, name: string) {

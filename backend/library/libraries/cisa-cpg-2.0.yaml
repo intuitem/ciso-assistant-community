@@ -7,7 +7,7 @@ description:
   CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions
   aligned to the NIST Cybersecurity Framework.
 copyright: This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.
-version: 1
+version: 2
 publication_date: "2025-03-04"
 provider: CISA
 packager: intuitem
@@ -21,6 +21,12 @@ translations:
     copyright:
       Ce document est fourni par la CISA (Cybersecurity and Infrastructure Security Agency) et est du domaine public.
       La traduction française est une traduction non officielle fournie à titre indicatif.
+  de:
+    name: CISA-Ziele für die Cybersicherheit v2.0
+    description: |-
+      Sektorübergreifende Ziele für die Cybersicherheit der CISA (CPG) 2.0 – freiwillige Praktiken mit besonders wirksamen Sicherheitsmaßnahmen, abgestimmt auf das NIST Cybersecurity Framework.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung der Herausgeber; keine unabhängige menschliche Prüfung. Die deutschen Ergänzungen umfassen die Bibliotheksmetadaten und Bedrohungstexte.
 objects:
   reference_controls:
     - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-01
@@ -625,6 +631,10 @@ objects:
           description:
             Manque de responsabilité, d'investissement ou d'efficacité en matière de cybersécurité en raison de l'absence
             ou de l'inadéquation des politiques, des rôles et des procédures de gestion des risques cyber.
+        de:
+          name: Unzureichende Cybersicherheits-Governance
+          description: Unzureichende Rechenschaftspflicht, Investitionen oder Wirksamkeit im Bereich Cybersicherheit
+            aufgrund fehlender oder ungeeigneter Richtlinien, Rollen und Verfahren für das Management von Cybersicherheitsrisiken.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
       ref_id: T.02
       name: Ineffective Incident Response
@@ -638,6 +648,11 @@ objects:
             Incapacité à isoler, contenir, éradiquer, remédier et communiquer rapidement et efficacement lors d'incidents
             de cybersécurité. Les défaillances de communication ralentissent la résolution, augmentent les temps d'arrêt et
             amplifient les dommages.
+        de:
+          name: Unwirksame Vorfallbehandlung
+          description: Unfähigkeit, Cybersicherheitsvorfälle schnell und wirksam zu isolieren, einzudämmen, ihre
+            Ursachen zu beseitigen, ihre Folgen zu beheben und darüber zu kommunizieren. Kommunikationsfehler
+            verzögern die Behebung, verlängern Ausfallzeiten und vergrößern den Schaden.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-03
       ref_id: T.03
       name: Supply Chain Compromise
@@ -651,6 +666,11 @@ objects:
             Les adversaires exploitent les vulnérabilités en abusant des relations de confiance avec des tiers, en
             manipulant les produits ou les mécanismes de livraison avant qu'ils n'atteignent les utilisateurs finaux, ou en
             compromettant les environnements des fournisseurs.
+        de:
+          name: Kompromittierung der Lieferkette
+          description: Angreifer nutzen Schwachstellen aus, indem sie vertrauenswürdige Beziehungen zu Dritten
+            missbrauchen, Produkte oder Bereitstellungsmechanismen vor der Auslieferung an Endnutzer manipulieren
+            oder Umgebungen von Anbietern kompromittieren.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-04
       ref_id: T.04
       name: Exploitation of Known Vulnerabilities
@@ -664,6 +684,11 @@ objects:
             Les adversaires ciblent les systèmes non corrigés et mal configurés, en particulier ceux exposés à Internet,
             en exploitant les vulnérabilités logicielles, les dysfonctionnements temporaires ou les erreurs de configuration
             pour obtenir un accès initial.
+        de:
+          name: Ausnutzung bekannter Schwachstellen
+          description: Angreifer greifen ungepatchte und fehlkonfigurierte Systeme an, insbesondere aus dem Internet
+            erreichbare Systeme. Sie nutzen Softwareschwachstellen, vorübergehende Fehlfunktionen oder Konfigurationsfehler,
+            um sich erstmals Zugang zu verschaffen.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-05
       ref_id: T.05
       name: Unvalidated Security Controls
@@ -676,6 +701,11 @@ objects:
           description:
             Lacunes dans les défenses cyber ou excès de confiance dans les protections existantes en raison d'un
             manque de validation indépendante du bon fonctionnement et de la configuration des contrôles mis en place.
+        de:
+          name: Ungeprüfte Sicherheitsmaßnahmen
+          description: Lücken in der Cyberabwehr oder übermäßiges Vertrauen in bestehende Schutzmaßnahmen, weil
+            eine unabhängige Prüfung fehlt, ob die umgesetzten Maßnahmen richtig konfiguriert sind und wie vorgesehen
+            funktionieren.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-06
       ref_id: T.06
       name: Insufficient Asset and Network Visibility
@@ -688,6 +718,10 @@ objects:
           description:
             Compréhension incomplète ou inexacte des actifs organisationnels, de la topologie réseau et des journaux
             de sécurité, entravant la détection efficace, la réponse aux incidents et la reprise d'activité.
+        de:
+          name: Unzureichende Übersicht über Assets und Netzwerke
+          description: Ein unvollständiges oder unzutreffendes Bild der Assets, Netzwerktopologie und Sicherheitsprotokolle
+            einer Organisation beeinträchtigt die wirksame Erkennung, Vorfallbehandlung und Wiederherstellung.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-07
       ref_id: T.07
       name: Default Credential Exploitation
@@ -700,6 +734,11 @@ objects:
           description:
             Les adversaires acquièrent et exploitent les identifiants de comptes par défaut du fabricant pour obtenir
             un accès initial, maintenir la persistance, élever les privilèges ou contourner les défenses.
+        de:
+          name: Ausnutzung voreingestellter Zugangsdaten
+          description: Angreifer beschaffen und nutzen vom Hersteller voreingestellte Kontozugangsdaten, um sich
+            erstmals Zugang zu verschaffen, dauerhaft Zugriff zu behalten, Berechtigungen auszuweiten oder Schutzmaßnahmen
+            zu umgehen.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-08
       ref_id: T.08
       name: Brute Force and Password Attacks
@@ -712,6 +751,10 @@ objects:
           description:
             Les adversaires utilisent des techniques de force brute pour craquer les mots de passe, en devinant systématiquement
             les identifiants par des méthodes répétitives ou itératives sur des mots de passe inconnus ou des condensats obtenus.
+        de:
+          name: Brute-Force- und Passwortangriffe
+          description: Angreifer nutzen Brute-Force-Verfahren, um Passwörter zu knacken. Dabei erraten sie Zugangsdaten
+            systematisch durch wiederholte oder iterative Versuche gegen unbekannte Passwörter oder erlangte Hashwerte.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-09
       ref_id: T.09
       name: Credential Theft and Misuse
@@ -725,6 +768,11 @@ objects:
             Les adversaires obtiennent et exploitent des identifiants de comptes par vol, réutilisation ou abus de
             comptes inactifs pour obtenir un accès, maintenir la persistance, élever les privilèges ou contourner les contrôles
             d'accès réseau.
+        de:
+          name: Diebstahl und Missbrauch von Zugangsdaten
+          description: Angreifer beschaffen und nutzen Kontozugangsdaten durch Diebstahl, Wiederverwendung oder
+            Missbrauch inaktiver Konten, um Zugang zu erlangen, dauerhaft Zugriff zu behalten, Berechtigungen
+            auszuweiten oder Netzwerkzugangskontrollen zu umgehen.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       ref_id: T.10
       name: Unauthorized Access and Lateral Movement
@@ -737,6 +785,10 @@ objects:
           description:
             Accès non autorisé aux ressources réseau permettant aux adversaires de se déplacer entre les systèmes
             sans être détectés, d'élever les privilèges et de compromettre les données sensibles et les systèmes critiques.
+        de:
+          name: Unbefugter Zugriff und laterale Bewegung
+          description: Unbefugter Zugriff auf Netzwerkressourcen ermöglicht Angreifern, sich unbemerkt zwischen
+            Systemen zu bewegen, Berechtigungen auszuweiten sowie sensible Daten und kritische Systeme zu kompromittieren.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-11
       ref_id: T.11
       name: Social Engineering and Phishing
@@ -750,6 +802,11 @@ objects:
             Les adversaires utilisent des courriels trompeurs, des pièces jointes ou liens malveillants et des tactiques
             d'ingénierie sociale pour inciter les utilisateurs à divulguer des informations sensibles, exécuter du code malveillant
             ou accorder un accès non autorisé.
+        de:
+          name: Social Engineering und Phishing
+          description: Angreifer nutzen täuschende E-Mails, schädliche Anhänge oder Links und Social-Engineering-Techniken,
+            um Nutzer zur Preisgabe sensibler Informationen, zur Ausführung von Schadcode oder zur Gewährung unbefugten
+            Zugriffs zu verleiten.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-12
       ref_id: T.12
       name: Network Interception and Data Manipulation
@@ -762,6 +819,11 @@ objects:
           description:
             Les adversaires se positionnent entre les équipements réseau pour permettre l'écoute et la manipulation
             de données, ou voler des données opérationnelles à des fins personnelles ou pour de futures opérations.
+        de:
+          name: Abfangen des Netzwerkverkehrs und Datenmanipulation
+          description: Angreifer positionieren sich zwischen vernetzten Geräten, um den Netzwerkverkehr mitzulesen
+            und Daten zu manipulieren, oder entwenden betriebliche Daten zum eigenen Vorteil oder für spätere
+            Angriffe.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-13
       ref_id: T.13
       name: Uncontained Network Compromise
@@ -774,6 +836,10 @@ objects:
           description:
             Si un réseau est compromis par un utilisateur non autorisé, l'absence de segmentation permet à l'activité
             malveillante de se propager de manière incontrôlée à travers les réseaux et les infrastructures critiques.
+        de:
+          name: Unkontrollierte Ausbreitung im Netzwerk
+          description: Wird ein Netzwerk durch einen unbefugten Nutzer kompromittiert, kann sich bösartige Aktivität
+            wegen fehlender Segmentierung unkontrolliert über Netzwerke und kritische Infrastruktur ausbreiten.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-14
       ref_id: T.14
       name: Malware and Malicious Code
@@ -787,6 +853,11 @@ objects:
             Les adversaires déploient des logiciels malveillants incluant des charges utiles, des téléchargeurs et
             des portes dérobées pour contrôler des machines à distance, contourner les défenses et exécuter des actions post-compromission.
             Les logiciels malveillants peuvent se propager via des supports amovibles vers des réseaux isolés.
+        de:
+          name: Malware und Schadcode
+          description: Angreifer setzen Malware wie Schadfunktionen, Dropper und Hintertüren ein, um entfernte
+            Rechner zu steuern, Schutzmaßnahmen zu umgehen und nach der Kompromittierung weitere Aktionen auszuführen.
+            Über Wechseldatenträger kann sich Malware auch in physisch isolierte Netzwerke ausbreiten.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-15
       ref_id: T.15
       name: Unmanaged System Changes
@@ -799,6 +870,10 @@ objects:
           description:
             Capacité retardée, insuffisante ou incomplète à maintenir ou restaurer le fonctionnement des dispositifs
             critiques et des opérations de service en raison de changements non autorisés ou non testés.
+        de:
+          name: Unkontrollierte Systemänderungen
+          description: Nicht autorisierte oder ungetestete Änderungen verzögern oder beeinträchtigen die Fähigkeit,
+            die Funktion kritischer Geräte und den Betrieb von Diensten aufrechtzuerhalten oder vollständig wiederherzustellen.
     - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-16
       ref_id: T.16
       name: Data Destruction and Service Disruption
@@ -812,6 +887,11 @@ objects:
             Les adversaires perturbent les systèmes critiques, suppriment des données et désactivent les services
             de récupération pour empêcher la restauration des systèmes, causant une interruption de la disponibilité des actifs,
             services ou systèmes.
+        de:
+          name: Datenzerstörung und Dienstunterbrechung
+          description: Angreifer stören kritische Systeme, löschen Daten und deaktivieren Wiederherstellungsdienste,
+            um die Systemwiederherstellung zu verhindern. Dadurch wird die Verfügbarkeit von Assets, Diensten
+            oder Systemen beeinträchtigt.
   framework:
     urn: urn:intuitem:risk:framework:cisa-cpg-2.0
     ref_id: CISA-CPG-2.0
