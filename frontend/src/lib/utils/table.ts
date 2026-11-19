@@ -2100,8 +2100,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'risk_scenarios'],
 		// State is shown as a badge on the name column, so the column is opt-in.
 		optionalFields: {
-			head: ['state'],
-			body: ['state']
+			head: ['ref_id', 'state'],
+			body: ['ref_id', 'state']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2541,8 +2541,8 @@ export const listViewFields = {
 			'applied_controls'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['ref_id', 'createdAt'],
+			body: ['ref_id', 'created_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2756,8 +2756,8 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter', 'expiryDate', 'filteringLabels'],
-			body: ['perimeter', 'expiry_date', 'filtering_labels']
+			head: ['ref_id', 'perimeter', 'expiryDate', 'filteringLabels'],
+			body: ['ref_id', 'perimeter', 'expiry_date', 'filtering_labels']
 		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
@@ -2876,8 +2876,8 @@ export const listViewFields = {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt', 'filteringLabels'],
-			body: ['created_at', 'updated_at', 'filtering_labels']
+			head: ['ref_id', 'createdAt', 'updatedAt', 'filteringLabels'],
+			body: ['ref_id', 'created_at', 'updated_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -4229,7 +4229,7 @@ export interface BatchActionConfig {
 	adminOnly?: boolean;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
-	inputType?: 'date';
+	inputType?: 'date' | 'text';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -4911,6 +4911,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-shield-halved',
 			field: 'is_sensitive',
 			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{
+			type: 'change_field',
+			label: 'changeRetention',
+			icon: 'fa-solid fa-hourglass-half',
+			field: 'retention',
+			inputType: 'text'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

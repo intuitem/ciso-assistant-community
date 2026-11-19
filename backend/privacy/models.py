@@ -3,8 +3,8 @@ from iam.models import FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
-from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.constants import COUNTRY_CHOICES
+from core.base_models import AutoRefIdMixin, NameDescriptionMixin, AbstractBaseModel
+from core.constants import PRIVACY_COUNTRY_CHOICES
 from django.db.models import Count
 
 from auditlog.registry import auditlog
@@ -78,7 +78,7 @@ def create_default_privacy_terminologies():
     Terminology._seed_defaults(DEFAULT_PERSONAL_DATA_CATEGORIES)
 
 
-class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
+class Processing(AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("privacy_draft", "Draft"),
         ("privacy_in_review", "In Review"),
@@ -92,6 +92,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     # A DPIA is the controller's (Art. 35): a processor only assists (Art. 28(3)(f)).
     DPIA_ROLES = ("privacy_controller", "privacy_joint_controller")
+
+    auto_ref_id_prefix = "PRC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
@@ -441,7 +444,7 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     relationship_type = models.CharField(
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
@@ -472,7 +475,7 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         null=True,
         blank=True,
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     transfer_mechanism = models.CharField(
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
@@ -493,7 +496,7 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class RightRequest(NameDescriptionFolderMixin):
+class RightRequest(AutoRefIdMixin, NameDescriptionFolderMixin):
     REQUEST_TYPE_CHOICES = (
         ("deletion", "Deletion / Erasure"),
         ("rectification", "Rectification"),
@@ -510,6 +513,9 @@ class RightRequest(NameDescriptionFolderMixin):
         ("on_hold", "On hold"),
         ("done", "Done"),
     )
+
+    auto_ref_id_prefix = "RR"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     owner = models.ManyToManyField(
@@ -536,7 +542,7 @@ class RightRequest(NameDescriptionFolderMixin):
         verbose_name_plural = "Right Requests"
 
 
-class DataBreach(NameDescriptionFolderMixin):
+class DataBreach(AutoRefIdMixin, NameDescriptionFolderMixin):
     BREACH_TYPE_CHOICES = (
         ("privacy_destruction", "Destruction"),
         ("privacy_loss", "Loss"),
@@ -559,6 +565,9 @@ class DataBreach(NameDescriptionFolderMixin):
         ("privacy_subjects_notified", "Data Subjects Notified"),
         ("privacy_closed", "Closed"),
     )
+
+    auto_ref_id_prefix = "DB"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     assigned_to = models.ManyToManyField(

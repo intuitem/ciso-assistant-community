@@ -77,7 +77,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch, Sum, F, FloatField, TextField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
-from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
+from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES, DATA_LOCATION_CHOICES
 from core.dora import (
     DORA_ENTITY_TYPE_CHOICES,
     DORA_ENTITY_HIERARCHY_CHOICES,
@@ -1214,10 +1214,13 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
     API endpoint that allows entity assessments to be viewed or edited.
     """
 
+    search_fields = ["name", "description", "ref_id"]
+
     model = EntityAssessment
     export_config = {
         "filename": "entity_assessments_export",
         "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "version": {"source": "version", "label": "version", "escape": True},
             "description": {
@@ -2228,11 +2231,11 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(DATA_LOCATION_CHOICES))
 
     @action(detail=False, name="Get data location processing choices")
     def data_location_processing(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(DATA_LOCATION_CHOICES))
 
     @action(detail=False, name="Get data sensitiveness choices")
     def dora_data_sensitiveness(self, request):

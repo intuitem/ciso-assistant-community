@@ -8,10 +8,17 @@ description: >-
   per category submitted. The record arrives as a draft — reviewing and
   approving it stays with the DPO.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-29
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Neue Verarbeitung und zugehörige Daten erfassen
+    description: |-
+      Ein Team übermittelt eine neue Verarbeitung an die URL dieses Workflows. Im Datenschutzregister werden die Verarbeitung, ihr Zweck und je übermittelter Kategorie ein Eintrag für personenbezogene Daten angelegt. Die Erfassung erfolgt als Entwurf; Prüfung und Freigabe bleiben beim Datenschutzbeauftragten.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
     - urn: urn:intuitem:risk:library:workflow-privacy-processing-intake:workflow:processing-intake

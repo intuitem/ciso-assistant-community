@@ -89,6 +89,8 @@ GENERAL_SETTINGS_KEYS = [
     "mapping_max_depth",
     "allow_self_validation",
     "evidence_four_eyes",
+    "auto_ref_id",
+    "auto_ref_id_prefixes",
     "show_warning_external_links",
     "show_get_started",
     "builtin_metrics_retention_days",
@@ -124,6 +126,32 @@ LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
 }
+
+
+def _validate_auto_ref_id_prefixes(value) -> dict:
+    """Keep the non-empty overrides of known models; blank means the default."""
+    from core.base_models import AUTO_REF_ID_PREFIX_RE, auto_ref_id_models
+
+    if not isinstance(value, dict):
+        raise serializers.ValidationError({"auto_ref_id_prefixes": "Invalid value."})
+    known = auto_ref_id_models()
+    cleaned = {}
+    for model_name, prefix in value.items():
+        prefix = (prefix or "").strip() if isinstance(prefix, str) else prefix
+        if not prefix:
+            continue
+        if model_name not in known:
+            raise serializers.ValidationError(
+                {"auto_ref_id_prefixes": f"Unknown object type: {model_name}"}
+            )
+        if not isinstance(prefix, str) or not AUTO_REF_ID_PREFIX_RE.match(prefix):
+            raise serializers.ValidationError(
+                {
+                    "auto_ref_id_prefixes": "A prefix has 1 to 8 letters, digits, '-' or '_'."
+                }
+            )
+        cleaned[model_name] = prefix
+    return cleaned
 
 
 # Proposed on the audit form for frameworks without a scale of their own.
@@ -234,6 +262,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = _normalize_organisation_score_scale(
                     value
                 )
+            if key == "auto_ref_id" and not isinstance(value, bool):
+                raise serializers.ValidationError({"auto_ref_id": "Must be a boolean."})
+            if key == "auto_ref_id_prefixes":
+                validated_data["value"][key] = _validate_auto_ref_id_prefixes(value)
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(
