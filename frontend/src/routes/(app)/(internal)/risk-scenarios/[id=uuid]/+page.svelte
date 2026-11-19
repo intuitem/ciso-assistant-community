@@ -343,7 +343,9 @@
 				<div>
 					<p class="text-sm font-semibold text-surface-400-600">{m.targetTreatmentDate()}</p>
 					<p class="text-sm font-semibold">
-						{data.scenario.target_treatment_date !== null ? formatDate(new Date(data.scenario.target_treatment_date), false, getLocale()) : ""}
+						{data.scenario.target_treatment_date !== null
+							? formatDate(new Date(data.scenario.target_treatment_date), false, getLocale())
+							: ''}
 					</p>
 				</div>
 			</div>
