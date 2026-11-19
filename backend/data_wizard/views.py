@@ -1332,6 +1332,34 @@ class AssetRecordConsumer(RecordConsumer[list]):
             index.setdefault(_normalize_key(name), {})[name] = pk
         return index
 
+    def find_existing(self, record_data: dict) -> Optional[Asset]:
+        """Return the asset of the folder matching every non-blank field of
+        `Asset.fields_to_check` (ref_id and name, trimmed, case-insensitive),
+        or None.
+
+        Same rule as `Asset.is_unique_in_scope`: two assets may share a name when
+        their ref_ids differ, which the generic ref_id-or-name lookup refuses.
+        Values are trimmed because the serializer trims them before saving.
+
+        Raises FolderScopeError when no folder is known.
+        """
+        folder = record_data.get("folder") or self.folder_id
+        if folder is None:
+            raise FolderScopeError(
+                "Cannot resolve existing record without folder context: "
+                "provide an X-Folder-Id header or a 'domain' column"
+            )
+        query = {}
+        for field in Asset.fields_to_check:
+            value = record_data.get(field)
+            if isinstance(value, str):
+                value = value.strip()
+            if value not in (None, ""):
+                query[f"{field}__iexact"] = value
+        if not query:
+            return None
+        return Asset.objects.filter(folder=folder, **query).first()
+
     def create_context(self):
         return _get_security_objective_scale(), None
 
