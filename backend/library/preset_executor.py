@@ -542,6 +542,12 @@ class PresetExecutor:
         elif obj_type == "task_template":
             self._link_requirements(obj, item, object_refs)
 
+        elif obj_type == "findings_assessment":
+            audit_id = object_refs.get(item.get("audit") or "")
+            if audit_id and not obj.compliance_assessment_id:
+                obj.compliance_assessment_id = audit_id
+                obj.save(update_fields=["compliance_assessment"])
+
         elif obj_type == "risk_scenario":
             asset_refs = item.get("asset_refs", [])
             asset_ids = [object_refs[r] for r in asset_refs if r in object_refs]
@@ -704,6 +710,8 @@ class PresetExecutor:
                     "name": name,
                     "category": item.get("category", "pentest"),
                 }
+                if audit_id := object_refs.get(item.get("audit") or ""):
+                    data["compliance_assessment"] = audit_id
                 serializer = FindingsAssessmentWriteSerializer(
                     data=data, context=context
                 )

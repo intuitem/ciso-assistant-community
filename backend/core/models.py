@@ -1700,6 +1700,26 @@ class LibraryUpdater:
                 },
             )
 
+    def audit_guides_error(self) -> str | None:
+        """Refuse, before anything changes, guides that would break the pre-read
+        or take over a guide another library owns."""
+        from library.utils import AuditGuideImporter
+
+        guides = self.audit_guides
+        if not isinstance(guides, list) or any(
+            AuditGuideImporter(g).is_valid() for g in guides
+        ):
+            return "invalidLibraryUpdate"
+        urns = [g["urn"].lower() for g in guides]
+        if (
+            len(set(urns)) != len(urns)
+            or AuditGuide.objects.filter(urn__in=urns)
+            .exclude(library=self.old_library)
+            .exists()
+        ):
+            return "invalidLibraryUpdate"
+        return None
+
     def update_audit_guides(self):
         # Guides the new version no longer ships go, so none lingers to compete.
         AuditGuide.objects.filter(library=self.old_library).exclude(
@@ -2768,6 +2788,8 @@ class LibraryUpdater:
             return error_msg
         if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
+        if (error_msg := self.audit_guides_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -2789,11 +2811,6 @@ class LibraryUpdater:
             except ValueError:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
-        # A guide that would break the pre-read is refused before anything changes.
-        from library.utils import AuditGuideImporter
-
-        if any(AuditGuideImporter(g).is_valid() for g in self.audit_guides):
-            return "invalidLibraryUpdate"
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),

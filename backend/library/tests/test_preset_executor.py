@@ -4,6 +4,7 @@ from django.test import RequestFactory
 from core.models import (
     Asset,
     ComplianceAssessment,
+    FindingsAssessment,
     Framework,
     LoadedLibrary,
     Perimeter,
@@ -462,6 +463,12 @@ class TestPresetExecutorExistingDomain:
                     "audit": "iso_audit",
                     "requirements": ["REQ-1"],
                 },
+                {
+                    "type": "findings_assessment",
+                    "name": "Stage 1",
+                    "category": "audit",
+                    "audit": "iso_audit",
+                },
             ],
             steps=[
                 {
@@ -487,6 +494,8 @@ class TestPresetExecutorExistingDomain:
         assert [ra.requirement.ref_id for ra in task.requirement_assessments.all()] == [
             "REQ-1"
         ]
+        binder = FindingsAssessment.objects.get(folder=journey.folder)
+        assert str(binder.compliance_assessment_id) == ca_id
 
     def test_compliance_assessment_implementation_groups_are_applied(self):
         """A compliance_assessment preset item with implementation_groups should

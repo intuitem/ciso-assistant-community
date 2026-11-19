@@ -21,7 +21,8 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const audit = await auditRes.json();
 
 	// The evidence form behind "Upload this document": the page fills in name and requirement.
-	const evidenceModel = getModelInfo('evidences');
+	// A copy: the map entry is shared across requests.
+	const evidenceModel = { ...getModelInfo('evidences') };
 	const evidenceCreateForm = await superValidate(
 		{ folder: audit.folder?.id },
 		zod(modelSchema('evidences')),

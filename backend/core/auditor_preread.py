@@ -103,7 +103,10 @@ def _localized(item: dict, texts: dict) -> dict:
                 for x in item[part]
             ]
     if "sampling" in item:
-        out["sampling"] = [{**x, **texts.get(x["id"], {})} for x in item["sampling"]]
+        out["sampling"] = [
+            {**x, **t} if isinstance(t := texts.get(x["id"]), dict) else x
+            for x in item["sampling"]
+        ]
     return out
 
 
@@ -150,9 +153,14 @@ def guide_key(ref_id, urn, keys) -> str | None:
     return None
 
 
+def _qualifies(fit) -> bool:
+    share = fit["matched"] / fit["total"] if fit["total"] else 0
+    return fit["coverage"] >= GUIDE_COVERAGE and share >= NODE_SHARE
+
+
 def _rank(fit) -> tuple:
     # On a tie between guides written for other frameworks, ours (the reference) wins.
-    return (fit["exact"], fit["own"], fit["coverage"], fit["builtin"])
+    return (fit["exact"], fit["own"], _qualifies(fit), fit["coverage"], fit["builtin"])
 
 
 def resolve_guide(framework, forced: str | None = None) -> dict | None:
@@ -198,12 +206,7 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
         if best is None or _rank(found) > _rank(best):
             best = found
     if best:
-        share = best["matched"] / best["total"] if best["total"] else 0
-        best["applies"] = bool(
-            best["exact"]
-            or forced
-            or (best["coverage"] >= GUIDE_COVERAGE and share >= NODE_SHARE)
-        )
+        best["applies"] = bool(best["exact"] or forced or _qualifies(best))
     return best
 
 
@@ -263,7 +266,10 @@ def readiness(
     evidences = [e for e in evidences if usable(e)]
     provided = {r: [e for e in evs if usable(e)] for r, evs in filed.items()}
     counted = [*evidences, *(e for evs in provided.values() for e in evs)]
-    nothing_provided = not counted
+    # What the auditor watches on site is never a linked evidence.
+    requests = [r for r in guidance.get("requests") or [] if r["kind"] != "observation"]
+    # Every request set aside (or only observations): nothing is missing.
+    nothing_provided = not counted and bool(requests)
     for code, reason in (
         ("no_file", MISSING_FILE),
         ("unusable", UNUSABLE_EVIDENCE),
@@ -284,8 +290,6 @@ def readiness(
         reasons.append(QUALITY_ERROR)
     if ra_result == RequirementAssessment.Result.NOT_ASSESSED:
         reasons.append(NOT_ASSESSED)
-    # What the auditor watches on site is never a linked evidence.
-    requests = [r for r in guidance.get("requests") or [] if r["kind"] != "observation"]
     matchable = [
         r for r in requests if r.get("reference_control") or r.get("id") in filed
     ]
@@ -302,9 +306,11 @@ def readiness(
         for r in matchable
         if r.get("fresh_days")
     )
+    paired_stale = {}
     for r in matchable:
         for e in filed.get(r["id"], []):
             e["stale"] = bool(r.get("fresh_days")) and too_old([e], r["fresh_days"])
+            paired_stale[e["id"]] = paired_stale.get(e["id"]) or e["stale"]
     # Requests without a pairing take whatever evidence is left; it may answer
     # them (own naming, no reference control), so it is to confirm, not missing.
     open_requests = unmatched + [r for r in matchable if not filed.get(r["id"])]
@@ -312,10 +318,12 @@ def readiness(
     # of the open requests applies to the newest of them.
     windows = [r["fresh_days"] for r in open_requests if r.get("fresh_days")]
     stale = stale or bool(rest and windows and too_old(rest, min(windows)))
-    # A paired evidence is judged on its request's row instead.
+    # A paired evidence carries its request's verdict.
     for e in all_evidences:
         e["stale"] = (
-            e.get("id") not in paired and bool(windows) and too_old([e], min(windows))
+            paired_stale[e["id"]]
+            if e.get("id") in paired
+            else bool(windows) and too_old([e], min(windows))
         )
     if stale:
         reasons.append(STALE_EVIDENCE)
@@ -682,7 +690,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         "preparation": _preparation_payload(prep),
         "previous_set_asides": []
         if set_asides
-        else _previous_set_asides(compliance_assessment, fit["guide"]),
+        else _previous_set_asides(compliance_assessment, fit["guide"], user),
     }
 
 
@@ -716,11 +724,15 @@ def _preparation_payload(prep) -> dict | None:
     }
 
 
-def _previous_set_asides(compliance_assessment, guide) -> list:
-    """Set-asides of the latest other preparation in the domain on the same guide."""
+def _previous_set_asides(compliance_assessment, guide, user) -> list:
+    """Set-asides of the latest other preparation in the domain on the same
+    guide, among the audits the user may view."""
     for prep in (
         AuditPreparation.objects.filter(
             compliance_assessment__folder_id=compliance_assessment.folder_id,
+            compliance_assessment__in=RoleAssignment.get_viewable_object_ids(
+                user, ComplianceAssessment
+            ),
             set_asides__isnull=False,
         )
         .exclude(compliance_assessment=compliance_assessment)
@@ -886,7 +898,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                         },
                     )
             elif data.get("carry_over"):
-                for a in _previous_set_asides(compliance_assessment, guide()):
+                for a in _previous_set_asides(compliance_assessment, guide(), user):
                     AuditPreparationSetAside.objects.get_or_create(
                         preparation=prep,
                         entry=a["entry"],

@@ -871,6 +871,8 @@ class AuditGuideImporter:
             return "an audit guide must be a mapping"
         if missing_fields := self.REQUIRED_FIELDS - set(data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+        if not all(isinstance(data[f], str) and data[f] for f in ("urn", "framework")):
+            return "urn and framework must be URNs"
         entries = data["entries"]
         if not isinstance(entries, dict):
             return "entries must be a mapping keyed by requirement number"
@@ -938,7 +940,11 @@ class AuditGuideImporter:
             not isinstance(t, dict)
             or not isinstance(t.get("entries") or {}, dict)
             or not isinstance(t.get("sessions") or {}, dict)
-            or not all(isinstance(v, dict) for v in (t.get("entries") or {}).values())
+            or not all(
+                isinstance(v, dict)
+                and all(isinstance(x, (str, dict)) for x in v.values())
+                for v in (t.get("entries") or {}).values()
+            )
             or not all(isinstance(v, dict) for v in (t.get("sessions") or {}).values())
             for t in translations.values()
         ):
@@ -1515,8 +1521,17 @@ class LibraryImporter:
                 return reference_control_import_error
 
         if "audit_guides" in library_objects:
+            if not isinstance(library_objects["audit_guides"], list):
+                return "[AUDIT_GUIDE_ERROR] audit_guides must be a list"
             importers = [AuditGuideImporter(g) for g in library_objects["audit_guides"]]
             self._audit_guides = importers
+            urns = [
+                str(g.get("urn")).lower()
+                for g in library_objects["audit_guides"]
+                if isinstance(g, dict)
+            ]
+            if len(set(urns)) != len(urns):
+                return "[AUDIT_GUIDE_ERROR] two audit guides share a URN"
             for index, importer in enumerate(importers):
                 if (error := importer.is_valid()) is not None:
                     return "[AUDIT_GUIDE_ERROR] audit guide {}: {}".format(

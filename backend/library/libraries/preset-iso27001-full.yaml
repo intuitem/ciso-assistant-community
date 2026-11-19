@@ -219,6 +219,7 @@ objects:
         name: "Certification audit \u2014 Stage 1"
         category: audit
         ref: stage1_findings
+        audit: iso_audit
         translations:
           fr:
             name: "Audit de certification \u2014 \u00c9tape 1"
@@ -227,6 +228,7 @@ objects:
         name: "Certification audit \u2014 Stage 2"
         category: audit
         ref: stage2_findings
+        audit: iso_audit
         translations:
           fr:
             name: "Audit de certification \u2014 \u00c9tape 2"

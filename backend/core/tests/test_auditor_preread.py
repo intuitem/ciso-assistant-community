@@ -150,6 +150,10 @@ def test_readiness_states():
     assert readiness("not_applicable", GUIDE, [], [], TODAY) == ("excluded", [])
     assert readiness("compliant", GUIDE, [], [], TODAY)[0] == "gap"
     assert NOTHING_LINKED in readiness("compliant", GUIDE, [], [], TODAY)[1]
+    # Every request set aside, or only observed on site: nothing is missing.
+    assert readiness("compliant", {"requests": []}, [], [], TODAY) == ("ready", [])
+    seen_only = {"requests": [{"id": "o", "label": "o", "kind": "observation"}]}
+    assert readiness("compliant", seen_only, [], [], TODAY) == ("ready", [])
     # Evidence without a pairing may answer the requests: to confirm, never ready.
     assert readiness("compliant", GUIDE, [ev(10), ev(20)], [], TODAY) == (
         "to_confirm",
@@ -759,7 +763,13 @@ def test_library_update_refuses_bad_guides_and_drops_removed_ones():
     assert loaded.update() == "invalidLibraryUpdate"
     assert loaded.audit_guides.count() == 2
 
-    StoredLibrary.store_library_content(library(3, [_guide()]))
+    # Another library's guide URN cannot be taken over.
+    StoredLibrary.store_library_content(
+        library(3, [_guide(urn="urn:intuitem:risk:audit_guide:iso27001-2022")])
+    )
+    assert loaded.update() == "invalidLibraryUpdate"
+
+    StoredLibrary.store_library_content(library(4, [_guide()]))
     assert loaded.update() is None
     assert list(loaded.audit_guides.values_list("urn", flat=True)) == [
         "urn:acme:risk:audit_guide:t"
@@ -841,3 +851,49 @@ def test_preread_permissions_with_builtin_roles():
         url(audit, "pair/"), {**pair, "evidence": "not-a-uuid"}, format="json"
     )
     assert bad.status_code == 400 and bad.json() == {"error": "invalidField"}
+    # A locked audit's requirements cannot gain an evidence through the pre-read.
+    ComplianceAssessment.objects.filter(id=audit.id).update(is_locked=True)
+    locked = analyst.post(url(audit, "pair/"), pair, format="json")
+    assert locked.status_code == 403
+
+
+def test_paired_evidence_keeps_its_request_verdict():
+    old = {**ev(300), "id": "e1"}
+    monthly = {"requests": [{"id": "r1", "label": "x", "kind": "record", "fresh_days": 40}]}  # fmt: skip
+    listed = dict(old)
+    readiness("compliant", monthly, [listed], [], TODAY, filed={"r1": [dict(old)]})
+    assert listed["stale"] is True
+
+
+@pytest.mark.django_db
+def test_guide_urns_must_be_strings_and_unique():
+    from core.models import LoadedLibrary, StoredLibrary
+    from library.utils import AuditGuideImporter
+
+    assert AuditGuideImporter(_guide(urn=None)).is_valid()
+    assert AuditGuideImporter(_guide(framework=None)).is_valid()
+    content = yaml.safe_dump(
+        {
+            "urn": "urn:acme:risk:library:twins",
+            "locale": "en",
+            "ref_id": "twins",
+            "name": "Twins",
+            "version": 1,
+            "provider": "ACME",
+            "packager": "ACME",
+            "objects": {"audit_guides": [_guide(), _guide(ref_id="u")]},
+        }
+    ).encode()
+    stored, error = StoredLibrary.store_library_content(content)
+    assert error is None
+    assert stored.load() is not None
+    assert not LoadedLibrary.objects.filter(urn="urn:acme:risk:library:twins").exists()
+
+
+def test_a_guide_that_can_apply_ranks_first():
+    from core.auditor_preread import _rank
+
+    def fit(coverage, matched):
+        return {"exact": False, "own": False, "builtin": False, "coverage": coverage, "matched": matched, "total": 100}  # fmt: skip
+
+    assert _rank(fit(0.95, 95)) > _rank(fit(1.0, 1))

@@ -15879,6 +15879,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # requirement on the way also edits the requirement.
         needed = ["change_auditpreparation"]
         if request.data.get("attach") and not request.data.get("remove"):
+            if audit.is_locked:
+                return Response(
+                    {"error": "auditLocked"}, status=status.HTTP_403_FORBIDDEN
+                )
             needed.append("change_requirementassessment")
         if not all(
             RoleAssignment.is_access_allowed(
