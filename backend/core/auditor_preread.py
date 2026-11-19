@@ -177,8 +177,9 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
             "matched": len(mapping),
             "total": len(nodes),
             "exact": g.framework_urn == framework.urn,
-            # An organisation's own guide wins over the one we ship.
-            "own": g.provider != "intuitem",
+            # Among guides written for this framework, an organisation's own
+            # wins over ours; a guide for another framework never jumps ahead.
+            "own": g.provider != "intuitem" and g.framework_urn == framework.urn,
         }
         if best is None or _rank(found) > _rank(best):
             best = found

@@ -566,3 +566,67 @@ def test_findings_count_for_every_viewer():
     assert item["prior_findings"][0]["name"] is None
     assert item["prior_findings"][0]["source"] is False
     assert len(item["prior_findings"]) == 1
+
+
+@pytest.mark.django_db
+def test_own_guide_wins_only_on_its_own_framework():
+    root = Folder.get_root_folder()
+    ours = AuditGuide.objects.get(urn=GUIDE_URN)
+    iso = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    copy = Framework.objects.create(
+        name="ISO copy", urn="urn:custom:risk:framework:copy", folder=root
+    )
+    other = Framework.objects.create(
+        name="Other", urn="urn:custom:risk:framework:other", folder=root
+    )
+    for fw in (iso, copy):
+        for i, key in enumerate(ours.entries):
+            RequirementNode.objects.create(
+                framework=fw,
+                urn=f"{fw.urn.replace('framework', 'req_node')}:{key}",
+                ref_id=key.upper(),
+                assessable=True,
+                folder=root,
+            )
+
+    def own(urn, framework):
+        return AuditGuide.objects.create(
+            urn=urn,
+            ref_id=urn.rsplit(":", 1)[-1],
+            provider="ACME",
+            framework_urn=framework,
+            entries=ours.entries,
+            sessions=ours.sessions,
+            folder=root,
+        )
+
+    # A guide written for another framework does not take over by numbering.
+    own("urn:acme:risk:audit_guide:other", other.urn)
+    assert resolve_guide(iso)["guide"] == GUIDE_URN
+    assert resolve_guide(copy)["guide"] == GUIDE_URN
+    # The organisation's own guide for the same framework wins over ours.
+    own("urn:acme:risk:audit_guide:iso", ISO)
+    assert resolve_guide(iso)["guide"] == "urn:acme:risk:audit_guide:iso"
+
+
+@pytest.mark.django_db
+def test_list_shows_only_audits_whose_preread_can_be_opened():
+    from rest_framework.test import APIClient
+
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="listed")
+    framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    ComplianceAssessment.objects.create(
+        name="listed",
+        framework=framework,
+        perimeter=Perimeter.objects.create(name="p", folder=folder),
+        folder=folder,
+    )
+    url = "/api/compliance-assessments/auditor_preread_audits/"
+    for user, count in (
+        (User.objects.create_superuser(email="lister@test.local", password="x"), 1),
+        (User.objects.create_user(email="nobody-list@test.local"), 0),
+    ):
+        client = APIClient()
+        client.force_authenticate(user)
+        assert len(client.get(url).json()) == count

@@ -114,4 +114,4 @@ Each session lists the entries it covers in `members`; an entry belongs to one s
 
 A guide applies to an audit on its own framework, and to a framework with the same requirement numbering (a licensed copy, a translation): each requirement is matched by its number, falling back to the parent number (`4.2 a)` reads as `4.2`; `A5.1` and `A.05.01` read as `a.5.1`). When only part of the guide lands, the pre-read offers **Apply the guide anyway**.
 
-When several guides fit, the one written for the audit's framework wins, then a guide of your own over ours, then the best match.
+When several guides fit, a guide written for the audit's own framework wins, yours before ours. Otherwise, the guide whose numbering matches best applies.

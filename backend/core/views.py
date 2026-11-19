@@ -15925,7 +15925,21 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """Experimental: audits an audit guide applies to, or is offered for, by framework."""
         from core.auditor_preread import SUGGEST_COVERAGE, resolve_guide
 
-        audits = self.get_queryset().select_related("framework", "folder", "perimeter")
+        # Only audits whose pre-read the user may open (analyst and up).
+        perm = Permission.objects.get(codename="view_auditpreparation")
+        allowed = {}
+        audits = [
+            a
+            for a in self.get_queryset().select_related(
+                "framework", "folder", "perimeter"
+            )
+            if allowed.setdefault(
+                a.folder_id,
+                RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=a.folder
+                ),
+            )
+        ]
         fits = {}
         for framework in {a.framework for a in audits if a.framework}:
             fits[framework.id] = resolve_guide(framework)
