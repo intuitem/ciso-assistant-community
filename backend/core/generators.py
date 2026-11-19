@@ -1426,21 +1426,24 @@ def gen_audit_context(
 
     def row_layers(ra):
         """The requirement's score layers when the report shows more than the
-        implementation score, as its audit counts them (Framework Insights
-        does the same). A not applicable requirement has none: exports leave
-        its scores empty."""
+        implementation score: the documentation score as recorded, like the
+        CSV, the others as its audit counts them. A not applicable requirement
+        has none: exports leave its scores empty."""
         if len(shown_layers) == 1:
             return {}
         if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
             return dict.fromkeys(shown_layers)
-        layers = audit.requirement_layer_scores(
-            result=ra.result,
-            is_scored=ra.is_scored,
-            score=ra.score,
-            documentation_score=ra.documentation_score,
-            min_score=ra.requirement.min_score,
-            max_score=ra.requirement.max_score,
-        )
+        layers = {
+            **audit.requirement_layer_scores(
+                result=ra.result,
+                is_scored=ra.is_scored,
+                score=ra.score,
+                documentation_score=ra.documentation_score,
+                min_score=ra.requirement.min_score,
+                max_score=ra.requirement.max_score,
+            ),
+            "documentation_score": ra.documentation_score,
+        }
         return {
             layer: None if layers[layer] is None else round_score(layers[layer])
             for layer in shown_layers

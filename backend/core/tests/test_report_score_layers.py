@@ -11,6 +11,7 @@ import io
 from pypdf import PdfReader
 import pytest
 from django.urls import reverse
+from docx import Document
 from openpyxl import load_workbook
 from rest_framework import status
 
@@ -36,6 +37,7 @@ from core.tests.test_audit_word_export import (  # noqa: F401  (fixtures)
 )
 from core.typst_render import localized_template, render_pdf
 from global_settings.models import GlobalSettings
+from iam.models import User
 
 NA = RequirementAssessment.Result.NOT_APPLICABLE
 PREFIX = "urn:intuitem:test:req_node:report-layers"
@@ -235,6 +237,15 @@ class TestRequirementRows:
         assert row["documentation_score"] == 2
         assert row["maturity_score"] == 3
 
+    def test_rows_keep_a_missing_documentation_score_empty(self, layered_audit):
+        _set(layered_audit, "A-1", documentation_score=None)
+
+        row = _rows(_context(layered_audit))["A-1"]
+
+        assert row["documentation_score"] is None
+        # Counted at the bottom of the scale: (4 + 1) / 2.
+        assert row["maturity_score"] == 2.5
+
     def test_rows_are_out_of_the_requirement_own_scale(self, layered_audit):
         RequirementNode.objects.filter(
             framework=layered_audit.framework, ref_id="A-1"
@@ -372,6 +383,21 @@ class TestPdf:
 
         # A-1: implementation 4, documentation 2, maturity 3.
         assert f"{maturity}: 3/5" in _text(pdf)
+
+    def test_attestation_leaves_a_missing_documentation_score_empty(
+        self, layered_audit
+    ):
+        _set(layered_audit, "A-1", documentation_score=None)
+        payload, images = audit_context_for_typst(
+            _context(layered_audit), layered_audit, "auditor", "en", "attestation"
+        )
+        template = localized_template(REPORT_PROFILES["attestation"]["template"], "en")
+
+        text = _text(render_pdf(template, payload, images=images))
+
+        assert "Documentation: 1/5" not in text
+        assert "Documentation: –" in text
+        assert "Maturity: 2.5/5" in text
 
 
 @pytest.mark.django_db
@@ -531,3 +557,109 @@ class TestReaderVisibilityInExports:
         b = captured["category_scores"][CAT_B]
         assert "maturity_score" not in b and "documentation_score" not in b
         assert b["average_score"] == 5
+
+
+@pytest.mark.django_db
+class TestWordReport:
+    """The default Word templates print the category scores next to the radar."""
+
+    def _score_table(self, client, audit):
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        doc = Document(io.BytesIO(b"".join(response.streaming_content)))
+        tables = [
+            [[cell.text for cell in row.cells] for row in table.rows]
+            for table in doc.tables
+        ]
+        return next(t for t in tables if t[0][0] in ("Category", "Catégorie"))
+
+    def test_shows_the_three_scores(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        table = self._score_table(admin_client, layered_audit)
+        rows = {
+            next(
+                (k for k in ("Category A", "Category B", "Overall") if k in row[0]),
+                row[0],
+            ): row[1:]
+            for row in table[1:]
+        }
+        overall = layered_audit.get_global_score()
+
+        assert table[0] == [
+            "Category",
+            "Implementation",
+            "Documentation",
+            "Maturity",
+            "Scored",
+            "Items",
+        ]
+        assert rows["Category A"] == ["3", "3", "3", "2", "2"]
+        assert rows["Category B"] == ["5", "3", "4", "1", "1"]
+        assert rows["Overall"][:3] == [
+            f"{round_score(overall[layer]):g}"
+            for layer in (
+                "implementation_score",
+                "documentation_score",
+                "maturity_score",
+            )
+        ]
+
+    def test_follows_the_documentation_first_setting(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings.value = {**(settings.value or {}), "documentation_score_first": True}
+        settings.save()
+
+        header = self._score_table(admin_client, layered_audit)[0]
+
+        assert header[1:4] == ["Documentation", "Implementation", "Maturity"]
+
+    def test_without_documentation_score_shows_the_average(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        layered_audit.show_documentation_score = False
+        layered_audit.save()
+
+        table = self._score_table(admin_client, layered_audit)
+        rows = {
+            next(
+                (k for k in ("Category A", "Category B", "Overall") if k in row[0]),
+                row[0],
+            ): row[1:]
+            for row in table[1:]
+        }
+
+        assert table[0] == ["Category", "Average", "Scored", "Items"]
+        assert rows["Category B"] == ["5", "1", "1"]
+
+    def test_french_template(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        admin = User.objects.get(email="admin@audit-word-export-tests.com")
+        admin.preferences = {**(admin.preferences or {}), "lang": "fr"}
+        admin.save()
+
+        table = self._score_table(admin_client, layered_audit)
+
+        assert table[0] == [
+            "Catégorie",
+            "Implémentation",
+            "Documentation",
+            "Maturité",
+            "Évalués",
+            "Éléments",
+        ]
+        assert table[-1][0] == "Global"

@@ -187,7 +187,7 @@ These tiles show to whoever sees the audit's **Result**. When the audit has thre
 |---|---|---|
 | **Requirements data** | CSV | Flat list of requirements with scores, observations and answers |
 | **Requirements workbook** | XLSX | Full data including answers, scoring and progress |
-| **Executive summary** | DOCX | Cover page, spider chart, framework tree, scored requirements |
+| **Executive summary** | DOCX | Cover page, spider chart, category scores, framework tree, scored requirements |
 | **Audit posture** | PDF | Full detail: results, scores, charts and observations per requirement |
 | **Attestation to countersign** | PDF | Compliance status, commitments and tasks with a signature block, no scores or ratings |
 | **Bundle with evidences** | ZIP | HTML snapshot bundled with all attached evidence files |
@@ -195,9 +195,9 @@ These tiles show to whoever sees the audit's **Result**. When the audit has thre
 
 <figure><img src="../.gitbook/assets/audit-export-options.png" alt=""><figcaption><p><strong>Export options</strong> on an ISO 27001 audit, with the <strong>Audit</strong> and <strong>Action plan</strong> groups</p></figcaption></figure>
 
-Exports leave the score of a _Not applicable_ requirement empty. Per-category scores in the reports follow the audit's scoring rules: N/A requirements are left out, or count at the target when **anchor N/A to target** is enabled. An **Overall** row closes the category table with the audit's own score.
+Exports leave the score of a _Not applicable_ requirement empty. Per-category scores in the reports follow the audit's scoring rules: N/A requirements are left out, or count at the target when **anchor N/A to target** is enabled. An **Overall** row closes the category table with the audit's own score. On a sum-based audit, category and overall scores are shown on the audit's scale.
 
-When the audit has a documentation score, the reports show the implementation, documentation and maturity scores side by side, per category and per requirement, as [Framework Insights](../features/framework-report.md) does. The maturity score leads: the category radar plots it. The pair follows the **Show the documentation score first** setting. A reader who may not see the documentation score gets the implementation score alone. The CSV export adds `documentation_score` and `maturity_score` columns, and the Excel export adds a `maturity_score` column after the others. The import ignores that column: edit the two scores it is computed from.
+When the audit has a documentation score, the reports show the implementation, documentation and maturity scores side by side, per category and per requirement, as [Framework Insights](../features/framework-report.md) does. The maturity score leads: the category radar plots it. The pair follows the **Show the documentation score first** setting. A requirement shows its documentation score as recorded, empty when none was entered; its maturity score counts a missing documentation score at the bottom of the scale. A reader who may not see the documentation score gets the implementation score alone. The CSV export adds `documentation_score` and `maturity_score` columns, and the Excel export adds a `maturity_score` column after the others. The import ignores that column: edit the two scores it is computed from.
 
 Framework-specific exports, such as the [CyFun self-assessment](../features/framework-specific/cyfun.md#exporting-an-audit-to-the-workbook), are added to the list. Third-party respondents only get the posture and attestation PDFs and the bundle.
 

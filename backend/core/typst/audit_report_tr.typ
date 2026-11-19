@@ -280,7 +280,7 @@
           ([*Sonuç ayrıntısı:* #ra.extended_result],)
         } else { () }
         + if layered and ra.at("maturity_score", default: none) != none {
-          layers.map(l => [*#layer-label.at(l):* #score-text(ra.at(l, default: none))#out-of(ra)])
+          layers.map(l => [*#layer-label.at(l):* #score-text(ra.at(l, default: none))#if ra.at(l, default: none) != none { out-of(ra) }])
         } else if "score" in ra and ra.score != none {
           ([*Puan:* #ra.score#out-of(ra)],)
         } else { () }
