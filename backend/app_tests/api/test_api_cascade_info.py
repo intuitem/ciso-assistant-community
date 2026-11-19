@@ -1,6 +1,5 @@
 import pytest
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from knox.models import AuthToken
@@ -9,7 +8,6 @@ from rest_framework.test import APIClient
 from core.apps import startup
 from core.models import AppliedControl, Asset, Comment, Policy, ReferenceControl
 from core.views import FolderViewSet
-from custom_fields.models import CustomFieldDefinition
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -243,19 +241,15 @@ def domain_tree(target_folder: Folder) -> dict[str, Folder]:
 MOVE_PREVIEW_URL = "/api/folders/move-preview/"
 
 
-def _carried_names(payload: dict) -> set[str]:
-    return {
-        o["name"]
-        for group in payload["carried"]["grouped_objects"]
-        for o in group["objects"]
-    }
+def _counts(payload: dict) -> dict[str, int]:
+    return {g["label"]: g["count"] for g in payload["carried"]["groups"]}
 
 
 def test_single_delete_preview_still_names_what_a_non_recursive_role_destroys(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
-    """The move preview hides sub-domain content from a non-recursive role; deleting
-    a domain must keep naming it, as the delete modal shows no hidden count."""
+    """Deleting a domain names what it destroys, sub-domain content included, even
+    for a non-recursive role."""
     client = _scoped_client(
         "non-recursive-delete@cascade.test",
         "BI-RL-DMA",
@@ -285,17 +279,10 @@ def test_move_preview_lists_sub_domains_and_their_content_once(
 
     assert res.status_code == 200, res.content
     payload = res.json()
-    names = [
-        o["name"]
-        for group in payload["carried"]["grouped_objects"]
-        for o in group["objects"]
-    ]
-    assert sorted(names) == sorted(set(names))
-    assert {"SUB-SUB-DOMAIN", "CANARY-ASSET", "SUB-ASSET", "SUB-SUB-ASSET"} <= set(
-        names
-    )
-    assert not {"Target", "SUB-DOMAIN"} & set(names)
-    assert payload["carried"]["count"] == len(names)
+    counts = _counts(payload)
+    assert counts["domains"] == 1
+    assert counts["assets"] == 3
+    assert payload["carried"]["count"] == sum(counts.values())
 
     subjects = {s["name"]: s for s in payload["subjects"]}
     assert subjects["SUB-DOMAIN"]["below_selected"] is True
@@ -333,9 +320,9 @@ def test_entity_assessment_batch_delete_removes_enclave_audit(
     assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()
 
 
-def _group(payload: dict, model: str) -> dict | None:
+def _group(payload: dict, label: str) -> dict | None:
     return next(
-        (g for g in payload["carried"]["grouped_objects"] if g["model"] == model),
+        (g for g in payload["carried"]["groups"] if g["label"] == label),
         None,
     )
 
@@ -355,11 +342,8 @@ def test_carried_folders_are_grouped_by_type(
     )
 
     assert res.status_code == 200, res.content
-    domains = _group(res.json(), "Folder.DO")
-    assert domains["verbose_name"] == "Domain"
-    assert {o["name"] for o in domains["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
-    enclaves = _group(res.json(), "Folder.EN")
-    assert [o["name"] for o in enclaves["objects"]] == ["SOME-ENCLAVE"]
+    assert _counts(res.json())["domains"] == 2
+    assert _counts(res.json())["enclaves"] == 1
 
 
 def test_move_preview_only_takes_domains_as_subjects(
@@ -385,22 +369,6 @@ def test_move_preview_only_takes_domains_as_subjects(
     assert [s["name"] for s in mixed.json()["subjects"]] == ["SUB-DOMAIN"]
 
 
-def test_move_preview_caps_the_names_but_not_the_count(
-    admin_client: APIClient, domain_tree: dict[str, Folder], monkeypatch
-) -> None:
-    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_NAMES_PER_GROUP", 2)
-
-    res = admin_client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    assets = _group(res.json(), "Asset")
-    assert assets["count"] == 3
-    assert assets["capped"] is False
-    assert len(assets["objects"]) == 2
-
-
 def test_move_preview_stops_counting_at_the_cap(
     admin_client: APIClient, domain_tree: dict[str, Folder], monkeypatch
 ) -> None:
@@ -412,39 +380,17 @@ def test_move_preview_stops_counting_at_the_cap(
 
     assert res.status_code == 200, res.content
     payload = res.json()
-    assets = _group(payload, "Asset")
+    assets = _group(payload, "assets")
     assert (assets["count"], assets["capped"]) == (2, True)
-    domains = _group(payload, "Folder.DO")
+    domains = _group(payload, "domains")
     assert (domains["count"], domains["capped"]) == (2, False)
     assert payload["carried"]["capped"] is True
-
-
-def test_move_preview_stops_counting_hidden_objects_at_the_cap(
-    app_ready: Folder, domain_tree: dict[str, Folder], monkeypatch
-) -> None:
-    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_COUNT_CAP", 2)
-    client = _scoped_client(
-        "non-recursive-cap@cascade.test",
-        "BI-RL-DMA",
-        domain_tree["target"],
-        app_ready,
-        is_recursive=False,
-    )
-
-    res = client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    carried = res.json()["carried"]
-    assert (carried["hidden_count"], carried["hidden_capped"]) == (2, True)
 
 
 def test_move_preview_queries_do_not_grow_with_the_selection(
     admin_client: APIClient, app_ready: Folder
 ) -> None:
-    """Neither the listed domains nor the named role assignments may cost a query
-    each."""
+    """The selected domains may not cost a query each."""
     domains = []
     for i in range(4):
         domain = Folder.objects.create(
@@ -477,7 +423,7 @@ def test_move_preview_queries_do_not_grow_with_the_selection(
 def test_move_preview_lists_a_policy_once(
     admin_client: APIClient, target_folder: Folder
 ) -> None:
-    """A policy is an applied control seen through a proxy: one row, one entry."""
+    """A policy is an applied control seen through a proxy: one row, counted once."""
     Policy.objects.create(name="LOCAL-POLICY", folder=target_folder)
 
     res = admin_client.post(
@@ -485,42 +431,7 @@ def test_move_preview_lists_a_policy_once(
     )
 
     assert res.status_code == 200, res.content
-    names = [
-        o["name"]
-        for group in res.json()["carried"]["grouped_objects"]
-        for o in group["objects"]
-    ]
-    assert names.count("LOCAL-POLICY") == 1
-
-
-def test_move_preview_masks_principals_the_caller_cannot_view(
-    app_ready: Folder, domain_tree: dict[str, Folder]
-) -> None:
-    """Viewing a role assignment does not reveal a user or group the caller could
-    not read on its own."""
-    victim = User.objects.create_user("hidden-principal@cascade.test")
-    RoleAssignment.objects.create(
-        user=victim, role=Role.objects.get(name="BI-RL-ANA"), folder=domain_tree["sub"]
-    )
-    mover = Role.objects.create(name="RA-MOVER", folder=app_ready)
-    mover.permissions.set(
-        Permission.objects.filter(
-            codename__in=["view_folder", "change_folder", "view_roleassignment"]
-        )
-    )
-    client = _scoped_client(
-        "ra-mover@cascade.test", "RA-MOVER", domain_tree["target"], app_ready
-    )
-
-    res = client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    assignments = _group(res.json(), "RoleAssignment")
-    assert assignments["count"] == 2
-    assert "hidden-principal@cascade.test" not in res.content.decode()
-    assert "grp-ra-mover@cascade.test" not in res.content.decode()
+    assert _counts(res.json())["appliedControls"] == 1
 
 
 def test_move_preview_needs_the_change_permission_not_the_delete_one(
@@ -541,64 +452,7 @@ def test_move_preview_needs_the_change_permission_not_the_delete_one(
     )
 
     assert res.status_code == 200, res.content
-    assert "SUB-SUB-ASSET" in _carried_names(res.json())
-
-
-def test_move_preview_names_only_the_models_the_caller_may_view(
-    app_ready: Folder, domain_tree: dict[str, Folder]
-) -> None:
-    """view_folder shows the sub-domains, not what they hold: a role allowed to move
-    a domain without view_asset or view_roleassignment only gets counts for those."""
-    mover = Role.objects.create(name="BLIND-MOVER", folder=app_ready)
-    mover.permissions.set(
-        Permission.objects.filter(codename__in=["view_folder", "change_folder"])
-    )
-    client = _scoped_client(
-        "blind-mover@cascade.test", "BLIND-MOVER", domain_tree["target"], app_ready
-    )
-
-    res = client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    payload = res.json()
-    assert _carried_names(payload) == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
-    # Three assets, plus the mover's own role assignment and group in Target.
-    assert payload["carried"]["hidden_count"] == 5
-    assert "blind-mover@cascade.test" not in res.content.decode()
-
-
-def test_move_preview_does_not_name_people_through_str(
-    app_ready: Folder, domain_tree: dict[str, Folder]
-) -> None:
-    """A comment's `__str__` names its author: the preview must not, for a caller who
-    may read the comment but not the user."""
-    author = User.objects.create_user("secret.author@cascade.test")
-    author.first_name, author.last_name = "Secret", "Author"
-    author.save()
-    control = AppliedControl.objects.create(name="AC", folder=domain_tree["sub"])
-    Comment.objects.create(
-        body="hello", author=author, applied_control=control, folder=domain_tree["sub"]
-    )
-    mover = Role.objects.create(name="COMMENT-MOVER", folder=app_ready)
-    mover.permissions.set(
-        Permission.objects.filter(
-            codename__in=["view_folder", "change_folder", "view_comment"]
-        )
-    )
-    client = _scoped_client(
-        "comment-mover@cascade.test", "COMMENT-MOVER", domain_tree["target"], app_ready
-    )
-
-    res = client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    assert _group(res.json(), "Comment")["count"] == 1
-    assert "Secret Author" not in res.content.decode()
-    assert "secret.author" not in res.content.decode()
+    assert _counts(res.json())["assets"] == 2
 
 
 def test_move_preview_leaves_out_what_stays_in_other_domains(
@@ -621,16 +475,16 @@ def test_move_preview_leaves_out_what_stays_in_other_domains(
     )
 
     assert res.status_code == 200, res.content
-    carried = _carried_names(res.json())
-    assert "LOCAL-REFERENCE" in carried
-    assert "FOREIGN-CONTROL" not in carried
+    counts = _counts(res.json())
+    assert counts["referenceControls"] == 1
+    assert "appliedControls" not in counts
 
 
-def test_move_preview_only_names_what_the_caller_may_view(
+def test_move_preview_counts_without_naming(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
-    """A non-recursive role grants nothing on the sub-domains: their names and
-    content stay hidden, but the preview still says that something moves along."""
+    """A non-recursive role grants nothing on the sub-domains: what they hold still
+    counts, as it moves too, but no object is ever named."""
     client = _scoped_client(
         "non-recursive@cascade.test",
         "BI-RL-DMA",
@@ -645,40 +499,17 @@ def test_move_preview_only_names_what_the_caller_may_view(
 
     assert res.status_code == 200, res.content
     payload = res.json()
-    names = _carried_names(payload)
-    assert "CANARY-ASSET" in names
-    assert not {"SUB-DOMAIN", "SUB-SUB-DOMAIN", "SUB-ASSET", "SUB-SUB-ASSET"} & names
-    # The four above, plus the caller's role assignment: the role lacks
-    # view_roleassignment.
-    assert payload["carried"]["hidden_count"] == 5
-
-
-def test_move_preview_does_not_name_custom_field_values(
-    app_ready: Folder, domain_tree: dict[str, Folder]
-) -> None:
-    """Custom field values have no folder of their own: they must not slip past the
-    visibility check of the object they describe."""
-    definition = CustomFieldDefinition.objects.create(
-        content_type=ContentType.objects.get_for_model(Asset),
-        key="vendor_contract",
-        label="Vendor contract",
-        field_type="text",
+    assert (_counts(payload)["domains"], _counts(payload)["assets"]) == (2, 3)
+    assert all(
+        set(g) == {"label", "count", "capped"} for g in payload["carried"]["groups"]
     )
-    Asset.objects.get(name="SUB-ASSET").set_custom_field(definition, "SECRET-4242")
-    client = _scoped_client(
-        "non-recursive-cf@cascade.test",
-        "BI-RL-DMA",
-        domain_tree["target"],
-        app_ready,
-        is_recursive=False,
-    )
-
-    res = client.post(
-        MOVE_PREVIEW_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
-    )
-
-    assert res.status_code == 200, res.content
-    assert "SECRET-4242" not in res.content.decode()
+    for name in [
+        "CANARY-ASSET",
+        "SUB-DOMAIN",
+        "SUB-ASSET",
+        "non-recursive@cascade.test",
+    ]:
+        assert name not in res.content.decode()
 
 
 def test_move_preview_refuses_builtin_domains(
@@ -689,3 +520,25 @@ def test_move_preview_refuses_builtin_domains(
     )
 
     assert res.status_code == 403
+
+
+def test_move_preview_sums_the_other_types_in_one_capped_group(
+    admin_client: APIClient, target_folder: Folder, monkeypatch
+) -> None:
+    """Only the types a user knows get a line of their own: the others are summed,
+    and their count stops at the cap too."""
+    monkeypatch.setattr(FolderViewSet, "MOVE_PREVIEW_COUNT_CAP", 2)
+    control = AppliedControl.objects.create(name="AC", folder=target_folder)
+    for body in ["one", "two", "three"]:
+        Comment.objects.create(body=body, applied_control=control, folder=target_folder)
+
+    res = admin_client.post(
+        MOVE_PREVIEW_URL, {"ids": [str(target_folder.id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    payload = res.json()
+    others = _group(payload, "otherObjects")
+    assert (others["count"], others["capped"]) == (2, True)
+    assert payload["carried"]["groups"][-1] == others
+    assert "comments" not in _counts(payload)

@@ -4,22 +4,17 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
 	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
-	import CascadeGroupList, {
-		type CascadeGroup
-	} from '#lib/components/Modals/CascadeGroupList.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+
+	/** `label` is the i18n key of the type. `capped`: counting stopped at the
+	 * server's cap, so there are more than `count`. */
+	type CarriedGroup = { label: string; count: number; capped: boolean };
 
 	/** Response of `folders/move-preview`: the selected domains the caller may move,
-	 * and what they carry along. */
+	 * and how many objects of each type they carry along. */
 	type MovePreview = {
 		subjects: { id: string; name: string; below_selected: boolean }[];
-		/** `capped` / `hidden_capped`: counting stopped at the server's cap. */
-		carried: {
-			count: number;
-			capped?: boolean;
-			hidden_count: number;
-			hidden_capped?: boolean;
-			grouped_objects: CascadeGroup[];
-		};
+		carried: { count: number; capped: boolean; groups: CarriedGroup[] };
 	};
 
 	interface Props {
@@ -49,15 +44,6 @@
 	const flattenedNames = $derived(
 		(preview?.subjects ?? []).filter((s) => s.below_selected).map((s) => s.name)
 	);
-	const carriedTotal = $derived(preview ? preview.carried.count + preview.carried.hidden_count : 0);
-	const carriedLabel = $derived(
-		preview?.carried.capped || preview?.carried.hidden_capped
-			? `${carriedTotal}+`
-			: String(carriedTotal)
-	);
-	const hiddenLabel = $derived(
-		preview ? `${preview.carried.hidden_count}${preview.carried.hidden_capped ? '+' : ''}` : ''
-	);
 	const canConfirm = $derived(
 		preview !== null &&
 			preview.subjects.length > 0 &&
@@ -74,7 +60,7 @@
 			});
 			if (res.status === 403) {
 				// None of the selected domains may be moved by the caller.
-				preview = { subjects: [], carried: { count: 0, hidden_count: 0, grouped_objects: [] } };
+				preview = { subjects: [], carried: { count: 0, capped: false, groups: [] } };
 			} else if (!res.ok) {
 				throw new Error(`HTTP ${res.status}`);
 			} else {
@@ -131,22 +117,25 @@
 					{m.batchMoveFlattenWarning({ names: flattenedNames.join(', ') })}
 				</p>
 			{/if}
-			{#if carriedTotal > 0}
+			{#if preview.carried.count > 0}
 				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-3">
-						{m.batchMoveCarriedNotice({ count: carriedLabel })}
+						{m.batchMoveCarriedNotice({
+							count: `${preview.carried.count}${preview.carried.capped ? '+' : ''}`
+						})}
 					</div>
-					<div class="max-h-64 overflow-y-auto space-y-1">
-						<CascadeGroupList groups={preview.carried.grouped_objects} idPrefix="mov" />
-						{#if preview.carried.hidden_count}
-							<p
-								class="px-3 pt-2 text-xs text-surface-600-400"
-								data-testid="cascade-hidden-objects"
+					<ul class="max-h-64 overflow-y-auto text-sm" data-testid="batch-move-carried">
+						{#each preview.carried.groups as group (group.label)}
+							<li
+								class="flex items-center justify-between px-3 py-2 border-t border-surface-200-800"
 							>
-								{m.cascadeHiddenObjects({ count: hiddenLabel })}
-							</p>
-						{/if}
-					</div>
+								<span class="font-medium text-surface-950-50">{safeTranslate(group.label)}</span>
+								<span class="text-xs text-surface-600-400">
+									{group.count}{group.capped ? '+' : ''}
+								</span>
+							</li>
+						{/each}
+					</ul>
 				</div>
 			{/if}
 		{/if}

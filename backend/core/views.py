@@ -92,7 +92,7 @@ from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
 from django.utils import timezone, translation
-from django.utils.text import capfirst, slugify
+from django.utils.text import slugify
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -139,15 +139,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import (
-    Folder,
-    IdPGroup,
-    Permission,
-    Role,
-    RoleAssignment,
-    User,
-    UserGroup,
-)
+from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
 from iam.utils import ViewableFilter
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
@@ -10095,19 +10087,36 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
-    # Names returned per group; the count still covers every object in it.
-    MOVE_PREVIEW_NAMES_PER_GROUP = 50
     # Counts stop past this many rows, so a large subtree is never scanned in full:
     # a count over it is returned as the cap and flagged as capped.
     MOVE_PREVIEW_COUNT_CAP = 1000
-    # The object's own fields that may name it in the move preview. `__str__` is not
-    # used: on some models it embeds a related person (a comment's author, an
-    # answer's owner) the caller may not be allowed to see.
-    MOVE_PREVIEW_NAME_FIELDS = ("name", "email", "label", "title", "ref_id", "filename")
+    # The folder types and models the move preview counts on a line of their own,
+    # mapped to the i18n key of that line. Every other type is summed under
+    # "otherObjects": most are internal records a user would not recognise.
     MOVE_PREVIEW_FOLDER_LABELS = {
-        Folder.ContentType.DOMAIN: _("Domain"),
-        Folder.ContentType.ENCLAVE: _("Enclave"),
-        Folder.ContentType.PERSONAL: _("Personal folder"),
+        Folder.ContentType.DOMAIN: "domains",
+        Folder.ContentType.ENCLAVE: "enclaves",
+    }
+    MOVE_PREVIEW_MODEL_LABELS = {
+        "core.Perimeter": "perimeters",
+        "core.ComplianceAssessment": "complianceAssessments",
+        "core.RiskAssessment": "riskAssessments",
+        "ebios_rm.EbiosRMStudy": "ebiosRMStudies",
+        "resilience.BusinessImpactAnalysis": "businessImpactAnalysis",
+        "core.Asset": "assets",
+        "core.AppliedControl": "appliedControls",
+        "core.Evidence": "evidences",
+        "core.Incident": "incidents",
+        "core.Vulnerability": "vulnerabilities",
+        "core.SecurityException": "securityExceptions",
+        "core.RiskAcceptance": "riskAcceptances",
+        "core.Threat": "threats",
+        "core.ReferenceControl": "referenceControls",
+        "core.FindingsAssessment": "findingsAssessments",
+        "core.Finding": "findings",
+        "tprm.Entity": "entities",
+        "privacy.Processing": "processings",
+        "core.TaskTemplate": "taskTemplates",
     }
 
     @action(detail=False, methods=["post"], url_path="move-preview")
@@ -10116,13 +10125,14 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
         Covers the listed domains the caller may change; other folders are left out.
         `subjects` says for each one whether it sits below another listed domain:
-        moved to a common target, it leaves that subtree. `carried` groups the
-        folders and everything filed under the moved subtrees, each group with its
-        `count` and at most `MOVE_PREVIEW_NAMES_PER_GROUP` names; what the caller may
-        not view is counted in `hidden_count`, never named. Counts stop at
-        `MOVE_PREVIEW_COUNT_CAP`, with `capped` (per group and overall) or
-        `hidden_capped` set when there are more. 400 if `ids` is empty or longer
-        than `BATCH_SIZE_LIMIT`, 403 if none is changeable.
+        moved to a common target, it leaves that subtree. `carried` counts the
+        folders and everything filed under the moved subtrees, whatever the caller
+        may view, and names none of them: one group per type of
+        `MOVE_PREVIEW_FOLDER_LABELS` and `MOVE_PREVIEW_MODEL_LABELS`, labelled by its
+        i18n key, then an "otherObjects" group for the rest. Counts stop at
+        `MOVE_PREVIEW_COUNT_CAP`, with `capped` (per group and overall) set when
+        there are more. 400 if `ids` is empty or longer than `BATCH_SIZE_LIMIT`,
+        403 if none is changeable.
         """
         ids = request.data.get("ids")
         if not isinstance(ids, list) or not ids:
@@ -10135,7 +10145,6 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = request.user
         subjects = sorted(
             self.get_queryset()
             .filter(
@@ -10143,7 +10152,9 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 builtin=False,
                 content_type=Folder.ContentType.DOMAIN,
             )
-            .filter(id__in=RoleAssignment.get_changeable_object_ids(user, Folder)),
+            .filter(
+                id__in=RoleAssignment.get_changeable_object_ids(request.user, Folder)
+            ),
             key=lambda folder: folder.name.lower(),
         )
         if not subjects:
@@ -10162,141 +10173,47 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             "to_folder_id"
         )
 
-        content_models = self._folder_content_models(exempt=frozenset())
-        content_types = ContentType.objects.get_for_models(Folder, *content_models)
-        view_permissions = {
-            (permission.content_type_id, permission.codename): permission
-            for permission in Permission.objects.filter(
-                content_type__in=content_types.values(), codename__startswith="view_"
-            )
-        }
-
-        def view_permission(model) -> Permission | None:
-            return view_permissions.get(
-                (content_types[model].id, f"view_{model._meta.model_name}")
-            )
-
         cap = self.MOVE_PREVIEW_COUNT_CAP
+        groups: list[dict] = []
 
-        def capped_count(queryset) -> int:
-            """The row count, read no further than `cap + 1` rows."""
+        def capped_count(queryset: models.QuerySet) -> int:
             return queryset.order_by()[: cap + 1].count()
 
-        def own_name(obj) -> str:
-            fields = {field.name for field in obj._meta.concrete_fields}
-            for field in self.MOVE_PREVIEW_NAME_FIELDS:
-                if field in fields and (value := getattr(obj, field)):
-                    return str(value)
-            return f"{capfirst(obj._meta.verbose_name)} {str(obj.pk)[:8]}"
-
-        def readable_ids(model, pks) -> set:
-            """Which of `pks` the caller may view, checked for these ids only."""
-            pks = {pk for pk in pks if pk}
-            if not pks:
-                return set()
-            return set(
-                RoleAssignment.get_viewable_object_ids(user, model).filter(id__in=pks)
-            )
-
-        def assignment_names(assignments) -> list[str]:
-            # The assignment is viewable, its role and principal not necessarily:
-            # name only what the caller could read on its own.
-            roles = readable_ids(Role, (a.role_id for a in assignments))
-            users = readable_ids(User, (a.user_id for a in assignments))
-            user_groups = readable_ids(
-                UserGroup, (a.user_group_id for a in assignments)
-            )
-            names = []
-            for assignment in assignments:
-                role = (
-                    assignment.role.name
-                    if assignment.role_id in roles
-                    else str(_("Role assignment"))
+        def add_group(label: str, count: int) -> None:
+            if count:
+                groups.append(
+                    {"label": label, "count": min(count, cap), "capped": count > cap}
                 )
-                if assignment.user_id in users:
-                    names.append(f"{role} → {assignment.user.email}")
-                elif assignment.user_group_id in user_groups:
-                    names.append(f"{role} → {assignment.user_group.name}")
-                else:
-                    names.append(role)
-            return names
 
-        groups = []
-        hidden_count = 0
-
-        def add_group(key, verbose_name, model, queryset, order_field) -> None:
-            nonlocal hidden_count
-            total = capped_count(queryset)
-            if not total:
-                return
-            # Per model, not per folder: view_folder alone does not let a role read
-            # what a domain holds.
-            permission = view_permission(model)
-            if permission is None:
-                hidden_count += total
-                return
-            allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, permission)
-            visible = queryset.filter(folder_id__in=allowed_folder_ids)
-            count = capped_count(visible)
-            if total <= cap:
-                hidden_count += total - count
-            elif hidden_count <= cap:
-                hidden_count += capped_count(
-                    queryset.exclude(folder_id__in=allowed_folder_ids)
-                )
-            if not count:
-                return
-            rows = visible.order_by(order_field)
-            if model is RoleAssignment:
-                rows = rows.select_related("role", "user", "user_group")
-            rows = list(rows[: self.MOVE_PREVIEW_NAMES_PER_GROUP])
-            names = (
-                assignment_names(rows)
-                if model is RoleAssignment
-                else [own_name(obj) for obj in rows]
-            )
-            objects = [
-                {"id": str(obj.pk), "name": name} for obj, name in zip(rows, names)
-            ]
-            objects.sort(key=lambda o: (o["name"] or "").lower())
-            groups.append(
-                {
-                    "model": key,
-                    "verbose_name": str(verbose_name),
-                    "count": min(count, cap),
-                    "capped": count > cap,
-                    "objects": objects,
-                }
-            )
-
-        # Every folder below a moved domain moves with it, enclaves included. A
-        # folder's own folder is itself, so view_folder is checked on that folder.
-        carried_folders = (
-            Folder.objects.filter(id__in=descendant_ids)
-            .exclude(id__in=subject_ids)
-            .annotate(folder_id=F("id"))
+        # Every folder below a moved domain moves with it, enclaves included.
+        carried_folders = Folder.objects.filter(id__in=descendant_ids).exclude(
+            id__in=subject_ids
         )
         for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
             add_group(
-                f"Folder.{content_type}",
-                label,
-                Folder,
-                carried_folders.filter(content_type=content_type),
-                "name",
+                label, capped_count(carried_folders.filter(content_type=content_type))
             )
-        in_subtree = Q(folder_id__in=subject_ids) | Q(folder_id__in=descendant_ids)
-        for model in content_models:
-            # By name where there is one, so the capped names are the first ones.
-            has_name = any(field.name == "name" for field in model._meta.fields)
-            add_group(
-                model.__name__,
-                model._meta.verbose_name,
-                model,
-                model._base_manager.filter(in_subtree),
-                "name" if has_name else "pk",
+        other_count = capped_count(
+            carried_folders.exclude(
+                content_type__in=list(self.MOVE_PREVIEW_FOLDER_LABELS)
             )
+        )
 
-        groups.sort(key=lambda g: g["verbose_name"].lower())
+        in_subtree = Q(folder_id__in=subject_ids) | Q(folder_id__in=descendant_ids)
+        content_models = {
+            model._meta.label: model
+            for model in self._folder_content_models(exempt=frozenset())
+        }
+        for model_label, label in self.MOVE_PREVIEW_MODEL_LABELS.items():
+            if model := content_models.pop(model_label, None):
+                add_group(label, capped_count(model._base_manager.filter(in_subtree)))
+        for model in content_models.values():
+            # Once over the cap, the other types cannot change what is shown.
+            if other_count > cap:
+                break
+            other_count += capped_count(model._base_manager.filter(in_subtree))
+        add_group("otherObjects", other_count)
+
         return Response(
             {
                 "subjects": [
@@ -10310,9 +10227,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 "carried": {
                     "count": sum(g["count"] for g in groups),
                     "capped": any(g["capped"] for g in groups),
-                    "hidden_count": min(hidden_count, cap),
-                    "hidden_capped": hidden_count > cap,
-                    "grouped_objects": groups,
+                    "groups": groups,
                 },
             }
         )

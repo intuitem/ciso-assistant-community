@@ -5204,8 +5204,9 @@
 	"workshopTwo": "Atelier 2",
 	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
 	"cascadeBlockedWarning": "Suppression impossible : {count} objet(s) y font encore référence. Supprimez-les ou rattachez-les ailleurs au préalable.",
-	"cascadeHiddenObjects": "+ {count} objet(s) dans des domaines auxquels vous n'avez pas accès",
 	"batchMoveCarriedNotice": "{count} objet(s) associé(s) classé(s) sous les domaines sélectionnés seront déplacé(s) avec eux :",
+	"enclaves": "Enclaves",
+	"otherObjects": "Autres objets",
 	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
 	"cascadeAffectedNotice": [
 		{

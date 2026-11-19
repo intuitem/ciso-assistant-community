@@ -5392,8 +5392,9 @@
 	"viewWebhookendpoint": "View webhook endpoint",
 	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
 	"cascadeBlockedWarning": "This cannot be deleted: {count} object(s) still reference it. Delete or reassign them first.",
-	"cascadeHiddenObjects": "+ {count} object(s) in domains you cannot access",
 	"batchMoveCarriedNotice": "{count} related object(s) filed under the selected domains will move with them:",
+	"enclaves": "Enclaves",
+	"otherObjects": "Other objects",
 	"errorFetching": "Unable to load cascade information. Please try again.",
 	"cascadeAffectedNotice": [
 		{
