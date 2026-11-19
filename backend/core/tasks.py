@@ -22,7 +22,7 @@ from core.models import (
 )
 from iam.models import ServiceAccount, User
 from core import mailer
-from core.constants import EEA_COUNTRIES_SET
+from core.constants import GDPR_INTERNAL_LOCATIONS
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models, transaction
@@ -396,7 +396,7 @@ def _with_gap_flags(processings):
         _mechanism_missing=Exists(
             DataTransfer.objects.filter(
                 processing=OuterRef("pk"), transfer_mechanism=""
-            ).exclude(country__in=EEA_COUNTRIES_SET)
+            ).exclude(country__in=GDPR_INTERNAL_LOCATIONS)
         ),
     )
 
@@ -427,7 +427,7 @@ def processing_obligation_gaps(processing) -> list[str]:
         "_mechanism_missing",
         lambda: (
             processing.data_transfers.filter(transfer_mechanism="")
-            .exclude(country__in=EEA_COUNTRIES_SET)
+            .exclude(country__in=GDPR_INTERNAL_LOCATIONS)
             .exists()
         ),
     ):

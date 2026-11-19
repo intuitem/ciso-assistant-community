@@ -1466,6 +1466,19 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             fields=self.filterset_fields or [],
         )
 
+    def get_object_unfiltered(self):
+        """get_object() without the filter backends.
+
+        For a detail action whose own query parameters share a name with a list
+        filter (``search``, ``id``): get_object() would apply them to the lookup
+        of the object itself. Scoping and object permissions are unchanged."""
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        obj = generics.get_object_or_404(
+            self.get_queryset(), **{self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        )
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     @action(detail=True, name="Get the object's relation neighbourhood")
     def neighborhood(self, request, pk=None):
         """One pass over the curated relations, for the graph drawer."""
@@ -14166,7 +14179,7 @@ def _preview_suggestions_for_compliance_assessment(
                     category=rc.category,
                     name=rc.get_name_translated or rc.ref_id,
                     ref_id=rc.ref_id,
-                    description=rc.description,
+                    description=rc.get_description_translated,
                 )
             dedupe_key = str(rc.id)
             current = best.get(dedupe_key)
@@ -23847,9 +23860,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         """Options for one object-reference question on this request."""
         from core.object_references import ReferenceError_, options_for
 
-        response = self.get_object()
-        if response is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        # `search` narrows the options below, not the request being looked up.
+        response = self.get_object_unfiltered()
         question = Question.objects.filter(
             page__quick_form_id=response.quick_form_id,
             urn=request.query_params.get("question"),

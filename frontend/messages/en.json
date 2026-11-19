@@ -2439,7 +2439,7 @@
 	"ebiosRM": "EBIOS RM",
 	"ebiosRMStudies": "EBIOS RM studies",
 	"ebiosRMStudyARM": "EBIOS RM study (ARM format)",
-	"ebiosRMStudyARMDescription": "Import an EBIOS RM study from ARM Excel format.\nNote that this is a proprietary format, not all objects are supported and some imports could miss because of the headers or sheets changes.",
+	"ebiosRMStudyARMDescription": "Import an EBIOS RM study from ARM Excel format: the full study export, or a zip of the per-table exports.\nNote that this is a proprietary format, not all objects are supported and some imports could miss because of the headers or sheets changes.",
 	"ebiosRMStudyExcel": "EBIOS RM study (CISO Assistant format)",
 	"ebiosRMStudyExcelDescription": "Import an EBIOS RM study from a CISO Assistant Excel export. This allows sharing studies between different instances or restoring previously exported studies.",
 	"ebiosRMStudyEgerieXML": "EBIOS RM study (Egerie XML format)",
@@ -3144,6 +3144,8 @@
 	"delete": "Delete",
 	"changeStatus": "Change status",
 	"changeDeletionPolicy": "Change deletion policy",
+	"changeRetention": "Change retention",
+	"batchTextLeaveEmptyToClear": "Leave empty to clear",
 	"changeIsSensitive": "Change sensitivity",
 	"changeTransferMechanism": "Change transfer mechanism",
 	"changeHealth": "Change health check",
@@ -3829,6 +3831,7 @@
 	"addAccreditation": "Start an accreditation",
 	"actors": "Actors",
 	"cellsFilled": "cells filled",
+	"addActor": "Add actor",
 	"preview": "Preview",
 	"dragToReorder": "Drag to reorder",
 	"clickToRename": "Click to rename",
@@ -8222,5 +8225,9 @@
 	"reviewToastApproved": "Approved: {name}",
 	"reviewToastRejected": "Rejected: {name}",
 	"reviewUndoError": "The decision could not be undone.",
-	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again."
+	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again.",
+	"europeanUnion": "European Union",
+	"europeanEconomicArea": "European Economic Area",
+	"otherCountries": "Other Countries",
+	"notShownOnMap": "Not shown on map"
 }
