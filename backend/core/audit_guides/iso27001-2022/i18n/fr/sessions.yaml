@@ -30,4 +30,13 @@ sessions:
   suppliers: {label: "Sécurité des relations avec les fournisseurs"}
   compliance: {label: "Juridique, conformité et revues indépendantes"}
   performance: {label: "Évaluation des performances"}
-  improvement: {label: "Amélioration et suivi de l'étape 1"}
+  improvement: {label: "Amélioration : non-conformités et actions correctives"}
+  closing:
+    label: "Réunion de clôture"
+    r1: "La direction présente, ou une personne habilitée à accepter les constats et à engager des moyens"
+    r2: "Votre propre liste des points soulevés pendant l'audit, avec ce qui a été montré ou promis pour chacun"
+    r3: "La preuve de ce qui a été corrigé pendant l'audit, pour que l'auditeur en tienne compte"
+    r4: "Un responsable et une date pour chaque plan d'actions correctives à envoyer à l'organisme de certification"
+    p1: "Contester un constat pour la première fois en réunion de clôture : signalez un désaccord dès qu'il apparaît"
+    p2: "Repartir sans connaître la gravité de chaque constat (majeur, mineur, observation) ni le délai pour y répondre"
+    p3: "Une non-conformité majeure bloque la certification tant que sa correction n'est pas vérifiée, parfois lors d'une visite complémentaire"

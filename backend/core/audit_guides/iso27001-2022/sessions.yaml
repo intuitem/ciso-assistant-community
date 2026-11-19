@@ -54,4 +54,16 @@ sessions:
   - id: performance
     label: "Performance evaluation"
     members: ["9.1", "9.2.1", "9.2.2", "9.3.1", "9.3.2", "9.3.3"]
-  - {id: improvement, label: "Improvement and Stage 1 follow-up", members: ["10.1", "10.2"]}
+  - {id: improvement, label: "Improvement: nonconformities and corrective action", members: ["10.1", "10.2"]}
+  - id: closing
+    label: "Closing meeting"
+    members: []
+    requests:
+      - {id: r1, label: "Top management in the room, or someone with authority to accept the findings and commit resources", kind: record}
+      - {id: r2, label: "Your own running list of the points raised during the audit, with what was shown or promised for each", kind: record}
+      - {id: r3, label: "Evidence of anything corrected while the audit was running, so the auditor can take it into account", kind: record}
+      - {id: r4, label: "An owner and a date for each corrective action plan to send to the certification body", kind: document}
+    pitfalls:
+      - {id: p1, text: "Disputing a finding for the first time at the closing meeting: raise disagreements as soon as they come up"}
+      - {id: p2, text: "Leaving without knowing the grade of each finding (major, minor, observation) and the deadline to answer it"}
+      - {id: p3, text: "A major nonconformity holds up certification until its correction is verified, sometimes through a follow-up visit"}

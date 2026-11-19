@@ -4,6 +4,10 @@
 	import { tick } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
@@ -268,29 +272,27 @@
 	const modalStore = getModalStore();
 
 	// "Choose an existing document": one picker open at a time, searching every evidence the user sees.
-	let picking: string | null = $state(null);
-	let pickQuery = $state('');
-	let found: { id: string; name: string; folder?: { str: string } }[] = $state([]);
-	let searchSeq = 0;
-	function togglePick(key: string) {
-		picking = picking === key ? null : key;
-		pickQuery = '';
+	let picking: { key: string; ra: string; request: string } | null = $state(null);
+	const pickSchema = z.object({ evidence: z.string().nullable().optional() });
+	const pickForm = superForm(defaults({ evidence: null }, zod(pickSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		SPA: true,
+		validators: zod(pickSchema)
+	});
+	const pickValue = pickForm.form;
+	function togglePick(key: string, ra: string, request: string) {
+		picking = picking?.key === key ? null : { key, ra, request };
+		pickForm.reset();
 	}
 	$effect(() => {
-		if (!picking) return;
-		const q = pickQuery.trim();
-		const seq = ++searchSeq;
-		const t = setTimeout(async () => {
-			const res = await fetch(
-				`/evidences?${new URLSearchParams({ search: q, ordering: '-updated_at', limit: '8' })}`
-			);
-			if (seq === searchSeq) found = res.ok ? ((await res.json()).results ?? []) : [];
-		}, 250);
-		return () => clearTimeout(t);
+		const evidence = $pickValue.evidence;
+		if (evidence && picking) pick(picking.ra, picking.request, evidence);
 	});
 	async function pick(raId: string, request: string, evidence: string) {
-		await pair(raId, request, evidence, false, true);
 		picking = null;
+		pickForm.reset();
+		await pair(raId, request, evidence, false, true);
 	}
 
 	/** A file or link for a paired evidence that has neither: a new revision of it. */
@@ -930,58 +932,43 @@
 																	><i class="fa-solid fa-upload"></i>{m.prereadUpload()}</button
 																>
 																<button
-																	class="btn btn-sm {picking === key
+																	class="btn btn-sm {picking?.key === key
 																		? 'preset-filled-surface-500'
 																		: 'preset-tonal-surface'}"
 																	title={m.prereadPickHint()}
-																	aria-expanded={picking === key}
-																	onclick={() => togglePick(key)}
+																	aria-expanded={picking?.key === key}
+																	onclick={() => togglePick(key, selected.id, r.id)}
 																	><i class="fa-solid fa-magnifying-glass"
 																	></i>{m.prereadPickExisting()}</button
 																>
 															</span>
-															{#if picking === key}
-																{@const shown = [
-																	...candidates
-																		.filter((e) =>
-																			e.name!.toLowerCase().includes(pickQuery.trim().toLowerCase())
-																		)
-																		.map((e) => ({ ...e, here: true })),
-																	...found.filter((e) => !candidates.some((c) => c.id === e.id))
-																]}
+															{#if picking?.key === key}
 																<div
-																	class="ml-7 flex flex-col gap-1.5 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+																	class="ml-7 flex flex-col gap-2 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
 																>
-																	<input
-																		class="input py-1 text-sm"
-																		type="search"
-																		{@attach (el) => el.focus()}
-																		placeholder={m.prereadPickSearch()}
-																		aria-label={m.prereadPickSearch()}
-																		bind:value={pickQuery}
-																	/>
-																	<ul class="flex flex-col max-h-60 overflow-auto">
-																		{#each shown as e (e.id)}
-																			<li>
+																	{#if candidates.length}
+																		<span class="text-xs text-surface-600-400"
+																			>{m.prereadPickOnRequirement()}</span
+																		>
+																		<span class="flex flex-wrap gap-1.5">
+																			{#each candidates as e (e.id)}
 																				<button
-																					class="w-full text-left rounded px-2 py-1.5 text-sm hover:bg-primary-500/10 disabled:opacity-50 flex flex-wrap items-baseline gap-x-2"
+																					class="btn btn-sm preset-tonal-primary disabled:opacity-50"
 																					disabled={pairing !== null}
 																					onclick={() => pick(selected.id, r.id, e.id)}
+																					>{e.name}</button
 																				>
-																					<span class="grow">{e.name}</span>
-																					<span class="text-xs text-surface-600-400"
-																						>{'here' in e
-																							? m.prereadPickOnRequirement()
-																							: (e.folder?.str ?? '')}</span
-																					>
-																				</button>
-																			</li>
-																		{:else}
-																			<li class="px-2 py-1.5 text-sm text-surface-600-400">
-																				{m.prereadPickNone()}
-																			</li>
-																		{/each}
-																	</ul>
+																			{/each}
+																		</span>
+																	{/if}
+																	<AutocompleteSelect
+																		form={pickForm}
+																		field="evidence"
+																		optionsEndpoint="evidences"
+																		lazy
+																		optionsExtraFields={[['folder', 'str']]}
+																		label={m.prereadPickSearch()}
+																	/>
 																</div>
 															{/if}
 														{/if}
