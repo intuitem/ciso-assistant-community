@@ -6,12 +6,15 @@ import yaml
 
 from core.auditor_preread import (
     EVIDENCE_TO_CONFIRM,
+    EVIDENCE_TO_VALIDATE,
+    EXPIRES_BEFORE_AUDIT,
     MISSING_FILE,
     NOTHING_LINKED,
     OPEN_FINDING,
     OPEN_MINOR_FINDING,
     REQUEST_NOT_ON_FILE,
     STALE_EVIDENCE,
+    UNUSABLE_EVIDENCE,
     auditor_preread,
     guide_key,
     load_audit_guides,
@@ -20,9 +23,12 @@ from core.auditor_preread import (
     pair_request,
     readiness,
     resolve_guide,
+    update_preparation,
 )
 from core.models import (
+    Actor,
     AppliedControl,
+    AuditPreparation,
     ComplianceAssessment,
     Evidence,
     EvidenceRequestLink,
@@ -178,6 +184,19 @@ def test_readiness_states():
         "r2": [{"id": 2, **ev(5), "has_file": False}],
     }
     assert readiness("compliant", two, [], [], TODAY, (), one_empty) == ("weak", [MISSING_FILE])  # fmt: skip
+    # Rejected, expired or missing: on file but not counted, like no file.
+    for status in ("rejected", "expired", "missing"):
+        dead = {"r1": [{"id": 1, **ev(5), "status": status}]}
+        assert readiness("compliant", paired, [], [], TODAY, (), dead) == ("gap", [UNUSABLE_EVIDENCE])  # fmt: skip
+    lapsed = {"r1": [{"id": 1, **ev(5), "expiry_date": TODAY - timedelta(days=1)}]}
+    assert readiness("compliant", paired, [], [], TODAY, (), lapsed)[0] == "gap"
+    # Draft or in review counts, capped at weak; so does expiring before the audit.
+    draft = {"r1": [{"id": 1, **ev(5), "status": "in_review"}]}
+    assert readiness("compliant", paired, [], [], TODAY, (), draft) == ("weak", [EVIDENCE_TO_VALIDATE])  # fmt: skip
+    soon = {"r1": [{"id": 1, **ev(5), "expiry_date": TODAY + timedelta(days=10)}]}
+    due = TODAY + timedelta(days=30)
+    assert readiness("compliant", paired, [], [], TODAY, (), soon, due) == ("weak", [EXPIRES_BEFORE_AUDIT])  # fmt: skip
+    assert readiness("compliant", paired, [], [], TODAY, (), soon) == ("ready", [])
     errors = [{"severity": "error", "msgid": "x", "msg": "x"}]
     assert readiness("compliant", GUIDE, [ev(1), ev(1)], errors, TODAY)[0] == "gap"
 
@@ -361,7 +380,145 @@ def test_guide_projects_on_a_copy_and_pairs_by_hand():
     assert pair_request(audit, user, paired) is None
     by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
     assert [e["manual"] for e in by_id[c52.id]["filed"][asking["5.2"]]] == [True]
+    # The pairing holds for the audits of this domain only, and says so.
+    twin = ComplianceAssessment.objects.create(
+        name="twin", framework=copy, perimeter=audit.perimeter, folder=folder
+    )
+    twin.create_requirement_assessments()
+    elsewhere = Folder.objects.create(parent_folder=root, name="elsewhere")
+    away = ComplianceAssessment.objects.create(
+        name="away",
+        framework=copy,
+        perimeter=Perimeter.objects.create(name="q", folder=elsewhere),
+        folder=elsewhere,
+    )
+    away.create_requirement_assessments()
+    for a in (twin, away):
+        a.requirement_assessments.get(requirement__ref_id="A.5.1").evidences.add(doc)
+    reach = by_id[a51.id]["filed"][asking["a.5.1"]][0]["reach"]
+    assert "Clause 5.2" in reach["requirements"]
+    by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
+    assert by_id[a51.id]["filed"][asking["a.5.1"]][0]["reach"]["audits"] == 1
+
+    def manual_in(a):
+        items = auditor_preread(a, user)["items"]
+        a51_there = next(i for i in items if i["ref_id"] == "A.5.1")
+        return [e["manual"] for e in a51_there["filed"][asking["a.5.1"]]]
+
+    assert manual_in(twin) == [True]
+    assert manual_in(away) == []
     unpair = {"requirement_assessment": c52.id, "request": asking["5.2"], "evidence": doc.id, "remove": True}  # fmt: skip
     assert pair_request(audit, user, unpair) is None
     by_id = {i["id"]: i for i in auditor_preread(audit, user)["items"]}
     assert not by_id[a51.id]["filed"][asking["a.5.1"]]
+
+
+@pytest.mark.django_db
+def test_preparation_is_lazy_and_drives_readiness():
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="prep")
+    framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.18",
+        ref_id="A.5.18",
+        name="Access rights",
+        assessable=True,
+        folder=root,
+    )
+
+    def new_audit(name):
+        audit = ComplianceAssessment.objects.create(
+            name=name,
+            framework=framework,
+            perimeter=Perimeter.objects.create(name=name, folder=folder),
+            folder=folder,
+        )
+        audit.create_requirement_assessments()
+        return audit, audit.requirement_assessments.get()
+
+    audit, ra = new_audit("2026")
+    user = User.objects.create_superuser(email="prep@test.local", password="x")
+    payload = auditor_preread(audit, user)
+    assert payload["preparation"] is None and payload["previous_set_asides"] == []
+    # A rejected change creates nothing.
+    assert (
+        update_preparation(audit, user, {"fields": {"stage": "nope"}}) == "invalidField"
+    )
+    assert update_preparation(audit, user, {"set_aside": {"requirement_assessment": ra.id, "request": "r1"}}) == "reasonRequired"  # fmt: skip
+    assert not AuditPreparation.objects.exists()
+
+    fields = {"stage": "stage_2", "start_date": "2026-11-30", "end_date": "2026-12-02", "auditors": "A. Auditor"}  # fmt: skip
+    assert update_preparation(audit, user, {"fields": fields}) is None
+    prep = AuditPreparation.objects.get()
+    assert prep.folder == folder and prep.end_date == date(2026, 12, 2)
+
+    # Set aside: the requests stop counting, and their reason is shown.
+    review = Evidence.objects.create(name="Review", folder=folder)
+    EvidenceRevision.objects.create(
+        evidence=review, folder=folder, version=1, link="https://example.test/r"
+    )
+    ra.evidences.add(review)
+    before = auditor_preread(audit, user)["items"][0]
+    assert EVIDENCE_TO_CONFIRM in before["reasons"]
+    for rid in ("r1", "r2", "r3", "r4"):
+        aside = {"requirement_assessment": ra.id, "request": rid, "reason": "No access rights here"}  # fmt: skip
+        assert update_preparation(audit, user, {"set_aside": aside}) is None
+    item = auditor_preread(audit, user)["items"][0]
+    assert set(item["set_aside"]) == {"r1", "r2", "r3", "r4"}
+    assert EVIDENCE_TO_CONFIRM not in item["reasons"]
+
+    # Roles and sessions name actors.
+    actor = Actor.objects.get(user=user)
+    assert update_preparation(audit, user, {"role": {"role": "ciso", "actors": [actor.id]}}) is None  # fmt: skip
+    session = {"session": "access", "date": "2026-12-01", "start_time": "09:00", "location": "Room 2", "attendees": [actor.id]}  # fmt: skip
+    assert update_preparation(audit, user, {"session": session}) is None
+    assert update_preparation(audit, user, {"role": {"role": "ciso", "actors": ["00000000-0000-0000-0000-000000000000"]}}) == "unknownObject"  # fmt: skip
+    prep_payload = auditor_preread(audit, user)["preparation"]
+    assert [a["id"] for a in prep_payload["roles"]["ciso"]] == [actor.id]
+    assert prep_payload["sessions"]["access"]["location"] == "Room 2"
+
+    # The next audit of the domain is offered the set-asides, and takes them on request.
+    nxt, nxt_ra = new_audit("2027")
+    offered = auditor_preread(nxt, user)["previous_set_asides"]
+    assert {a["request"] for a in offered} == {"r1", "r2", "r3", "r4"}
+    assert update_preparation(nxt, user, {"carry_over": True}) is None
+    assert set(auditor_preread(nxt, user)["items"][0]["set_aside"]) == {"r1", "r2", "r3", "r4"}  # fmt: skip
+
+
+@pytest.mark.django_db
+def test_findings_count_for_every_viewer():
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="seen")
+    framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    node = RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.18",
+        ref_id="A.5.18",
+        name="Access rights",
+        assessable=True,
+        folder=root,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name="a",
+        framework=framework,
+        perimeter=Perimeter.objects.create(name="p", folder=folder),
+        folder=folder,
+    )
+    audit.create_requirement_assessments()
+    stage1 = FindingsAssessment.objects.create(
+        name="Stage 1", category="audit", perimeter=audit.perimeter, folder=folder
+    )
+    Finding.objects.create(
+        name="Secret",
+        findings_assessment=stage1,
+        requirement_node=node,
+        severity=2,
+        status="identified",
+        folder=folder,
+    )
+    nobody = User.objects.create_user(email="nobody@test.local")
+    item = auditor_preread(audit, nobody)["items"][0]
+    assert OPEN_FINDING in item["reasons"]
+    assert item["prior_findings"][0]["name"] is None
+    assert item["prior_findings"][0]["source"] is False

@@ -14628,8 +14628,8 @@ auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)
 
 class EvidenceRequestLink(AbstractBaseModel):
     """Experimental: an evidence marked by hand as answering one request of an
-    audit guide. Keyed by the guide, not the audit, so it holds at every audit
-    where the evidence shows up."""
+    audit guide. Keyed by the guide and the domain of the audit where it was
+    made, not the audit: it holds at every audit of that domain."""
 
     IAM_SCOPE_FIELD = "evidence"
 
@@ -14641,6 +14641,8 @@ class EvidenceRequestLink(AbstractBaseModel):
     guide = models.CharField(max_length=255)
     entry = models.CharField(max_length=64)
     request = models.CharField(max_length=16)
+    # The audited domain, not the evidence's: it stays if the audit moves.
+    domain = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name="+")
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
@@ -14648,7 +14650,108 @@ class EvidenceRequestLink(AbstractBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["evidence", "guide", "entry", "request"],
+                fields=["evidence", "guide", "entry", "request", "domain"],
                 name="unique_evidence_request_link",
+            )
+        ]
+
+
+class AuditPreparation(AbstractBaseModel, FolderMixin):
+    """Experimental: what an organisation decides while preparing one audit
+    with the auditor pre-read. Created on the first stored decision."""
+
+    class Stage(models.TextChoices):
+        STAGE_1 = "stage_1", _("Stage 1")
+        STAGE_2 = "stage_2", _("Stage 2")
+        SURVEILLANCE = "surveillance", _("Surveillance")
+        RECERTIFICATION = "recertification", _("Recertification")
+
+    compliance_assessment = models.OneToOneField(
+        ComplianceAssessment, on_delete=models.CASCADE, related_name="preparation"
+    )
+    # Guide forced for a framework the numbering only partly matches; blank
+    # means the one resolved automatically.
+    guide = models.CharField(max_length=255, blank=True)
+    stage = models.CharField(max_length=20, choices=Stage.choices, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    certification_body = models.ForeignKey(
+        "tprm.Entity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    auditors = models.CharField(max_length=255, blank=True)
+    # Hook for later: the real audit's result, to set against the forecast.
+    findings_assessment = models.ForeignKey(
+        FindingsAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    def save(self, *args, **kwargs):
+        self.folder = self.compliance_assessment.folder
+        super().save(*args, **kwargs)
+
+
+class AuditPreparationSetAside(AbstractBaseModel):
+    """A request of the guide that does not apply to this audit, and why."""
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="set_asides"
+    )
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    reason = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "entry", "request"],
+                name="unique_preparation_set_aside",
+            )
+        ]
+
+
+class AuditPreparationRole(AbstractBaseModel):
+    """Who answers for one interview role of the guide (ciso, hr, dpo...)."""
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="roles"
+    )
+    role = models.CharField(max_length=32)
+    actors = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "role"], name="unique_preparation_role"
+            )
+        ]
+
+
+class AuditPreparationSession(AbstractBaseModel):
+    """When and where one session of the guide takes place, and who attends."""
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="sessions"
+    )
+    session = models.CharField(max_length=32)
+    date = models.DateField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    attendees = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "session"], name="unique_preparation_session"
             )
         ]

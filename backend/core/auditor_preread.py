@@ -14,15 +14,24 @@ from operator import or_
 from pathlib import Path
 
 import yaml
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import get_language
 
 from core.models import (
+    Actor,
     AppliedControl,
+    AuditPreparation,
+    AuditPreparationRole,
+    AuditPreparationSession,
+    AuditPreparationSetAside,
+    ComplianceAssessment,
     Evidence,
     EvidenceRequestLink,
     EvidenceRevision,
     Finding,
+    Framework,
     RequirementAssessment,
     Severity,
     TaskNode,
@@ -31,6 +40,7 @@ from core.models import (
     _requirement_assessment_quality_findings,
 )
 from iam.models import RoleAssignment
+from tprm.models import Entity
 
 AUDIT_GUIDES_DIR = Path(__file__).parent / "audit_guides"
 
@@ -47,6 +57,27 @@ REQUEST_NOT_ON_FILE = "request_not_on_file"
 EVIDENCE_TO_CONFIRM = "evidence_to_confirm"
 QUALITY_WARNING = "quality_warning"
 MISSING_FILE = "missing_file"
+# Rejected, expired (by status or date) or marked missing: on file, not usable.
+UNUSABLE_EVIDENCE = "unusable_evidence"
+EVIDENCE_TO_VALIDATE = "evidence_to_validate"
+EXPIRES_BEFORE_AUDIT = "expires_before_audit"
+NOT_USABLE = {
+    Evidence.Status.REJECTED,
+    Evidence.Status.EXPIRED,
+    Evidence.Status.MISSING,
+}
+NOT_VALIDATED = {Evidence.Status.DRAFT, Evidence.Status.IN_REVIEW}
+# Quality rules on evidence the pre-read judges itself, over every path
+# (tasks included); kept, they would contradict it.
+EVIDENCE_RULES = {
+    "requirementAssessmentCompliantNoEvidence",
+    "requirementAssessmentPartialNoEvidence",
+    "requirementAssessmentEvidenceAllDraft",
+    "requirementAssessmentEvidenceExpired",
+    "requirementAssessmentEvidenceRejected",
+    "requirementAssessmentNoUsableEvidence",
+    "requirementAssessmentEvidenceStale",
+}
 GAP_REASONS = {OPEN_FINDING, NOTHING_LINKED, NON_COMPLIANT, QUALITY_ERROR}
 # A guide written for one framework applies to another (a licensed copy, a
 # translation) when nearly all of it lands there by requirement number and
@@ -178,7 +209,14 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
 
 
 def readiness(
-    ra_result, guidance, evidences, findings, today, prior_findings=(), filed=None
+    ra_result,
+    guidance,
+    evidences,
+    findings,
+    today,
+    prior_findings=(),
+    filed=None,
+    due_date=None,
 ) -> tuple[str, list]:
     """(ready | to_confirm | weak | gap | excluded, reason codes) for one requirement.
 
@@ -196,18 +234,34 @@ def readiness(
         reasons.append(OPEN_FINDING)
     elif still_open:
         reasons.append(OPEN_MINOR_FINDING)
-    # A document with neither file nor link is a placeholder: it holds its
-    # request (no "not on file") but provides nothing until the file is added.
-    fileless = any(not e["has_file"] for e in evidences) or any(
-        not e["has_file"] for evs in filed.values() for e in evs
-    )
-    evidences = [e for e in evidences if e["has_file"]]
-    provided = {r: [e for e in evs if e["has_file"]] for r, evs in filed.items()}
-    nothing_provided = not evidences and not any(provided.values())
-    if nothing_provided:
-        reasons.append(MISSING_FILE if fileless else NOTHING_LINKED)
-    elif fileless:
+
+    # An evidence without a file, or rejected, lapsed or marked missing, holds
+    # its request (no "not on file") but provides nothing until it is fixed.
+    def usable(e):
+        expiry = e.get("expiry_date")
+        return (
+            e["has_file"]
+            and e.get("status") not in NOT_USABLE
+            and not (expiry and expiry < today)
+        )
+
+    every = [*evidences, *(e for evs in filed.values() for e in evs)]
+    evidences = [e for e in evidences if usable(e)]
+    provided = {r: [e for e in evs if usable(e)] for r, evs in filed.items()}
+    counted = [*evidences, *(e for evs in provided.values() for e in evs)]
+    nothing_provided = not counted
+    if any(not e["has_file"] for e in every):
         reasons.append(MISSING_FILE)
+    if any(e["has_file"] and not usable(e) for e in every):
+        reasons.append(UNUSABLE_EVIDENCE)
+    if nothing_provided and not every:
+        reasons.append(NOTHING_LINKED)
+    if any(e.get("status") in NOT_VALIDATED for e in counted):
+        reasons.append(EVIDENCE_TO_VALIDATE)
+    if due_date and any(
+        e.get("expiry_date") and e["expiry_date"] < due_date for e in counted
+    ):
+        reasons.append(EXPIRES_BEFORE_AUDIT)
     if ra_result == RequirementAssessment.Result.NON_COMPLIANT:
         reasons.append(NON_COMPLIANT)
     if any(f["severity"] == "error" for f in findings):
@@ -256,7 +310,13 @@ def readiness(
 
 def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
     framework = compliance_assessment.framework
-    fit = resolve_guide(framework, forced_guide)
+    prep = (
+        AuditPreparation.objects.filter(compliance_assessment=compliance_assessment)
+        .select_related("certification_body")
+        .prefetch_related("set_asides", "roles__actors", "sessions__attendees")
+        .first()
+    )
+    fit = resolve_guide(framework, forced_guide or (prep and prep.guide) or None)
     if not fit or not fit["applies"]:
         suggestion = fit and fit["coverage"] >= SUGGEST_COVERAGE and _guide_summary(fit)
         return {
@@ -321,10 +381,10 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         .filter(id__in=RoleAssignment.get_viewable_object_ids(user, TaskTemplate))
         .values_list("id", "name")
     )
-    task_evidence_info = {
+    evidence_info = {
         eid: (ev_status, expiry)
         for eid, ev_status, expiry in Evidence.objects.filter(
-            id__in=task_evidence_ids
+            id__in=evidence_ids
         ).values_list("id", "status", "expiry_date")
     }
     # Same rule as the shared context: the newest revision decides the file.
@@ -360,35 +420,46 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
 
     # Findings on these requirements from any audit of the framework: Stage 1,
     # internal audits and earlier cycles live in their own audits.
+    # Every finding counts, so readiness is the same whoever looks; names and
+    # links only for those who may view the finding.
     prior = defaultdict(list)
-    for f in (
-        Finding.objects.filter(
-            Q(requirement_node__framework=framework)
-            | Q(requirement_assessment__requirement__framework=framework)
-        )
-        .filter(id__in=RoleAssignment.get_viewable_object_ids(user, Finding))
-        .select_related("findings_assessment")
-        .order_by("-findings_assessment__reported_at", "ref_id")
+    on_framework = Finding.objects.filter(
+        Q(requirement_node__framework=framework)
+        | Q(requirement_assessment__requirement__framework=framework)
+    )
+    visible_findings = set(
+        on_framework.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, Finding)
+        ).values_list("id", flat=True)
+    )
+    for f in on_framework.select_related("findings_assessment").order_by(
+        "-findings_assessment__reported_at", "ref_id"
     ):
         node_id = f.requirement_node_id or f.requirement_assessment.requirement_id
+        shown = f.id in visible_findings
         prior[node_id].append(
             {
-                "id": f.id,
-                "ref_id": f.ref_id,
-                "name": f.name,
+                "id": f.id if shown else None,
+                "ref_id": f.ref_id if shown else None,
+                "name": f.name if shown else None,
                 "severity": f.severity,
                 "status": f.status,
                 "open": f.status in OPEN_FINDING_STATUSES,
-                "source": f.findings_assessment and f.findings_assessment.name,
+                "source": shown
+                and f.findings_assessment
+                and f.findings_assessment.name,
                 "reported_at": f.findings_assessment
                 and f.findings_assessment.reported_at,
             }
         )
 
-    # Evidences marked by hand as answering a request, wherever they sit in the audit.
+    # Evidences marked by hand as answering a request in this audit's domain,
+    # wherever they sit in the audit.
     by_hand = defaultdict(set)
     for eid, entry, rid in EvidenceRequestLink.objects.filter(
-        guide=fit["guide"], evidence_id__in=evidence_ids
+        guide=fit["guide"],
+        domain_id=compliance_assessment.folder_id,
+        evidence_id__in=evidence_ids,
     ).values_list("evidence_id", "entry", "request"):
         by_hand[(entry, rid)].add(eid)
     # A request with a reference control is one document: paired once, it is
@@ -400,6 +471,12 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
             by_hand_rc[rc_of[pair]] |= eids
 
     today = date.today()
+    # Evidence must hold until the audit's last day, else its due date.
+    due_date = (prep and prep.end_date) or compliance_assessment.due_date
+    set_asides = {
+        (a.entry, a.request): {"reason": a.reason}
+        for a in (prep.set_asides.all() if prep else [])
+    }
     items = []
     for ra in compliance_assessment.requirement_assessments.select_related(
         "requirement"
@@ -423,6 +500,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
             {"severity": sev, "msgid": f["msgid"], "msg": f["msg"]}
             for sev, bucket in (("error", errors), ("warning", warnings))
             for f in bucket
+            if f["msgid"] not in EVIDENCE_RULES
         ]
         evidences = []
         ra_controls = context.controls.get(ra.id, {})
@@ -434,7 +512,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         linked = dict(context.evidences.get(ra.id, {}))
         for tid in ra_tasks:
             for eid in task_evidences[tid]:
-                linked.setdefault(eid, task_evidence_info[eid])
+                linked.setdefault(eid, evidence_info[eid])
         for eid, (ev_status, expiry) in linked.items():
             has_file, updated_at = revisions.get(eid, (False, None))
             evidences.append(
@@ -478,6 +556,8 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                         "name": evidence_names.get(eid),
                         "has_file": revisions.get(eid, (False, None))[0],
                         "updated_at": revisions.get(eid, (False, None))[1],
+                        "status": evidence_info.get(eid, (None, None))[0],
+                        "expiry_date": evidence_info.get(eid, (None, None))[1],
                         "here": eid in here,
                         "manual": eid in hand,
                     }
@@ -486,15 +566,24 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                 key=lambda e: e["updated_at"] or datetime.min.replace(tzinfo=UTC),
                 reverse=True,
             )
+        # A request set aside for this audit no longer counts either way.
+        aside = {rid: info for (k, rid), info in set_asides.items() if k == key}
+        judged = node_guidance and {
+            **node_guidance,
+            "requests": [
+                r for r in node_guidance.get("requests") or [] if r["id"] not in aside
+            ],
+        }
         state, reasons = (
             readiness(
                 ra.result,
-                node_guidance,
+                judged,
                 evidences,
                 findings,
                 today,
                 prior[node.id],
-                filed,
+                {r: evs for r, evs in filed.items() if r not in aside},
+                due_date,
             )
             if node_guidance
             else ("no_guidance", [])
@@ -515,17 +604,103 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                 "findings": findings,
                 "prior_findings": prior[node.id],
                 "filed": filed,
+                "set_aside": aside,
                 "readiness": state,
                 "reasons": reasons,
             }
         )
+    # What a pairing made by hand also answers: the other requirements here
+    # asking the same thing, and the other audits of the domain on this guide.
+    others = list(
+        ComplianceAssessment.objects.filter(
+            folder_id=compliance_assessment.folder_id,
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment),
+        )
+        .exclude(id=compliance_assessment.id)
+        .values_list("framework_id", flat=True)
+    )
+    on_guide = {
+        f.id
+        for f in Framework.objects.filter(id__in=others)
+        if (other := resolve_guide(f))
+        and other["applies"]
+        and other["guide"] == fit["guide"]
+    }
+    other_audits = sum(fid in on_guide for fid in others)
+    for item in items:
+        for rid, evs in item["filed"].items():
+            rc = rc_of.get((item["guide_key"], rid))
+            keys = {k for (k, _r), u in rc_of.items() if u == rc} if rc else set()
+            keys.add(item["guide_key"])
+            refs = [
+                o["ref_id"] or o["urn_suffix"]
+                for o in items
+                if o is not item and o["guide_key"] in keys
+            ]
+            for e in evs:
+                if e["manual"]:
+                    e["reach"] = {"requirements": refs, "audits": other_audits}
     return {
         "framework_urn": framework.urn,
         "supported": True,
         "guide": _guide_summary(fit),
         "items": items,
         "sessions": load_audit_sessions(locale).get(fit["guide"], []),
+        "preparation": _preparation_payload(prep),
+        "previous_set_asides": []
+        if set_asides
+        else _previous_set_asides(compliance_assessment, fit["guide"]),
     }
+
+
+def _actors(qs) -> list:
+    return [{"id": a.id, "str": str(a)} for a in qs]
+
+
+def _preparation_payload(prep) -> dict | None:
+    if prep is None:
+        return None
+    body = prep.certification_body
+    return {
+        "id": prep.id,
+        "guide": prep.guide,
+        "stage": prep.stage,
+        "start_date": prep.start_date,
+        "end_date": prep.end_date,
+        "certification_body": body and {"id": body.id, "str": str(body)},
+        "auditors": prep.auditors,
+        "roles": {r.role: _actors(r.actors.all()) for r in prep.roles.all()},
+        "sessions": {
+            s.session: {
+                "date": s.date,
+                "start_time": s.start_time,
+                "end_time": s.end_time,
+                "location": s.location,
+                "attendees": _actors(s.attendees.all()),
+            }
+            for s in prep.sessions.all()
+        },
+    }
+
+
+def _previous_set_asides(compliance_assessment, guide) -> list:
+    """Set-asides of the latest other preparation in the domain on the same guide."""
+    for prep in (
+        AuditPreparation.objects.filter(
+            folder_id=compliance_assessment.folder_id, set_asides__isnull=False
+        )
+        .exclude(compliance_assessment=compliance_assessment)
+        .select_related("compliance_assessment__framework")
+        .distinct()
+        .order_by("-updated_at")
+    ):
+        other = resolve_guide(prep.compliance_assessment.framework, prep.guide or None)
+        if other and other["applies"] and other["guide"] == guide:
+            return [
+                {"entry": a.entry, "request": a.request, "reason": a.reason}
+                for a in prep.set_asides.all()
+            ]
+    return []
 
 
 def _guide_summary(fit) -> dict:
@@ -539,6 +714,166 @@ def _guide_summary(fit) -> dict:
 
 
 PAIRING_ERRORS = ("unknownRequirementAssessment", "unknownRequest", "unknownEvidence")
+
+
+def _guide_request(compliance_assessment, data, forced_guide=None):
+    """(requirement assessment, guide fit, entry key, request) named by `data`,
+    or an error code from PAIRING_ERRORS. Observations cannot be filed."""
+    ra = compliance_assessment.requirement_assessments.filter(
+        id=data.get("requirement_assessment")
+    ).first()
+    if ra is None:
+        return PAIRING_ERRORS[0]
+    prep = getattr(compliance_assessment, "preparation", None)
+    fit = resolve_guide(
+        compliance_assessment.framework, forced_guide or (prep and prep.guide) or None
+    )
+    key = fit and fit["applies"] and fit["mapping"].get(ra.requirement_id)
+    entry = key and load_audit_guides()[fit["guide"]].get(key)
+    request = next(
+        (
+            r
+            for r in (entry or {}).get("requests", [])
+            if r["id"] == data.get("request")
+        ),
+        None,
+    )
+    if request is None or request["kind"] == "observation":
+        return PAIRING_ERRORS[1]
+    return ra, fit, key, request
+
+
+PREPARATION_ERRORS = ("invalidField", "unknownObject", "reasonRequired")
+
+
+class _Rejected(Exception):
+    """Leaves the preparation transaction, undoing a preparation created for nothing."""
+
+    def __init__(self, code):
+        self.code = code
+
+
+def _ids(model, values, user=None):
+    """The objects `values` names, or None if any is unknown (or not viewable)."""
+    values = values or []
+    qs = model.objects.filter(id__in=values)
+    if user is not None:
+        qs = qs.filter(id__in=RoleAssignment.get_viewable_object_ids(user, model))
+    found = list(qs)
+    return found if len(found) == len(set(values)) else None
+
+
+def update_preparation(compliance_assessment, user, data) -> str | None:
+    """Store one decision of the audit's preparation, creating it on the way.
+
+    `data` holds one of: "fields" (stage, dates, certification body, auditors,
+    guide), "set_aside" (requirement_assessment, request, reason, remove),
+    "carry_over" (take the previous preparation's set-asides), "role" (role,
+    actors) or "session" (session, date, times, location, attendees). Returns
+    None, or a code from PREPARATION_ERRORS / PAIRING_ERRORS. The caller has
+    checked the user may change the preparation.
+    """
+    try:
+        with transaction.atomic():
+            prep, _created = AuditPreparation.objects.get_or_create(
+                compliance_assessment=compliance_assessment
+            )
+            if "fields" in data:
+                fields = data["fields"] or {}
+                allowed = {
+                    "stage",
+                    "start_date",
+                    "end_date",
+                    "auditors",
+                    "guide",
+                    "certification_body",
+                }
+                if set(fields) - allowed:
+                    raise _Rejected(PREPARATION_ERRORS[0])
+                if "guide" in fields and fields["guide"] not in (
+                    "",
+                    *load_audit_guides(),
+                ):
+                    raise _Rejected(PREPARATION_ERRORS[0])
+                if "certification_body" in fields:
+                    body = fields.pop("certification_body")
+                    found = _ids(Entity, [body] if body else [], user)
+                    if found is None:
+                        raise _Rejected(PREPARATION_ERRORS[1])
+                    prep.certification_body = found[0] if found else None
+                for name, value in fields.items():
+                    setattr(
+                        prep,
+                        name,
+                        value
+                        or ("" if name in ("stage", "auditors", "guide") else None),
+                    )
+                prep.full_clean()
+                prep.save()
+            elif "set_aside" in data:
+                aside = data["set_aside"] or {}
+                found = _guide_request(compliance_assessment, aside)
+                if isinstance(found, str):
+                    raise _Rejected(found)
+                _ra, _fit, key, request = found
+                rows = prep.set_asides.filter(entry=key, request=request["id"])
+                if aside.get("remove"):
+                    rows.delete()
+                elif not (aside.get("reason") or "").strip():
+                    raise _Rejected(PREPARATION_ERRORS[2])
+                else:
+                    AuditPreparationSetAside.objects.update_or_create(
+                        preparation=prep,
+                        entry=key,
+                        request=request["id"],
+                        defaults={
+                            "reason": aside["reason"].strip(),
+                            "created_by": user,
+                        },
+                    )
+            elif data.get("carry_over"):
+                fit = resolve_guide(compliance_assessment.framework, prep.guide or None)
+                for a in _previous_set_asides(compliance_assessment, fit["guide"]):
+                    AuditPreparationSetAside.objects.get_or_create(
+                        preparation=prep,
+                        entry=a["entry"],
+                        request=a["request"],
+                        defaults={"reason": a["reason"], "created_by": user},
+                    )
+            elif "role" in data:
+                role = data["role"] or {}
+                actors = _ids(Actor, role.get("actors"))
+                if not role.get("role") or actors is None:
+                    raise _Rejected(PREPARATION_ERRORS[1])
+                row, _ = AuditPreparationRole.objects.get_or_create(
+                    preparation=prep, role=role["role"]
+                )
+                row.actors.set(actors)
+            elif "session" in data:
+                session = data["session"] or {}
+                attendees = _ids(Actor, session.get("attendees"))
+                if not session.get("session") or attendees is None:
+                    raise _Rejected(PREPARATION_ERRORS[1])
+                row, _ = AuditPreparationSession.objects.get_or_create(
+                    preparation=prep, session=session["session"]
+                )
+                for name in ("date", "start_time", "end_time", "location"):
+                    if name in session:
+                        setattr(
+                            row,
+                            name,
+                            session[name] or ("" if name == "location" else None),
+                        )
+                row.full_clean(exclude=["preparation"])
+                row.save()
+                row.attendees.set(attendees)
+            else:
+                raise _Rejected(PREPARATION_ERRORS[0])
+    except _Rejected as rejected:
+        return rejected.code
+    except ValidationError, ValueError:
+        return PREPARATION_ERRORS[0]
+    return None
 
 
 def _request_references(guidance) -> dict:
@@ -557,32 +892,23 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
     Returns None, or an error code from PAIRING_ERRORS. The caller has checked
     the user may edit the audit.
     """
-    ra = compliance_assessment.requirement_assessments.filter(
-        id=data.get("requirement_assessment")
-    ).first()
-    if ra is None:
-        return PAIRING_ERRORS[0]
-    fit = resolve_guide(compliance_assessment.framework, forced_guide)
-    key = fit and fit["applies"] and fit["mapping"].get(ra.requirement_id)
-    entry = key and load_audit_guides()[fit["guide"]].get(key)
-    request = next(
-        (
-            r
-            for r in (entry or {}).get("requests", [])
-            if r["id"] == data.get("request")
-        ),
-        None,
-    )
-    if request is None or request["kind"] == "observation":
-        return PAIRING_ERRORS[1]
+    found = _guide_request(compliance_assessment, data, forced_guide)
+    if isinstance(found, str):
+        return found
+    ra, fit, key, request = found
     # An evidence the user may see, linked to this requirement directly or
-    # through one of its applied controls; with "attach", any such evidence,
+    # through its applied controls or tasks; with "attach", any such evidence,
     # linked to the requirement on the way (picked from elsewhere in the domain).
     viewable = Evidence.objects.filter(
         id__in=RoleAssignment.get_viewable_object_ids(user, Evidence)
     )
     linked = viewable.filter(
-        Q(requirement_assessments=ra) | Q(applied_controls__requirement_assessments=ra)
+        Q(requirement_assessments=ra)
+        | Q(applied_controls__requirement_assessments=ra)
+        | Q(task_templates__requirement_assessments=ra)
+        | Q(task_templates__applied_controls__requirement_assessments=ra)
+        | Q(task_nodes__task_template__requirement_assessments=ra)
+        | Q(task_nodes__task_template__applied_controls__requirement_assessments=ra)
     )
     evidence = linked.filter(id=data.get("evidence")).distinct().first()
     if evidence is None and data.get("attach") and not data.get("remove"):
@@ -596,6 +922,7 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
         "guide": fit["guide"],
         "entry": key,
         "request": request["id"],
+        "domain_id": compliance_assessment.folder_id,
     }
     if data.get("remove"):
         # Unpaired everywhere the same document is asked, wherever it was paired.
@@ -603,7 +930,9 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
         rc = request.get("reference_control")
         same = [p for p, u in refs.items() if rc and u == rc] or [(key, request["id"])]
         links = EvidenceRequestLink.objects.filter(
-            evidence=evidence, guide=fit["guide"]
+            evidence=evidence,
+            guide=fit["guide"],
+            domain_id=compliance_assessment.folder_id,
         )
         links.filter(reduce(or_, (Q(entry=e, request=r) for e, r in same))).delete()
     else:

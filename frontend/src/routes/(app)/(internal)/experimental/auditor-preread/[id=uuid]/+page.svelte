@@ -10,7 +10,13 @@
 	import { z } from 'zod';
 	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import {
+		canPerformAction,
+		hasPermissionAnywhere,
+		isAccessAllowed
+	} from '#lib/utils/access-control.js';
 	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import type { PageData } from './$types';
 	import {
 		KINDS,
@@ -19,6 +25,7 @@
 		SECTIONS,
 		STAGES,
 		interviewPlan,
+		evidenceIssue,
 		isStale,
 		tooOld,
 		worstOf,
@@ -28,7 +35,10 @@
 		keyOf,
 		sessionPlan,
 		unpairedOf,
+		type ActorRef,
+		type Preparation,
 		type PrereadItem,
+		type Session,
 		type Readiness
 	} from '../preread';
 
@@ -86,7 +96,9 @@
 	let view: 'req' | 'sessions' | 'requests' | 'interviews' = $state('req');
 	let readinessFilter: Readiness | 'all' = $state('all');
 	let section = $state('all');
-	let stage: 0 | 1 | 2 = $state(0);
+	const prep = $derived(data.preread.preparation as Preparation | null);
+	// Stage 1 is the document review: the page opens on it.
+	let stage: 0 | 1 | 2 = $state(data.preread.preparation?.stage === 'stage_1' ? 1 : 0);
 	let query = $state('');
 	let flagged = $state(false);
 	let prepOpen = $state(false);
@@ -111,6 +123,7 @@
 	);
 	const isFlagged = (i: PrereadItem) => i.prior_findings.some((f) => f.open);
 	// Where to start: each step shows only while it has something left to do.
+	const onSite = $derived(!!prep?.stage && prep.stage !== 'stage_1');
 	const start = $derived.by(() => {
 		const open = (i: PrereadItem) => ['gap', 'weak', 'to_confirm'].includes(i.readiness);
 		return {
@@ -122,8 +135,12 @@
 				)
 				.sort((a, b) => b.items.length - a.items.length)
 				.slice(0, 3),
-			stage1: items.filter((i) => open(i) && i.guidance?.questions.some((q) => q.stage === 1))
-				.length
+			stage1: onSite
+				? 0
+				: items.filter((i) => open(i) && i.guidance?.questions.some((q) => q.stage === 1)).length,
+			sessions: onSite
+				? (data.preread.sessions ?? []).filter((x: Session) => !prep?.sessions[x.id]?.date).length
+				: 0
 		};
 	});
 	const matchesQuery = (i: PrereadItem) => {
@@ -208,7 +225,7 @@
 	}
 
 	const stepNo = (k: number) =>
-		[start.confirm, start.findings, start.documents.length, start.stage1]
+		[start.confirm, start.findings, start.documents.length, start.stage1, start.sessions]
 			.slice(0, k + 1)
 			.filter(Boolean).length;
 
@@ -242,6 +259,10 @@
 		if (has('nothing_linked', 'request_not_on_file')) out.push({ text: m.prereadTodoGather() });
 		if (has('evidence_to_confirm')) out.push({ text: m.prereadTodoPair() });
 		if (has('missing_file')) out.push({ text: m.prereadTodoAddFile() });
+		if (has('unusable_evidence')) out.push({ text: m.prereadTodoUnusable(), action: 'evidence' });
+		if (has('evidence_to_validate')) out.push({ text: m.prereadTodoValidate() });
+		if (has('expires_before_audit'))
+			out.push({ text: m.prereadTodoExpiresBeforeAudit(), action: 'evidence' });
 		if (has('stale_evidence')) out.push({ text: m.prereadTodoRefresh(), action: 'evidence' });
 		if (has('non_compliant')) out.push({ text: m.prereadTodoFix(), action: 'assess' });
 		if (has('not_assessed')) out.push({ text: m.prereadTodoAssess(), action: 'assess' });
@@ -267,6 +288,43 @@
 		}
 	}
 
+	// Each action shows only to who may do it; the backend enforces it anyway.
+	const domain = data.audit.folder?.id;
+	const allowed = (codename: string) =>
+		!!domain && isAccessAllowed(page.data.user, codename, domain);
+	// Pairing, set-asides and the plan are preparation work; the first one creates it.
+	const canPrepare = $derived(
+		allowed('change_auditpreparation') && (!!prep || allowed('add_auditpreparation'))
+	);
+	const canEditRA = $derived(allowed('change_requirementassessment'));
+	// Set-asides of the domain's previous audit, offered until this one has its own.
+	const previous: { reason: string }[] = $derived(
+		canPrepare ? (data.preread.previous_set_asides ?? []) : []
+	);
+	const canUpload = $derived(canPrepare && canEditRA && allowed('add_evidence'));
+	// The evidence may sit in another domain; the server checks the real one.
+	const canAddFile = $derived(hasPermissionAnywhere(page.data.user, 'add_evidencerevision'));
+	const ISSUE: Record<string, string> = {
+		unusable: 'text-error-600-400',
+		to_validate: 'text-warning-700-300',
+		expires_before_audit: 'text-warning-700-300'
+	};
+	const today = new Date().toISOString().slice(0, 10);
+	const expiryLabel = (date: string) =>
+		(date < today ? m.prereadExpiredOn : m.prereadExpires)({
+			date: new Date(date).toLocaleDateString(getLocale())
+		});
+	function reachText(r: { requirements: string[]; audits: number }) {
+		const parts = [];
+		if (r.requirements.length)
+			parts.push(
+				r.requirements.slice(0, 3).join(', ') +
+					(r.requirements.length > 3 ? ` +${r.requirements.length - 3}` : '')
+			);
+		if (r.audits) parts.push(m.prereadReachAudits({ count: r.audits }));
+		return parts.join(', ');
+	}
+
 	let pairing: string | null = $state(null);
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -287,12 +345,92 @@
 	}
 	$effect(() => {
 		const evidence = $pickValue.evidence;
-		if (evidence && picking) pick(picking.ra, picking.request, evidence);
+		if (evidence && picking) pick(picking.ra, picking.request, evidence, true);
 	});
-	async function pick(raId: string, request: string, evidence: string) {
+	async function pick(raId: string, request: string, evidence: string, attach = false) {
 		picking = null;
 		pickForm.reset();
-		await pair(raId, request, evidence, false, true);
+		await pair(raId, request, evidence, false, attach);
+	}
+
+	/** Store one decision of the preparation; true when saved. */
+	async function savePrep(body: Record<string, unknown>) {
+		const res = await fetch(`/experimental/auditor-preread/${data.audit.id}/preparation`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+		if (!res.ok) {
+			toastStore.trigger({
+				message: res.status === 403 ? m.prereadCannotEdit() : m.prereadNotSaved(),
+				background: 'preset-filled-error-500'
+			});
+			return false;
+		}
+		await invalidateAll();
+		return true;
+	}
+
+	// One editor open at a time: the audit panel, a role or a session.
+	const prepSchema = z.object({
+		body: z.string().nullable().optional(),
+		actors: z.array(z.string()).optional()
+	});
+	const prepForm = superForm(defaults({ body: null, actors: [] }, zod(prepSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		SPA: true,
+		validators: zod(prepSchema)
+	});
+	const prepValue = prepForm.form;
+	let editing: { kind: 'audit' | 'role' | 'session'; key: string } | null = $state(null);
+	let draft = $state({ stage: '', start_date: '', end_date: '', auditors: '' });
+	let slot = $state({ date: '', start_time: '', end_time: '', location: '' });
+	const ids = (list?: ActorRef[]) => (list ?? []).map((a) => a.id);
+	function edit(kind: 'audit' | 'role' | 'session', key = '') {
+		editing = { kind, key };
+		const s = prep?.sessions[key];
+		draft = {
+			stage: prep?.stage ?? '',
+			start_date: prep?.start_date ?? '',
+			end_date: prep?.end_date ?? '',
+			auditors: prep?.auditors ?? ''
+		};
+		slot = {
+			date: s?.date ?? '',
+			start_time: s?.start_time?.slice(0, 5) ?? '',
+			end_time: s?.end_time?.slice(0, 5) ?? '',
+			location: s?.location ?? ''
+		};
+		prepForm.reset({
+			data: {
+				body: prep?.certification_body?.id ?? null,
+				actors: kind === 'role' ? ids(prep?.roles[key]) : ids(s?.attendees)
+			}
+		});
+	}
+	async function saveEdit() {
+		if (!editing) return;
+		const { kind, key } = editing;
+		const body =
+			kind === 'audit'
+				? { fields: { ...draft, certification_body: $prepValue.body ?? null } }
+				: kind === 'role'
+					? { role: { role: key, actors: $prepValue.actors ?? [] } }
+					: { session: { session: key, ...slot, attendees: $prepValue.actors ?? [] } };
+		if (await savePrep(body)) editing = null;
+	}
+
+	// "Doesn't apply": one reason box open at a time.
+	let asideFor: string | null = $state(null);
+	let asideReason = $state('');
+	async function setAside(ra: string, request: string, remove = false) {
+		const body = { requirement_assessment: ra, request, reason: asideReason, remove };
+		if (await savePrep({ set_aside: body })) {
+			asideFor = null;
+			asideReason = '';
+			kept = ra;
+		}
 	}
 
 	/** A file or link for a paired evidence that has neither: a new revision of it. */
@@ -424,6 +562,74 @@
 					<i class="fa-solid fa-arrow-up-right-from-square"></i>{m.prereadOpenAudit()}
 				</a>
 			</div>
+			{#if data.preread.supported}
+				{@const stageLabel = prep?.stage ? safeTranslate(`prereadStage_${prep.stage}`) : ''}
+				{@const dates = [prep?.start_date, prep?.end_date]
+					.filter(Boolean)
+					.map((d) => new Date(d!).toLocaleDateString(getLocale()))
+					.join(' – ')}
+				<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+					<i class="fa-solid fa-calendar-check text-surface-500"></i>
+					<span class={stageLabel || dates ? '' : 'text-surface-600-400'}
+						>{[stageLabel, dates, prep?.certification_body?.str, prep?.auditors]
+							.filter(Boolean)
+							.join(' · ') || m.prereadPrepNone()}</span
+					>
+					{#if canPrepare}
+						<button
+							class="btn btn-sm preset-tonal-primary"
+							aria-expanded={editing?.kind === 'audit'}
+							onclick={() => (editing?.kind === 'audit' ? (editing = null) : edit('audit'))}
+							><i class="fa-solid fa-pen"></i>{m.prereadPrepare()}</button
+						>
+					{/if}
+				</div>
+				{#if editing?.kind === 'audit'}
+					<div
+						class="rounded-base border border-surface-200-800 bg-surface-50-950 p-4 grid gap-3 md:grid-cols-2"
+					>
+						<label class="flex flex-col gap-1 text-sm"
+							><span class="font-medium">{m.prereadStageField()}</span>
+							<select class="select" bind:value={draft.stage}>
+								<option value="">{m.prereadStageNone()}</option>
+								{#each ['stage_1', 'stage_2', 'surveillance', 'recertification'] as v (v)}
+									<option value={v}>{safeTranslate(`prereadStage_${v}`)}</option>
+								{/each}
+							</select>
+						</label>
+						<label class="flex flex-col gap-1 text-sm"
+							><span class="font-medium">{m.prereadAuditors()}</span>
+							<input class="input" type="text" bind:value={draft.auditors} />
+						</label>
+						<label class="flex flex-col gap-1 text-sm"
+							><span class="font-medium">{m.prereadFirstDay()}</span>
+							<input class="input" type="date" bind:value={draft.start_date} />
+						</label>
+						<label class="flex flex-col gap-1 text-sm"
+							><span class="font-medium">{m.prereadLastDay()}</span>
+							<input class="input" type="date" bind:value={draft.end_date} />
+							<span class="text-xs text-surface-600-400">{m.prereadLastDayHint()}</span>
+						</label>
+						<div class="md:col-span-2">
+							<AutocompleteSelect
+								form={prepForm}
+								field="body"
+								optionsEndpoint="entities"
+								nullable
+								label={m.prereadCertificationBody()}
+							/>
+						</div>
+						<div class="md:col-span-2 flex justify-end gap-2">
+							<button class="btn btn-sm preset-tonal-surface" onclick={() => (editing = null)}
+								>{m.cancel()}</button
+							>
+							<button class="btn btn-sm preset-filled-primary-500" onclick={saveEdit}
+								>{m.save()}</button
+							>
+						</div>
+					</div>
+				{/if}
+			{/if}
 
 			{#if data.preread.supported && items.length}
 				<div class="flex flex-col gap-2">
@@ -462,7 +668,7 @@
 		</div>
 	</header>
 
-	{#if data.preread.supported && (start.confirm || start.findings || start.documents.length || start.stage1)}
+	{#if data.preread.supported && (start.confirm || start.findings || start.documents.length || start.stage1 || start.sessions || previous.length)}
 		<section
 			class="card border border-primary-500/40 bg-primary-500/5 p-4 flex flex-col gap-2"
 			aria-label={m.prereadStartTitle()}
@@ -526,7 +732,27 @@
 						>
 					</li>
 				{/if}
+				{#if start.sessions}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(4)}.</span>
+						<button class="anchor text-left" onclick={() => (view = 'sessions')}
+							>{m.prereadStartSessions({ count: start.sessions })}</button
+						>
+					</li>
+				{/if}
 			</ol>
+			{#if previous.length}
+				<p class="text-sm flex flex-wrap items-center gap-2">
+					<i class="fa-solid fa-clock-rotate-left text-surface-500"></i>
+					<span title={previous.map((a: { reason: string }) => a.reason).join('\n')}
+						>{m.prereadCarryOver({ count: previous.length })}</span
+					>
+					<button
+						class="btn btn-sm preset-tonal-primary"
+						onclick={() => savePrep({ carry_over: true })}>{m.prereadCarryOverAction()}</button
+					>
+				</p>
+			{/if}
 		</section>
 	{/if}
 
@@ -703,17 +929,24 @@
 								<span class="text-xs text-surface-600-400" title={m.prereadResultHint()}>
 									{m.prereadResultIn({ result: safeTranslate(selected.result) })}
 								</span>
-								<a
-									class="btn btn-sm preset-tonal-primary"
-									href={editHref(selected.id)}
-									title={m.prereadOpenInAuditHint()}
-								>
-									<i class="fa-solid fa-arrow-up-right-from-square"></i>{m.prereadOpenInAudit()}
-								</a>
+								{#if canEditRA}
+									<a
+										class="btn btn-sm preset-tonal-primary"
+										href={editHref(selected.id)}
+										title={m.prereadOpenInAuditHint()}
+									>
+										<i class="fa-solid fa-arrow-up-right-from-square"></i>{m.prereadOpenInAudit()}
+									</a>
+								{/if}
 							</div>
 						</header>
 
 						<div class="p-5 flex flex-col gap-6">
+							{#if !canPrepare}
+								<p class="text-sm text-surface-600-400">
+									<i class="fa-solid fa-eye mr-1"></i>{m.prereadReadOnly()}
+								</p>
+							{/if}
 							<!-- Verdict -->
 							<div class="rounded-base bg-surface-100-900 border-l-4 p-4 flex gap-3 {s.border}">
 								<i class="{s.icon} {s.text} text-xl mt-0.5"></i>
@@ -742,7 +975,7 @@
 															<button class="btn btn-sm preset-tonal-primary" onclick={showPrep}
 																><i class={ACTION.prep.icon}></i>{ACTION.prep.label()}</button
 															>
-														{:else if t.action}
+														{:else if t.action && canEditRA}
 															<a
 																class="btn btn-sm preset-tonal-primary"
 																href={editHref(
@@ -788,16 +1021,18 @@
 										m.prereadEarlierAuditHint()
 									)}
 									<ul class="flex flex-col divide-y divide-surface-200-800 text-sm">
-										{#each selected.prior_findings as f (f.id)}
+										{#each selected.prior_findings as f, n (n)}
 											<li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
 												<i
 													class="fa-solid {f.open
 														? 'fa-flag text-error-500'
 														: 'fa-check text-success-500'} text-xs"
 												></i>
-												<a class="anchor grow" href="/findings/{f.id}"
-													>{f.ref_id ? `${f.ref_id} ` : ''}{f.name}</a
-												>
+												{#if f.id}<a class="anchor grow" href="/findings/{f.id}"
+														>{f.ref_id ? `${f.ref_id} ` : ''}{f.name}</a
+													>{:else}<span class="grow italic text-surface-600-400"
+														>{m.prereadHiddenFinding()}</span
+													>{/if}
 												<span class="text-xs text-surface-600-400"
 													>{safeTranslate(
 														['undefined', 'info', 'low', 'medium', 'high', 'critical'][
@@ -848,6 +1083,8 @@
 															: selected.evidences.filter(
 																	(e) => e.name && !filed?.some((f) => f.id === e.id)
 																)}
+													{@const aside = selected.set_aside?.[r.id]}
+													{@const key = `${selected.id}:${r.id}`}
 													<li class="flex flex-col gap-1.5 p-2.5 text-sm">
 														<span class="flex gap-3">
 															<i
@@ -864,112 +1101,178 @@
 																>
 															{/if}
 														</span>
-														{#if filed?.length}
-															<ul class="pl-7 flex flex-col gap-1 text-xs">
-																{#each filed as e (e.id)}
-																	{@const old = r.fresh_days && tooOld(e.updated_at, r.fresh_days)}
-																	<li class="flex flex-wrap items-baseline gap-x-2">
-																		<i class="fa-solid fa-check text-success-500"></i>
-																		{#if e.name}<a class="anchor" href="/evidences/{e.id}"
-																				>{e.name}</a
-																			>{:else}<span class="italic text-surface-600-400"
-																				>{m.prereadEvidenceHidden()}</span
-																			>{/if}
-																		<span
-																			class="tabular-nums {old
-																				? 'text-warning-700-300'
-																				: 'text-surface-600-400'}"
-																			>{#if old}<i class="fa-solid fa-clock-rotate-left mr-1"
-																				></i>{/if}{ageLabel(e.updated_at)}</span
-																		>
-																		{#if !e.here}<span
-																				class="text-surface-600-400"
-																				title={m.prereadFiledElsewhereHint()}
-																				>{m.prereadFiledElsewhere()}</span
-																			>{/if}
-																		{#if e.has_file === false && e.name}
-																			<button
-																				class="anchor text-warning-700-300"
-																				onclick={() => addFile(e.id)}
-																				><i class="fa-solid fa-file-circle-plus mr-1"
-																				></i>{m.prereadAddFile()}</button
-																			>
-																		{/if}
-																		{#if e.manual}
-																			<span class="text-surface-600-400"
-																				>{m.prereadPairedByHand()}</span
-																			>
-																			<button
-																				class="text-surface-500 hover:text-error-600-400 disabled:opacity-50"
-																				title={m.prereadUnpairHint()}
-																				aria-label={m.prereadUnpair({ name: e.name ?? '' })}
-																				disabled={pairing !== null}
-																				onclick={() => pair(selected.id, r.id, e.id, true)}
-																				><i class="fa-solid fa-xmark"></i></button
-																			>
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
-														{:else if r.kind !== 'observation' && unpaired.length}
-															<span class="pl-7 text-xs text-primary-700-300"
-																><i class="fa-solid fa-circle-question mr-1"
-																></i>{m.prereadToConfirmPick()}</span
+														{#if aside}
+															<span class="pl-7 text-xs text-surface-600-400 flex flex-wrap gap-x-2"
+																><span
+																	><i class="fa-solid fa-ban mr-1"></i>{m.prereadSetAsideShown({
+																		reason: aside.reason
+																	})}</span
+																>{#if canPrepare}<button
+																		class="anchor"
+																		onclick={() => setAside(selected.id, r.id, true)}
+																		>{m.prereadRestore()}</button
+																	>{/if}</span
 															>
-														{:else if r.kind !== 'observation'}
-															<span class="pl-7 text-xs text-error-600-400"
-																><i class="fa-solid fa-circle-xmark mr-1"
-																></i>{m.prereadNotOnFile()}</span
-															>
-														{/if}
-														{#if !filed?.length && r.kind !== 'observation'}
-															{@const key = `${selected.id}:${r.id}`}
-															<span class="pl-7 flex flex-wrap gap-2">
-																<button
-																	class="btn btn-sm preset-tonal-primary"
-																	title={m.prereadUploadHint()}
-																	onclick={() => upload(selected.id, r)}
-																	><i class="fa-solid fa-upload"></i>{m.prereadUpload()}</button
-																>
-																<button
-																	class="btn btn-sm {picking?.key === key
-																		? 'preset-filled-primary-500'
-																		: 'preset-tonal-primary'}"
-																	title={m.prereadPickHint()}
-																	aria-expanded={picking?.key === key}
-																	onclick={() => togglePick(key, selected.id, r.id)}
-																	><i class="fa-solid fa-magnifying-glass"
-																	></i>{m.prereadPickExisting()}</button
-																>
-															</span>
-															{#if picking?.key === key}
-																<div
-																	class="ml-7 flex flex-col gap-2 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
-																>
-																	{#if candidates.length}
-																		<span class="text-xs text-surface-600-400"
-																			>{m.prereadPickOnRequirement()}</span
-																		>
-																		<span class="flex flex-wrap gap-1.5">
-																			{#each candidates as e (e.id)}
-																				<button
-																					class="btn btn-sm preset-tonal-primary disabled:opacity-50"
-																					disabled={pairing !== null}
-																					onclick={() => pick(selected.id, r.id, e.id)}
-																					>{e.name}</button
+														{:else}
+															{#if filed?.length}
+																<ul class="pl-7 flex flex-col gap-1 text-xs">
+																	{#each filed as e (e.id)}
+																		{@const old =
+																			r.fresh_days && tooOld(e.updated_at, r.fresh_days)}
+																		{@const issue = evidenceIssue(e, data.audit.due_date)}
+																		<li class="flex flex-wrap items-baseline gap-x-2">
+																			{#if issue === 'no_file' || issue === 'unusable'}
+																				<i
+																					class="fa-solid fa-triangle-exclamation text-warning-600-400"
+																				></i>
+																			{:else}
+																				<i class="fa-solid fa-check text-success-500"></i>
+																			{/if}
+																			{#if e.name}<a class="anchor" href="/evidences/{e.id}"
+																					>{e.name}</a
+																				>{:else}<span class="italic text-surface-600-400"
+																					>{m.prereadEvidenceHidden()}</span
+																				>{/if}
+																			<span
+																				class="tabular-nums {old
+																					? 'text-warning-700-300'
+																					: 'text-surface-600-400'}"
+																				>{#if old}<i class="fa-solid fa-clock-rotate-left mr-1"
+																					></i>{/if}{ageLabel(e.updated_at)}</span
+																			>
+																			{#if !e.here}<span
+																					class="text-surface-600-400"
+																					title={m.prereadFiledElsewhereHint()}
+																					>{m.prereadFiledElsewhere()}</span
+																				>{/if}
+																			{#if issue && issue !== 'no_file'}
+																				<span class={ISSUE[issue]}
+																					>{safeTranslate(e.status ?? '')}{#if e.expiry_date}
+																						· {expiryLabel(e.expiry_date)}{/if}</span
 																				>
-																			{/each}
-																		</span>
-																	{/if}
-																	<AutocompleteSelect
-																		form={pickForm}
-																		field="evidence"
-																		optionsEndpoint="evidences"
-																		lazy
-																		optionsExtraFields={[['folder', 'str']]}
-																		label={m.prereadPickSearch()}
-																	/>
-																</div>
+																			{/if}
+																			{#if e.has_file === false && e.name && canAddFile}
+																				<button
+																					class="anchor text-warning-700-300"
+																					onclick={() => addFile(e.id)}
+																					><i class="fa-solid fa-file-circle-plus mr-1"
+																					></i>{m.prereadAddFile()}</button
+																				>
+																			{/if}
+																			{#if e.manual}
+																				<span class="text-surface-600-400"
+																					>{m.prereadPairedByHand()}</span
+																				>
+																				{#if canPrepare}<button
+																						class="text-surface-500 hover:text-error-600-400 disabled:opacity-50"
+																						title={m.prereadUnpairHint()}
+																						aria-label={m.prereadUnpair({ name: e.name ?? '' })}
+																						disabled={pairing !== null}
+																						onclick={() => pair(selected.id, r.id, e.id, true)}
+																						><i class="fa-solid fa-xmark"></i></button
+																					>{/if}
+																				{#if e.reach && (e.reach.requirements.length || e.reach.audits)}
+																					<span class="basis-full pl-5 text-surface-600-400"
+																						><i class="fa-solid fa-share-nodes mr-1"
+																						></i>{m.prereadReach({
+																							what: reachText(e.reach)
+																						})}</span
+																					>
+																				{/if}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+															{:else if r.kind !== 'observation' && unpaired.length}
+																<span class="pl-7 text-xs text-primary-700-300"
+																	><i class="fa-solid fa-circle-question mr-1"
+																	></i>{m.prereadToConfirmPick()}</span
+																>
+															{:else if r.kind !== 'observation'}
+																<span class="pl-7 text-xs text-error-600-400"
+																	><i class="fa-solid fa-circle-xmark mr-1"
+																	></i>{m.prereadNotOnFile()}</span
+																>
+															{/if}
+															{#if !filed?.length && r.kind !== 'observation' && canPrepare}
+																<span class="pl-7 flex flex-wrap gap-2">
+																	{#if canUpload}<button
+																			class="btn btn-sm preset-tonal-primary"
+																			title={m.prereadUploadHint()}
+																			onclick={() => upload(selected.id, r)}
+																			><i class="fa-solid fa-upload"></i>{m.prereadUpload()}</button
+																		>{/if}
+																	<button
+																		class="btn btn-sm {picking?.key === key
+																			? 'preset-filled-primary-500'
+																			: 'preset-tonal-primary'}"
+																		title={m.prereadPickHint()}
+																		aria-expanded={picking?.key === key}
+																		onclick={() => togglePick(key, selected.id, r.id)}
+																		><i class="fa-solid fa-magnifying-glass"
+																		></i>{m.prereadPickExisting()}</button
+																	>
+																	<button
+																		class="btn btn-sm preset-tonal-surface"
+																		title={m.prereadSetAsideHint()}
+																		aria-expanded={asideFor === key}
+																		onclick={() => {
+																			asideFor = asideFor === key ? null : key;
+																			asideReason = '';
+																		}}><i class="fa-solid fa-ban"></i>{m.prereadSetAside()}</button
+																	>
+																</span>
+																{#if asideFor === key}
+																	<form
+																		class="ml-7 flex flex-wrap gap-2"
+																		onsubmit={(ev) => {
+																			ev.preventDefault();
+																			setAside(selected.id, r.id);
+																		}}
+																	>
+																		<input
+																			class="input py-1 text-sm grow basis-64"
+																			required
+																			placeholder={m.prereadSetAsideReason()}
+																			aria-label={m.prereadSetAsideReason()}
+																			bind:value={asideReason}
+																			{@attach (el) => el.focus()}
+																		/>
+																		<button
+																			class="btn btn-sm preset-filled-primary-500"
+																			type="submit">{m.save()}</button
+																		>
+																	</form>
+																{/if}
+																{#if picking?.key === key}
+																	<div
+																		class="ml-7 flex flex-col gap-2 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+																	>
+																		{#if candidates.length}
+																			<span class="text-xs text-surface-600-400"
+																				>{m.prereadPickOnRequirement()}</span
+																			>
+																			<span class="flex flex-wrap gap-1.5">
+																				{#each candidates as e (e.id)}
+																					<button
+																						class="btn btn-sm preset-tonal-primary disabled:opacity-50"
+																						disabled={pairing !== null}
+																						onclick={() => pick(selected.id, r.id, e.id)}
+																						>{e.name}</button
+																					>
+																				{/each}
+																			</span>
+																		{/if}
+																		{#if canEditRA}<AutocompleteSelect
+																				form={pickForm}
+																				field="evidence"
+																				optionsEndpoint="evidences"
+																				lazy
+																				optionsExtraFields={[['folder', 'str']]}
+																				label={m.prereadPickSearch()}
+																			/>{/if}
+																	</div>
+																{/if}
 															{/if}
 														{/if}
 													</li>
@@ -1031,7 +1334,12 @@
 																		})}</span
 																	>
 																{/each}
-																{#if !e.has_file && e.name}<button
+																{#if evidenceIssue(e, data.audit.due_date) && e.has_file}<span
+																		class={ISSUE[evidenceIssue(e, data.audit.due_date) ?? '']}
+																		>{safeTranslate(e.status)}{#if e.expiry_date}
+																			· {expiryLabel(e.expiry_date)}{/if}</span
+																	>{/if}
+																{#if !e.has_file && e.name && canAddFile}<button
 																		class="anchor text-warning-700-300"
 																		onclick={() => addFile(e.id)}
 																		><i class="fa-solid fa-file-circle-plus mr-1"
@@ -1213,6 +1521,7 @@
 				</p>
 				<ol class="flex flex-col gap-3">
 					{#each sessions as { session, reqs, people }, n (session.id)}
+						{@const planned = prep?.sessions[session.id]}
 						{@const byState = SHOWN.map(
 							(r) => [r, reqs.filter((x) => x.readiness === r).length] as const
 						)}
@@ -1243,6 +1552,69 @@
 									{/each}
 								</span>
 							</header>
+							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+								<i class="fa-solid fa-calendar text-surface-500"></i>
+								{#if planned?.date}
+									<span
+										>{new Date(planned.date).toLocaleDateString(getLocale())}{planned.start_time
+											? ` · ${planned.start_time.slice(0, 5)}`
+											: ''}{planned.end_time
+											? `–${planned.end_time.slice(0, 5)}`
+											: ''}{planned.location ? ` · ${planned.location}` : ''}</span
+									>
+									{#if planned.attendees.length}<span class="text-surface-600-400"
+											>{planned.attendees.map((a) => a.str).join(', ')}</span
+										>{/if}
+								{:else}
+									<span class="text-surface-600-400">{m.prereadNoDate()}</span>
+								{/if}
+								{#if canPrepare}
+									<button class="anchor text-xs" onclick={() => edit('session', session.id)}
+										>{m.prereadSchedule()}</button
+									>
+								{/if}
+							</div>
+							{#if editing?.kind === 'session' && editing.key === session.id}
+								<div
+									class="rounded-base border border-surface-200-800 bg-surface-50-950 p-3 grid gap-3 md:grid-cols-4"
+								>
+									<label class="flex flex-col gap-1 text-sm"
+										><span class="font-medium">{m.date()}</span>
+										<input class="input" type="date" bind:value={slot.date} />
+									</label>
+									<label class="flex flex-col gap-1 text-sm"
+										><span class="font-medium">{m.prereadStartTime()}</span>
+										<input class="input" type="time" bind:value={slot.start_time} />
+									</label>
+									<label class="flex flex-col gap-1 text-sm"
+										><span class="font-medium">{m.prereadEndTime()}</span>
+										<input class="input" type="time" bind:value={slot.end_time} />
+									</label>
+									<label class="flex flex-col gap-1 text-sm"
+										><span class="font-medium">{m.prereadLocation()}</span>
+										<input class="input" type="text" bind:value={slot.location} />
+									</label>
+									<div class="md:col-span-4">
+										<AutocompleteSelect
+											form={prepForm}
+											field="actors"
+											multiple
+											lazy
+											optionsEndpoint="actors"
+											optionsLabelField="str"
+											label={m.prereadAttendees()}
+										/>
+									</div>
+									<div class="md:col-span-4 flex justify-end gap-2">
+										<button class="btn btn-sm preset-tonal-surface" onclick={() => (editing = null)}
+											>{m.cancel()}</button
+										>
+										<button class="btn btn-sm preset-filled-primary-500" onclick={saveEdit}
+											>{m.save()}</button
+										>
+									</div>
+								</div>
+							{/if}
 							{#if people.length}
 								<div class="flex flex-wrap gap-1.5">
 									{#each people as w (w)}
@@ -1368,6 +1740,7 @@
 		{:else}
 			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 				{#each interviews as [who, reqs] (who)}
+					{@const named = prep?.roles[who] ?? []}
 					{@const byState = SHOWN.map(
 						(r) => [r, reqs.filter((x) => x.readiness === r).length] as const
 					)}
@@ -1393,6 +1766,37 @@
 									></span>{/if}
 							{/each}
 						</div>
+						{#if editing?.kind === 'role' && editing.key === who}
+							<div class="flex flex-col gap-2">
+								<AutocompleteSelect
+									form={prepForm}
+									field="actors"
+									multiple
+									lazy
+									optionsEndpoint="actors"
+									optionsLabelField="str"
+									label={m.prereadWho()}
+								/>
+								<div class="flex justify-end gap-2">
+									<button class="btn btn-sm preset-tonal-surface" onclick={() => (editing = null)}
+										>{m.cancel()}</button
+									>
+									<button class="btn btn-sm preset-filled-primary-500" onclick={saveEdit}
+										>{m.save()}</button
+									>
+								</div>
+							</div>
+						{:else}
+							<p class="text-sm flex flex-wrap items-center gap-x-2">
+								<i class="fa-solid fa-user-check text-surface-500"></i>
+								<span class={named.length ? '' : 'text-surface-600-400'}
+									>{named.map((a) => a.str).join(', ') || m.prereadNobodyYet()}</span
+								>
+								{#if canPrepare}<button class="anchor text-xs" onclick={() => edit('role', who)}
+										>{m.prereadAssign()}</button
+									>{/if}
+							</p>
+						{/if}
 						<ul class="text-sm flex flex-col max-h-72 overflow-auto -mx-1">
 							{#each reqs as r (r.id)}
 								<li>

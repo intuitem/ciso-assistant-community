@@ -42,6 +42,10 @@ export interface FiledEvidence {
 	here: boolean;
 	/** Paired by hand rather than through the request's reference control. */
 	manual: boolean;
+	status: string | null;
+	expiry_date: string | null;
+	/** On pairings made by hand: what else they answer in this domain. */
+	reach?: { requirements: string[]; audits: number };
 }
 
 export interface PrereadItem {
@@ -68,20 +72,47 @@ export interface PrereadItem {
 	applied_controls: { id: string; name: string | null; status: string; eta: string | null }[];
 	findings: { severity: 'error' | 'warning'; msgid: string; msg: string }[];
 	/** Findings raised on this requirement by any audit of the framework (Stage 1, internal). */
+	/** Every one counts; id, name and source are null for viewers who may not see it. */
 	prior_findings: {
-		id: string;
+		id: string | null;
 		ref_id: string | null;
-		name: string;
+		name: string | null;
 		severity: number;
 		status: string;
 		open: boolean;
-		source: string | null;
+		source: string | null | false;
 		reported_at: string | null;
 	}[];
 	/** Request id -> evidences matched through its reference control, newest first. */
 	filed: Record<string, FiledEvidence[]>;
+	/** Request id -> why it does not apply to this audit. */
+	set_aside: Record<string, { reason: string }>;
 	readiness: Readiness;
 	reasons: string[];
+}
+
+export type ActorRef = { id: string; str: string };
+
+/** What the organisation decided for this audit; null until the first decision. */
+export interface Preparation {
+	id: string;
+	guide: string;
+	stage: '' | 'stage_1' | 'stage_2' | 'surveillance' | 'recertification';
+	start_date: string | null;
+	end_date: string | null;
+	certification_body: ActorRef | null;
+	auditors: string;
+	roles: Record<string, ActorRef[]>;
+	sessions: Record<
+		string,
+		{
+			date: string | null;
+			start_time: string | null;
+			end_time: string | null;
+			location: string;
+			attendees: ActorRef[];
+		}
+	>;
 }
 
 export const PEOPLE: Record<string, string> = lazy({
@@ -155,7 +186,10 @@ export const REASONS: Record<string, string> = lazy({
 	request_not_on_file: m.prereadReasonRequestNotOnFile,
 	evidence_to_confirm: m.prereadReasonEvidenceToConfirm,
 	quality_warning: m.prereadReasonQualityWarning,
-	missing_file: m.prereadReasonMissingFile
+	missing_file: m.prereadReasonMissingFile,
+	unusable_evidence: m.prereadReasonUnusableEvidence,
+	evidence_to_validate: m.prereadReasonEvidenceToValidate,
+	expires_before_audit: m.prereadReasonExpiresBeforeAudit
 });
 
 export const SECTIONS = [
@@ -241,6 +275,20 @@ export const STAGES: Record<number, string> = lazy({
 	2: m.prereadStage2Long
 });
 
+/** Why an evidence will not hold on the day, as the backend judges it; null when it does. */
+export function evidenceIssue(
+	e: { has_file: boolean; status?: string | null; expiry_date?: string | null },
+	dueDate?: string | null,
+	today = new Date().toISOString().slice(0, 10)
+): 'no_file' | 'unusable' | 'to_validate' | 'expires_before_audit' | null {
+	if (!e.has_file) return 'no_file';
+	if (['rejected', 'expired', 'missing'].includes(e.status ?? '')) return 'unusable';
+	if (e.expiry_date && e.expiry_date < today) return 'unusable';
+	if (['draft', 'in_review'].includes(e.status ?? '')) return 'to_validate';
+	if (dueDate && e.expiry_date && e.expiry_date < dueDate) return 'expires_before_audit';
+	return null;
+}
+
 export const tooOld = (updatedAt: string | null, days: number, now = Date.now()) =>
 	!!updatedAt && now - Date.parse(updatedAt) > days * 86_400_000;
 
@@ -281,7 +329,7 @@ export const worstOf = (row: RequestRow) => row.items.reduce((a, i) => (rank(i) 
 export function requestList(items: PrereadItem[]): RequestRow[] {
 	const rows = new Map<string, RequestRow>();
 	for (const item of items.filter((i) => i.guidance && i.readiness !== 'excluded')) {
-		for (const r of item.guidance!.requests) {
+		for (const r of item.guidance!.requests.filter((r) => !item.set_aside?.[r.id])) {
 			const key = r.reference_control ?? `${keyOf(item)}:${r.id}`;
 			const row = rows.get(key);
 			if (!row) {

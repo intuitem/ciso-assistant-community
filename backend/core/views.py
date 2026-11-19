@@ -15869,15 +15869,47 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         from core.auditor_preread import pair_request
 
         audit = self.get_object()
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_requirementassessment"),
-            folder=audit.folder,
+        # Pairing is preparation work; attaching the evidence to the
+        # requirement on the way also edits the requirement.
+        needed = ["change_auditpreparation"]
+        if request.data.get("attach"):
+            needed.append("change_requirementassessment")
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
         error = pair_request(
             audit, request.user, request.data, request.data.get("guide")
         )
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/preparation")
+    def auditor_preread_preparation(self, request, pk):
+        """Experimental: store one decision of this audit's preparation."""
+        from core.auditor_preread import update_preparation
+
+        audit = self.get_object()
+        exists = hasattr(audit, "preparation")
+        needed = ["change_auditpreparation"] + (
+            [] if exists else ["add_auditpreparation"]
+        )
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        error = update_preparation(audit, request.user, request.data)
         if error:
             return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)

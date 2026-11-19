@@ -9,6 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0208_evidence_ref_id_riskacceptance_ref_id"),
+        ("iam", "0035_connected_apps"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -37,6 +38,14 @@ class Migration(migrations.Migration):
                 ("entry", models.CharField(max_length=64)),
                 ("request", models.CharField(max_length=16)),
                 (
+                    "domain",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="+",
+                        to="iam.folder",
+                    ),
+                ),
+                (
                     "created_by",
                     models.ForeignKey(
                         blank=True,
@@ -58,7 +67,7 @@ class Migration(migrations.Migration):
             options={
                 "constraints": [
                     models.UniqueConstraint(
-                        fields=("evidence", "guide", "entry", "request"),
+                        fields=("evidence", "guide", "entry", "request", "domain"),
                         name="unique_evidence_request_link",
                     )
                 ],

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	evidenceIssue,
 	interviewPlan,
 	requestList,
 	sectionOf,
@@ -27,6 +28,7 @@ const item = (ref: string, readiness: PrereadItem['readiness'], who: string[]): 
 	findings: [],
 	prior_findings: [],
 	filed: {},
+	set_aside: {},
 	guide_key: null,
 	readiness,
 	reasons: []
@@ -73,6 +75,8 @@ describe('auditor pre-read lists', () => {
 			name: 'Review',
 			updated_at: null,
 			has_file: true,
+			status: null,
+			expiry_date: null,
 			here: true,
 			manual: false
 		};
@@ -116,7 +120,18 @@ describe('auditor pre-read lists', () => {
 	it('shows a hand-paired request as filed even without a reference control', () => {
 		const i = item('A.9', 'weak', []);
 		i.filed = {
-			r1: [{ id: 'e', name: 'Export', updated_at: null, has_file: true, here: true, manual: true }]
+			r1: [
+				{
+					id: 'e',
+					name: 'Export',
+					updated_at: null,
+					has_file: true,
+					status: null,
+					expiry_date: null,
+					here: true,
+					manual: true
+				}
+			]
 		};
 		expect(requestList([i])[0].filed).toHaveLength(1);
 	});
@@ -153,5 +168,31 @@ describe('isStale', () => {
 		expect(isStale('2020-01-01T00:00:00Z', { ...g, requests: [] }, now)).toBe(false);
 		const paired = [{ ...g.requests[0], reference_control: 'u' }];
 		expect(isStale('2020-01-01T00:00:00Z', { ...g, requests: paired }, now)).toBe(false);
+	});
+});
+
+describe('evidenceIssue', () => {
+	const ok = { has_file: true, status: 'approved', expiry_date: null };
+	it('mirrors the backend rule: file first, then status, then dates', () => {
+		expect(evidenceIssue(ok)).toBeNull();
+		expect(evidenceIssue({ ...ok, has_file: false, status: 'rejected' })).toBe('no_file');
+		for (const status of ['rejected', 'expired', 'missing'])
+			expect(evidenceIssue({ ...ok, status })).toBe('unusable');
+		expect(evidenceIssue({ ...ok, expiry_date: '2026-01-01' }, null, '2026-06-01')).toBe(
+			'unusable'
+		);
+		expect(evidenceIssue({ ...ok, status: 'in_review' })).toBe('to_validate');
+		const soon = { ...ok, expiry_date: '2026-07-01' };
+		expect(evidenceIssue(soon, '2026-09-01', '2026-06-01')).toBe('expires_before_audit');
+		expect(evidenceIssue(soon, null, '2026-06-01')).toBeNull();
+	});
+});
+
+describe('set-aside requests', () => {
+	it('leave the evidence request list', () => {
+		const i = item('A.8.25', 'weak', []);
+		expect(requestList([i])).toHaveLength(1);
+		i.set_aside = { r1: { reason: 'No development' } };
+		expect(requestList([i])).toHaveLength(0);
 	});
 });
