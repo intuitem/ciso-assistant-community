@@ -858,10 +858,10 @@ def test_preread_permissions_with_builtin_roles():
     assert hidden and hidden[0]["id"] == "hidden-1"
     assert hidden[0]["status"] is None and hidden[0]["updated_at"] is None
     # A set-aside made under another guide does not apply under this one.
-    from core.models import AuditPreparationSetAside
+    from core.models import AuditPreparation, AuditPreparationSetAside
 
     AuditPreparationSetAside.objects.create(
-        preparation=audit.preparation,
+        preparation=AuditPreparation.objects.get(compliance_assessment=audit),
         guide="urn:acme:risk:audit_guide:other",
         entry="a.6.3",
         request=request,

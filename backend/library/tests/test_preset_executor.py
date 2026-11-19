@@ -534,6 +534,7 @@ class TestPresetExecutorExistingDomain:
                     "ref": "iso_audit",
                 },
             ],
+            steps=[],
         )
         request = RequestFactory().post("/")
         request.user = user
