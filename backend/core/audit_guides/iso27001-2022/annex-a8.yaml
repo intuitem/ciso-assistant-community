@@ -2,9 +2,9 @@ framework_urn: urn:intuitem:risk:framework:iso27001-2022
 entries:
   a.8.1:
     questions:
-      - {id: q1, stage: 1, text: "Which rules apply to laptops and phones that hold company data, and where are they written down?"}
-      - {id: q2, stage: 2, text: "Pick any laptop in this room. Show me it is encrypted, managed and patched."}
-      - {id: q3, stage: 2, text: "What happens when a device is lost or stolen? Walk me through the last case."}
+      - {id: q1, stage: 1, who: [endpoint], text: "Which rules apply to laptops and phones that hold company data, and where are they written down?"}
+      - {id: q2, stage: 2, who: [endpoint, staff], text: "Pick any laptop in this room. Show me it is encrypted, managed and patched."}
+      - {id: q3, stage: 2, who: [endpoint], text: "What happens when a device is lost or stolen? Walk me through the last case."}
     requests:
       - {id: r1, label: "Endpoint or acceptable use policy covering company and personal devices", kind: document}
       - {id: r2, label: "MDM or endpoint management export: device list with encryption, OS version and last check-in", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.mdm}
@@ -18,10 +18,10 @@ entries:
       - {id: p3, text: "Devices that stopped checking in months ago are still counted as compliant"}
   a.8.2:
     questions:
-      - {id: q1, stage: 1, text: "How do you define a privileged account, and who approves granting one?"}
-      - {id: q2, stage: 2, text: "Show me the list of admin accounts on your identity provider, cloud console and production servers today."}
-      - {id: q3, stage: 2, text: "Do administrators use a separate account for admin work, or their everyday account?"}
-      - {id: q4, stage: 2, text: "How do you limit privileged access in time, including break-glass accounts, and where is privileged activity logged?"}
+      - {id: q1, stage: 1, who: [ciso], text: "How do you define a privileged account, and who approves granting one?"}
+      - {id: q2, stage: 2, who: [iam], text: "Show me the list of admin accounts on your identity provider, cloud console and production servers today."}
+      - {id: q3, stage: 2, who: [iam], text: "Do administrators use a separate account for admin work, or their everyday account?"}
+      - {id: q4, stage: 2, who: [iam], text: "How do you limit privileged access in time, including break-glass accounts, and where is privileged activity logged?"}
     requests:
       - {id: r1, label: "Inventory of privileged accounts, including service and break-glass accounts, with named owners", kind: record, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:doc.pam_register}
       - {id: r2, label: "Approval tickets for privileged access granted in the audit period", kind: record}
@@ -37,9 +37,9 @@ entries:
       - {id: p4, text: "Administrators never acknowledged the rules that apply to their privileged accounts"}
   a.8.3:
     questions:
-      - {id: q1, stage: 1, text: "How do you decide who can see what inside your main business applications?"}
-      - {id: q2, stage: 2, text: "Log in with a standard user and show me you cannot open records outside that user's role."}
-      - {id: q3, stage: 2, text: "How do you control access to shared drives and SharePoint sites holding confidential data?"}
+      - {id: q1, stage: 1, who: [iam], text: "How do you decide who can see what inside your main business applications?"}
+      - {id: q2, stage: 2, who: [iam, staff], text: "Log in with a standard user and show me you cannot open records outside that user's role."}
+      - {id: q3, stage: 2, who: [iam], text: "How do you control access to shared drives and SharePoint sites holding confidential data?"}
     requests:
       - {id: r1, label: "Role or permission matrix for key applications", kind: document}
       - {id: r2, label: "Export of permissions on a confidential share or site", kind: technical, fresh_days: 40}
@@ -52,10 +52,10 @@ entries:
       - {id: p2, text: "Role matrix exists on paper but application permissions were granted ad hoc"}
   a.8.4:
     questions:
-      - {id: q1, stage: 1, text: "Who may read or change source code, and where is that rule written for each repository?"}
-      - {id: q2, stage: 2, text: "Who has write access to your source code repositories, and how is that reviewed?"}
-      - {id: q3, stage: 2, text: "Can a developer push directly to the main branch? Show me the branch protection settings."}
-      - {id: q4, stage: 2, text: "Who can change CI/CD pipelines, build tools and internal package registries?"}
+      - {id: q1, stage: 1, who: [dev], text: "Who may read or change source code, and where is that rule written for each repository?"}
+      - {id: q2, stage: 2, who: [dev], text: "Who has write access to your source code repositories, and how is that reviewed?"}
+      - {id: q3, stage: 2, who: [dev], text: "Can a developer push directly to the main branch? Show me the branch protection settings."}
+      - {id: q4, stage: 2, who: [dev], text: "Who can change CI/CD pipelines, build tools and internal package registries?"}
     requests:
       - {id: r1, label: "Repository access list with roles per repo or group", kind: technical, fresh_days: 40}
       - {id: r2, label: "Branch protection or merge rule screenshots for production repositories", kind: technical, fresh_days: 40}
@@ -70,10 +70,10 @@ entries:
       - {id: p3, text: "Write access to production repositories or build pipelines broader than the designated owners"}
   a.8.5:
     questions:
-      - {id: q1, stage: 1, text: "What is your password and MFA rule, and which systems does it cover?"}
-      - {id: q4, stage: 1, text: "How did you decide which systems and accounts need MFA or other stronger authentication?"}
-      - {id: q2, stage: 2, text: "Show me the MFA enforcement settings and the list of users or apps excluded from it."}
-      - {id: q3, stage: 2, text: "How do you handle legacy protocols and apps that cannot do MFA?"}
+      - {id: q1, stage: 1, who: [iam], text: "What is your password and MFA rule, and which systems does it cover?"}
+      - {id: q4, stage: 1, who: [iam], text: "How did you decide which systems and accounts need MFA or other stronger authentication?"}
+      - {id: q2, stage: 2, who: [iam], text: "Show me the MFA enforcement settings and the list of users or apps excluded from it."}
+      - {id: q3, stage: 2, who: [iam], text: "How do you handle legacy protocols and apps that cannot do MFA?"}
     requests:
       - {id: r1, label: "Authentication standard: password rules, MFA scope, lockout", kind: document}
       - {id: r2, label: "IdP conditional access or MFA policy configuration export", kind: technical, fresh_days: 40}
@@ -87,10 +87,10 @@ entries:
       - {id: p3, text: "Some SaaS tools use local logins outside SSO with weak passwords"}
   a.8.6:
     questions:
-      - {id: q1, stage: 1, text: "Which resources do you track for capacity, and what thresholds trigger action?"}
-      - {id: q2, stage: 2, text: "How do you know when a critical system is running out of storage, CPU or licences before it fails?"}
-      - {id: q3, stage: 2, text: "Show me a capacity alert and what was done about it."}
-      - {id: q4, stage: 2, text: "How do you project future capacity needs for new business or projects, especially resources with long lead times?"}
+      - {id: q1, stage: 1, who: [infra], text: "Which resources do you track for capacity, and what thresholds trigger action?"}
+      - {id: q2, stage: 2, who: [infra], text: "How do you know when a critical system is running out of storage, CPU or licences before it fails?"}
+      - {id: q3, stage: 2, who: [infra], text: "Show me a capacity alert and what was done about it."}
+      - {id: q4, stage: 2, who: [infra], text: "How do you project future capacity needs for new business or projects, especially resources with long lead times?"}
     requests:
       - {id: r1, label: "Monitoring dashboard or thresholds for critical systems", kind: technical, fresh_days: 40}
       - {id: r2, label: "Capacity review or planning minutes, or ticket resulting from a capacity alert", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt}
@@ -101,10 +101,10 @@ entries:
       - {id: p2, text: "Past incident caused by full disk or quota with no follow-up capacity action"}
   a.8.7:
     questions:
-      - {id: q1, stage: 1, text: "What is your malware protection approach across endpoints, servers, email and cloud?"}
-      - {id: q2, stage: 2, text: "What anti-malware or EDR covers your endpoints and servers, and how do you know none are missing it?"}
-      - {id: q3, stage: 2, text: "Show me the last malware detection and how it was handled."}
-      - {id: q4, stage: 2, text: "How do staff learn to spot phishing, and what happens when they report one?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What is your malware protection approach across endpoints, servers, email and cloud?"}
+      - {id: q2, stage: 2, who: [sec_ops, endpoint], text: "What anti-malware or EDR covers your endpoints and servers, and how do you know none are missing it?"}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Show me the last malware detection and how it was handled."}
+      - {id: q4, stage: 2, who: [staff, sec_ops], text: "How do staff learn to spot phishing, and what happens when they report one?"}
     requests:
       - {id: r1, label: "Anti-malware or EDR console export: coverage, agent health, outdated agents", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.endpoint_protection}
       - {id: r2, label: "Detection or quarantine events with handling tickets", kind: record, fresh_days: 100}
@@ -118,10 +118,10 @@ entries:
       - {id: p2, text: "Local admins can disable the agent and some have"}
   a.8.8:
     questions:
-      - {id: q1, stage: 1, text: "What are your remediation deadlines per severity, and what is in scope of scanning?"}
-      - {id: q4, stage: 1, text: "How do you learn about new vulnerabilities in software and devices you cannot scan (vendor advisories, CVE feeds, supplier notices), and who triages them against your asset inventory?"}
-      - {id: q2, stage: 2, text: "Show me your latest scan and how many criticals are past their deadline."}
-      - {id: q3, stage: 2, text: "Take this critical from three months ago: when was it found, when fixed, and how did you verify the fix?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What are your remediation deadlines per severity, and what is in scope of scanning?"}
+      - {id: q4, stage: 1, who: [sec_ops], text: "How do you learn about new vulnerabilities in software and devices you cannot scan (vendor advisories, CVE feeds, supplier notices), and who triages them against your asset inventory?"}
+      - {id: q2, stage: 2, who: [sec_ops], text: "Show me your latest scan and how many criticals are past their deadline."}
+      - {id: q3, stage: 2, who: [sec_ops, infra], text: "Take this critical from three months ago: when was it found, when fixed, and how did you verify the fix?"}
     requests:
       - {id: r1, label: "Vulnerability management procedure with severity based SLAs", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.vulnerability}
       - {id: r2, label: "Latest internal and external vulnerability scan reports", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.vuln_scanner}
@@ -136,9 +136,9 @@ entries:
       - {id: p3, text: "Pentest findings not tracked to closure; same issues reappear in next report"}
   a.8.9:
     questions:
-      - {id: q1, stage: 1, text: "Which secure configuration baselines do you use for servers, endpoints, network gear and cloud, and who owns them?"}
-      - {id: q2, stage: 2, text: "Show me how you detect a system that has drifted from its baseline."}
-      - {id: q3, stage: 2, text: "Here is a production server: show me its current settings against the baseline."}
+      - {id: q1, stage: 1, who: [infra], text: "Which secure configuration baselines do you use for servers, endpoints, network gear and cloud, and who owns them?"}
+      - {id: q2, stage: 2, who: [infra], text: "Show me how you detect a system that has drifted from its baseline."}
+      - {id: q3, stage: 2, who: [infra], text: "Here is a production server: show me its current settings against the baseline."}
     requests:
       - {id: r1, label: "Hardening baselines or templates (for example CIS based) per platform, with version and review date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.hardening}
       - {id: r2, label: "Configuration compliance or drift report from a tool (Intune, GPO, CSPM, Ansible, Terraform state)", kind: technical, fresh_days: 40}
@@ -152,9 +152,9 @@ entries:
       - {id: p3, text: "Default passwords or services still active on appliances"}
   a.8.10:
     questions:
-      - {id: q1, stage: 1, text: "How do you decide when information must be deleted, and is that tied to your retention schedule?"}
-      - {id: q2, stage: 2, text: "Show me that data past its retention date was deleted in an application, and how backup retention makes old copies expire."}
-      - {id: q3, stage: 2, text: "How are disks and devices wiped or destroyed when retired, and by whom?"}
+      - {id: q1, stage: 1, who: [dpo, legal], text: "How do you decide when information must be deleted, and is that tied to your retention schedule?"}
+      - {id: q2, stage: 2, who: [infra], text: "Show me that data past its retention date was deleted in an application, and how backup retention makes old copies expire."}
+      - {id: q3, stage: 2, who: [infra], text: "How are disks and devices wiped or destroyed when retired, and by whom?"}
     requests:
       - {id: r1, label: "Retention and deletion schedule per data category", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.retention}
       - {id: r2, label: "Deletion logs or purge job outputs from a key system", kind: record, fresh_days: 400}
@@ -170,10 +170,10 @@ entries:
       - {id: p3, text: "Deletion of former customers' data in SaaS tools never requested or confirmed"}
   a.8.11:
     questions:
-      - {id: q1, stage: 1, text: "Where do you use masking, pseudonymisation or anonymisation, and what drove that decision?"}
-      - {id: q2, stage: 2, text: "Show me how personal data looks in your test or analytics environment."}
-      - {id: q3, stage: 2, text: "Which users see full card numbers or IDs in the application, and why?"}
-      - {id: q4, stage: 2, text: "How did you check that pseudonymised or anonymised data cannot be re-identified by combining fields?"}
+      - {id: q1, stage: 1, who: [dpo], text: "Where do you use masking, pseudonymisation or anonymisation, and what drove that decision?"}
+      - {id: q2, stage: 2, who: [dev], text: "Show me how personal data looks in your test or analytics environment."}
+      - {id: q3, stage: 2, who: [dev], text: "Which users see full card numbers or IDs in the application, and why?"}
+      - {id: q4, stage: 2, who: [dpo, dev], text: "How did you check that pseudonymised or anonymised data cannot be re-identified by combining fields?"}
     requests:
       - {id: r1, label: "Data masking or pseudonymisation rules mapped to data classification", kind: document}
       - {id: r2, label: "Screenshot of masked fields in application or non-production database", kind: technical, fresh_days: 100}
@@ -188,9 +188,9 @@ entries:
       - {id: p4, text: "Least privilege offered as the masking measure; the auditor wants which data is masked, by which technique and with which tool"}
   a.8.12:
     questions:
-      - {id: q1, stage: 1, text: "Which channels could sensitive data leak through, and which ones do you control?"}
-      - {id: q2, stage: 2, text: "Show me what happens if I email a file labelled confidential to a personal address or copy it to USB."}
-      - {id: q3, stage: 2, text: "If a DLP tool is used, who reviews its alerts and what did the last ones lead to?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "Which channels could sensitive data leak through, and which ones do you control?"}
+      - {id: q2, stage: 2, who: [endpoint], text: "Show me what happens if I email a file labelled confidential to a personal address or copy it to USB."}
+      - {id: q3, stage: 2, who: [sec_ops], text: "If a DLP tool is used, who reviews its alerts and what did the last ones lead to?"}
     requests:
       - {id: r1, label: "Leakage channel analysis: sensitive information types, channels, and the measure chosen for each channel", kind: document}
       - {id: r2, label: "DLP tool configuration export, if a DLP tool is used (M365 Purview, CASB, endpoint)", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.dlp}
@@ -205,9 +205,9 @@ entries:
       - {id: p4, text: "Monitoring of staff communications deployed without checking privacy law or works council obligations"}
   a.8.13:
     questions:
-      - {id: q1, stage: 1, text: "What is backed up, how often, how long is it kept, and where are copies held?"}
-      - {id: q2, stage: 2, text: "When did you last restore from backup as a test, and what was the result?"}
-      - {id: q3, stage: 2, text: "Could ransomware with admin rights delete or encrypt your backups?"}
+      - {id: q1, stage: 1, who: [infra], text: "What is backed up, how often, how long is it kept, and where are copies held?"}
+      - {id: q2, stage: 2, who: [infra], text: "When did you last restore from backup as a test, and what was the result?"}
+      - {id: q3, stage: 2, who: [infra], text: "Could ransomware with admin rights delete or encrypt your backups?"}
     requests:
       - {id: r1, label: "Backup policy or schedule per system with RPO and retention", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.backup}
       - {id: r2, label: "Backup job reports showing success and failures", kind: technical, fresh_days: 40}
@@ -222,9 +222,9 @@ entries:
       - {id: p3, text: "Failed jobs recurring for weeks with no ticket"}
   a.8.14:
     questions:
-      - {id: q1, stage: 1, text: "Which services need redundancy, and how did you derive that from their availability requirements?"}
-      - {id: q2, stage: 2, text: "Which systems must stay available, and what redundancy do they have?"}
-      - {id: q3, stage: 2, text: "Have you tested a failover? Show me the result."}
+      - {id: q1, stage: 1, who: [infra], text: "Which services need redundancy, and how did you derive that from their availability requirements?"}
+      - {id: q2, stage: 2, who: [infra], text: "Which systems must stay available, and what redundancy do they have?"}
+      - {id: q3, stage: 2, who: [infra], text: "Have you tested a failover? Show me the result."}
     requests:
       - {id: r1, label: "Availability requirements per critical service (from BIA or risk assessment)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.bia}
       - {id: r2, label: "Architecture diagram showing redundant components, zones or sites", kind: document}
@@ -236,10 +236,10 @@ entries:
       - {id: p2, text: "Redundancy designed but never tested"}
   a.8.15:
     questions:
-      - {id: q1, stage: 1, text: "What events do you log, on which systems, and how long do you keep logs?"}
-      - {id: q2, stage: 2, text: "Show me the admin login events for this server from last month."}
-      - {id: q3, stage: 2, text: "Who can delete or alter logs, and how would you know?"}
-      - {id: q4, stage: 2, text: "Who analyses these logs, how often? Show me a recent review and what came of it."}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What events do you log, on which systems, and how long do you keep logs?"}
+      - {id: q2, stage: 2, who: [infra], text: "Show me the admin login events for this server from last month."}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Who can delete or alter logs, and how would you know?"}
+      - {id: q4, stage: 2, who: [sec_ops], text: "Who analyses these logs, how often? Show me a recent review and what came of it."}
     requests:
       - {id: r1, label: "Logging standard: sources, event types, retention", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.logging}
       - {id: r2, label: "List of log sources onboarded to the SIEM or log platform", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.siem}
@@ -253,9 +253,9 @@ entries:
       - {id: p3, text: "Admins can clear the logs of their own activity"}
   a.8.16:
     questions:
-      - {id: q1, stage: 1, text: "What counts as abnormal behaviour on your network and systems, and who is responsible for watching for it?"}
-      - {id: q2, stage: 2, text: "Show me your monitoring console and walk me through an alert from detection to closure."}
-      - {id: q3, stage: 2, text: "Is monitoring coverage outside working hours defined, and does it match how critical the systems are?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What counts as abnormal behaviour on your network and systems, and who is responsible for watching for it?"}
+      - {id: q2, stage: 2, who: [sec_ops], text: "Show me your monitoring console and walk me through an alert from detection to closure."}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Is monitoring coverage outside working hours defined, and does it match how critical the systems are?"}
     requests:
       - {id: r1, label: "Monitoring procedure: use cases, alert severities, response times, on-call", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.monitor}
       - {id: r2, label: "Monitoring rules or use cases (SIEM, MDR, IDS or equivalent) and the sources they cover", kind: technical, fresh_days: 40}
@@ -269,8 +269,8 @@ entries:
       - {id: p3, text: "No baseline of normal activity, so 'anomalous' is undefined"}
   a.8.17:
     questions:
-      - {id: q1, stage: 1, text: "Which time source do your systems use, and where is that standard documented?"}
-      - {id: q2, stage: 2, text: "Which time source do your systems use, and how do you know they agree?"}
+      - {id: q1, stage: 1, who: [infra], text: "Which time source do your systems use, and where is that standard documented?"}
+      - {id: q2, stage: 2, who: [infra], text: "Which time source do your systems use, and how do you know they agree?"}
     requests:
       - {id: r1, label: "NTP configuration on domain controllers, network devices and cloud", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:proc.ntp}
     sampling:
@@ -281,9 +281,9 @@ entries:
       - {id: p2, text: "Mixed time zones in logs without UTC normalisation, making correlation hard"}
   a.8.18:
     questions:
-      - {id: q1, stage: 1, text: "Which tools let an admin bypass normal security controls, and who may use them?"}
-      - {id: q2, stage: 2, text: "Which tools can override system or security controls here, and who can run them?"}
-      - {id: q3, stage: 2, text: "How do you stop a normal user from running admin tools or scripting engines?"}
+      - {id: q1, stage: 1, who: [iam], text: "Which tools let an admin bypass normal security controls, and who may use them?"}
+      - {id: q2, stage: 2, who: [iam], text: "Which tools can override system or security controls here, and who can run them?"}
+      - {id: q3, stage: 2, who: [sec_ops], text: "How do you stop a normal user from running admin tools or scripting engines?"}
     requests:
       - {id: r1, label: "List of restricted utility programs and who is authorised", kind: document}
       - {id: r2, label: "Application control or local admin restriction configuration", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:tech.app_control}
@@ -294,9 +294,9 @@ entries:
       - {id: p2, text: "No list of what is considered a privileged utility"}
   a.8.19:
     questions:
-      - {id: q1, stage: 1, text: "Who may install software on production systems, and from which approved sources?"}
-      - {id: q2, stage: 2, text: "Can a user install software on their laptop? Show me."}
-      - {id: q3, stage: 2, text: "How is software installed on production servers approved and tracked?"}
+      - {id: q1, stage: 1, who: [endpoint], text: "Who may install software on production systems, and from which approved sources?"}
+      - {id: q2, stage: 2, who: [staff, endpoint], text: "Can a user install software on their laptop? Show me."}
+      - {id: q3, stage: 2, who: [endpoint], text: "How is software installed on production servers approved and tracked?"}
     requests:
       - {id: r1, label: "Approved software list or catalogue", kind: document}
       - {id: r2, label: "Installed software inventory report from endpoint management", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.sw_inventory}
@@ -309,10 +309,10 @@ entries:
       - {id: p2, text: "Browser extensions not controlled"}
   a.8.20:
     questions:
-      - {id: q1, stage: 1, text: "Show me your current network diagram. Where are the trust boundaries and remote access paths?"}
-      - {id: q2, stage: 2, text: "Show me your current network diagram and tell me when it was last updated."}
-      - {id: q3, stage: 2, text: "How are firewall rules reviewed, and when was the last review?"}
-      - {id: q4, stage: 2, text: "How is admin access to network devices controlled?"}
+      - {id: q1, stage: 1, who: [network], text: "Show me your current network diagram. Where are the trust boundaries and remote access paths?"}
+      - {id: q2, stage: 2, who: [network], text: "Show me your current network diagram and tell me when it was last updated."}
+      - {id: q3, stage: 2, who: [network], text: "How are firewall rules reviewed, and when was the last review?"}
+      - {id: q4, stage: 2, who: [network], text: "How is admin access to network devices controlled?"}
     requests:
       - {id: r1, label: "Up-to-date network diagram including cloud and remote access", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.is_map}
       - {id: r2, label: "Firewall rule review record with removals", kind: record, fresh_days: 400}
@@ -326,9 +326,9 @@ entries:
       - {id: p3, text: "Management interfaces reachable from the internet"}
   a.8.21:
     questions:
-      - {id: q1, stage: 1, text: "Which network services do you buy or run, and what security terms did you set for each?"}
-      - {id: q2, stage: 2, text: "Which network services do you buy (internet, SD-WAN, VPN, DNS), and what security terms are in those contracts?"}
-      - {id: q3, stage: 2, text: "How do you check the provider is meeting the agreed service levels?"}
+      - {id: q1, stage: 1, who: [network, proc], text: "Which network services do you buy or run, and what security terms did you set for each?"}
+      - {id: q2, stage: 2, who: [proc], text: "Which network services do you buy (internet, SD-WAN, VPN, DNS), and what security terms are in those contracts?"}
+      - {id: q3, stage: 2, who: [network], text: "How do you check the provider is meeting the agreed service levels?"}
     requests:
       - {id: r1, label: "Network service contracts or SLAs with security clauses", kind: document}
       - {id: r2, label: "Provider service reports or review minutes", kind: record, fresh_days: 400}
@@ -339,9 +339,9 @@ entries:
       - {id: p2, text: "Provider reports received but never reviewed"}
   a.8.22:
     questions:
-      - {id: q1, stage: 1, text: "How is your network split into zones, and what decides which zone a system lands in?"}
-      - {id: q2, stage: 2, text: "How are guest, user, server, and management networks separated?"}
-      - {id: q3, stage: 2, text: "Connect me to guest Wi-Fi: can I reach any internal system?"}
+      - {id: q1, stage: 1, who: [network], text: "How is your network split into zones, and what decides which zone a system lands in?"}
+      - {id: q2, stage: 2, who: [network], text: "How are guest, user, server, and management networks separated?"}
+      - {id: q3, stage: 2, who: [network], text: "Connect me to guest Wi-Fi: can I reach any internal system?"}
     requests:
       - {id: r1, label: "Network segmentation diagram with VLANs, zones and trust levels", kind: document}
       - {id: r2, label: "Inter-zone firewall rules or ACLs", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.flow_matrix}
@@ -353,10 +353,10 @@ entries:
       - {id: p2, text: "Guest Wi-Fi shares a VLAN with printers or IoT devices"}
   a.8.23:
     questions:
-      - {id: q1, stage: 1, text: "Which website categories do you block and how did you decide?"}
-      - {id: q2, stage: 2, text: "Try to open a known malicious or blocked test site from this laptop: what happens?"}
-      - {id: q3, stage: 2, text: "Does filtering still apply when staff work from home off VPN?"}
-      - {id: q4, stage: 2, text: "How do staff request access to a blocked site for business reasons, and where are the rules for safe web use?"}
+      - {id: q1, stage: 1, who: [network], text: "Which website categories do you block and how did you decide?"}
+      - {id: q2, stage: 2, who: [network], text: "Try to open a known malicious or blocked test site from this laptop: what happens?"}
+      - {id: q3, stage: 2, who: [network], text: "Does filtering still apply when staff work from home off VPN?"}
+      - {id: q4, stage: 2, who: [staff, network], text: "How do staff request access to a blocked site for business reasons, and where are the rules for safe web use?"}
     requests:
       - {id: r1, label: "Web filtering policy with blocked categories", kind: document}
       - {id: r2, label: "Filtering tool configuration (secure web gateway, DNS filter, firewall)", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:tech.web_proxy}
@@ -369,9 +369,9 @@ entries:
       - {id: p2, text: "Sites flagged as malicious by threat intelligence or the filtering provider are not blocked"}
   a.8.24:
     questions:
-      - {id: q1, stage: 1, text: "What are your rules on encryption algorithms, key lengths and where encryption is mandatory?"}
-      - {id: q2, stage: 2, text: "Who manages keys and certificates, and how would you know one is about to expire?"}
-      - {id: q3, stage: 2, text: "Show me encryption at rest for this database and in transit for this web app."}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What are your rules on encryption algorithms, key lengths and where encryption is mandatory?"}
+      - {id: q2, stage: 2, who: [infra], text: "Who manages keys and certificates, and how would you know one is about to expire?"}
+      - {id: q3, stage: 2, who: [infra, dev], text: "Show me encryption at rest for this database and in transit for this web app."}
     requests:
       - {id: r1, label: "Cryptography policy including key management", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.crypto}
       - {id: r2, label: "Key and certificate inventory with owners and expiry", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:tech.pki}
@@ -385,8 +385,8 @@ entries:
       - {id: p3, text: "Keys stored alongside data or in source code"}
   a.8.25:
     questions:
-      - {id: q1, stage: 1, text: "Describe your development life cycle and where security activities sit in it."}
-      - {id: q2, stage: 2, text: "Take this recent release: show me the security steps it went through."}
+      - {id: q1, stage: 1, who: [dev], text: "Describe your development life cycle and where security activities sit in it."}
+      - {id: q2, stage: 2, who: [dev], text: "Take this recent release: show me the security steps it went through."}
     requests:
       - {id: r1, label: "Secure development policy or SDLC description", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.secdev}
       - {id: r2, label: "Evidence trail for one release: requirements, review, tests, approval", kind: record, fresh_days: 200}
@@ -398,9 +398,9 @@ entries:
       - {id: p2, text: "Low-code or scripts outside the official SDLC"}
   a.8.26:
     questions:
-      - {id: q1, stage: 1, text: "How are security requirements captured for a new application or a major change?"}
-      - {id: q2, stage: 2, text: "How do security requirements get into a new application or feature you build or buy?"}
-      - {id: q3, stage: 2, text: "Show me the security requirements captured for your last new system."}
+      - {id: q1, stage: 1, who: [dev], text: "How are security requirements captured for a new application or a major change?"}
+      - {id: q2, stage: 2, who: [dev, proc], text: "How do security requirements get into a new application or feature you build or buy?"}
+      - {id: q3, stage: 2, who: [dev], text: "Show me the security requirements captured for your last new system."}
     requests:
       - {id: r1, label: "Security requirements template or checklist for projects and acquisitions", kind: document}
       - {id: r2, label: "Completed and approved security requirements, with the approver, for one recent project or SaaS acquisition", kind: record, fresh_days: 400}
@@ -413,8 +413,8 @@ entries:
       - {id: p3, text: "Requirements drafted but never formally approved before build or purchase"}
   a.8.27:
     questions:
-      - {id: q1, stage: 1, text: "Which secure engineering principles do your architects follow, and where are they written?"}
-      - {id: q2, stage: 2, text: "Show me how a recent design was reviewed against them."}
+      - {id: q1, stage: 1, who: [dev], text: "Which secure engineering principles do your architects follow, and where are they written?"}
+      - {id: q2, stage: 2, who: [dev], text: "Show me how a recent design was reviewed against them."}
     requests:
       - {id: r1, label: "Secure architecture principles or reference architecture", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.arc_principles}
       - {id: r2, label: "Architecture or threat model review for a recent system", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.threat_modeling}
@@ -426,9 +426,9 @@ entries:
       - {id: p3, text: "Principles never reviewed since they were written, and never passed on to external developers"}
   a.8.28:
     questions:
-      - {id: q1, stage: 1, text: "What secure coding standard do your developers follow, and how are they trained on it?"}
-      - {id: q2, stage: 2, text: "Show me a recent pull request: who reviewed it and what security checks ran automatically?"}
-      - {id: q3, stage: 2, text: "How do you track and update vulnerable third-party libraries?"}
+      - {id: q1, stage: 1, who: [dev], text: "What secure coding standard do your developers follow, and how are they trained on it?"}
+      - {id: q2, stage: 2, who: [dev], text: "Show me a recent pull request: who reviewed it and what security checks ran automatically?"}
+      - {id: q3, stage: 2, who: [dev], text: "How do you track and update vulnerable third-party libraries?"}
     requests:
       - {id: r1, label: "Secure coding guideline (for example OWASP based) per language", kind: document}
       - {id: r2, label: "SAST and dependency scan results from the pipeline", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.sast_dast}
@@ -443,10 +443,10 @@ entries:
       - {id: p3, text: "Third-party libraries not inventoried or kept up to date; hard-coded credentials found in code"}
   a.8.29:
     questions:
-      - {id: q1, stage: 1, text: "Which security tests must pass before a release, and who signs off?"}
-      - {id: q2, stage: 2, text: "What security testing happens before a release goes live, and who signs off?"}
-      - {id: q3, stage: 2, text: "Show me the acceptance test evidence for the last significant release."}
-      - {id: q4, stage: 2, text: "Who other than the developers performs acceptance testing, and how close is the test environment to production?"}
+      - {id: q1, stage: 1, who: [dev], text: "Which security tests must pass before a release, and who signs off?"}
+      - {id: q2, stage: 2, who: [dev], text: "What security testing happens before a release goes live, and who signs off?"}
+      - {id: q3, stage: 2, who: [dev], text: "Show me the acceptance test evidence for the last significant release."}
+      - {id: q4, stage: 2, who: [dev], text: "Who other than the developers performs acceptance testing, and how close is the test environment to production?"}
     requests:
       - {id: r1, label: "Test plan or criteria including security tests", kind: document}
       - {id: r2, label: "Security test results (DAST, pentest, functional security tests) for a recent release", kind: record, fresh_days: 400}
@@ -458,9 +458,9 @@ entries:
       - {id: p2, text: "No acceptance criteria, so failed tests do not block go-live"}
   a.8.30:
     questions:
-      - {id: q1, stage: 1, text: "Which development do you outsource, and what security terms apply to it?"}
-      - {id: q2, stage: 2, text: "Do you use external developers? What security terms are in their contracts?"}
-      - {id: q3, stage: 2, text: "How do you check the code they deliver?"}
+      - {id: q1, stage: 1, who: [proc], text: "Which development do you outsource, and what security terms apply to it?"}
+      - {id: q2, stage: 2, who: [proc], text: "Do you use external developers? What security terms are in their contracts?"}
+      - {id: q3, stage: 2, who: [dev], text: "How do you check the code they deliver?"}
     requests:
       - {id: r1, label: "Contracts or SOWs with secure development, IP and access clauses", kind: document}
       - {id: r2, label: "Acceptance or code review records for outsourced deliverables", kind: record}
@@ -473,10 +473,10 @@ entries:
       - {id: p2, text: "No review of delivered code; contract silent on security"}
   a.8.31:
     questions:
-      - {id: q1, stage: 1, text: "How are development, test and production kept apart, and who may access each?"}
-      - {id: q2, stage: 2, text: "How are development, test and production separated, and who can access production?"}
-      - {id: q3, stage: 2, text: "Can a developer change production directly? Show me."}
-      - {id: q4, stage: 2, text: "How are development and test environments themselves protected (access, patching, secure configuration, monitoring)?"}
+      - {id: q1, stage: 1, who: [infra], text: "How are development, test and production kept apart, and who may access each?"}
+      - {id: q2, stage: 2, who: [infra], text: "How are development, test and production separated, and who can access production?"}
+      - {id: q3, stage: 2, who: [dev], text: "Can a developer change production directly? Show me."}
+      - {id: q4, stage: 2, who: [infra], text: "How are development and test environments themselves protected (access, patching, secure configuration, monitoring)?"}
     requests:
       - {id: r1, label: "Environment diagram showing separate accounts, subscriptions or networks", kind: document}
       - {id: r2, label: "Production access list", kind: technical, fresh_days: 40}
@@ -487,9 +487,9 @@ entries:
       - {id: p2, text: "Test and production share credentials or databases"}
   a.8.32:
     questions:
-      - {id: q1, stage: 1, text: "What is your change process, including emergency changes?"}
-      - {id: q2, stage: 2, text: "Take this change from your list: show me the request, risk assessment, approval, test and rollback plan."}
-      - {id: q3, stage: 2, text: "How do you detect a change that bypassed the process?"}
+      - {id: q1, stage: 1, who: [service_desk], text: "What is your change process, including emergency changes?"}
+      - {id: q2, stage: 2, who: [service_desk], text: "Take this change from your list: show me the request, risk assessment, approval, test and rollback plan."}
+      - {id: q3, stage: 2, who: [service_desk, dev], text: "How do you detect a change that bypassed the process?"}
     requests:
       - {id: r1, label: "Change management procedure", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.change_mgmt}
       - {id: r2, label: "Change log or ticket export for audit period", kind: record, fresh_days: 40}
@@ -503,9 +503,9 @@ entries:
       - {id: p3, text: "Emergency changes never reviewed after the fact"}
   a.8.33:
     questions:
-      - {id: q1, stage: 1, text: "What are your rules for using production data in test, and who approves exceptions?"}
-      - {id: q2, stage: 2, text: "Where does your test data come from, and is any of it real production data?"}
-      - {id: q3, stage: 2, text: "If production data is copied to test, who approves it and when is it removed?"}
+      - {id: q1, stage: 1, who: [dev], text: "What are your rules for using production data in test, and who approves exceptions?"}
+      - {id: q2, stage: 2, who: [dev], text: "Where does your test data come from, and is any of it real production data?"}
+      - {id: q3, stage: 2, who: [dev, dpo], text: "If production data is copied to test, who approves it and when is it removed?"}
     requests:
       - {id: r1, label: "Test data rules or procedure", kind: document}
       - {id: r2, label: "Approval and deletion records for production data copies", kind: record}
@@ -517,8 +517,8 @@ entries:
       - {id: p2, text: "Copies never deleted after testing"}
   a.8.34:
     questions:
-      - {id: q1, stage: 1, text: "How do you plan and approve audits or tests that touch live systems?"}
-      - {id: q2, stage: 2, text: "When auditors or pentesters test live systems, how do you plan and control that access?"}
+      - {id: q1, stage: 1, who: [sec_ops, auditor], text: "How do you plan and approve audits or tests that touch live systems?"}
+      - {id: q2, stage: 2, who: [sec_ops], text: "When auditors or pentesters test live systems, how do you plan and control that access?"}
     requests:
       - {id: r1, label: "Rules of engagement or authorisation for the last penetration test or technical audit", kind: record, fresh_days: 400}
       - {id: r2, label: "Evidence that temporary auditor or tester accounts were removed", kind: record}

@@ -13,7 +13,7 @@ framework_urn: urn:intuitem:risk:framework:iso27001-2022
 entries:
   a.5.18:                      # URN suffix of the requirement node
     questions:
-      - {id: q1, stage: 2, text: "Walk me through a joiner, a mover and a leaver."}
+      - {id: q1, stage: 2, who: [iam, hr], text: "Walk me through a joiner, a mover and a leaver."}
     requests:
       - {id: r1, label: "Access review records, last 2 cycles", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:proc.recertification}
     sampling:
@@ -26,6 +26,8 @@ entries:
 - `id`: `q<n>`, `r<n>`, `p<n>`, `s<n>` (sampling), unique within the entry. Never renumber or
   reuse a retired id: translations and evidence links key on it.
 - `stage`: 1 (documentation review) or 2 (implementation, sampling).
+- `who`: on every question, the 1 to 3 roles who answer it, taken from the
+  entry's `interviewees`; flash card decks are built from it.
 - `kind`: document | record | technical | observation.
 - `observation`: seen on site, never a linked evidence, so not counted in readiness.
 - `fresh_days`: records/technical only, one of 40 (monthly), 100 (quarterly),

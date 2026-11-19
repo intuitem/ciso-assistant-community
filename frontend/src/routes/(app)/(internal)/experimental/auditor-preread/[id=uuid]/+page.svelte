@@ -27,6 +27,7 @@
 		sectionOf,
 		keyOf,
 		sessionPlan,
+		todos,
 		unpairedOf,
 		type ActorRef,
 		type Preparation,
@@ -133,7 +134,13 @@
 				: items.filter((i) => open(i) && i.guidance?.questions.some((q) => q.stage === 1)).length,
 			sessions: onSite
 				? (data.preread.sessions ?? []).filter((x: Session) => !prep?.sessions[x.id]?.date).length
-				: 0
+				: 0,
+			// The session with the most left to do, to prepare first.
+			walk:
+				(data.preread.sessions ?? [])
+					.map((x: Session) => ({ session: x as Session, count: toDoIn(x) }))
+					.filter((w: { count: number }) => w.count)
+					.sort((a: { count: number }, b: { count: number }) => b.count - a.count)[0] ?? null
 		};
 	});
 	const matchesQuery = (i: PrereadItem) => {
@@ -146,20 +153,34 @@
 		const keys = items.map((i) => i.guide_key).filter(Boolean);
 		return new Set(keys).size < keys.length;
 	});
+	// Session by session: its requirements still to work on, worst first, one at a time.
+	let walkId: string | null = $state(page.url.searchParams.get('session'));
+	const TO_DO: Readiness[] = ['gap', 'weak', 'to_confirm'];
+	const walkSession = $derived(
+		(data.preread.sessions ?? []).find((x: Session) => x.id === walkId) as Session | undefined
+	);
+	const toDoIn = (x: Session) =>
+		items.filter((i) => x.members.includes(keyOf(i)) && TO_DO.includes(i.readiness)).length;
 	const beforeSection = $derived(
 		items.filter(
 			(i) =>
+				(!walkSession ||
+					(walkSession.members.includes(keyOf(i)) &&
+						(TO_DO.includes(i.readiness) || i.id === kept))) &&
 				(readinessFilter === 'all' || i.readiness === readinessFilter || i.id === kept) &&
 				(!stage || i.guidance?.questions.some((q) => q.stage === stage)) &&
 				(!flagged || isFlagged(i)) &&
 				matchesQuery(i)
 		)
 	);
-	const visible = $derived(
-		beforeSection.filter(
+	const visible = $derived.by(() => {
+		const shown = beforeSection.filter(
 			(i) => section === 'all' || SECTIONS.find((s) => s.key === section)!.test(keyOf(i))
-		)
-	);
+		);
+		return walkSession
+			? [...shown].sort((a, b) => READINESS[a.readiness].rank - READINESS[b.readiness].rank)
+			: shown;
+	});
 	const grouped = $derived(
 		SECTIONS.map((s) => ({ ...s, items: visible.filter((i) => s.test(keyOf(i))) })).filter(
 			(g) => g.items.length
@@ -172,6 +193,18 @@
 		)
 	);
 	const selected = $derived(visible[selectedIndex]);
+	// Preparing a session: once the requirement on screen is handled, show its new
+	// verdict for a moment, then move on to the next one still to work on.
+	$effect(() => {
+		if (!walkSession || !selected || TO_DO.includes(selected.readiness)) return;
+		const done = selected.id;
+		const t = setTimeout(() => {
+			const next = visible.find((i) => i.id !== done && TO_DO.includes(i.readiness));
+			kept = null;
+			if (next) select(next.id);
+		}, 1500);
+		return () => clearTimeout(t);
+	});
 	const requests = $derived(requestList(visible));
 	const interviews = $derived(interviewPlan(visible));
 	const sessions = $derived(sessionPlan(visible, data.preread.sessions ?? []));
@@ -184,6 +217,8 @@
 		selectedId = id;
 		const url = new URL(page.url.href);
 		url.searchParams.set('req', id);
+		if (walkId) url.searchParams.set('session', walkId);
+		else url.searchParams.delete('session');
 		replaceState(url, {});
 		await tick();
 		const row = listEl?.querySelector<HTMLElement>(`[data-id="${id}"]`);
@@ -209,6 +244,22 @@
 		select(id);
 	}
 
+	/** Prepare one session (or go back to the full view with null), from its worst requirement. */
+	function walk(id: string | null) {
+		clearFilters();
+		walkId = id;
+		view = 'req';
+		// Leaving keeps the requirement on screen; entering starts at the worst one.
+		const first = (!id && visible.find((i) => i.id === selectedId)) || visible[0];
+		if (first) select(first.id);
+		else {
+			const url = new URL(page.url.href);
+			if (id) url.searchParams.set('session', id);
+			else url.searchParams.delete('session');
+			replaceState(url, {});
+		}
+	}
+
 	function clearFilters() {
 		readinessFilter = 'all';
 		section = 'all';
@@ -218,7 +269,14 @@
 	}
 
 	const stepNo = (k: number) =>
-		[start.confirm, start.findings, start.documents.length, start.stage1, start.sessions]
+		[
+			start.confirm,
+			start.findings,
+			start.documents.length,
+			start.stage1,
+			start.sessions,
+			start.walk?.count ?? 0
+		]
 			.slice(0, k + 1)
 			.filter(Boolean).length;
 
@@ -235,34 +293,12 @@
 		document.getElementById('prep')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	}
 
-	type Todo = { text: string; action?: 'evidence' | 'assess' | 'justify' | 'prep' };
 	const ACTION = {
 		evidence: { label: m.prereadActionEvidence, icon: 'fa-solid fa-paperclip' },
 		assess: { label: m.prereadActionAssess, icon: 'fa-solid fa-pen' },
 		justify: { label: m.prereadActionJustify, icon: 'fa-solid fa-pen' },
 		prep: { label: m.prereadActionPrep, icon: 'fa-solid fa-comments' }
 	};
-	/** The readiness reasons, turned into plain next steps in the order to do them. */
-	function todos(i: PrereadItem): Todo[] {
-		if (i.readiness === 'excluded') return [{ text: m.prereadTodoJustify(), action: 'justify' }];
-		if (!i.guidance) return [{ text: m.prereadTodoNoGuide(), action: 'assess' }];
-		const has = (...r: string[]) => r.some((x) => i.reasons.includes(x));
-		const out: Todo[] = [];
-		if (has('open_finding', 'open_minor_finding')) out.push({ text: m.prereadTodoFinding() });
-		if (has('nothing_linked', 'request_not_on_file')) out.push({ text: m.prereadTodoGather() });
-		if (has('evidence_to_confirm')) out.push({ text: m.prereadTodoPair() });
-		if (has('missing_file')) out.push({ text: m.prereadTodoAddFile() });
-		if (has('unusable_evidence')) out.push({ text: m.prereadTodoUnusable(), action: 'evidence' });
-		if (has('evidence_to_validate')) out.push({ text: m.prereadTodoValidate() });
-		if (has('expires_before_audit'))
-			out.push({ text: m.prereadTodoExpiresBeforeAudit(), action: 'evidence' });
-		if (has('stale_evidence')) out.push({ text: m.prereadTodoRefresh(), action: 'evidence' });
-		if (has('non_compliant')) out.push({ text: m.prereadTodoFix(), action: 'assess' });
-		if (has('not_assessed')) out.push({ text: m.prereadTodoAssess(), action: 'assess' });
-		if (has('quality_error', 'quality_warning')) out.push({ text: m.prereadTodoQuality() });
-		if (!out.length && i.guidance) out.push({ text: m.prereadTodoRehearse(), action: 'prep' });
-		return out;
-	}
 
 	/** Run a start step: show only what it is about, on the requirement view. */
 	function go(set: () => void) {
@@ -665,7 +701,7 @@
 		</div>
 	</header>
 
-	{#if data.preread.supported && (start.confirm || start.findings || start.documents.length || start.stage1 || start.sessions || previous.length)}
+	{#if data.preread.supported && (start.confirm || start.findings || start.documents.length || start.stage1 || start.sessions || start.walk || previous.length)}
 		<section
 			class="card border border-primary-500/40 bg-primary-500/5 p-4 flex flex-col gap-2"
 			aria-label={m.prereadStartTitle()}
@@ -737,6 +773,17 @@
 						>
 					</li>
 				{/if}
+				{#if start.walk}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(5)}.</span>
+						<button class="anchor text-left" onclick={() => walk(start.walk!.session.id)}
+							>{m.prereadStartWalk({
+								label: start.walk.session.label,
+								count: start.walk.count
+							})}</button
+						>
+					</li>
+				{/if}
 			</ol>
 			{#if previous.length}
 				<p class="text-sm flex flex-wrap items-center gap-2">
@@ -783,131 +830,162 @@
 				{#if lettered}{m.prereadLettered()}{/if}
 			</p>
 		{/if}
-		<!-- Tabs -->
-		<div class="flex gap-1 border-b border-surface-200-800 overflow-x-auto" role="tablist">
-			{#each [['req', m.prereadByRequirement(), 'fa-solid fa-list-check', visible.length], ['sessions', m.prereadSessions(), 'fa-solid fa-calendar-day', sessions.length], ['requests', m.prereadRequestList(), 'fa-solid fa-folder-open', requests.length], ['interviews', m.prereadInterviewPlan(), 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
-				<button
-					role="tab"
-					aria-selected={view === key}
-					class="flex items-center gap-2 px-3 py-2 -mb-px border-b-2 whitespace-nowrap {view === key
-						? 'border-primary-500 font-semibold'
-						: 'border-transparent text-surface-600-400 hover:text-surface-950-50'}"
-					onclick={() => (view = key)}
-				>
-					<i class={icon}></i>{label}
-					<span class="badge preset-tonal-surface text-xs tabular-nums">{n}</span>
-				</button>
-			{/each}
-		</div>
-
-		<!-- Filters -->
-		<div class="flex flex-wrap items-center gap-2">
-			<label class="relative grow max-w-sm">
-				<span class="sr-only">{m.prereadSearchRequirements()}</span>
-				<i
-					class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 text-sm"
-				></i>
-				<input
-					class="input pl-9 w-full"
-					type="search"
-					placeholder={m.prereadSearchRequirementsPlaceholder()}
-					bind:value={query}
-				/>
-			</label>
+		{#if walkSession}
 			<div
-				class="flex rounded-base border border-surface-200-800 overflow-hidden text-sm"
-				role="group"
-				aria-label={m.prereadAuditStage()}
+				class="card border border-primary-500/40 bg-primary-500/5 p-3 flex flex-wrap items-center gap-x-3 gap-y-1"
 			>
-				{#each [[0, m.prereadBothStages()], [1, m.prereadStage1()], [2, m.prereadStage2()]] as [value, label] (value)}
+				<i class="fa-solid fa-shoe-prints text-primary-500"></i>
+				<span class="font-semibold">{m.prereadWalkSession({ label: walkSession.label })}</span>
+				<span class="text-sm text-surface-600-400"
+					>{m.prereadWalkCount({ count: toDoIn(walkSession) })}</span
+				>
+				<button class="btn btn-sm preset-tonal-surface ml-auto" onclick={() => walk(null)}
+					><i class="fa-solid fa-xmark"></i>{m.prereadWalkExit()}</button
+				>
+			</div>
+		{:else}
+			<!-- Tabs -->
+			<div class="flex gap-1 border-b border-surface-200-800 overflow-x-auto" role="tablist">
+				{#each [['req', m.prereadByRequirement(), 'fa-solid fa-list-check', visible.length], ['sessions', m.prereadSessions(), 'fa-solid fa-calendar-day', sessions.length], ['requests', m.prereadRequestList(), 'fa-solid fa-folder-open', requests.length], ['interviews', m.prereadInterviewPlan(), 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
 					<button
-						class="px-3 py-1.5 {stage === value
-							? 'preset-filled-primary-500'
-							: 'hover:bg-surface-100-900'}"
-						aria-pressed={stage === value}
-						title={value ? STAGES[value as number] : m.prereadBothStagesHint()}
-						onclick={() => (stage = value as 0 | 1 | 2)}>{label}</button
+						role="tab"
+						aria-selected={view === key}
+						class="flex items-center gap-2 px-3 py-2 -mb-px border-b-2 whitespace-nowrap {view ===
+						key
+							? 'border-primary-500 font-semibold'
+							: 'border-transparent text-surface-600-400 hover:text-surface-950-50'}"
+						onclick={() => (view = key)}
 					>
+						<i class={icon}></i>{label}
+						<span class="badge preset-tonal-surface text-xs tabular-nums">{n}</span>
+					</button>
 				{/each}
 			</div>
-			<label>
-				<span class="sr-only">{m.prereadSection()}</span>
-				<select class="select w-auto text-sm py-1.5" bind:value={section}>
-					{#each [{ key: 'all', label: m.prereadAllSections(), test: () => true }, ...SECTIONS.filter( (s) => data.preread.items.some( (i: any) => s.test(keyOf(i)) ) )] as s (s.key)}
-						<option value={s.key}
-							>{s.label} ({beforeSection.filter((i) => s.test(keyOf(i))).length})</option
+
+			<!-- Filters -->
+			<div class="flex flex-wrap items-center gap-2">
+				<label class="relative grow max-w-sm">
+					<span class="sr-only">{m.prereadSearchRequirements()}</span>
+					<i
+						class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 text-sm"
+					></i>
+					<input
+						class="input pl-9 w-full"
+						type="search"
+						placeholder={m.prereadSearchRequirementsPlaceholder()}
+						bind:value={query}
+					/>
+				</label>
+				<div
+					class="flex rounded-base border border-surface-200-800 overflow-hidden text-sm"
+					role="group"
+					aria-label={m.prereadAuditStage()}
+				>
+					{#each [[0, m.prereadBothStages()], [1, m.prereadStage1()], [2, m.prereadStage2()]] as [value, label] (value)}
+						<button
+							class="px-3 py-1.5 {stage === value
+								? 'preset-filled-primary-500'
+								: 'hover:bg-surface-100-900'}"
+							aria-pressed={stage === value}
+							title={value ? STAGES[value as number] : m.prereadBothStagesHint()}
+							onclick={() => (stage = value as 0 | 1 | 2)}>{label}</button
 						>
 					{/each}
-				</select>
-			</label>
-			{#if flagged}
-				<button
-					class="flex items-center gap-1.5 rounded-full border border-error-500 px-2.5 py-0.5 text-sm"
-					aria-pressed="true"
-					onclick={() => (flagged = false)}
-				>
-					<i class="fa-solid fa-flag text-error-500 text-xs"></i>{m.prereadOpenFindingsFilter()}
-					<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
-				</button>
-			{/if}
-			{#if filtered}
-				<button class="btn btn-sm preset-tonal-surface" onclick={clearFilters}>
-					<i class="fa-solid fa-xmark"></i>{m.prereadClearFilters()}
-				</button>
-			{/if}
-		</div>
+				</div>
+				<label>
+					<span class="sr-only">{m.prereadSection()}</span>
+					<select class="select w-auto text-sm py-1.5" bind:value={section}>
+						{#each [{ key: 'all', label: m.prereadAllSections(), test: () => true }, ...SECTIONS.filter( (s) => data.preread.items.some( (i: any) => s.test(keyOf(i)) ) )] as s (s.key)}
+							<option value={s.key}
+								>{s.label} ({beforeSection.filter((i) => s.test(keyOf(i))).length})</option
+							>
+						{/each}
+					</select>
+				</label>
+				{#if flagged}
+					<button
+						class="flex items-center gap-1.5 rounded-full border border-error-500 px-2.5 py-0.5 text-sm"
+						aria-pressed="true"
+						onclick={() => (flagged = false)}
+					>
+						<i class="fa-solid fa-flag text-error-500 text-xs"></i>{m.prereadOpenFindingsFilter()}
+						<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
+					</button>
+				{/if}
+				{#if filtered}
+					<button class="btn btn-sm preset-tonal-surface" onclick={clearFilters}>
+						<i class="fa-solid fa-xmark"></i>{m.prereadClearFilters()}
+					</button>
+				{/if}
+			</div>
+		{/if}
 
 		{#if view === 'req'}
-			<div class="grid grid-cols-1 lg:grid-cols-[20rem_minmax(0,1fr)] gap-5 items-start">
-				<!-- Requirement index -->
-				<nav
-					bind:this={listEl}
-					class="card border border-surface-200-800 lg:sticky lg:top-4 max-h-[75vh] overflow-auto"
-					aria-label={m.prereadRequirements()}
-				>
-					{#each grouped as g (g.key)}
-						<div
-							class="sticky top-0 z-10 bg-surface-50-950 px-3 py-1.5 text-xs uppercase tracking-wider font-semibold text-surface-600-400 border-b border-surface-200-800 flex justify-between"
-						>
-							<span>{g.label}</span><span class="tabular-nums">{g.items.length}</span>
-						</div>
-						<ul aria-label={g.label}>
-							{#each g.items as item (item.id)}
-								<li>
-									<button
-										data-id={item.id}
-										aria-current={selected?.id === item.id}
-										onkeydown={onListKey}
-										tabindex={selected?.id === item.id ? 0 : -1}
-										class="w-full grid grid-cols-[3.75rem_1fr_auto] gap-2 items-center text-left px-3 py-2 text-sm border-l-2 {selected?.id ===
-										item.id
-											? 'bg-primary-500/10 border-primary-500'
-											: 'border-transparent hover:bg-surface-100-900'}"
-										onclick={() => select(item.id)}
-									>
-										<span class="font-mono text-xs text-surface-600-400">{item.ref_id}</span>
-										<span class="leading-snug"
-											>{item.name}{#if item.prior_findings.some((f) => f.open)}<i
-													class="fa-solid fa-flag text-error-500 text-xs ml-1.5"
-													title={m.prereadOpenFindingHint()}
-												></i>{/if}</span
+			<div
+				class="grid grid-cols-1 gap-5 items-start {walkSession
+					? ''
+					: 'lg:grid-cols-[20rem_minmax(0,1fr)]'}"
+			>
+				<!-- Requirement index; none while preparing a session: one requirement at a time -->
+				{#if !walkSession}
+					<nav
+						bind:this={listEl}
+						class="card border border-surface-200-800 lg:sticky lg:top-4 max-h-[75vh] overflow-auto"
+						aria-label={m.prereadRequirements()}
+					>
+						{#each grouped as g (g.key)}
+							<div
+								class="sticky top-0 z-10 bg-surface-50-950 px-3 py-1.5 text-xs uppercase tracking-wider font-semibold text-surface-600-400 border-b border-surface-200-800 flex justify-between"
+							>
+								<span>{g.label}</span><span class="tabular-nums">{g.items.length}</span>
+							</div>
+							<ul aria-label={g.label}>
+								{#each g.items as item (item.id)}
+									<li>
+										<button
+											data-id={item.id}
+											aria-current={selected?.id === item.id}
+											onkeydown={onListKey}
+											tabindex={selected?.id === item.id ? 0 : -1}
+											class="w-full grid grid-cols-[3.75rem_1fr_auto] gap-2 items-center text-left px-3 py-2 text-sm border-l-2 {selected?.id ===
+											item.id
+												? 'bg-primary-500/10 border-primary-500'
+												: 'border-transparent hover:bg-surface-100-900'}"
+											onclick={() => select(item.id)}
 										>
-										{@render dot(item.readiness)}
-									</button>
-								</li>
-							{/each}
-						</ul>
-					{:else}
-						<div class="p-6 text-center text-sm text-surface-600-400 flex flex-col gap-2">
-							<i class="fa-solid fa-filter-circle-xmark text-2xl"></i>
-							{m.prereadNothingMatches()}
-							<button class="anchor" onclick={clearFilters}>{m.prereadClearFilters()}</button>
-						</div>
-					{/each}
-				</nav>
+											<span class="font-mono text-xs text-surface-600-400">{item.ref_id}</span>
+											<span class="leading-snug"
+												>{item.name}{#if item.prior_findings.some((f) => f.open)}<i
+														class="fa-solid fa-flag text-error-500 text-xs ml-1.5"
+														title={m.prereadOpenFindingHint()}
+													></i>{/if}</span
+											>
+											{@render dot(item.readiness)}
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{:else}
+							<div class="p-6 text-center text-sm text-surface-600-400 flex flex-col gap-2">
+								<i class="fa-solid fa-filter-circle-xmark text-2xl"></i>
+								{m.prereadNothingMatches()}
+								<button class="anchor" onclick={clearFilters}>{m.prereadClearFilters()}</button>
+							</div>
+						{/each}
+					</nav>
+				{/if}
 
 				<!-- Requirement file -->
-				{#if selected}
+				{#if walkSession && !selected}
+					<div class="card border border-surface-200-800 p-6 flex flex-col items-start gap-3">
+						<p>
+							<i class="fa-solid fa-circle-check text-success-500 mr-2"></i>{m.prereadWalkDone()}
+						</p>
+						<button class="btn btn-sm preset-filled-primary-500" onclick={() => walk(null)}
+							>{m.prereadWalkExit()}</button
+						>
+					</div>
+				{:else if selected}
 					{@const g = selected.guidance}
 					{@const s = STYLE[selected.readiness]}
 					{@const steps = todos(selected)}
@@ -1546,6 +1624,11 @@
 											>{/if}
 									{/each}
 								</span>
+								{#if toDoIn(session)}
+									<button class="btn btn-sm preset-tonal-primary" onclick={() => walk(session.id)}
+										><i class="fa-solid fa-shoe-prints"></i>{m.prereadWalk()}</button
+									>
+								{/if}
 							</header>
 							<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 								<i class="fa-solid fa-calendar text-surface-500"></i>

@@ -2,9 +2,9 @@ framework_urn: urn:intuitem:risk:framework:iso27001-2022
 entries:
   "4.1":
     questions:
-      - {id: q1, stage: 1, text: "Show me where you recorded the internal and external issues that shape your ISMS, and when that list was last revisited."}
-      - {id: q2, stage: 1, text: "Did you decide whether climate change matters for your information security? Walk me through how you reached that answer."}
-      - {id: q3, stage: 2, text: "Pick one issue on this list and show me where it turned into a risk, an objective or a control."}
+      - {id: q1, stage: 1, who: [ciso, top], text: "Show me where you recorded the internal and external issues that shape your ISMS, and when that list was last revisited."}
+      - {id: q2, stage: 1, who: [top], text: "Did you decide whether climate change matters for your information security? Walk me through how you reached that answer."}
+      - {id: q3, stage: 2, who: [ciso], text: "Pick one issue on this list and show me where it turned into a risk, an objective or a control."}
     requests:
       - {id: r1, label: "Context analysis (internal and external issues, e.g. PESTLE/SWOT) with date and owner", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.context}
       - {id: r2, label: "Record of the decision on climate change relevance (auditors expect the reasoning, the standard does not mandate it)", kind: document}
@@ -18,10 +18,10 @@ entries:
       - {id: p3, text: "Issues listed but disconnected from the risk assessment, so the auditor cannot see how they influenced anything"}
   "4.2":
     questions:
-      - {id: q1, stage: 1, text: "Who are the interested parties that matter to your ISMS, and what does each of them expect from you on security?"}
-      - {id: q2, stage: 1, text: "Which of those expectations have you chosen to address through the ISMS, and which have you left out?"}
-      - {id: q3, stage: 2, text: "Take a customer contract or a regulation from this list and show me the controls that satisfy it."}
-      - {id: q4, stage: 2, text: "Do any of your interested parties have climate-related expectations, such as resilience commitments from customers or regulators?"}
+      - {id: q1, stage: 1, who: [ciso, legal, dpo], text: "Who are the interested parties that matter to your ISMS, and what does each of them expect from you on security?"}
+      - {id: q2, stage: 1, who: [ciso], text: "Which of those expectations have you chosen to address through the ISMS, and which have you left out?"}
+      - {id: q3, stage: 2, who: [legal, ciso], text: "Take a customer contract or a regulation from this list and show me the controls that satisfy it."}
+      - {id: q4, stage: 2, who: [legal], text: "Do any of your interested parties have climate-related expectations, such as resilience commitments from customers or regulators?"}
     requests:
       - {id: r1, label: "Interested parties register with requirements and which ones the ISMS addresses", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.context}
       - {id: r2, label: "Legal, regulatory and contractual requirements register (links to A.5.31)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.legal}
@@ -35,10 +35,10 @@ entries:
       - {id: p3, text: "No review of interested parties after a new regulation (NIS2, DORA) came into force"}
   "4.3":
     questions:
-      - {id: q1, stage: 1, text: "Read me your scope statement. Which locations, teams, products and systems are in, and what is excluded?"}
-      - {id: q2, stage: 1, text: "Where something is left out, how do you handle the connections and hand-offs with it?"}
-      - {id: q4, stage: 1, text: "Which of your context issues and stakeholder requirements shaped where you drew the scope boundary?"}
-      - {id: q3, stage: 2, text: "This team or site I saw on your org chart: is it in scope? Show me how the scope document says so."}
+      - {id: q1, stage: 1, who: [ciso], text: "Read me your scope statement. Which locations, teams, products and systems are in, and what is excluded?"}
+      - {id: q2, stage: 1, who: [ciso, it_lead], text: "Where something is left out, how do you handle the connections and hand-offs with it?"}
+      - {id: q4, stage: 1, who: [ciso, top], text: "Which of your context issues and stakeholder requirements shaped where you drew the scope boundary?"}
+      - {id: q3, stage: 2, who: [ciso], text: "This team or site I saw on your org chart: is it in scope? Show me how the scope document says so."}
     requests:
       - {id: r1, label: "ISMS scope statement (documented, approved, versioned)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.scope}
       - {id: r2, label: "List of links and hand-offs with what sits outside scope, including outsourced and cloud services", kind: document}
@@ -51,8 +51,8 @@ entries:
       - {id: p3, text: "Cloud providers and remote workers ignored when drawing the boundary"}
   "4.4":
     questions:
-      - {id: q1, stage: 1, text: "Show me how your ISMS processes connect: which outputs feed which inputs?"}
-      - {id: q2, stage: 2, text: "How do you know the ISMS is maintained and improved, not just documented? Give me an example of something that changed this year."}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me how your ISMS processes connect: which outputs feed which inputs?"}
+      - {id: q2, stage: 2, who: [ciso], text: "How do you know the ISMS is maintained and improved, not just documented? Give me an example of something that changed this year."}
     requests:
       - {id: r1, label: "ISMS manual or process map showing processes, owners and interactions", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.overview}
       - {id: r2, label: "Change log or version history of ISMS documents over the last 12 months", kind: record, fresh_days: 400}
@@ -63,9 +63,9 @@ entries:
       - {id: p2, text: "No evidence of any improvement since the last audit, suggesting the ISMS is static"}
   "5.1":
     questions:
-      - {id: q1, stage: 2, text: "What is your personal role in the ISMS? Tell me in your own words what the security objectives are."}
-      - {id: q2, stage: 2, text: "Give me an example where you allocated budget or people to information security in the last year."}
-      - {id: q3, stage: 2, text: "How does security show up in the way the business already runs, such as budgeting, projects or purchasing?"}
+      - {id: q1, stage: 2, who: [top], text: "What is your personal role in the ISMS? Tell me in your own words what the security objectives are."}
+      - {id: q2, stage: 2, who: [top], text: "Give me an example where you allocated budget or people to information security in the last year."}
+      - {id: q3, stage: 2, who: [top], text: "How does security show up in the way the business already runs, such as budgeting, projects or purchasing?"}
     requests:
       - {id: r1, label: "Evidence of resources approved for the ISMS (budget line, headcount, tool purchase)", kind: record, fresh_days: 400}
       - {id: r2, label: "Top management communications on information security (all-hands slide, memo, intranet post)", kind: record, fresh_days: 400}
@@ -78,9 +78,9 @@ entries:
       - {id: p3, text: "Top management does not attend management review, only signs the minutes afterwards"}
   "5.2":
     questions:
-      - {id: q1, stage: 1, text: "Show me your information security policy. Who approved it and when?"}
-      - {id: q2, stage: 1, text: "Read me the lines that set the policy's intent. Does it say how objectives are set, commit you to meeting the security requirements that apply to you, and promise to keep getting better?"}
-      - {id: q3, stage: 2, text: "How did staff and relevant external parties get this policy? Show me."}
+      - {id: q1, stage: 1, who: [top, ciso], text: "Show me your information security policy. Who approved it and when?"}
+      - {id: q2, stage: 1, who: [top], text: "Read me the lines that set the policy's intent. Does it say how objectives are set, commit you to meeting the security requirements that apply to you, and promise to keep getting better?"}
+      - {id: q3, stage: 2, who: [ciso, staff], text: "How did staff and relevant external parties get this policy? Show me."}
     requests:
       - {id: r1, label: "Information security policy, signed or approved by top management, with version and date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.main}
       - {id: r2, label: "Evidence the policy was communicated internally and made available to relevant interested parties (acknowledgements also serve A.5.1)", kind: record}
@@ -93,9 +93,9 @@ entries:
       - {id: p3, text: "Policy text no longer matches the current ISMS, for example it still cites the 2013 Annex A"}
   "5.3":
     questions:
-      - {id: q1, stage: 1, text: "Who answers for the ISMS meeting the standard, and who briefs top management on how it is doing?"}
-      - {id: q2, stage: 2, text: "Show me where security responsibilities are written into job descriptions or a RACI."}
-      - {id: q3, stage: 2, text: "You are listed as owner of this process. Tell me what you do as owner."}
+      - {id: q1, stage: 1, who: [top], text: "Who answers for the ISMS meeting the standard, and who briefs top management on how it is doing?"}
+      - {id: q2, stage: 2, who: [hr], text: "Show me where security responsibilities are written into job descriptions or a RACI."}
+      - {id: q3, stage: 2, who: [ciso], text: "You are listed as owner of this process. Tell me what you do as owner."}
     requests:
       - {id: r1, label: "ISMS roles and responsibilities document or RACI", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.raci}
       - {id: r2, label: "Appointment letter or org chart naming the ISMS manager / CISO", kind: document}
@@ -108,8 +108,8 @@ entries:
       - {id: p2, text: "Nobody formally assigned to report ISMS performance to top management"}
   "6.1.1":
     questions:
-      - {id: q1, stage: 1, text: "Take your context issues and stakeholder expectations: which risks and opportunities for the ISMS itself did they produce?"}
-      - {id: q2, stage: 2, text: "Show me one opportunity you identified and what you did with it."}
+      - {id: q1, stage: 1, who: [ciso, risk], text: "Take your context issues and stakeholder expectations: which risks and opportunities for the ISMS itself did they produce?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Show me one opportunity you identified and what you did with it."}
     requests:
       - {id: r1, label: "Register of ISMS-level risks and opportunities (distinct from or part of the information security risk register)", kind: document}
       - {id: r2, label: "Plan of actions on ISMS risks and opportunities, showing which ISMS process carries each and how you will know it worked", kind: record, fresh_days: 400}
@@ -120,10 +120,10 @@ entries:
       - {id: p2, text: "Opportunities never identified or recorded"}
   "6.1.2":
     questions:
-      - {id: q1, stage: 1, text: "Walk me through your risk assessment methodology: criteria for acceptance, how you score likelihood and consequence."}
-      - {id: q2, stage: 1, text: "If two people scored the same risk a year apart, why would they land on the same answer?"}
-      - {id: q3, stage: 2, text: "Show me the latest risk assessment. When was it done and what triggered it?"}
-      - {id: q4, stage: 2, text: "For this risk, who is the owner? Let me ask them about it."}
+      - {id: q1, stage: 1, who: [ciso], text: "Walk me through your risk assessment methodology: criteria for acceptance, how you score likelihood and consequence."}
+      - {id: q2, stage: 1, who: [ciso], text: "If two people scored the same risk a year apart, why would they land on the same answer?"}
+      - {id: q3, stage: 2, who: [risk, ciso], text: "Show me the latest risk assessment. When was it done and what triggered it?"}
+      - {id: q4, stage: 2, who: [risk], text: "For this risk, who is the owner? Let me ask them about it."}
     requests:
       - {id: r1, label: "Risk assessment methodology with acceptance criteria and scales", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.risk}
       - {id: r2, label: "Risk register / latest risk assessment results with owners", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.risk_register}
@@ -136,10 +136,10 @@ entries:
       - {id: p3, text: "Scores do not match the documented scales, or acceptance criteria are not defined"}
   "6.1.3":
     questions:
-      - {id: q1, stage: 1, text: "Show me your Statement of Applicability. For each excluded Annex A control, why is it excluded?"}
-      - {id: q2, stage: 1, text: "You picked your controls from your risks. How did you then check Annex A for anything you overlooked?"}
-      - {id: q3, stage: 2, text: "Who approved the risk treatment plan and accepted the residual risks?"}
-      - {id: q4, stage: 2, text: "This control says implemented in the SoA. Show me it working."}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me your Statement of Applicability. For each excluded Annex A control, why is it excluded?"}
+      - {id: q2, stage: 1, who: [ciso], text: "You picked your controls from your risks. How did you then check Annex A for anything you overlooked?"}
+      - {id: q3, stage: 2, who: [risk, top], text: "Who approved the risk treatment plan and accepted the residual risks?"}
+      - {id: q4, stage: 2, who: [ciso], text: "This control says implemented in the SoA. Show me it working."}
     requests:
       - {id: r1, label: "Statement of Applicability: every necessary control (the 93 Annex A ones plus any you added), why each is included or excluded, and whether it is implemented", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.soa}
       - {id: r2, label: "Risk treatment plan with actions, owners, deadlines and status", kind: record, fresh_days: 200}
@@ -153,10 +153,10 @@ entries:
       - {id: p3, text: "Treatment plan overdue items with no rescheduling or residual risk acceptance by the owner"}
   "6.2":
     questions:
-      - {id: q1, stage: 1, text: "Show me your information security objectives. How are they measured and who owns each?"}
-      - {id: q2, stage: 2, text: "Where are you against these objectives today? Show me the data."}
-      - {id: q3, stage: 2, text: "What happens when an objective is missed?"}
-      - {id: q4, stage: 2, text: "Which risks or requirements drove these objectives, and when did you last revise them?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me your information security objectives. How are they measured and who owns each?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Where are you against these objectives today? Show me the data."}
+      - {id: q3, stage: 2, who: [top, ciso], text: "What happens when an objective is missed?"}
+      - {id: q4, stage: 2, who: [ciso, top], text: "Which risks or requirements drove these objectives, and when did you last revise them?"}
     requests:
       - {id: r1, label: "Objectives list: target, owner, budget or people, due date and how progress is measured", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.so_register}
       - {id: r2, label: "Progress tracking against objectives (dashboard or report)", kind: record, fresh_days: 100}
@@ -169,8 +169,8 @@ entries:
       - {id: p4, text: "Objectives and indicators exist, but no plan for each: what will be done, with which resources, by whom, by when and how the result is judged"}
   "6.3":
     questions:
-      - {id: q1, stage: 1, text: "How do you decide that a change to the ISMS needs formal planning?"}
-      - {id: q2, stage: 2, text: "Tell me about a significant ISMS change this year, such as scope, structure or a key outsourcing. Show me how it was planned."}
+      - {id: q1, stage: 1, who: [ciso], text: "How do you decide that a change to the ISMS needs formal planning?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Tell me about a significant ISMS change this year, such as scope, structure or a key outsourcing. Show me how it was planned."}
     requests:
       - {id: r1, label: "Criteria for when an ISMS change needs planning (good practice, not required by 6.3)", kind: document}
       - {id: r2, label: "Evidence a recent ISMS change was planned before it was made (auditors commonly look for purpose, impact, resources and owner)", kind: record, fresh_days: 400}
@@ -182,9 +182,9 @@ entries:
       - {id: p2, text: "Reorganisation or scope extension carried out with no sign it was planned beforehand"}
   "7.1":
     questions:
-      - {id: q1, stage: 1, text: "How did you decide what the ISMS needs in people, budget and tools, and where is that recorded?"}
-      - {id: q2, stage: 2, text: "Is any resource you asked for still missing, and what does that hold back?"}
-      - {id: q3, stage: 2, text: "How much of your working time actually goes to the ISMS?"}
+      - {id: q1, stage: 1, who: [top, ciso], text: "How did you decide what the ISMS needs in people, budget and tools, and where is that recorded?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Is any resource you asked for still missing, and what does that hold back?"}
+      - {id: q3, stage: 2, who: [ciso], text: "How much of your working time actually goes to the ISMS?"}
     requests:
       - {id: r1, label: "ISMS budget or resource plan", kind: record, fresh_days: 400}
       - {id: r2, label: "Staffing of security roles (org chart, FTE allocation)", kind: document}
@@ -195,9 +195,9 @@ entries:
       - {id: p2, text: "Resource needs never formally assessed or discussed in management review"}
   "7.2":
     questions:
-      - {id: q1, stage: 1, text: "For admins, developers and the ISMS team, what skills did you decide each role needs?"}
-      - {id: q2, stage: 2, text: "Show me the competence evidence for your ISMS manager and internal auditor."}
-      - {id: q3, stage: 2, text: "Tell me about someone who lacked a skill their role needs. What did you do, and how do you know it helped?"}
+      - {id: q1, stage: 1, who: [ciso, hr], text: "For admins, developers and the ISMS team, what skills did you decide each role needs?"}
+      - {id: q2, stage: 2, who: [hr], text: "Show me the competence evidence for your ISMS manager and internal auditor."}
+      - {id: q3, stage: 2, who: [hr], text: "Tell me about someone who lacked a skill their role needs. What did you do, and how do you know it helped?"}
     requests:
       - {id: r1, label: "Competence matrix or requirements per security role", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.competency}
       - {id: r2, label: "Training certificates, CVs or qualifications for key ISMS roles", kind: record}
@@ -211,10 +211,10 @@ entries:
       - {id: p3, text: "Competence requirements not defined for admins or developers"}
   "7.3":
     questions:
-      - {id: q1, stage: 1, text: "What must every person in scope know about security, and where is that set out?"}
-      - {id: q2, stage: 2, text: "What does the information security policy mean for your daily work?"}
-      - {id: q3, stage: 2, text: "What would you do if you clicked a suspicious link or lost your laptop?"}
-      - {id: q4, stage: 2, text: "What happens here if someone does not follow the security rules?"}
+      - {id: q1, stage: 1, who: [hr], text: "What must every person in scope know about security, and where is that set out?"}
+      - {id: q2, stage: 2, who: [staff], text: "What does the information security policy mean for your daily work?"}
+      - {id: q3, stage: 2, who: [staff], text: "What would you do if you clicked a suspicious link or lost your laptop?"}
+      - {id: q4, stage: 2, who: [staff], text: "What happens here if someone does not follow the security rules?"}
     requests:
       - {id: r1, label: "Awareness programme plan and content", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_plan}
       - {id: r2, label: "Awareness completion records for in-scope staff", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_register}
@@ -226,8 +226,8 @@ entries:
       - {id: p2, text: "Contractors and new joiners missing from completion records"}
   "7.4":
     questions:
-      - {id: q1, stage: 1, text: "Which security topics do you communicate inside and outside the company, when, to whom and through which channel?"}
-      - {id: q2, stage: 2, text: "Give me an example of a security communication to an external party, such as a customer or authority."}
+      - {id: q1, stage: 1, who: [ciso], text: "Which security topics do you communicate inside and outside the company, when, to whom and through which channel?"}
+      - {id: q2, stage: 2, who: [legal, ciso], text: "Give me an example of a security communication to an external party, such as a customer or authority."}
     requests:
       - {id: r1, label: "Communication plan or matrix (topic, audience, timing, channel; owner optional)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.com}
       - {id: r2, label: "Examples of internal and external security communications", kind: record, fresh_days: 400}
@@ -238,8 +238,8 @@ entries:
       - {id: p2, text: "Plan exists but none of the communications listed can be evidenced"}
   "7.5.1":
     questions:
-      - {id: q1, stage: 1, text: "Show me the documented information the standard requires and what you added yourselves."}
-      - {id: q2, stage: 1, text: "How did you decide how much documentation your organisation needs?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me the documented information the standard requires and what you added yourselves."}
+      - {id: q2, stage: 1, who: [ciso], text: "How did you decide how much documentation your organisation needs?"}
     requests:
       - {id: r1, label: "Master list of ISMS documents and records", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.doc_register}
       - {id: r2, label: "Documented information the standard requires: scope, policy, objectives, risk assessment and treatment process, SoA, plus the records asked for by 7.2, 8.1 to 8.3, 9.1, 9.2, 9.3 and 10.2", kind: document}
@@ -250,8 +250,8 @@ entries:
       - {id: p2, text: "Procedures listed in the master list that do not exist or are drafts"}
   "7.5.2":
     questions:
-      - {id: q1, stage: 1, text: "How does a document get its name, version and owner, and who signs it off before it is published? Show me the history of one."}
-      - {id: q2, stage: 2, text: "Who approved this policy revision and where is that recorded?"}
+      - {id: q1, stage: 1, who: [ciso], text: "How does a document get its name, version and owner, and who signs it off before it is published? Show me the history of one."}
+      - {id: q2, stage: 2, who: [ciso], text: "Who approved this policy revision and where is that recorded?"}
     requests:
       - {id: r1, label: "How documents are identified, formatted and approved (a written procedure is optional)", kind: document}
       - {id: r2, label: "Approval records for recent document revisions", kind: record, fresh_days: 400}
@@ -263,10 +263,10 @@ entries:
       - {id: p2, text: "Different versions of the same policy in circulation (intranet vs shared drive)"}
   "7.5.3":
     questions:
-      - {id: q1, stage: 1, text: "How are ISMS documents approved, versioned, distributed and retired, and how long do you keep records?"}
-      - {id: q2, stage: 2, text: "How do you make sure people use the current version and obsolete versions are withdrawn?"}
-      - {id: q3, stage: 2, text: "Where do records live, who can alter them, and when do you delete them?"}
-      - {id: q4, stage: 2, text: "How do you keep track of documents you did not write, such as standards or supplier manuals?"}
+      - {id: q1, stage: 1, who: [ciso], text: "How are ISMS documents approved, versioned, distributed and retired, and how long do you keep records?"}
+      - {id: q2, stage: 2, who: [ciso], text: "How do you make sure people use the current version and obsolete versions are withdrawn?"}
+      - {id: q3, stage: 2, who: [it_lead], text: "Where do records live, who can alter them, and when do you delete them?"}
+      - {id: q4, stage: 2, who: [ciso], text: "How do you keep track of documents you did not write, such as standards or supplier manuals?"}
     requests:
       - {id: r1, label: "Record retention schedule", kind: document}
       - {id: r2, label: "Access rights on the ISMS document repository", kind: technical, fresh_days: 400}
@@ -278,10 +278,10 @@ entries:
       - {id: p2, text: "Everyone has edit rights on the ISMS repository"}
   "8.1":
     questions:
-      - {id: q1, stage: 1, text: "Which processes, including outsourced ones, did you identify as needing planning and control for security?"}
-      - {id: q2, stage: 2, text: "Pick a process that delivers a risk treatment action: what does done right look like, and how do you check it?"}
-      - {id: q3, stage: 2, text: "Which processes are outsourced, and how do you control them?"}
-      - {id: q4, stage: 2, text: "Tell me about a change that did not go to plan. What did you do about the side effects?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which processes, including outsourced ones, did you identify as needing planning and control for security?"}
+      - {id: q2, stage: 2, who: [it_lead], text: "Pick a process that delivers a risk treatment action: what does done right look like, and how do you check it?"}
+      - {id: q3, stage: 2, who: [proc], text: "Which processes are outsourced, and how do you control them?"}
+      - {id: q4, stage: 2, who: [it_lead], text: "Tell me about a change that did not go to plan. What did you do about the side effects?"}
     requests:
       - {id: r1, label: "List of outsourced processes and bought-in services the ISMS depends on, with how each is controlled", kind: document}
       - {id: r2, label: "Operational records showing processes carried out as planned (e.g. backup logs, patch reports)", kind: record, fresh_days: 100}
@@ -293,9 +293,9 @@ entries:
       - {id: p2, text: "Processes run, but nothing kept to prove they ran when and how they should"}
   "8.2":
     questions:
-      - {id: q1, stage: 1, text: "Are the results of each risk assessment cycle kept, or only today's register?"}
-      - {id: q2, stage: 2, text: "How often do you reassess risks, and what triggers an unscheduled reassessment?"}
-      - {id: q3, stage: 2, text: "Show me the assessment you did after your last significant change."}
+      - {id: q1, stage: 1, who: [risk], text: "Are the results of each risk assessment cycle kept, or only today's register?"}
+      - {id: q2, stage: 2, who: [risk], text: "How often do you reassess risks, and what triggers an unscheduled reassessment?"}
+      - {id: q3, stage: 2, who: [risk], text: "Show me the assessment you did after your last significant change."}
     requests:
       - {id: r1, label: "Risk assessment results from each scheduled cycle (last two)", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.risk_register}
       - {id: r2, label: "Ad-hoc risk assessment following a significant change or incident", kind: record}
@@ -308,9 +308,9 @@ entries:
       - {id: p3, text: "Reassessments not done at the intervals the organisation planned itself, or not triggered by significant changes"}
   "8.3":
     questions:
-      - {id: q1, stage: 1, text: "Which treatment actions are due before Stage 2, and which are already done?"}
-      - {id: q2, stage: 2, text: "Show me progress on the risk treatment plan. Which actions are complete and how do you know they work?"}
-      - {id: q3, stage: 2, text: "What happens to treatment actions that miss their deadline?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which treatment actions are due before Stage 2, and which are already done?"}
+      - {id: q2, stage: 2, who: [risk], text: "Show me progress on the risk treatment plan. Which actions are complete and how do you know they work?"}
+      - {id: q3, stage: 2, who: [ciso, risk], text: "What happens to treatment actions that miss their deadline?"}
     requests:
       - {id: r1, label: "Risk treatment plan status report", kind: record, fresh_days: 100}
       - {id: r2, label: "Evidence of completed treatment actions", kind: record}
@@ -322,10 +322,10 @@ entries:
       - {id: p2, text: "Large backlog of overdue actions with no escalation"}
   "9.1":
     questions:
-      - {id: q1, stage: 1, text: "Which numbers tell you the ISMS is working, where do they come from, and who looks at them?"}
-      - {id: q2, stage: 2, text: "Show me the latest measurement results and what decision they led to."}
-      - {id: q3, stage: 2, text: "Which of these numbers would move if a control stopped working?"}
-      - {id: q4, stage: 2, text: "If someone else measured this KPI next quarter, would they get a comparable number? And how do you conclude the ISMS is effective overall?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which numbers tell you the ISMS is working, where do they come from, and who looks at them?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Show me the latest measurement results and what decision they led to."}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Which of these numbers would move if a control stopped working?"}
+      - {id: q4, stage: 2, who: [ciso], text: "If someone else measured this KPI next quarter, would they get a comparable number? And how do you conclude the ISMS is effective overall?"}
     requests:
       - {id: r1, label: "KPI catalogue: each metric with its source, cadence, who collects it and who interprets it", kind: document}
       - {id: r2, label: "Latest KPI / metrics report with analysis", kind: record, fresh_days: 100}
@@ -338,10 +338,10 @@ entries:
       - {id: p3, text: "Nobody named for collecting or interpreting the metrics"}
   "9.2.1":
     questions:
-      - {id: q1, stage: 1, text: "Has a full internal audit been carried out yet, and which parts of the ISMS did it cover?"}
-      - {id: q2, stage: 2, text: "Over its cycle, does your audit programme cover all ISMS clauses and the applicable Annex A controls? Show me where."}
-      - {id: q3, stage: 2, text: "Did the audit test your own procedures as well as the standard? Where does the report show it?"}
-      - {id: q4, stage: 2, text: "Who ran the internal audit, how do you know they are competent on the current edition of the standard, and that they did not audit their own work?"}
+      - {id: q1, stage: 1, who: [auditor], text: "Has a full internal audit been carried out yet, and which parts of the ISMS did it cover?"}
+      - {id: q2, stage: 2, who: [auditor], text: "Over its cycle, does your audit programme cover all ISMS clauses and the applicable Annex A controls? Show me where."}
+      - {id: q3, stage: 2, who: [auditor], text: "Did the audit test your own procedures as well as the standard? Where does the report show it?"}
+      - {id: q4, stage: 2, who: [ciso, auditor], text: "Who ran the internal audit, how do you know they are competent on the current edition of the standard, and that they did not audit their own work?"}
     requests:
       - {id: r1, label: "Internal audit report(s) with findings (certification bodies expect at least one internal audit cycle covering the ISMS before Stage 2)", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:pol.audit}
       - {id: r2, label: "Internal audit checklists and evidence notes", kind: record, fresh_days: 400}
@@ -354,9 +354,9 @@ entries:
       - {id: p3, text: "Applicable Annex A controls skipped across the whole programme, with only policies ever audited"}
   "9.2.2":
     questions:
-      - {id: q1, stage: 1, text: "Show me your audit programme. How did you decide frequency and coverage?"}
-      - {id: q2, stage: 2, text: "Who are your internal auditors, and how do you ensure they don't audit their own work?"}
-      - {id: q3, stage: 2, text: "Who received the audit report, and what did they do with it?"}
+      - {id: q1, stage: 1, who: [auditor], text: "Show me your audit programme. How did you decide frequency and coverage?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Who are your internal auditors, and how do you ensure they don't audit their own work?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Who received the audit report, and what did they do with it?"}
     requests:
       - {id: r1, label: "Internal audit programme (frequency, methods, responsibilities, planning, reporting), often aligned to the 3-year certification cycle", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.audit_plan}
       - {id: r2, label: "Plan of each internal audit: what was checked and against which requirements", kind: record, fresh_days: 400}
@@ -369,9 +369,9 @@ entries:
       - {id: p3, text: "Sites or departments in scope never audited"}
   "9.3.1":
     questions:
-      - {id: q1, stage: 1, text: "When was the last management review, and who attended?"}
-      - {id: q2, stage: 2, text: "How often do you hold the review, and was one skipped or postponed this cycle?"}
-      - {id: q3, stage: 2, text: "Was the management review done before this certification audit?"}
+      - {id: q1, stage: 1, who: [top, ciso], text: "When was the last management review, and who attended?"}
+      - {id: q2, stage: 2, who: [ciso], text: "How often do you hold the review, and was one skipped or postponed this cycle?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Was the management review done before this certification audit?"}
     requests:
       - {id: r1, label: "Management review minutes with date and attendance", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.mgmt_review}
       - {id: r2, label: "Management review schedule", kind: document}
@@ -382,9 +382,9 @@ entries:
       - {id: p2, text: "Top management absent, review done by the CISO alone"}
   "9.3.2":
     questions:
-      - {id: q1, stage: 1, text: "Show me the agenda of the last management review. Where is each expected input covered?"}
-      - {id: q2, stage: 2, text: "Show me where the minutes discuss what customers, regulators and other stakeholders now expect."}
-      - {id: q3, stage: 2, text: "How did audit results, nonconformities, metrics and risk status feed the discussion? Show me the trends, not just current figures."}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me the agenda of the last management review. Where is each expected input covered?"}
+      - {id: q2, stage: 2, who: [ciso], text: "Show me where the minutes discuss what customers, regulators and other stakeholders now expect."}
+      - {id: q3, stage: 2, who: [ciso, top], text: "How did audit results, nonconformities, metrics and risk status feed the discussion? Show me the trends, not just current figures."}
     requests:
       - {id: r1, label: "Management review input pack (follow-up of last actions, what changed inside and outside, performance and audit results, risks, improvement ideas)", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.mgmt_review}
       - {id: r2, label: "Mapping of review agenda items to each required input", kind: document}
@@ -396,9 +396,9 @@ entries:
       - {id: p3, text: "Risk assessment results and progress on the treatment plan left out of the review pack"}
   "9.3.3":
     questions:
-      - {id: q1, stage: 1, text: "What decisions came out of the last management review, and where are they tracked?"}
-      - {id: q2, stage: 2, text: "Which review decisions changed the ISMS scope, resources or objectives?"}
-      - {id: q3, stage: 2, text: "Show me one decision from the review that has been implemented."}
+      - {id: q1, stage: 1, who: [top, ciso], text: "What decisions came out of the last management review, and where are they tracked?"}
+      - {id: q2, stage: 2, who: [top], text: "Which review decisions changed the ISMS scope, resources or objectives?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Show me one decision from the review that has been implemented."}
     requests:
       - {id: r1, label: "Management review outputs: what was decided, who owns each action, and by when", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.mgmt_review}
       - {id: r2, label: "Action tracker showing follow-up of review decisions", kind: record, fresh_days: 200}
@@ -411,8 +411,8 @@ entries:
       - {id: p3, text: "No recorded conclusion on whether the ISMS still fits, is sufficient and works, and no decision on resource needs"}
   "10.1":
     questions:
-      - {id: q1, stage: 2, text: "Give me examples of improvements to the ISMS in the last year. Where did they come from?"}
-      - {id: q2, stage: 2, text: "How do you capture improvement ideas from staff and incidents?"}
+      - {id: q1, stage: 2, who: [ciso], text: "Give me examples of improvements to the ISMS in the last year. Where did they come from?"}
+      - {id: q2, stage: 2, who: [ciso], text: "How do you capture improvement ideas from staff and incidents?"}
     requests:
       - {id: r1, label: "Improvement register or log", kind: record, fresh_days: 400}
       - {id: r2, label: "Before/after evidence for one completed improvement (e.g. revised procedure, KPI trend)", kind: record}
@@ -423,9 +423,9 @@ entries:
       - {id: p2, text: "Nothing in the ISMS measurably better than at the last audit"}
   "10.2":
     questions:
-      - {id: q1, stage: 2, text: "Walk me through a nonconformity from discovery to closure. What did you do about its consequences, how did you decide whether the cause needed removing, and did it change the ISMS?"}
-      - {id: q2, stage: 2, text: "How did you check the corrective action actually worked?"}
-      - {id: q3, stage: 2, text: "Could the same problem be happening in another team or system? How did you check?"}
+      - {id: q1, stage: 2, who: [ciso], text: "Walk me through a nonconformity from discovery to closure. What did you do about its consequences, how did you decide whether the cause needed removing, and did it change the ISMS?"}
+      - {id: q2, stage: 2, who: [auditor], text: "How did you check the corrective action actually worked?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Could the same problem be happening in another team or system? How did you check?"}
     requests:
       - {id: r1, label: "Nonconformity and corrective action register", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:doc.nc_log}
       - {id: r2, label: "Root cause analysis records for closed nonconformities", kind: record}

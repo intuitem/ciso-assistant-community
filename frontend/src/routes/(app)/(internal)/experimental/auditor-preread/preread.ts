@@ -407,3 +407,27 @@ export function requestListTsv(rows: RequestRow[]): string {
 		.map((cols) => cols.map(clean).join('\t'))
 		.join('\n');
 }
+
+export type Todo = { text: string; action?: 'evidence' | 'assess' | 'justify' | 'prep' };
+
+/** The readiness reasons, turned into plain next steps in the order to do them. */
+export function todos(i: PrereadItem): Todo[] {
+	if (i.readiness === 'excluded') return [{ text: m.prereadTodoJustify(), action: 'justify' }];
+	if (!i.guidance) return [{ text: m.prereadTodoNoGuide(), action: 'assess' }];
+	const has = (...r: string[]) => r.some((x) => i.reasons.includes(x));
+	const out: Todo[] = [];
+	if (has('open_finding', 'open_minor_finding')) out.push({ text: m.prereadTodoFinding() });
+	if (has('nothing_linked', 'request_not_on_file')) out.push({ text: m.prereadTodoGather() });
+	if (has('evidence_to_confirm')) out.push({ text: m.prereadTodoPair() });
+	if (has('missing_file')) out.push({ text: m.prereadTodoAddFile() });
+	if (has('unusable_evidence')) out.push({ text: m.prereadTodoUnusable(), action: 'evidence' });
+	if (has('evidence_to_validate')) out.push({ text: m.prereadTodoValidate() });
+	if (has('expires_before_audit'))
+		out.push({ text: m.prereadTodoExpiresBeforeAudit(), action: 'evidence' });
+	if (has('stale_evidence')) out.push({ text: m.prereadTodoRefresh(), action: 'evidence' });
+	if (has('non_compliant')) out.push({ text: m.prereadTodoFix(), action: 'assess' });
+	if (has('not_assessed')) out.push({ text: m.prereadTodoAssess(), action: 'assess' });
+	if (has('quality_error', 'quality_warning')) out.push({ text: m.prereadTodoQuality() });
+	if (!out.length && i.guidance) out.push({ text: m.prereadTodoRehearse(), action: 'prep' });
+	return out;
+}

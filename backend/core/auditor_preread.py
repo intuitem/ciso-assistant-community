@@ -927,6 +927,8 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                 row.attendees.set(attendees)
             else:
                 raise _Rejected(PREPARATION_ERRORS[0])
+            prep.updated_by = user
+            prep.save(update_fields=["updated_by", "updated_at"])
     except _Rejected as rejected:
         return rejected.code
     except ValidationError, ValueError:

@@ -2,9 +2,9 @@ framework_urn: urn:intuitem:risk:framework:iso27001-2022
 entries:
   a.5.1:
     questions:
-      - {id: q1, stage: 1, text: "Show me the top-level security policy and the topic-specific policies that sit under it. Who approved each one and when?"}
-      - {id: q2, stage: 2, text: "How do staff and relevant external parties learn about a new or changed policy, and how do you know they acknowledged it?"}
-      - {id: q3, stage: 2, text: "Pick one topic-specific policy and walk me through its last review: what triggered it and what changed."}
+      - {id: q1, stage: 1, who: [ciso, top], text: "Show me the top-level security policy and the topic-specific policies that sit under it. Who approved each one and when?"}
+      - {id: q2, stage: 2, who: [ciso, staff], text: "How do staff and relevant external parties learn about a new or changed policy, and how do you know they acknowledged it?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Pick one topic-specific policy and walk me through its last review: what triggered it and what changed."}
     requests:
       - {id: r1, label: "Information security policy with approval signature or record and version history", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.main}
       - {id: r2, label: "List of topic-specific policies with owner, version, last review date and next review date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.doc_register}
@@ -19,9 +19,9 @@ entries:
       - {id: p3, text: "Policies still cite 2013 control numbers or titles after the 2022 transition"}
   a.5.2:
     questions:
-      - {id: q1, stage: 1, text: "Show me where security roles and responsibilities are defined, including asset and risk owners."}
-      - {id: q2, stage: 2, text: "Pick an asset owner from your inventory. Can they tell me what they are accountable for in security terms?"}
-      - {id: q3, stage: 2, text: "How do you make sure the people in security roles have, and keep, the competence those roles need?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me where security roles and responsibilities are defined, including asset and risk owners."}
+      - {id: q2, stage: 2, who: [it_lead], text: "Pick an asset owner from your inventory. Can they tell me what they are accountable for in security terms?"}
+      - {id: q3, stage: 2, who: [ciso, top], text: "How do you make sure the people in security roles have, and keep, the competence those roles need?"}
     requests:
       - {id: r1, label: "RACI or responsibility matrix for the ISMS and security processes", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.raci}
       - {id: r2, label: "Job descriptions or role definitions for the CISO and other named security roles", kind: document}
@@ -34,9 +34,9 @@ entries:
       - {id: p2, text: "Roles assigned to people who have since left or changed job"}
   a.5.3:
     questions:
-      - {id: q1, stage: 1, text: "Which duties have you identified as conflicting, and where is that analysis recorded?"}
-      - {id: q2, stage: 2, text: "Show me how you stop one person from both requesting and approving their own access or change, in a real system."}
-      - {id: q3, stage: 2, text: "Where segregation is not possible because the team is small, what compensating control do you run and where is the evidence?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which duties have you identified as conflicting, and where is that analysis recorded?"}
+      - {id: q2, stage: 2, who: [iam, dev], text: "Show me how you stop one person from both requesting and approving their own access or change, in a real system."}
+      - {id: q3, stage: 2, who: [ciso], text: "Where segregation is not possible because the team is small, what compensating control do you run and where is the evidence?"}
     requests:
       - {id: r1, label: "Segregation of duties matrix or list of incompatible role combinations", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.seg_duty}
       - {id: r2, label: "Workflow configuration showing requester and approver must differ (change, access, payments)", kind: technical, fresh_days: 400}
@@ -50,9 +50,9 @@ entries:
       - {id: p3, text: "Small-team exception claimed but no compensating log review exists"}
   a.5.4:
     questions:
-      - {id: q1, stage: 1, text: "Where do you say what you expect from managers on security, and how does that reach their objectives or appraisals?"}
-      - {id: q2, stage: 2, text: "How does management make sure managers and staff actually apply the security policies day to day?"}
-      - {id: q3, stage: 2, text: "Give me an example where a manager enforced or escalated a security rule within their team."}
+      - {id: q1, stage: 1, who: [top, hr], text: "Where do you say what you expect from managers on security, and how does that reach their objectives or appraisals?"}
+      - {id: q2, stage: 2, who: [top], text: "How does management make sure managers and staff actually apply the security policies day to day?"}
+      - {id: q3, stage: 2, who: [top, staff], text: "Give me an example where a manager enforced or escalated a security rule within their team."}
     requests:
       - {id: r1, label: "Management communications on security expectations (memos, town hall slides, objectives)", kind: record, fresh_days: 400}
       - {id: r2, label: "If used, manager objectives or appraisal criteria that include security duties", kind: document}
@@ -65,8 +65,8 @@ entries:
       - {id: p2, text: "Managers unaware of overdue training or open findings in their own team"}
   a.5.5:
     questions:
-      - {id: q1, stage: 1, text: "Show me the list of authorities you would contact and in which situations."}
-      - {id: q2, stage: 2, text: "Who decides to notify the data protection authority or a national CSIRT, and within what deadline? Walk me through the last time it happened or was rehearsed."}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me the list of authorities you would contact and in which situations."}
+      - {id: q2, stage: 2, who: [dpo, ciso], text: "Who decides to notify the data protection authority or a national CSIRT, and within what deadline? Walk me through the last time it happened or was rehearsed."}
     requests:
       - {id: r1, label: "Authority contact register (regulators, CSIRT, police, supervisory authority) with owner and trigger", kind: document}
       - {id: r2, label: "Evidence the contact list was checked recently (review date, test call or email)", kind: record, fresh_days: 400}
@@ -78,9 +78,9 @@ entries:
       - {id: p2, text: "Notification deadlines (for example 72 hours for personal data breaches, NIS2 timelines) not reflected in the incident procedure"}
   a.5.6:
     questions:
-      - {id: q1, stage: 1, text: "Which security communities, ISACs, forums or professional associations do you belong to, and who maintains each contact?"}
-      - {id: q2, stage: 2, text: "Which professional groups, forums or information-sharing communities are you part of?"}
-      - {id: q3, stage: 2, text: "Give me one example where something learned from one of those groups changed what you do."}
+      - {id: q1, stage: 1, who: [ciso], text: "Which security communities, ISACs, forums or professional associations do you belong to, and who maintains each contact?"}
+      - {id: q2, stage: 2, who: [ciso, sec_ops], text: "Which professional groups, forums or information-sharing communities are you part of?"}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Give me one example where something learned from one of those groups changed what you do."}
     requests:
       - {id: r1, label: "List of memberships and subscriptions (ISAC, CERT mailing lists, associations)", kind: document}
       - {id: r2, label: "Evidence of participation (event attendance, shared advisories, forum posts)", kind: record, fresh_days: 400}
@@ -90,9 +90,9 @@ entries:
       - {id: p1, text: "Memberships listed but no one can show anything received or acted upon in the past year"}
   a.5.7:
     questions:
-      - {id: q1, stage: 1, text: "Show me which threat intelligence sources you use, who reads them, and how often."}
-      - {id: q2, stage: 2, text: "Pick a threat advisory from the last quarter and show me what decision or action it led to."}
-      - {id: q3, stage: 2, text: "How does threat intelligence feed into your risk assessment, your detection rules and the scope of your security testing?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "Show me which threat intelligence sources you use, who reads them, and how often."}
+      - {id: q2, stage: 2, who: [sec_ops], text: "Pick a threat advisory from the last quarter and show me what decision or action it led to."}
+      - {id: q3, stage: 2, who: [ciso, risk, sec_ops], text: "How does threat intelligence feed into your risk assessment, your detection rules and the scope of your security testing?"}
     requests:
       - {id: r1, label: "Threat intelligence procedure or section defining sources, cadence, analysis and distribution", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.threat_intel}
       - {id: r2, label: "Recent threat intelligence summaries or bulletins issued internally", kind: record, fresh_days: 100}
@@ -107,8 +107,8 @@ entries:
       - {id: p3, text: "Only strategic news collected; tactical and operational intelligence never considered or fed into detection or preventive controls"}
   a.5.8:
     questions:
-      - {id: q1, stage: 1, text: "Show me where your project methodology requires a security assessment, and at which stage gates."}
-      - {id: q2, stage: 2, text: "Pick a project delivered this year and show me its security requirements, risk assessment and sign-off."}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me where your project methodology requires a security assessment, and at which stage gates."}
+      - {id: q2, stage: 2, who: [dev, it_lead], text: "Pick a project delivered this year and show me its security requirements, risk assessment and sign-off."}
     requests:
       - {id: r1, label: "Project management methodology or gate checklist with security steps", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.project}
       - {id: r2, label: "Project portfolio list for the last 12 months", kind: record, fresh_days: 400}
@@ -121,9 +121,9 @@ entries:
       - {id: p2, text: "Only product or IT development goes through the security step; infrastructure moves, new suppliers, office or process changes never do"}
   a.5.9:
     questions:
-      - {id: q1, stage: 1, text: "Show me your asset inventory. How does it cover information, not just hardware?"}
-      - {id: q2, stage: 2, text: "I will pick a laptop, a server and a SaaS application from what I see today. Show me each one in the inventory with its owner."}
-      - {id: q3, stage: 2, text: "How do new assets get into the inventory, and how is it kept accurate?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me your asset inventory. How does it cover information, not just hardware?"}
+      - {id: q2, stage: 2, who: [service_desk], text: "I will pick a laptop, a server and a SaaS application from what I see today. Show me each one in the inventory with its owner."}
+      - {id: q3, stage: 2, who: [service_desk], text: "How do new assets get into the inventory, and how is it kept accurate?"}
     requests:
       - {id: r1, label: "Asset inventory export with owner, classification and location", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.asset_register}
       - {id: r2, label: "Reconciliation evidence against discovery tools (MDM, EDR, cloud console, CMDB)", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:tech.asset_discovery}
@@ -137,8 +137,8 @@ entries:
       - {id: p3, text: "Owner column names people who have left, or a group with no accountable contact who can explain what ownership involves"}
   a.5.10:
     questions:
-      - {id: q1, stage: 1, text: "Show me your acceptable use rules for information and devices."}
-      - {id: q2, stage: 2, text: "Ask any staff member: can they use personal cloud storage or AI chat tools for work data? Does their answer match the policy?"}
+      - {id: q1, stage: 1, who: [hr], text: "Show me your acceptable use rules for information and devices."}
+      - {id: q2, stage: 2, who: [staff], text: "Ask any staff member: can they use personal cloud storage or AI chat tools for work data? Does their answer match the policy?"}
     requests:
       - {id: r1, label: "Acceptable use policy covering devices, email, internet, cloud and generative AI tools", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.accept}
       - {id: r2, label: "Signed acceptable use acknowledgements", kind: record}
@@ -151,9 +151,9 @@ entries:
       - {id: p2, text: "Acknowledgement missing for contractors or temporary staff"}
   a.5.11:
     questions:
-      - {id: q1, stage: 1, text: "Which assets must come back when someone leaves, and where is that list kept for each person?"}
-      - {id: q2, stage: 2, text: "Walk me through what happens to a leaver's laptop, badge and tokens on their last day."}
-      - {id: q3, stage: 2, text: "How do you make sure company data on personal devices is removed when someone leaves?"}
+      - {id: q1, stage: 1, who: [hr], text: "Which assets must come back when someone leaves, and where is that list kept for each person?"}
+      - {id: q2, stage: 2, who: [hr, endpoint], text: "Walk me through what happens to a leaver's laptop, badge and tokens on their last day."}
+      - {id: q3, stage: 2, who: [endpoint], text: "How do you make sure company data on personal devices is removed when someone leaves?"}
     requests:
       - {id: r1, label: "Leaver checklist including asset return steps", kind: document}
       - {id: r2, label: "Completed leaver checklists or asset return receipts", kind: record, fresh_days: 400}
@@ -166,9 +166,9 @@ entries:
       - {id: p2, text: "Laptops still assigned to leavers in the inventory months after departure"}
   a.5.12:
     questions:
-      - {id: q1, stage: 1, text: "Show me your classification scheme and the handling rules for each level."}
-      - {id: q3, stage: 1, text: "How does your scheme reflect integrity and availability needs and client or contractual requirements, and when is a classification revisited?"}
-      - {id: q2, stage: 2, text: "Pick three documents from a shared drive. Who classified them and does the classification match the content?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me your classification scheme and the handling rules for each level."}
+      - {id: q3, stage: 1, who: [ciso, dpo], text: "How does your scheme reflect integrity and availability needs and client or contractual requirements, and when is a classification revisited?"}
+      - {id: q2, stage: 2, who: [staff], text: "Pick three documents from a shared drive. Who classified them and does the classification match the content?"}
     requests:
       - {id: r1, label: "Classification policy with levels, criteria and handling rules", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.classif}
       - {id: r2, label: "Asset or information inventory showing assigned classification", kind: record, fresh_days: 400}
@@ -182,9 +182,9 @@ entries:
       - {id: p3, text: "Scheme covers confidentiality only, so data whose integrity or availability is critical gets no distinct handling"}
   a.5.13:
     questions:
-      - {id: q1, stage: 1, text: "Show me your labelling rules. Which classification levels get a visible label, and on which media?"}
-      - {id: q2, stage: 2, text: "Show me how a confidential document is labelled, both electronically and on paper."}
-      - {id: q3, stage: 2, text: "What happens with labelling when information is exported, printed or emailed outside?"}
+      - {id: q1, stage: 1, who: [endpoint], text: "Show me your labelling rules. Which classification levels get a visible label, and on which media?"}
+      - {id: q2, stage: 2, who: [staff], text: "Show me how a confidential document is labelled, both electronically and on paper."}
+      - {id: q3, stage: 2, who: [staff, endpoint], text: "What happens with labelling when information is exported, printed or emailed outside?"}
     requests:
       - {id: r1, label: "Labelling procedure covering electronic, physical and exported formats", kind: document}
       - {id: r2, label: "Screenshot of labelling tool or document templates with labels", kind: technical, fresh_days: 400}
@@ -197,8 +197,8 @@ entries:
       - {id: p2, text: "Labelling silently skipped for some outputs, such as system exports, with no written rule saying when that is acceptable"}
   a.5.14:
     questions:
-      - {id: q1, stage: 1, text: "Show me the rules for sending information outside the organisation, by channel and classification level."}
-      - {id: q2, stage: 2, text: "Show me how a staff member would send a confidential file to a client today. Which tool, which protection?"}
+      - {id: q1, stage: 1, who: [network, legal], text: "Show me the rules for sending information outside the organisation, by channel and classification level."}
+      - {id: q2, stage: 2, who: [staff], text: "Show me how a staff member would send a confidential file to a client today. Which tool, which protection?"}
     requests:
       - {id: r1, label: "Information transfer policy or procedure (email, file transfer, removable media, verbal)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.transfer}
       - {id: r2, label: "Agreements covering information exchange with key partners (NDA, data exchange clauses)", kind: document}
@@ -211,8 +211,8 @@ entries:
       - {id: p2, text: "Policy covers email but not messaging apps, phone calls or courier transfers"}
   a.5.15:
     questions:
-      - {id: q1, stage: 1, text: "Show me your access control policy. How does it cover physical access as well as logical access?"}
-      - {id: q2, stage: 2, text: "How do you apply need-to-know and least privilege in practice? Show me the role model for one key application."}
+      - {id: q1, stage: 1, who: [ciso, facilities], text: "Show me your access control policy. How does it cover physical access as well as logical access?"}
+      - {id: q2, stage: 2, who: [iam], text: "How do you apply need-to-know and least privilege in practice? Show me the role model for one key application."}
     requests:
       - {id: r1, label: "Access control policy covering logical and physical access, need-to-know and least privilege", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.access}
       - {id: r2, label: "Role or profile definitions for key applications", kind: document}
@@ -224,9 +224,9 @@ entries:
       - {id: p2, text: "Role model documented but most users hold an admin or broad default profile"}
   a.5.16:
     questions:
-      - {id: q1, stage: 1, text: "Where is the identity lifecycle described, including shared, service and non-human accounts?"}
-      - {id: q2, stage: 2, text: "Show me how an identity is created and who approves it. How do you link each personal account to one individual, and each non-human account to an accountable owner?"}
-      - {id: q3, stage: 2, text: "How do you handle shared, service and generic accounts? Show me the list and their owners."}
+      - {id: q1, stage: 1, who: [iam], text: "Where is the identity lifecycle described, including shared, service and non-human accounts?"}
+      - {id: q2, stage: 2, who: [iam, hr], text: "Show me how an identity is created and who approves it. How do you link each personal account to one individual, and each non-human account to an accountable owner?"}
+      - {id: q3, stage: 2, who: [iam], text: "How do you handle shared, service and generic accounts? Show me the list and their owners."}
     requests:
       - {id: r1, label: "Identity lifecycle procedure (create, change, disable, delete)", kind: document}
       - {id: r2, label: "Export of active accounts from the identity provider", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.iam}
@@ -239,12 +239,12 @@ entries:
       - {id: p2, text: "Accounts in the directory that do not match any current employee or contractor"}
   a.5.17:
     questions:
-      - {id: q1, stage: 1, text: "What are your rules for passwords, MFA and secrets, and how is a reset done without a phishing risk?"}
-      - {id: q5, stage: 1, text: "How are staff told how to handle their passwords and tokens, and where is that written (policy, onboarding, terms of employment)?"}
-      - {id: q2, stage: 2, text: "Show me your password and MFA configuration in the identity provider."}
-      - {id: q3, stage: 2, text: "How are initial passwords and reset credentials delivered, and how do you verify the person asking for a reset?"}
-      - {id: q4, stage: 2, text: "Where are shared secrets, API keys and service passwords stored?"}
-      - {id: q6, stage: 2, text: "How do new users receive their first credentials, and are vendor default passwords changed before a system goes live?"}
+      - {id: q1, stage: 1, who: [iam], text: "What are your rules for passwords, MFA and secrets, and how is a reset done without a phishing risk?"}
+      - {id: q5, stage: 1, who: [iam, staff], text: "How are staff told how to handle their passwords and tokens, and where is that written (policy, onboarding, terms of employment)?"}
+      - {id: q2, stage: 2, who: [iam], text: "Show me your password and MFA configuration in the identity provider."}
+      - {id: q3, stage: 2, who: [iam], text: "How are initial passwords and reset credentials delivered, and how do you verify the person asking for a reset?"}
+      - {id: q4, stage: 2, who: [dev, iam], text: "Where are shared secrets, API keys and service passwords stored?"}
+      - {id: q6, stage: 2, who: [iam], text: "How do new users receive their first credentials, and are vendor default passwords changed before a system goes live?"}
     requests:
       - {id: r1, label: "Password and MFA policy settings from the identity provider (see also A.8.5)", kind: technical, fresh_days: 40}
       - {id: r2, label: "MFA coverage report listing users without MFA (see also A.8.5)", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.mfa}
@@ -260,9 +260,9 @@ entries:
       - {id: p4, text: "Users share credentials or reuse work passwords elsewhere, and nobody was ever briefed against it"}
   a.5.18:
     questions:
-      - {id: q1, stage: 1, text: "Show me how access rights are requested, approved and reviewed on paper: who approves, and how often you review."}
-      - {id: q2, stage: 2, text: "Walk me through a joiner, a mover and a leaver, from the HR trigger to the account change."}
-      - {id: q3, stage: 2, text: "Show me your last two access review cycles for a critical system. What was removed as a result?"}
+      - {id: q1, stage: 1, who: [iam, ciso], text: "Show me how access rights are requested, approved and reviewed on paper: who approves, and how often you review."}
+      - {id: q2, stage: 2, who: [hr, iam], text: "Walk me through a joiner, a mover and a leaver, from the HR trigger to the account change."}
+      - {id: q3, stage: 2, who: [iam], text: "Show me your last two access review cycles for a critical system. What was removed as a result?"}
     requests:
       - {id: r1, label: "Access request and approval records for sampled joiners and movers", kind: record}
       - {id: r2, label: "Access review records for critical systems, last 2 cycles, with sign-off and actions", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:proc.recertification}
@@ -279,8 +279,8 @@ entries:
       - {id: p3, text: "Leaver accounts disabled days or weeks after the exit date, or SaaS accounts outside SSO never disabled"}
   a.5.19:
     questions:
-      - {id: q1, stage: 1, text: "Show me how you classify suppliers by security risk and what you require from each tier."}
-      - {id: q2, stage: 2, text: "Pick a supplier onboarded this year and show me the security assessment done before signing."}
+      - {id: q1, stage: 1, who: [proc, ciso], text: "Show me how you classify suppliers by security risk and what you require from each tier."}
+      - {id: q2, stage: 2, who: [proc], text: "Pick a supplier onboarded this year and show me the security assessment done before signing."}
     requests:
       - {id: r1, label: "Supplier security policy or procedure with tiering criteria", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.supplier}
       - {id: r2, label: "Supplier register with criticality, data accessed and assessment status", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:doc.supplier_register}
@@ -294,9 +294,9 @@ entries:
       - {id: p3, text: "Exit provisions (return or destruction of data, removal of access) not defined for supplier relationships"}
   a.5.20:
     questions:
-      - {id: q1, stage: 1, text: "Which security clauses must appear in a supplier contract, and how do they change with the supplier's risk?"}
-      - {id: q2, stage: 2, text: "Pick a critical supplier contract. Show me the security clauses: confidentiality, incident notification, audit rights, sub-processing, data return."}
-      - {id: q3, stage: 2, text: "How do you make sure older contracts are brought up to your current requirements?"}
+      - {id: q1, stage: 1, who: [legal], text: "Which security clauses must appear in a supplier contract, and how do they change with the supplier's risk?"}
+      - {id: q2, stage: 2, who: [legal], text: "Pick a critical supplier contract. Show me the security clauses: confidentiality, incident notification, audit rights, sub-processing, data return."}
+      - {id: q3, stage: 2, who: [legal, proc], text: "How do you make sure older contracts are brought up to your current requirements?"}
     requests:
       - {id: r1, label: "Standard security clauses or schedule used in supplier contracts", kind: document}
       - {id: r2, label: "Signed contracts or DPAs for sampled critical suppliers", kind: document}
@@ -309,9 +309,9 @@ entries:
       - {id: p2, text: "Audit or assessment rights missing, so the organisation relies on whatever the supplier chooses to share"}
   a.5.21:
     questions:
-      - {id: q1, stage: 1, text: "Which ICT supply chain risks did you identify, and what do you ask of suppliers about their own subcontractors?"}
-      - {id: q2, stage: 2, text: "How do you get assurance on the subcontractors of your critical ICT providers?"}
-      - {id: q3, stage: 2, text: "For software or hardware you buy, how do you check where components come from and that they are supported?"}
+      - {id: q1, stage: 1, who: [ciso, proc], text: "Which ICT supply chain risks did you identify, and what do you ask of suppliers about their own subcontractors?"}
+      - {id: q2, stage: 2, who: [proc], text: "How do you get assurance on the subcontractors of your critical ICT providers?"}
+      - {id: q3, stage: 2, who: [dev, proc], text: "For software or hardware you buy, how do you check where components come from and that they are supported?"}
     requests:
       - {id: r1, label: "Requirements imposed on suppliers to flow down security to their subcontractors", kind: document}
       - {id: r2, label: "Sub-processor or subcontractor lists for critical providers", kind: record, fresh_days: 400}
@@ -324,9 +324,9 @@ entries:
       - {id: p2, text: "Sub-processor change notifications received but never reviewed"}
   a.5.22:
     questions:
-      - {id: q1, stage: 1, text: "How do you decide how often a supplier is reviewed, and what counts as a change worth reassessing?"}
-      - {id: q2, stage: 2, text: "Pick a critical supplier. Show me the last performance or security review you held with them."}
-      - {id: q3, stage: 2, text: "How did you assess the impact the last time a supplier changed their service, location or subcontractor?"}
+      - {id: q1, stage: 1, who: [proc], text: "How do you decide how often a supplier is reviewed, and what counts as a change worth reassessing?"}
+      - {id: q2, stage: 2, who: [proc], text: "Pick a critical supplier. Show me the last performance or security review you held with them."}
+      - {id: q3, stage: 2, who: [proc, ciso], text: "How did you assess the impact the last time a supplier changed their service, location or subcontractor?"}
     requests:
       - {id: r1, label: "Supplier review schedule by tier", kind: document}
       - {id: r2, label: "Minutes or reports of supplier security reviews", kind: record, fresh_days: 400}
@@ -341,9 +341,9 @@ entries:
       - {id: p3, text: "Reviews scheduled annually but last one is two years old"}
   a.5.23:
     questions:
-      - {id: q1, stage: 1, text: "Show me how you decide to adopt a new cloud service and what security checks happen before use."}
-      - {id: q2, stage: 2, text: "For your main cloud provider, show me which controls are yours and which are the provider's."}
-      - {id: q3, stage: 2, text: "If you had to leave this provider next quarter, what is the exit plan and has any part of it been tried?"}
+      - {id: q1, stage: 1, who: [ciso, proc], text: "Show me how you decide to adopt a new cloud service and what security checks happen before use."}
+      - {id: q2, stage: 2, who: [infra], text: "For your main cloud provider, show me which controls are yours and which are the provider's."}
+      - {id: q3, stage: 2, who: [infra, ciso], text: "If you had to leave this provider next quarter, what is the exit plan and has any part of it been tried?"}
     requests:
       - {id: r1, label: "Cloud services policy or procedure: how you choose, run and leave a cloud provider", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.cloud}
       - {id: r2, label: "Cloud service register including SaaS, with owner and data classification", kind: record, fresh_days: 200}
@@ -358,9 +358,9 @@ entries:
       - {id: p3, text: "No exit strategy, or one that cannot be carried out because export formats or contract terms were never checked"}
   a.5.24:
     questions:
-      - {id: q1, stage: 1, text: "Show me your incident management procedure, roles and escalation paths."}
-      - {id: q2, stage: 2, text: "When did you last exercise the incident process, and what did you change after it?"}
-      - {id: q3, stage: 2, text: "Who is allowed to handle incidents, and how do you know they are trained for it?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Show me your incident management procedure, roles and escalation paths."}
+      - {id: q2, stage: 2, who: [ciso, sec_ops], text: "When did you last exercise the incident process, and what did you change after it?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Who is allowed to handle incidents, and how do you know they are trained for it?"}
     requests:
       - {id: r1, label: "Incident management policy and procedure with roles, severity scale and escalation", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.incident}
       - {id: r2, label: "Incident response team contact list including external parties", kind: document}
@@ -373,9 +373,9 @@ entries:
       - {id: p2, text: "Severity criteria do not tie to regulatory notification thresholds"}
   a.5.25:
     questions:
-      - {id: q1, stage: 1, text: "What turns an event into an incident here? Show me the criteria and who makes the call."}
-      - {id: q2, stage: 2, text: "Show me how an event becomes an incident: who decides, using which criteria?"}
-      - {id: q3, stage: 2, text: "Pick three events from the log that were not escalated. Why not?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "What turns an event into an incident here? Show me the criteria and who makes the call."}
+      - {id: q2, stage: 2, who: [sec_ops, service_desk], text: "Show me how an event becomes an incident: who decides, using which criteria?"}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Pick three events from the log that were not escalated. Why not?"}
     requests:
       - {id: r1, label: "Event triage criteria or classification matrix", kind: document}
       - {id: r2, label: "Event and incident log or ticket queue for the last 12 months", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.incident_register}
@@ -387,9 +387,9 @@ entries:
       - {id: p2, text: "Triage decisions not recorded, so nobody can explain why an event was dismissed"}
   a.5.26:
     questions:
-      - {id: q1, stage: 1, text: "Which incident scenarios have a written response, and who has the authority to act on them?"}
-      - {id: q2, stage: 2, text: "Pick your most serious incident of the year. Walk me through detection, containment, communication and closure."}
-      - {id: q3, stage: 2, text: "Who was notified, including customers or authorities, and when?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which incident scenarios have a written response, and who has the authority to act on them?"}
+      - {id: q2, stage: 2, who: [sec_ops], text: "Pick your most serious incident of the year. Walk me through detection, containment, communication and closure."}
+      - {id: q3, stage: 2, who: [ciso, legal], text: "Who was notified, including customers or authorities, and when?"}
     requests:
       - {id: r1, label: "Incident records with timeline, actions and closure", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.incident_register}
       - {id: r2, label: "Communication records for notified parties", kind: record}
@@ -402,9 +402,9 @@ entries:
       - {id: p2, text: "Incidents closed without root cause or with open containment actions"}
   a.5.27:
     questions:
-      - {id: q1, stage: 1, text: "How is an incident closed, and where does the post-incident review get recorded?"}
-      - {id: q2, stage: 2, text: "Show me a lessons-learned review from a past incident and the actions it produced."}
-      - {id: q3, stage: 2, text: "How do incident trends feed into your risk assessment and awareness programme?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "How is an incident closed, and where does the post-incident review get recorded?"}
+      - {id: q2, stage: 2, who: [ciso, sec_ops], text: "Show me a lessons-learned review from a past incident and the actions it produced."}
+      - {id: q3, stage: 2, who: [ciso, risk], text: "How do incident trends feed into your risk assessment and awareness programme?"}
     requests:
       - {id: r1, label: "Post-incident review reports", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.post_incident}
       - {id: r2, label: "Corrective action tracking linked to incidents", kind: record, fresh_days: 400}
@@ -417,8 +417,8 @@ entries:
       - {id: p2, text: "Repeated incidents of the same type with no change to controls or risk register"}
   a.5.28:
     questions:
-      - {id: q1, stage: 1, text: "Show me your procedure for collecting and preserving digital evidence."}
-      - {id: q2, stage: 2, text: "If you needed to support legal action after an incident, how would you show the evidence was not altered?"}
+      - {id: q1, stage: 1, who: [sec_ops], text: "Show me your procedure for collecting and preserving digital evidence."}
+      - {id: q2, stage: 2, who: [sec_ops, legal], text: "If you needed to support legal action after an incident, how would you show the evidence was not altered?"}
     requests:
       - {id: r1, label: "Evidence handling procedure with chain of custody form", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.forensics}
       - {id: r2, label: "Completed chain of custody records, if any", kind: record}
@@ -430,9 +430,9 @@ entries:
       - {id: p2, text: "No guidance on legal admissibility or jurisdiction; legal counsel or law enforcement only involved after the evidence was already handled"}
   a.5.29:
     questions:
-      - {id: q1, stage: 1, text: "Which security controls must keep running during a disruption, and where is that written down?"}
-      - {id: q2, stage: 2, text: "During a disruption, which security controls must stay in place and how is that written into your continuity plans?"}
-      - {id: q3, stage: 2, text: "In your last continuity test, did access control and logging keep working? How do you know?"}
+      - {id: q1, stage: 1, who: [ciso], text: "Which security controls must keep running during a disruption, and where is that written down?"}
+      - {id: q2, stage: 2, who: [ciso, risk], text: "During a disruption, which security controls must stay in place and how is that written into your continuity plans?"}
+      - {id: q3, stage: 2, who: [infra], text: "In your last continuity test, did access control and logging keep working? How do you know?"}
     requests:
       - {id: r1, label: "Business continuity plans with security requirements during disruption", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.bcp}
       - {id: r2, label: "Continuity test reports covering security aspects", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.bcp_exercise}
@@ -443,9 +443,9 @@ entries:
       - {id: p2, text: "Recovery site not covered by the same security monitoring as production"}
   a.5.30:
     questions:
-      - {id: q1, stage: 1, text: "Show me how your ICT recovery objectives were derived from the business impact analysis."}
-      - {id: q2, stage: 2, text: "Show me the last disaster recovery or restore test for a critical service. Did you meet the RTO and RPO?"}
-      - {id: q3, stage: 2, text: "When a test failed or overran, what did you do about it?"}
+      - {id: q1, stage: 1, who: [risk, infra], text: "Show me how your ICT recovery objectives were derived from the business impact analysis."}
+      - {id: q2, stage: 2, who: [infra], text: "Show me the last disaster recovery or restore test for a critical service. Did you meet the RTO and RPO?"}
+      - {id: q3, stage: 2, who: [infra], text: "When a test failed or overran, what did you do about it?"}
     requests:
       - {id: r1, label: "Business impact analysis listing critical processes, supporting ICT services, RTO and RPO", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.bia}
       - {id: r2, label: "ICT continuity or disaster recovery plans for critical services", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.drp}
@@ -460,8 +460,8 @@ entries:
       - {id: p3, text: "Test results not compared to objectives, so misses never become corrective actions"}
   a.5.31:
     questions:
-      - {id: q1, stage: 1, text: "Show me your register of legal, regulatory and contractual requirements relevant to security."}
-      - {id: q2, stage: 2, text: "How do you find out about a new or changed law that affects you? Show me the last update you made."}
+      - {id: q1, stage: 1, who: [legal], text: "Show me your register of legal, regulatory and contractual requirements relevant to security."}
+      - {id: q2, stage: 2, who: [legal], text: "How do you find out about a new or changed law that affects you? Show me the last update you made."}
     requests:
       - {id: r1, label: "Legal and regulatory requirements register with owner and applicability", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.legal}
       - {id: r2, label: "Evidence of periodic review of the register", kind: record, fresh_days: 400}
@@ -474,9 +474,9 @@ entries:
       - {id: p2, text: "Contractual security commitments to customers not captured, so nobody tracks them"}
   a.5.32:
     questions:
-      - {id: q1, stage: 1, text: "How do you track software licences and the reuse of third-party or open source content?"}
-      - {id: q2, stage: 2, text: "How do you make sure software in use is licensed and that open source licences are respected?"}
-      - {id: q3, stage: 2, text: "Show me the licence count against installations for one commercial product."}
+      - {id: q1, stage: 1, who: [service_desk, dev], text: "How do you track software licences and the reuse of third-party or open source content?"}
+      - {id: q2, stage: 2, who: [service_desk, dev], text: "How do you make sure software in use is licensed and that open source licences are respected?"}
+      - {id: q3, stage: 2, who: [service_desk], text: "Show me the licence count against installations for one commercial product."}
     requests:
       - {id: r1, label: "Software licence register or software asset management report", kind: record, fresh_days: 200}
       - {id: r2, label: "Software installation restrictions (no local admin, approved software list)", kind: technical, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:tech.app_control}
@@ -489,9 +489,9 @@ entries:
       - {id: p2, text: "Copyleft components shipped in products without licence review"}
   a.5.33:
     questions:
-      - {id: q1, stage: 1, text: "Show me your retention schedule for records, including legal basis."}
-      - {id: q2, stage: 2, text: "Pick a record type and show me that it is kept for the right period and then destroyed."}
-      - {id: q3, stage: 2, text: "How do you stop records being altered or read by the wrong people, and how will you still read archived or encrypted records at the end of their retention period?"}
+      - {id: q1, stage: 1, who: [legal, dpo], text: "Show me your retention schedule for records, including legal basis."}
+      - {id: q2, stage: 2, who: [infra], text: "Pick a record type and show me that it is kept for the right period and then destroyed."}
+      - {id: q3, stage: 2, who: [infra], text: "How do you stop records being altered or read by the wrong people, and how will you still read archived or encrypted records at the end of their retention period?"}
     requests:
       - {id: r1, label: "Records retention schedule by record type", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.retention}
       - {id: r2, label: "Evidence of retention settings in systems (mail, document management, backups)", kind: technical, fresh_days: 400}
@@ -506,9 +506,9 @@ entries:
       - {id: p4, text: "Records needed for audit or legal purposes can be edited by the people they describe"}
   a.5.34:
     questions:
-      - {id: q1, stage: 1, text: "Which laws on personal data apply to you, and where do you show how your controls cover them?"}
-      - {id: q2, stage: 2, text: "Show me your record of processing activities and how it links to your security controls."}
-      - {id: q3, stage: 2, text: "Who is your DPO or privacy lead, and how do privacy and security work together on a breach?"}
+      - {id: q1, stage: 1, who: [dpo, legal], text: "Which laws on personal data apply to you, and where do you show how your controls cover them?"}
+      - {id: q2, stage: 2, who: [dpo], text: "Show me your record of processing activities and how it links to your security controls."}
+      - {id: q3, stage: 2, who: [dpo, ciso], text: "Who is your DPO or privacy lead, and how do privacy and security work together on a breach?"}
     requests:
       - {id: r1, label: "Record of processing activities", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.ropa}
       - {id: r2, label: "Privacy policy and internal data protection policy", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.privacy}
@@ -522,10 +522,10 @@ entries:
       - {id: p2, text: "Breach register kept separately from the incident log, with inconsistencies between them"}
   a.5.35:
     questions:
-      - {id: q1, stage: 1, text: "How is the ISMS reviewed independently, and who does it? Show me the plan for this cycle."}
-      - {id: q2, stage: 2, text: "When was your security approach last reviewed by someone independent of the people running it? Show me the report."}
-      - {id: q3, stage: 2, text: "Show me how the findings of that review were tracked to closure."}
-      - {id: q4, stage: 2, text: "After your last significant change (reorganisation, new hosting, merger), was an independent review considered?"}
+      - {id: q1, stage: 1, who: [auditor], text: "How is the ISMS reviewed independently, and who does it? Show me the plan for this cycle."}
+      - {id: q2, stage: 2, who: [auditor], text: "When was your security approach last reviewed by someone independent of the people running it? Show me the report."}
+      - {id: q3, stage: 2, who: [ciso], text: "Show me how the findings of that review were tracked to closure."}
+      - {id: q4, stage: 2, who: [top, ciso], text: "After your last significant change (reorganisation, new hosting, merger), was an independent review considered?"}
     requests:
       - {id: r1, label: "Independent review plan or reports (internal audit, external assessment or an independent manager) covering people, processes and technology", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.audit_plan}
       - {id: r2, label: "Independent review or internal audit reports", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:pol.audit}
@@ -539,9 +539,9 @@ entries:
       - {id: p3, text: "Findings from the last review still open with no target date"}
   a.5.36:
     questions:
-      - {id: q1, stage: 1, text: "How do managers check that their teams follow the policies, and how often?"}
-      - {id: q2, stage: 2, text: "How do managers check compliance with security policies in their area? Show me the last check."}
-      - {id: q3, stage: 2, text: "Show me a technical compliance review, such as a configuration scan against your hardening standard."}
+      - {id: q1, stage: 1, who: [ciso], text: "How do managers check that their teams follow the policies, and how often?"}
+      - {id: q2, stage: 2, who: [it_lead], text: "How do managers check compliance with security policies in their area? Show me the last check."}
+      - {id: q3, stage: 2, who: [it_lead], text: "Show me a technical compliance review, such as a configuration scan against your hardening standard."}
     requests:
       - {id: r1, label: "Compliance check schedule or self-assessment programme", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring}
       - {id: r2, label: "Results of compliance checks and technical scans", kind: record, fresh_days: 200}
@@ -554,9 +554,9 @@ entries:
       - {id: p2, text: "Scans run but deviations from baseline never triaged"}
   a.5.37:
     questions:
-      - {id: q1, stage: 1, text: "Show me the list of documented operating procedures for your IT operations."}
-      - {id: q2, stage: 2, text: "Pick a routine task such as backup or user creation. Show me the procedure and have the operator walk me through it."}
-      - {id: q3, stage: 2, text: "Where does an on-call operator find the procedure at 3am, including when the main wiki or single sign-on is down?"}
+      - {id: q1, stage: 1, who: [service_desk], text: "Show me the list of documented operating procedures for your IT operations."}
+      - {id: q2, stage: 2, who: [service_desk], text: "Pick a routine task such as backup or user creation. Show me the procedure and have the operator walk me through it."}
+      - {id: q3, stage: 2, who: [service_desk], text: "Where does an on-call operator find the procedure at 3am, including when the main wiki or single sign-on is down?"}
     requests:
       - {id: r1, label: "Index of operating procedures with owner and review date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.proc_register}
       - {id: r2, label: "Sample procedures (backup, restore, patching, account provisioning, monitoring)", kind: document}

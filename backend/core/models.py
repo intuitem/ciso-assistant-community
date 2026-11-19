@@ -14686,6 +14686,10 @@ class AuditPreparation(AbstractBaseModel):
         related_name="+",
     )
     auditors = models.CharField(max_length=255, blank=True)
+    # Who to send a missing document to, as shown on the flash cards.
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     # Hook for later: the real audit's result, to set against the forecast.
     findings_assessment = models.ForeignKey(
         FindingsAssessment,

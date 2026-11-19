@@ -65,6 +65,14 @@ def ev(days_old):
     }
 
 
+def test_every_question_says_who_answers_it():
+    for key, entry in load_audit_guides()[ISO].items():
+        for q in entry.get("questions") or []:
+            who = q.get("who") or []
+            assert 1 <= len(who) <= 3, (key, q["id"])
+            assert set(who) <= set(entry["interviewees"]), (key, q["id"])
+
+
 def test_iso27001_guidance_covers_every_assessable_node():
     framework = yaml.safe_load(LIBRARY.read_text())["objects"]["framework"]
     suffixes = {
@@ -497,7 +505,7 @@ def test_preparation_is_lazy_and_drives_readiness():
     assert prep_payload["sessions"]["access"]["location"] == "Room 2"
 
     # The next audit of the domain is offered the set-asides, and takes them on request.
-    nxt, nxt_ra = new_audit("2027")
+    nxt, _ = new_audit("2027")
     offered = auditor_preread(nxt, user)["previous_set_asides"]
     assert {a["request"] for a in offered} == {"r1", "r2", "r3", "r4"}
     assert update_preparation(nxt, user, {"carry_over": True}) is None

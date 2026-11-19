@@ -2,10 +2,10 @@ framework_urn: urn:intuitem:risk:framework:iso27001-2022
 entries:
   a.6.1:
     questions:
-      - {id: q1, stage: 1, text: "Which checks do you run for which roles, and who decided that privileged roles need more?"}
-      - {id: q2, stage: 2, text: "Show me the screening file for this engineer, and tell me whether the checks were finished before their first day."}
-      - {id: q3, stage: 2, text: "How do you make sure contractors and agency staff are screened to the level their role requires, and where is that written in the supplier contract?"}
-      - {id: q4, stage: 2, text: "For critical or privileged roles, how and how often do you re-check that people are still suitable after they start?"}
+      - {id: q1, stage: 1, who: [hr], text: "Which checks do you run for which roles, and who decided that privileged roles need more?"}
+      - {id: q2, stage: 2, who: [hr], text: "Show me the screening file for this engineer, and tell me whether the checks were finished before their first day."}
+      - {id: q3, stage: 2, who: [proc, hr], text: "How do you make sure contractors and agency staff are screened to the level their role requires, and where is that written in the supplier contract?"}
+      - {id: q4, stage: 2, who: [hr], text: "For critical or privileged roles, how and how often do you re-check that people are still suitable after they start?"}
     requests:
       - {id: r1, label: "Screening procedure with checks per role or risk level", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.bg_screening}
       - {id: r2, label: "Screening evidence for sampled hires (ID, right to work, references, criminal check where lawful)", kind: record}
@@ -21,8 +21,8 @@ entries:
       - {id: p4, text: "Screening happens only at hiring, with no re-check for people promoted into or holding critical roles"}
   a.6.2:
     questions:
-      - {id: q1, stage: 1, text: "Where in the employment contract do staff accept their information security responsibilities?"}
-      - {id: q2, stage: 2, text: "Pick a recent hire: show me what they signed and which policies it points to."}
+      - {id: q1, stage: 1, who: [hr], text: "Where in the employment contract do staff accept their information security responsibilities?"}
+      - {id: q2, stage: 2, who: [hr], text: "Pick a recent hire: show me what they signed and which policies it points to."}
     requests:
       - {id: r1, label: "Employment contract and contractor agreement templates with security clauses highlighted", kind: document}
       - {id: r2, label: "Signed contracts or acknowledgements for sampled starters", kind: record}
@@ -35,11 +35,11 @@ entries:
       - {id: p2, text: "Contractor agreements managed by procurement with no security clauses at all"}
   a.6.3:
     questions:
-      - {id: q1, stage: 1, text: "How did you decide what goes into the awareness programme, and how does it change for developers or admins?"}
-      - {id: q2, stage: 2, text: "What percentage of staff completed training this year, and what happens to those who did not?"}
-      - {id: q3, stage: 2, text: "Tell me, without looking it up, how you would report a suspicious email here."}
-      - {id: q4, stage: 2, text: "When a policy or procedure changed this year, how did the people it affects find out? Show me."}
-      - {id: q5, stage: 2, text: "How do you check that awareness actually landed (quiz, test, observed behaviour)? Show me the latest results."}
+      - {id: q1, stage: 1, who: [ciso], text: "How did you decide what goes into the awareness programme, and how does it change for developers or admins?"}
+      - {id: q2, stage: 2, who: [hr, ciso], text: "What percentage of staff completed training this year, and what happens to those who did not?"}
+      - {id: q3, stage: 2, who: [staff], text: "Tell me, without looking it up, how you would report a suspicious email here."}
+      - {id: q4, stage: 2, who: [ciso], text: "When a policy or procedure changed this year, how did the people it affects find out? Show me."}
+      - {id: q5, stage: 2, who: [ciso], text: "How do you check that awareness actually landed (quiz, test, observed behaviour)? Show me the latest results."}
     requests:
       - {id: r1, label: "Awareness and training plan with topics per audience", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_plan}
       - {id: r2, label: "Training completion report from the LMS for all staff", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_register}
@@ -54,8 +54,8 @@ entries:
       - {id: p3, text: "Training content generic and never updated after incidents or risk changes"}
   a.6.4:
     questions:
-      - {id: q1, stage: 1, text: "Where is it written what happens when someone breaches a security policy, and do staff know about it?"}
-      - {id: q2, stage: 2, text: "Has the process been used since the last audit? Walk me through one case, anonymised if needed."}
+      - {id: q1, stage: 1, who: [hr], text: "Where is it written what happens when someone breaches a security policy, and do staff know about it?"}
+      - {id: q2, stage: 2, who: [hr, legal], text: "Has the process been used since the last audit? Walk me through one case, anonymised if needed."}
     requests:
       - {id: r1, label: "Disciplinary procedure that explicitly covers security breaches", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.disciplinary}
       - {id: r2, label: "Anonymised log of security-related disciplinary cases", kind: record}
@@ -68,10 +68,10 @@ entries:
       - {id: p3, text: "Disciplinary process covers employees only; there is no contractual route to act on a contractor or supplier employee who breaks policy"}
   a.6.5:
     questions:
-      - {id: q1, stage: 1, text: "Which obligations continue after someone leaves or changes role, and how are they told?"}
-      - {id: q4, stage: 1, text: "In which contract or agreement are the duties that continue after leaving written down, and for how long do they apply?"}
-      - {id: q2, stage: 2, text: "When someone leaves, how are they reminded of what still binds them, such as confidentiality?"}
-      - {id: q3, stage: 2, text: "Show me the exit record for this leaver: which ongoing obligations were restated, and who took over their security duties?"}
+      - {id: q1, stage: 1, who: [hr], text: "Which obligations continue after someone leaves or changes role, and how are they told?"}
+      - {id: q4, stage: 1, who: [hr], text: "In which contract or agreement are the duties that continue after leaving written down, and for how long do they apply?"}
+      - {id: q2, stage: 2, who: [hr], text: "When someone leaves, how are they reminded of what still binds them, such as confidentiality?"}
+      - {id: q3, stage: 2, who: [hr], text: "Show me the exit record for this leaver: which ongoing obligations were restated, and who took over their security duties?"}
     requests:
       - {id: r1, label: "Leaver procedure or exit checklist covering continuing obligations", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.hr_security}
       - {id: r2, label: "Completed exit checklists or exit letters for sampled leavers", kind: record}
@@ -84,9 +84,9 @@ entries:
       - {id: p2, text: "A mover or leaver held a security duty (owner of a risk or an asset, an on-call role) and nobody was formally named to take it over"}
   a.6.6:
     questions:
-      - {id: q1, stage: 1, text: "Who has to sign an NDA, and when were the templates last reviewed by legal?"}
-      - {id: q3, stage: 1, text: "What do your agreements say about how long confidentiality lasts and what happens to information when the relationship ends?"}
-      - {id: q2, stage: 2, text: "Show me signed agreements for these suppliers and staff who handle confidential data."}
+      - {id: q1, stage: 1, who: [legal], text: "Who has to sign an NDA, and when were the templates last reviewed by legal?"}
+      - {id: q3, stage: 1, who: [legal], text: "What do your agreements say about how long confidentiality lasts and what happens to information when the relationship ends?"}
+      - {id: q2, stage: 2, who: [proc, hr], text: "Show me signed agreements for these suppliers and staff who handle confidential data."}
     requests:
       - {id: r1, label: "NDA templates for staff, contractors and third parties", kind: document}
       - {id: r2, label: "Register of signed NDAs or signed copies for the sample", kind: record}
@@ -99,10 +99,10 @@ entries:
       - {id: p2, text: "Templates never reviewed since adoption, so the review requirement is not met"}
   a.6.7:
     questions:
-      - {id: q1, stage: 1, text: "What rules apply when people work from home, a café or abroad, and where are they written?"}
-      - {id: q2, stage: 2, text: "Show me how you enforce those rules technically on a laptop that is never in the office."}
-      - {id: q3, stage: 2, text: "Can staff work from another country, and who approves that?"}
-      - {id: q4, stage: 2, text: "How do remote users authenticate to internal systems, and is any remote path still single-factor?"}
+      - {id: q1, stage: 1, who: [ciso], text: "What rules apply when people work from home, a café or abroad, and where are they written?"}
+      - {id: q2, stage: 2, who: [endpoint], text: "Show me how you enforce those rules technically on a laptop that is never in the office."}
+      - {id: q3, stage: 2, who: [ciso], text: "Can staff work from another country, and who approves that?"}
+      - {id: q4, stage: 2, who: [endpoint], text: "How do remote users authenticate to internal systems, and is any remote path still single-factor?"}
     requests:
       - {id: r1, label: "Remote working policy or section of the acceptable use policy", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.work}
       - {id: r2, label: "Endpoint compliance report showing encryption, screen lock and VPN or ZTNA posture", kind: technical, fresh_days: 40}
@@ -116,9 +116,9 @@ entries:
       - {id: p3, text: "Staff work from other countries for weeks without approval or a check of local legal constraints"}
   a.6.8:
     questions:
-      - {id: q1, stage: 1, text: "How should staff report a security event, and how did you tell them about those channels?"}
-      - {id: q2, stage: 2, text: "If I saw something suspicious right now, how would I report it, and how fast would someone respond?"}
-      - {id: q3, stage: 2, text: "Show me reports from staff in the last few months and what was done with them."}
+      - {id: q1, stage: 1, who: [sec_ops], text: "How should staff report a security event, and how did you tell them about those channels?"}
+      - {id: q2, stage: 2, who: [staff], text: "If I saw something suspicious right now, how would I report it, and how fast would someone respond?"}
+      - {id: q3, stage: 2, who: [sec_ops], text: "Show me reports from staff in the last few months and what was done with them."}
     requests:
       - {id: r1, label: "Event reporting procedure and the channels advertised to staff", kind: document}
       - {id: r2, label: "Ticket or mailbox log of staff-reported events with triage outcome", kind: record, fresh_days: 100}
@@ -133,9 +133,9 @@ entries:
       - {id: p4, text: "Staff encouraged to confirm a suspected weakness themselves before reporting it, risking damage and lost evidence"}
   a.7.1:
     questions:
-      - {id: q1, stage: 1, text: "Which sites are in scope, and how did you define the boundary of each secure area?"}
-      - {id: q2, stage: 2, text: "Walk me around the perimeter. Where could someone get in without passing a control?"}
-      - {id: q3, stage: 2, text: "Where provider data centres are in scope, how do you know their perimeter controls are adequate? (Otherwise this is covered under A.5.19 to A.5.23.)"}
+      - {id: q1, stage: 1, who: [ciso, facilities], text: "Which sites are in scope, and how did you define the boundary of each secure area?"}
+      - {id: q2, stage: 2, who: [facilities], text: "Walk me around the perimeter. Where could someone get in without passing a control?"}
+      - {id: q3, stage: 2, who: [ciso], text: "Where provider data centres are in scope, how do you know their perimeter controls are adequate? (Otherwise this is covered under A.5.19 to A.5.23.)"}
     requests:
       - {id: r1, label: "Site list and floor plans marking secure zones and entry points", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:phys.secure_area}
       - {id: r2, label: "Site tour: doors, windows, fire exits and loading areas on the perimeter", kind: observation}
@@ -148,10 +148,10 @@ entries:
       - {id: p3, text: "Provider SOC 2 report collected but its scope does not cover the region or service actually used (where provider sites are in scope)"}
   a.7.2:
     questions:
-      - {id: q1, stage: 1, text: "Which entry points to your sites are controlled, and how are badges, keys and visitors handled on paper?"}
-      - {id: q2, stage: 2, text: "How do visitors get in, who escorts them, and how long do you keep the visitor log?"}
-      - {id: q3, stage: 2, text: "When were badge rights to the server room last reviewed, and who removed the ones no longer needed?"}
-      - {id: q4, stage: 2, text: "Who holds keys or door codes for restricted rooms, when were codes last changed, and how are delivery areas kept apart from secure zones?"}
+      - {id: q1, stage: 1, who: [facilities], text: "Which entry points to your sites are controlled, and how are badges, keys and visitors handled on paper?"}
+      - {id: q2, stage: 2, who: [facilities], text: "How do visitors get in, who escorts them, and how long do you keep the visitor log?"}
+      - {id: q3, stage: 2, who: [facilities], text: "When were badge rights to the server room last reviewed, and who removed the ones no longer needed?"}
+      - {id: q4, stage: 2, who: [facilities], text: "Who holds keys or door codes for restricted rooms, when were codes last changed, and how are delivery areas kept apart from secure zones?"}
     requests:
       - {id: r1, label: "Visitor log for a recent period", kind: record, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt}
       - {id: r2, label: "Badge system export of people with access to restricted zones", kind: technical, fresh_days: 40}
@@ -167,9 +167,9 @@ entries:
       - {id: p4, text: "Server room door code unchanged for years and known to former staff or contractors"}
   a.7.3:
     questions:
-      - {id: q1, stage: 1, text: "Which rooms did you mark as needing extra protection, and how did you choose them?"}
-      - {id: q2, stage: 2, text: "Which rooms hold sensitive information or equipment, and how are they protected from casual view and entry?"}
-      - {id: q3, stage: 2, text: "Is there anything in public building directories or signage that tells outsiders where the sensitive rooms are?"}
+      - {id: q1, stage: 1, who: [facilities], text: "Which rooms did you mark as needing extra protection, and how did you choose them?"}
+      - {id: q2, stage: 2, who: [facilities], text: "Which rooms hold sensitive information or equipment, and how are they protected from casual view and entry?"}
+      - {id: q3, stage: 2, who: [facilities], text: "Is there anything in public building directories or signage that tells outsiders where the sensitive rooms are?"}
     requests:
       - {id: r1, label: "List of sensitive rooms such as server rooms, HR and finance offices, with their protections", kind: document}
       - {id: r2, label: "Site tour: locks, window coverings and signage of sensitive rooms", kind: observation}
@@ -180,9 +180,9 @@ entries:
       - {id: p2, text: "Meeting rooms with screens or whiteboards visible through glass from the street"}
   a.7.4:
     questions:
-      - {id: q1, stage: 1, text: "What do you monitor physically, why those areas, and how long do you keep footage?"}
-      - {id: q2, stage: 2, text: "Show me the last alarm test and what happened when an alarm went off out of hours."}
-      - {id: q3, stage: 2, text: "If you record video, can you retrieve footage from last Tuesday morning for this door right now?"}
+      - {id: q1, stage: 1, who: [facilities], text: "What do you monitor physically, why those areas, and how long do you keep footage?"}
+      - {id: q2, stage: 2, who: [facilities], text: "Show me the last alarm test and what happened when an alarm went off out of hours."}
+      - {id: q3, stage: 2, who: [facilities], text: "If you record video, can you retrieve footage from last Tuesday morning for this door right now?"}
     requests:
       - {id: r1, label: "Coverage map of cameras, alarm zones and sensors against secure areas", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:phys.cctv}
       - {id: r2, label: "Alarm and intrusion test log with dates and results", kind: record, fresh_days: 100}
@@ -199,8 +199,8 @@ entries:
       - {id: p5, text: "SoA carried over from the 2013 version with no line or justification for this control, which is new in 2022"}
   a.7.5:
     questions:
-      - {id: q1, stage: 1, text: "Which physical and environmental threats did you consider for each site, such as flood, fire or heat?"}
-      - {id: q2, stage: 2, text: "Show me the fire suppression and detection inspection records for the server room."}
+      - {id: q1, stage: 1, who: [risk, facilities], text: "Which physical and environmental threats did you consider for each site, such as flood, fire or heat?"}
+      - {id: q2, stage: 2, who: [facilities], text: "Show me the fire suppression and detection inspection records for the server room."}
     requests:
       - {id: r1, label: "Risk assessment entries for natural and environmental threats per site", kind: record}
       - {id: r2, label: "Fire detection and suppression inspection certificates", kind: record, fresh_days: 400}
@@ -212,9 +212,9 @@ entries:
       - {id: p2, text: "Cardboard and spare equipment stored in the server room, adding fire load"}
   a.7.6:
     questions:
-      - {id: q1, stage: 1, text: "What rules apply inside your secure areas, and who are they shown to?"}
-      - {id: q2, stage: 2, text: "What rules apply inside secure areas, for example on phones, photography and lone working?"}
-      - {id: q3, stage: 2, text: "How is a third-party engineer supervised when they work in the server room?"}
+      - {id: q1, stage: 1, who: [facilities], text: "What rules apply inside your secure areas, and who are they shown to?"}
+      - {id: q2, stage: 2, who: [facilities], text: "What rules apply inside secure areas, for example on phones, photography and lone working?"}
+      - {id: q3, stage: 2, who: [infra], text: "How is a third-party engineer supervised when they work in the server room?"}
     requests:
       - {id: r1, label: "Rules for working in secure areas, posted and documented", kind: document}
       - {id: r2, label: "Server room access log or sign-in sheet for third parties", kind: record, fresh_days: 100}
@@ -227,9 +227,9 @@ entries:
       - {id: p2, text: "Server room used as storage, so many people have a reason to enter"}
   a.7.7:
     questions:
-      - {id: q1, stage: 1, text: "Show me your clear desk and clear screen rule. Does it cover home and shared workspaces?"}
-      - {id: q2, stage: 2, text: "What is the rule for desks and screens when people step away, and how do you check it is followed?"}
-      - {id: q3, stage: 2, text: "What happens to documents left on the printer?"}
+      - {id: q1, stage: 1, who: [facilities], text: "Show me your clear desk and clear screen rule. Does it cover home and shared workspaces?"}
+      - {id: q2, stage: 2, who: [staff], text: "What is the rule for desks and screens when people step away, and how do you check it is followed?"}
+      - {id: q3, stage: 2, who: [staff], text: "What happens to documents left on the printer?"}
     requests:
       - {id: r1, label: "Clear desk and clear screen policy", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:phys.clear_desk}
       - {id: r2, label: "Screen lock timeout setting from the device management console", kind: technical, fresh_days: 40}
@@ -244,8 +244,8 @@ entries:
       - {id: p3, text: "No lockable storage provided, so the policy cannot be followed"}
   a.7.8:
     questions:
-      - {id: q1, stage: 1, text: "How did you decide where critical equipment sits and what protects it from damage and overlooking?"}
-      - {id: q2, stage: 2, text: "Why is this equipment placed where it is, and what protects it from damage and unauthorised viewing?"}
+      - {id: q1, stage: 1, who: [infra, facilities], text: "How did you decide where critical equipment sits and what protects it from damage and overlooking?"}
+      - {id: q2, stage: 2, who: [infra], text: "Why is this equipment placed where it is, and what protects it from damage and unauthorised viewing?"}
     requests:
       - {id: r1, label: "Site tour: rack layout, cooling, equipment positioning and screens facing windows", kind: observation}
       - {id: r2, label: "Environmental monitoring readings for temperature and humidity in equipment rooms", kind: technical, fresh_days: 40}
@@ -256,10 +256,10 @@ entries:
       - {id: p2, text: "Equipment room with no temperature monitoring or alerting"}
   a.7.9:
     questions:
-      - {id: q1, stage: 1, text: "What are the rules for laptops, phones and media used outside your premises?"}
-      - {id: q2, stage: 2, text: "How do you protect laptops and other assets that leave the office, and what happens when one is lost?"}
-      - {id: q3, stage: 2, text: "Show me the last lost or stolen device report and the actions taken."}
-      - {id: q4, stage: 2, text: "Which of your equipment sits permanently outside your premises (kiosks, antennas, branch or remote-site network kit), and how is it protected against tampering and theft?"}
+      - {id: q1, stage: 1, who: [endpoint], text: "What are the rules for laptops, phones and media used outside your premises?"}
+      - {id: q2, stage: 2, who: [endpoint], text: "How do you protect laptops and other assets that leave the office, and what happens when one is lost?"}
+      - {id: q3, stage: 2, who: [endpoint], text: "Show me the last lost or stolen device report and the actions taken."}
+      - {id: q4, stage: 2, who: [endpoint], text: "Which of your equipment sits permanently outside your premises (kiosks, antennas, branch or remote-site network kit), and how is it protected against tampering and theft?"}
     requests:
       - {id: r1, label: "Rules for assets used off site, in the acceptable use or remote working policy", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.work}
       - {id: r2, label: "Device encryption and remote wipe compliance report", kind: technical, fresh_days: 40}
@@ -273,9 +273,9 @@ entries:
       - {id: p2, text: "Lost device reported but no evidence it was wiped or that data exposure was assessed"}
   a.7.10:
     questions:
-      - {id: q1, stage: 1, text: "Do you allow removable media at all? If yes, how is it controlled through its lifecycle?"}
-      - {id: q3, stage: 1, text: "How do your media handling rules change with the classification level, from purchase through transport to disposal, and do they include paper?"}
-      - {id: q2, stage: 2, text: "What stops sensitive data leaving on USB storage: a technical block, enforced encryption or something else? Show me."}
+      - {id: q1, stage: 1, who: [endpoint], text: "Do you allow removable media at all? If yes, how is it controlled through its lifecycle?"}
+      - {id: q3, stage: 1, who: [endpoint], text: "How do your media handling rules change with the classification level, from purchase through transport to disposal, and do they include paper?"}
+      - {id: q2, stage: 2, who: [endpoint], text: "What stops sensitive data leaving on USB storage: a technical block, enforced encryption or something else? Show me."}
     requests:
       - {id: r1, label: "Removable media and storage media handling rules", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.removable_media}
       - {id: r2, label: "Endpoint policy blocking or encrypting removable storage, with exceptions list", kind: technical, fresh_days: 40}
@@ -289,10 +289,10 @@ entries:
       - {id: p3, text: "Media rules make no reference to the classification scheme, so a confidential disk is handled like a public one"}
   a.7.11:
     questions:
-      - {id: q1, stage: 1, text: "Which utilities do your critical systems depend on, and what backs each one up?"}
-      - {id: q2, stage: 2, text: "What happens to the server room and network if mains power fails for two hours?"}
-      - {id: q3, stage: 2, text: "When was the UPS or generator last tested under load?"}
-      - {id: q4, stage: 2, text: "Are UPS, HVAC or building management controllers on a separate network, and can any of them be reached from the internet?"}
+      - {id: q1, stage: 1, who: [infra, facilities], text: "Which utilities do your critical systems depend on, and what backs each one up?"}
+      - {id: q2, stage: 2, who: [infra], text: "What happens to the server room and network if mains power fails for two hours?"}
+      - {id: q3, stage: 2, who: [facilities], text: "When was the UPS or generator last tested under load?"}
+      - {id: q4, stage: 2, who: [infra], text: "Are UPS, HVAC or building management controllers on a separate network, and can any of them be reached from the internet?"}
     requests:
       - {id: r1, label: "UPS and generator maintenance and load test records", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:phys.power_env}
       - {id: r2, label: "Utility dependency list covering power, cooling, network and telecoms", kind: document}
@@ -304,8 +304,8 @@ entries:
       - {id: p2, text: "Single internet line or cooling unit with no risk entry or fallback"}
   a.7.12:
     questions:
-      - {id: q1, stage: 1, text: "Where are your power and network cables documented, and which runs did you decide to protect?"}
-      - {id: q2, stage: 2, text: "Where do your power and network cables run, and could someone tap or damage them without being noticed?"}
+      - {id: q1, stage: 1, who: [network, facilities], text: "Where are your power and network cables documented, and which runs did you decide to protect?"}
+      - {id: q2, stage: 2, who: [network, facilities], text: "Where do your power and network cables run, and could someone tap or damage them without being noticed?"}
     requests:
       - {id: r1, label: "Site tour: patch panels, cable trunking and comms cupboards", kind: observation}
       - {id: r2, label: "Cabling plan or labelled patch panel documentation", kind: document}
@@ -316,9 +316,9 @@ entries:
       - {id: p2, text: "Unlabelled patching, so nobody can say what an active port in a meeting room connects to"}
   a.7.13:
     questions:
-      - {id: q1, stage: 1, text: "Which equipment has scheduled maintenance, and who is allowed to carry it out?"}
-      - {id: q2, stage: 2, text: "Who maintains your critical equipment, how often, and how do you control their access to it?"}
-      - {id: q3, stage: 2, text: "What happens to data on equipment that goes away for repair?"}
+      - {id: q1, stage: 1, who: [facilities, infra], text: "Which equipment has scheduled maintenance, and who is allowed to carry it out?"}
+      - {id: q2, stage: 2, who: [infra], text: "Who maintains your critical equipment, how often, and how do you control their access to it?"}
+      - {id: q3, stage: 2, who: [infra], text: "What happens to data on equipment that goes away for repair?"}
     requests:
       - {id: r1, label: "Maintenance schedule for critical equipment, aligned with supplier recommendations", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.maintenance}
       - {id: r2, label: "Maintenance and service records for sampled equipment", kind: record, fresh_days: 400}
@@ -331,10 +331,10 @@ entries:
       - {id: p2, text: "Disks returned under warranty with no wipe, no destruction and no keep-your-drive or vendor sanitisation arrangement"}
   a.7.14:
     questions:
-      - {id: q1, stage: 1, text: "What is your procedure before equipment holding data is reused, returned or thrown away?"}
-      - {id: q2, stage: 2, text: "Take me through what happens to a laptop from the moment it is retired to its disposal."}
-      - {id: q3, stage: 2, text: "How do you know your disposal provider actually destroyed what you gave them?"}
-      - {id: q4, stage: 2, text: "Who checks that a wipe actually succeeded, and are licensed software and organisation labels removed before reuse or resale?"}
+      - {id: q1, stage: 1, who: [endpoint], text: "What is your procedure before equipment holding data is reused, returned or thrown away?"}
+      - {id: q2, stage: 2, who: [endpoint], text: "Take me through what happens to a laptop from the moment it is retired to its disposal."}
+      - {id: q3, stage: 2, who: [proc], text: "How do you know your disposal provider actually destroyed what you gave them?"}
+      - {id: q4, stage: 2, who: [endpoint], text: "Who checks that a wipe actually succeeded, and are licensed software and organisation labels removed before reuse or resale?"}
     requests:
       - {id: r1, label: "Disposal and reuse procedure covering wiping or destruction methods", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.disposal}
       - {id: r2, label: "Certificates of destruction from the disposal provider", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:phys.equipment_disposal}
