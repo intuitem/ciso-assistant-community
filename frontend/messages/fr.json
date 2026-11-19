@@ -2440,7 +2440,7 @@
 	"ebiosRM": "EBIOS RM",
 	"ebiosRMStudies": "Études EBIOS RM",
 	"ebiosRMStudyARM": "Étude EBIOS RM (format ARM)",
-	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM.\n Notez qu'il s'agit d'un format propriétaire, que tous les objets EBIOS ne sont pas compatibles et certains imports peuvent être incomplets à cause d'entêtes ou onglets manquants.",
+	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM : l'export complet de l'étude, ou un zip des exports par tableau.\n Notez qu'il s'agit d'un format propriétaire, que tous les objets EBIOS ne sont pas compatibles et certains imports peuvent être incomplets à cause d'entêtes ou onglets manquants.",
 	"ebiosRMStudyExcel": "Étude EBIOS RM (format CISO Assistant)",
 	"ebiosRMStudyExcelDescription": "Importer une étude EBIOS RM depuis un export Excel CISO Assistant. Cela permet de partager des études entre différentes instances ou de restaurer des études précédemment exportées.",
 	"ebiosRMStudyEgerieXML": "Étude EBIOS RM (format XML Egerie)",
@@ -3167,6 +3167,8 @@
 	"delete": "Supprimer",
 	"changeStatus": "Changer le statut",
 	"changeDeletionPolicy": "Changer la politique de suppression",
+	"changeRetention": "Changer la durée de conservation",
+	"batchTextLeaveEmptyToClear": "Laisser vide pour effacer",
 	"changeIsSensitive": "Changer la sensibilité",
 	"changeTransferMechanism": "Changer le mécanisme de transfert",
 	"changeHealth": "Changer le diagnostic",
@@ -8218,5 +8220,9 @@
 	"reviewToastApproved": "Approuvée : {name}",
 	"reviewToastRejected": "Rejetée : {name}",
 	"reviewUndoError": "La décision n'a pas pu être annulée.",
-	"evidenceExportTooLarge": "La sélection représente {size} Mo de fichiers, au-delà de la limite de {max} Mo. Réduisez la sélection et relancez l'export."
+	"evidenceExportTooLarge": "La sélection représente {size} Mo de fichiers, au-delà de la limite de {max} Mo. Réduisez la sélection et relancez l'export.",
+	"europeanUnion": "Union européenne",
+	"europeanEconomicArea": "Espace économique européen",
+	"otherCountries": "Autres pays",
+	"notShownOnMap": "Non représenté sur la carte"
 }

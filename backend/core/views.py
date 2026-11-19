@@ -14179,7 +14179,7 @@ def _preview_suggestions_for_compliance_assessment(
                     category=rc.category,
                     name=rc.get_name_translated or rc.ref_id,
                     ref_id=rc.ref_id,
-                    description=rc.description,
+                    description=rc.get_description_translated,
                 )
             dedupe_key = str(rc.id)
             current = best.get(dedupe_key)
