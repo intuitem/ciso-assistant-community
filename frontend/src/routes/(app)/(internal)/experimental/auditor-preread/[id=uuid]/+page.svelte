@@ -933,8 +933,8 @@
 																>
 																<button
 																	class="btn btn-sm {picking?.key === key
-																		? 'preset-filled-surface-500'
-																		: 'preset-tonal-surface'}"
+																		? 'preset-filled-primary-500'
+																		: 'preset-tonal-primary'}"
 																	title={m.prereadPickHint()}
 																	aria-expanded={picking?.key === key}
 																	onclick={() => togglePick(key, selected.id, r.id)}
@@ -1021,6 +1021,13 @@
 																	<span
 																		><i class="fa-solid fa-shield-halved mr-1"></i>{m.prereadVia({
 																			name
+																		})}</span
+																	>
+																{/each}
+																{#each e.via_tasks ?? [] as name, i (i)}
+																	<span
+																		><i class="fa-solid fa-list-check mr-1"></i>{m.prereadViaTask({
+																			name: name ?? m.prereadTaskHiddenLower()
 																		})}</span
 																	>
 																{/each}

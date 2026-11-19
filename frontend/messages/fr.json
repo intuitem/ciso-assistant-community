@@ -8377,6 +8377,8 @@
 	"prereadNotOnFile": "Absent du dossier",
 	"prereadAlsoOnFile": "Aussi au dossier, non rattachées",
 	"prereadOnFile": "Déjà au dossier",
+	"prereadViaTask": "via la tâche {name}",
+	"prereadTaskHiddenLower": "une tâche non visible pour vous",
 	"prereadControlHiddenLower": "une mesure non visible pour vous",
 	"prereadOlderThanWindow": "Plus ancien que la fraîcheur attendue",
 	"prereadAttachedToRequirement": "jointe à l'exigence",

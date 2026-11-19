@@ -63,6 +63,7 @@ export interface PrereadItem {
 		updated_at: string | null;
 		direct: boolean;
 		via_controls: string[];
+		via_tasks: (string | null)[];
 	}[];
 	applied_controls: { id: string; name: string | null; status: string; eta: string | null }[];
 	findings: { severity: 'error' | 'warning'; msgid: string; msg: string }[];

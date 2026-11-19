@@ -21,9 +21,12 @@ from core.models import (
     AppliedControl,
     Evidence,
     EvidenceRequestLink,
+    EvidenceRevision,
     Finding,
     RequirementAssessment,
     Severity,
+    TaskNode,
+    TaskTemplate,
     _build_requirement_assessment_quality_context,
     _requirement_assessment_quality_findings,
 )
@@ -287,6 +290,57 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
     ).values_list("appliedcontrol_id", "evidence_id"):
         control_evidences[cid].add(eid)
     evidence_ids |= {e for evs in control_evidences.values() for e in evs}
+    # Third path, recurring tasks: each occurrence files a new revision of the
+    # evidence its task expects (or adds one of its own), so both count for the
+    # requirements and controls the task is linked to. Never filed means no
+    # file, which the readiness rule already discounts.
+    task_ras = defaultdict(set)
+    for tid, ra_id in TaskTemplate.requirement_assessments.through.objects.filter(
+        requirementassessment__compliance_assessment=compliance_assessment
+    ).values_list("tasktemplate_id", "requirementassessment_id"):
+        task_ras[tid].add(ra_id)
+    task_controls = defaultdict(set)
+    for tid, cid in TaskTemplate.applied_controls.through.objects.filter(
+        appliedcontrol_id__in=control_ids
+    ).values_list("tasktemplate_id", "appliedcontrol_id"):
+        task_controls[tid].add(cid)
+    tasks = task_ras.keys() | task_controls.keys()
+    task_evidences = defaultdict(set)
+    for tid, eid in TaskTemplate.evidences.through.objects.filter(
+        tasktemplate_id__in=tasks
+    ).values_list("tasktemplate_id", "evidence_id"):
+        task_evidences[tid].add(eid)
+    for tid, eid in TaskNode.evidences.through.objects.filter(
+        tasknode__task_template_id__in=tasks
+    ).values_list("tasknode__task_template_id", "evidence_id"):
+        task_evidences[tid].add(eid)
+    task_evidence_ids = set().union(*task_evidences.values())
+    evidence_ids |= task_evidence_ids
+    task_names = dict(
+        TaskTemplate.objects.filter(id__in=task_evidences.keys())
+        .filter(id__in=RoleAssignment.get_viewable_object_ids(user, TaskTemplate))
+        .values_list("id", "name")
+    )
+    task_evidence_info = {
+        eid: (ev_status, expiry)
+        for eid, ev_status, expiry in Evidence.objects.filter(
+            id__in=task_evidence_ids
+        ).values_list("id", "status", "expiry_date")
+    }
+    # Same rule as the shared context: the newest revision decides the file.
+    revisions = dict(context.evidence_revisions)
+    for eid, attachment, link, updated_at in (
+        EvidenceRevision.objects.filter(
+            evidence_id__in=task_evidence_ids - revisions.keys()
+        )
+        .order_by("version")
+        .values_list("evidence_id", "attachment", "link", "updated_at")
+    ):
+        latest = revisions.get(eid, (False, None))[1]
+        revisions[eid] = (
+            bool(attachment) or bool(link),
+            updated_at if latest is None else max(latest, updated_at),
+        )
     evidence_names = dict(
         Evidence.objects.filter(id__in=evidence_ids)
         .filter(id__in=RoleAssignment.get_viewable_object_ids(user, Evidence))
@@ -300,6 +354,9 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         id__in=control_ids, reference_control__isnull=False
     ).values_list("id", "reference_control__urn"):
         by_reference[urn] |= control_evidences[cid]
+        for tid, cids in task_controls.items():
+            if cid in cids:
+                by_reference[urn] |= task_evidences[tid]
 
     # Findings on these requirements from any audit of the framework: Stage 1,
     # internal audits and earlier cycles live in their own audits.
@@ -369,8 +426,17 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         ]
         evidences = []
         ra_controls = context.controls.get(ra.id, {})
-        for eid, (ev_status, expiry) in context.evidences.get(ra.id, {}).items():
-            has_file, updated_at = context.evidence_revisions.get(eid, (False, None))
+        ra_tasks = [
+            tid
+            for tid in task_evidences
+            if ra.id in task_ras[tid] or task_controls[tid] & ra_controls.keys()
+        ]
+        linked = dict(context.evidences.get(ra.id, {}))
+        for tid in ra_tasks:
+            for eid in task_evidences[tid]:
+                linked.setdefault(eid, task_evidence_info[eid])
+        for eid, (ev_status, expiry) in linked.items():
+            has_file, updated_at = revisions.get(eid, (False, None))
             evidences.append(
                 {
                     "id": eid,
@@ -382,6 +448,11 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                     "direct": (ra.id, eid) in direct,
                     "via_controls": [
                         cid for cid in ra_controls if eid in control_evidences[cid]
+                    ],
+                    "via_tasks": [
+                        task_names.get(tid)
+                        for tid in ra_tasks
+                        if eid in task_evidences[tid]
                     ],
                 }
             )
@@ -405,12 +476,8 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                     {
                         "id": eid,
                         "name": evidence_names.get(eid),
-                        "has_file": context.evidence_revisions.get(eid, (False, None))[
-                            0
-                        ],
-                        "updated_at": context.evidence_revisions.get(
-                            eid, (False, None)
-                        )[1],
+                        "has_file": revisions.get(eid, (False, None))[0],
+                        "updated_at": revisions.get(eid, (False, None))[1],
                         "here": eid in here,
                         "manual": eid in hand,
                     }

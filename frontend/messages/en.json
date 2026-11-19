@@ -8380,6 +8380,8 @@
 	"prereadNotOnFile": "Not on file",
 	"prereadAlsoOnFile": "Also on file, not matched",
 	"prereadOnFile": "You have on file",
+	"prereadViaTask": "via task {name}",
+	"prereadTaskHiddenLower": "a task you cannot view",
 	"prereadControlHiddenLower": "a control you cannot view",
 	"prereadOlderThanWindow": "Older than the freshness window requested",
 	"prereadAttachedToRequirement": "attached to the requirement",

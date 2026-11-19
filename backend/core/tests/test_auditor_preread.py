@@ -26,12 +26,15 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     EvidenceRequestLink,
+    EvidenceRevision,
     Finding,
     FindingsAssessment,
     Framework,
     Perimeter,
     ReferenceControl,
     RequirementNode,
+    TaskNode,
+    TaskTemplate,
 )
 from iam.models import Folder, User
 
@@ -238,6 +241,39 @@ def test_evidence_through_applied_control_is_counted_and_attributed():
     assert item["filed"]["r2"][0]["here"] is True
     assert [f["source"] for f in item["prior_findings"]] == ["Stage 1"]
     assert item["readiness"] == "gap" and OPEN_FINDING in item["reasons"]
+
+    # Tasks are the third path: the evidence a task expects (filed as revisions
+    # by its occurrences) and what an occurrence adds, through the requirement
+    # or one of its controls; never filed, it is listed but has no file.
+    review = TaskTemplate.objects.create(name="Quarterly review", folder=folder)
+    review.applied_controls.add(control)
+    expected = Evidence.objects.create(name="Review export", folder=folder)
+    review.evidences.add(expected)
+    EvidenceRevision.objects.create(
+        evidence=expected, folder=folder, version=1, link="https://example.test/r"
+    )
+    drill = TaskTemplate.objects.create(name="Offboarding drill", folder=folder)
+    drill.requirement_assessments.add(ra)
+    occurrence = TaskNode.objects.create(
+        task_template=drill, folder=folder, due_date=date.today()
+    )
+    ad_hoc = Evidence.objects.create(name="Drill notes", folder=folder)
+    occurrence.evidences.add(ad_hoc)
+    elsewhere = TaskTemplate.objects.create(name="Unrelated", folder=folder)
+    elsewhere.evidences.add(Evidence.objects.create(name="Other", folder=folder))
+
+    item = auditor_preread(audit, user)["items"][0]
+    by_name = {e["name"]: e for e in item["evidences"]}
+    assert "Other" not in by_name
+    assert by_name["Review export"]["via_tasks"] == ["Quarterly review"]
+    assert by_name["Review export"]["has_file"] is True
+    assert by_name["Review export"]["via_controls"] == []
+    assert by_name["Drill notes"]["via_tasks"] == ["Offboarding drill"]
+    assert by_name["Drill notes"]["has_file"] is False
+    assert by_name["JML procedure"]["via_tasks"] == []
+    # The control implements the request's reference control: its task's
+    # evidence answers the request too.
+    assert "Review export" in [e["name"] for e in item["filed"]["r2"]]
 
 
 def test_guide_key_falls_back_to_the_parent_number():
