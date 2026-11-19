@@ -497,6 +497,15 @@ class TestPresetExecutorExistingDomain:
         ]
         binder = FindingsAssessment.objects.get(folder=journey.folder)
         assert str(binder.compliance_assessment_id) == ca_id
+        # A locked binder is never claimed by the backfill.
+        locked = FindingsAssessment.objects.create(
+            name="Locked", category="audit", folder=journey.folder, is_locked=True
+        )
+        PresetExecutor(preset_library, user, request)._backfill_side_effects(
+            "findings_assessment", locked, {"audit": "iso_audit"}, {"iso_audit": ca_id}
+        )
+        locked.refresh_from_db()
+        assert locked.compliance_assessment_id is None
         # Applied again on the same domain, another audit's binder is not reused.
         other = FindingsAssessment.objects.create(
             name="Stage 1 (other)", category="audit", folder=journey.folder

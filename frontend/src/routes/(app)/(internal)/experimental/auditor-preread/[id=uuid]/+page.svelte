@@ -336,6 +336,8 @@
 	const canUpload = $derived(canPrepare && canEditRA && allowed('add_evidence'));
 	// The evidence may sit in another domain; the server checks the real one.
 	const canAddFile = $derived(hasPermissionAnywhere(page.data.user, 'add_evidencerevision'));
+	// Date-only values parse as midnight UTC: show that day, not the local one.
+	const UTC_DAY = { timeZone: 'UTC' } as const;
 	const ISSUE: Record<string, string> = {
 		unusable: 'text-error-600-400',
 		to_validate: 'text-warning-700-300',
@@ -355,7 +357,9 @@
 	}) =>
 		(e.issue === 'unusable' && !['rejected', 'missing'].includes(e.status ?? '')
 			? m.prereadExpiredOn
-			: m.prereadExpires)({ date: new Date(e.expiry_date ?? '').toLocaleDateString(getLocale()) });
+			: m.prereadExpires)({
+			date: new Date(e.expiry_date ?? '').toLocaleDateString(getLocale(), UTC_DAY)
+		});
 	function reachText(r: { requirements: string[]; audits: number }) {
 		const parts = [];
 		if (r.requirements.length)
@@ -608,7 +612,7 @@
 				{@const stageLabel = prep?.stage ? safeTranslate(`prereadStage_${prep.stage}`) : ''}
 				{@const dates = [prep?.start_date, prep?.end_date]
 					.filter(Boolean)
-					.map((d) => new Date(d!).toLocaleDateString(getLocale()))
+					.map((d) => new Date(d!).toLocaleDateString(getLocale(), UTC_DAY))
 					.join(' – ')}
 				<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 					<i class="fa-solid fa-calendar-check text-surface-500"></i>
@@ -1658,7 +1662,10 @@
 								<i class="fa-solid fa-calendar text-surface-500"></i>
 								{#if planned?.date}
 									<span
-										>{new Date(planned.date).toLocaleDateString(getLocale())}{planned.start_time
+										>{new Date(planned.date).toLocaleDateString(
+											getLocale(),
+											UTC_DAY
+										)}{planned.start_time
 											? ` · ${planned.start_time.slice(0, 5)}`
 											: ''}{planned.end_time
 											? `–${planned.end_time.slice(0, 5)}`

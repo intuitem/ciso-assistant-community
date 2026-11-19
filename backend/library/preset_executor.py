@@ -558,8 +558,10 @@ class PresetExecutor:
         elif obj_type == "findings_assessment":
             audit_id = object_refs.get(item.get("audit") or "")
             if audit_id and not obj.compliance_assessment_id:
-                obj.compliance_assessment_id = audit_id
-                obj.save(update_fields=["compliance_assessment"])
+                # Claimed only while still free and unlocked: never overwrites.
+                FindingsAssessment.objects.filter(
+                    id=obj.id, compliance_assessment__isnull=True, is_locked=False
+                ).update(compliance_assessment_id=audit_id)
 
         elif obj_type == "risk_scenario":
             asset_refs = item.get("asset_refs", [])
