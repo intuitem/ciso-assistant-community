@@ -13,6 +13,7 @@ from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
+from core.constants import REGION_CODES
 from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
@@ -152,6 +153,11 @@ def get_provider_chain(entity):
         current = parent
     chain.reverse()  # root first
     return chain
+
+
+def ga_location(code: str) -> str:
+    """c0150/c0160 value: regions and blanks are reported as Not applicable."""
+    return f"eba_GA:{code}" if code and code not in REGION_CODES else "eba_GA:qx2007"
 
 
 def get_entity_identifier(
@@ -661,21 +667,11 @@ def generate_b_02_02_ict_services(
                     "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
                 )
 
-                # c0150: Location of data at rest
-                data_location_storage = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                # c0150/c0160: key fields, cannot be empty (Rule 805)
+                data_location_storage = ga_location(solution.data_location_storage)
+                data_location_processing = ga_location(
+                    solution.data_location_processing
                 )
-                if solution.data_location_storage:
-                    data_location_storage = f"eba_GA:{solution.data_location_storage}"
-
-                # c0160: Location of data processing
-                data_location_processing = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
-                )
-                if solution.data_location_processing:
-                    data_location_processing = (
-                        f"eba_GA:{solution.data_location_processing}"
-                    )
 
                 # c0170: Data sensitiveness
                 data_sensitiveness = solution.dora_data_sensitiveness or ""
