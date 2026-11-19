@@ -1817,9 +1817,24 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
         if target_treatment_date is None:
             return 0
 
-        late_extra_controls = obj.applied_controls.filter(eta__gt=target_treatment_date)
-        late_extra_controls_count = late_extra_controls.count()
-        return late_extra_controls_count
+        # Iterate the prefetched relation (RiskScenarioViewSet.get_queryset):
+        # .filter() would bypass the prefetch and add one COUNT per row.
+        viewable_ids = self._viewable_applied_control_ids()
+        return sum(
+            1
+            for control in obj.applied_controls.all()
+            if control.eta is not None
+            and control.eta > target_treatment_date
+            and control.id in viewable_ids
+        )
+
+    def _viewable_applied_control_ids(self) -> set:
+        # One permission query per request, shared by every serialized row.
+        if "viewable_applied_control_ids" not in self.context:
+            self.context["viewable_applied_control_ids"] = set(
+                self._viewable_ids(AppliedControl)
+            )
+        return self.context["viewable_applied_control_ids"]
 
     class Meta:
         model = RiskScenario
