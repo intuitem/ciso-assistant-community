@@ -22,7 +22,7 @@
 		optionsEndpoint?: string;
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
-		inputType?: 'date';
+		inputType?: 'date' | 'text';
 		// Optional i18n key for an action-specific warning (receives {count}),
 		// e.g. a cascade disclosure on delete.
 		confirmMessage?: string;
@@ -121,7 +121,7 @@
 			onConfirm(selectedValues);
 		} else {
 			// "--" means "unset": send undefined so the backend receives null
-			onConfirm(selectedValue === '--' ? undefined : selectedValue);
+			onConfirm(selectedValue === '--' && !inputType ? undefined : selectedValue);
 		}
 		parent.onClose();
 	}
@@ -141,7 +141,7 @@
 				? true
 				: multiSelect
 					? selectedValues.length > 0
-					: selectedValue !== ''
+					: inputType === 'text' || selectedValue !== ''
 	);
 </script>
 
@@ -184,11 +184,13 @@
 
 			{#if !needsSelection}
 				<!-- value comes from the action's config; nothing to pick -->
-			{:else if inputType === 'date'}
+			{:else if inputType}
 				<input
-					type="date"
+					type={inputType}
+					maxlength={inputType === 'text' ? 255 : undefined}
+					placeholder={inputType === 'text' ? m.batchTextLeaveEmptyToClear() : undefined}
 					class="input w-full border border-surface-300-700 rounded px-3 py-2"
-					data-testid="batch-date-input"
+					data-testid="batch-{inputType}-input"
 					aria-label={$modalStore[0].title}
 					bind:value={selectedValue}
 				/>

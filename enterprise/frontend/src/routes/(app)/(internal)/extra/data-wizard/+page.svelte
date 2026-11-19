@@ -173,6 +173,7 @@
 	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate', 'Processing']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (modelId === 'EbiosRMStudyARM') return ['.xls', '.xlsx', '.zip'];
 		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}

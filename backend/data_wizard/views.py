@@ -31,7 +31,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
-from core.constants import COUNTRY_CHOICES
+from core.constants import PRIVACY_COUNTRY_CHOICES
 from core.models import (
     Actor,
     AppliedControl,
@@ -89,7 +89,11 @@ from core.utils import (
     parse_answers_cell,
     unescape_excel_formula,
 )
-from data_wizard.arm_helpers import process_arm_file
+from data_wizard.arm_helpers import (
+    ARM_ARCHIVE_ERRORS,
+    ARMArchiveError,
+    process_arm_file,
+)
 from data_wizard.cyfun_helpers import LEVEL_TO_GROUP, process_cyfun_file
 from ebios_rm.models import (
     AttackPath,
@@ -4010,7 +4014,7 @@ class DataContractorRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer)
                 error=f"Unknown relationship type '{record.get('relationship_type')}'",
             )
 
-        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        country = self._choice_key(record.get("country"), PRIVACY_COUNTRY_CHOICES)
         if country is None:
             return {}, Error(
                 record=record, error=f"Unknown country '{record.get('country')}'"
@@ -4043,7 +4047,7 @@ class DataTransferRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
         if error:
             return {}, error
 
-        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        country = self._choice_key(record.get("country"), PRIVACY_COUNTRY_CHOICES)
         if country is None:
             return {}, Error(
                 record=record, error=f"Unknown country '{record.get('country')}'"
@@ -6976,7 +6980,10 @@ class LoadFileView(APIView):
 
         # Check if the file is an Excel file
         file_extension = file_obj.name.split(".")[-1].lower()
-        if file_extension not in ["xlsx", "xls", "csv", "xml"]:
+        allowed_extensions = ["xlsx", "xls", "csv", "xml"]
+        if request.META.get("HTTP_X_MODEL_TYPE") == ModelType.EBIOS_RM_STUDY_ARM:
+            allowed_extensions.append("zip")
+        if file_extension not in allowed_extensions:
             logger.error(f"Unsupported file format: {repr(file_extension)}")
             return Response(
                 {"error": "unsupportedFileFormat"}, status=status.HTTP_400_BAD_REQUEST
@@ -7039,17 +7046,27 @@ class LoadFileView(APIView):
 
             # Parse ARM Excel file
             excel_file.seek(0)
-            arm_data = process_arm_file(excel_file.read())
+            try:
+                arm_data = process_arm_file(excel_file.read())
+            except ARMArchiveError as e:
+                logger.warning("Invalid ARM archive", error=e)
+                results["failed"] = 1
+                results["errors"].append({"error": ARM_ARCHIVE_ERRORS[e.code]})
+                return results
 
-            missing_sheets = arm_data.get("missing_sheets", [])
-            if missing_sheets:
-                results["warnings"] = [
-                    {
-                        "sheet": key,
-                        "warning": "Sheet not found in the ARM file, related data was not imported",
-                    }
-                    for key in missing_sheets
-                ]
+            results["warnings"] = [
+                {
+                    "sheet": key,
+                    "warning": "Sheet not found in the ARM file, related data was not imported",
+                }
+                for key in arm_data.get("missing_sheets", [])
+            ] + [
+                {
+                    "file": name,
+                    "warning": "File not recognized as an ARM table, it was not imported",
+                }
+                for name in arm_data.get("unrecognized_files", [])
+            ]
 
             # Generate study name
             study_name = resolve_container_name(request, "EBIOS_RM_Study")
@@ -7349,6 +7366,8 @@ class LoadFileView(APIView):
                                 )
                                 if control_data.get("ref_id"):
                                     existing_control.ref_id = control_data["ref_id"]
+                                if control_data.get("status"):
+                                    existing_control.status = control_data["status"]
                                 existing_control.save()
                                 results["details"]["applied_controls_updated"] += 1
                                 continue
@@ -7359,6 +7378,11 @@ class LoadFileView(APIView):
                             "description": control_data["description"],
                             "ref_id": control_data["ref_id"] or None,
                             "folder": folder_id,
+                            **(
+                                {"status": control_data["status"]}
+                                if control_data.get("status")
+                                else {}
+                            ),
                         },
                         context={"request": request},
                     )
@@ -7420,9 +7444,17 @@ class LoadFileView(APIView):
                 # =========================================================
                 # Step 4: Create Feared Events
                 # =========================================================
+                impact_levels = (
+                    len(risk_matrix.json_definition.get("impact", []))
+                    if risk_matrix
+                    else 0
+                )
                 for fe_data in arm_data.get("feared_events", []):
                     try:
                         fe_name = fe_data["name"]
+                        gravity = fe_data.get("gravity", -1)
+                        if gravity >= impact_levels:
+                            gravity = -1
                         # Find linked assets
                         linked_asset_ids = []
                         for asset_name in fe_data.get("asset_names", []):
@@ -7454,9 +7486,7 @@ class LoadFileView(APIView):
                                     existing_fe.justification = fe_data.get(
                                         "justification", existing_fe.justification
                                     )
-                                    existing_fe.gravity = fe_data.get(
-                                        "gravity", existing_fe.gravity
-                                    )
+                                    existing_fe.gravity = gravity
                                     existing_fe.is_selected = fe_data.get(
                                         "is_selected", existing_fe.is_selected
                                     )
@@ -7471,7 +7501,7 @@ class LoadFileView(APIView):
                             ebios_rm_study=study,
                             name=fe_name,
                             justification=fe_data.get("justification", ""),
-                            gravity=fe_data.get("gravity", -1),
+                            gravity=gravity,
                             is_selected=fe_data.get("is_selected", False),
                         )
 
@@ -7587,6 +7617,13 @@ class LoadFileView(APIView):
                                         "justification", existing_roto.justification
                                     )
                                     existing_roto.save()
+                                    existing_roto.feared_events.add(
+                                        *study.feared_events.filter(
+                                            name__in=roto_data.get(
+                                                "feared_event_names", []
+                                            )
+                                        )
+                                    )
                                     results["details"]["roto_couples_updated"] += 1
                                     logger.info(
                                         f"[RoTo Import] Updated existing RoTo couple: "
@@ -7594,8 +7631,7 @@ class LoadFileView(APIView):
                                     )
                                     continue
                         else:
-                            # Create the RoTo couple
-                            RoTo.objects.create(
+                            roto = RoTo.objects.create(
                                 ebios_rm_study=study,
                                 risk_origin=risk_origin,
                                 target_objective=roto_data["target_objective"],
@@ -7604,6 +7640,11 @@ class LoadFileView(APIView):
                                 activity=roto_data.get("activity", 0),
                                 is_selected=roto_data.get("is_selected", False),
                                 justification=roto_data.get("justification", ""),
+                            )
+                            roto.feared_events.set(
+                                study.feared_events.filter(
+                                    name__in=roto_data.get("feared_event_names", [])
+                                )
                             )
 
                             results["details"]["roto_couples_created"] += 1
@@ -8043,25 +8084,20 @@ class LoadFileView(APIView):
                                     logger.info(
                                         f"[Strategic Scenarios Import] Updated existing scenario: '{scenario_name}'"
                                     )
-                                    # Still create attack path if missing
-                                    attack_path_name = scenario_data.get(
-                                        "attack_path_name", ""
-                                    )
-                                    if (
-                                        attack_path_name
-                                        and not AttackPath.objects.filter(
+                                    for path_data in scenario_data.get(
+                                        "attack_paths", []
+                                    ):
+                                        if AttackPath.objects.filter(
                                             ebios_rm_study=study,
                                             strategic_scenario=existing_scenario,
-                                            name__iexact=attack_path_name,
-                                        ).exists()
-                                    ):
+                                            name__iexact=path_data["name"],
+                                        ).exists():
+                                            continue
                                         AttackPath.objects.create(
                                             ebios_rm_study=study,
                                             strategic_scenario=existing_scenario,
-                                            name=attack_path_name,
-                                            ref_id=scenario_data.get(
-                                                "attack_path_ref_id", ""
-                                            ),
+                                            name=path_data["name"],
+                                            ref_id=path_data["ref_id"],
                                         )
                                         results["details"]["attack_paths_created"] += 1
                                     continue
@@ -8078,19 +8114,14 @@ class LoadFileView(APIView):
                             f"[Strategic Scenarios Import] Created StrategicScenario id={strategic_scenario.id}, name='{scenario_name}'"
                         )
 
-                        # Create the attack path if provided
-                        attack_path_name = scenario_data.get("attack_path_name", "")
-                        if attack_path_name:
-                            attack_path = AttackPath.objects.create(
+                        for path_data in scenario_data.get("attack_paths", []):
+                            AttackPath.objects.create(
                                 ebios_rm_study=study,
                                 strategic_scenario=strategic_scenario,
-                                name=attack_path_name,
-                                ref_id=scenario_data.get("attack_path_ref_id", ""),
+                                name=path_data["name"],
+                                ref_id=path_data["ref_id"],
                             )
                             results["details"]["attack_paths_created"] += 1
-                            logger.info(
-                                f"[Strategic Scenarios Import] Created AttackPath id={attack_path.id}, name='{attack_path_name}'"
-                            )
 
                     except Exception as e:
                         logger.error(
