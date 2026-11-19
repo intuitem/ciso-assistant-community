@@ -809,11 +809,12 @@
 				{@const s = data.preread.suggestion}
 				<p class="text-sm">
 					{m.prereadSuggestion({
+						guide: s.name,
 						pct: Math.round(s.coverage * 100),
 						matched: s.matched,
 						total: s.total
 					})}
-					<a class="anchor" href="?guide={encodeURIComponent(s.framework_urn)}"
+					<a class="anchor" href="?guide={encodeURIComponent(s.urn)}"
 						>{m.prereadApplyAnyway()}</a
 					>
 				</p>

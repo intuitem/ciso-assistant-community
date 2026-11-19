@@ -9,6 +9,7 @@ from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregatio
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
+    AuditGuide,
     Framework,
     QuickForm,
     QuickFormPage,
@@ -853,6 +854,64 @@ class ReferenceControlImporter:
         )
 
 
+class AuditGuideImporter:
+    """An auditor's guide to a framework; format in the product docs, "Audit guides"."""
+
+    REQUIRED_FIELDS = {"ref_id", "urn", "framework", "entries"}
+    KINDS = {"document", "record", "technical", "observation"}
+
+    def __init__(self, guide_data: dict):
+        self.guide_data = guide_data
+
+    def is_valid(self) -> Union[str, None]:
+        data = self.guide_data
+        if missing_fields := self.REQUIRED_FIELDS - set(data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        if not isinstance(data["entries"], dict):
+            return "entries must be a mapping keyed by requirement number"
+        for key, entry in data["entries"].items():
+            people = set(entry.get("interviewees") or [])
+            for part in ("questions", "requests", "pitfalls", "sampling"):
+                items = entry.get(part) or []
+                ids = [item.get("id") for item in items]
+                if None in ids or len(set(ids)) != len(ids):
+                    return "entry {}: every item of {} needs an id, unique in the entry".format(
+                        key, part
+                    )
+            for q in entry.get("questions") or []:
+                if q.get("stage") not in (1, 2) or not q.get("text"):
+                    return "entry {}: question {} needs a stage (1 or 2) and a text".format(
+                        key, q["id"]
+                    )
+                if not set(q.get("who") or []) <= people:
+                    return "entry {}: question {} names someone who is not an interviewee".format(
+                        key, q["id"]
+                    )
+            for r in entry.get("requests") or []:
+                if r.get("kind") not in self.KINDS or not r.get("label"):
+                    return (
+                        "entry {}: request {} needs a label and a kind among {}".format(
+                            key, r["id"], ", ".join(sorted(self.KINDS))
+                        )
+                    )
+        sessions = data.get("sessions") or []
+        if any(
+            not x.get("id") or not isinstance(x.get("members"), list) for x in sessions
+        ):
+            return "every session needs an id and a members list"
+        return None
+
+    def import_audit_guide(self, library_object: LoadedLibrary):
+        AuditGuide.objects.create(
+            library=library_object,
+            urn=self.guide_data["urn"].lower(),
+            provider=library_object.provider,
+            locale=library_object.locale,
+            default_locale=library_object.default_locale,
+            **AuditGuide.fields_from(self.guide_data),
+        )
+
+
 class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
@@ -1023,6 +1082,7 @@ class LibraryImporter:
         "requirement_mapping_sets",
         "preset",
         "workflows",
+        "audit_guides",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -1043,6 +1103,7 @@ class LibraryImporter:
         self._risk_matrices = []
         self._requirement_mapping_sets = []
         self._workflows = []
+        self._audit_guides = []
 
     def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
         """Structural validation of workflow objects; actual
@@ -1407,6 +1468,15 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
+        if "audit_guides" in library_objects:
+            importers = [AuditGuideImporter(g) for g in library_objects["audit_guides"]]
+            self._audit_guides = importers
+            for index, importer in enumerate(importers):
+                if (error := importer.is_valid()) is not None:
+                    return "[AUDIT_GUIDE_ERROR] audit guide {}: {}".format(
+                        index + 1, error
+                    )
+
         if "metric_definitions" in library_objects:
             metric_definition_data = library_objects["metric_definitions"]
             if (
@@ -1508,6 +1578,9 @@ class LibraryImporter:
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        for audit_guide in self._audit_guides:
+            audit_guide.import_audit_guide(library_object)
 
         # after reference controls: techniques link to them and to parents
         for technique in self._techniques:

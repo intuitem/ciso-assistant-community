@@ -10,7 +10,7 @@ import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params, url }) => {
-	// ?guide=<framework urn> applies a guide the numbering only partly matches.
+	// ?guide=<guide urn> applies a guide the numbering only partly matches.
 	const guide = url.searchParams.get('guide');
 	const query = guide ? `?guide=${encodeURIComponent(guide)}` : '';
 	const [auditRes, prereadRes] = await Promise.all([

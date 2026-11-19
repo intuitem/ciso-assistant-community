@@ -1,19 +1,17 @@
 """Auditor pre-read (experimental): what a certification auditor will ask for
 each requirement of an audit, set against what the audit already holds.
 
-The audit guides are static content in `core/audit_guides/<framework>/*.yaml`;
-the audit side reuses the quality-check context, so the whole audit resolves
-in a constant number of queries.
+The audit guides are library objects (`AuditGuide`, see the product docs page
+"Audit guides"); the audit side reuses the quality-check context, so the whole
+audit resolves in a constant number of queries.
 """
 
 import re
 from collections import defaultdict
 from datetime import UTC, date, datetime, timedelta
-from functools import cache, reduce
+from functools import reduce
 from operator import or_
-from pathlib import Path
 
-import yaml
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -22,6 +20,7 @@ from django.utils.translation import get_language
 from core.models import (
     Actor,
     AppliedControl,
+    AuditGuide,
     AuditPreparation,
     AuditPreparationRole,
     AuditPreparationSession,
@@ -41,8 +40,6 @@ from core.models import (
 )
 from iam.models import RoleAssignment
 from tprm.models import Entity
-
-AUDIT_GUIDES_DIR = Path(__file__).parent / "audit_guides"
 
 # Reason codes, ordered roughly by how badly they will land with an auditor.
 OPEN_FINDING = "open_finding"
@@ -94,19 +91,6 @@ OPEN_FINDING_STATUSES = {"--", "identified", "confirmed", "assigned", "in_progre
 TEXT_FIELD = {"questions": "text", "requests": "label", "pitfalls": "text"}
 
 
-@cache
-def load_guide_translations(locale: str) -> dict[str, dict]:
-    """framework_urn -> {"entries"|"sessions": {key: {item id: text}}} in one locale."""
-    out: dict[str, dict] = {}
-    for path in sorted(AUDIT_GUIDES_DIR.glob(f"*/i18n/{locale}/*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
-        t = out.setdefault(data["framework_urn"], {"entries": {}, "sessions": {}})
-        for part in t:
-            for key, texts in (data.get(part) or {}).items():
-                t[part].setdefault(key, {}).update(texts)
-    return out
-
-
 def _localized(item: dict, texts: dict) -> dict:
     """An entry or a session with its text in the locale, English where missing."""
     out = {**item, "label": texts.get("label", item.get("label"))}
@@ -123,32 +107,24 @@ def _localized(item: dict, texts: dict) -> dict:
     return out
 
 
-@cache
 def load_audit_guides(locale: str | None = None) -> dict[str, dict]:
-    """framework_urn -> {urn_suffix: entry}, merged over every file."""
-    out: dict[str, dict] = {}
-    for path in sorted(AUDIT_GUIDES_DIR.glob("*/*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
-        out.setdefault(data["framework_urn"], {}).update(data.get("entries") or {})
-    for urn, t in load_guide_translations(str(locale)).items():
-        entries = out.get(urn, {})
-        for key, texts in t["entries"].items():
-            if key in entries:
-                entries[key] = _localized(entries[key], texts)
+    """guide urn -> {requirement number: entry}, in the locale where translated."""
+    out = {}
+    for g in AuditGuide.objects.only("urn", "entries", "translations"):
+        texts = ((g.translations or {}).get(str(locale)) or {}).get("entries") or {}
+        out[g.urn] = {
+            key: _localized(entry, texts[key]) if key in texts else entry
+            for key, entry in g.entries.items()
+        }
     return out
 
 
-@cache
 def load_audit_sessions(locale: str | None = None) -> dict[str, list]:
-    """framework_urn -> Stage 2 sessions, in the order an auditor runs them."""
-    out: dict[str, list] = {}
-    for path in sorted(AUDIT_GUIDES_DIR.glob("*/*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
-        out.setdefault(data["framework_urn"], []).extend(data.get("sessions") or [])
-    for urn, t in load_guide_translations(str(locale)).items():
-        out[urn] = [
-            _localized(s, t["sessions"].get(s["id"], {})) for s in out.get(urn, [])
-        ]
+    """guide urn -> Stage 2 sessions, in the order an auditor runs them."""
+    out = {}
+    for g in AuditGuide.objects.only("urn", "sessions", "translations"):
+        texts = ((g.translations or {}).get(str(locale)) or {}).get("sessions") or {}
+        out[g.urn] = [_localized(x, texts.get(x["id"], {})) for x in g.sessions]
     return out
 
 
@@ -166,6 +142,10 @@ def guide_key(ref_id, urn, keys) -> str | None:
     return None
 
 
+def _rank(fit) -> tuple:
+    return (fit["exact"], fit["own"], fit["coverage"])
+
+
 def resolve_guide(framework, forced: str | None = None) -> dict | None:
     """The guide that best fits a framework, and which entry each requirement gets.
 
@@ -178,25 +158,29 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
         )
     )
     best = None
-    for urn, entries in load_audit_guides().items():
-        if forced and urn != forced:
+    guides = AuditGuide.objects.only(
+        "urn", "name", "framework_urn", "provider", "entries"
+    )
+    for g in guides:
+        if forced and g.urn != forced:
             continue
-        keys = set(entries)
+        keys = set(g.entries)
         mapping = {
             nid: key for nid, nurn, ref in nodes if (key := guide_key(ref, nurn, keys))
         }
         found = {
-            "guide": urn,
+            "guide": g.urn,
+            "name": g.get_name_translated,
+            "framework_urn": g.framework_urn,
             "mapping": mapping,
-            "coverage": len(set(mapping.values())) / len(keys),
+            "coverage": len(set(mapping.values())) / len(keys) if keys else 0,
             "matched": len(mapping),
             "total": len(nodes),
-            "exact": urn == framework.urn,
+            "exact": g.framework_urn == framework.urn,
+            # An organisation's own guide wins over the one we ship.
+            "own": g.provider != "intuitem",
         }
-        if best is None or (found["exact"], found["coverage"]) > (
-            best["exact"],
-            best["coverage"],
-        ):
+        if best is None or _rank(found) > _rank(best):
             best = found
     if best:
         share = best["matched"] / best["total"] if best["total"] else 0
@@ -740,7 +724,9 @@ def _previous_set_asides(compliance_assessment, guide) -> list:
 
 def _guide_summary(fit) -> dict:
     return {
-        "framework_urn": fit["guide"],
+        "urn": fit["guide"],
+        "name": fit["name"],
+        "framework_urn": fit["framework_urn"],
         "exact": fit["exact"],
         "matched": fit["matched"],
         "total": fit["total"],

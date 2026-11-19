@@ -8322,7 +8322,7 @@
 	"prereadShowOnly": "Afficher uniquement « {state} »",
 	"prereadSummaryHint": "{count} exigences. Cliquez sur un total pour n'afficher que celles-ci. La préparation est estimée à partir des preuves liées à l'audit et de ses contrôles qualité.",
 	"prereadUnsupported": "Pas encore de guide d'audit pour ce référentiel. Seule l'ISO/IEC 27001:2022 est couverte, y compris ses copies qui gardent la même numérotation.",
-	"prereadSuggestion": "Sa numérotation recoupe en partie le guide ISO/IEC 27001:2022 : {pct} % du guide s'applique à {matched} de ses {total} exigences.",
+	"prereadSuggestion": "Sa numérotation recoupe en partie « {guide} » : {pct} % du guide s'applique à {matched} de ses {total} exigences.",
 	"prereadApplyAnyway": "Appliquer le guide quand même",
 	"prereadProjected": "Guide ISO/IEC 27001:2022 appliqué par numéro d'exigence : {matched} exigences retrouvées sur {total}.",
 	"prereadLettered": "Les points en lettres reprennent le guide de leur exigence parente.",

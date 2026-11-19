@@ -19,7 +19,6 @@ from core.auditor_preread import (
     guide_key,
     load_audit_guides,
     load_audit_sessions,
-    load_guide_translations,
     pair_request,
     readiness,
     resolve_guide,
@@ -28,6 +27,7 @@ from core.auditor_preread import (
 from core.models import (
     Actor,
     AppliedControl,
+    AuditGuide,
     AuditPreparation,
     ComplianceAssessment,
     Evidence,
@@ -45,6 +45,7 @@ from core.models import (
 from iam.models import Folder, User
 
 ISO = "urn:intuitem:risk:framework:iso27001-2022"
+GUIDE_URN = "urn:intuitem:risk:audit_guide:iso27001-2022"
 LIBRARY = Path(__file__).parents[2] / "library/libraries/iso27001-2022.yaml"
 KINDS = {"document", "record", "technical", "observation"}
 PEOPLE = {
@@ -65,14 +66,16 @@ def ev(days_old):
     }
 
 
+@pytest.mark.django_db
 def test_every_question_says_who_answers_it():
-    for key, entry in load_audit_guides()[ISO].items():
+    for key, entry in load_audit_guides()[GUIDE_URN].items():
         for q in entry.get("questions") or []:
             who = q.get("who") or []
             assert 1 <= len(who) <= 3, (key, q["id"])
             assert set(who) <= set(entry["interviewees"]), (key, q["id"])
 
 
+@pytest.mark.django_db
 def test_iso27001_guidance_covers_every_assessable_node():
     framework = yaml.safe_load(LIBRARY.read_text())["objects"]["framework"]
     suffixes = {
@@ -80,7 +83,7 @@ def test_iso27001_guidance_covers_every_assessable_node():
         for n in framework["requirement_nodes"]
         if n.get("assessable")
     }
-    guidance = load_audit_guides()[ISO]
+    guidance = load_audit_guides()[GUIDE_URN]
     key_library = yaml.safe_load(
         (LIBRARY.parent / "key-reference-controls.yaml").read_text()
     )
@@ -110,10 +113,11 @@ def test_iso27001_guidance_covers_every_assessable_node():
         assert all(0 < r["min"] <= r["max"] and r["unit"] for r in g["sampling"]), key
 
 
+@pytest.mark.django_db
 def test_iso27001_sessions_cover_every_entry_once():
-    sessions = load_audit_sessions()[ISO]
+    sessions = load_audit_sessions()[GUIDE_URN]
     members = [m for s in sessions for m in s["members"]]
-    assert sorted(members) == sorted(load_audit_guides()[ISO])
+    assert sorted(members) == sorted(load_audit_guides()[GUIDE_URN])
     assert len({s["id"] for s in sessions}) == len(sessions)
     for s in sessions:
         assert s["label"], s["id"]
@@ -122,22 +126,23 @@ def test_iso27001_sessions_cover_every_entry_once():
         ]
 
 
+@pytest.mark.django_db
 def test_iso27001_french_covers_every_item():
     """Version 1 ships in French: every question, request, pitfall, sample and session."""
-    t = load_guide_translations("fr")[ISO]
-    english, french = load_audit_guides()[ISO], load_audit_guides("fr")[ISO]
+    t = AuditGuide.objects.get(urn=GUIDE_URN).translations["fr"]
+    english, french = load_audit_guides()[GUIDE_URN], load_audit_guides("fr")[GUIDE_URN]
     assert set(t["entries"]) == set(english)
     for key, entry in english.items():
         ids = {x["id"] for part in ("questions", "requests", "pitfalls", "sampling") for x in entry.get(part) or []}  # fmt: skip
         assert set(t["entries"][key]) == ids, key
         assert french[key]["requests"][0]["kind"] == entry["requests"][0]["kind"]
         assert french[key]["questions"][0]["text"] != entry["questions"][0]["text"], key
-    for s in load_audit_sessions()[ISO]:
+    for s in load_audit_sessions()[GUIDE_URN]:
         own = {x["id"] for part in ("requests", "pitfalls") for x in s.get(part) or []}
         assert set(t["sessions"][s["id"]]) == {"label", *own}, s["id"]
     assert (
-        load_audit_sessions("fr")[ISO][0]["label"]
-        != load_audit_sessions()[ISO][0]["label"]
+        load_audit_sessions("fr")[GUIDE_URN][0]["label"]
+        != load_audit_sessions()[GUIDE_URN][0]["label"]
     )
 
 
@@ -325,7 +330,7 @@ def test_guide_projects_on_a_copy_and_pairs_by_hand():
         name="ISO copy", urn="urn:custom:risk:framework:iso-copy", folder=root
     )
     # Same numbers as the built-in standard, other URNs and ref_id spelling.
-    for i, key in enumerate(load_audit_guides()[ISO]):
+    for i, key in enumerate(load_audit_guides()[GUIDE_URN]):
         RequirementNode.objects.create(
             framework=copy,
             urn=f"urn:custom:risk:req_node:iso-copy:n{i}",
@@ -378,7 +383,7 @@ def test_guide_projects_on_a_copy_and_pairs_by_hand():
         key: next(
             r["id"] for r in e["requests"] if r.get("reference_control") == policy
         )
-        for key, e in load_audit_guides()[ISO].items()
+        for key, e in load_audit_guides()[GUIDE_URN].items()
         if any(r.get("reference_control") == policy for r in e["requests"])
     }
     assert {"a.5.1", "5.2"} <= set(asking)

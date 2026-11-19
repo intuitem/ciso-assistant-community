@@ -127,6 +127,7 @@
     * [URN prefixes](configuration/libraries/library-objects/urn-prefixes.md)
     * [Risk matrices](configuration/libraries/library-objects/risk-matrices.md)
     * [Mappings](configuration/libraries/library-objects/mappings.md)
+    * [Audit guides](configuration/libraries/library-objects/audit-guides.md)
   * [Create a Library](configuration/libraries/create-library.md)
   * [Create a Mapping](configuration/libraries/create-mapping.md)
   * [Translate library content](configuration/libraries/translations.md)

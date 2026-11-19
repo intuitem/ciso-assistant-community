@@ -1538,6 +1538,7 @@ class LibraryUpdater:
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
+        self.audit_guides = new_library_content.get("audit_guides", [])
 
         self.new_quick_forms = new_library_content.get("quick_forms")
         if isinstance(self.new_quick_forms, dict):
@@ -1695,6 +1696,20 @@ class LibraryUpdater:
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
                     **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_audit_guides(self):
+        for guide in self.audit_guides:
+            fields = AuditGuide.fields_from(guide)
+            AuditGuide.objects.update_or_create(
+                urn=guide["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
                     "library": self.old_library,
                 },
             )
@@ -2797,6 +2812,7 @@ class LibraryUpdater:
         self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_audit_guides()
         self.update_techniques()
         self.update_metric_definitions()
 
@@ -14770,3 +14786,43 @@ class AuditPreparationSession(AbstractBaseModel):
             raise ValidationError(
                 {"end_time": _("The session cannot end before it starts")}
             )
+
+
+class AuditGuide(ReferentialObjectMixin, I18nObjectMixin):
+    """Experimental: what a certification auditor will ask per requirement of a
+    framework (questions, records, sampling, pitfalls) and the sessions they run.
+    Ships in libraries, so anyone can load their own wording and content.
+
+    `entries` is keyed by the requirement number the guide is written for (the
+    URN suffix, e.g. "a.5.18"); every item has an id, stable across versions,
+    that translations, pairings and set-asides key on. `translations` holds, per
+    locale, `name`/`description` and the item texts keyed the same way.
+    """
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="audit_guides",
+    )
+    framework_urn = models.CharField(max_length=255)
+    entries = models.JSONField(default=dict)
+    sessions = models.JSONField(default=list)
+
+    @staticmethod
+    def fields_from(data: dict) -> dict:
+        """Model fields from a guide as written in a library."""
+        return {
+            "ref_id": data["ref_id"],
+            "name": data.get("name"),
+            "description": data.get("description"),
+            "framework_urn": data["framework"].lower(),
+            "entries": data.get("entries") or {},
+            "sessions": data.get("sessions") or [],
+            "translations": data.get("translations") or {},
+        }
+
+    class Meta:
+        verbose_name = _("Audit guide")
+        verbose_name_plural = _("Audit guides")

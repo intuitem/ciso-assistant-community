@@ -8325,7 +8325,7 @@
 	"prereadShowOnly": "Show only “{state}”",
 	"prereadSummaryHint": "{count} requirements. Click a count to show only those. Readiness is an estimate from the evidence linked to the audit and its quality checks.",
 	"prereadUnsupported": "There is no auditor guidance for this framework yet. Only ISO/IEC 27001:2022 is covered, including copies of it with the same requirement numbers.",
-	"prereadSuggestion": "Its numbering partly matches the ISO/IEC 27001:2022 guide: {pct}% of the guide lands on {matched} of its {total} requirements.",
+	"prereadSuggestion": "Its numbering partly matches “{guide}”: {pct}% of the guide lands on {matched} of its {total} requirements.",
 	"prereadApplyAnyway": "Apply the guide anyway",
 	"prereadProjected": "ISO/IEC 27001:2022 guidance applied by requirement number: {matched} of {total} requirements matched.",
 	"prereadLettered": "Lettered items share their parent's guidance.",
