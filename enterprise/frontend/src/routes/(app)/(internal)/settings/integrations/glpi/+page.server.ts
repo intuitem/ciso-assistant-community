@@ -1,53 +1,20 @@
-import { z } from 'zod';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { m } from '#paraglide/messages.js';
-
-const schema = z
-	.object({
-		id: z.string(),
-		provider_id: z.string(),
-		folder_id: z.string(),
-		is_active: z.boolean().default(true),
-		webhook_secret: z.string().optional(),
-		credentials: z.object({
-			instance_url: z.string().url(),
-			client_id: z.string(),
-			client_secret: z.string().optional(),
-			username: z.string(),
-			password: z.string().optional()
-		}),
-		settings: z.object({
-			enable_outgoing_sync: z.boolean().default(false),
-			enable_incoming_sync: z.boolean().default(false),
-			// Required for sync to function, but unsettable until the integration
-			// row exists (the table picker only renders once the config has an id).
-			// Enforced via superRefine below for updates.
-			table_name: z.string().optional(),
-			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
-		})
-	})
-	.superRefine((data, ctx) => {
-		if (data.id && !data.settings.table_name) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				path: ['settings', 'table_name'],
-				message: 'A target table must be selected'
-			});
-		}
-	});
+import { schema } from './schema';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=glpi`);
-	let config: Record<string, any> = {};
-	if (response.ok) {
-		config = await response.json().then((res) => res.results[0]);
+	if (!response.ok) {
+		// Not the same as "no configuration yet": the creation form must not
+		// show over a configuration that only failed to load.
+		error(response.status, 'Failed to load the GLPI integration configuration');
 	}
+	let config: Record<string, any> = await response.json().then((res) => res.results[0]);
 	if (!config) {
 		const providerResponse = await fetch(`${BASE_API_URL}/integrations/providers/?name=glpi`);
 		if (!providerResponse.ok) {
@@ -55,6 +22,9 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		}
 		const providerData = await providerResponse.json();
 		const provider = providerData.results[0];
+		if (!provider) {
+			error(404, 'The GLPI integration is not available');
+		}
 		config = {
 			folder_id: (await locals.getUser())?.root_folder_id,
 			provider_id: provider.id
@@ -83,6 +53,10 @@ export const actions: Actions = {
 		const body = {
 			...data
 		};
+		// An empty value means "keep the stored secret"; the API refuses a blank one.
+		if (!body.webhook_secret) {
+			delete body.webhook_secret;
+		}
 
 		const response = id
 			? await event.fetch(`${BASE_API_URL}/integrations/configs/${id}/`, {
@@ -98,7 +72,7 @@ export const actions: Actions = {
 			// Surface DRF's validation detail so the user can see *what* was
 			// rejected rather than just "save failed".
 			const rawBody = await response.text();
-			let detail = '';
+			let detail: string;
 			try {
 				const parsed = JSON.parse(rawBody);
 				detail =

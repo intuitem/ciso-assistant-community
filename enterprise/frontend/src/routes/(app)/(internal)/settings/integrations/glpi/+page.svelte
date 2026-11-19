@@ -3,58 +3,20 @@
 	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '#lib/components/Forms/FieldMapper.svelte';
-	import { z } from 'zod';
+	import { schema } from './schema';
 	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
 	import { describeTestFailure } from '#lib/utils/integration-test.js';
 
-	interface Props {
-		data: PageData;
-		form: ActionData;
-		[key: string]: any;
-	}
-
-	let { data, form }: Props = $props();
+	let { data }: { data: PageData } = $props();
 
 	const invalidateAll = true;
 	const formAction = '?/save';
-
-	const schema = z
-		.object({
-			id: z.string(),
-			provider_id: z.string(),
-			folder_id: z.string(),
-			is_active: z.boolean().default(true),
-			webhook_secret: z.string().optional(),
-			credentials: z.object({
-				instance_url: z.string().url(),
-				client_id: z.string(),
-				client_secret: z.string().optional(),
-				username: z.string(),
-				password: z.string().optional()
-			}),
-			settings: z.object({
-				enable_outgoing_sync: z.boolean().default(false),
-				enable_incoming_sync: z.boolean().default(false),
-				table_name: z.string().optional(),
-				field_map: z.record(z.string(), z.any()).default({}).optional(),
-				value_map: z.record(z.string(), z.any()).default({}).optional()
-			})
-		})
-		.superRefine((data, ctx) => {
-			if (data.id && !data.settings.table_name) {
-				ctx.addIssue({
-					code: z.ZodIssueCode.custom,
-					path: ['settings', 'table_name'],
-					message: 'A target table must be selected'
-				});
-			}
-		});
 
 	const _form = superForm(data.form, {
 		dataType: 'json',
@@ -76,6 +38,44 @@
 		loading: false,
 		success: undefined
 	});
+	let latestTest = 0;
+
+	async function testConnection() {
+		// Only the latest test may report: a slow earlier one must not replace
+		// the result of a newer one.
+		const test = ++latestTest;
+		testConnectionState = { loading: true };
+		let result: { success: boolean; detail?: string };
+		try {
+			const response = await fetch('/settings/integrations/test-connection', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					credentials: {
+						instance_url: $formStore.credentials.instance_url,
+						client_id: $formStore.credentials.client_id,
+						client_secret: $formStore.credentials.client_secret,
+						username: $formStore.credentials.username,
+						password: $formStore.credentials.password
+					},
+					provider: page.data.provider,
+					configuration_id: page.data?.config?.id
+				})
+			});
+			result = {
+				success: response.ok,
+				detail: response.ok ? '' : await describeTestFailure(response)
+			};
+		} catch {
+			// The request itself failed: show a failure instead of spinning forever.
+			result = { success: false };
+		}
+		if (test === latestTest) {
+			testConnectionState = { loading: false, ...result };
+		}
+	}
 </script>
 
 {#key page.data}
@@ -83,8 +83,8 @@
 		<SuperForm
 			class="flex flex-col space-y-3"
 			action={formAction}
-			dataType={'json'}
-			enctype={'application/x-www-form-urlencoded'}
+			dataType="json"
+			enctype="application/x-www-form-urlencoded"
 			data={data.form}
 			{_form}
 			{invalidateAll}
@@ -172,31 +172,7 @@
 							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 							type="button"
 							class="btn preset-filled-secondary-500"
-							onclick={async () => {
-								testConnectionState = { loading: true, success: false };
-								const response = await fetch('/settings/integrations/test-connection', {
-									method: 'POST',
-									headers: {
-										'Content-Type': 'application/json'
-									},
-									body: JSON.stringify({
-										credentials: {
-											instance_url: $formStore.credentials.instance_url,
-											client_id: $formStore.credentials.client_id,
-											client_secret: $formStore.credentials.client_secret,
-											username: $formStore.credentials.username,
-											password: $formStore.credentials.password
-										},
-										provider: page.data.provider,
-										configuration_id: page.data?.config?.id
-									})
-								});
-								testConnectionState = {
-									loading: false,
-									success: response.ok,
-									detail: response.ok ? '' : await describeTestFailure(response)
-								};
-							}}>{m.testConnection()}</button
+							onclick={testConnection}>{m.testConnection()}</button
 						>
 						<div class="flex items-center">
 							{#if testConnectionState.loading}
