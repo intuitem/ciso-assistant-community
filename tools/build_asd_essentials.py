@@ -281,7 +281,9 @@ def build_framework(catalog, profiles):
     return framework, instances
 
 
-def library(urn_slug, name, description, objects, dependencies=None, copyright=None):
+def library(
+    urn_slug, name, description, objects, dependencies=None, copyright=None, version=1
+):
     lib = {
         "urn": f"urn:intuitem:risk:library:{urn_slug}",
         "locale": "en",
@@ -289,7 +291,7 @@ def library(urn_slug, name, description, objects, dependencies=None, copyright=N
         "name": name,
         "description": description,
         "copyright": copyright or COPYRIGHT,
-        "version": 1,
+        "version": version,
         "publication_date": date.today().isoformat(),
         "provider": "Australian Signals Directorate (ASD)",
         "packager": "intuitem",
@@ -336,7 +338,7 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
                     "source_requirement_urn": source,
                     "target_requirement_urn": target,
                     "relationship": "intersect",
-                    "rationale": "semantic",
+                    "rationale": mappings["provenance"]["matching-rationale"],
                     "strength_of_relationship": None,
                 }
             )
@@ -366,6 +368,7 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
             f"urn:intuitem:risk:library:{E8}",
             f"urn:intuitem:risk:library:{SLUG}",
         ],
+        version=2,  # v2: rationale read from ASD's provenance (functional, was semantic)
     ), len(missing)
 
 
@@ -392,7 +395,7 @@ def build_csf_mapping(mappings, instances, csf_path: Path):
                         "source_requirement_urn": source,
                         "target_requirement_urn": urn,
                         "relationship": "intersect",
-                        "rationale": "semantic",
+                        "rationale": mappings["provenance"]["matching-rationale"],
                         "strength_of_relationship": None,
                     }
                 )
