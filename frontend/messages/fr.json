@@ -8224,8 +8224,7 @@
 	"europeanUnion": "Union européenne",
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
-	"notShownOnMap": "Non représenté sur la carte"
-	"evidenceExportTooLarge": "La sélection représente {size} Mo de fichiers, au-delà de la limite de {max} Mo. Réduisez la sélection et relancez l'export.",
+	"notShownOnMap": "Non représenté sur la carte",
 	"targetTreatmentDate": "Date cible de traitement",
 	"controlsEtaAfterTargetDate": [
 		{
