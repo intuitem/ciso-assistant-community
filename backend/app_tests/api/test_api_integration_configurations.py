@@ -312,3 +312,38 @@ def test_glpi_refuses_settings_for_other_models(admin_client, root_folder):
         format="json",
     )
     assert response.status_code == 400, response.content
+
+
+def test_glpi_cannot_be_linked_to_objects_it_does_not_sync(admin_client, root_folder):
+    from core.models import Asset
+    from integrations.models import SyncMapping
+
+    config = IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name="glpi"),
+        folder=root_folder,
+        credentials={
+            "instance_url": "https://glpi.example.com",
+            "client_id": "cid",
+            "client_secret": "csecret",
+            "username": "sync",
+            "password": "pw",
+        },
+        settings={"table_name": "Ticket"},
+    )
+    asset = Asset.objects.create(name="Server", folder=root_folder)
+
+    response = admin_client.patch(
+        f"/api/assets/{asset.id}/",
+        {"integration_config": str(config.id), "remote_object_id": "7"},
+        format="json",
+    )
+    assert response.status_code == 400, response.content
+    assert "integration_config" in response.json()
+    assert not SyncMapping.objects.filter(configuration=config).exists()
+
+    with patch("integrations.views.IntegrationRegistry.get_client") as get_client:
+        response = admin_client.get(
+            f"{CONFIGS_URL}{config.id}/remote-objects/", {"model_key": "asset"}
+        )
+    assert response.status_code == 400, response.content
+    get_client.assert_not_called()

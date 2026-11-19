@@ -15,6 +15,9 @@ logger = structlog.get_logger(__name__)
 # is HTML, while local descriptions are plain text.
 RICH_TEXT_FIELD = "content"
 
+# GLPI property holding the status, an object rather than a plain value.
+STATUS_FIELD = "status"
+
 _BLOCK_TAGS = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"}
 
 
@@ -253,7 +256,12 @@ class GLPIFieldMapper(BaseFieldMapper):
             if mapped is None:
                 return None
             # GLPI enums are integer ids.
-            return int(mapped) if str(mapped).isdigit() else mapped
+            remote = int(mapped) if str(mapped).isdigit() else mapped
+            if self.field_map.get(field) == STATUS_FIELD:
+                # GLPI 11.0.0 and 11.0.1 ignore a status sent as a bare id;
+                # every release takes the form the API itself returns.
+                return {"id": remote}
+            return remote
 
         if field == "eta":
             if isinstance(value, datetime):

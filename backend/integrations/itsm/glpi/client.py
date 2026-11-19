@@ -407,8 +407,16 @@ class GLPIClient(BaseIntegrationClient):
         callers cache the result.
         """
         if self._schema is None:
-            document = self._request("GET", "/doc.json", timeout=60).json()
-            self._schema = parse_schema(document)
+            # The document is public. It is requested without the token: GLPI
+            # 11.0.0 and 11.0.1 answer 500 when one comes with it.
+            response = requests.get(
+                f"{self.base_url}{API_PREFIX}/doc.json",
+                headers={"Accept": "application/json"},
+                timeout=60,
+                allow_redirects=False,
+            )
+            self._raise_for_status(response)
+            self._schema = parse_schema(response.json())
         return self._schema
 
     def get_available_tables(self) -> list[dict]:

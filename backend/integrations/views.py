@@ -191,6 +191,12 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
                 {"error": f"Unknown model_key '{model_key}'"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        provider = IntegrationRegistry.get_provider(instance.provider.name)
+        if provider and not provider.orchestrator_class.supports_model(model_key):
+            return Response(
+                {"error": f"This integration does not sync '{model_key}' objects"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             limit = int(request.query_params.get("limit", 50))
         except TypeError, ValueError:

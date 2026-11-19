@@ -2906,12 +2906,28 @@ class IntegrationLinkViewSetMixin:
         key = getattr(self.model, "INTEGRATION_MODEL_KEY", None)
         return list(mappable_field_keys(key)) if key else []
 
+    def _check_integration_syncs_model(self, integration_config) -> None:
+        """A link is only saved for a model its provider syncs. Otherwise the
+        mapping could never sync, and would shadow another object linked to the
+        same remote id."""
+        from integrations.registry import IntegrationRegistry
+
+        key = getattr(self.model, "INTEGRATION_MODEL_KEY", None)
+        if not (integration_config and key):
+            return
+        provider = IntegrationRegistry.get_provider(integration_config.provider.name)
+        if provider and not provider.orchestrator_class.supports_model(key):
+            raise serializers.ValidationError(
+                {"integration_config": "This integration does not sync these objects."}
+            )
+
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(
             "create_remote_object", False
         )
         integration_config = serializer.validated_data.pop("integration_config", None)
         serializer.validated_data.pop("remote_object_id", None)
+        self._check_integration_syncs_model(integration_config)
 
         super().perform_create(serializer)
 
@@ -2939,6 +2955,7 @@ class IntegrationLinkViewSetMixin:
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
         serializer.validated_data.pop("create_remote_object", None)
+        self._check_integration_syncs_model(integration_config)
 
         super().perform_update(serializer)
 

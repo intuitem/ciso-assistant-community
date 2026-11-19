@@ -135,7 +135,7 @@ def test_default_mapping_pushes_a_ticket_payload():
     assert mapper.to_remote(control) == {
         "name": "Patch servers",
         "content": "<p>Line one</p><p>A &amp; B</p>",
-        "status": 2,
+        "status": {"id": 2},
         "priority": 5,
         "resolution_date": "2026-12-24",
     }
@@ -143,7 +143,11 @@ def test_default_mapping_pushes_a_ticket_payload():
 
 @pytest.mark.parametrize(
     "item_type, payload",
-    [("Ticket", {"status": 2}), ("Problem", {"status": 2}), ("Change", {})],
+    [
+        ("Ticket", {"status": {"id": 2}}),
+        ("Problem", {"status": {"id": 2}}),
+        ("Change", {}),
+    ],
 )
 def test_default_status_only_uses_values_the_item_type_has(item_type, payload):
     mapper = GLPIFieldMapper(_configuration({"table_name": item_type}))
@@ -152,7 +156,7 @@ def test_default_status_only_uses_values_the_item_type_has(item_type, payload):
     assert mapper.to_remote_partial(control, ["status"]) == payload
     # The statuses every type shares are still sent.
     assert mapper.to_remote_partial(SimpleNamespace(status="on_hold"), ["status"]) == {
-        "status": 4
+        "status": {"id": 4}
     }
 
 
@@ -194,7 +198,9 @@ def test_configured_value_map_wins_over_defaults():
         )
     )
 
-    assert mapper.to_remote(SimpleNamespace(status="deprecated")) == {"status": 6}
+    assert mapper.to_remote(SimpleNamespace(status="deprecated")) == {
+        "status": {"id": 6}
+    }
     assert mapper.to_local({"fields": {"status": {"id": 6}}}) == {
         "status": "deprecated"
     }
@@ -292,13 +298,53 @@ def test_a_redirected_write_is_a_failure(mock_request, status):
         ({"models": {"asset": {"table_name": "Ticket"}}}, True),
         ({"models": [{}]}, True),
         ({"models": {"applied_control": True}}, True),
+        # Wrong types that are falsy must not pass as "not set".
+        ({"models": []}, True),
+        ({"models": {"applied_control": False}}, True),
+        ({"table_name": []}, True),
+        ({"table_name": 0}, True),
+        ({"value_map": {"status": ["2"]}}, True),
+        ({"value_map": []}, True),
+        ({"field_map": {"name": ["name"]}}, True),
+        # Null and empty mean "not set".
+        ({"models": None, "table_name": None, "field_map": None}, False),
+        ({"table_name": "", "field_map": {}, "value_map": {}}, False),
+        ({"value_map": {"status": {"to_do": "1"}}}, False),
     ],
 )
 def test_settings_are_checked_before_a_configuration_is_created(settings, refused):
     assert bool(GLPIOrchestrator.settings_errors(None, settings)) is refused
 
 
+@pytest.mark.parametrize("table_name", [["Ticket"], {"a": 1}, 3, ""])
+def test_rpc_refuses_a_table_name_that_is_not_text(table_name):
+    orchestrator = GLPIOrchestrator(_configuration())
+    with pytest.raises(ValueError):
+        orchestrator.execute_action("get_columns", {"table_name": table_name})
+
+
+@patch("integrations.itsm.glpi.client.requests.get")
+def test_schema_is_fetched_without_the_token(mock_get):
+    """GLPI 11.0.0 and 11.0.1 answer 500 when the public document is asked
+    for with a token."""
+    answer = requests.Response()
+    answer.status_code = 200
+    answer._content = json.dumps(OPENAPI).encode()
+    mock_get.return_value = answer
+    client = _client()
+    client._get_token = MagicMock(side_effect=AssertionError("no token needed"))
+
+    tables, _, _ = client.fetch_schema()
+
+    assert [t["name"] for t in tables] == ["Ticket"]
+    assert mock_get.call_args[0][0] == "https://glpi.example.com/api.php/v2/doc.json"
+    assert "Authorization" not in mock_get.call_args[1]["headers"]
+    assert mock_get.call_args[1]["allow_redirects"] is False
+
+
 def test_only_applied_controls_get_a_client_or_a_mapper():
+    assert GLPIOrchestrator.supports_model("applied_control") is True
+    assert GLPIOrchestrator.supports_model("asset") is False
     orchestrator = GLPIOrchestrator(_configuration())
     with pytest.raises(ValueError):
         orchestrator.mapper_for("asset")
@@ -601,3 +647,42 @@ def test_a_state_older_than_the_synced_one_is_not_applied(synced, read_back, app
         assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
 
     assert orchestrator.pull_changes.called is applied
+
+
+def test_pending_local_edit_survives_a_change_to_other_fields_in_glpi():
+    """The control was renamed locally and not pushed yet when GLPI reports a
+    new priority: only the priority is taken from GLPI."""
+    orchestrator = GLPIOrchestrator(_configuration())
+    local_object = MagicMock()
+    orchestrator._get_local_object = MagicMock(return_value=local_object)
+    orchestrator._update_local_object = MagicMock()
+
+    def state(name, priority):
+        fields = {"id": 4, "name": name, "priority": priority, "status": {"id": 1}}
+        return {"key": "4", "fields": fields, "updated": "d"}
+
+    mapping = MagicMock(remote_data=state("Old name", 3), version=1, remote_id="4")
+    assert orchestrator._resolve_conflict(mapping, state("Old name", 5)) is True
+    orchestrator._update_local_object.assert_called_once_with(
+        local_object, {"priority": 1}
+    )
+    assert mapping.remote_data == state("Old name", 5)
+    mapping.save.assert_called_once()
+
+    # Both sides changed the same field: GLPI wins, as before.
+    orchestrator._update_local_object.reset_mock()
+    mapping = MagicMock(remote_data=state("Old name", 3), version=1, remote_id="4")
+    orchestrator._resolve_conflict(mapping, state("Renamed in GLPI", 3))
+    orchestrator._update_local_object.assert_called_once_with(
+        local_object, {"name": "Renamed in GLPI"}
+    )
+
+    # Nothing known about the previous state: everything GLPI holds applies.
+    orchestrator._update_local_object.reset_mock()
+    mapping = MagicMock(remote_data={}, version=1, remote_id="4")
+    orchestrator._resolve_conflict(mapping, state("N", 3))
+    assert set(orchestrator._update_local_object.call_args[0][1]) == {
+        "name",
+        "priority",
+        "status",
+    }

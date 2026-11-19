@@ -247,6 +247,12 @@ class BaseSyncOrchestrator(ABC):
         self._mapper_cache: dict[str, BaseFieldMapper] = {}
 
     @classmethod
+    def supports_model(cls, model_key: str) -> bool:
+        """Whether this provider can sync objects of this model. All of them by
+        default."""
+        return True
+
+    @classmethod
     def settings_errors(
         cls, configuration: IntegrationConfiguration | None, new_settings: dict
     ) -> list[str]:

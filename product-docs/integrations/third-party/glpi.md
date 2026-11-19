@@ -12,7 +12,7 @@ The GLPI integration synchronizes applied controls from CISO Assistant with assi
 
 ## Requirements
 
-* **GLPI 11 or later.** The integration uses the high-level REST API (version 2), which GLPI 10 does not provide. It has been tested against GLPI 11.0 and 12.0.
+* **GLPI 11 or later.** The integration uses the high-level REST API (version 2), which GLPI 10 does not provide. It has been tested against GLPI 11.0.0, 11.0.13 and 12.0.2.
 * A GLPI administrator, to enable the API and create an OAuth client and a webhook.
 * A GLPI user for the integration. CISO Assistant acts as this user, so its profile decides which items can be read, created and updated.
 * CISO Assistant must be able to reach GLPI over HTTPS. For incoming sync, GLPI must be able to reach CISO Assistant.
@@ -112,6 +112,7 @@ The applied control page shows the linked GLPI id, the last sync time and its st
 * GLPI stores the item description as rich text. CISO Assistant sends plain paragraphs and reads formatted content back as plain text.
 * Items created directly in GLPI are not imported into CISO Assistant.
 * Links store GLPI item ids. Only change the instance URL when the new address serves the same GLPI instance, otherwise unlink the objects first.
+* The ETA is synced from GLPI 11.0.2 on. GLPI 11.0.0 and 11.0.1 do not expose the date through their API, so it is left out there.
 * Removing the ETA of an applied control does not remove the date in GLPI: its API cannot clear it.
 * With the default mapping, the `In progress` status is not sent to a change: GLPI changes have no matching status. Pick one in **Value Mapping** if you want it synced.
 * Assets are not synchronized with GLPI yet.

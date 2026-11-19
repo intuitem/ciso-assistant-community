@@ -71,8 +71,12 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     # Only applied controls sync with GLPI. A webhook does not name its item
     # type, so a second model under the same configuration could not tell its
     # items from the tickets.
+    @classmethod
+    def supports_model(cls, model_key: str) -> bool:
+        return model_key == cls.DEFAULT_MODEL_KEY
+
     def _check_model(self, model_key: str) -> None:
-        if model_key != self.DEFAULT_MODEL_KEY:
+        if not self.supports_model(model_key):
             raise ValueError(f"GLPI does not sync '{model_key}' objects")
 
     def _get_mapper(self, model_key="applied_control"):
@@ -85,9 +89,16 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
 
     @classmethod
     def settings_errors(cls, configuration, new_settings):
-        models = new_settings.get("models") or {}
+        # Types are checked before any default applies: a wrong value must not
+        # quietly become the Ticket default. Only a missing or null key is
+        # "not set".
+        def given(settings: dict, key: str, default):
+            value = settings.get(key)
+            return default if value is None else value
+
+        models = given(new_settings, "models", {})
         if not isinstance(models, dict) or not isinstance(
-            models.get(cls.DEFAULT_MODEL_KEY) or {}, dict
+            given(models, cls.DEFAULT_MODEL_KEY, {}), dict
         ):
             return ["'models' must map a model to its settings."]
         other_models = sorted(set(models) - {cls.DEFAULT_MODEL_KEY})
@@ -96,14 +107,23 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
                 "GLPI only syncs applied controls. Remove the settings for: "
                 + ", ".join(other_models)
             ]
-        chosen = get_model_settings(new_settings, cls.DEFAULT_MODEL_KEY).get(
-            "table_name"
-        )
-        if chosen and (not isinstance(chosen, str) or chosen not in ITEM_TYPES):
+        model_settings = get_model_settings(new_settings, cls.DEFAULT_MODEL_KEY)
+        chosen = given(model_settings, "table_name", "")
+        if chosen != "" and chosen not in tuple(ITEM_TYPES):
             return [
                 f"Unknown GLPI item type '{chosen}'. Use one of: "
                 + ", ".join(ITEM_TYPES)
             ]
+        field_map = given(model_settings, "field_map", {})
+        if not isinstance(field_map, dict) or not all(
+            isinstance(remote, str) for remote in field_map.values()
+        ):
+            return ["'field_map' must map each field to a GLPI property name."]
+        value_map = given(model_settings, "value_map", {})
+        if not isinstance(value_map, dict) or not all(
+            isinstance(choices, dict) for choices in value_map.values()
+        ):
+            return ["'value_map' must map each field to its value pairs."]
         if configuration is None:
             return []
 
@@ -242,6 +262,40 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return True
         return self.pull_changes(remote_id, current)
 
+    def _resolve_conflict(self, mapping, remote_data, model_key=None) -> bool:
+        """A local edit not pushed yet meets a change in GLPI. GLPI wins, but
+        only on what it changed: a webhook arriving in the second before a
+        local edit is pushed carries the item's other fields unchanged, and
+        applying those would undo the edit, which the push would then send
+        back to GLPI as if it were new."""
+        strategy = self.configuration.settings.get("conflict_resolution", "remote_wins")
+        if strategy != "remote_wins":
+            return super()._resolve_conflict(mapping, remote_data, model_key)
+
+        mapper = self.mapper_for(model_key or self.DEFAULT_MODEL_KEY)
+        incoming = mapper.to_local(remote_data)
+        known = mapper.to_local(mapping.remote_data or {})
+        changed = {
+            field: value
+            for field, value in incoming.items()
+            if field not in known or known[field] != value
+        }
+        if changed:
+            self._update_local_object(self._get_local_object(mapping), changed)
+
+        mapping.sync_status = SyncMapping.SyncStatus.SYNCED
+        mapping.last_sync_direction = SyncMapping.SyncDirection.PULL
+        mapping.remote_data = remote_data
+        mapping.version += 1
+        mapping.error_message = ""
+        mapping.save()
+        logger.info(
+            "Applied the fields GLPI changed over a pending local edit",
+            remote_id=mapping.remote_id,
+            fields=sorted(changed),
+        )
+        return True
+
     # --- Schema cache ---------------------------------------------------------
     # The schema comes from the instance's OpenAPI document, a multi-megabyte
     # download that describes every item type at once. It is parsed in one go
@@ -298,7 +352,7 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return self._load_schema().tables
 
         table = params.get("table_name")
-        if not table:
+        if not table or not isinstance(table, str):
             raise ValueError(f"Parameter 'table_name' is required for {action}")
 
         if action == "get_columns":
@@ -306,7 +360,7 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
 
         if action == "get_choices":
             field = params.get("field_name")
-            if not field:
+            if not field or not isinstance(field, str):
                 raise ValueError("Parameter 'field_name' is required for get_choices")
             return self.get_field_choices(table, field)
 
