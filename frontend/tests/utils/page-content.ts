@@ -131,7 +131,8 @@ export class PageContent extends BasePage {
 
 		const filters = [
 			{ has: this.page.getByText(name, { exact: true }).first() },
-			{ has: this.page.getByText(language).first() }
+			// 'any': whichever language the library is in.
+			...(language === 'any' ? [] : [{ has: this.page.getByText(language).first() }])
 		];
 		const row = this.getRow(name, filters);
 		// A row missing from the results must fail here, not pass as already loaded.
