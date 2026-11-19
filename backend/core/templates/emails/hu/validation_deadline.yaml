@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${days} nap múlva esedékes validálási kérelem"
+body: |
+  Tisztelt Felhasználó!
+
+  Emlékeztetjük, hogy ${validation_count} validálási kérelem határideje ${days} nap múlva lejár:
+
+  ${validation_list}
+
+  Tekintse át a kérelmeket, és intézkedjen a határidő előtt: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
