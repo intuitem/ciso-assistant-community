@@ -864,20 +864,38 @@ class AuditGuideImporter:
         self.guide_data = guide_data
 
     def is_valid(self) -> Union[str, None]:
+        from core.auditor_preread import normalize_key
+
         data = self.guide_data
+        if not isinstance(data, dict):
+            return "an audit guide must be a mapping"
         if missing_fields := self.REQUIRED_FIELDS - set(data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
-        if not isinstance(data["entries"], dict):
+        entries = data["entries"]
+        if not isinstance(entries, dict):
             return "entries must be a mapping keyed by requirement number"
-        for key, entry in data["entries"].items():
+        keys = [normalize_key(k) for k in entries]
+        if len(set(keys)) != len(keys):
+            return "two entries are keyed by the same requirement number"
+        for key, entry in entries.items():
+            if not isinstance(entry, dict):
+                return "entry {} must be a mapping".format(key)
             people = set(entry.get("interviewees") or [])
+            ids = []
             for part in ("questions", "requests", "pitfalls", "sampling"):
                 items = entry.get(part) or []
-                ids = [item.get("id") for item in items]
-                if None in ids or len(set(ids)) != len(ids):
-                    return "entry {}: every item of {} needs an id, unique in the entry".format(
-                        key, part
+                if not isinstance(items, list) or not all(
+                    isinstance(item, dict) for item in items
+                ):
+                    return "entry {}: {} must be a list of mappings".format(key, part)
+                ids += [item.get("id") for item in items]
+            # Translations key every item of an entry in one flat mapping.
+            if None in ids or len(set(ids)) != len(ids):
+                return (
+                    "entry {}: every item needs an id, unique across the entry".format(
+                        key
                     )
+                )
             for q in entry.get("questions") or []:
                 if q.get("stage") not in (1, 2) or not q.get("text"):
                     return "entry {}: question {} needs a stage (1 or 2) and a text".format(
@@ -894,11 +912,39 @@ class AuditGuideImporter:
                             key, r["id"], ", ".join(sorted(self.KINDS))
                         )
                     )
+                fresh = r.get("fresh_days")
+                if fresh is not None and (
+                    not isinstance(fresh, int) or isinstance(fresh, bool) or fresh <= 0
+                ):
+                    return "entry {}: request {}: fresh_days must be a positive number of days".format(
+                        key, r["id"]
+                    )
+                if not isinstance(r.get("reference_control", ""), str):
+                    return (
+                        "entry {}: request {}: reference_control must be a URN".format(
+                            key, r["id"]
+                        )
+                    )
         sessions = data.get("sessions") or []
-        if any(
-            not x.get("id") or not isinstance(x.get("members"), list) for x in sessions
+        if not isinstance(sessions, list) or any(
+            not isinstance(x, dict)
+            or not x.get("id")
+            or not isinstance(x.get("members"), list)
+            for x in sessions
         ):
             return "every session needs an id and a members list"
+        translations = data.get("translations") or {}
+        if not isinstance(translations, dict) or any(
+            not isinstance(t, dict)
+            or not isinstance(t.get("entries") or {}, dict)
+            or not isinstance(t.get("sessions") or {}, dict)
+            or not all(isinstance(v, dict) for v in (t.get("entries") or {}).values())
+            or not all(isinstance(v, dict) for v in (t.get("sessions") or {}).values())
+            for t in translations.values()
+        ):
+            return (
+                "translations must map each locale to texts keyed by entry and item id"
+            )
         return None
 
     def import_audit_guide(self, library_object: LoadedLibrary):

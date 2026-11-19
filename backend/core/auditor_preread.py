@@ -128,13 +128,21 @@ def load_audit_sessions(locale: str | None = None) -> dict[str, list]:
     return out
 
 
+def _number_parts(raw: str) -> list[str]:
+    # A5.1 and A.05.01 read as a.5.1: letters split from digits, no padding.
+    parts = [p.lstrip("0") or p for p in re.findall(r"[a-z]+|\d+", raw.lower())]
+    return parts[1:] if parts[:1] in (["clause"], ["annex"]) else parts
+
+
+def normalize_key(raw: str) -> str:
+    """A requirement number as guides key it: "A.05.18" and "Annex A 5.18" read "a.5.18"."""
+    return ".".join(_number_parts(str(raw)))
+
+
 def guide_key(ref_id, urn, keys) -> str | None:
     """Guide entry for a requirement: its number, else its parent's (4.2 a) -> 4.2)."""
     for raw in (urn.rsplit(":", 1)[-1], ref_id or ""):
-        # A5.1 and A.05.01 read as a.5.1: letters split from digits, no padding.
-        parts = [p.lstrip("0") or p for p in re.findall(r"[a-z]+|\d+", raw.lower())]
-        if parts[:1] in (["clause"], ["annex"]):
-            parts = parts[1:]
+        parts = _number_parts(raw)
         while parts:
             if (key := ".".join(parts)) in keys:
                 return key
@@ -143,7 +151,8 @@ def guide_key(ref_id, urn, keys) -> str | None:
 
 
 def _rank(fit) -> tuple:
-    return (fit["exact"], fit["own"], fit["coverage"])
+    # On a tie between guides written for other frameworks, ours (the reference) wins.
+    return (fit["exact"], fit["own"], fit["coverage"], fit["builtin"])
 
 
 def resolve_guide(framework, forced: str | None = None) -> dict | None:
@@ -158,9 +167,13 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
         )
     )
     best = None
+    # Fixed order so a tie never flips between requests.
     guides = AuditGuide.objects.only(
-        "urn", "name", "framework_urn", "provider", "entries"
-    )
+        "urn", "name", "translations", "framework_urn", "provider", "entries"
+    ).order_by("urn")
+    # A forced guide that is no longer loaded falls back to the automatic choice.
+    if forced and not guides.filter(urn=forced).exists():
+        forced = None
     for g in guides:
         if forced and g.urn != forced:
             continue
@@ -180,6 +193,7 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
             # Among guides written for this framework, an organisation's own
             # wins over ours; a guide for another framework never jumps ahead.
             "own": g.provider != "intuitem" and g.framework_urn == framework.urn,
+            "builtin": g.provider == "intuitem",
         }
         if best is None or _rank(found) > _rank(best):
             best = found
@@ -918,7 +932,8 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
             prep.save(update_fields=["updated_by", "updated_at"])
     except _Rejected as rejected:
         return rejected.code
-    except ValidationError, ValueError:
+    # clean() still runs after a field failed, so a bad date can reach a comparison.
+    except ValidationError, ValueError, TypeError:
         return PREPARATION_ERRORS[0]
     return None
 
@@ -945,7 +960,7 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
     ra, fit, key, request = found
     # An evidence the user may see, linked to this requirement directly or
     # through its applied controls or tasks; with "attach", any such evidence,
-    # linked to the requirement on the way (picked from elsewhere in the domain).
+    # linked to the requirement on the way (picked from any evidence the user can see).
     viewable = Evidence.objects.filter(
         id__in=RoleAssignment.get_viewable_object_ids(user, Evidence)
     )

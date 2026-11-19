@@ -15889,9 +15889,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             for codename in needed
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        error = pair_request(
-            audit, request.user, request.data, request.data.get("guide")
-        )
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            error = pair_request(
+                audit, request.user, request.data, request.data.get("guide")
+            )
+        except DjangoValidationError, ValueError:  # an id that is not a UUID
+            error = "invalidField"
         if error:
             return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -817,7 +817,15 @@
 						matched: s.matched,
 						total: s.total
 					})}
-					<a class="anchor" href="?guide={encodeURIComponent(s.urn)}">{m.prereadApplyAnyway()}</a>
+					<!-- Stored on the preparation, so every later save and visit uses it; a
+					     reader who cannot prepare only gets it for this visit. -->
+					{#if canPrepare}
+						<button class="anchor" onclick={() => savePrep({ fields: { guide: s.urn } })}
+							>{m.prereadApplyAnyway()}</button
+						>
+					{:else}
+						<a class="anchor" href="?guide={encodeURIComponent(s.urn)}">{m.prereadApplyAnyway()}</a>
+					{/if}
 				</p>
 			{/if}
 		</div>

@@ -8508,7 +8508,16 @@
 	"prereadTodoValidate": "An evidence below is still a draft or in review: have it approved before the audit, the auditor will ask.",
 	"prereadTodoExpiresBeforeAudit": "An evidence below expires before the audit date: renew it by then.",
 	"prereadReach": "Also counts for {what}",
-	"prereadReachAudits": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} other audit in this domain where this evidence is on file", "countPlural=other": "{count} other audits in this domain, wherever this evidence is on file"}}],
+	"prereadReachAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} other audit in this domain where this evidence is on file",
+				"countPlural=other": "{count} other audits in this domain, wherever this evidence is on file"
+			}
+		}
+	],
 	"prereadReadOnly": "Read only: you can follow the preparation, but changes are made by those who can edit this audit.",
 	"prereadExpiredOn": "expired {date}",
 	"prereadExpires": "expires {date}",
@@ -8531,9 +8540,27 @@
 	"prereadSetAsideReason": "Why? The auditor will ask.",
 	"prereadSetAsideShown": "Set aside: {reason}",
 	"prereadRestore": "Restore",
-	"prereadCarryOver": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} request was set aside at the previous audit of this domain.", "countPlural=other": "{count} requests were set aside at the previous audit of this domain."}}],
+	"prereadCarryOver": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} request was set aside at the previous audit of this domain.",
+				"countPlural=other": "{count} requests were set aside at the previous audit of this domain."
+			}
+		}
+	],
 	"prereadCarryOverAction": "Take them over",
-	"prereadStartSessions": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "Schedule the sessions with the certification body: {count} session has no date", "countPlural=other": "Schedule the sessions with the certification body: {count} sessions have no date"}}],
+	"prereadStartSessions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Schedule the sessions with the certification body: {count} session has no date",
+				"countPlural=other": "Schedule the sessions with the certification body: {count} sessions have no date"
+			}
+		}
+	],
 	"prereadSchedule": "Schedule",
 	"prereadStartTime": "Start",
 	"prereadEndTime": "End",
@@ -8546,10 +8573,28 @@
 	"prereadNoDate": "No date yet",
 	"prereadWalk": "Prepare this session",
 	"prereadWalkSession": "Preparing the session: {label}",
-	"prereadWalkCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} requirement left to work on", "countPlural=other": "{count} requirements left to work on"}}],
+	"prereadWalkCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requirement left to work on",
+				"countPlural=other": "{count} requirements left to work on"
+			}
+		}
+	],
 	"prereadWalkExit": "Back to the full view",
 	"prereadWalkDone": "Everything in this session is handled.",
-	"prereadStartWalk": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "Then prepare session by session, starting with “{label}”: {count} requirement left", "countPlural=other": "Then prepare session by session, starting with “{label}”: {count} requirements left"}}],
+	"prereadStartWalk": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Then prepare session by session, starting with “{label}”: {count} requirement left",
+				"countPlural=other": "Then prepare session by session, starting with “{label}”: {count} requirements left"
+			}
+		}
+	],
 	"prereadTodoAddFile": "An evidence below has no file or link yet: it does not count until you add it with “Add the file”.",
 	"prereadAddFile": "Add the file",
 	"europeanUnion": "European Union",

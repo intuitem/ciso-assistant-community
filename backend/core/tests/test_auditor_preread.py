@@ -647,3 +647,196 @@ def test_iso_requirements_suggest_every_control_the_guide_asks_for():
         for r in entry["requests"]:
             if r.get("reference_control"):
                 assert r["reference_control"] in suggested[key], (key, r["id"])
+
+
+def _guide(**over):
+    entry = {
+        "questions": [{"id": "q1", "stage": 2, "who": ["ciso"], "text": "Show me."}],
+        "requests": [{"id": "r1", "label": "Records", "kind": "record"}],
+        "interviewees": ["ciso"],
+    }
+    return {
+        "urn": "urn:acme:risk:audit_guide:t",
+        "ref_id": "t",
+        "framework": ISO,
+        "entries": {"A.05.18": entry},
+        **over,
+    }
+
+
+def test_guide_validation_catches_what_would_break_the_preread():
+    from library.utils import AuditGuideImporter
+
+    assert AuditGuideImporter(_guide()).is_valid() is None
+    entry = _guide()["entries"]["A.05.18"]
+    broken = [
+        {"entries": {"a.5.18": entry, "A.5.18": entry}},  # same number twice
+        {"entries": {"a.5.18": {**entry, "pitfalls": [{"id": "q1", "text": "x"}]}}},
+        {
+            "entries": {
+                "a.5.18": {
+                    **entry,
+                    "requests": [
+                        {
+                            "id": "r1",
+                            "label": "x",
+                            "kind": "record",
+                            "fresh_days": "monthly",
+                        }
+                    ],
+                }
+            }
+        },
+        {
+            "entries": {
+                "a.5.18": {
+                    **entry,
+                    "requests": [
+                        {
+                            "id": "r1",
+                            "label": "x",
+                            "kind": "record",
+                            "reference_control": ["a"],
+                        }
+                    ],
+                }
+            }
+        },
+        {"entries": {"a.5.18": ["not", "a", "mapping"]}},
+        {"translations": {"fr": {"entries": {"a.5.18": "texte"}}}},
+    ]
+    for over in broken:
+        assert AuditGuideImporter(_guide(**over)).is_valid(), over
+
+
+def test_guide_keys_are_normalized_like_requirements():
+    fields = AuditGuide.fields_from(
+        _guide(
+            sessions=[{"id": "s", "members": ["A.05.18"]}],
+            translations={"fr": {"entries": {"A.05.18": {"q1": "Montrez."}}}},
+        )
+    )
+    assert list(fields["entries"]) == ["a.5.18"]
+    assert fields["sessions"][0]["members"] == ["a.5.18"]
+    assert list(fields["translations"]["fr"]["entries"]) == ["a.5.18"]
+
+
+@pytest.mark.django_db
+def test_forced_guide_that_is_gone_falls_back():
+    framework = Framework.objects.create(
+        name="ISO", urn=ISO, folder=Folder.get_root_folder()
+    )
+    fit = resolve_guide(framework, "urn:acme:risk:audit_guide:unloaded")
+    assert fit["guide"] == GUIDE_URN and fit["applies"]
+
+
+@pytest.mark.django_db
+def test_library_update_refuses_bad_guides_and_drops_removed_ones():
+    from core.models import LoadedLibrary, StoredLibrary
+
+    def library(version, guides):
+        return yaml.safe_dump(
+            {
+                "urn": "urn:acme:risk:library:guides",
+                "locale": "en",
+                "ref_id": "acme-guides",
+                "name": "ACME guides",
+                "version": version,
+                "provider": "ACME",
+                "packager": "ACME",
+                "objects": {"audit_guides": guides},
+            }
+        ).encode()
+
+    two = [_guide(), _guide(urn="urn:acme:risk:audit_guide:u", ref_id="u")]
+    stored, error = StoredLibrary.store_library_content(library(1, two))
+    assert error is None and stored.load() is None
+    loaded = LoadedLibrary.objects.get(urn="urn:acme:risk:library:guides")
+    assert loaded.audit_guides.count() == 2
+
+    bad = [_guide(entries={"a.5.18": {"requests": [{"id": "r1", "label": "x"}]}})]
+    StoredLibrary.store_library_content(library(2, bad))
+    assert loaded.update() == "invalidLibraryUpdate"
+    assert loaded.audit_guides.count() == 2
+
+    StoredLibrary.store_library_content(library(3, [_guide()]))
+    assert loaded.update() is None
+    assert list(loaded.audit_guides.values_list("urn", flat=True)) == [
+        "urn:acme:risk:audit_guide:t"
+    ]
+
+
+@pytest.mark.django_db
+def test_preread_permissions_with_builtin_roles():
+    """Reader: no pre-read. Analyst: reads and prepares in their domain only,
+    and cannot pair an evidence they cannot see."""
+    from core.startup import startup
+    from iam.models import Role, RoleAssignment, UserGroup
+    from rest_framework.test import APIClient
+
+    startup(sender=None, **{})
+    root = Folder.get_root_folder()
+    framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:intuitem:risk:req_node:iso27001-2022:a.6.3",
+        ref_id="A.6.3",
+        assessable=True,
+        folder=root,
+    )
+
+    def domain(name):
+        folder = Folder.objects.create(
+            name=name, content_type=Folder.ContentType.DOMAIN, parent_folder=root
+        )
+        audit = ComplianceAssessment.objects.create(
+            name=name,
+            framework=framework,
+            perimeter=Perimeter.objects.create(name=name, folder=folder),
+            folder=folder,
+        )
+        audit.create_requirement_assessments()
+        return folder, audit
+
+    mine, audit = domain("mine")
+    theirs, other_audit = domain("theirs")
+    secret = Evidence.objects.create(name="Their secret", folder=theirs)
+
+    def member(email, role):
+        user = User.objects.create_user(email=email)
+        group = UserGroup.objects.create(name=email, folder=mine)
+        group.user_set.add(user)
+        ra = RoleAssignment.objects.create(
+            user_group=group, role=Role.objects.get(name=role), folder=mine
+        )
+        ra.perimeter_folders.add(mine)
+        client = APIClient()
+        client.force_authenticate(user)
+        return client
+
+    reader, analyst = member("r@t.local", "BI-RL-AUD"), member("a@t.local", "BI-RL-ANA")
+    url = lambda a, tail="": (
+        f"/api/compliance-assessments/{a.id}/auditor_preread/{tail}"
+    )  # noqa: E731
+
+    assert reader.get(url(audit)).status_code == 403
+    assert reader.post(url(audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 403  # fmt: skip
+    assert analyst.get(url(audit)).status_code == 200
+    assert analyst.post(url(audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 204  # fmt: skip
+    # Another domain's audit does not exist for them.
+    assert analyst.get(url(other_audit)).status_code == 404
+    assert analyst.post(url(other_audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 404  # fmt: skip
+    # An evidence of another domain cannot be paired, even with attach.
+    ra = audit.requirement_assessments.get()
+    request = load_audit_guides()[GUIDE_URN]["a.6.3"]["requests"][0]["id"]
+    pair = {"requirement_assessment": str(ra.id), "request": request, "evidence": str(secret.id), "attach": True}  # fmt: skip
+    response = analyst.post(url(audit, "pair/"), pair, format="json")
+    assert response.status_code == 400 and response.json() == {
+        "error": "unknownEvidence"
+    }
+    assert not ra.evidences.filter(id=secret.id).exists()
+    # Malformed ids are a 400 with a fixed code, never a stack trace.
+    bad = analyst.post(
+        url(audit, "pair/"), {**pair, "evidence": "not-a-uuid"}, format="json"
+    )
+    assert bad.status_code == 400 and bad.json() == {"error": "invalidField"}

@@ -1701,6 +1701,10 @@ class LibraryUpdater:
             )
 
     def update_audit_guides(self):
+        # Guides the new version no longer ships go, so none lingers to compete.
+        AuditGuide.objects.filter(library=self.old_library).exclude(
+            urn__in=[g["urn"].lower() for g in self.audit_guides]
+        ).delete()
         for guide in self.audit_guides:
             fields = AuditGuide.fields_from(guide)
             AuditGuide.objects.update_or_create(
@@ -2785,6 +2789,11 @@ class LibraryUpdater:
             except ValueError:
                 return "dependencyNotFound"
             new_dependencies.append(new_dependency)
+        # A guide that would break the pre-read is refused before anything changes.
+        from library.utils import AuditGuideImporter
+
+        if any(AuditGuideImporter(g).is_valid() for g in self.audit_guides):
+            return "invalidLibraryUpdate"
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
@@ -14702,7 +14711,7 @@ class AuditPreparation(AbstractBaseModel):
         related_name="+",
     )
     auditors = models.CharField(max_length=255, blank=True)
-    # Who to send a missing document to, as shown on the flash cards.
+    # Last person who changed the preparation: who to send a missing document to.
     updated_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
@@ -14812,15 +14821,28 @@ class AuditGuide(ReferentialObjectMixin, I18nObjectMixin):
 
     @staticmethod
     def fields_from(data: dict) -> dict:
-        """Model fields from a guide as written in a library."""
+        """Model fields from a guide as written in a library, its requirement
+        numbers normalized the way requirements are matched ("A.05.18" -> "a.5.18")."""
+        from core.auditor_preread import normalize_key
+
+        def keyed(entries):
+            return {normalize_key(k): v for k, v in (entries or {}).items()}
+
+        translations = {
+            locale: {**t, "entries": keyed(t.get("entries"))} if "entries" in t else t
+            for locale, t in (data.get("translations") or {}).items()
+        }
         return {
             "ref_id": data["ref_id"],
             "name": data.get("name"),
             "description": data.get("description"),
             "framework_urn": data["framework"].lower(),
-            "entries": data.get("entries") or {},
-            "sessions": data.get("sessions") or [],
-            "translations": data.get("translations") or {},
+            "entries": keyed(data.get("entries")),
+            "sessions": [
+                {**s, "members": [normalize_key(m) for m in s.get("members") or []]}
+                for s in data.get("sessions") or []
+            ],
+            "translations": translations,
         }
 
     class Meta:
