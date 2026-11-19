@@ -11615,7 +11615,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     ),
                     "status": "create",
                 }
@@ -11668,7 +11668,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     )
                     if not dry_run:
                         applied_control.save()

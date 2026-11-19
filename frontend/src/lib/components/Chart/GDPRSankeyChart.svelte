@@ -96,6 +96,8 @@
 					series: [
 						{
 							type: 'sankey',
+							top: title ? 48 : 16,
+							bottom: 16,
 							data: translatedNodes,
 							links: links,
 							emphasis: {
