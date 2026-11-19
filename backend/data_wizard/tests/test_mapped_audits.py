@@ -2,9 +2,11 @@
 created and named by the import, nested applied controls, and a third-party
 assessment linked to that audit in the same run."""
 
+import io
 import json
 from pathlib import Path
 
+import openpyxl
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -260,3 +262,106 @@ def test_vendor_assessment_links_the_audit_created_in_the_same_run(
         ).result
         == "non_compliant"
     )
+
+
+def _scored_audit(framework, folder, documentation_score=True):
+    audit = ComplianceAssessment.objects.create(
+        name="Scored", framework=framework, folder=folder, min_score=1, max_score=5
+    )
+    audit.create_requirement_assessments()
+    audit.scoring_enabled = True
+    audit.show_documentation_score = documentation_score
+    audit.save()
+    return audit
+
+
+def _import_into(client, folder, audit, workbook):
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    header = [cell.value for cell in workbook.active[1]]
+    imported = {"ref_id", "implementation_score", "documentation_score", "score"}
+    step = {
+        "model_type": "ComplianceAssessment",
+        "options": {"target_id": str(audit.id)},
+        "sheets": [
+            {
+                "source": workbook.active.title,
+                "target": "Requirements",
+                "header_row": 1,
+                "columns": {name: name for name in header if name in imported},
+            }
+        ],
+    }
+    return client.post(
+        IMPORT_URL,
+        {
+            "file": SimpleUploadedFile("audit.xlsx", buffer.getvalue()),
+            "mapping": json.dumps({"steps": [step]}),
+            "options": json.dumps({"folder_id": str(folder.id)}),
+        },
+        format="multipart",
+    )
+
+
+def _scores(audit):
+    return {
+        ra.requirement.ref_id: (ra.score, ra.documentation_score, ra.is_scored)
+        for ra in RequirementAssessment.objects.filter(compliance_assessment=audit)
+    }
+
+
+@pytest.mark.django_db
+class TestScoreColumns:
+    def test_exported_audit_reimports_either_score_alone(
+        self, knox_admin_client, domain_folder, framework
+    ):
+        audit = _scored_audit(framework, domain_folder)
+        RequirementAssessment.objects.filter(
+            compliance_assessment=audit, requirement__ref_id="A.5.7"
+        ).update(score=2, documentation_score=3, is_scored=True)
+
+        resp = knox_admin_client.get(f"/api/compliance-assessments/{audit.id}/xlsx/")
+        assert resp.status_code == 200
+        workbook = openpyxl.load_workbook(io.BytesIO(resp.content))
+        sheet = workbook.active
+        column = {cell.value: cell.column for cell in sheet[1]}
+        row = {
+            sheet.cell(r, column["ref_id"]).value: r
+            for r in range(2, sheet.max_row + 1)
+        }
+        edits = {
+            "A.5.1": {"implementation_score": 4},
+            "A.5.2": {"implementation_score": 3, "documentation_score": 2},
+            "A.5.3": {"documentation_score": 5},
+            "A.5.7": {"implementation_score": 4},
+        }
+        for ref_id, cells in edits.items():
+            for name, value in cells.items():
+                sheet.cell(row[ref_id], column[name]).value = value
+
+        resp = _import_into(knox_admin_client, domain_folder, audit, workbook)
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["steps"][0]["results"]
+        assert results["failed"] == 0, results["errors"]
+
+        scores = _scores(audit)
+        assert scores["A.5.1"] == (4, None, True)
+        assert scores["A.5.2"] == (3, 2, True)
+        # A documentation score alone does not make the requirement scored.
+        assert scores["A.5.3"] == (None, 5, False)
+        assert scores["A.5.7"] == (4, 3, True)
+
+    def test_documentation_score_alone_turns_it_on(
+        self, knox_admin_client, domain_folder, framework
+    ):
+        audit = _scored_audit(framework, domain_folder, documentation_score=False)
+        workbook = openpyxl.Workbook()
+        workbook.active.append(["ref_id", "documentation_score"])
+        workbook.active.append(["A.5.1", 4])
+
+        resp = _import_into(knox_admin_client, domain_folder, audit, workbook)
+        assert resp.status_code == 200, resp.json()
+
+        audit.refresh_from_db()
+        assert audit.show_documentation_score
+        assert _scores(audit)["A.5.1"] == (None, 4, False)
