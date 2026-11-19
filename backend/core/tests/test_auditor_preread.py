@@ -770,11 +770,12 @@ def test_library_update_refuses_bad_guides_and_drops_removed_ones():
 def test_preread_permissions_with_builtin_roles():
     """Reader: no pre-read. Analyst: reads and prepares in their domain only,
     and cannot pair an evidence they cannot see."""
-    from core.startup import startup
-    from iam.models import Role, RoleAssignment, UserGroup
     from rest_framework.test import APIClient
 
-    startup(sender=None, **{})
+    from core.startup import startup
+    from iam.models import Role, RoleAssignment, UserGroup
+
+    startup(sender=None)
     root = Folder.get_root_folder()
     framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
     RequirementNode.objects.create(
@@ -815,9 +816,9 @@ def test_preread_permissions_with_builtin_roles():
         return client
 
     reader, analyst = member("r@t.local", "BI-RL-AUD"), member("a@t.local", "BI-RL-ANA")
-    url = lambda a, tail="": (
-        f"/api/compliance-assessments/{a.id}/auditor_preread/{tail}"
-    )  # noqa: E731
+
+    def url(a, tail=""):
+        return f"/api/compliance-assessments/{a.id}/auditor_preread/{tail}"
 
     assert reader.get(url(audit)).status_code == 403
     assert reader.post(url(audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 403  # fmt: skip
