@@ -104,6 +104,7 @@ Worker command: `uv run python manage.py run_huey -w 2 -k process`
 | `backend/core/templates/emails/fr/` | French YAML email templates |
 | `backend/core/templates/emails/de/` | German YAML email templates |
 | `backend/core/templates/emails/nl/` | Dutch YAML email templates |
+| `backend/core/templates/emails/hu/` | Hungarian YAML email templates |
 | `backend/core/templates/registration/` | HTML templates for password reset / welcome emails |
 
 ---
@@ -149,7 +150,7 @@ The `ciso_assistant_url` variable is always injected via `get_default_context()`
 ### How to Add a New Template
 
 1. Create `backend/core/templates/emails/en/{template_name}.yaml` with `subject` and `body` keys
-2. Create the `fr`, `de` and `nl` translations next to it (`backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`); a missing locale falls back to English
+2. Create the `fr`, `de`, `nl` and `hu` translations next to it (`backend/core/templates/emails/{fr,de,nl,hu}/{template_name}.yaml`); a missing locale falls back to English
 3. Use `${variable_name}` for dynamic content
 4. `${ciso_assistant_url}` is automatically available
 
@@ -339,7 +340,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Create email templates**:
    - `backend/core/templates/emails/en/{template_name}.yaml`
-   - `backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`
+   - `backend/core/templates/emails/{fr,de,nl,hu}/{template_name}.yaml`
 
 2. **Add a Huey task** in `backend/core/tasks.py`:
    ```python
