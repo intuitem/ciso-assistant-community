@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	interviewPlan,
 	requestList,
+	sectionOf,
 	requestListTsv,
 	sessionPlan,
 	type PrereadItem
@@ -42,6 +43,15 @@ describe('auditor pre-read lists', () => {
 		expect(requestList(items).map((r) => r.items[0].ref_id)).toEqual(['A.2', 'A.1']);
 	});
 
+	it('reads a request as to confirm when the requirement holds unpaired evidence', () => {
+		const held = item('A.4', 'to_confirm', []);
+		held.evidences = [{ id: 'e1', name: 'Our access review' } as PrereadItem['evidences'][number]];
+		const [row] = requestList([held]);
+		expect(row.toConfirm).toBe(true);
+		expect(requestListTsv([row]).split('\n')[1]).toMatch(/\tto confirm$/);
+		expect(requestList([item('A.5', 'gap', [])])[0].toConfirm).toBe(false);
+	});
+
 	it('groups by interviewee, busiest first', () => {
 		expect(interviewPlan(items).map(([who, rs]) => [who, rs.length])).toEqual([
 			['hr', 2],
@@ -58,7 +68,14 @@ describe('auditor pre-read lists', () => {
 			i.filed = filed;
 			return i;
 		};
-		const ev = { id: 'e1', name: 'Review', updated_at: null, here: true, manual: false };
+		const ev = {
+			id: 'e1',
+			name: 'Review',
+			updated_at: null,
+			has_file: true,
+			here: true,
+			manual: false
+		};
 		const rows = requestList([shared('9.3', 400, { r9: [ev] }), shared('5.1', 200, { r9: [ev] })]);
 		expect(rows).toHaveLength(1);
 		expect(rows[0].items.map((i) => i.ref_id)).toEqual(['9.3', '5.1']);
@@ -91,12 +108,26 @@ describe('auditor pre-read lists', () => {
 		const b = { ...item('4.2 b)', 'weak', []), id: 'x', guide_key: '4.2' };
 		const plan = sessionPlan([a, b], [{ id: 'ctx', label: 'Context', members: ['4.2'] }]);
 		expect(plan[0].reqs.map((r) => r.ref_id)).toEqual(['4.2 a)', '4.2 b)']);
+		const rows = requestList([a, b]);
+		expect(rows).toHaveLength(1);
+		expect(rows[0].items).toHaveLength(2);
 	});
 
 	it('shows a hand-paired request as filed even without a reference control', () => {
 		const i = item('A.9', 'weak', []);
-		i.filed = { r1: [{ id: 'e', name: 'Export', updated_at: null, here: true, manual: true }] };
+		i.filed = {
+			r1: [{ id: 'e', name: 'Export', updated_at: null, has_file: true, here: true, manual: true }]
+		};
 		expect(requestList([i])[0].filed).toHaveLength(1);
+	});
+
+	it('files requirements with no ISO number under other requirements', () => {
+		expect(['4.1', 'a.5.1', 'a.8.34', 'n12'].map((k) => sectionOf(k).key)).toEqual([
+			'clauses',
+			'a.5',
+			'a.8',
+			'other'
+		]);
 	});
 
 	it('escapes tabs in the TSV export', () => {

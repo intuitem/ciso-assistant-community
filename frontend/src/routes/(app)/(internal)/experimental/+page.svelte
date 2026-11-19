@@ -63,8 +63,8 @@
 		tags={['PRO', 'audit', 'domains', 'analytics', 'prototype']}
 	/>
 	<Article
-		title="Auditor pre-read"
-		desc="For an ISO/IEC 27001:2022 audit: what the certification auditor will ask, request, sample and who they will interview, per requirement, set against the evidence already linked. Evidence request list and interview plan included."
+		title={m.prereadTitle()}
+		desc={m.prereadDescription()}
 		link="/experimental/auditor-preread"
 		tags={['audit', 'iso27001', 'certification', 'prototype']}
 	/>

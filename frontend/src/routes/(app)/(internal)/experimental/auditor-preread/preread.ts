@@ -1,4 +1,15 @@
-export type Readiness = 'gap' | 'weak' | 'ready' | 'excluded' | 'no_guidance';
+import { m } from '#paraglide/messages.js';
+
+/** Labels read in the current locale each time they are shown, not once at import. */
+const lazy = (messages: Record<string, () => string>): Record<string, string> =>
+	Object.defineProperties(
+		{},
+		Object.fromEntries(
+			Object.entries(messages).map(([k, f]) => [k, { get: () => f(), enumerable: true }])
+		)
+	);
+
+export type Readiness = 'gap' | 'weak' | 'to_confirm' | 'ready' | 'excluded' | 'no_guidance';
 
 export interface Guidance {
 	questions: { id: string; stage: 1 | 2; text: string }[];
@@ -24,6 +35,8 @@ export interface Guidance {
 export interface FiledEvidence {
 	id: string;
 	name: string | null;
+	/** Holds a file or a link in its latest revision. */
+	has_file: boolean;
 	updated_at: string | null;
 	/** Linked to this requirement, not only to another one asking the same document. */
 	here: boolean;
@@ -70,54 +83,124 @@ export interface PrereadItem {
 	reasons: string[];
 }
 
-export const PEOPLE: Record<string, string> = {
-	top: 'Top management',
-	ciso: 'ISMS manager / CISO',
-	risk: 'Risk owner',
-	auditor: 'Internal auditor',
-	hr: 'HR',
-	legal: 'Legal / compliance',
-	dpo: 'Data protection officer',
-	proc: 'Procurement',
-	facilities: 'Facilities',
-	it_lead: 'Head of IT',
-	iam: 'Identity & access admin',
-	infra: 'Infrastructure & hosting',
-	network: 'Network admin',
-	endpoint: 'Workplace & endpoints',
-	service_desk: 'Service desk / ITSM',
-	sec_ops: 'Security operations',
-	dev: 'Engineering lead',
-	staff: 'Staff (random)'
-};
+export const PEOPLE: Record<string, string> = lazy({
+	top: m.prereadRoleTop,
+	ciso: m.prereadRoleCiso,
+	risk: m.prereadRoleRisk,
+	auditor: m.prereadRoleAuditor,
+	hr: m.prereadRoleHr,
+	legal: m.prereadRoleLegal,
+	dpo: m.prereadRoleDpo,
+	proc: m.prereadRoleProc,
+	facilities: m.prereadRoleFacilities,
+	it_lead: m.prereadRoleItLead,
+	iam: m.prereadRoleIam,
+	infra: m.prereadRoleInfra,
+	network: m.prereadRoleNetwork,
+	endpoint: m.prereadRoleEndpoint,
+	service_desk: m.prereadRoleServiceDesk,
+	sec_ops: m.prereadRoleSecOps,
+	dev: m.prereadRoleDev,
+	staff: m.prereadRoleStaff
+});
 
 export const READINESS: Record<Readiness, { label: string; rank: number }> = {
-	gap: { label: 'Gap', rank: 0 },
-	weak: { label: 'Weak', rank: 1 },
-	ready: { label: 'Ready', rank: 2 },
-	excluded: { label: 'Excluded', rank: 3 },
-	no_guidance: { label: 'No guidance', rank: 4 }
+	gap: {
+		get label() {
+			return m.prereadGap();
+		},
+		rank: 0
+	},
+	weak: {
+		get label() {
+			return m.prereadWeak();
+		},
+		rank: 1
+	},
+	to_confirm: {
+		get label() {
+			return m.prereadToConfirm();
+		},
+		rank: 2
+	},
+	ready: {
+		get label() {
+			return m.prereadReady();
+		},
+		rank: 3
+	},
+	excluded: {
+		get label() {
+			return m.prereadExcluded();
+		},
+		rank: 4
+	},
+	no_guidance: {
+		get label() {
+			return m.prereadNoGuidance();
+		},
+		rank: 5
+	}
 };
 
-export const REASONS: Record<string, string> = {
-	open_finding: 'Open finding from an earlier audit, potential nonconformity',
-	open_minor_finding: 'Open point to watch from an earlier audit',
-	nothing_linked: 'No evidence linked',
-	non_compliant: 'Assessed as non-compliant',
-	quality_error: 'Audit quality check raises an error',
-	not_assessed: 'Not assessed yet',
-	stale_evidence: 'A requested record is older than its freshness window',
-	request_not_on_file: 'A requested document or record is not on file',
-	fewer_evidences_than_requests: 'Fewer evidences linked than records requested',
-	quality_warning: 'Audit quality check raises a warning'
-};
+export const REASONS: Record<string, string> = lazy({
+	open_finding: m.prereadReasonOpenFinding,
+	open_minor_finding: m.prereadReasonOpenMinorFinding,
+	nothing_linked: m.prereadReasonNothingLinked,
+	non_compliant: m.prereadReasonNonCompliant,
+	quality_error: m.prereadReasonQualityError,
+	not_assessed: m.prereadReasonNotAssessed,
+	stale_evidence: m.prereadReasonStaleEvidence,
+	request_not_on_file: m.prereadReasonRequestNotOnFile,
+	evidence_to_confirm: m.prereadReasonEvidenceToConfirm,
+	quality_warning: m.prereadReasonQualityWarning,
+	missing_file: m.prereadReasonMissingFile
+});
 
 export const SECTIONS = [
-	{ key: 'clauses', label: 'Clauses 4-10', test: (s: string) => !s.startsWith('a.') },
-	{ key: 'a.5', label: 'A.5 Organizational', test: (s: string) => s.startsWith('a.5.') },
-	{ key: 'a.6', label: 'A.6 People', test: (s: string) => s.startsWith('a.6.') },
-	{ key: 'a.7', label: 'A.7 Physical', test: (s: string) => s.startsWith('a.7.') },
-	{ key: 'a.8', label: 'A.8 Technological', test: (s: string) => s.startsWith('a.8.') }
+	{
+		key: 'clauses',
+		get label() {
+			return m.prereadSectionClauses();
+		},
+		test: (s: string) => /^\d/.test(s)
+	},
+	{
+		key: 'a.5',
+		get label() {
+			return m.prereadSectionA5();
+		},
+		test: (s: string) => s.startsWith('a.5.')
+	},
+	{
+		key: 'a.6',
+		get label() {
+			return m.prereadSectionA6();
+		},
+		test: (s: string) => s.startsWith('a.6.')
+	},
+	{
+		key: 'a.7',
+		get label() {
+			return m.prereadSectionA7();
+		},
+		test: (s: string) => s.startsWith('a.7.')
+	},
+	{
+		key: 'a.8',
+		get label() {
+			return m.prereadSectionA8();
+		},
+		test: (s: string) => s.startsWith('a.8.')
+	},
+	{
+		// Requirements of a projected framework with no ISO number of their own.
+		key: 'other',
+		get label() {
+			return m.prereadSectionOther();
+		},
+		test: (s: string): boolean => !SECTIONS.slice(0, -1).some((x) => x.test(s))
+	}
 ];
 
 /** The guide entry an item answers to, for grouping by section or session. */
@@ -126,16 +209,36 @@ export const keyOf = (i: PrereadItem) => i.guide_key ?? i.urn_suffix;
 export const sectionOf = (suffix: string) => SECTIONS.find((s) => s.test(suffix)) ?? SECTIONS[0];
 
 export const KINDS: Record<string, { label: string; icon: string }> = {
-	document: { label: 'Document', icon: 'fa-solid fa-file-lines' },
-	record: { label: 'Record', icon: 'fa-solid fa-clipboard-list' },
-	technical: { label: 'Technical export', icon: 'fa-solid fa-terminal' },
-	observation: { label: 'Observed on site', icon: 'fa-solid fa-eye' }
+	document: {
+		get label() {
+			return m.prereadKindDocument();
+		},
+		icon: 'fa-solid fa-file-lines'
+	},
+	record: {
+		get label() {
+			return m.prereadKindRecord();
+		},
+		icon: 'fa-solid fa-clipboard-list'
+	},
+	technical: {
+		get label() {
+			return m.prereadKindTechnical();
+		},
+		icon: 'fa-solid fa-terminal'
+	},
+	observation: {
+		get label() {
+			return m.prereadKindObservation();
+		},
+		icon: 'fa-solid fa-eye'
+	}
 };
 
-export const STAGES: Record<number, string> = {
-	1: 'Stage 1: documentation review',
-	2: 'Stage 2: implementation, tested on samples'
-};
+export const STAGES: Record<number, string> = lazy({
+	1: m.prereadStage1Long,
+	2: m.prereadStage2Long
+});
 
 export const tooOld = (updatedAt: string | null, days: number, now = Date.now()) =>
 	!!updatedAt && now - Date.parse(updatedAt) > days * 86_400_000;
@@ -159,7 +262,15 @@ export interface RequestRow {
 	reference_control?: string;
 	/** Matched evidences, or null when the request cannot be matched automatically. */
 	filed: FiledEvidence[] | null;
+	/** Nothing paired, but a requirement asking for it holds evidence that may answer it. */
+	toConfirm: boolean;
 }
+
+/** Evidence linked to the requirement that no request is paired with yet. */
+export const unpairedOf = (i: PrereadItem) => {
+	const paired = new Set(Object.values(i.filed ?? {}).flatMap((f) => f.map((e) => e.id)));
+	return i.evidences.filter((e) => !paired.has(e.id));
+};
 
 const rank = (i: PrereadItem) => READINESS[i.readiness].rank;
 /** The requirement in the worst state among those asking for this record. */
@@ -170,13 +281,14 @@ export function requestList(items: PrereadItem[]): RequestRow[] {
 	const rows = new Map<string, RequestRow>();
 	for (const item of items.filter((i) => i.guidance && i.readiness !== 'excluded')) {
 		for (const r of item.guidance!.requests) {
-			const key = r.reference_control ?? `${item.id}:${r.id}`;
+			const key = r.reference_control ?? `${keyOf(item)}:${r.id}`;
 			const row = rows.get(key);
 			if (!row) {
 				rows.set(key, {
 					items: [item],
 					...r,
-					filed: r.reference_control || item.filed?.[r.id] ? (item.filed?.[r.id] ?? []) : null
+					filed: r.reference_control || item.filed?.[r.id] ? (item.filed?.[r.id] ?? []) : null,
+					toConfirm: false
 				});
 			} else {
 				if (!row.items.includes(item)) row.items.push(item);
@@ -186,6 +298,11 @@ export function requestList(items: PrereadItem[]): RequestRow[] {
 			}
 		}
 	}
+	for (const row of rows.values())
+		row.toConfirm =
+			row.kind !== 'observation' &&
+			!row.filed?.length &&
+			row.items.some((i) => unpairedOf(i).length);
 	return [...rows.values()].sort((a, b) => rank(worstOf(a)) - rank(worstOf(b)));
 }
 
@@ -226,14 +343,14 @@ export function interviewPlan(items: PrereadItem[]): [string, PrereadItem[]][] {
 /** Tab-separated, ready to paste into a spreadsheet. */
 export function requestListTsv(rows: RequestRow[]): string {
 	const head = [
-		'Readiness',
-		'Ref',
-		'Requirement',
-		'Request',
-		'Kind',
-		'Max age (days)',
-		'Owner',
-		'On file'
+		m.prereadColReadiness(),
+		m.prereadColRef(),
+		m.prereadColRequirement(),
+		m.prereadColRequest(),
+		m.prereadColKind(),
+		m.prereadColMaxAgeDays(),
+		m.prereadColOwner(),
+		m.prereadColOnFile()
 	];
 	const clean = (s: string) => s.replace(/[\t\n]/g, ' ');
 	return [
@@ -246,11 +363,13 @@ export function requestListTsv(rows: RequestRow[]): string {
 			r.kind,
 			r.fresh_days ? String(r.fresh_days) : '',
 			PEOPLE[r.items[0].guidance?.interviewees[0] ?? ''] ?? '',
-			r.filed === null
-				? ''
-				: r.filed.length
-					? r.filed.map((e) => e.name ?? '').join('; ')
-					: 'missing'
+			r.filed?.length
+				? r.filed.map((e) => e.name ?? '').join('; ')
+				: r.toConfirm
+					? m.prereadTsvToConfirm()
+					: r.kind === 'observation'
+						? ''
+						: m.prereadTsvMissing()
 		])
 	]
 		.map((cols) => cols.map(clean).join('\t'))

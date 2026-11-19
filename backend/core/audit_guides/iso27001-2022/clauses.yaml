@@ -10,7 +10,7 @@ entries:
       - {id: r2, label: "Record of the decision on climate change relevance (auditors expect the reasoning, the standard does not mandate it)", kind: document}
       - {id: r3, label: "Management review minutes showing the issues list was revisited", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.mgmt_review}
     sampling:
-      - {min: 2, max: 3, unit: "issues", population: "issues listed in the context analysis", method: "trace each issue to a risk register entry, objective or control"}
+      - {id: s1, min: 2, max: 3, unit: "issues", population: "issues listed in the context analysis", method: "trace each issue to a risk register entry, objective or control"}
     interviewees: [top, ciso]
     pitfalls:
       - {id: p1, text: "No decision at all on whether climate change is relevant (required by 4.1 since Amendment 1:2024, so a likely nonconformity); a bare one-line dismissal usually draws a question or an improvement point, as 4.1 asks for no written reasoning"}
@@ -27,7 +27,7 @@ entries:
       - {id: r2, label: "Legal, regulatory and contractual requirements register (links to A.5.31)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.legal}
       - {id: r3, label: "Sample customer contract or DPA with security clauses", kind: record}
     sampling:
-      - {min: 2, max: 3, unit: "requirements", population: "legal, regulatory and contractual obligations in the register", method: "trace each to an implemented control and its evidence"}
+      - {id: s1, min: 2, max: 3, unit: "requirements", population: "legal, regulatory and contractual obligations in the register", method: "trace each to an implemented control and its evidence"}
     interviewees: [ciso, legal, dpo]
     pitfalls:
       - {id: p1, text: "Register lists parties but not their actual requirements, or does not say which requirements the ISMS will address (an explicit 2022 expectation)"}
@@ -85,7 +85,7 @@ entries:
       - {id: r1, label: "Information security policy, signed or approved by top management, with version and date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.main}
       - {id: r2, label: "Evidence the policy was communicated internally and made available to relevant interested parties (acknowledgements also serve A.5.1)", kind: record}
     sampling:
-      - {min: 3, max: 5, unit: "staff", population: "in-scope employees and contractors", method: "ask whether they know where the policy is and what it means for their role"}
+      - {id: s1, min: 3, max: 5, unit: "staff", population: "in-scope employees and contractors", method: "ask whether they know where the policy is and what it means for their role"}
     interviewees: [top, ciso, staff]
     pitfalls:
       - {id: p1, text: "Policy approved by the CISO only, not by top management"}
@@ -101,7 +101,7 @@ entries:
       - {id: r2, label: "Appointment letter or org chart naming the ISMS manager / CISO", kind: document}
       - {id: r3, label: "Job descriptions for key security roles", kind: document}
     sampling:
-      - {min: 2, max: 3, unit: "role holders", population: "named owners in the RACI (risk owners, control owners)", method: "interview to confirm they know and perform the role"}
+      - {id: s1, min: 2, max: 3, unit: "role holders", population: "named owners in the RACI (risk owners, control owners)", method: "interview to confirm they know and perform the role"}
     interviewees: [top, ciso, hr]
     pitfalls:
       - {id: p1, text: "Named risk or control owners who have left the company or do not know they hold the role"}
@@ -128,7 +128,7 @@ entries:
       - {id: r1, label: "Risk assessment methodology with acceptance criteria and scales", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.risk}
       - {id: r2, label: "Risk register / latest risk assessment results with owners", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.risk_register}
     sampling:
-      - {min: 3, max: 5, unit: "risks", population: "risk register entries, weighted to high risks", method: "check scoring against methodology, interview owner, follow to treatment"}
+      - {id: s1, min: 3, max: 5, unit: "risks", population: "risk register entries, weighted to high risks", method: "check scoring against methodology, interview owner, follow to treatment"}
     interviewees: [risk, ciso]
     pitfalls:
       - {id: p1, text: "Risk criteria or the assessment method not defined, so results cannot be repeated or compared"}
@@ -145,7 +145,7 @@ entries:
       - {id: r2, label: "Risk treatment plan with actions, owners, deadlines and status", kind: record, fresh_days: 200}
       - {id: r3, label: "Risk owner approval of the plan and acceptance of residual risk", kind: record, fresh_days: 400}
     sampling:
-      - {min: 5, max: 10, unit: "controls", population: "SoA entries marked applicable and implemented", method: "request evidence of operation for each"}
+      - {id: s1, min: 5, max: 10, unit: "controls", population: "SoA entries marked applicable and implemented", method: "request evidence of operation for each"}
     interviewees: [risk, ciso, top]
     pitfalls:
       - {id: p1, text: "SoA still on the 2013 structure (114 controls) or missing the 11 new 2022 controls such as threat intelligence and data masking"}
@@ -175,7 +175,7 @@ entries:
       - {id: r1, label: "Criteria for when an ISMS change needs planning (good practice, not required by 6.3)", kind: document}
       - {id: r2, label: "Evidence a recent ISMS change was planned before it was made (auditors commonly look for purpose, impact, resources and owner)", kind: record, fresh_days: 400}
     sampling:
-      - {min: 1, max: 2, unit: "changes", population: "ISMS-level changes in the last 12 months", method: "check planning was done before the change, not after"}
+      - {id: s1, min: 1, max: 2, unit: "changes", population: "ISMS-level changes in the last 12 months", method: "check planning was done before the change, not after"}
     interviewees: [ciso]
     pitfalls:
       - {id: p1, text: "Confused with operational change management (A.8.32); no evidence of planning for changes to the ISMS itself"}
@@ -203,7 +203,7 @@ entries:
       - {id: r2, label: "Training certificates, CVs or qualifications for key ISMS roles", kind: record}
       - {id: r3, label: "Evaluation of training effectiveness", kind: record, fresh_days: 400}
     sampling:
-      - {min: 3, max: 5, unit: "people", population: "holders of security-relevant roles (admins, developers, auditors)", method: "compare required competence to retained evidence"}
+      - {id: s1, min: 3, max: 5, unit: "people", population: "holders of security-relevant roles (admins, developers, auditors)", method: "compare required competence to retained evidence"}
     interviewees: [hr, ciso]
     pitfalls:
       - {id: p1, text: "No retained evidence (training, qualification or experience) that the internal auditor is competent"}
@@ -219,7 +219,7 @@ entries:
       - {id: r1, label: "Awareness programme plan and content", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_plan}
       - {id: r2, label: "Awareness completion records for in-scope staff", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_register}
     sampling:
-      - {min: 5, max: 10, unit: "staff", population: "staff met during the site tour and interviews, including new joiners", method: "short conversational questions on policy, reporting and their role"}
+      - {id: s1, min: 5, max: 10, unit: "staff", population: "staff met during the site tour and interviews, including new joiners", method: "short conversational questions on policy, reporting and their role"}
     interviewees: [staff, hr]
     pitfalls:
       - {id: p1, text: "Staff cannot say how their own role contributes to security"}
@@ -256,7 +256,7 @@ entries:
       - {id: r1, label: "How documents are identified, formatted and approved (a written procedure is optional)", kind: document}
       - {id: r2, label: "Approval records for recent document revisions", kind: record, fresh_days: 400}
     sampling:
-      - {min: 3, max: 5, unit: "documents", population: "ISMS policies and procedures", method: "check version, owner, approval and review date"}
+      - {id: s1, min: 3, max: 5, unit: "documents", population: "ISMS policies and procedures", method: "check version, owner, approval and review date"}
     interviewees: [ciso]
     pitfalls:
       - {id: p1, text: "Documents with no version, owner or approval record"}
@@ -271,7 +271,7 @@ entries:
       - {id: r1, label: "Record retention schedule", kind: document}
       - {id: r2, label: "Access rights on the ISMS document repository", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 2, max: 3, unit: "documents", population: "documents found at point of use during the tour", method: "compare against the current master list version"}
+      - {id: s1, min: 2, max: 3, unit: "documents", population: "documents found at point of use during the tour", method: "compare against the current master list version"}
     interviewees: [ciso, it_lead]
     pitfalls:
       - {id: p1, text: "Printed or locally saved outdated procedures in use"}
@@ -286,7 +286,7 @@ entries:
       - {id: r1, label: "List of outsourced processes and bought-in services the ISMS depends on, with how each is controlled", kind: document}
       - {id: r2, label: "Operational records showing processes carried out as planned (e.g. backup logs, patch reports)", kind: record, fresh_days: 100}
     sampling:
-      - {min: 3, max: 5, unit: "processes", population: "operational security processes and outsourced services", method: "check criteria exist and records prove execution"}
+      - {id: s1, min: 3, max: 5, unit: "processes", population: "operational security processes and outsourced services", method: "check criteria exist and records prove execution"}
     interviewees: [it_lead, ciso, proc]
     pitfalls:
       - {id: p1, text: "Outsourced IT or cloud services not listed as outsourced processes, so nothing controls them"}
@@ -300,7 +300,7 @@ entries:
       - {id: r1, label: "Risk assessment results from each scheduled cycle (last two)", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.risk_register}
       - {id: r2, label: "Ad-hoc risk assessment following a significant change or incident", kind: record}
     sampling:
-      - {min: 1, max: 2, unit: "changes", population: "significant changes in the last 12 months", method: "check a risk assessment was triggered and recorded"}
+      - {id: s1, min: 1, max: 2, unit: "changes", population: "significant changes in the last 12 months", method: "check a risk assessment was triggered and recorded"}
     interviewees: [risk]
     pitfalls:
       - {id: p1, text: "Reassessment done annually but never triggered by changes such as a new SaaS platform or acquisition"}
@@ -315,7 +315,7 @@ entries:
       - {id: r1, label: "Risk treatment plan status report", kind: record, fresh_days: 100}
       - {id: r2, label: "Evidence of completed treatment actions", kind: record}
     sampling:
-      - {min: 3, max: 5, unit: "treatment actions", population: "actions due in the last 12 months", method: "verify completion evidence and update of residual risk"}
+      - {id: s1, min: 3, max: 5, unit: "treatment actions", population: "actions due in the last 12 months", method: "verify completion evidence and update of residual risk"}
     interviewees: [risk, ciso]
     pitfalls:
       - {id: p1, text: "Actions marked done without evidence or without updating the residual risk score"}
@@ -330,7 +330,7 @@ entries:
       - {id: r1, label: "KPI catalogue: each metric with its source, cadence, who collects it and who interprets it", kind: document}
       - {id: r2, label: "Latest KPI / metrics report with analysis", kind: record, fresh_days: 100}
     sampling:
-      - {min: 2, max: 3, unit: "metrics", population: "KPIs in the measurement plan", method: "check data source, frequency met and results used"}
+      - {id: s1, min: 2, max: 3, unit: "metrics", population: "KPIs in the measurement plan", method: "check data source, frequency met and results used"}
     interviewees: [ciso, sec_ops]
     pitfalls:
       - {id: p1, text: "Metrics count activity (number of trainings) without saying anything about effectiveness"}
@@ -346,7 +346,7 @@ entries:
       - {id: r1, label: "Internal audit report(s) with findings (certification bodies expect at least one internal audit cycle covering the ISMS before Stage 2)", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:pol.audit}
       - {id: r2, label: "Internal audit checklists and evidence notes", kind: record, fresh_days: 400}
     sampling:
-      - {min: 2, max: 3, unit: "audit findings", population: "findings from the last internal audit", method: "trace to corrective action and closure"}
+      - {id: s1, min: 2, max: 3, unit: "audit findings", population: "findings from the last internal audit", method: "trace to corrective action and closure"}
     interviewees: [auditor, ciso]
     pitfalls:
       - {id: p1, text: "No internal audit cycle completed before Stage 2; certification bodies expect one and often raise its absence as a major finding"}
@@ -403,7 +403,7 @@ entries:
       - {id: r1, label: "Management review outputs: what was decided, who owns each action, and by when", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.mgmt_review}
       - {id: r2, label: "Action tracker showing follow-up of review decisions", kind: record, fresh_days: 200}
     sampling:
-      - {min: 2, max: 3, unit: "actions", population: "decisions from the last management review", method: "verify implementation evidence"}
+      - {id: s1, min: 2, max: 3, unit: "actions", population: "decisions from the last management review", method: "verify implementation evidence"}
     interviewees: [top, ciso]
     pitfalls:
       - {id: p1, text: "Minutes record discussion only, with no decisions, owners or deadlines"}
@@ -431,7 +431,7 @@ entries:
       - {id: r2, label: "Root cause analysis records for closed nonconformities", kind: record}
       - {id: r3, label: "Effectiveness review records for corrective actions", kind: record}
     sampling:
-      - {min: 3, max: 5, unit: "nonconformities", population: "nonconformities from internal audit, incidents and complaints in the last 12 months", method: "check correction, root cause, action, effectiveness review"}
+      - {id: s1, min: 3, max: 5, unit: "nonconformities", population: "nonconformities from internal audit, incidents and complaints in the last 12 months", method: "check correction, root cause, action, effectiveness review"}
     interviewees: [ciso, auditor]
     pitfalls:
       - {id: p1, text: "Correction only, with no evaluation of whether the cause needed removing, or no root cause work on significant or repeated nonconformities"}

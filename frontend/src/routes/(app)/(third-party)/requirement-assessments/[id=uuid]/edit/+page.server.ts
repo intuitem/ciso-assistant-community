@@ -325,7 +325,7 @@ export const actions: Actions = {
 			const nextParam = getSecureRedirect(event.url.searchParams.get('next'));
 			redirect(
 				302,
-				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${nextParam}` : ''}`
+				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`
 			);
 		}
 

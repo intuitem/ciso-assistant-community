@@ -17,13 +17,13 @@ entries:
     requests:
       - {id: r1, label: "Access review records, last 2 cycles", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:proc.recertification}
     sampling:
-      - {min: 5, max: 5, unit: "leavers", population: "last 12 months", method: "compare HR exit date to account disable date"}
+      - {id: s1, min: 5, max: 5, unit: "leavers", population: "last 12 months", method: "compare HR exit date to account disable date"}
     interviewees: [iam, hr]
     pitfalls:
       - {id: p1, text: "Reviews done but no record of revocations acted on"}
 ```
 
-- `id`: `q<n>`, `r<n>`, `p<n>`, unique within the entry. Never renumber or
+- `id`: `q<n>`, `r<n>`, `p<n>`, `s<n>` (sampling), unique within the entry. Never renumber or
   reuse a retired id: translations and evidence links key on it.
 - `stage`: 1 (documentation review) or 2 (implementation, sampling).
 - `kind`: document | record | technical | observation.
@@ -51,14 +51,24 @@ belongs to exactly one session (tested). A session may carry its own
 A guide also applies to a framework with another URN (a licensed copy, a
 translation) when its entries land there by requirement number: each
 assessable requirement maps by URN suffix or ref_id, falling back to the
-parent number (`4.2 a)` -> `4.2`). It applies on its own when at least 90% of
-the guide lands and that covers half the framework; otherwise the page offers
-it (`?guide=<framework urn>`).
+parent number (`4.2 a)` -> `4.2`); `A5.1` and `A.05.01` read as `a.5.1`. It
+applies on its own when at least 90% of the guide lands and that covers half
+the framework; from 50%, the audit is listed as partial and the page offers it
+(`?guide=<framework urn>`). Requirements with no ISO number show under "Other
+requirements", without guidance.
+
+Readiness: an evidence answers a request when it comes through an applied
+control whose reference control is the request's, or when someone paired it by
+hand. Evidence linked to the requirement but paired with no request makes the
+requirement *to confirm*: it may answer the requests (own naming, no
+reference control), so it is neither missing nor ready.
 
 Evidence can be paired with a request by hand (`EvidenceRequestLink`: evidence,
 guide framework URN, entry, request id). The link belongs to the evidence, so it
-holds at every audit where that evidence shows up; it counts like a match
-through the request's reference control.
+holds at every audit where that evidence shows up. When the request has a
+reference control, the pairing answers every request sharing it: the policy is
+paired once, not once per requirement asking for it, and unpairing it anywhere
+unpairs it everywhere.
 
 Findings from earlier audits (Stage 1, internal audit) come from the
 findings assessments: any `Finding` linked to the requirement, or to a
@@ -66,14 +76,26 @@ requirement assessment of any audit on the same framework. An open one at
 medium severity or above reads as a potential nonconformity (gap); below, as
 a point to watch (weak).
 
+Translations live in `<guide>/i18n/<locale>/*.yaml`, one file per source file,
+keyed by entry and item id, never by position:
+
+```yaml
+framework_urn: urn:intuitem:risk:framework:iso27001-2022
+locale: fr
+entries:
+  a.5.18:
+    q1: "Décrivez-moi une arrivée, une mobilité et un départ."
+    r1: "Revues des droits, deux derniers cycles"
+    s1: {unit: "départs", population: "12 derniers mois", method: "…"}
+sessions:
+  opening: {label: "Réunion d'ouverture", r1: "…", p1: "…"}
+```
+
+The API serves the user's language (`Accept-Language`), English for any item
+not translated. French is complete and tested; same writing rules as English.
+
 ## Target (decided 2026-11-16, not implemented yet)
 
 - Shipped as an **audit guide** library (object type `audit_guides`, model
   `AuditGuide`, one entry per requirement) that depends on the framework
   library and is versioned on its own.
-- Matching is automatic only: an evidence answers a request when it comes through
-  an applied control whose reference control is the request's. Per-request
-  freshness and coverage replace the count and tightest-window heuristics.
-  Manual evidence-to-request links come later, keyed by request `id`.
-- `translations: {<locale>: {questions|requests|pitfalls: {<id>: text}, sampling: {<unit>: text}}}`,
-  keyed by id, never by position.

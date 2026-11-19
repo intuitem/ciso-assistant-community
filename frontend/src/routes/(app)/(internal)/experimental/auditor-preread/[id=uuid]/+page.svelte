@@ -2,13 +2,16 @@
 	import { invalidateAll, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 	import {
 		KINDS,
 		PEOPLE,
 		READINESS,
-		REASONS,
 		SECTIONS,
 		STAGES,
 		interviewPlan,
@@ -20,6 +23,7 @@
 		sectionOf,
 		keyOf,
 		sessionPlan,
+		unpairedOf,
 		type PrereadItem,
 		type Readiness
 	} from '../preread';
@@ -27,7 +31,7 @@
 	let { data }: { data: PageData } = $props();
 
 	const items: PrereadItem[] = $derived(data.preread.items ?? []);
-	const SHOWN: Readiness[] = ['gap', 'weak', 'ready', 'excluded'];
+	const SHOWN: Readiness[] = ['gap', 'weak', 'to_confirm', 'ready', 'excluded'];
 	const STYLE: Record<Readiness, { bar: string; text: string; border: string; icon: string }> = {
 		gap: {
 			bar: 'bg-error-500',
@@ -40,6 +44,12 @@
 			text: 'text-warning-700-300',
 			border: 'border-warning-500',
 			icon: 'fa-solid fa-triangle-exclamation'
+		},
+		to_confirm: {
+			bar: 'bg-primary-400',
+			text: 'text-primary-700-300',
+			border: 'border-primary-400',
+			icon: 'fa-solid fa-circle-question'
 		},
 		ready: {
 			bar: 'bg-success-500',
@@ -60,13 +70,13 @@
 			icon: 'fa-solid fa-circle-question'
 		}
 	};
-	const VERDICT: Record<Readiness, string> = {
-		gap: 'Likely a nonconformity if the auditor picks this one. Prepare it before the audit.',
-		weak: 'Likely an observation, or a minor nonconformity if it comes up in a sample.',
-		ready: 'Nothing to prepare beyond having the records below open on the day.',
-		excluded:
-			'Marked not applicable. The auditor will still ask why it is excluded from the Statement of Applicability.',
-		no_guidance: 'No auditor guidance for this requirement yet.'
+	const VERDICT: Record<Readiness, () => string> = {
+		gap: m.prereadVerdictGap,
+		weak: m.prereadVerdictWeak,
+		to_confirm: m.prereadVerdictToConfirm,
+		ready: m.prereadVerdictReady,
+		excluded: m.prereadVerdictExcluded,
+		no_guidance: m.prereadVerdictNoGuidance
 	};
 
 	let view: 'req' | 'sessions' | 'requests' | 'interviews' = $state('req');
@@ -74,7 +84,16 @@
 	let section = $state('all');
 	let stage: 0 | 1 | 2 = $state(0);
 	let query = $state('');
+	let flagged = $state(false);
+	let prepOpen = $state(false);
 	let selectedId: string | null = $state(page.url.searchParams.get('req'));
+	// Paired just now: stays listed though it no longer matches the readiness filter,
+	// until another requirement is picked or the filter changes.
+	let kept: string | null = $state(null);
+	$effect(() => {
+		void readinessFilter;
+		kept = null;
+	});
 	let copied = $state(false);
 	let listEl: HTMLElement | undefined = $state();
 
@@ -86,16 +105,39 @@
 			])
 		) as Record<Readiness, number>
 	);
+	const isFlagged = (i: PrereadItem) => i.prior_findings.some((f) => f.open);
+	// Where to start: each step shows only while it has something left to do.
+	const start = $derived.by(() => {
+		const open = (i: PrereadItem) => ['gap', 'weak', 'to_confirm'].includes(i.readiness);
+		return {
+			confirm: counts.to_confirm,
+			findings: items.filter(isFlagged).length,
+			documents: requestList(items)
+				.filter(
+					(r) => r.kind !== 'observation' && !r.filed?.length && !r.toConfirm && r.items.length > 1
+				)
+				.sort((a, b) => b.items.length - a.items.length)
+				.slice(0, 3),
+			stage1: items.filter((i) => open(i) && i.guidance?.questions.some((q) => q.stage === 1))
+				.length
+		};
+	});
 	const matchesQuery = (i: PrereadItem) => {
 		const q = query.trim().toLowerCase();
 		return !q || i.ref_id.toLowerCase().includes(q) || i.name.toLowerCase().includes(q);
 	};
 	// Section counts ignore the section filter itself, so each chip says what it would show.
+	// Several requirements of a projected framework share one entry (4.2 a, 4.2 b).
+	const lettered = $derived.by(() => {
+		const keys = data.preread.items.map((i: any) => i.guide_key).filter(Boolean);
+		return new Set(keys).size < keys.length;
+	});
 	const beforeSection = $derived(
 		items.filter(
 			(i) =>
-				(readinessFilter === 'all' || i.readiness === readinessFilter) &&
+				(readinessFilter === 'all' || i.readiness === readinessFilter || i.id === kept) &&
 				(!stage || i.guidance?.questions.some((q) => q.stage === stage)) &&
+				(!flagged || isFlagged(i)) &&
 				matchesQuery(i)
 		)
 	);
@@ -120,10 +162,11 @@
 	const interviews = $derived(interviewPlan(visible));
 	const sessions = $derived(sessionPlan(visible, data.preread.sessions ?? []));
 	const filtered = $derived(
-		readinessFilter !== 'all' || section !== 'all' || stage !== 0 || query.trim() !== ''
+		readinessFilter !== 'all' || section !== 'all' || stage !== 0 || flagged || query.trim() !== ''
 	);
 
 	async function select(id: string, focus = false) {
+		if (id !== kept) kept = null;
 		selectedId = id;
 		const url = new URL(page.url.href);
 		url.searchParams.set('req', id);
@@ -156,7 +199,58 @@
 		readinessFilter = 'all';
 		section = 'all';
 		stage = 0;
+		flagged = false;
 		query = '';
+	}
+
+	const stepNo = (k: number) =>
+		[start.confirm, start.findings, start.documents.length, start.stage1]
+			.slice(0, k + 1)
+			.filter(Boolean).length;
+
+	/** The audit's edit form for one requirement; Cancel and Save come back to it here. */
+	function editHref(id: string, tab?: string, focus?: string) {
+		const back = new URL(page.url.href);
+		back.searchParams.set('req', id);
+		return `/requirement-assessments/${id}/edit?next=${encodeURIComponent(back.pathname + back.search)}${tab ? `&tab=${tab}` : ''}${focus ? `&focus=${focus}` : ''}`;
+	}
+
+	async function showPrep() {
+		prepOpen = true;
+		await tick();
+		document.getElementById('prep')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	type Todo = { text: string; action?: 'evidence' | 'assess' | 'justify' | 'prep' };
+	const ACTION = {
+		evidence: { label: m.prereadActionEvidence, icon: 'fa-solid fa-paperclip' },
+		assess: { label: m.prereadActionAssess, icon: 'fa-solid fa-pen' },
+		justify: { label: m.prereadActionJustify, icon: 'fa-solid fa-pen' },
+		prep: { label: m.prereadActionPrep, icon: 'fa-solid fa-comments' }
+	};
+	/** The readiness reasons, turned into plain next steps in the order to do them. */
+	function todos(i: PrereadItem): Todo[] {
+		if (i.readiness === 'excluded') return [{ text: m.prereadTodoJustify(), action: 'justify' }];
+		if (!i.guidance) return [{ text: m.prereadTodoNoGuide(), action: 'assess' }];
+		const has = (...r: string[]) => r.some((x) => i.reasons.includes(x));
+		const out: Todo[] = [];
+		if (has('open_finding', 'open_minor_finding')) out.push({ text: m.prereadTodoFinding() });
+		if (has('nothing_linked', 'request_not_on_file')) out.push({ text: m.prereadTodoGather() });
+		if (has('evidence_to_confirm')) out.push({ text: m.prereadTodoPair() });
+		if (has('missing_file')) out.push({ text: m.prereadTodoAddFile() });
+		if (has('stale_evidence')) out.push({ text: m.prereadTodoRefresh(), action: 'evidence' });
+		if (has('non_compliant')) out.push({ text: m.prereadTodoFix(), action: 'assess' });
+		if (has('not_assessed')) out.push({ text: m.prereadTodoAssess(), action: 'assess' });
+		if (has('quality_error', 'quality_warning')) out.push({ text: m.prereadTodoQuality() });
+		if (!out.length && i.guidance) out.push({ text: m.prereadTodoRehearse(), action: 'prep' });
+		return out;
+	}
+
+	/** Run a start step: show only what it is about, on the requirement view. */
+	function go(set: () => void) {
+		clearFilters();
+		set();
+		view = 'req';
 	}
 
 	async function copyRequests() {
@@ -170,26 +264,112 @@
 	}
 
 	let pairing: string | null = $state(null);
-	let pairError = $state('');
+	const toastStore = getToastStore();
+	const modalStore = getModalStore();
+
+	// "Choose an existing document": one picker open at a time, searching every evidence the user sees.
+	let picking: string | null = $state(null);
+	let pickQuery = $state('');
+	let found: { id: string; name: string; folder?: { str: string } }[] = $state([]);
+	let searchSeq = 0;
+	function togglePick(key: string) {
+		picking = picking === key ? null : key;
+		pickQuery = '';
+	}
+	$effect(() => {
+		if (!picking) return;
+		const q = pickQuery.trim();
+		const seq = ++searchSeq;
+		const t = setTimeout(async () => {
+			const res = await fetch(
+				`/evidences?${new URLSearchParams({ search: q, ordering: '-updated_at', limit: '8' })}`
+			);
+			if (seq === searchSeq) found = res.ok ? ((await res.json()).results ?? []) : [];
+		}, 250);
+		return () => clearTimeout(t);
+	});
+	async function pick(raId: string, request: string, evidence: string) {
+		await pair(raId, request, evidence, false, true);
+		picking = null;
+	}
+
+	/** A file or link for a paired evidence that has neither: a new revision of it. */
+	function addFile(evidence: string) {
+		const f = data.revisionCreateForm;
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: CreateModal,
+				props: {
+					form: { ...f, id: `preread-revision-${evidence}`, data: { ...f.data, evidence } },
+					formAction: '?/createRevision',
+					model: data.revisionModel,
+					debug: false
+				}
+			},
+			title: m.prereadAddFile()
+		});
+	}
+
+	/** New evidence for one request: created on the requirement and paired with the request. */
+	function upload(raId: string, r: { id: string; label: string }) {
+		const f = data.evidenceCreateForm;
+		const guide = page.url.searchParams.get('guide');
+		kept = raId;
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: CreateModal,
+				props: {
+					form: {
+						...f,
+						id: `preread-evidence-${raId}-${r.id}`,
+						data: { ...f.data, name: r.label, requirement_assessments: [raId] }
+					},
+					formAction: `?/createEvidence&ra=${raId}&request=${encodeURIComponent(r.id)}${guide ? `&guide=${encodeURIComponent(guide)}` : ''}`,
+					model: data.evidenceModel,
+					debug: false
+				}
+			},
+			title: m.prereadUpload()
+		});
+	}
 
 	/** Mark (or unmark) an evidence as answering one request, then reload the pre-read. */
-	async function pair(raId: string, request: string, evidence: string, remove = false) {
+	async function pair(
+		raId: string,
+		request: string,
+		evidence: string,
+		remove = false,
+		attach = false
+	) {
 		pairing = `${request}:${evidence}`;
-		pairError = '';
 		const guide = page.url.searchParams.get('guide');
 		const res = await fetch(`/experimental/auditor-preread/${data.audit.id}/pair`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ requirement_assessment: raId, request, evidence, remove, guide })
+			body: JSON.stringify({
+				requirement_assessment: raId,
+				request,
+				evidence,
+				remove,
+				attach,
+				guide
+			})
 		});
-		if (res.ok) await invalidateAll();
-		else
-			pairError = res.status === 403 ? 'You cannot edit this audit.' : 'The pairing was not saved.';
+		if (res.ok) {
+			kept = raId;
+			await invalidateAll();
+		} else
+			toastStore.trigger({
+				message: res.status === 403 ? m.prereadCannotEdit() : m.prereadPairNotSaved(),
+				background: 'preset-filled-error-500'
+			});
 		pairing = null;
 	}
 
 	const pct = (n: number) => (items.length ? (100 * n) / items.length : 0);
-	const ageLabel = (iso: string | null) => (iso ? iso.slice(0, 10) : 'no revision');
+	const ageLabel = (iso: string | null) => (iso ? iso.slice(0, 10) : m.prereadNoRevision());
 </script>
 
 {#snippet dot(r: Readiness)}
@@ -219,7 +399,7 @@
 	<!-- Summary -->
 	<header
 		class="card border border-surface-200-800 overflow-hidden flex flex-col"
-		aria-label="Readiness summary"
+		aria-label={m.prereadSummary()}
 	>
 		<div class="h-1 bg-gradient-to-r from-primary-500 via-primary-400 to-secondary-400"></div>
 		<div class="p-5 flex flex-col gap-4">
@@ -231,7 +411,7 @@
 				</span>
 				<div class="flex flex-col leading-tight">
 					<span class="text-xs uppercase tracking-[0.12em] font-semibold text-primary-600-400"
-						>Auditor pre-read</span
+						>{m.prereadTitle()}</span
 					>
 					<span class="text-sm text-surface-600-400">{data.audit.framework?.str ?? ''}</span>
 				</div>
@@ -239,44 +419,17 @@
 					href="/compliance-assessments/{data.audit.id}"
 					class="btn btn-sm preset-tonal-surface ml-auto"
 				>
-					<i class="fa-solid fa-arrow-up-right-from-square"></i>Open the audit
+					<i class="fa-solid fa-arrow-up-right-from-square"></i>{m.prereadOpenAudit()}
 				</a>
 			</div>
 
 			{#if data.preread.supported && items.length}
-				<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-					{#each SHOWN as r (r)}
-						{@const on = readinessFilter === r}
-						<button
-							class="group relative text-left rounded-base border px-3 pt-2 pb-2.5 transition disabled:opacity-50 disabled:cursor-default {on
-								? `bg-surface-100-900 shadow-sm ${STYLE[r].border}`
-								: 'border-surface-200-800 enabled:hover:border-surface-400-600 enabled:hover:bg-surface-100-900'}"
-							aria-pressed={on}
-							disabled={!counts[r] && !on}
-							title={on ? 'Show all requirements' : `Show ${READINESS[r].label.toLowerCase()} only`}
-							onclick={() => (readinessFilter = on ? 'all' : r)}
-						>
-							<i
-								class="fa-solid {on
-									? 'fa-xmark text-surface-700-300'
-									: 'fa-filter text-surface-400 group-enabled:group-hover:text-surface-600-400'} absolute top-2 right-2.5 text-xs"
-								aria-hidden="true"
-							></i>
-							<span class="block text-3xl font-semibold tabular-nums leading-none">{counts[r]}</span
-							>
-							<span class="flex items-center gap-1.5 mt-1.5 text-sm text-surface-600-400">
-								{@render dot(r)}{READINESS[r].label}
-								{#if on}<span class="text-xs font-medium text-surface-700-300">· Filtering</span
-									>{/if}
-							</span>
-						</button>
-					{/each}
-				</div>
-				<div class="flex flex-col gap-1.5">
+				<div class="flex flex-col gap-2">
 					<div
-						class="flex h-1.5 w-full gap-0.5 overflow-hidden rounded-full"
+						class="flex h-2 w-full gap-0.5 overflow-hidden rounded-full"
 						role="img"
 						aria-label={SHOWN.map((r) => `${counts[r]} ${READINESS[r].label}`).join(', ')}
+						title={m.prereadSummaryHint({ count: items.length })}
 					>
 						{#each SHOWN as r (r)}
 							{#if counts[r]}
@@ -284,28 +437,112 @@
 							{/if}
 						{/each}
 					</div>
-					<span class="text-xs text-surface-500">
-						{items.length} requirements. Click a count to show only those. Readiness is an estimate from
-						the evidence linked to the audit and its quality checks.
-					</span>
+					<div class="flex flex-wrap gap-1.5 text-sm" role="group" aria-label={m.prereadSummary()}>
+						{#each SHOWN as r (r)}
+							{@const on = readinessFilter === r}
+							<button
+								class="flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 disabled:opacity-50 disabled:cursor-default {on
+									? `bg-surface-100-900 font-medium ${STYLE[r].border}`
+									: 'border-surface-200-800 enabled:hover:bg-surface-100-900'}"
+								aria-pressed={on}
+								disabled={!counts[r] && !on}
+								title={on ? m.prereadShowAll() : m.prereadShowOnly({ state: READINESS[r].label })}
+								onclick={() => (readinessFilter = on ? 'all' : r)}
+							>
+								{@render dot(r)}<span class="font-semibold tabular-nums">{counts[r]}</span>
+								<span class="text-surface-600-400">{READINESS[r].label}</span>
+								{#if on}<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>{/if}
+							</button>
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>
 	</header>
 
+	{#if data.preread.supported && (start.confirm || start.findings || start.documents.length || start.stage1)}
+		<section
+			class="card border border-primary-500/40 bg-primary-500/5 p-4 flex flex-col gap-2"
+			aria-label={m.prereadStartTitle()}
+		>
+			<h2 class="font-semibold flex items-center gap-2">
+				<i class="fa-solid fa-route text-primary-500"></i>{m.prereadStartTitle()}
+			</h2>
+			<ol class="flex flex-col gap-1.5 text-sm">
+				{#if start.confirm}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(0)}.</span>
+						<button
+							class="anchor text-left"
+							onclick={() => go(() => (readinessFilter = 'to_confirm'))}
+							>{m.prereadStartConfirm({ count: start.confirm })}</button
+						>
+					</li>
+				{/if}
+				{#if start.findings}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(1)}.</span>
+						<button class="anchor text-left" onclick={() => go(() => (flagged = true))}
+							>{m.prereadStartFindings({ count: start.findings })}</button
+						>
+					</li>
+				{/if}
+				{#if start.documents.length}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(2)}.</span>
+						<div class="flex flex-col gap-1">
+							<span>{m.prereadStartDocuments()}</span>
+							<ul class="flex flex-col gap-0.5">
+								{#each start.documents as r, i (i)}
+									<li class="flex flex-wrap items-baseline gap-x-2">
+										<i class="{KINDS[r.kind]?.icon ?? 'fa-solid fa-file'} text-surface-500 text-xs"
+										></i>
+										<button class="anchor text-left" onclick={() => openRequirement(r.items[0].id)}
+											>{r.label}</button
+										>
+										<span class="text-xs text-surface-600-400"
+											>{m.prereadAnswers({ count: r.items.length })}</span
+										>
+									</li>
+								{/each}
+							</ul>
+							<button
+								class="anchor text-left text-xs"
+								onclick={() => {
+									clearFilters();
+									view = 'requests';
+								}}>{m.prereadSeeAllRequests()}</button
+							>
+						</div>
+					</li>
+				{/if}
+				{#if start.stage1}
+					<li class="flex gap-2">
+						<span class="text-surface-500 tabular-nums">{stepNo(3)}.</span>
+						<button class="anchor text-left" onclick={() => go(() => (stage = 1))}
+							>{m.prereadStartStage1({ count: start.stage1 })}</button
+						>
+					</li>
+				{/if}
+			</ol>
+		</section>
+	{/if}
+
 	{#if !data.preread.supported}
 		<div class="card preset-tonal-warning p-4 flex flex-col gap-2">
 			<p>
-				There is no auditor guidance for this framework yet. Only ISO/IEC 27001:2022 is covered,
-				including copies of it with the same requirement numbers.
+				{m.prereadUnsupported()}
 			</p>
 			{#if data.preread.suggestion}
 				{@const s = data.preread.suggestion}
 				<p class="text-sm">
-					Its numbering partly matches the ISO/IEC 27001:2022 guide: {Math.round(s.coverage * 100)}%
-					of the guide lands on {s.matched} of its {s.total} requirements.
+					{m.prereadSuggestion({
+						pct: Math.round(s.coverage * 100),
+						matched: s.matched,
+						total: s.total
+					})}
 					<a class="anchor" href="?guide={encodeURIComponent(s.framework_urn)}"
-						>Apply the guide anyway</a
+						>{m.prereadApplyAnyway()}</a
 					>
 				</p>
 			{/if}
@@ -314,73 +551,20 @@
 		{#if data.preread.guide && !data.preread.guide.exact}
 			<p class="text-sm text-surface-600-400 flex items-center gap-2">
 				<i class="fa-solid fa-shuffle"></i>
-				ISO/IEC 27001:2022 guidance applied by requirement number: {data.preread.guide.matched} of
-				{data.preread.guide.total} requirements matched. Lettered items share their parent's guidance.
+				{m.prereadProjected({
+					matched: data.preread.guide.matched,
+					total: data.preread.guide.total
+				})}
+				{#if lettered}{m.prereadLettered()}{/if}
 			</p>
 		{/if}
-		{#if pairError}
-			<p class="card preset-tonal-error p-3 text-sm" role="alert">{pairError}</p>
-		{/if}
-		<!-- Toolbar -->
-		<div class="flex flex-col gap-3">
-			<div class="flex flex-wrap items-center gap-2">
-				<label class="relative grow max-w-sm">
-					<span class="sr-only">Search requirements</span>
-					<i
-						class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 text-sm"
-					></i>
-					<input
-						class="input pl-9 w-full"
-						type="search"
-						placeholder="Search by ref or title"
-						bind:value={query}
-					/>
-				</label>
-				<div
-					class="flex rounded-base border border-surface-200-800 overflow-hidden text-sm"
-					role="group"
-					aria-label="Audit stage"
-				>
-					{#each [[0, 'Both stages'], [1, 'Stage 1'], [2, 'Stage 2']] as [value, label] (value)}
-						<button
-							class="px-3 py-1.5 {stage === value
-								? 'preset-filled-primary-500'
-								: 'hover:bg-surface-100-900'}"
-							aria-pressed={stage === value}
-							title={value ? STAGES[value as number] : 'Questions from both stages'}
-							onclick={() => (stage = value as 0 | 1 | 2)}>{label}</button
-						>
-					{/each}
-				</div>
-				{#if filtered}
-					<button class="btn btn-sm preset-tonal-surface" onclick={clearFilters}>
-						<i class="fa-solid fa-xmark"></i>Clear filters
-					</button>
-				{/if}
-			</div>
-			<div class="flex flex-wrap gap-1.5 text-sm" role="group" aria-label="Section">
-				{#each [{ key: 'all', label: 'All sections', test: () => true }, ...SECTIONS] as s (s.key)}
-					{@const n = beforeSection.filter((i) => s.test(keyOf(i))).length}
-					<button
-						class="rounded-full px-3 py-1 border {section === s.key
-							? 'preset-filled-primary-500 border-transparent'
-							: 'border-surface-200-800 hover:bg-surface-100-900'}"
-						aria-pressed={section === s.key}
-						onclick={() => (section = s.key)}
-					>
-						{s.label} <span class="tabular-nums opacity-70">{n}</span>
-					</button>
-				{/each}
-			</div>
-		</div>
-
 		<!-- Tabs -->
-		<div class="flex gap-1 border-b border-surface-200-800" role="tablist">
-			{#each [['req', 'By requirement', 'fa-solid fa-list-check', visible.length], ['sessions', 'Audit sessions', 'fa-solid fa-calendar-day', sessions.length], ['requests', 'Evidence request list', 'fa-solid fa-folder-open', requests.length], ['interviews', 'Interview plan', 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
+		<div class="flex gap-1 border-b border-surface-200-800 overflow-x-auto" role="tablist">
+			{#each [['req', m.prereadByRequirement(), 'fa-solid fa-list-check', visible.length], ['sessions', m.prereadSessions(), 'fa-solid fa-calendar-day', sessions.length], ['requests', m.prereadRequestList(), 'fa-solid fa-folder-open', requests.length], ['interviews', m.prereadInterviewPlan(), 'fa-solid fa-people-group', interviews.length]] as const as [key, label, icon, n] (key)}
 				<button
 					role="tab"
 					aria-selected={view === key}
-					class="flex items-center gap-2 px-3 py-2 -mb-px border-b-2 {view === key
+					class="flex items-center gap-2 px-3 py-2 -mb-px border-b-2 whitespace-nowrap {view === key
 						? 'border-primary-500 font-semibold'
 						: 'border-transparent text-surface-600-400 hover:text-surface-950-50'}"
 					onclick={() => (view = key)}
@@ -391,13 +575,70 @@
 			{/each}
 		</div>
 
+		<!-- Filters -->
+		<div class="flex flex-wrap items-center gap-2">
+			<label class="relative grow max-w-sm">
+				<span class="sr-only">{m.prereadSearchRequirements()}</span>
+				<i
+					class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 text-sm"
+				></i>
+				<input
+					class="input pl-9 w-full"
+					type="search"
+					placeholder={m.prereadSearchRequirementsPlaceholder()}
+					bind:value={query}
+				/>
+			</label>
+			<div
+				class="flex rounded-base border border-surface-200-800 overflow-hidden text-sm"
+				role="group"
+				aria-label={m.prereadAuditStage()}
+			>
+				{#each [[0, m.prereadBothStages()], [1, m.prereadStage1()], [2, m.prereadStage2()]] as [value, label] (value)}
+					<button
+						class="px-3 py-1.5 {stage === value
+							? 'preset-filled-primary-500'
+							: 'hover:bg-surface-100-900'}"
+						aria-pressed={stage === value}
+						title={value ? STAGES[value as number] : m.prereadBothStagesHint()}
+						onclick={() => (stage = value as 0 | 1 | 2)}>{label}</button
+					>
+				{/each}
+			</div>
+			<label>
+				<span class="sr-only">{m.prereadSection()}</span>
+				<select class="select w-auto text-sm py-1.5" bind:value={section}>
+					{#each [{ key: 'all', label: m.prereadAllSections(), test: () => true }, ...SECTIONS.filter( (s) => data.preread.items.some( (i: any) => s.test(keyOf(i)) ) )] as s (s.key)}
+						<option value={s.key}
+							>{s.label} ({beforeSection.filter((i) => s.test(keyOf(i))).length})</option
+						>
+					{/each}
+				</select>
+			</label>
+			{#if flagged}
+				<button
+					class="flex items-center gap-1.5 rounded-full border border-error-500 px-2.5 py-0.5 text-sm"
+					aria-pressed="true"
+					onclick={() => (flagged = false)}
+				>
+					<i class="fa-solid fa-flag text-error-500 text-xs"></i>{m.prereadOpenFindingsFilter()}
+					<i class="fa-solid fa-xmark text-xs" aria-hidden="true"></i>
+				</button>
+			{/if}
+			{#if filtered}
+				<button class="btn btn-sm preset-tonal-surface" onclick={clearFilters}>
+					<i class="fa-solid fa-xmark"></i>{m.prereadClearFilters()}
+				</button>
+			{/if}
+		</div>
+
 		{#if view === 'req'}
 			<div class="grid grid-cols-1 lg:grid-cols-[20rem_minmax(0,1fr)] gap-5 items-start">
 				<!-- Requirement index -->
 				<nav
 					bind:this={listEl}
 					class="card border border-surface-200-800 lg:sticky lg:top-4 max-h-[75vh] overflow-auto"
-					aria-label="Requirements"
+					aria-label={m.prereadRequirements()}
 				>
 					{#each grouped as g (g.key)}
 						<div
@@ -423,7 +664,7 @@
 										<span class="leading-snug"
 											>{item.name}{#if item.prior_findings.some((f) => f.open)}<i
 													class="fa-solid fa-flag text-error-500 text-xs ml-1.5"
-													title="Open finding from an earlier audit"
+													title={m.prereadOpenFindingHint()}
 												></i>{/if}</span
 										>
 										{@render dot(item.readiness)}
@@ -434,8 +675,8 @@
 					{:else}
 						<div class="p-6 text-center text-sm text-surface-600-400 flex flex-col gap-2">
 							<i class="fa-solid fa-filter-circle-xmark text-2xl"></i>
-							Nothing matches these filters.
-							<button class="anchor" onclick={clearFilters}>Clear filters</button>
+							{m.prereadNothingMatches()}
+							<button class="anchor" onclick={clearFilters}>{m.prereadClearFilters()}</button>
 						</div>
 					{/each}
 				</nav>
@@ -444,6 +685,7 @@
 				{#if selected}
 					{@const g = selected.guidance}
 					{@const s = STYLE[selected.readiness]}
+					{@const steps = todos(selected)}
 					<article class="card border border-surface-200-800 flex flex-col min-w-0">
 						<header
 							class="flex flex-wrap items-start gap-x-3 gap-y-2 p-5 border-b border-surface-200-800"
@@ -456,15 +698,15 @@
 								</h2>
 							</div>
 							<div class="flex items-center gap-2">
-								<span class="badge preset-tonal-surface" title="Result recorded in the audit">
-									{safeTranslate(selected.result)}
+								<span class="text-xs text-surface-600-400" title={m.prereadResultHint()}>
+									{m.prereadResultIn({ result: safeTranslate(selected.result) })}
 								</span>
 								<a
 									class="btn btn-sm preset-tonal-primary"
-									href="/requirement-assessments/{selected.id}"
-									title="Open this requirement in the audit"
+									href={editHref(selected.id)}
+									title={m.prereadOpenInAuditHint()}
 								>
-									<i class="fa-solid fa-arrow-up-right-from-square"></i>Open in audit
+									<i class="fa-solid fa-arrow-up-right-from-square"></i>{m.prereadOpenInAudit()}
 								</a>
 							</div>
 						</header>
@@ -478,25 +720,46 @@
 										<span class="font-semibold {s.text}"
 											>{READINESS[selected.readiness].label}.</span
 										>
-										{VERDICT[selected.readiness]}
+										{VERDICT[selected.readiness]()}
 									</p>
-									{#if selected.reasons.length}
-										<div class="flex flex-wrap gap-1.5">
-											{#each selected.reasons as r (r)}
-												<span
-													class="text-xs rounded-full border border-surface-300-700 px-2 py-0.5 text-surface-700-300"
-													>{REASONS[r] ?? r}</span
-												>
-											{/each}
+									{#if steps.length}
+										<div class="flex flex-col gap-1.5">
+											<span
+												class="text-xs uppercase tracking-wider font-semibold text-surface-600-400"
+												>{m.prereadTodoTitle()}</span
+											>
+											<ol class="flex flex-col gap-2">
+												{#each steps as t, n (n)}
+													<li class="flex flex-wrap items-center gap-x-3 gap-y-1">
+														<span
+															class="size-5 shrink-0 rounded-full bg-surface-200-800 grid place-items-center text-xs font-semibold tabular-nums"
+															>{n + 1}</span
+														>
+														<span class="grow basis-64">{t.text}</span>
+														{#if t.action === 'prep'}
+															<button class="btn btn-sm preset-tonal-primary" onclick={showPrep}
+																><i class={ACTION.prep.icon}></i>{ACTION.prep.label()}</button
+															>
+														{:else if t.action}
+															<a
+																class="btn btn-sm preset-tonal-primary"
+																href={editHref(
+																	selected.id,
+																	t.action === 'evidence' ? 'evidences' : undefined,
+																	t.action === 'evidence' ? undefined : 'result'
+																)}
+																><i class={ACTION[t.action].icon}></i>{ACTION[t.action].label()}</a
+															>
+														{/if}
+													</li>
+												{/each}
+											</ol>
 										</div>
 									{/if}
 									{#if selected.findings.length}
 										<details class="text-sm">
 											<summary class="cursor-pointer text-surface-600-400">
-												{selected.findings.length} audit quality finding{selected.findings.length >
-												1
-													? 's'
-													: ''}
+												{m.prereadQualityFindings({ count: selected.findings.length })}
 											</summary>
 											<ul class="mt-1 flex flex-col gap-1 pl-1">
 												{#each selected.findings as f, i (i)}
@@ -519,8 +782,8 @@
 								<section class="flex flex-col gap-2">
 									{@render title(
 										'fa-solid fa-flag',
-										'Raised at an earlier audit',
-										'Followed up first: bring the action taken and its evidence'
+										m.prereadEarlierAudit(),
+										m.prereadEarlierAuditHint()
 									)}
 									<ul class="flex flex-col divide-y divide-surface-200-800 text-sm">
 										{#each selected.prior_findings as f (f.id)}
@@ -552,82 +815,25 @@
 										.flat()
 										.map((e) => e.id)
 								)}
-								{@const unpaired = selected.evidences.filter((e) => !pairedIds.has(e.id))}
-								<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
-									<section class="flex flex-col gap-3">
-										{@render title('fa-solid fa-comments', 'What the auditor will ask')}
-										<ol class="flex flex-col gap-3 border-l-2 border-primary-500/50 pl-4">
-											{#each g.questions as q (q.id)}
-												<li class="flex gap-3 items-start">
-													<span
-														class="shrink-0 mt-0.5 rounded px-1.5 text-[11px] font-mono font-semibold leading-5 {q.stage ===
-														1
-															? 'border border-surface-300-700 text-surface-600-400'
-															: 'bg-surface-200-800 text-surface-800-200'}"
-														title={STAGES[q.stage]}>S{q.stage}</span
-													>
-													<span class="leading-relaxed text-[15px]">{q.text}</span>
-												</li>
-											{/each}
-										</ol>
-									</section>
-									<section class="flex flex-col gap-4">
-										<div class="flex flex-col gap-2">
-											{@render title('fa-solid fa-vials', 'How they will check it')}
-											{@render heading('fa-solid fa-layer-group', 'Sample')}
-											{#if g.sampling.length}
-												{@const s = g.sampling[0]}
-												<!-- shortcut: rows of one requirement share population and method today; group by them if that changes -->
-												<div
-													class="rounded-base bg-surface-100-900 p-3 text-sm flex flex-col gap-1"
-												>
-													<span class="font-semibold"
-														>{g.sampling
-															.map(
-																(r) => `${r.min === r.max ? r.min : `${r.min}–${r.max}`} ${r.unit}`
-															)
-															.join(' + ')}</span
-													>
-													{#if s.note}<span class="text-surface-600-400">{s.note}</span>{/if}
-													{#if s.population}
-														<span class="text-surface-600-400">From {s.population}</span>
-													{/if}
-													{#if s.method}<span class="first-letter:uppercase">{s.method}</span>{/if}
-												</div>
-											{:else}
-												<p class="text-sm text-surface-600-400">
-													Document review only, no sampling expected.
-												</p>
-											{/if}
-										</div>
-										<div class="flex flex-col gap-2">
-											{@render heading('fa-solid fa-user-group', 'Interviews')}
-											<div class="flex flex-wrap gap-1.5">
-												{#each g.interviewees as w (w)}
-													<span
-														class="text-xs rounded-full border border-surface-300-700 px-2.5 py-1 flex items-center gap-1.5"
-														><i class="fa-solid fa-user text-surface-500 text-[10px]"></i>{PEOPLE[
-															w
-														] ?? w}</span
-													>
-												{/each}
-											</div>
-										</div>
-									</section>
-								</div>
-
+								{@const unpaired = unpairedOf(selected)}
 								<!-- Requested vs on file -->
 								<section class="flex flex-col gap-3">
 									{@render title(
 										'fa-solid fa-scale-balanced',
-										'Requested vs. on file',
-										`${g.requests.filter((r) => r.kind !== 'observation').length} to file · ${Object.values(selected.filed ?? {}).filter((f) => f.length).length} matched · ${unpaired.length} other on file`
+										m.prereadRequestedVsOnFile(),
+										m.prereadRequestedAside({
+											toFile: g.requests.filter((r) => r.kind !== 'observation').length,
+											matched: Object.values(selected.filed ?? {}).filter((f) =>
+												f.some((e) => e.has_file)
+											).length,
+											other: unpaired.length
+										})
 									)}
 									<div
 										class="grid grid-cols-1 xl:grid-cols-2 gap-4 rounded-container bg-surface-100-900 p-3"
 									>
 										<section class="flex flex-col gap-2">
-											{@render heading('fa-solid fa-folder-open', 'The auditor will ask for')}
+											{@render heading('fa-solid fa-folder-open', m.prereadWillAskFor())}
 											<ul
 												class="flex flex-col divide-y divide-surface-200-800 border border-surface-200-800 rounded-base bg-surface-50-950"
 											>
@@ -651,8 +857,8 @@
 															{#if r.fresh_days}
 																<span
 																	class="shrink-0 text-xs text-surface-600-400 tabular-nums"
-																	title="The most recent one should be younger than this"
-																	>≤ {r.fresh_days} d</span
+																	title={m.prereadFreshHint()}
+																	>≤ {m.prereadDays({ days: r.fresh_days })}</span
 																>
 															{/if}
 														</span>
@@ -665,7 +871,7 @@
 																		{#if e.name}<a class="anchor" href="/evidences/{e.id}"
 																				>{e.name}</a
 																			>{:else}<span class="italic text-surface-600-400"
-																				>Evidence you cannot view</span
+																				>{m.prereadEvidenceHidden()}</span
 																			>{/if}
 																		<span
 																			class="tabular-nums {old
@@ -676,15 +882,25 @@
 																		>
 																		{#if !e.here}<span
 																				class="text-surface-600-400"
-																				title="Linked under another requirement that asks for the same document"
-																				>· filed elsewhere in the audit</span
+																				title={m.prereadFiledElsewhereHint()}
+																				>{m.prereadFiledElsewhere()}</span
 																			>{/if}
+																		{#if e.has_file === false && e.name}
+																			<button
+																				class="anchor text-warning-700-300"
+																				onclick={() => addFile(e.id)}
+																				><i class="fa-solid fa-file-circle-plus mr-1"
+																				></i>{m.prereadAddFile()}</button
+																			>
+																		{/if}
 																		{#if e.manual}
-																			<span class="text-surface-600-400">· paired by hand</span>
+																			<span class="text-surface-600-400"
+																				>{m.prereadPairedByHand()}</span
+																			>
 																			<button
 																				class="text-surface-500 hover:text-error-600-400 disabled:opacity-50"
-																				title="Unpair: this evidence does not answer this request"
-																				aria-label="Unpair {e.name ?? 'evidence'}"
+																				title={m.prereadUnpairHint()}
+																				aria-label={m.prereadUnpair({ name: e.name ?? '' })}
 																				disabled={pairing !== null}
 																				onclick={() => pair(selected.id, r.id, e.id, true)}
 																				><i class="fa-solid fa-xmark"></i></button
@@ -693,32 +909,81 @@
 																	</li>
 																{/each}
 															</ul>
-														{:else if filed}
+														{:else if r.kind !== 'observation' && unpaired.length}
+															<span class="pl-7 text-xs text-primary-700-300"
+																><i class="fa-solid fa-circle-question mr-1"
+																></i>{m.prereadToConfirmPick()}</span
+															>
+														{:else if r.kind !== 'observation'}
 															<span class="pl-7 text-xs text-error-600-400"
-																><i class="fa-solid fa-circle-xmark mr-1"></i>Not on file</span
+																><i class="fa-solid fa-circle-xmark mr-1"
+																></i>{m.prereadNotOnFile()}</span
 															>
 														{/if}
-														{#if candidates.length}
-															<label
-																class="pl-7 flex items-center gap-2 text-xs text-surface-600-400"
-															>
-																<i class="fa-solid fa-link"></i>
-																<span class="sr-only">Pair an evidence with: {r.label}</span>
-																<select
-																	class="select py-0.5 px-2 text-xs w-auto max-w-full"
-																	disabled={pairing !== null}
-																	onchange={(ev) => {
-																		const id = ev.currentTarget.value;
-																		ev.currentTarget.value = '';
-																		if (id) pair(selected.id, r.id, id);
-																	}}
+														{#if !filed?.length && r.kind !== 'observation'}
+															{@const key = `${selected.id}:${r.id}`}
+															<span class="pl-7 flex flex-wrap gap-2">
+																<button
+																	class="btn btn-sm preset-tonal-primary"
+																	title={m.prereadUploadHint()}
+																	onclick={() => upload(selected.id, r)}
+																	><i class="fa-solid fa-upload"></i>{m.prereadUpload()}</button
 																>
-																	<option value="">Answered by…</option>
-																	{#each candidates as e (e.id)}
-																		<option value={e.id}>{e.name}</option>
-																	{/each}
-																</select>
-															</label>
+																<button
+																	class="btn btn-sm {picking === key
+																		? 'preset-filled-surface-500'
+																		: 'preset-tonal-surface'}"
+																	title={m.prereadPickHint()}
+																	aria-expanded={picking === key}
+																	onclick={() => togglePick(key)}
+																	><i class="fa-solid fa-magnifying-glass"
+																	></i>{m.prereadPickExisting()}</button
+																>
+															</span>
+															{#if picking === key}
+																{@const shown = [
+																	...candidates
+																		.filter((e) =>
+																			e.name!.toLowerCase().includes(pickQuery.trim().toLowerCase())
+																		)
+																		.map((e) => ({ ...e, here: true })),
+																	...found.filter((e) => !candidates.some((c) => c.id === e.id))
+																]}
+																<div
+																	class="ml-7 flex flex-col gap-1.5 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+																>
+																	<input
+																		class="input py-1 text-sm"
+																		type="search"
+																		{@attach (el) => el.focus()}
+																		placeholder={m.prereadPickSearch()}
+																		aria-label={m.prereadPickSearch()}
+																		bind:value={pickQuery}
+																	/>
+																	<ul class="flex flex-col max-h-60 overflow-auto">
+																		{#each shown as e (e.id)}
+																			<li>
+																				<button
+																					class="w-full text-left rounded px-2 py-1.5 text-sm hover:bg-primary-500/10 disabled:opacity-50 flex flex-wrap items-baseline gap-x-2"
+																					disabled={pairing !== null}
+																					onclick={() => pick(selected.id, r.id, e.id)}
+																				>
+																					<span class="grow">{e.name}</span>
+																					<span class="text-xs text-surface-600-400"
+																						>{'here' in e
+																							? m.prereadPickOnRequirement()
+																							: (e.folder?.str ?? '')}</span
+																					>
+																				</button>
+																			</li>
+																		{:else}
+																			<li class="px-2 py-1.5 text-sm text-surface-600-400">
+																				{m.prereadPickNone()}
+																			</li>
+																		{/each}
+																	</ul>
+																</div>
+															{/if}
 														{/if}
 													</li>
 												{/each}
@@ -727,7 +992,7 @@
 										<section class="flex flex-col gap-2">
 											{@render heading(
 												'fa-solid fa-paperclip',
-												pairedIds.size ? 'Also on file, not matched' : 'You have on file'
+												pairedIds.size ? m.prereadAlsoOnFile() : m.prereadOnFile()
 											)}
 											{#if unpaired.length}
 												<ul
@@ -737,7 +1002,7 @@
 														{@const via = e.via_controls.map(
 															(id) =>
 																selected.applied_controls.find((c) => c.id === id)?.name ??
-																'a control you cannot view'
+																m.prereadControlHiddenLower()
 														)}
 														{@const stale = isStale(e.updated_at, g)}
 														<li class="flex flex-col gap-0.5 p-2.5 text-sm">
@@ -746,14 +1011,14 @@
 																	<a class="anchor grow" href="/evidences/{e.id}">{e.name}</a>
 																{:else}
 																	<span class="italic text-surface-600-400 grow"
-																		>Evidence you cannot view</span
+																		>{m.prereadEvidenceHidden()}</span
 																	>
 																{/if}
 																<span
 																	class="shrink-0 text-xs tabular-nums {stale || !e.updated_at
 																		? 'text-warning-700-300'
 																		: 'text-surface-600-400'}"
-																	title={stale ? 'Older than the freshness window requested' : ''}
+																	title={stale ? m.prereadOlderThanWindow() : ''}
 																>
 																	{#if stale || !e.updated_at}<i
 																			class="fa-solid fa-clock-rotate-left mr-1"
@@ -762,17 +1027,24 @@
 															</span>
 															<span class="text-xs text-surface-600-400 flex flex-wrap gap-x-2">
 																{#if e.direct}<span
-																		><i class="fa-solid fa-link mr-1"></i>attached to the
-																		requirement</span
+																		><i class="fa-solid fa-link mr-1"
+																		></i>{m.prereadAttachedToRequirement()}</span
 																	>{/if}
 																{#each via as name, i (i)}
 																	<span
-																		><i class="fa-solid fa-shield-halved mr-1"></i>via {name}</span
+																		><i class="fa-solid fa-shield-halved mr-1"></i>{m.prereadVia({
+																			name
+																		})}</span
 																	>
 																{/each}
-																{#if !e.has_file}<span class="text-warning-700-300"
-																		><i class="fa-solid fa-file-circle-exclamation mr-1"></i>no file
-																		or link</span
+																{#if !e.has_file && e.name}<button
+																		class="anchor text-warning-700-300"
+																		onclick={() => addFile(e.id)}
+																		><i class="fa-solid fa-file-circle-plus mr-1"
+																		></i>{m.prereadNoFile()} · {m.prereadAddFile()}</button
+																	>{:else if !e.has_file}<span class="text-warning-700-300"
+																		><i class="fa-solid fa-file-circle-exclamation mr-1"
+																		></i>{m.prereadNoFile()}</span
 																	>{/if}
 															</span>
 														</li>
@@ -783,23 +1055,17 @@
 													class="rounded-base border border-dashed border-surface-300-700 bg-surface-50-950 p-4 text-sm text-surface-600-400 flex flex-col gap-1"
 												>
 													{#if pairedIds.size}
-														<span>Every linked evidence answers a request on the left.</span>
+														<span>{m.prereadAllAnswer()}</span>
 													{:else}
-														<span>Nothing linked yet.</span>
-														<span
-															>Attach evidence to the applied controls of this requirement, or to
-															the requirement itself.</span
-														>
+														<span>{m.prereadNothingLinkedYet()}</span>
+														<span>{m.prereadAttachHint()}</span>
 													{/if}
 												</div>
 											{/if}
 											{#if selected.applied_controls.length}
 												<details class="text-sm mt-1">
 													<summary class="cursor-pointer text-surface-600-400">
-														{selected.applied_controls.length} applied control{selected
-															.applied_controls.length > 1
-															? 's'
-															: ''}
+														{m.prereadAppliedControls({ count: selected.applied_controls.length })}
 													</summary>
 													<ul class="mt-1 flex flex-col gap-1">
 														{#each selected.applied_controls as c (c.id)}
@@ -807,7 +1073,7 @@
 																{#if c.name}<a class="anchor" href="/applied-controls/{c.id}"
 																		>{c.name}</a
 																	>{:else}<span class="italic text-surface-600-400"
-																		>Control you cannot view</span
+																		>{m.prereadControlHidden()}</span
 																	>{/if}
 																<span class="text-xs text-surface-600-400"
 																	>{c.status && c.status !== '--'
@@ -823,24 +1089,101 @@
 									</div>
 								</section>
 
-								{#if g.pitfalls?.length}
-									<section class="flex flex-col gap-3">
-										{@render title(
-											'fa-solid fa-lightbulb',
-											'Where auditors usually find something'
-										)}
-										<ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-											{#each g.pitfalls as p (p.id)}
-												<li
-													class="flex gap-2.5 rounded-base border border-surface-200-800 p-3 leading-snug"
-												>
-													<i class="fa-solid fa-magnifying-glass text-primary-500 mt-0.5 text-xs"
-													></i>{p.text}
-												</li>
-											{/each}
-										</ul>
-									</section>
-								{/if}
+								<details id="prep" class="group flex flex-col scroll-mt-4" bind:open={prepOpen}>
+									<summary
+										class="cursor-pointer list-none flex items-baseline gap-2 text-base font-semibold"
+									>
+										<i
+											class="fa-solid fa-chevron-right text-primary-500 w-4 text-center text-xs transition group-open:rotate-90"
+										></i>{m.prereadPrepareInterview()}
+										<span class="text-sm font-normal text-surface-500"
+											>{m.prereadPrepareInterviewAside()}</span
+										>
+									</summary>
+									<div class="flex flex-col gap-6 mt-4">
+										<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
+											<section class="flex flex-col gap-3">
+												{@render title('fa-solid fa-comments', m.prereadWillAsk())}
+												<ol class="flex flex-col gap-3 border-l-2 border-primary-500/50 pl-4">
+													{#each g.questions as q (q.id)}
+														<li class="flex gap-3 items-start">
+															<span
+																class="shrink-0 mt-0.5 rounded px-1.5 text-[11px] font-mono font-semibold leading-5 {q.stage ===
+																1
+																	? 'border border-surface-300-700 text-surface-600-400'
+																	: 'bg-surface-200-800 text-surface-800-200'}"
+																title={STAGES[q.stage]}>S{q.stage}</span
+															>
+															<span class="leading-relaxed text-[15px]">{q.text}</span>
+														</li>
+													{/each}
+												</ol>
+											</section>
+											<section class="flex flex-col gap-4">
+												<div class="flex flex-col gap-2">
+													{@render title('fa-solid fa-vials', m.prereadHowChecked())}
+													{@render heading('fa-solid fa-layer-group', m.prereadSample())}
+													{#if g.sampling.length}
+														{@const s = g.sampling[0]}
+														<!-- shortcut: rows of one requirement share population and method today; group by them if that changes -->
+														<div
+															class="rounded-base bg-surface-100-900 p-3 text-sm flex flex-col gap-1"
+														>
+															<span class="font-semibold"
+																>{g.sampling
+																	.map(
+																		(r) =>
+																			`${r.min === r.max ? r.min : `${r.min}–${r.max}`} ${r.unit}`
+																	)
+																	.join(' + ')}</span
+															>
+															{#if s.note}<span class="text-surface-600-400">{s.note}</span>{/if}
+															{#if s.population}
+																<span class="text-surface-600-400"
+																	>{m.prereadSampleFrom({ population: s.population })}</span
+																>
+															{/if}
+															{#if s.method}<span class="first-letter:uppercase">{s.method}</span
+																>{/if}
+														</div>
+													{:else}
+														<p class="text-sm text-surface-600-400">
+															{m.prereadNoSampling()}
+														</p>
+													{/if}
+												</div>
+												<div class="flex flex-col gap-2">
+													{@render heading('fa-solid fa-user-group', m.prereadInterviews())}
+													<div class="flex flex-wrap gap-1.5">
+														{#each g.interviewees as w (w)}
+															<span
+																class="text-xs rounded-full border border-surface-300-700 px-2.5 py-1 flex items-center gap-1.5"
+																><i class="fa-solid fa-user text-surface-500 text-[10px]"
+																></i>{PEOPLE[w] ?? w}</span
+															>
+														{/each}
+													</div>
+												</div>
+											</section>
+										</div>
+										{#if g.pitfalls?.length}
+											<section class="flex flex-col gap-3">
+												{@render title('fa-solid fa-lightbulb', m.prereadPitfalls())}
+												<ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+													{#each g.pitfalls as p (p.id)}
+														<li
+															class="flex gap-2.5 rounded-base border border-surface-200-800 p-3 leading-snug"
+														>
+															<i
+																class="fa-solid fa-magnifying-glass text-primary-500 mt-0.5 text-xs"
+															></i>{p.text}
+														</li>
+													{/each}
+												</ul>
+											</section>
+										{/if}
+									</div>
+								</details>
 							{/if}
 						</div>
 
@@ -852,18 +1195,18 @@
 								disabled={selectedIndex === 0}
 								onclick={() => step(-1)}
 							>
-								<i class="fa-solid fa-arrow-left"></i>Previous
+								<i class="fa-solid fa-arrow-left"></i>{m.prereadPrevious()}
 							</button>
 							<span class="text-surface-600-400 tabular-nums"
 								>{selectedIndex + 1} / {visible.length}
-								<span class="hidden md:inline">· use ↑ ↓ in the list</span></span
+								<span class="hidden md:inline">{m.prereadKeysHint()}</span></span
 							>
 							<button
 								class="btn btn-sm preset-tonal-surface"
 								disabled={selectedIndex >= visible.length - 1}
 								onclick={() => step(1)}
 							>
-								Next<i class="fa-solid fa-arrow-right"></i>
+								{m.prereadNext()}<i class="fa-solid fa-arrow-right"></i>
 							</button>
 						</footer>
 					</article>
@@ -872,8 +1215,7 @@
 		{:else if view === 'sessions'}
 			<div class="flex flex-col gap-3">
 				<p class="text-sm text-surface-600-400 max-w-3xl">
-					Stage 2 runs by topic, not in standard order: each session walks related clauses and
-					controls with the same people. Prepare one folder and one owner per session.
+					{m.prereadSessionsIntro()}
 				</p>
 				<ol class="flex flex-col gap-3">
 					{#each sessions as { session, reqs, people }, n (session.id)}
@@ -895,8 +1237,8 @@
 									<h3 class="font-semibold">{session.label}</h3>
 									<span class="text-xs text-surface-600-400 tabular-nums"
 										>{reqs.length
-											? `${reqs.length} requirement${reqs.length > 1 ? 's' : ''} · ${asks} records to file`
-											: `${session.requests?.length ?? 0} items to have ready`}</span
+											? m.prereadSessionCount({ count: reqs.length, asks })
+											: m.prereadSessionItems({ count: session.requests?.length ?? 0 })}</span
 									>
 								</div>
 								<span class="flex gap-1.5 text-xs">
@@ -959,23 +1301,23 @@
 			<div class="flex flex-col gap-3">
 				<div class="flex flex-wrap items-center gap-3">
 					<p class="text-sm text-surface-600-400 max-w-3xl">
-						Every record the auditor is likely to ask for, once, worst readiness first. A document
-						asked by several requirements shows on one row. Excluded requirements are left out. Copy
-						it into a spreadsheet to share with owners ahead of the audit.
+						{m.prereadRequestsIntro()}
 					</p>
 					<button class="btn btn-sm preset-filled-primary-500 ml-auto" onclick={copyRequests}>
 						<i class="fa-solid {copied ? 'fa-check' : 'fa-copy'}"></i>{copied
-							? 'Copied'
-							: `Copy ${requests.length} rows`}
+							? m.prereadCopied()
+							: m.prereadCopyRows({ count: requests.length })}
 					</button>
 				</div>
 				<div class="overflow-auto max-h-[70vh] border border-surface-200-800 rounded-base">
 					<table class="table text-sm">
 						<thead class="sticky top-0 bg-surface-50-950 z-10">
 							<tr>
-								<th class="w-8"></th><th>Ref</th><th>Request</th><th>Kind</th><th>Max age</th><th
-									>Owner</th
-								><th class="text-right">On file</th>
+								<th class="w-8"></th><th>{m.prereadColRef()}</th><th>{m.prereadColRequest()}</th><th
+									>{m.prereadColOnFile()}</th
+								><th>{m.prereadColKind()}</th><th>{m.prereadColMaxAge()}</th><th
+									>{m.prereadColOwner()}</th
+								>
 							</tr>
 						</thead>
 						<tbody>
@@ -993,36 +1335,36 @@
 											{/each}
 										</span>
 									</td>
-									<td>{r.label}</td>
+									<td class="min-w-64">{r.label}</td>
+									<td class="whitespace-nowrap">
+										{#if r.filed?.length}
+											{@const old = r.fresh_days && tooOld(r.filed[0].updated_at, r.fresh_days)}
+											<span
+												class="tabular-nums {old ? 'text-warning-700-300' : 'text-success-700-300'}"
+												title={r.filed.map((e) => e.name ?? m.prereadEvidenceHidden()).join('\n')}
+												><i class="fa-solid {old ? 'fa-clock-rotate-left' : 'fa-check'} mr-1"></i>{r
+													.filed.length}</span
+											>
+										{:else if r.toConfirm}
+											<span class="text-primary-700-300" title={m.prereadToConfirmHint()}
+												>{m.prereadToConfirm()}</span
+											>
+										{:else if r.kind === 'observation'}
+											<span class="text-surface-500" title={m.prereadSeenOnSite()}>—</span>
+										{:else}
+											<span class="text-error-600-400">{m.prereadMissing()}</span>
+										{/if}
+									</td>
 									<td class="whitespace-nowrap text-surface-600-400">
 										<i class="{KINDS[r.kind]?.icon ?? 'fa-solid fa-file'} mr-1"></i>{KINDS[r.kind]
 											?.label ?? r.kind}
 									</td>
 									<td class="tabular-nums whitespace-nowrap text-surface-600-400"
-										>{r.fresh_days ? `${r.fresh_days} d` : ''}</td
+										>{r.fresh_days ? m.prereadDays({ days: r.fresh_days }) : ''}</td
 									>
-									<td class="whitespace-nowrap"
+									<td class="min-w-32"
 										>{PEOPLE[r.items[0].guidance?.interviewees[0] ?? ''] ?? ''}</td
 									>
-									<td class="text-right whitespace-nowrap">
-										{#if r.filed === null}
-											<span
-												class="text-surface-500"
-												title="No reference control to match on: check the evidence linked to the requirement"
-												>—</span
-											>
-										{:else if r.filed.length}
-											{@const old = r.fresh_days && tooOld(r.filed[0].updated_at, r.fresh_days)}
-											<span
-												class="tabular-nums {old ? 'text-warning-700-300' : 'text-success-700-300'}"
-												title={r.filed.map((e) => e.name ?? 'Evidence you cannot view').join('\n')}
-												><i class="fa-solid {old ? 'fa-clock-rotate-left' : 'fa-check'} mr-1"></i>{r
-													.filed.length}</span
-											>
-										{:else}
-											<span class="text-error-600-400">Missing</span>
-										{/if}
-									</td>
 								</tr>
 							{/each}
 						</tbody>
@@ -1040,7 +1382,7 @@
 							<div class="flex flex-col">
 								<h3 class="font-semibold">{PEOPLE[who] ?? who}</h3>
 								<span class="text-xs text-surface-600-400 tabular-nums"
-									>{reqs.length} requirement{reqs.length > 1 ? 's' : ''} to walk through</span
+									>{m.prereadWalkThrough({ count: reqs.length })}</span
 								>
 							</div>
 							<span class="flex gap-1.5 text-xs">

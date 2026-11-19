@@ -11,7 +11,7 @@ entries:
       - {id: r3, label: "Policy acknowledgement records for staff and contractors", kind: record, fresh_days: 400}
       - {id: r4, label: "Minutes or tickets showing the most recent policy review", kind: record, fresh_days: 400}
     sampling:
-      - {min: 5, max: 10, unit: "staff", population: "current workforce in scope", method: "check acknowledgement of the current policy versions", note: "including contractors and recent joiners"}
+      - {id: s1, min: 5, max: 10, unit: "staff", population: "current workforce in scope", method: "check acknowledgement of the current policy versions", note: "including contractors and recent joiners"}
     interviewees: [top, ciso, staff]
     pitfalls:
       - {id: p1, text: "Policies reviewed on paper but the review date is older than the interval the policy itself sets"}
@@ -27,7 +27,7 @@ entries:
       - {id: r2, label: "Job descriptions or role definitions for the CISO and other named security roles", kind: document}
       - {id: r3, label: "Appointment letters or minutes formally assigning ISMS roles", kind: record}
     sampling:
-      - {min: 2, max: 3, unit: "named role holders", population: "asset owners, risk owners and ISMS roles", method: "interview and compare stated duties to the documented role"}
+      - {id: s1, min: 2, max: 3, unit: "named role holders", population: "asset owners, risk owners and ISMS roles", method: "interview and compare stated duties to the documented role"}
     interviewees: [top, ciso, it_lead]
     pitfalls:
       - {id: p1, text: "Asset and risk owners named in registers have never been told they hold that role"}
@@ -42,7 +42,7 @@ entries:
       - {id: r2, label: "Workflow configuration showing requester and approver must differ (change, access, payments)", kind: technical, fresh_days: 400}
       - {id: r3, label: "Records of compensating reviews where segregation is not technically enforced", kind: record, fresh_days: 100}
     sampling:
-      - {min: 5, max: 10, unit: "changes or access approvals", population: "last 6 months", method: "check requester and approver are different people"}
+      - {id: s1, min: 5, max: 10, unit: "changes or access approvals", population: "last 6 months", method: "check requester and approver are different people"}
     interviewees: [ciso, iam, dev]
     pitfalls:
       - {id: p1, text: "Developers can push straight to production with no second approver on the pipeline"}
@@ -58,7 +58,7 @@ entries:
       - {id: r2, label: "If used, manager objectives or appraisal criteria that include security duties", kind: document}
       - {id: r3, label: "Training completion report broken down by team or manager", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.educ_register}
     sampling:
-      - {min: 2, max: 3, unit: "line managers", population: "managers of in-scope teams", method: "interview on how they brief and supervise security behaviour"}
+      - {id: s1, min: 2, max: 3, unit: "line managers", population: "managers of in-scope teams", method: "interview on how they brief and supervise security behaviour"}
     interviewees: [top, hr, staff]
     pitfalls:
       - {id: p1, text: "Leadership commitment shown only in the policy signature, with no visible follow-through"}
@@ -99,7 +99,7 @@ entries:
       - {id: r3, label: "Tickets, risk register updates or detection rule changes triggered by intelligence", kind: record, fresh_days: 200}
       - {id: r4, label: "Configuration of feeds or platform integrations (SIEM, EDR, vulnerability scanner)", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 2, max: 3, unit: "advisories", population: "intelligence received in the last 6 months", method: "trace each from receipt to assessment to action or documented no-action"}
+      - {id: s1, min: 2, max: 3, unit: "advisories", population: "intelligence received in the last 6 months", method: "trace each from receipt to assessment to action or documented no-action"}
     interviewees: [ciso, sec_ops, risk]
     pitfalls:
       - {id: p1, text: "Feeds subscribed to and landing in a mailbox nobody triages, with no record of analysis"}
@@ -114,7 +114,7 @@ entries:
       - {id: r2, label: "Project portfolio list for the last 12 months", kind: record, fresh_days: 400}
       - {id: r3, label: "Security requirement or risk assessment records for sampled projects", kind: record}
     sampling:
-      - {min: 2, max: 3, unit: "projects", population: "projects started or closed in the last 12 months, including non-IT ones", method: "check security step at initiation and before go-live"}
+      - {id: s1, min: 2, max: 3, unit: "projects", population: "projects started or closed in the last 12 months, including non-IT ones", method: "check security step at initiation and before go-live"}
     interviewees: [ciso, dev, it_lead]
     pitfalls:
       - {id: p1, text: "Security checklist exists in the template but is left blank or ticked without content"}
@@ -129,7 +129,7 @@ entries:
       - {id: r2, label: "Reconciliation evidence against discovery tools (MDM, EDR, cloud console, CMDB)", kind: technical, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:tech.asset_discovery}
       - {id: r3, label: "Procedure describing how the inventory is maintained", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:pol.asset}
     sampling:
-      - {min: 10, max: 15, unit: "assets", population: "assets observed on site, in the cloud console and in discovery tools", method: "floor-to-list and list-to-floor tracing"}
+      - {id: s1, min: 10, max: 15, unit: "assets", population: "assets observed on site, in the cloud console and in discovery tools", method: "floor-to-list and list-to-floor tracing"}
     interviewees: [service_desk, ciso]
     pitfalls:
       - {id: p1, text: "Inventory lists hardware only; information assets and SaaS tools are missing"}
@@ -144,7 +144,7 @@ entries:
       - {id: r2, label: "Signed acceptable use acknowledgements", kind: record}
       - {id: r3, label: "Technical controls enforcing the rules (web filtering, DLP, app allow-list)", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 3, max: 5, unit: "staff", population: "staff across departments", method: "short interview on key rules plus acknowledgement check"}
+      - {id: s1, min: 3, max: 5, unit: "staff", population: "staff across departments", method: "short interview on key rules plus acknowledgement check"}
     interviewees: [staff, hr, endpoint]
     pitfalls:
       - {id: p1, text: "Policy silent on generative AI tools while staff use them with client data"}
@@ -159,7 +159,7 @@ entries:
       - {id: r2, label: "Completed leaver checklists or asset return receipts", kind: record, fresh_days: 400}
       - {id: r3, label: "MDM records of device wipe or retirement for leavers", kind: technical}
     sampling:
-      - {min: 5, max: 5, unit: "leavers", population: "leavers in the last 12 months", method: "compare HR leaver list to asset return records and inventory status"}
+      - {id: s1, min: 5, max: 5, unit: "leavers", population: "leavers in the last 12 months", method: "compare HR leaver list to asset return records and inventory status"}
     interviewees: [hr, endpoint]
     pitfalls:
       - {id: p1, text: "Leaver checklist completed for employees but not for contractors or interns"}
@@ -174,7 +174,7 @@ entries:
       - {id: r2, label: "Asset or information inventory showing assigned classification", kind: record, fresh_days: 400}
       - {id: r3, label: "Classification tool configuration (for example sensitivity labels)", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 5, max: 10, unit: "documents or data sets", population: "shared drives, document management and email", method: "check assigned label against content and scheme"}
+      - {id: s1, min: 5, max: 10, unit: "documents or data sets", population: "shared drives, document management and email", method: "check assigned label against content and scheme"}
     interviewees: [ciso, staff, dpo]
     pitfalls:
       - {id: p1, text: "Scheme defined but staff cannot name the levels or apply them"}
@@ -190,7 +190,7 @@ entries:
       - {id: r2, label: "Screenshot of labelling tool or document templates with labels", kind: technical, fresh_days: 400}
       - {id: r3, label: "Sample labelled documents and reports", kind: observation}
     sampling:
-      - {min: 5, max: 5, unit: "documents", population: "documents classified above internal", method: "check presence and correctness of label"}
+      - {id: s1, min: 5, max: 5, unit: "documents", population: "documents classified above internal", method: "check presence and correctness of label"}
     interviewees: [staff, endpoint]
     pitfalls:
       - {id: p1, text: "Labels exist in templates but are stripped from exports, reports and printed copies"}
@@ -204,7 +204,7 @@ entries:
       - {id: r2, label: "Agreements covering information exchange with key partners (NDA, data exchange clauses)", kind: document}
       - {id: r3, label: "Configuration of secure transfer tools (email encryption, TLS enforcement, secure file share expiry)", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 3, max: 5, unit: "transfers", population: "recent external transfers of sensitive data", method: "check channel used against policy for that classification"}
+      - {id: s1, min: 3, max: 5, unit: "transfers", population: "recent external transfers of sensitive data", method: "check channel used against policy for that classification"}
     interviewees: [network, staff, legal]
     pitfalls:
       - {id: p1, text: "Public file-sharing links with no expiry or password used for confidential data"}
@@ -232,7 +232,7 @@ entries:
       - {id: r2, label: "Export of active accounts from the identity provider", kind: technical, fresh_days: 40, reference_control: urn:intuitem:risk:function:doc-pol:tech.iam}
       - {id: r3, label: "Register of shared, service and non-personal accounts with owner and justification", kind: record, fresh_days: 200}
     sampling:
-      - {min: 10, max: 10, unit: "accounts", population: "active accounts in the identity provider", method: "match each account to an HR record or a documented owner"}
+      - {id: s1, min: 10, max: 10, unit: "accounts", population: "active accounts in the identity provider", method: "match each account to an HR record or a documented owner"}
     interviewees: [iam, hr]
     pitfalls:
       - {id: p1, text: "Generic and service accounts without an owner or justification"}
@@ -251,7 +251,7 @@ entries:
       - {id: r3, label: "Help desk reset procedure with identity verification steps", kind: document}
       - {id: r4, label: "Evidence of a password manager or secrets vault in use", kind: technical, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:tech.password_manager}
     sampling:
-      - {min: 3, max: 5, unit: "password reset tickets", population: "help desk tickets in the last 6 months", method: "check identity verification was performed and recorded"}
+      - {id: s1, min: 3, max: 5, unit: "password reset tickets", population: "help desk tickets in the last 6 months", method: "check identity verification was performed and recorded"}
     interviewees: [iam, dev, staff]
     pitfalls:
       - {id: p1, text: "MFA enforced for most users but exempted for admins, service accounts or legacy protocols"}
@@ -269,9 +269,9 @@ entries:
       - {id: r3, label: "HR leaver list and account disable dates for the same period", kind: record, fresh_days: 400}
       - {id: r4, label: "Privileged access review evidence", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:proc.pam}
     sampling:
-      - {min: 5, max: 5, unit: "joiners", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
-      - {min: 5, max: 5, unit: "movers", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
-      - {min: 5, max: 5, unit: "leavers", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
+      - {id: s1, min: 5, max: 5, unit: "joiners", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
+      - {id: s2, min: 5, max: 5, unit: "movers", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
+      - {id: s3, min: 5, max: 5, unit: "leavers", population: "last 12 months", method: "compare HR dates to account creation, change and disable dates; check approvals"}
     interviewees: [iam, hr, ciso]
     pitfalls:
       - {id: p1, text: "Access reviews signed off but no record that the revocations were actually carried out"}
@@ -286,7 +286,7 @@ entries:
       - {id: r2, label: "Supplier register with criticality, data accessed and assessment status", kind: record, fresh_days: 200, reference_control: urn:intuitem:risk:function:doc-pol:doc.supplier_register}
       - {id: r3, label: "Completed pre-contract security assessments for new suppliers", kind: record, reference_control: urn:intuitem:risk:function:doc-pol:proc.tprm_assessment}
     sampling:
-      - {min: 3, max: 5, unit: "suppliers", population: "suppliers onboarded or renewed in the last 12 months", method: "check assessment happened before contract and matches tier", note: "weighted to critical tiers"}
+      - {id: s1, min: 3, max: 5, unit: "suppliers", population: "suppliers onboarded or renewed in the last 12 months", method: "check assessment happened before contract and matches tier", note: "weighted to critical tiers"}
     interviewees: [proc, ciso, legal]
     pitfalls:
       - {id: p1, text: "Supplier register is a procurement list with no security tiering"}
@@ -302,7 +302,7 @@ entries:
       - {id: r2, label: "Signed contracts or DPAs for sampled critical suppliers", kind: document}
       - {id: r3, label: "Gap tracking for legacy contracts lacking required clauses", kind: record, fresh_days: 400}
     sampling:
-      - {min: 3, max: 5, unit: "contracts", population: "critical and high-tier suppliers", method: "check each required clause is present"}
+      - {id: s1, min: 3, max: 5, unit: "contracts", population: "critical and high-tier suppliers", method: "check each required clause is present"}
     interviewees: [legal, proc]
     pitfalls:
       - {id: p1, text: "Contracts signed on supplier paper with no incident notification timeframe"}
@@ -317,7 +317,7 @@ entries:
       - {id: r2, label: "Sub-processor or subcontractor lists for critical providers", kind: record, fresh_days: 400}
       - {id: r3, label: "Software bill of materials or component inventory for key products, if applicable", kind: technical, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.sbom}
     sampling:
-      - {min: 2, max: 3, unit: "critical ICT suppliers", population: "ICT product and service providers", method: "review subcontractor list and flow-down evidence"}
+      - {id: s1, min: 2, max: 3, unit: "critical ICT suppliers", population: "ICT product and service providers", method: "review subcontractor list and flow-down evidence"}
     interviewees: [proc, ciso, dev]
     pitfalls:
       - {id: p1, text: "No visibility of fourth parties even for providers hosting sensitive data"}
@@ -333,7 +333,7 @@ entries:
       - {id: r3, label: "Current third-party assurance reports for critical suppliers (ISO 27001 certificate, SOC 2 report)", kind: record, fresh_days: 400}
       - {id: r4, label: "Records of supplier incidents and changes and how they were assessed", kind: record}
     sampling:
-      - {min: 3, max: 5, unit: "suppliers", population: "critical and high-tier suppliers", method: "check review is within the tier interval and findings are followed up"}
+      - {id: s1, min: 3, max: 5, unit: "suppliers", population: "critical and high-tier suppliers", method: "check review is within the tier interval and findings are followed up"}
     interviewees: [proc, ciso]
     pitfalls:
       - {id: p1, text: "Certificates on file expired or scope of the supplier certificate does not cover the service used"}
@@ -350,7 +350,7 @@ entries:
       - {id: r3, label: "Shared responsibility matrix for key cloud providers", kind: document}
       - {id: r4, label: "Exit plan, with any data export or portability check performed", kind: record}
     sampling:
-      - {min: 2, max: 3, unit: "cloud services", population: "IaaS, PaaS and SaaS in use", method: "check selection assessment, responsibility split and exit provisions"}
+      - {id: s1, min: 2, max: 3, unit: "cloud services", population: "IaaS, PaaS and SaaS in use", method: "check selection assessment, responsibility split and exit provisions"}
     interviewees: [ciso, infra, proc]
     pitfalls:
       - {id: p1, text: "SaaS tools bought by business teams on a card never enter the cloud register"}
@@ -380,7 +380,7 @@ entries:
       - {id: r1, label: "Event triage criteria or classification matrix", kind: document}
       - {id: r2, label: "Event and incident log or ticket queue for the last 12 months", kind: record, fresh_days: 100, reference_control: urn:intuitem:risk:function:doc-pol:doc.incident_register}
     sampling:
-      - {min: 5, max: 10, unit: "events", population: "events and alerts in the last 12 months", method: "check triage decision is recorded and consistent with criteria"}
+      - {id: s1, min: 5, max: 10, unit: "events", population: "events and alerts in the last 12 months", method: "check triage decision is recorded and consistent with criteria"}
     interviewees: [sec_ops, service_desk]
     pitfalls:
       - {id: p1, text: "Zero incidents recorded in a year, which suggests events are closed in the service desk without security triage"}
@@ -395,7 +395,7 @@ entries:
       - {id: r2, label: "Communication records for notified parties", kind: record}
       - {id: r3, label: "Playbooks for common incident types (phishing, ransomware, data leak)", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:proc.incident}
     sampling:
-      - {min: 3, max: 5, unit: "incidents", population: "incidents in the last 12 months", method: "trace from detection to closure against the procedure", note: "including the most severe"}
+      - {id: s1, min: 3, max: 5, unit: "incidents", population: "incidents in the last 12 months", method: "trace from detection to closure against the procedure", note: "including the most severe"}
     interviewees: [sec_ops, ciso, legal]
     pitfalls:
       - {id: p1, text: "Timeline missing, so notification deadlines cannot be shown to have been met"}
@@ -410,7 +410,7 @@ entries:
       - {id: r2, label: "Corrective action tracking linked to incidents", kind: record, fresh_days: 400}
       - {id: r3, label: "Incident trend summary presented to management review", kind: record, fresh_days: 400}
     sampling:
-      - {min: 2, max: 3, unit: "significant incidents", population: "incidents of medium severity or above", method: "check review held and actions closed"}
+      - {id: s1, min: 2, max: 3, unit: "significant incidents", population: "incidents of medium severity or above", method: "check review held and actions closed"}
     interviewees: [ciso, sec_ops, risk]
     pitfalls:
       - {id: p1, text: "Lessons learned written but actions never assigned or closed"}
@@ -452,7 +452,7 @@ entries:
       - {id: r3, label: "DR and restore test reports with measured recovery times", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.bcp_exercise}
       - {id: r4, label: "Corrective actions raised from failed or partial tests", kind: record}
     sampling:
-      - {min: 2, max: 3, unit: "critical ICT services", population: "services supporting critical processes in the BIA", method: "compare BIA objectives to plan and to measured test results"}
+      - {id: s1, min: 2, max: 3, unit: "critical ICT services", population: "services supporting critical processes in the BIA", method: "compare BIA objectives to plan and to measured test results"}
     interviewees: [infra, ciso, risk]
     pitfalls:
       - {id: p1, text: "RTO and RPO set by IT without a BIA, or BIA objectives that the architecture cannot meet"}
@@ -467,7 +467,7 @@ entries:
       - {id: r2, label: "Evidence of periodic review of the register", kind: record, fresh_days: 400}
       - {id: r3, label: "Analysis of cryptography export or use restrictions where relevant", kind: document}
     sampling:
-      - {min: 2, max: 3, unit: "requirements", population: "entries in the register", method: "check how each is met by a control or process"}
+      - {id: s1, min: 2, max: 3, unit: "requirements", population: "entries in the register", method: "check how each is met by a control or process"}
     interviewees: [legal, ciso, dpo]
     pitfalls:
       - {id: p1, text: "Register not updated for recent regulations such as NIS2, DORA or sector rules"}
@@ -482,7 +482,7 @@ entries:
       - {id: r2, label: "Software installation restrictions (no local admin, approved software list)", kind: technical, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:tech.app_control}
       - {id: r3, label: "Open source licence policy or scan results for developed software", kind: technical, fresh_days: 400}
     sampling:
-      - {min: 2, max: 3, unit: "products", population: "commercial software and SaaS in use", method: "compare entitlements to installations or users"}
+      - {id: s1, min: 2, max: 3, unit: "products", population: "commercial software and SaaS in use", method: "compare entitlements to installations or users"}
     interviewees: [service_desk, legal, dev]
     pitfalls:
       - {id: p1, text: "No reconciliation of licences to installations"}
@@ -497,7 +497,7 @@ entries:
       - {id: r2, label: "Evidence of retention settings in systems (mail, document management, backups)", kind: technical, fresh_days: 400}
       - {id: r3, label: "Destruction or deletion logs", kind: record, fresh_days: 400}
     sampling:
-      - {min: 3, max: 3, unit: "record types", population: "record types in the retention schedule", method: "check system configuration and existence of records at expected age"}
+      - {id: s1, min: 3, max: 3, unit: "record types", population: "record types in the retention schedule", method: "check system configuration and existence of records at expected age"}
     interviewees: [legal, dpo, infra]
     pitfalls:
       - {id: p1, text: "Retention schedule exists but systems keep everything forever"}
@@ -515,7 +515,7 @@ entries:
       - {id: r3, label: "DPIAs for high-risk processing", kind: record, reference_control: urn:intuitem:risk:function:doc-pol:proc.dpia}
       - {id: r4, label: "Personal data breach register", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:proc.breach_notif}
     sampling:
-      - {min: 2, max: 3, unit: "processing activities", population: "entries in the record of processing", method: "check legal basis, retention and security measures are documented"}
+      - {id: s1, min: 2, max: 3, unit: "processing activities", population: "entries in the record of processing", method: "check legal basis, retention and security measures are documented"}
     interviewees: [dpo, legal, ciso]
     pitfalls:
       - {id: p1, text: "Record of processing incomplete or not updated after new systems went live"}
@@ -547,7 +547,7 @@ entries:
       - {id: r2, label: "Results of compliance checks and technical scans", kind: record, fresh_days: 200}
       - {id: r3, label: "Non-compliance log with corrective actions", kind: record, fresh_days: 400, reference_control: urn:intuitem:risk:function:doc-pol:doc.nc_log}
     sampling:
-      - {min: 3, max: 5, unit: "non-compliances", population: "issues raised in the last 12 months", method: "check root cause and corrective action recorded"}
+      - {id: s1, min: 3, max: 5, unit: "non-compliances", population: "issues raised in the last 12 months", method: "check root cause and corrective action recorded"}
     interviewees: [ciso, it_lead, auditor]
     pitfalls:
       - {id: p1, text: "Compliance checks only happen through the annual internal audit"}
@@ -561,7 +561,7 @@ entries:
       - {id: r1, label: "Index of operating procedures with owner and review date", kind: document, reference_control: urn:intuitem:risk:function:doc-pol:doc.proc_register}
       - {id: r2, label: "Sample procedures (backup, restore, patching, account provisioning, monitoring)", kind: document}
     sampling:
-      - {min: 2, max: 3, unit: "procedures", population: "documented operating procedures", method: "compare procedure to what the operator actually does"}
+      - {id: s1, min: 2, max: 3, unit: "procedures", population: "documented operating procedures", method: "compare procedure to what the operator actually does"}
     interviewees: [service_desk, dev]
     pitfalls:
       - {id: p1, text: "Procedures out of date with the current tooling"}

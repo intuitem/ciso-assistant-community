@@ -12,7 +12,7 @@ entries:
       - {id: r3, label: "Contract clauses or attestations requiring suppliers to screen their staff", kind: document}
       - {id: r4, label: "HR starter list for the audit period with start dates", kind: record, fresh_days: 40}
     sampling:
-      - {min: 5, max: 10, unit: "starters", population: "starters in the last 12 months", method: "compare screening completion date to start date and to the checks required for the role", note: "at least 2 in privileged or IT roles, plus 2 contractors"}
+      - {id: s1, min: 5, max: 10, unit: "starters", population: "starters in the last 12 months", method: "compare screening completion date to start date and to the checks required for the role", note: "at least 2 in privileged or IT roles, plus 2 contractors"}
     interviewees: [hr, proc]
     pitfalls:
       - {id: p1, text: "Checks completed weeks after the start date with no documented interim restriction on access"}
@@ -28,7 +28,7 @@ entries:
       - {id: r2, label: "Signed contracts or acknowledgements for sampled starters", kind: record}
       - {id: r3, label: "Staff handbook or code of conduct referenced by the contract", kind: document}
     sampling:
-      - {min: 5, max: 5, unit: "starters", population: "starters in the last 12 months", method: "check the signed contract or a signed addendum states security responsibilities and was in place before access was granted", note: "including 1 contractor"}
+      - {id: s1, min: 5, max: 5, unit: "starters", population: "starters in the last 12 months", method: "check the signed contract or a signed addendum states security responsibilities and was in place before access was granted", note: "including 1 contractor"}
     interviewees: [hr, legal]
     pitfalls:
       - {id: p1, text: "Long-serving staff on contracts that say nothing about information security, with no addendum or signed acknowledgement filling the gap"}
@@ -46,7 +46,7 @@ entries:
       - {id: r3, label: "Phishing simulation results and follow-up actions, if simulations are run", kind: record, fresh_days: 200}
       - {id: r4, label: "Role-based training records for the ISMS team and privileged users", kind: record, fresh_days: 400}
     sampling:
-      - {min: 5, max: 10, unit: "staff from different departments", population: "current headcount plus contractors and supplier staff with access", method: "trace each name to a completion record and ask each a short awareness question during interviews", note: "include 1-2 external personnel"}
+      - {id: s1, min: 5, max: 10, unit: "staff from different departments", population: "current headcount plus contractors and supplier staff with access", method: "trace each name to a completion record and ask each a short awareness question during interviews", note: "include 1-2 external personnel"}
     interviewees: [staff, ciso, hr]
     pitfalls:
       - {id: p1, text: "Completion below target with no chasing or escalation recorded"}
@@ -77,7 +77,7 @@ entries:
       - {id: r2, label: "Completed exit checklists or exit letters for sampled leavers", kind: record}
       - {id: r3, label: "HR leaver list for the audit period with last working days", kind: record, fresh_days: 40}
     sampling:
-      - {min: 5, max: 10, unit: "leavers", population: "leavers and role changes in the last 12 months", method: "check continuing obligations were stated in the contract and restated at exit, and any security role held was handed to a named person (asset return and access removal are checked under A.5.11 and A.5.18)", note: "including 1 mover and 1 contractor"}
+      - {id: s1, min: 5, max: 10, unit: "leavers", population: "leavers and role changes in the last 12 months", method: "check continuing obligations were stated in the contract and restated at exit, and any security role held was handed to a named person (asset return and access removal are checked under A.5.11 and A.5.18)", note: "including 1 mover and 1 contractor"}
     interviewees: [hr, iam]
     pitfalls:
       - {id: p1, text: "Exit checklist exists but is blank or missing for contractors and short-notice departures"}
@@ -92,7 +92,7 @@ entries:
       - {id: r2, label: "Register of signed NDAs or signed copies for the sample", kind: record}
       - {id: r3, label: "Record of the last NDA template review", kind: record, fresh_days: 400}
     sampling:
-      - {min: 5, max: 5, unit: "staff or contractors and 3 suppliers with data access", population: "people and suppliers with access to confidential information", method: "confirm a signed agreement exists and predates access"}
+      - {id: s1, min: 5, max: 5, unit: "staff or contractors and 3 suppliers with data access", population: "people and suppliers with access to confidential information", method: "confirm a signed agreement exists and predates access"}
     interviewees: [legal, hr, proc]
     pitfalls:
       - {id: p1, text: "Supplier NDAs signed during sales talks expired or never covered the later service"}
@@ -108,7 +108,7 @@ entries:
       - {id: r2, label: "Endpoint compliance report showing encryption, screen lock and VPN or ZTNA posture", kind: technical, fresh_days: 40}
       - {id: r3, label: "Approvals for working from abroad", kind: record}
     sampling:
-      - {min: 3, max: 5, unit: "remote workers", population: "staff working partly or fully remotely", method: "check device compliance in the management console and ask each how they handle calls and printing at home"}
+      - {id: s1, min: 3, max: 5, unit: "remote workers", population: "staff working partly or fully remotely", method: "check device compliance in the management console and ask each how they handle calls and printing at home"}
     interviewees: [staff, endpoint, ciso]
     pitfalls:
       - {id: p1, text: "Policy forbids public wifi or printing at home but nothing enforces or checks it"}
@@ -124,7 +124,7 @@ entries:
       - {id: r2, label: "Ticket or mailbox log of staff-reported events with triage outcome", kind: record, fresh_days: 100}
       - {id: r3, label: "Phishing report button statistics", kind: technical, fresh_days: 100}
     sampling:
-      - {min: 5, max: 5, unit: "reported events", population: "events reported by staff in the last 6 months", method: "check each report reached the defined channel promptly and was logged (triage quality is assessed under A.5.25)"}
+      - {id: s1, min: 5, max: 5, unit: "reported events", population: "events reported by staff in the last 6 months", method: "check each report reached the defined channel promptly and was logged (triage quality is assessed under A.5.25)"}
     interviewees: [staff, sec_ops]
     pitfalls:
       - {id: p1, text: "Staff interviewed give different answers on how to report, or name a person who has left"}
@@ -158,7 +158,7 @@ entries:
       - {id: r3, label: "Records of the last physical access rights review", kind: record, fresh_days: 200}
       - {id: r4, label: "Site tour: reception, badge readers, tailgating behaviour at entry points", kind: observation}
     sampling:
-      - {min: 5, max: 5, unit: "leavers and 5 badge holders for restricted zones", population: "badge database and leavers in the last 12 months", method: "check leaver badges were disabled on the last day and that each restricted-zone holder has a role justification"}
+      - {id: s1, min: 5, max: 5, unit: "leavers and 5 badge holders for restricted zones", population: "badge database and leavers in the last 12 months", method: "check leaver badges were disabled on the last day and that each restricted-zone holder has a role justification"}
     interviewees: [facilities, hr]
     pitfalls:
       - {id: p1, text: "Badges of leavers still active because HR does not notify facilities or the building manager"}
@@ -189,7 +189,7 @@ entries:
       - {id: r3, label: "CCTV retention and access rules, with the privacy notice and signage required by local law", kind: document}
       - {id: r4, label: "Live retrieval of a recorded clip from a chosen date, if video recording is used", kind: observation}
     sampling:
-      - {min: 2, max: 3, unit: "alarm events", population: "alarms and out-of-hours events in the last 6 months", method: "trace each event to a response record and check response time against the defined target"}
+      - {id: s1, min: 2, max: 3, unit: "alarm events", population: "alarms and out-of-hours events in the last 6 months", method: "trace each event to a response record and check response time against the defined target"}
     interviewees: [facilities, sec_ops]
     pitfalls:
       - {id: p1, text: "Cameras installed but recording failed or the retention is shorter than stated, discovered when footage is requested"}
@@ -220,7 +220,7 @@ entries:
       - {id: r2, label: "Server room access log or sign-in sheet for third parties", kind: record, fresh_days: 100}
       - {id: r3, label: "Site tour: posted rules and state of the secure area", kind: observation}
     sampling:
-      - {min: 3, max: 3, unit: "third-party visits", population: "secure area visits in the last 6 months", method: "check each was authorised in advance and escorted"}
+      - {id: s1, min: 3, max: 3, unit: "third-party visits", population: "secure area visits in the last 6 months", method: "check each was authorised in advance and escorted"}
     interviewees: [facilities, infra]
     pitfalls:
       - {id: p1, text: "Contractors given a code or badge for the server room and left to work alone"}
@@ -236,7 +236,7 @@ entries:
       - {id: r3, label: "Records of clear desk walk-arounds and follow-up", kind: record, fresh_days: 200}
       - {id: r4, label: "Site tour: unattended desks, printers, whiteboards and unlocked screens", kind: observation}
     sampling:
-      - {min: 10, max: 15, unit: "desks and the shared printers", population: "open-plan areas visited during the tour", method: "observe at random times, ideally at lunch or end of day"}
+      - {id: s1, min: 10, max: 15, unit: "desks and the shared printers", population: "open-plan areas visited during the tour", method: "observe at random times, ideally at lunch or end of day"}
     interviewees: [staff, facilities]
     pitfalls:
       - {id: p1, text: "Sensitive printouts left on printers and whiteboards not wiped after meetings"}
@@ -266,7 +266,7 @@ entries:
       - {id: r3, label: "Lost or stolen device incident records", kind: record}
       - {id: r4, label: "Record of approved equipment removals or custody hand-overs, where you require them", kind: record}
     sampling:
-      - {min: 5, max: 5, unit: "devices from the asset register", population: "laptops and mobiles issued to staff", method: "check encryption status and remote wipe enrollment in the management console"}
+      - {id: s1, min: 5, max: 5, unit: "devices from the asset register", population: "laptops and mobiles issued to staff", method: "check encryption status and remote wipe enrollment in the management console"}
     interviewees: [endpoint, staff]
     pitfalls:
       - {id: p1, text: "Devices taken off site left unattended in vehicles or public places, and nobody reports or investigates it"}
@@ -281,7 +281,7 @@ entries:
       - {id: r2, label: "Endpoint policy blocking or encrypting removable storage, with exceptions list", kind: technical, fresh_days: 40}
       - {id: r3, label: "Register or transfer log for media carrying sensitive data, such as backup tapes", kind: record}
     sampling:
-      - {min: 3, max: 3, unit: "exceptions or media transfers", population: "approved USB exceptions and physical media transfers in the last 12 months", method: "check approval, encryption and return or destruction"}
+      - {id: s1, min: 3, max: 3, unit: "exceptions or media transfers", population: "approved USB exceptions and physical media transfers in the last 12 months", method: "check approval, encryption and return or destruction"}
     interviewees: [endpoint, sec_ops]
     pitfalls:
       - {id: p1, text: "USB storage technically allowed despite a policy that forbids it"}
@@ -324,7 +324,7 @@ entries:
       - {id: r2, label: "Maintenance and service records for sampled equipment", kind: record, fresh_days: 400}
       - {id: r3, label: "Maintenance contracts or SLAs for UPS, air conditioning and fire systems", kind: document}
     sampling:
-      - {min: 3, max: 5, unit: "critical items", population: "critical equipment in the asset register", method: "compare last service date to the planned interval"}
+      - {id: s1, min: 3, max: 5, unit: "critical items", population: "critical equipment in the asset register", method: "compare last service date to the planned interval"}
     interviewees: [facilities, infra]
     pitfalls:
       - {id: p1, text: "Maintenance contracts lapsed and nobody noticed because invoices go to another department"}
@@ -341,7 +341,7 @@ entries:
       - {id: r3, label: "Wipe logs for reissued devices", kind: record}
       - {id: r4, label: "Site tour: storage of retired equipment awaiting disposal", kind: observation}
     sampling:
-      - {min: 5, max: 5, unit: "disposed or reissued devices", population: "assets marked retired in the last 12 months", method: "trace serial numbers from the asset register to a wipe log or destruction certificate"}
+      - {id: s1, min: 5, max: 5, unit: "disposed or reissued devices", population: "assets marked retired in the last 12 months", method: "trace serial numbers from the asset register to a wipe log or destruction certificate"}
     interviewees: [endpoint, proc]
     pitfalls:
       - {id: p1, text: "Destruction certificates list weights or counts, not serial numbers, so nothing traces back to the register"}

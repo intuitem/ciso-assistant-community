@@ -15855,8 +15855,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="auditor_preread_audits")
     def auditor_preread_audits(self, request):
-        """Experimental: audits an audit guide applies to, by framework."""
-        from core.auditor_preread import resolve_guide
+        """Experimental: audits an audit guide applies to, or is offered for, by framework."""
+        from core.auditor_preread import SUGGEST_COVERAGE, resolve_guide
 
         audits = self.get_queryset().select_related("framework", "folder", "perimeter")
         fits = {}
@@ -15873,9 +15873,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "perimeter": {"str": str(a.perimeter)} if a.perimeter else None,
                     "exact": fit["exact"],
                     "coverage": round(fit["coverage"], 3),
+                    "applies": fit["applies"],
                 }
                 for a in audits
-                if (fit := fits.get(a.framework_id)) and fit["applies"]
+                if (fit := fits.get(a.framework_id))
+                and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
             ]
         )
 

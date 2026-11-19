@@ -4216,7 +4216,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return scoring
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -4600,7 +4601,8 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
         )
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):

@@ -9,11 +9,13 @@ in a constant number of queries.
 import re
 from collections import defaultdict
 from datetime import UTC, date, datetime, timedelta
-from functools import cache
+from functools import cache, reduce
+from operator import or_
 from pathlib import Path
 
 import yaml
 from django.db.models import Q
+from django.utils.translation import get_language
 
 from core.models import (
     AppliedControl,
@@ -37,43 +39,90 @@ NON_COMPLIANT = "non_compliant"
 QUALITY_ERROR = "quality_error"
 NOT_ASSESSED = "not_assessed"
 STALE_EVIDENCE = "stale_evidence"
-FEWER_EVIDENCES_THAN_REQUESTS = "fewer_evidences_than_requests"
 REQUEST_NOT_ON_FILE = "request_not_on_file"
+# Evidence linked to the requirement may answer the request: not missing, not ready.
+EVIDENCE_TO_CONFIRM = "evidence_to_confirm"
 QUALITY_WARNING = "quality_warning"
+MISSING_FILE = "missing_file"
 GAP_REASONS = {OPEN_FINDING, NOTHING_LINKED, NON_COMPLIANT, QUALITY_ERROR}
 # A guide written for one framework applies to another (a licensed copy, a
 # translation) when nearly all of it lands there by requirement number and
 # those numbers make up most of the other framework.
 GUIDE_COVERAGE = 0.9
 NODE_SHARE = 0.5
+# Below GUIDE_COVERAGE but above this, the guide is offered rather than applied.
+SUGGEST_COVERAGE = 0.5
 # A finding still in one of these was raised and not yet dealt with.
 OPEN_FINDING_STATUSES = {"--", "identified", "confirmed", "assigned", "in_progress"}
 
 
+# Translated text of a guide item, by the field that holds it.
+TEXT_FIELD = {"questions": "text", "requests": "label", "pitfalls": "text"}
+
+
 @cache
-def load_audit_guides() -> dict[str, dict]:
+def load_guide_translations(locale: str) -> dict[str, dict]:
+    """framework_urn -> {"entries"|"sessions": {key: {item id: text}}} in one locale."""
+    out: dict[str, dict] = {}
+    for path in sorted(AUDIT_GUIDES_DIR.glob(f"*/i18n/{locale}/*.yaml")):
+        data = yaml.safe_load(path.read_text()) or {}
+        t = out.setdefault(data["framework_urn"], {"entries": {}, "sessions": {}})
+        for part in t:
+            for key, texts in (data.get(part) or {}).items():
+                t[part].setdefault(key, {}).update(texts)
+    return out
+
+
+def _localized(item: dict, texts: dict) -> dict:
+    """An entry or a session with its text in the locale, English where missing."""
+    out = {**item, "label": texts.get("label", item.get("label"))}
+    if "label" not in item:
+        del out["label"]
+    for part, field in TEXT_FIELD.items():
+        if part in item:
+            out[part] = [
+                {**x, field: texts[x["id"]]} if x["id"] in texts else x
+                for x in item[part]
+            ]
+    if "sampling" in item:
+        out["sampling"] = [{**x, **texts.get(x["id"], {})} for x in item["sampling"]]
+    return out
+
+
+@cache
+def load_audit_guides(locale: str | None = None) -> dict[str, dict]:
     """framework_urn -> {urn_suffix: entry}, merged over every file."""
     out: dict[str, dict] = {}
     for path in sorted(AUDIT_GUIDES_DIR.glob("*/*.yaml")):
         data = yaml.safe_load(path.read_text()) or {}
         out.setdefault(data["framework_urn"], {}).update(data.get("entries") or {})
+    for urn, t in load_guide_translations(str(locale)).items():
+        entries = out.get(urn, {})
+        for key, texts in t["entries"].items():
+            if key in entries:
+                entries[key] = _localized(entries[key], texts)
     return out
 
 
 @cache
-def load_audit_sessions() -> dict[str, list]:
+def load_audit_sessions(locale: str | None = None) -> dict[str, list]:
     """framework_urn -> Stage 2 sessions, in the order an auditor runs them."""
     out: dict[str, list] = {}
     for path in sorted(AUDIT_GUIDES_DIR.glob("*/*.yaml")):
         data = yaml.safe_load(path.read_text()) or {}
         out.setdefault(data["framework_urn"], []).extend(data.get("sessions") or [])
+    for urn, t in load_guide_translations(str(locale)).items():
+        out[urn] = [
+            _localized(s, t["sessions"].get(s["id"], {})) for s in out.get(urn, [])
+        ]
     return out
 
 
 def guide_key(ref_id, urn, keys) -> str | None:
     """Guide entry for a requirement: its number, else its parent's (4.2 a) -> 4.2)."""
     for raw in (urn.rsplit(":", 1)[-1], ref_id or ""):
-        parts = [p for p in re.split(r"[^0-9a-z]+", raw.lower()) if p]
+        # A5.1 and A.05.01 read as a.5.1: letters split from digits, no padding.
+        parts = [p.lstrip("0") or p for p in re.findall(r"[a-z]+|\d+", raw.lower())]
         if parts[:1] in (["clause"], ["annex"]):
             parts = parts[1:]
         while parts:
@@ -128,7 +177,7 @@ def resolve_guide(framework, forced: str | None = None) -> dict | None:
 def readiness(
     ra_result, guidance, evidences, findings, today, prior_findings=(), filed=None
 ) -> tuple[str, list]:
-    """(ready | weak | gap | excluded, reason codes) for one requirement.
+    """(ready | to_confirm | weak | gap | excluded, reason codes) for one requirement.
 
     `filed` maps a request id to the evidences paired with it, through its
     reference control or by hand; unpaired requests fall back to the count.
@@ -144,8 +193,18 @@ def readiness(
         reasons.append(OPEN_FINDING)
     elif still_open:
         reasons.append(OPEN_MINOR_FINDING)
-    if not evidences and not any(filed.values()):
-        reasons.append(NOTHING_LINKED)
+    # A document with neither file nor link is a placeholder: it holds its
+    # request (no "not on file") but provides nothing until the file is added.
+    fileless = any(not e["has_file"] for e in evidences) or any(
+        not e["has_file"] for evs in filed.values() for e in evs
+    )
+    evidences = [e for e in evidences if e["has_file"]]
+    provided = {r: [e for e in evs if e["has_file"]] for r, evs in filed.items()}
+    nothing_provided = not evidences and not any(provided.values())
+    if nothing_provided:
+        reasons.append(MISSING_FILE if fileless else NOTHING_LINKED)
+    elif fileless:
+        reasons.append(MISSING_FILE)
     if ra_result == RequirementAssessment.Result.NON_COMPLIANT:
         reasons.append(NON_COMPLIANT)
     if any(f["severity"] == "error" for f in findings):
@@ -166,39 +225,45 @@ def readiness(
         return newest is None or newest.date() < today - timedelta(days=days)
 
     stale = any(
-        filed.get(r["id"]) and too_old(filed[r["id"]], r["fresh_days"])
+        provided.get(r["id"]) and too_old(provided[r["id"]], r["fresh_days"])
         for r in matchable
         if r.get("fresh_days")
     )
-    # shortcut: requests without a reference control cannot be paired, so the
-    # tightest of their windows applies to the newest unpaired evidence.
-    windows = [r["fresh_days"] for r in unmatched if r.get("fresh_days")]
+    # Requests without a pairing take whatever evidence is left; it may answer
+    # them (own naming, no reference control), so it is to confirm, not missing.
+    open_requests = unmatched + [r for r in matchable if not filed.get(r["id"])]
+    # shortcut: unpaired evidences cannot be told apart, so the tightest window
+    # of the open requests applies to the newest of them.
+    windows = [r["fresh_days"] for r in open_requests if r.get("fresh_days")]
     stale = stale or bool(rest and windows and too_old(rest, min(windows)))
     if stale:
         reasons.append(STALE_EVIDENCE)
-    if (evidences or paired) and any(not filed.get(r["id"]) for r in matchable):
-        reasons.append(REQUEST_NOT_ON_FILE)
-    if rest and len(rest) < len(unmatched):
-        reasons.append(FEWER_EVIDENCES_THAN_REQUESTS)
+    # Any unpaired evidence may answer the open requests, one document often
+    # several of them: to confirm by pairing, whatever the count.
+    if open_requests and (evidences or paired):
+        reasons.append(EVIDENCE_TO_CONFIRM if rest else REQUEST_NOT_ON_FILE)
     if any(f["severity"] == "warning" for f in findings):
         reasons.append(QUALITY_WARNING)
-    if GAP_REASONS & set(reasons):
+    if nothing_provided or GAP_REASONS & set(reasons):
         return "gap", reasons
-    return ("weak" if reasons else "ready"), reasons
+    if set(reasons) - {EVIDENCE_TO_CONFIRM}:
+        return "weak", reasons
+    return ("to_confirm" if reasons else "ready"), reasons
 
 
 def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
     framework = compliance_assessment.framework
     fit = resolve_guide(framework, forced_guide)
     if not fit or not fit["applies"]:
-        suggestion = fit and fit["coverage"] >= 0.5 and _guide_summary(fit)
+        suggestion = fit and fit["coverage"] >= SUGGEST_COVERAGE and _guide_summary(fit)
         return {
             "framework_urn": framework.urn,
             "supported": False,
             "items": [],
             "suggestion": suggestion or None,
         }
-    guidance = load_audit_guides()[fit["guide"]]
+    locale = get_language()
+    guidance = load_audit_guides(locale)[fit["guide"]]
 
     context = _build_requirement_assessment_quality_context(compliance_assessment)
     evidence_ids = {e for per_ra in context.evidences.values() for e in per_ra}
@@ -269,6 +334,13 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         guide=fit["guide"], evidence_id__in=evidence_ids
     ).values_list("evidence_id", "entry", "request"):
         by_hand[(entry, rid)].add(eid)
+    # A request with a reference control is one document: paired once, it is
+    # paired at every requirement asking for it.
+    rc_of = _request_references(guidance)
+    by_hand_rc = defaultdict(set)
+    for pair, eids in by_hand.items():
+        if rc_of.get(pair):
+            by_hand_rc[rc_of[pair]] |= eids
 
     today = date.today()
     items = []
@@ -323,7 +395,9 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         filed = {}
         for r in (node_guidance or {}).get("requests") or []:
             auto = by_reference.get(r.get("reference_control"), set())
-            hand = by_hand.get((key, r["id"]), set())
+            hand = by_hand.get((key, r["id"]), set()) | by_hand_rc.get(
+                r.get("reference_control"), set()
+            )
             if not r.get("reference_control") and not hand:
                 continue  # nothing to pair on: falls back to the linked count
             filed[r["id"]] = sorted(
@@ -331,6 +405,9 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                     {
                         "id": eid,
                         "name": evidence_names.get(eid),
+                        "has_file": context.evidence_revisions.get(eid, (False, None))[
+                            0
+                        ],
                         "updated_at": context.evidence_revisions.get(
                             eid, (False, None)
                         )[1],
@@ -380,7 +457,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         "supported": True,
         "guide": _guide_summary(fit),
         "items": items,
-        "sessions": load_audit_sessions().get(fit["guide"], []),
+        "sessions": load_audit_sessions(locale).get(fit["guide"], []),
     }
 
 
@@ -395,6 +472,16 @@ def _guide_summary(fit) -> dict:
 
 
 PAIRING_ERRORS = ("unknownRequirementAssessment", "unknownRequest", "unknownEvidence")
+
+
+def _request_references(guidance) -> dict:
+    """(entry, request id) -> reference control, for requests that have one."""
+    return {
+        (key, r["id"]): r["reference_control"]
+        for key, entry in guidance.items()
+        for r in entry.get("requests") or []
+        if r.get("reference_control")
+    }
 
 
 def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | None:
@@ -421,12 +508,20 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
     )
     if request is None or request["kind"] == "observation":
         return PAIRING_ERRORS[1]
-    # Only an evidence already linked to this requirement, directly or through
-    # one of its applied controls, and one the user may see.
-    linked = Evidence.objects.filter(
+    # An evidence the user may see, linked to this requirement directly or
+    # through one of its applied controls; with "attach", any such evidence,
+    # linked to the requirement on the way (picked from elsewhere in the domain).
+    viewable = Evidence.objects.filter(
+        id__in=RoleAssignment.get_viewable_object_ids(user, Evidence)
+    )
+    linked = viewable.filter(
         Q(requirement_assessments=ra) | Q(applied_controls__requirement_assessments=ra)
-    ).filter(id__in=RoleAssignment.get_viewable_object_ids(user, Evidence))
+    )
     evidence = linked.filter(id=data.get("evidence")).distinct().first()
+    if evidence is None and data.get("attach") and not data.get("remove"):
+        evidence = viewable.filter(id=data.get("evidence")).first()
+        if evidence is not None:
+            ra.evidences.add(evidence)
     if evidence is None:
         return PAIRING_ERRORS[2]
     fields = {
@@ -436,7 +531,14 @@ def pair_request(compliance_assessment, user, data, forced_guide=None) -> str | 
         "request": request["id"],
     }
     if data.get("remove"):
-        EvidenceRequestLink.objects.filter(**fields).delete()
+        # Unpaired everywhere the same document is asked, wherever it was paired.
+        refs = _request_references(load_audit_guides()[fit["guide"]])
+        rc = request.get("reference_control")
+        same = [p for p, u in refs.items() if rc and u == rc] or [(key, request["id"])]
+        links = EvidenceRequestLink.objects.filter(
+            evidence=evidence, guide=fit["guide"]
+        )
+        links.filter(reduce(or_, (Q(entry=e, request=r) for e, r in same))).delete()
     else:
         EvidenceRequestLink.objects.get_or_create(
             **fields, defaults={"created_by": user}
