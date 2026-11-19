@@ -15949,9 +15949,19 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 ),
             )
         ]
+        # A guide saved on the preparation ("apply anyway") wins over the
+        # framework's own match; each pair is resolved once.
+        saved = dict(
+            AuditPreparation.objects.filter(
+                compliance_assessment__in=[a.id for a in audits]
+            )
+            .exclude(guide="")
+            .values_list("compliance_assessment_id", "guide")
+        )
         fits = {}
-        for framework in {a.framework for a in audits if a.framework}:
-            fits[framework.id] = resolve_guide(framework)
+        for a in audits:
+            if a.framework and (key := (a.framework_id, saved.get(a.id))) not in fits:
+                fits[key] = resolve_guide(a.framework, key[1])
         return Response(
             [
                 {
@@ -15966,7 +15976,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "applies": fit["applies"],
                 }
                 for a in audits
-                if (fit := fits.get(a.framework_id))
+                if (fit := fits.get((a.framework_id, saved.get(a.id))))
                 and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
             ]
         )

@@ -341,6 +341,12 @@
 		to_validate: 'text-warning-700-300',
 		expires_before_audit: 'text-warning-700-300'
 	};
+	// A hidden evidence comes with its verdict only, not its status or dates.
+	const HIDDEN_ISSUE: Record<string, () => string> = {
+		unusable: m.prereadHiddenUnusable,
+		to_validate: m.prereadHiddenToValidate,
+		expires_before_audit: m.prereadHiddenExpires
+	};
 	// Past tense once the backend judged it lapsed by date.
 	const expiryLabel = (e: {
 		issue?: string | null;
@@ -1011,9 +1017,12 @@
 								</h2>
 							</div>
 							<div class="flex items-center gap-2">
-								<span class="text-xs text-surface-600-400" title={m.prereadResultHint()}>
-									{m.prereadResultIn({ result: safeTranslate(selected.result) })}
-								</span>
+								{#if selected.result}<span
+										class="text-xs text-surface-600-400"
+										title={m.prereadResultHint()}
+									>
+										{m.prereadResultIn({ result: safeTranslate(selected.result) })}
+									</span>{/if}
 								{#if canEditRA}
 									<a
 										class="btn btn-sm preset-tonal-primary"
@@ -1217,13 +1226,13 @@
 																				>{:else}<span class="italic text-surface-600-400"
 																					>{m.prereadEvidenceHidden()}</span
 																				>{/if}
-																			<span
-																				class="tabular-nums {old
-																					? 'text-warning-700-300'
-																					: 'text-surface-600-400'}"
-																				>{#if old}<i class="fa-solid fa-clock-rotate-left mr-1"
-																					></i>{/if}{ageLabel(e.updated_at)}</span
-																			>
+																			{#if e.name}<span
+																					class="tabular-nums {old
+																						? 'text-warning-700-300'
+																						: 'text-surface-600-400'}"
+																					>{#if old}<i class="fa-solid fa-clock-rotate-left mr-1"
+																						></i>{/if}{ageLabel(e.updated_at)}</span
+																				>{/if}
 																			{#if !e.here}<span
 																					class="text-surface-600-400"
 																					title={m.prereadFiledElsewhereHint()}
@@ -1231,7 +1240,9 @@
 																				>{/if}
 																			{#if issue && issue !== 'no_file'}
 																				<span class={ISSUE[issue]}
-																					>{safeTranslate(e.status ?? '')}{#if e.expiry_date}
+																					>{e.name
+																						? safeTranslate(e.status ?? '')
+																						: HIDDEN_ISSUE[issue]?.()}{#if e.expiry_date}
 																						· {expiryLabel(e)}{/if}</span
 																				>
 																			{/if}
@@ -1389,6 +1400,7 @@
 																	>
 																{/if}
 																<span
+																	hidden={!e.name}
 																	class="shrink-0 text-xs tabular-nums {stale || !e.updated_at
 																		? 'text-warning-700-300'
 																		: 'text-surface-600-400'}"
@@ -1419,7 +1431,9 @@
 																	>
 																{/each}
 																{#if e.issue && e.has_file}<span class={ISSUE[e.issue]}
-																		>{safeTranslate(e.status)}{#if e.expiry_date}
+																		>{e.name
+																			? safeTranslate(e.status)
+																			: HIDDEN_ISSUE[e.issue]?.()}{#if e.expiry_date}
 																			· {expiryLabel(e)}{/if}</span
 																	>{/if}
 																{#if !e.has_file && e.name && canAddFile}<button

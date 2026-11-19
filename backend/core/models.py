@@ -14754,6 +14754,8 @@ class AuditPreparationSetAside(AbstractBaseModel):
     preparation = models.ForeignKey(
         AuditPreparation, on_delete=models.CASCADE, related_name="set_asides"
     )
+    # Request ids belong to a guide: another guide's "r1" is another document.
+    guide = models.CharField(max_length=255)
     entry = models.CharField(max_length=64)
     request = models.CharField(max_length=16)
     reason = models.TextField()
@@ -14764,7 +14766,7 @@ class AuditPreparationSetAside(AbstractBaseModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["preparation", "entry", "request"],
+                fields=["preparation", "guide", "entry", "request"],
                 name="unique_preparation_set_aside",
             )
         ]

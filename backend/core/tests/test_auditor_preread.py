@@ -851,6 +851,29 @@ def test_preread_permissions_with_builtin_roles():
         url(audit, "pair/"), {**pair, "evidence": "not-a-uuid"}, format="json"
     )
     assert bad.status_code == 400 and bad.json() == {"error": "invalidField"}
+    # Linked from another domain, it counts but comes back as a stand-in.
+    ra.evidences.add(secret)
+    item = analyst.get(url(audit)).json()["items"][0]
+    hidden = [e for e in item["evidences"] if e["name"] is None]
+    assert hidden and hidden[0]["id"] == "hidden-1"
+    assert hidden[0]["status"] is None and hidden[0]["updated_at"] is None
+    # A set-aside made under another guide does not apply under this one.
+    from core.models import AuditPreparationSetAside
+
+    AuditPreparationSetAside.objects.create(
+        preparation=audit.preparation,
+        guide="urn:acme:risk:audit_guide:other",
+        entry="a.6.3",
+        request=request,
+        reason="other guide",
+    )
+    assert analyst.get(url(audit)).json()["items"][0]["set_aside"] == {}
+    # Score-only audit: the hidden compliance result says nothing.
+    ComplianceAssessment.objects.filter(id=audit.id).update(
+        field_visibility={"result": {"auditor": "hidden", "respondent": "hidden"}}
+    )
+    item = analyst.get(url(audit)).json()["items"][0]
+    assert item["result"] is None and "not_assessed" not in item["reasons"]
     # A locked audit's requirements cannot gain an evidence through the pre-read.
     ComplianceAssessment.objects.filter(id=audit.id).update(is_locked=True)
     locked = analyst.post(url(audit, "pair/"), pair, format="json")

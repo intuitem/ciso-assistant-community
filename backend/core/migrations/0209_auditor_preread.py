@@ -209,6 +209,7 @@ class Migration(migrations.Migration):
                     "updated_at",
                     models.DateTimeField(auto_now=True, verbose_name="Updated at"),
                 ),
+                ("guide", models.CharField(max_length=255)),
                 ("entry", models.CharField(max_length=64)),
                 ("request", models.CharField(max_length=16)),
                 ("reason", models.TextField()),
@@ -234,7 +235,7 @@ class Migration(migrations.Migration):
             options={
                 "constraints": [
                     models.UniqueConstraint(
-                        fields=("preparation", "entry", "request"),
+                        fields=("preparation", "guide", "entry", "request"),
                         name="unique_preparation_set_aside",
                     )
                 ],

@@ -61,7 +61,7 @@ export interface PrereadItem {
 	guide_key: string | null;
 	ref_id: string;
 	name: string;
-	result: string;
+	result: string | null;
 	status: string;
 	guidance: Guidance | null;
 	evidences: {

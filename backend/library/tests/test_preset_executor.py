@@ -1,4 +1,5 @@
 import pytest
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory
 
 from core.models import (
@@ -511,6 +512,33 @@ class TestPresetExecutorExistingDomain:
             )
             is None
         )
+
+    def test_item_listed_before_its_audit_is_refused(self):
+        root = Folder.get_root_folder()
+        user = User.objects.create_superuser(
+            email="preset_fwd@example.com", password="x"
+        )
+        _create_test_libraries(root)
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "findings_assessment",
+                    "name": "Stage 1",
+                    "audit": "iso_audit",
+                },
+                {
+                    "type": "compliance_assessment",
+                    "name": "ISO Audit",
+                    "framework": "urn:test:framework-lib",
+                    "ref": "iso_audit",
+                },
+            ],
+        )
+        request = RequestFactory().post("/")
+        request.user = user
+        with pytest.raises(ValidationError):
+            PresetExecutor(preset_library, user, request).apply(folder_name="Fwd")
 
     def test_compliance_assessment_implementation_groups_are_applied(self):
         """A compliance_assessment preset item with implementation_groups should

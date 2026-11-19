@@ -577,6 +577,16 @@ class PresetExecutor:
         existing_refs: dict | None = None,
     ) -> dict:
         scaffolded = self._preset.scaffolded_objects or []
+        # An item tied to an audit must come after it: before, the audit is not
+        # resolved yet and another audit's object could be reused.
+        listed = set()
+        for item in scaffolded:
+            if item.get("audit") and item["audit"] not in listed:
+                raise ValidationError(
+                    f"Preset item {item.get('ref') or item.get('name')!r} refers to "
+                    f"audit {item['audit']!r}, which must be listed before it."
+                )
+            listed.add(item.get("ref"))
         object_refs = {}
         deferred_scenarios = []
         context = {"request": self._request} if self._request else {}

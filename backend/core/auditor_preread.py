@@ -511,6 +511,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
     set_asides = {
         (a.entry, a.request): {"reason": a.reason}
         for a in (prep.set_asides.all() if prep else [])
+        if a.guide == fit["guide"]
     }
     # Like a pairing, a set-aside holds wherever the same document is asked.
     for pair, info in list(set_asides.items()):
@@ -519,6 +520,24 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                 if u == rc:
                     set_asides.setdefault(other, info)
     items = []
+    # A score-only audit hides the compliance result from everyone: it stays
+    # "not assessed" and says nothing, apart from "not applicable".
+    from core.utils import is_field_visible_to
+
+    result_used = is_field_visible_to(compliance_assessment, "result", "auditor")
+
+    def result_of(ra):
+        if result_used or ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return ra.result
+        return None
+
+    # What the user may not view still counts, but leaves only its verdict:
+    # a per-response stand-in replaces its id, its own details are dropped.
+    stand_ins = {}
+
+    def stand_in(oid) -> str:
+        return stand_ins.setdefault(oid, f"hidden-{len(stand_ins) + 1}")
+
     for ra in compliance_assessment.requirement_assessments.select_related(
         "requirement"
     ).order_by("requirement__order_id", "created_at"):
@@ -619,7 +638,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         }
         state, reasons = (
             readiness(
-                ra.result,
+                result_of(ra),
                 judged,
                 evidences,
                 findings,
@@ -631,6 +650,23 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
             if node_guidance
             else ("no_guidance", [])
         )
+        for e in [*evidences, *(f for evs in filed.values() for f in evs)]:
+            if e["name"] is None:
+                e.update(
+                    id=stand_in(e["id"]),
+                    has_file=e["issue"] != "no_file",
+                    status=None,
+                    expiry_date=None,
+                    updated_at=None,
+                )
+            if "via_controls" in e:
+                e["via_controls"] = [
+                    cid if control_names.get(cid) else stand_in(cid)
+                    for cid in e["via_controls"]
+                ]
+        for c in controls:
+            if c["name"] is None:
+                c.update(id=stand_in(c["id"]), status=None, eta=None)
         items.append(
             {
                 "id": ra.id,
@@ -638,7 +674,7 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
                 "guide_key": key,
                 "ref_id": node.ref_id,
                 "name": node.get_name_translated or node.name,
-                "result": ra.result,
+                "result": result_of(ra),
                 "status": ra.status,
                 "has_observation": bool(ra.observation),
                 "guidance": node_guidance,
@@ -735,7 +771,7 @@ def _previous_set_asides(compliance_assessment, guide, user) -> list:
             compliance_assessment__in=RoleAssignment.get_viewable_object_ids(
                 user, ComplianceAssessment
             ),
-            set_asides__isnull=False,
+            set_asides__guide=guide,
         )
         .exclude(compliance_assessment=compliance_assessment)
         .select_related("compliance_assessment__framework")
@@ -746,7 +782,7 @@ def _previous_set_asides(compliance_assessment, guide, user) -> list:
         if other and other["applies"] and other["guide"] == guide:
             return [
                 {"entry": a.entry, "request": a.request, "reason": a.reason}
-                for a in prep.set_asides.all()
+                for a in prep.set_asides.filter(guide=guide)
             ]
     return []
 
@@ -878,7 +914,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                     rc = request.get("reference_control")
                     refs = _request_references(load_audit_guides()[fit["guide"]])
                     same = [p for p, u in refs.items() if rc and u == rc]
-                    prep.set_asides.filter(
+                    prep.set_asides.filter(guide=fit["guide"]).filter(
                         reduce(
                             or_,
                             (
@@ -892,6 +928,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                 else:
                     AuditPreparationSetAside.objects.update_or_create(
                         preparation=prep,
+                        guide=fit["guide"],
                         entry=key,
                         request=request["id"],
                         defaults={
@@ -900,9 +937,11 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                         },
                     )
             elif data.get("carry_over"):
-                for a in _previous_set_asides(compliance_assessment, guide(), user):
+                current = guide()
+                for a in _previous_set_asides(compliance_assessment, current, user):
                     AuditPreparationSetAside.objects.get_or_create(
                         preparation=prep,
+                        guide=current,
                         entry=a["entry"],
                         request=a["request"],
                         defaults={"reason": a["reason"], "created_by": user},
