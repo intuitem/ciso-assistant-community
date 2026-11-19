@@ -630,3 +630,20 @@ def test_list_shows_only_audits_whose_preread_can_be_opened():
         client = APIClient()
         client.force_authenticate(user)
         assert len(client.get(url).json()) == count
+
+
+def test_iso_requirements_suggest_every_control_the_guide_asks_for():
+    """A request answered through a reference control only fills itself when the
+    ISO requirement suggests that control: keep the library and the guide in step."""
+    framework = yaml.safe_load(LIBRARY.read_text())["objects"]["framework"]
+    suggested = {
+        n["urn"].rsplit(":", 1)[-1]: set(n.get("reference_controls") or [])
+        for n in framework["requirement_nodes"]
+    }
+    guide = yaml.safe_load(
+        (LIBRARY.parent / "audit-guide-iso27001-2022.yaml").read_text()
+    )["objects"]["audit_guides"][0]
+    for key, entry in guide["entries"].items():
+        for r in entry["requests"]:
+            if r.get("reference_control"):
+                assert r["reference_control"] in suggested[key], (key, r["id"])

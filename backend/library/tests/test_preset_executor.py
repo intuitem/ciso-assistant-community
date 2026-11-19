@@ -1,4 +1,5 @@
 import pytest
+from django.test import RequestFactory
 
 from core.models import (
     Asset,
@@ -11,6 +12,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
     StoredLibrary,
+    TaskTemplate,
 )
 from iam.models import Folder, User
 from library.preset_executor import PresetExecutor
@@ -435,6 +437,56 @@ class TestPresetExecutorExistingDomain:
             "implementation_groups": "SoA",
         }
         assert "ghost" not in step.target_params
+
+    def test_step_target_url_substitutes_refs_and_links_tasks(self):
+        """{{ref:name}} in a target_url path resolves to the object's id (an
+        unresolved one makes the step unlinkable), and a task_template with
+        `audit` + `requirements` is linked to those requirement assessments."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_superuser(
+            email="preset_url@example.com", password="x"
+        )
+        _create_test_libraries(root)
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "compliance_assessment",
+                    "name": "ISO Audit",
+                    "framework": "urn:test:framework-lib",
+                    "ref": "iso_audit",
+                },
+                {
+                    "type": "task_template",
+                    "name": "Access review",
+                    "audit": "iso_audit",
+                    "requirements": ["REQ-1"],
+                },
+            ],
+            steps=[
+                {
+                    "key": "preread",
+                    "title": "Pre-read",
+                    "target_url": "/experimental/auditor-preread/{{ref:iso_audit}}",
+                },
+                {"key": "ghost", "title": "Ghost", "target_url": "/x/{{ref:unknown}}"},
+            ],
+        )
+        request = RequestFactory().post("/")
+        request.user = user  # creating a task template needs the requesting user
+        journey = PresetExecutor(preset_library, user, request).apply(
+            folder_name="URL Domain"
+        )
+        ca_id = journey.object_refs["iso_audit"]
+        assert (
+            journey.steps.get(key="preread").target_url
+            == f"/experimental/auditor-preread/{ca_id}"
+        )
+        assert journey.steps.get(key="ghost").target_url is None
+        task = TaskTemplate.objects.get(name="Access review", folder=journey.folder)
+        assert [ra.requirement.ref_id for ra in task.requirement_assessments.all()] == [
+            "REQ-1"
+        ]
 
     def test_compliance_assessment_implementation_groups_are_applied(self):
         """A compliance_assessment preset item with implementation_groups should

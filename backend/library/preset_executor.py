@@ -7,10 +7,28 @@ from django.db.models import Max
 from django.utils.translation import get_language
 
 _PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
+_URL_REF_RE = re.compile(r"\{\{ref:([A-Za-z0-9_]+)\}\}")
 
 # Reserved object_refs key for the perimeter the executor creates itself; it is
 # not a scaffolded item, so it has no author-supplied ref to track it by.
 _DEFAULT_PERIMETER_REF = "__default_perimeter__"
+
+
+def _resolve_url_refs(url: str | None, object_refs: dict) -> str | None:
+    """Substitute {{ref:<name>}} in a step's target_url (e.g. an audit id in the
+    path); a URL with an unresolved ref is not linkable, so None."""
+    if not url or "{{ref:" not in url:
+        return url
+    unresolved = False
+
+    def _sub(match):
+        nonlocal unresolved
+        resolved = object_refs.get(match.group(1))
+        unresolved = unresolved or not resolved
+        return resolved or ""
+
+    out = _URL_REF_RE.sub(_sub, url)
+    return None if unresolved else out
 
 
 def _resolve_param_refs(params: dict | None, object_refs: dict) -> dict | None:
@@ -59,6 +77,7 @@ from core.models import (
     Asset,
     Threat,
     ComplianceAssessment,
+    RequirementAssessment,
     FindingsAssessment,
     TaskTemplate,
     OrganisationObjective,
@@ -267,7 +286,9 @@ class PresetExecutor:
                 step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
                 step.target_ref = step_target_ref
-                step.target_url = step_def.get("target_url")
+                step.target_url = _resolve_url_refs(
+                    step_def.get("target_url"), object_refs
+                )
                 step.target_params = resolved_params
                 to_update.append(step)
             else:
@@ -280,7 +301,9 @@ class PresetExecutor:
                     translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
                     target_ref=step_target_ref,
-                    target_url=step_def.get("target_url"),
+                    target_url=_resolve_url_refs(
+                        step_def.get("target_url"), object_refs
+                    ),
                     target_params=resolved_params,
                     status=PresetJourneyStep.Status.NOT_STARTED,
                 )
@@ -482,6 +505,21 @@ class PresetExecutor:
             risk_assessment_id=risk_assessment_id, name=name
         ).first()
 
+    @staticmethod
+    def _link_requirements(task_template, item: dict, object_refs: dict) -> None:
+        """Link a task to the requirements it serves in a scaffolded audit
+        (`audit`: its ref, `requirements`: ref_ids), so the evidence its
+        occurrences file counts for them. Idempotent."""
+        audit_id = object_refs.get(item.get("audit") or "")
+        if not audit_id or not item.get("requirements"):
+            return
+        task_template.requirement_assessments.add(
+            *RequirementAssessment.objects.filter(
+                compliance_assessment_id=audit_id,
+                requirement__ref_id__in=item["requirements"],
+            )
+        )
+
     def _backfill_side_effects(
         self, obj_type: str, obj, item: dict, object_refs: dict
     ) -> None:
@@ -500,6 +538,9 @@ class PresetExecutor:
                 )
                 for ra in assessments:
                     ra.create_applied_controls_from_suggestions()
+
+        elif obj_type == "task_template":
+            self._link_requirements(obj, item, object_refs)
 
         elif obj_type == "risk_scenario":
             asset_refs = item.get("asset_refs", [])
@@ -605,6 +646,7 @@ class PresetExecutor:
                 serializer = TaskTemplateWriteSerializer(data=data, context=context)
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
+                self._link_requirements(obj, item, object_refs)
 
             elif obj_type == "organisation_objective":
                 data = {
@@ -922,7 +964,7 @@ class PresetExecutor:
                 translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
                 target_ref=step_target_ref,
-                target_url=step_def.get("target_url"),
+                target_url=_resolve_url_refs(step_def.get("target_url"), object_refs),
                 target_params=_resolve_param_refs(
                     step_def.get("target_params"), object_refs
                 ),

@@ -87,7 +87,10 @@
 		no_guidance: m.prereadVerdictNoGuidance
 	};
 
-	let view: 'req' | 'sessions' | 'requests' | 'interviews' = $state('req');
+	// ?view= opens a tab directly (a journey step lands on the audit sessions).
+	const VIEWS = ['req', 'sessions', 'requests', 'interviews'] as const;
+	const askedView = page.url.searchParams.get('view') as (typeof VIEWS)[number];
+	let view: (typeof VIEWS)[number] = $state(VIEWS.includes(askedView) ? askedView : 'req');
 	let readinessFilter: Readiness | 'all' = $state('all');
 	let section = $state('all');
 	const prep = $derived(data.preread.preparation as Preparation | null);
@@ -814,9 +817,7 @@
 						matched: s.matched,
 						total: s.total
 					})}
-					<a class="anchor" href="?guide={encodeURIComponent(s.urn)}"
-						>{m.prereadApplyAnyway()}</a
-					>
+					<a class="anchor" href="?guide={encodeURIComponent(s.urn)}">{m.prereadApplyAnyway()}</a>
 				</p>
 			{/if}
 		</div>
