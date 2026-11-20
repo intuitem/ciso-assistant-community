@@ -14751,6 +14751,8 @@ class AuditPreparation(AbstractBaseModel):
 class AuditPreparationSetAside(AbstractBaseModel):
     """A request of the guide that does not apply to this audit, and why."""
 
+    IAM_SCOPE_FIELD = "preparation"
+
     preparation = models.ForeignKey(
         AuditPreparation, on_delete=models.CASCADE, related_name="set_asides"
     )
@@ -14775,6 +14777,8 @@ class AuditPreparationSetAside(AbstractBaseModel):
 class AuditPreparationRole(AbstractBaseModel):
     """Who answers for one interview role of the guide (ciso, hr, dpo...)."""
 
+    IAM_SCOPE_FIELD = "preparation"
+
     preparation = models.ForeignKey(
         AuditPreparation, on_delete=models.CASCADE, related_name="roles"
     )
@@ -14791,6 +14795,8 @@ class AuditPreparationRole(AbstractBaseModel):
 
 class AuditPreparationSession(AbstractBaseModel):
     """When and where one session of the guide takes place, and who attends."""
+
+    IAM_SCOPE_FIELD = "preparation"
 
     preparation = models.ForeignKey(
         AuditPreparation, on_delete=models.CASCADE, related_name="sessions"
