@@ -1,0 +1,24 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${exception_name}” biztonsági kivételt"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő biztonsági kivételt:
+
+  - Név: ${exception_name}
+  - Hivatkozási azonosító: ${exception_ref_id}
+  - Súlyosság: ${exception_severity}
+  - Állapot: ${exception_status}
+  - Lejárati dátum: ${expiration_date}
+  - Tartomány: ${folder_name}
+
+  Leírás:
+
+  ${exception_description}
+
+  Észrevétel:
+
+  ${exception_observation}
+
+  A biztonsági kivétel megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A biztonsági kivétel megtekintése](${exception_url})
+
+  Köszönjük.

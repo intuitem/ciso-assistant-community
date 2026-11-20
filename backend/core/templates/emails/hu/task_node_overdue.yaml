@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Önnek ${task_count} lejárt határidejű feladata van"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő, még nem teljesített feladatok határideje lejárt:
+
+  ${task_list}
+
+  A feladatok teljesítéséhez vagy frissítéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

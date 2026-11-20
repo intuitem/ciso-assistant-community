@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Újranyitották a(z) „${response_name}” gyors űrlapot"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő űrlapválaszt módosításra visszaküldték Önnek:
+
+  - Űrlapválasz: ${response_name}
+  - Űrlap: ${quick_form_name}
+  - Felülvizsgálói megjegyzés: ${observation}
+
+  A válaszai frissítéséhez jelentkezzen be a CISO Assistantba: [Az űrlap megnyitása](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Köszönjük.
