@@ -2429,7 +2429,7 @@
 	"ebiosRM": "EBIOS RM",
 	"ebiosRMStudies": "EBIOS RM tanulmányok",
 	"ebiosRMStudyARM": "EBIOS RM tanulmány (ARM-formátum)",
-	"ebiosRMStudyARMDescription": "EBIOS RM tanulmány importálása ARM Excel-formátumból.\nEz zárt formátum: nem minden objektum támogatott, és a fejlécek vagy munkalapok változása miatt egyes importálások hiányosak lehetnek.",
+	"ebiosRMStudyARMDescription": "EBIOS RM tanulmány importálása ARM Excel-formátumból: a tanulmány teljes exportjából vagy a táblázatonkénti exportok ZIP-fájljából.\nEz zárt formátum: nem minden objektum támogatott, és a fejlécek vagy munkalapok változása miatt egyes importálások hiányosak lehetnek.",
 	"ebiosRMStudyExcel": "EBIOS RM tanulmány (CISO Assistant formátum)",
 	"ebiosRMStudyExcelDescription": "EBIOS RM tanulmány importálása CISO Assistant Excel-exportból. Így tanulmányok oszthatók meg példányok között, vagy korábban exportált tanulmányok állíthatók vissza.",
 	"ebiosRMStudyEgerieXML": "EBIOS RM tanulmány (Egerie XML-formátum)",
