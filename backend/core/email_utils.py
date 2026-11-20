@@ -35,6 +35,7 @@ _DAY_UNITS = {
     "de": ("Tag", "Tagen"),
     "en": ("day", "days"),
     "fr": ("jour", "jours"),
+    "hu": ("nap", "nap"),
     "nl": ("dag", "dagen"),
 }
 
@@ -53,6 +54,11 @@ _ASSIGNMENT_DECISIONS = {
         "closed": "clôturée",
         "reopened": "rouverte",
         "changes_requested": "renvoyée avec des modifications demandées",
+    },
+    "hu": {
+        "closed": "Lezárva",
+        "reopened": "Újranyitva",
+        "changes_requested": "Módosításra visszaküldve",
     },
     "nl": {
         "closed": "gesloten",
@@ -90,6 +96,15 @@ _STATE_LABELS = {
         "change_requested": "Modification demandée",
         "published": "Publiée",
         "validated": "Validé",
+    },
+    "hu": {
+        "accepted": "Elfogadva",
+        "approved": "Jóváhagyva",
+        "rejected": "Elutasítva",
+        "revoked": "Visszavonva",
+        "change_requested": "Változtatás kérve",
+        "published": "Közzétéve",
+        "validated": "Validált",
     },
     "nl": {
         "accepted": "Geaccepteerd",
@@ -168,6 +183,27 @@ _MODEL_LABELS = {
         "rightRequest": "Exercice de droit",
         "solution": "Solution",
     },
+    "hu": {
+        "asset": "Eszköz",
+        "businessImpactAnalysis": "Üzleti hatáselemzés",
+        "contract": "Szerződés",
+        "dataBreach": "Adatvédelmi incidens",
+        "ebiosRmStudy": "EBIOS RM tanulmány",
+        "documentContainer": "Dokumentum",
+        "entityAssessment": "Szervezetértékelés",
+        "evidence": "Bizonyíték",
+        "finding": "Megállapítás",
+        "findingsAssessment": "Megállapításgyűjtő",
+        "metricInstance": "Metrikapéldány",
+        "organisationObjective": "Célkitűzés",
+        "postureAssessment": "Technikai helyzetkép",
+        "processing": "Adatkezelés",
+        "quantitativeRiskScenario": "CRQ-forgatókönyv",
+        "quantitativeRiskStudy": "CRQ-tanulmány",
+        "riskAssessment": "Kockázatértékelés",
+        "rightRequest": "Érintetti kérelem",
+        "solution": "Megoldás",
+    },
     "nl": {
         "asset": "Middel",
         "businessImpactAnalysis": "Bedrijfsimpactanalyse",
@@ -210,6 +246,12 @@ _TASK_LIST_LABELS = {
         "not_set": "Non définie",
         "unknown": "Inconnue",
     },
+    "hu": {
+        "due": "Határidő",
+        "status": "Állapot",
+        "not_set": "Nincs megadva",
+        "unknown": "Ismeretlen",
+    },
     "nl": {
         "due": "Vervaldatum",
         "status": "Status",
@@ -236,6 +278,12 @@ _TASK_STATUSES = {
         "in_progress": "En cours",
         "completed": "Terminé",
         "cancelled": "Annulé",
+    },
+    "hu": {
+        "pending": "Függőben",
+        "in_progress": "Folyamatban",
+        "completed": "Teljesítve",
+        "cancelled": "Lemondva",
     },
     "nl": {
         "pending": "In behandeling",
@@ -277,6 +325,16 @@ _REGULATORY_LABELS = {
         "gapDpiaMissing": "AIPD requise mais absente",
         "gapRetentionMissing": "durée de conservation manquante",
         "gapTransferMechanismMissing": "transfert sans mécanisme de transfert",
+    },
+    "hu": {
+        "earlyWarning": "Korai előrejelzés (24 óra)",
+        "incidentNotification": "Incidensbejelentés (72 óra)",
+        "finalReport": "Zárójelentés (1 hónap)",
+        "gdprBreachNotification": "Adatvédelmi incidens GDPR szerinti bejelentése (72 óra)",
+        "gapNoPurpose": "nincs rögzített cél",
+        "gapDpiaMissing": "hiányzik a szükséges adatvédelmi hatásvizsgálat",
+        "gapRetentionMissing": "hiányzik a megőrzési idő",
+        "gapTransferMechanismMissing": "adattovábbítás továbbítási mechanizmus nélkül",
     },
     "nl": {
         "earlyWarning": "Vroegtijdige waarschuwing (24 u)",
@@ -408,7 +466,7 @@ def format_email_date(value, locale: Optional[str], preference: str = "auto") ->
     if preference == "mmddyyyy":
         return value.strftime("%m/%d/%Y")
 
-    # Same de/en/fr/nl fallback as labels and templates, so an email never mixes languages.
+    # Same de/en/fr/hu/nl fallback as labels and templates, so an email never mixes languages.
     with override(_language_code(locale)):
         if preference == "long_dmy":
             return django_date_format(value, "j F Y")

@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${task_name}” feladatot"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő feladatot:
+
+  - Név: ${task_name}
+  - Leírás: ${task_description}
+  - Hivatkozási azonosító: ${task_ref_id}
+  - Dátum: ${task_date}
+  - Ismétlődő: ${is_recurrent}
+  - Tartomány: ${folder_name}
+
+  A feladat megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url}/task-templates/${task_id})
+
+  Köszönjük.

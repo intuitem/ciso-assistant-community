@@ -270,6 +270,8 @@
 	"evidenceFourEyes": "Double contrôle des preuves",
 	"reviewEvidences": "Examiner les preuves",
 	"evidenceFourEyesHelpText": "Lorsque cette option est activée, la personne qui a déposé un fichier ne peut ni l'approuver ni le rejeter",
+	"autoLockOverdueAssessments": "Verrouillage automatique des évaluations en retard",
+	"autoLockOverdueAssessmentsHelpText": "Lorsque cette option est activée, les audits issus d'une campagne ou d'une évaluation de tiers sont verrouillés et passés « En revue » la nuit suivant leur date d'échéance",
 	"autoRefId": "Identifiants de référence automatiques",
 	"autoRefIdHelpText": "Lorsque cette option est activée, les objets créés sans identifiant de référence en reçoivent un, numéroté au sein de leur parent (par ex. AC.01 dans son domaine, R.01 dans son analyse de risques). Les identifiants existants ne sont jamais modifiés",
 	"autoRefIdPrefixes": "Préfixes",
@@ -8600,5 +8602,18 @@
 	"europeanUnion": "Union européenne",
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
-	"notShownOnMap": "Non représenté sur la carte"
+	"notShownOnMap": "Non représenté sur la carte",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "Configuration de l'intégration GLPI",
+	"glpiInstanceUrlHelpText": "URL de votre instance GLPI (ex. https://glpi.example.com/). GLPI 11 ou ultérieur est requis.",
+	"glpiClientIdHelpText": "Identifiant d'un client OAuth créé dans GLPI avec l'autorisation « password » et le périmètre « api ».",
+	"glpiUsernameHelpText": "Utilisateur GLPI au nom duquel l'intégration agit. Son profil détermine les éléments lisibles et modifiables.",
+	"glpiSecretsAlreadySetHelpText": "Le secret client et le mot de passe sont déjà définis.",
+	"glpiResetSecrets": "Réinitialiser les secrets",
+	"glpiWebhookSecretHelpText": "Le secret affiché dans l'onglet Sécurité de votre webhook GLPI.",
+	"glpiIntegrationMappingsHelpText": "Associez vos mesures locales aux éléments GLPI.",
+	"glpiTableHelpText": "Sélectionnez le type d'élément GLPI à synchroniser (ticket, changement ou problème).",
+	"glpiField": "Champ GLPI",
+	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
+	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...)."
 }

@@ -286,6 +286,8 @@
 	"evidenceFourEyes": "Four-eyes review of evidences",
 	"reviewEvidences": "Review evidences",
 	"evidenceFourEyesHelpText": "When enabled, whoever uploaded a file cannot approve or reject it",
+	"autoLockOverdueAssessments": "Auto-lock overdue assessments",
+	"autoLockOverdueAssessmentsHelpText": "When enabled, audits from a campaign or a third-party assessment are locked and moved to \"In review\" the night after their due date",
 	"autoRefId": "Automatic reference IDs",
 	"autoRefIdHelpText": "When enabled, objects created without a reference ID get one numbered within their parent (e.g. AC.01 in its domain, R.01 in its risk assessment). Existing reference IDs are never changed",
 	"autoRefIdPrefixes": "Prefixes",
@@ -8603,5 +8605,18 @@
 	"europeanUnion": "European Union",
 	"europeanEconomicArea": "European Economic Area",
 	"otherCountries": "Other Countries",
-	"notShownOnMap": "Not shown on map"
+	"notShownOnMap": "Not shown on map",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "GLPI Integration Configuration",
+	"glpiInstanceUrlHelpText": "The URL of your GLPI instance (e.g., https://glpi.example.com/). GLPI 11 or later is required.",
+	"glpiClientIdHelpText": "The ID of an OAuth client created in GLPI with the password grant and the api scope.",
+	"glpiUsernameHelpText": "The GLPI user the integration acts as. Its profile decides which items can be read and written.",
+	"glpiSecretsAlreadySetHelpText": "The client secret and the password are already set.",
+	"glpiResetSecrets": "Reset secrets",
+	"glpiWebhookSecretHelpText": "The secret shown in the Security tab of your GLPI webhook.",
+	"glpiIntegrationMappingsHelpText": "Map your local controls to GLPI items.",
+	"glpiTableHelpText": "Select the GLPI item type to sync with (ticket, change or problem).",
+	"glpiField": "GLPI Field",
+	"glpiAssetMappingsHelpText": "Map your assets to GLPI items. Assets are synced once an item type is selected.",
+	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...)."
 }

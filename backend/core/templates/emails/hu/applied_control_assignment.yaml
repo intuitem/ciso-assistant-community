@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${control_name}” kontrollt"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő kontrollt:
+
+  - Név: ${control_name}
+  - Leírás: ${control_description}
+  - Hivatkozási azonosító: ${control_ref_id}
+  - Állapot: ${control_status}
+  - Prioritás: ${control_priority}
+  - Várható befejezés: ${control_eta}
+  - Tartomány: ${folder_name}
+
+  A kontroll megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
