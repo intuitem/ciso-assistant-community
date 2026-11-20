@@ -2194,13 +2194,14 @@ async def prepare_evidence_upload(
         command = (
             "curl -sS --fail-with-body -X POST "
             "-H 'Content-Type: application/octet-stream' "
-            f"--data-binary @<sandbox path> '{url}'"
+            f"--data-binary @\"<sandbox path>\" '{url}'"
         )
         return (
             f"{head}\n"
             f"Upload URL for {filename}, single use, expires {issued.get('expires_at')}.\n"
             "Run in your code execution sandbox, <sandbox path> being the chat "
-            "file's path there:\n"
+            "file's path there, kept inside the double quotes (escape any "
+            '", $, ` or \\ it contains):\n'
             f"{command}\n"
             "A JSON answer with the evidence ID and size means the file is "
             "stored. On 410, call this tool again with "

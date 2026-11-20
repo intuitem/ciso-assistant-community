@@ -5,6 +5,7 @@ test_risk_review_tools.py; files are real, under pytest's tmp_path.
 """
 
 import asyncio
+import shlex
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -362,8 +363,14 @@ class TestPrepareEvidenceUpload:
         assert (
             "curl -sS --fail-with-body -X POST "
             "-H 'Content-Type: application/octet-stream' "
-            f"--data-binary @<sandbox path> '{UPLOAD_URL}'"
+            f"--data-binary @\"<sandbox path>\" '{UPLOAD_URL}'"
         ) in out
+        # A path with spaces stays one argument once substituted.
+        command = next(line for line in out.splitlines() if line.startswith("curl"))
+        args = shlex.split(
+            command.replace("<sandbox path>", "/mnt/data/audit report.pdf")
+        )
+        assert "@/mnt/data/audit report.pdf" in args
 
     def test_never_puts_a_credential_in_the_curl(self):
         post = self._post(
