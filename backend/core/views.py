@@ -6184,8 +6184,17 @@ class AppliedControlFilterSet(GenericFilterSet):
         method="filter_findings_assessments",
         queryset=FindingsAssessment.objects.all(),
     )
+    # A control linked to a scenario as an existing or an additional measure.
+    linked_risk_scenarios = df.ModelMultipleChoiceFilter(
+        method="filter_linked_risk_scenarios",
+        queryset=RiskScenario.objects.all(),
+        label="Linked risk scenarios",
+    )
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
+    )
+    exclude_status = df.MultipleChoiceFilter(
+        field_name="status", choices=AppliedControl.Status.choices, exclude=True
     )
     # The promises live in their own table, so this reaches through the live cycle.
     commitment_state = CommitmentStateFilter(
@@ -6229,6 +6238,17 @@ class AppliedControlFilterSet(GenericFilterSet):
             )
             return queryset.filter(findings__in=findings).distinct()
         return queryset
+
+    def filter_linked_risk_scenarios(self, queryset, name, value):
+        if not value:
+            return queryset
+        additional = RiskScenario.applied_controls.through.objects.filter(
+            riskscenario__in=value
+        ).values("appliedcontrol_id")
+        existing = RiskScenario.existing_applied_controls.through.objects.filter(
+            riskscenario__in=value
+        ).values("appliedcontrol_id")
+        return queryset.filter(Q(id__in=additional) | Q(id__in=existing))
 
     def filter_risk_assessments(self, queryset, name, value):
         if value:
@@ -7256,11 +7276,15 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
 
     @action(detail=False, methods=["get"])
     def impact_effort(self, request):
-        # TODO consider the case of passing the domain as a filter
-        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, AppliedControl
+        # Same filters as the list (exclude_status, folder, ...), so the matrix
+        # and the table under it count the same controls.
+        viewable_controls = self.filter_queryset(
+            AppliedControl.objects.filter(
+                id__in=RoleAssignment.get_viewable_object_ids(
+                    request.user, AppliedControl
+                )
+            )
         )
-        viewable_controls_set = set(viewable_controls_ids)
 
         output = [
             [[], [], [], [], []],
@@ -7270,8 +7294,7 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             [[], [], [], [], []],
         ]
 
-        assessed_controls = AppliedControl.objects.filter(
-            id__in=viewable_controls_set,
+        assessed_controls = viewable_controls.filter(
             control_impact__isnull=False,
             effort__isnull=False,
         ).values_list(
@@ -7303,12 +7326,6 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
                     }
                 )
 
-        # Get viewable but not assessed controls
-        all_assessed_ids = set(control_id for control_id, _, _, _ in assessed_controls)
-        viewable_not_assessed = viewable_controls_set - all_assessed_ids
-
-        print("Matrix populated with assessed controls")
-        print(f"Viewable but not assessed: {len(viewable_not_assessed)} controls")
         return Response(output)
 
     @action(detail=False, methods=["get"])

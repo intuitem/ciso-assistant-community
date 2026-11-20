@@ -59,6 +59,7 @@ from core.models import (
     CustomWordTemplate,
     FindingsAssessment,
     RiskAssessment,
+    RiskScenario,
     SecurityException,
 )
 from global_settings.models import GlobalSettings
@@ -1501,6 +1502,18 @@ class TimelineEntriesView(APIView):
         # Applied controls: bar (start_date + eta) or milestone (eta only)
         ac_ids = accessible_ids(AppliedControl)
         ac_owners = owner_ids_map(AppliedControl, "owner", ac_ids)
+        # Viewable risk scenarios each control is an existing or additional
+        # measure of, for the page's scenario filter.
+        rs_ids = accessible_ids(RiskScenario)
+        ac_scenarios: dict = {}
+        for through in (
+            RiskScenario.applied_controls.through,
+            RiskScenario.existing_applied_controls.through,
+        ):
+            for control_id, scenario_id in through.objects.filter(
+                appliedcontrol_id__in=ac_ids, riskscenario_id__in=rs_ids
+            ).values_list("appliedcontrol_id", "riskscenario_id"):
+                ac_scenarios.setdefault(control_id, set()).add(scenario_id)
         for row in (
             AppliedControl.objects.filter(id__in=ac_ids)
             .order_by("created_at")
@@ -1516,6 +1529,7 @@ class TimelineEntriesView(APIView):
                     "eta": row["eta"],
                     "progress_field": row["progress_field"],
                     "owners": ac_owners.get(row["id"], []),
+                    "risk_scenarios": sorted(ac_scenarios.get(row["id"], ()), key=str),
                 }
             )
 

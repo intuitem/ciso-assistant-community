@@ -895,6 +895,19 @@ export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Controls linked to a scenario as an existing or an additional measure.
+export const LINKED_RISK_SCENARIO_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		lazy: true,
+		label: 'riskScenario',
+		optionsEndpoint: 'risk-scenarios',
+		optionsLabelField: 'auto',
+		optionsExtraFields: [['risk_assessment', 'str']],
+		multiple: true
+	}
+};
+
 export const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2217,6 +2230,7 @@ export const listViewFields = {
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reference_control: REFERENCE_CONTROL_FILTER,
+			linked_risk_scenarios: LINKED_RISK_SCENARIO_FILTER,
 			eta: dateFilter('eta'),
 			start_date: dateFilter('start_date'),
 			expiry_date: dateFilter('expiry_date'),

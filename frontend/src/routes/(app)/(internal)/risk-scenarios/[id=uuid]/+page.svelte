@@ -446,10 +446,12 @@
 
 	{#if page.data?.featureflags?.inherent_risk}
 		<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-surface-50-950 shadow-lg">
-			<div class="flex flex-col w-full lg:w-1/2">
+			<div class="flex flex-col w-full lg:flex-1 min-w-0">
 				<h4 class="h4 font-semibold">{m.inherentRisk()}</h4>
 			</div>
-			<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2 h-full">
+			<div
+				class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-auto lg:shrink-0 lg:flex-col lg:flex-nowrap lg:gap-1 h-full"
+			>
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 					<span
@@ -462,7 +464,7 @@
 						{data.scenario.inherent_proba ? safeTranslate(data.scenario.inherent_proba.name) : '--'}
 					</span>
 				</p>
-				<i class="fa-solid fa-xmark mt-5"></i>
+				<i class="fa-solid fa-xmark mt-5 lg:mt-0"></i>
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 					<span
@@ -477,14 +479,14 @@
 							: '--'}
 					</span>
 				</p>
-				<i class="fa-solid fa-equals mt-5"></i>
+				<i class="fa-solid fa-equals mt-5 lg:mt-0"></i>
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600 whitespace-nowrap"
 						>{m.inherentRiskLevel()}</span
 					>
 					<span
-						class="text-sm text-center font-semibold p-2 rounded-md w-20 {data.scenario
-							.inherent_level
+						class="text-sm text-center font-semibold p-2 rounded-md min-w-20 whitespace-nowrap {data
+							.scenario.inherent_level
 							? classesCellText(data.scenario.inherent_level.hexcolor)
 							: ''}"
 						style="background-color: {data.scenario.inherent_level?.hexcolor || NO_VALUE_COLOR}"
@@ -497,7 +499,7 @@
 	{/if}
 
 	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-surface-50-950 shadow-lg">
-		<div class="flex flex-col w-full lg:w-1/2">
+		<div class="flex flex-col w-full lg:flex-1 min-w-0">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
 			<p class="text-sm font-semibold text-surface-400-600">{m.existingControls()}</p>
 			<ModelTable
@@ -506,7 +508,9 @@
 				baseEndpoint="/applied-controls?risk_scenarios_e={page.params.id}"
 			/>
 		</div>
-		<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2">
+		<div
+			class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-auto lg:shrink-0 lg:flex-col lg:flex-nowrap lg:gap-1"
+		>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
@@ -519,7 +523,7 @@
 					{data.scenario.current_proba ? safeTranslate(data.scenario.current_proba.name) : '--'}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5"></i>
+			<i class="fa-solid fa-xmark mt-5 lg:mt-0"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
@@ -532,13 +536,13 @@
 					{data.scenario.current_impact ? safeTranslate(data.scenario.current_impact.name) : '--'}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5"></i>
+			<i class="fa-solid fa-equals mt-5 lg:mt-0"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600 whitespace-nowrap"
 					>{m.currentRiskLevel()}</span
 				>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+					class="text-sm text-center font-semibold p-2 rounded-md min-w-20 whitespace-nowrap {classesCellText(
 						data.scenario.current_level.hexcolor
 					)}"
 					style="background-color: {data.scenario.current_level.hexcolor}"
@@ -549,7 +553,7 @@
 		</div>
 	</div>
 	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-surface-50-950 shadow-lg">
-		<div class="flex flex-col w-full lg:w-1/2">
+		<div class="flex flex-col w-full lg:flex-1 min-w-0">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<p class="text-sm font-semibold text-surface-400-600">{m.extraAppliedControls()}</p>
 			<ModelTable
@@ -558,7 +562,9 @@
 				baseEndpoint="/applied-controls?risk_scenarios={page.params.id}"
 			/>
 		</div>
-		<div class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-1/2">
+		<div
+			class="flex flex-row flex-wrap gap-4 items-center justify-center w-full lg:w-auto lg:shrink-0 lg:flex-col lg:flex-nowrap lg:gap-1"
+		>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
@@ -571,7 +577,7 @@
 					{data.scenario.residual_proba ? safeTranslate(data.scenario.residual_proba.name) : '--'}
 				</span>
 			</p>
-			<i class="fa-solid fa-xmark mt-5"></i>
+			<i class="fa-solid fa-xmark mt-5 lg:mt-0"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
@@ -584,13 +590,13 @@
 					{data.scenario.residual_impact ? safeTranslate(data.scenario.residual_impact.name) : '--'}
 				</span>
 			</p>
-			<i class="fa-solid fa-equals mt-5"></i>
+			<i class="fa-solid fa-equals mt-5 lg:mt-0"></i>
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600 whitespace-nowrap"
 					>{m.residualRiskLevel()}</span
 				>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+					class="text-sm text-center font-semibold p-2 rounded-md min-w-20 whitespace-nowrap {classesCellText(
 						data.scenario.residual_level.hexcolor
 					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
