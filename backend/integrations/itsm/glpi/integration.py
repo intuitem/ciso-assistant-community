@@ -123,7 +123,8 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
                 ]
             field_map = given(model_settings, "field_map", {})
             if not isinstance(field_map, dict) or not all(
-                isinstance(remote, str) for remote in field_map.values()
+                remote is None or isinstance(remote, str)
+                for remote in field_map.values()
             ):
                 return ["'field_map' must map each field to a GLPI property name."]
             value_map = given(model_settings, "value_map", {})

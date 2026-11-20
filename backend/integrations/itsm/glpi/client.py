@@ -422,11 +422,15 @@ class GLPIClient(BaseIntegrationClient):
                     match = f"({match},id=={term})"
                 rsql = f"{rsql};{match}"
 
-        used_ids = set(
-            SyncMapping.objects.filter(configuration=self.configuration).values_list(
-                "remote_id", flat=True
+        used_ids = {
+            qualify(item_type or self.table, item_id)
+            for item_type, item_id in map(
+                split_remote_id,
+                SyncMapping.objects.filter(
+                    configuration=self.configuration
+                ).values_list("remote_id", flat=True),
             )
-        )
+        }
 
         # Mapped items are filtered out client-side, so keep paging until the
         # page fills or the source (or the scan budget) runs out.

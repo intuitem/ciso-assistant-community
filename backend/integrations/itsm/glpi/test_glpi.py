@@ -435,6 +435,7 @@ def test_a_redirected_write_is_a_failure(mock_request, status):
         ({"value_map": {"status": ["2"]}}, True),
         ({"value_map": []}, True),
         ({"field_map": {"name": ["name"]}}, True),
+        ({"field_map": {"eta": None, "name": "name"}}, False),
         # Null and empty mean "not set".
         ({"models": None, "table_name": None, "field_map": None}, False),
         ({"table_name": "", "field_map": {}, "value_map": {}}, False),
@@ -587,10 +588,10 @@ def test_list_hides_trashed_and_mapped_items(mock_request, mock_sync):
         mock_sync,
         {"limit": 10},
         [[{"id": 2, "name": "Mapped"}, {"id": 1, "name": "Free"}]],
-        mapped=["Ticket:2", "Computer:1"],
+        mapped=["2", "Computer:1"],
     )
 
-    # Computer 1 is linked, ticket 1 is not.
+    # Ticket 2 is linked by its bare id; computer 1 is linked, ticket 1 is not.
     assert results == [{"key": "Ticket:1", "id": "Ticket:1", "summary": "#1 - Free"}]
     params = mock_request.call_args[1]["params"]
     assert params["filter"] == "is_deleted==false"
