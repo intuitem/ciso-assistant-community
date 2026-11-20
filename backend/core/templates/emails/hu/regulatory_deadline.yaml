@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${deadline_count} hatósági bejelentési határidő"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő hatósági bejelentési határidők az Ön figyelmét igénylik:
+
+  ${deadline_list}
+
+  Miután a bejelentést elküldték a hatóságnak, rögzítse a dátumát az incidensnél vagy az adatvédelmi incidensnél: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
