@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Önnek ${control_count} lejárt kontrollja van"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő kontrollok lejártak:
+
+  ${control_list}
+
+  Az emlékeztető megszűnik, amint az adott kontrollt aktívként jelölik meg, vagy frissül a várható befejezés dátuma (ETA).
+  A kontrolljai közvetlen eléréséhez jelentkezzen be a CISO Assistantba, és nyissa meg a „Hozzárendelések” részt: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

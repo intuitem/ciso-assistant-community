@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${expired_since} napja lejárt biztonsági kivétel"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${exception_count} biztonsági kivétele járt le ${expired_since} napja:
+
+  ${exception_list}
+
+  A biztonsági kivételek áttekintéséhez és frissítéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

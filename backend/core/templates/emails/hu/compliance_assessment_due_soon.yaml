@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${days_remaining} nap múlva esedékes audit"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${assessment_count} auditja esedékes ${days_remaining} nap múlva:
+
+  ${assessment_list}
+
+  Az auditok áttekintéséhez és befejezéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

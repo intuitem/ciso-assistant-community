@@ -8,8 +8,8 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 19
-publication_date: 2026-10-27
+version: 20
+publication_date: 2026-11-19
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -4535,6 +4535,7 @@ objects:
       - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
       translations:
         fr:
           name: "Compr\xE9hension de l'organisation et de son contexte"
@@ -4582,6 +4583,7 @@ objects:
       - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.context
+      - urn:intuitem:risk:function:doc-pol:doc.legal
       translations:
         fr:
           name: "Compr\xE9hension des besoins et attentes des parties int\xE9ress\xE9\
@@ -4628,6 +4630,7 @@ objects:
       - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.scope
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
       translations:
         fr:
           name: "D\xE9termination du domaine d'application du syst\xE8me de management\
@@ -4748,6 +4751,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:doc.audit_plan
       - urn:intuitem:risk:function:doc-pol:doc.competency
       - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
       translations:
         fr:
           name: Leadership et engagement
@@ -5273,6 +5277,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
+      - urn:intuitem:risk:function:doc-pol:doc.competency
       translations:
         fr:
           name: "Comp\xE9tences"
@@ -5322,6 +5327,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       translations:
         fr:
           name: Sensibilisation
@@ -5920,6 +5926,7 @@ objects:
       - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
       translations:
         fr:
           name: "G\xE9n\xE9ralit\xE9s"
@@ -6209,6 +6216,8 @@ objects:
       - Governance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.1
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.doc_register
       translations:
         fr:
           name: "Politiques de s\xE9curit\xE9 de l'information"
@@ -6266,6 +6275,7 @@ objects:
       - Governance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.2
+      - urn:intuitem:risk:function:doc-pol:doc.raci
       translations:
         fr:
           name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de\
@@ -6325,6 +6335,7 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.3
+      - urn:intuitem:risk:function:doc-pol:pol.seg_duty
       translations:
         fr:
           name: "S\xE9paration des t\xE2ches"
@@ -6378,6 +6389,7 @@ objects:
       - Governance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.4
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
       translations:
         fr:
           name: "Responsabilit\xE9s de la direction"
@@ -6540,6 +6552,7 @@ objects:
       - Threat_and_vulnerability_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.7
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
       translations:
         fr:
           name: Renseignements sur les menaces
@@ -6594,6 +6607,7 @@ objects:
       - Governance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.8
+      - urn:intuitem:risk:function:doc-pol:pol.project
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
@@ -6648,6 +6662,9 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.9
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
+      - urn:intuitem:risk:function:doc-pol:pol.asset
       translations:
         fr:
           name: "Inventaire des informations et autres actifs associ\xE9s"
@@ -6699,6 +6716,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.10
+      - urn:intuitem:risk:function:doc-pol:pol.accept
       translations:
         fr:
           name: "Utilisation correcte des informations et autres actifs associ\xE9\
@@ -6810,6 +6828,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.12
+      - urn:intuitem:risk:function:doc-pol:pol.classif
       translations:
         fr:
           name: Classification des informations
@@ -6914,6 +6933,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.14
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
       translations:
         fr:
           name: Transfert des informations
@@ -6964,6 +6984,7 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.15
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         fr:
           name: "Contr\xF4le d'acc\xE8s"
@@ -7018,6 +7039,7 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.16
+      - urn:intuitem:risk:function:doc-pol:tech.iam
       translations:
         fr:
           name: "Gestion des identit\xE9s"
@@ -7072,6 +7094,8 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.17
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
       translations:
         fr:
           name: Informations d'authentification
@@ -7122,6 +7146,8 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.18
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:proc.pam
       translations:
         fr:
           name: "Droits d'acc\xE8s"
@@ -7175,6 +7201,9 @@ objects:
       - Supplier_relationships_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.19
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
@@ -7279,6 +7308,7 @@ objects:
       - Supplier_relationships_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.21
+      - urn:intuitem:risk:function:doc-pol:proc.sbom
       translations:
         fr:
           name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnement\
@@ -7399,6 +7429,7 @@ objects:
       - Supplier_relationships_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.23
+      - urn:intuitem:risk:function:doc-pol:pol.cloud
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en\
@@ -7454,6 +7485,8 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.24
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.ir_exercise
       translations:
         fr:
           name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
@@ -7510,6 +7543,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.25
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
       translations:
         fr:
           name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
@@ -7569,6 +7603,8 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.26
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         fr:
           name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
@@ -7623,6 +7659,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.27
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
       translations:
         fr:
           name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
@@ -7679,6 +7716,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.28
+      - urn:intuitem:risk:function:doc-pol:proc.forensics
       translations:
         fr:
           name: Collecte de preuves
@@ -7734,6 +7772,8 @@ objects:
       - Continuity
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.29
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information pendant une perturbation"
@@ -7787,6 +7827,9 @@ objects:
       - Continuity
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.30
+      - urn:intuitem:risk:function:doc-pol:doc.bia
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
       translations:
         fr:
           name: "Pr\xE9paration des TIC la continuit\xE9 d'activit\xE9"
@@ -7842,6 +7885,7 @@ objects:
       - Legal_and_compliance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.31
+      - urn:intuitem:risk:function:doc-pol:doc.legal
       translations:
         fr:
           name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
@@ -7895,6 +7939,7 @@ objects:
       - Legal_and_compliance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.32
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
       translations:
         fr:
           name: "Droits de propri\xE9t\xE9 intellectuelle"
@@ -7949,6 +7994,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.33
+      - urn:intuitem:risk:function:doc-pol:pol.retention
       translations:
         fr:
           name: Protection des enregistrements
@@ -8005,6 +8051,10 @@ objects:
       - Legal_and_compliance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.34
+      - urn:intuitem:risk:function:doc-pol:doc.ropa
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
+      - urn:intuitem:risk:function:doc-pol:proc.dpia
+      - urn:intuitem:risk:function:doc-pol:proc.breach_notif
       translations:
         fr:
           name: "Protection de la vie priv\xE9e et des donn\xE9es \xE0 caract\xE8\
@@ -8058,6 +8108,9 @@ objects:
       - Information_security_assurance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.35
+      - urn:intuitem:risk:function:doc-pol:doc.audit_plan
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
       translations:
         fr:
           name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
@@ -8113,6 +8166,8 @@ objects:
       - Information_security_assurance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.36
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
       translations:
         fr:
           name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9\
@@ -8177,6 +8232,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.5.37
+      - urn:intuitem:risk:function:doc-pol:doc.proc_register
       translations:
         fr:
           name: "Proc\xE9dures d'exploitation document\xE9es"
@@ -8250,6 +8306,7 @@ objects:
       - Human_resource_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.6.1
+      - urn:intuitem:risk:function:doc-pol:proc.bg_screening
       translations:
         fr:
           name: "S\xE9lection des candidats"
@@ -8361,6 +8418,8 @@ objects:
       - Human_resource_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.6.3
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
       translations:
         fr:
           name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
@@ -8418,6 +8477,7 @@ objects:
       - Human_resource_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.6.4
+      - urn:intuitem:risk:function:doc-pol:proc.disciplinary
       translations:
         fr:
           name: "Proc\xE9dure disciplinaire"
@@ -8474,6 +8534,7 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.6.5
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
       translations:
         fr:
           name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d'emploi"
@@ -8596,6 +8657,7 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.6.7
+      - urn:intuitem:risk:function:doc-pol:pol.work
       translations:
         fr:
           name: "Travail \xE0 distance"
@@ -8734,6 +8796,7 @@ objects:
       - Physical_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.1
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
       translations:
         fr:
           name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
@@ -8792,6 +8855,7 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.2
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
       translations:
         fr:
           name: "Les entr\xE9es physiques"
@@ -8898,6 +8962,7 @@ objects:
       - Physical_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.4
+      - urn:intuitem:risk:function:doc-pol:phys.cctv
       translations:
         fr:
           name: "Surveillance de la s\xE9curit\xE9 physique"
@@ -9052,6 +9117,7 @@ objects:
       - Physical_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.7
+      - urn:intuitem:risk:function:doc-pol:phys.clear_desk
       translations:
         fr:
           name: "Bureau propre et \xE9cran vide"
@@ -9163,6 +9229,7 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.9
+      - urn:intuitem:risk:function:doc-pol:pol.work
       translations:
         fr:
           name: "S\xE9curit\xE9 des actifs hors des locaux"
@@ -9216,6 +9283,7 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.10
+      - urn:intuitem:risk:function:doc-pol:pol.removable_media
       translations:
         fr:
           name: Supports de stockage
@@ -9266,6 +9334,7 @@ objects:
       - Physical_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.11
+      - urn:intuitem:risk:function:doc-pol:phys.power_env
       translations:
         fr:
           name: Services supports
@@ -9370,6 +9439,7 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.13
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
       translations:
         fr:
           name: "Maintenance du mat\xE9riel"
@@ -9425,6 +9495,8 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.7.14
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
       translations:
         fr:
           name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
@@ -9501,6 +9573,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.1
+      - urn:intuitem:risk:function:doc-pol:tech.mdm
       translations:
         fr:
           name: Terminaux finaux des utilisateurs
@@ -9557,6 +9630,8 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.2
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+      - urn:intuitem:risk:function:doc-pol:proc.pam
       translations:
         fr:
           name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
@@ -9724,6 +9799,7 @@ objects:
       - Identity_and_access_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.5
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
       translations:
         fr:
           name: "Authentification s\xE9curis\xE9e"
@@ -9772,6 +9848,7 @@ objects:
       - Continuity
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.6
+      - urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
       translations:
         fr:
           name: Dimensionnement
@@ -9825,6 +9902,8 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.7
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
       translations:
         fr:
           name: Protection contre les programmes malveillants (malware)
@@ -9874,6 +9953,10 @@ objects:
       - Threat_and_vulnerability_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.8
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:proc.pentest
+      - urn:intuitem:risk:function:doc-pol:proc.update
       translations:
         fr:
           name: "Gestion des vuln\xE9rabilit\xE9s techniques"
@@ -9924,6 +10007,7 @@ objects:
       - Secure_configuration
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.9
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
       translations:
         fr:
           name: Gestion des configurations
@@ -9970,6 +10054,8 @@ objects:
       - Legal_and_compliance
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.10
+      - urn:intuitem:risk:function:doc-pol:pol.retention
+      - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
       translations:
         fr:
           name: Suppression des informations
@@ -10066,6 +10152,7 @@ objects:
       - Information_protection
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.12
+      - urn:intuitem:risk:function:doc-pol:tech.dlp
       translations:
         fr:
           name: "Pr\xE9vention de la fuite de donn\xE9es"
@@ -10113,6 +10200,7 @@ objects:
       - Continuity
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.13
+      - urn:intuitem:risk:function:doc-pol:pol.backup
       translations:
         fr:
           name: Sauvegarde des informations
@@ -10162,6 +10250,7 @@ objects:
       - Asset_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.14
+      - urn:intuitem:risk:function:doc-pol:doc.bia
       translations:
         fr:
           name: Redondance des moyens de traitement de l'information
@@ -10211,6 +10300,8 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.15
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
       translations:
         fr:
           name: Journalisation
@@ -10256,6 +10347,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.16
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
       translations:
         fr:
           name: "Activit\xE9s de surveillance"
@@ -10300,6 +10392,7 @@ objects:
       - Information_security_event_management
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.17
+      - urn:intuitem:risk:function:doc-pol:proc.ntp
       translations:
         fr:
           name: Synchronisation des horloges
@@ -10346,6 +10439,7 @@ objects:
       - Application_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.18
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
       translations:
         fr:
           name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
@@ -10391,6 +10485,7 @@ objects:
       - Application_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.19
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
       translations:
         fr:
           name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
@@ -10439,6 +10534,8 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.20
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       translations:
         fr:
           name: "S\xE9curit\xE9 des r\xE9seaux"
@@ -10531,6 +10628,7 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.22
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
       translations:
         fr:
           name: "Cloisonnement des r\xE9seaux"
@@ -10575,6 +10673,7 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.23
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
       translations:
         fr:
           name: Filtrage web
@@ -10618,6 +10717,8 @@ objects:
       - Secure_configuration
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.24
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.pki
       translations:
         fr:
           name: Utilisation de la cryptographie
@@ -10664,6 +10765,7 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.25
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
       translations:
         fr:
           name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
@@ -10753,6 +10855,8 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.27
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+      - urn:intuitem:risk:function:doc-pol:proc.threat_modeling
       translations:
         fr:
           name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9\
@@ -10798,6 +10902,8 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.28
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+      - urn:intuitem:risk:function:doc-pol:train.secdev
       translations:
         fr:
           name: "Codage s\xE9curis\xE9"
@@ -10984,6 +11090,7 @@ objects:
       - System_and_network_security
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:a.8.32
+      - urn:intuitem:risk:function:doc-pol:proc.change_mgmt
       translations:
         fr:
           name: Gestion des changements

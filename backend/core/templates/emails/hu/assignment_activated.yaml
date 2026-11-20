@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Elkezdődött az Ön hozzárendelése a(z) „${assessment_name}” auditon"
+body: |
+  Tisztelt Felhasználó!
+
+  Az Ön hozzárendelése a következő auditon elkezdődött, és kitöltésre kész:
+
+  - Audit: ${assessment_name}
+  - Keretrendszer: ${framework_name}
+  - Határidő: ${due_date}
+
+  Az értékelés megkezdéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url}/auditee-dashboard)
+
+  Köszönjük.

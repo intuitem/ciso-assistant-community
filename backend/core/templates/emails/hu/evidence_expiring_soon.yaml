@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${days_remaining} nap múlva lejáró bizonyíték"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${evidence_count} bizonyítéka jár le ${days_remaining} nap múlva:
+
+  ${evidence_list}
+
+  A bizonyítékok áttekintéséhez és frissítéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
