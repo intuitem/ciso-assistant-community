@@ -7,6 +7,7 @@
 	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '#lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '#lib/components/Forms/integrationModels.js';
 	import { schema } from './schema';
 	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
@@ -251,6 +252,18 @@
 						description={m.glpiIntegrationMappingsHelpText()}
 						remoteFieldLabel={m.glpiField()}
 						tableHelpText={m.glpiTableHelpText()}
+					/>
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id || $formStore.id}
+						modelKey="asset"
+						valuePathPrefix="settings.models.asset"
+						localFields={ASSET_LOCAL_FIELDS}
+						initialConfig={page.data?.config?.settings?.models?.asset}
+						title={m.assets()}
+						description={m.glpiAssetMappingsHelpText()}
+						remoteFieldLabel={m.glpiField()}
+						tableHelpText={m.glpiAssetTableHelpText()}
 					/>
 				{/if}
 				<button

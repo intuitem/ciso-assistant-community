@@ -31,6 +31,7 @@ OPENAPI = {
                 "properties": {
                     "id": {"type": "integer", "readOnly": True},
                     "name": {"type": "string"},
+                    "is_deleted": {"type": "boolean"},
                     "content": {"type": "string", "format": "html"},
                     "priority": {
                         "type": "integer",
@@ -56,7 +57,24 @@ OPENAPI = {
                     "team": {"type": "array"},
                 }
             },
-            "Computer": {"properties": {"name": {"type": "string"}}},
+            "Computer": {
+                "properties": {
+                    "id": {"type": "integer", "readOnly": True},
+                    "name": {"type": "string"},
+                    "comment": {"type": "string"},
+                    "otherserial": {"type": "string"},
+                    "is_deleted": {"type": "boolean"},
+                    # A dropdown fed by the instance, not a fixed list.
+                    "status": {
+                        "type": "object",
+                        "properties": {"id": {"type": "integer"}},
+                    },
+                }
+            },
+            # Not searchable by name: cannot be offered.
+            "Monitor": {"properties": {"id": {"type": "integer"}}},
+            # Not an item type this provider syncs.
+            "Document": {"properties": {"name": {"type": "string"}}},
         }
     }
 }
@@ -77,9 +95,20 @@ def _configuration(settings=None, webhook_secret="whsec"):
     return config
 
 
-def _client(settings=None):
+def _client(settings=None, model_key="applied_control"):
     with patch("integrations.itsm.glpi.client.check_integration_url"):
-        return GLPIClient(_configuration(settings))
+        return GLPIClient(_configuration(settings), model_key)
+
+
+ASSET_SETTINGS = {
+    "models": {
+        "asset": {
+            "table_name": "Computer",
+            "field_map": {"name": "name", "description": "comment", "type": "contact"},
+            "value_map": {"type": {"PR": "primary", "SP": "support"}},
+        }
+    }
+}
 
 
 def _response(payload=None, status=200):
@@ -96,15 +125,27 @@ def _token_response(token="tok", expires_in=3600):
 # --- Schema ------------------------------------------------------------------
 
 
-def test_parse_schema_keeps_assistance_types_and_mappable_properties():
+def test_parse_schema_keeps_synced_types_and_mappable_properties():
     tables, columns, choices = parse_schema(OPENAPI)
 
-    assert tables == [{"name": "Ticket", "label": "Tickets"}]
+    assert tables == [
+        {"name": "Ticket", "label": "Tickets"},
+        {"name": "Computer", "label": "Computers"},
+    ]
+    # An asset's status is a free dropdown: not mappable.
+    assert {c["name"] for c in columns["Computer"]} == {
+        "id",
+        "name",
+        "comment",
+        "otherserial",
+        "is_deleted",
+    }
     by_name = {c["name"]: c for c in columns["Ticket"]}
     # Scalars and the enum-backed status dropdown; no free dropdowns or arrays.
     assert set(by_name) == {
         "id",
         "name",
+        "is_deleted",
         "content",
         "priority",
         "resolution_date",
@@ -227,6 +268,68 @@ def test_suggest_mapping_only_offers_what_the_item_type_exposes():
     assert suggestion["value_map"]["status"]["to_do"] == "1"
 
 
+def test_asset_mapping_is_only_what_the_settings_name():
+    mapper = GLPIFieldMapper(_configuration(ASSET_SETTINGS), "asset")
+    asset = SimpleNamespace(
+        name="DB server",
+        description="Line one\nLine two",
+        type="PR",
+        ref_id="A-1",
+        reference_link=None,
+        observation=None,
+    )
+
+    # Plain text, not the rich text of a ticket description.
+    assert mapper.to_remote(asset) == {
+        "name": "DB server",
+        "comment": "Line one\nLine two",
+        "contact": "primary",
+    }
+    assert mapper.to_remote_partial(asset, ["type", "ref_id"]) == {"contact": "primary"}
+    item = {"id": 2, "name": "Renamed", "comment": "", "contact": "support"}
+    assert mapper.to_local({"key": "2", "fields": item}) == {
+        "name": "Renamed",
+        "type": "SP",
+    }
+
+    # No mapping, no sync: the control defaults do not apply to assets.
+    unmapped = GLPIFieldMapper(
+        _configuration({"models": {"asset": {"table_name": "Computer"}}}), "asset"
+    )
+    assert unmapped.to_remote(asset) == {}
+    assert unmapped.to_local({"fields": item}) == {}
+
+
+def test_a_number_mapped_to_a_text_field_is_pulled_as_text():
+    settings = {"models": {"asset": {"field_map": {"ref_id": "id"}}}}
+    mapper = GLPIFieldMapper(_configuration(settings), "asset")
+
+    assert mapper.to_local({"fields": {"id": 12}}) == {"ref_id": "12"}
+
+
+def test_asset_mapping_suggestion_follows_the_item_type():
+    mapper = GLPIFieldMapper(_configuration(), "asset")
+    _, columns, _ = parse_schema(OPENAPI)
+    source = MagicMock()
+    source.get_table_columns.return_value = columns["Computer"]
+
+    assert mapper.suggest_mapping_for_table("Computer", source) == {
+        "field_map": {
+            "name": "name",
+            "description": "comment",
+            "ref_id": "otherserial",
+        },
+        "value_map": {},
+    }
+
+    # Software has no inventory number.
+    source.get_table_columns.return_value = [
+        c for c in columns["Computer"] if c["name"] != "otherserial"
+    ]
+    suggestion = mapper.suggest_mapping_for_table("Software", source)
+    assert "ref_id" not in suggestion["field_map"]
+
+
 def test_rich_text_round_trip():
     text = "First line\nSecond <b> & line"
     assert html_to_text(text_to_html(text)) == text
@@ -295,7 +398,16 @@ def test_a_redirected_write_is_a_failure(mock_request, status):
         ({"table_name": "Tickets"}, True),
         ({"table_name": ["Ticket"]}, True),
         ({"models": {"applied_control": {"table_name": "../Session"}}}, True),
+        ({"models": {"asset": {}}}, False),
+        ({"models": {"asset": {"table_name": "Computer"}}}, False),
+        (ASSET_SETTINGS, False),
+        # Each model has its own item types.
         ({"models": {"asset": {"table_name": "Ticket"}}}, True),
+        ({"models": {"applied_control": {"table_name": "Computer"}}}, True),
+        ({"models": {"asset": {"table_name": "Custom/Server"}}}, True),
+        ({"models": {"asset": {"field_map": []}}}, True),
+        ({"models": {"asset": {"value_map": {"type": "PR"}}}}, True),
+        ({"models": {"finding": {"table_name": "Ticket"}}}, True),
         ({"models": [{}]}, True),
         ({"models": {"applied_control": True}}, True),
         # Wrong types that are falsy must not pass as "not set".
@@ -323,6 +435,34 @@ def test_rpc_refuses_a_table_name_that_is_not_text(table_name):
         orchestrator.execute_action("get_columns", {"table_name": table_name})
 
 
+@pytest.mark.parametrize("model_key", ["finding", ["asset"], None])
+def test_rpc_refuses_a_model_that_is_not_synced(model_key):
+    orchestrator = GLPIOrchestrator(_configuration())
+    with pytest.raises(ValueError):
+        orchestrator.execute_action("get_tables", {"model_key": model_key})
+
+
+def test_each_model_is_offered_its_own_item_types():
+    orchestrator = GLPIOrchestrator(_configuration())
+    tables, columns, choices = parse_schema(OPENAPI)
+    cache = MagicMock(tables=tables, columns=columns, choices=choices)
+    orchestrator._load_schema = MagicMock(return_value=cache)
+
+    def offered(params):
+        return [t["name"] for t in orchestrator.execute_action("get_tables", params)]
+
+    assert offered({}) == ["Ticket"]
+    assert offered({"model_key": "applied_control"}) == ["Ticket"]
+    assert offered({"model_key": "asset"}) == ["Computer"]
+
+    # A cache filled before assets were synced is reloaded once.
+    stale = MagicMock(tables=[{"name": "Ticket", "label": "Tickets"}])
+    orchestrator._load_schema = MagicMock(
+        side_effect=lambda force=False: cache if force else stale
+    )
+    assert offered({"model_key": "asset"}) == ["Computer"]
+
+
 @patch("integrations.itsm.glpi.client.requests.get")
 def test_schema_is_fetched_without_the_token(mock_get):
     """GLPI 11.0.0 and 11.0.1 answer 500 when the public document is asked
@@ -336,21 +476,22 @@ def test_schema_is_fetched_without_the_token(mock_get):
 
     tables, _, _ = client.fetch_schema()
 
-    assert [t["name"] for t in tables] == ["Ticket"]
+    assert [t["name"] for t in tables] == ["Ticket", "Computer"]
     assert mock_get.call_args[0][0] == "https://glpi.example.com/api.php/v2/doc.json"
     assert "Authorization" not in mock_get.call_args[1]["headers"]
     assert mock_get.call_args[1]["allow_redirects"] is False
 
 
-def test_only_applied_controls_get_a_client_or_a_mapper():
-    assert GLPIOrchestrator.supports_model("applied_control") is True
-    assert GLPIOrchestrator.supports_model("asset") is False
-    orchestrator = GLPIOrchestrator(_configuration())
+def test_only_synced_models_get_a_client_or_a_mapper():
+    orchestrator = GLPIOrchestrator(_configuration(ASSET_SETTINGS))
     with pytest.raises(ValueError):
-        orchestrator.mapper_for("asset")
+        orchestrator.mapper_for("finding")
     with pytest.raises(ValueError):
-        orchestrator.client_for("asset")
+        orchestrator.client_for("finding")
     assert isinstance(orchestrator.mapper_for("applied_control"), GLPIFieldMapper)
+    with patch("integrations.itsm.glpi.client.check_integration_url"):
+        assert orchestrator.client_for("asset").table == "Computer"
+        assert orchestrator.client_for("applied_control").table == "Ticket"
 
 
 def test_item_type_and_ids_cannot_alter_the_request_path():
@@ -358,6 +499,53 @@ def test_item_type_and_ids_cannot_alter_the_request_path():
         _client({"table_name": "../Setup/Webhook"})._collection_path()
     with pytest.raises(ValueError):
         _client()._item_path("3/../../Session")
+    with pytest.raises(ValueError):
+        _client()._item_path("../Session:3")
+
+
+def test_an_id_addresses_an_item_of_the_model_s_own_type():
+    tickets = _client()
+    assert tickets._item_path("Ticket:3") == "/Assistance/Ticket/3"
+    # As given when linking through the API.
+    assert tickets._item_path("3") == "/Assistance/Ticket/3"
+    # Linked under another type, or an asset id: never read as a ticket.
+    for other in ("Change:3", "Computer:3"):
+        with pytest.raises(ValueError):
+            tickets._item_path(other)
+
+    assets = _client(ASSET_SETTINGS, "asset")
+    assert assets._item_path("Computer:7") == "/Assets/Computer/7"
+    with pytest.raises(ValueError):
+        assets._item_path("Ticket:7")
+
+    # A model only reaches its own item types, and assets have no default.
+    for settings in ({}, {"models": {"asset": {"table_name": "Ticket"}}}):
+        with pytest.raises(ValueError):
+            _client(settings, "asset")._collection_path()
+    with pytest.raises(ValueError):
+        _client({"table_name": "Computer"})._collection_path()
+
+
+@patch("integrations.itsm.glpi.client.requests.request")
+def test_a_created_item_is_linked_under_its_type(mock_request):
+    mock_request.return_value = _response({"id": 12, "href": "/Assets/Computer/12"})
+    client = _client(ASSET_SETTINGS, "asset")
+    client._get_token = MagicMock(return_value="tok")
+    asset = SimpleNamespace(name="DB server", description=None, type=None)
+
+    assert client.create_remote_object(asset) == "Computer:12"
+    assert mock_request.call_args[0] == (
+        "POST",
+        "https://glpi.example.com/api.php/v2/Assets/Computer",
+    )
+    assert mock_request.call_args[1]["json"] == {"name": "DB server"}
+
+
+@patch("integrations.itsm.glpi.client.SyncMapping")
+@patch("integrations.itsm.glpi.client.requests.request")
+def test_nothing_is_listed_for_a_model_without_an_item_type(mock_request, mock_sync):
+    assert _client({}, "asset").list_remote_objects({"search": "db"}) == []
+    mock_request.assert_not_called()
 
 
 def _list(mock_request, mock_sync, query, pages, mapped=()):
@@ -376,10 +564,11 @@ def test_list_hides_trashed_and_mapped_items(mock_request, mock_sync):
         mock_sync,
         {"limit": 10},
         [[{"id": 2, "name": "Mapped"}, {"id": 1, "name": "Free"}]],
-        mapped=["2"],
+        mapped=["Ticket:2", "Computer:1"],
     )
 
-    assert results == [{"key": "1", "id": "1", "summary": "#1 - Free"}]
+    # Computer 1 is linked, ticket 1 is not.
+    assert results == [{"key": "Ticket:1", "id": "Ticket:1", "summary": "#1 - Free"}]
     params = mock_request.call_args[1]["params"]
     assert params["filter"] == "is_deleted==false"
     assert params["sort"] == "id:desc"
@@ -396,7 +585,7 @@ def test_list_does_not_offer_an_item_twice_when_pages_shift(mock_request, mock_s
 
     ids = [r["id"] for r in results]
     assert len(ids) == len(set(ids)) == LIST_PAGE_SIZE + 1
-    assert ids[-2:] == ["2", "1"]
+    assert ids[-2:] == ["Ticket:2", "Ticket:1"]
 
 
 @patch("integrations.itsm.glpi.client.SyncMapping")
@@ -427,12 +616,13 @@ def test_list_hydration_returns_mapped_items_and_ignores_bad_ids(
     results = _list(
         mock_request,
         mock_sync,
-        {"id": "5,x;y,6"},
+        {"id": "5,x;y, Ticket:6,Change:7,Computer:8"},
         [[{"id": 5, "name": "Mapped"}, {"id": 6, "name": "Other"}]],
-        mapped=["5"],
+        mapped=["Ticket:5"],
     )
 
-    assert [r["id"] for r in results] == ["5", "6"]
+    # Bare or as stored on a link; ids of other item types are not tickets.
+    assert [r["id"] for r in results] == ["Ticket:5", "Ticket:6"]
     assert mock_request.call_args[1]["params"]["filter"] == "id=in=(5,6)"
 
 
@@ -445,10 +635,10 @@ def test_list_pages_past_mapped_items(mock_request, mock_sync):
         mock_sync,
         {"limit": 5},
         [first, [{"id": 999, "name": "Free"}]],
-        mapped=[str(i) for i in range(LIST_PAGE_SIZE)],
+        mapped=[f"Ticket:{i}" for i in range(LIST_PAGE_SIZE)],
     )
 
-    assert [r["id"] for r in results] == ["999"]
+    assert [r["id"] for r in results] == ["Ticket:999"]
     assert mock_request.call_count == 2
     assert mock_request.call_args[1]["params"]["start"] == LIST_PAGE_SIZE
 
@@ -503,9 +693,9 @@ def _linked_orchestrator(current):
     """An orchestrator whose item is linked, with GLPI answering ``current``
     when the item is read back."""
     orchestrator = GLPIOrchestrator(_configuration())
-    orchestrator._is_linked = MagicMock(return_value=True)
+    orchestrator._linked = MagicMock(return_value=[("applied_control", "Ticket:4")])
     orchestrator._read_current = MagicMock(return_value=current)
-    orchestrator._is_outdated = MagicMock(return_value=False)
+    orchestrator._synced_state = MagicMock(return_value=None)
     orchestrator.pull_changes = MagicMock(return_value=True)
     orchestrator._handle_remote_deletion = MagicMock(return_value=True)
     return orchestrator
@@ -524,7 +714,8 @@ def test_update_webhook_applies_what_glpi_holds_now():
     assert orchestrator.handle_webhook_event("update", {"item": delivered}) is True
 
     # A late, replayed or reordered delivery cannot bring old values back.
-    orchestrator.pull_changes.assert_called_once_with("4", now)
+    orchestrator.pull_changes.assert_called_once_with("Ticket:4", now)
+    orchestrator._read_current.assert_called_once_with("applied_control", "Ticket:4")
     orchestrator._handle_remote_deletion.assert_not_called()
 
 
@@ -538,7 +729,7 @@ def test_an_item_gone_from_glpi_flags_the_link(event, current):
 
     assert orchestrator.handle_webhook_event(event, {"item": {"id": 4}}) is True
 
-    orchestrator._handle_remote_deletion.assert_called_once_with("4")
+    orchestrator._handle_remote_deletion.assert_called_once_with("Ticket:4")
     orchestrator.pull_changes.assert_not_called()
 
 
@@ -574,13 +765,58 @@ def test_webhooks_for_other_items_do_not_reach_glpi():
     assert orchestrator.handle_webhook_event("update", {"item": {}}) is False
     assert orchestrator.handle_webhook_event("purge", {"item": item}) is False
 
-    orchestrator._is_linked.return_value = False
+    orchestrator._linked.return_value = []
     assert orchestrator.handle_webhook_event("update", {"item": item}) is False
     assert orchestrator.handle_webhook_event("delete", {"item": item}) is False
 
     orchestrator._read_current.assert_not_called()
     orchestrator.pull_changes.assert_not_called()
     orchestrator._handle_remote_deletion.assert_not_called()
+
+
+def test_a_delivery_is_looked_up_under_every_synced_item_type():
+    """A delivery does not say whether id 4 is a ticket or a computer."""
+    orchestrator = GLPIOrchestrator(_configuration(ASSET_SETTINGS))
+    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
+        lookup = mapping.objects.filter.return_value.values_list
+        lookup.return_value = ["Computer:4"]
+        assert orchestrator._linked("4") == [("asset", "Computer:4")]
+    assert sorted(mapping.objects.filter.call_args[1]["remote_id__in"]) == [
+        "Computer:4",
+        "Ticket:4",
+    ]
+
+    # Without an asset item type, only tickets are looked up.
+    orchestrator = GLPIOrchestrator(_configuration())
+    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
+        mapping.objects.filter.return_value.values_list.return_value = []
+        assert orchestrator._linked("4") == []
+    assert mapping.objects.filter.call_args[1]["remote_id__in"] == ["Ticket:4"]
+
+
+def test_a_ticket_and_an_asset_sharing_an_id_are_each_read_as_their_own_type():
+    orchestrator = GLPIOrchestrator(_configuration(ASSET_SETTINGS))
+    orchestrator._linked = MagicMock(
+        return_value=[("applied_control", "Ticket:4"), ("asset", "Computer:4")]
+    )
+    ticket = {"key": "4", "fields": {"id": 4, "name": "Ticket"}, "updated": None}
+    orchestrator._read_current = MagicMock(
+        side_effect=lambda model_key, remote_id: (
+            ticket if model_key == "applied_control" else None
+        )
+    )
+    orchestrator._synced_state = MagicMock(return_value=None)
+    orchestrator.pull_changes = MagicMock(return_value=True)
+    orchestrator._handle_remote_deletion = MagicMock(return_value=True)
+
+    # The computer was purged; ticket 4 is untouched and only re-read.
+    assert orchestrator.handle_webhook_event("delete", {"item": {"id": 4}}) is True
+
+    orchestrator._handle_remote_deletion.assert_called_once_with("Computer:4")
+    orchestrator.pull_changes.assert_not_called()
+
+    assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
+    orchestrator.pull_changes.assert_called_once_with("Ticket:4", ticket)
 
 
 @patch("integrations.itsm.glpi.client.requests.request")
@@ -600,6 +836,8 @@ def test_read_item_tells_a_missing_item_from_a_failure(mock_request):
         "fields": {"id": 4, "date_mod": "d"},
         "updated": "d",
     }
+
+    assert client.read_item("Ticket:4")["key"] == "4"
 
     mock_request.return_value = answer(404)
     assert client.read_item("4") is None
@@ -638,7 +876,7 @@ def test_a_failed_token_request_is_not_a_missing_item(mock_post, mock_request):
 def test_a_state_older_than_the_synced_one_is_not_applied(synced, read_back, applied):
     current = {"key": "4", "fields": {"id": 4, "name": "N"}, "updated": read_back}
     orchestrator = _linked_orchestrator(current)
-    del orchestrator._is_outdated  # the real check
+    del orchestrator._synced_state  # the real lookup
     stored = {"key": "4", "fields": {}, "updated": synced} if synced else None
 
     with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:

@@ -10,6 +10,7 @@ from structlog import get_logger
 from core.net_safety import check_integration_url
 from integrations.base import BaseIntegrationClient
 from integrations.models import SyncMapping
+from integrations.settings_access import get_model_settings
 
 from .mapper import GLPIFieldMapper
 
@@ -21,15 +22,67 @@ logger = get_logger(__name__)
 API_ROOT = "/api.php"
 API_PREFIX = f"{API_ROOT}/v2"
 
-# Assistance item types a local object can sync with, and their display label.
-# The key is both the schema name in the OpenAPI document and the last segment
-# of the collection path.
-ITEM_TYPES: dict[str, str] = {
+# Item types a local object can sync with, per local model, and their display
+# label. The key is both the schema name in the OpenAPI document and the last
+# segment of the collection path.
+ASSISTANCE_TYPES: dict[str, str] = {
     "Ticket": "Tickets",
     "Change": "Changes",
     "Problem": "Problems",
 }
+ASSET_TYPES: dict[str, str] = {
+    "Computer": "Computers",
+    "Monitor": "Monitors",
+    "NetworkEquipment": "Network equipment",
+    "Peripheral": "Peripherals",
+    "Phone": "Phones",
+    "Printer": "Printers",
+    "Software": "Software",
+    "SoftwareLicense": "Software licenses",
+    "Certificate": "Certificates",
+    "Appliance": "Appliances",
+    "Rack": "Racks",
+    "Enclosure": "Enclosures",
+    "PDU": "PDUs",
+}
+MODEL_ITEM_TYPES: dict[str, dict[str, str]] = {
+    "applied_control": ASSISTANCE_TYPES,
+    "asset": ASSET_TYPES,
+}
+ITEM_TYPES: dict[str, str] = {**ASSISTANCE_TYPES, **ASSET_TYPES}
+# First path segment of each item type's collection.
+_API_SECTIONS: dict[str, str] = {
+    **{item_type: "Assistance" for item_type in ASSISTANCE_TYPES},
+    **{item_type: "Assets" for item_type in ASSET_TYPES},
+}
 DEFAULT_ITEM_TYPE = "Ticket"
+# Applied controls sync with tickets unless told otherwise. Assets only sync
+# once an item type is chosen.
+_DEFAULT_ITEM_TYPES: dict[str, str] = {"applied_control": DEFAULT_ITEM_TYPE}
+
+# Properties every synced item type must expose: the picker searches by name
+# and leaves out items in the trash.
+_REQUIRED_PROPERTIES = {"name", "is_deleted"}
+
+
+def item_type_for(settings: dict | None, model_key: str) -> str | None:
+    """Item type a model syncs with under these settings, None when unset."""
+    chosen = get_model_settings(settings or {}, model_key).get("table_name")
+    return chosen or _DEFAULT_ITEM_TYPES.get(model_key)
+
+
+def qualify(item_type: str, item_id: Any) -> str:
+    """Remote id as stored on a link. A GLPI id is only unique within its item
+    type, and one configuration can sync several, so the type goes with it."""
+    return f"{item_type}:{item_id}"
+
+
+def split_remote_id(remote_id: Any) -> tuple[str | None, str]:
+    """``(item type, id)`` of a stored remote id. The type is None for a bare
+    id, as given when linking through the API."""
+    item_type, sep, item_id = str(remote_id).strip().rpartition(":")
+    return (item_type if sep else None), item_id
+
 
 # Each hydration id is user-supplied; the picker only hydrates selected
 # values, so a handful is plenty.
@@ -88,7 +141,9 @@ def parse_schema(document: dict[str, Any]) -> tuple[list, dict, dict]:
 
     for table, label in ITEM_TYPES.items():
         schema = schemas.get(table)
-        if not schema:
+        if not schema or not _REQUIRED_PROPERTIES <= set(
+            schema.get("properties") or {}
+        ):
             continue
         tables.append({"name": table, "label": label})
         table_columns = []
@@ -132,7 +187,7 @@ class GLPIClient(BaseIntegrationClient):
         except ValueError:
             logger.error("GLPI instance_url blocked by SSRF guard", exc_info=True)
             raise
-        self.table = self.model_settings.get("table_name") or DEFAULT_ITEM_TYPE
+        self.table = item_type_for(configuration.settings, model_key)
         self.mapper = GLPIFieldMapper(configuration, model_key)
         self._schema: tuple[list, dict, dict] | None = None
 
@@ -217,17 +272,28 @@ class GLPIClient(BaseIntegrationClient):
             )
         response.raise_for_status()
 
-    def _collection_path(self, table: str | None = None) -> str:
-        table = table or self.table
-        if table not in ITEM_TYPES:
-            raise ValueError(f"Unsupported GLPI item type: {table}")
-        return f"/Assistance/{table}"
+    def _collection_path(self) -> str:
+        if self.table not in MODEL_ITEM_TYPES.get(self.model_key, {}):
+            raise ValueError(
+                f"Unsupported GLPI item type for {self.model_key}: {self.table}"
+            )
+        return f"/{_API_SECTIONS[self.table]}/{self.table}"
+
+    def _item_id(self, remote_id: str) -> str:
+        """Numeric id of an item of the configured type."""
+        item_type, item_id = split_remote_id(remote_id)
+        if item_type is not None and item_type != self.table:
+            raise ValueError(
+                f"{remote_id} is not a GLPI {self.table}: the configuration "
+                "syncs another item type"
+            )
+        # Ids are numeric; anything else would alter the request path.
+        if not item_id.isdigit():
+            raise ValueError(f"Invalid GLPI item id: {remote_id}")
+        return item_id
 
     def _item_path(self, remote_id: str) -> str:
-        # Ids are numeric; anything else would alter the request path.
-        if not str(remote_id).isdigit():
-            raise ValueError(f"Invalid GLPI item id: {remote_id}")
-        return f"{self._collection_path()}/{remote_id}"
+        return f"{self._collection_path()}/{self._item_id(remote_id)}"
 
     # --- Sync ---------------------------------------------------------------
 
@@ -246,7 +312,7 @@ class GLPIClient(BaseIntegrationClient):
         except requests.exceptions.RequestException:
             logger.error("Failed to create GLPI item", table=self.table, exc_info=True)
             raise
-        remote_id = str(response.json()["id"])
+        remote_id = qualify(self.table, response.json()["id"])
         logger.info("Created GLPI item", table=self.table, remote_id=remote_id)
         return remote_id
 
@@ -313,16 +379,24 @@ class GLPIClient(BaseIntegrationClient):
 
         ``query_params`` supports ``search`` (matched against the name, and
         the id when numeric), ``limit`` and ``id`` (comma-separated ids to
-        hydrate).
+        hydrate, as stored on links or bare).
         """
         query_params = query_params or {}
+        if not self.table:
+            # No item type chosen for this model yet: nothing to offer.
+            return []
         ids = str(query_params.get("id", "") or "")
         search = str(query_params.get("search", "") or "")
         limit = query_params.get("limit", 100)
 
         if ids:
-            # Digits only, so no RSQL operator can ride in on an id.
-            id_list = [i.strip() for i in ids.split(",") if i.strip().isdigit()]
+            # Digits only, so no RSQL operator can ride in on an id. An id
+            # of another item type is not one of this configuration's items.
+            id_list = [
+                item_id
+                for item_type, item_id in map(split_remote_id, ids.split(","))
+                if item_id.isdigit() and item_type in (None, self.table)
+            ]
             id_list = id_list[:MAX_HYDRATION_IDS]
             if not id_list:
                 return []
@@ -366,7 +440,7 @@ class GLPIClient(BaseIntegrationClient):
                     },
                 ).json()
                 for record in records:
-                    remote_id = str(record.get("id"))
+                    remote_id = qualify(self.table, record.get("id"))
                     # An item created during the scan shifts the offsets, so
                     # the next page can start with one already returned.
                     if remote_id in seen:
@@ -377,7 +451,7 @@ class GLPIClient(BaseIntegrationClient):
                             {
                                 "key": remote_id,
                                 "id": remote_id,
-                                "summary": f"#{remote_id} - {record.get('name') or ''}",
+                                "summary": f"#{record.get('id')} - {record.get('name') or ''}",
                             }
                         )
                         if len(results) >= limit:

@@ -54,12 +54,12 @@ def text_to_html(value: str) -> str:
 
 
 class GLPIFieldMapper(BaseFieldMapper):
-    """Maps fields between local objects and GLPI assistance items.
+    """Maps fields between local objects and GLPI items.
 
-    Mappings are configured per instance through ``settings.field_map`` and
-    ``settings.value_map``. Applied controls fall back to defaults targeting
-    the Ticket schema when a map is empty, so a freshly saved configuration
-    syncs without further setup.
+    Mappings are configured per instance and per model through ``field_map``
+    and ``value_map``. Applied controls fall back to defaults targeting the
+    Ticket schema when a map is empty, so a freshly saved configuration syncs
+    without further setup. Assets sync what their mapping names, nothing else.
     """
 
     _DEFAULT_FIELD_MAP: dict[str, str] = {
@@ -68,6 +68,14 @@ class GLPIFieldMapper(BaseFieldMapper):
         "status": "status",
         "priority": "priority",
         "eta": "resolution_date",
+    }
+
+    # Suggested when an asset item type is picked. Never applied on its own:
+    # an asset mapping left empty syncs nothing.
+    _SUGGESTED_ASSET_FIELD_MAP: dict[str, str] = {
+        "name": "name",
+        "description": "comment",
+        "ref_id": "otherserial",  # Inventory number
     }
 
     # Remote values are GLPI ids, stringified because the FieldMapper stores
@@ -166,11 +174,20 @@ class GLPIFieldMapper(BaseFieldMapper):
 
     def suggest_mapping_for_table(self, table_name: str, client) -> dict[str, Any]:
         """Defaults intersected with what the chosen item type exposes."""
-        if self.model_key != "applied_control":
-            return {"field_map": {}, "value_map": {}}
-
         columns = client.get_table_columns(table_name)
         column_names = {c.get("name") for c in columns if c.get("name")}
+
+        if self.model_key == "asset":
+            return {
+                "field_map": {
+                    local: remote
+                    for local, remote in self._SUGGESTED_ASSET_FIELD_MAP.items()
+                    if remote in column_names
+                },
+                "value_map": {},
+            }
+        if self.model_key != "applied_control":
+            return {"field_map": {}, "value_map": {}}
 
         field_map = {
             local: remote
@@ -310,4 +327,6 @@ class GLPIFieldMapper(BaseFieldMapper):
             )
             return None
 
-        return value
+        # Local fields without choices are text: a GLPI number or flag mapped
+        # to one is stored as its text.
+        return value if isinstance(value, str) else str(value)

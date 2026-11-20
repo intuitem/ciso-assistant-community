@@ -3,15 +3,17 @@ import hmac
 from datetime import datetime
 from typing import Any
 
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from structlog import get_logger
 
+from integrations import syncable
 from integrations.base import BaseITSMOrchestrator
 from integrations.models import IntegrationSchemaCache, SyncMapping
 from integrations.registry import IntegrationRegistry
 from integrations.settings_access import get_model_settings
 
-from .client import DEFAULT_ITEM_TYPE, ITEM_TYPES, GLPIClient
+from .client import MODEL_ITEM_TYPES, GLPIClient, item_type_for, qualify
 from .mapper import GLPIFieldMapper
 
 logger = get_logger(__name__)
@@ -57,6 +59,11 @@ GLPI_CONFIG_SCHEMA = {
             },
             "field_map": {"type": "object"},
             "value_map": {"type": "object"},
+            "models": {
+                "type": "object",
+                "description": "Per-model mapping, e.g. models.asset.table_name "
+                "for the asset item type (Computer, Software, ...)",
+            },
             "enable_incoming_sync": {"type": "boolean", "default": True},
             "enable_outgoing_sync": {"type": "boolean", "default": True},
         },
@@ -68,15 +75,8 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     client_class = GLPIClient
     mapper_class = GLPIFieldMapper
 
-    # Only applied controls sync with GLPI. A webhook does not name its item
-    # type, so a second model under the same configuration could not tell its
-    # items from the tickets.
-    @classmethod
-    def supports_model(cls, model_key: str) -> bool:
-        return model_key == cls.DEFAULT_MODEL_KEY
-
     def _check_model(self, model_key: str) -> None:
-        if not self.supports_model(model_key):
+        if model_key not in MODEL_ITEM_TYPES:
             raise ValueError(f"GLPI does not sync '{model_key}' objects")
 
     def _get_mapper(self, model_key="applied_control"):
@@ -97,52 +97,81 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return default if value is None else value
 
         models = given(new_settings, "models", {})
-        if not isinstance(models, dict) or not isinstance(
-            given(models, cls.DEFAULT_MODEL_KEY, {}), dict
+        if not isinstance(models, dict) or not all(
+            isinstance(given(models, model_key, {}), dict) for model_key in models
         ):
             return ["'models' must map a model to its settings."]
-        other_models = sorted(set(models) - {cls.DEFAULT_MODEL_KEY})
+        other_models = sorted(set(models) - set(MODEL_ITEM_TYPES))
         if other_models:
             return [
-                "GLPI only syncs applied controls. Remove the settings for: "
+                "GLPI syncs applied controls and assets. Remove the settings for: "
                 + ", ".join(other_models)
             ]
-        model_settings = get_model_settings(new_settings, cls.DEFAULT_MODEL_KEY)
-        chosen = given(model_settings, "table_name", "")
-        if chosen != "" and chosen not in tuple(ITEM_TYPES):
-            return [
-                f"Unknown GLPI item type '{chosen}'. Use one of: "
-                + ", ".join(ITEM_TYPES)
-            ]
-        field_map = given(model_settings, "field_map", {})
-        if not isinstance(field_map, dict) or not all(
-            isinstance(remote, str) for remote in field_map.values()
-        ):
-            return ["'field_map' must map each field to a GLPI property name."]
-        value_map = given(model_settings, "value_map", {})
-        if not isinstance(value_map, dict) or not all(
-            isinstance(choices, dict) for choices in value_map.values()
-        ):
-            return ["'value_map' must map each field to its value pairs."]
+        for model_key, item_types in MODEL_ITEM_TYPES.items():
+            model_settings = get_model_settings(new_settings, model_key)
+            chosen = given(model_settings, "table_name", "")
+            if chosen != "" and chosen not in tuple(item_types):
+                return [
+                    f"Unknown GLPI item type '{chosen}' for {model_key}. Use one "
+                    "of: " + ", ".join(item_types)
+                ]
+            field_map = given(model_settings, "field_map", {})
+            if not isinstance(field_map, dict) or not all(
+                isinstance(remote, str) for remote in field_map.values()
+            ):
+                return ["'field_map' must map each field to a GLPI property name."]
+            value_map = given(model_settings, "value_map", {})
+            if not isinstance(value_map, dict) or not all(
+                isinstance(choices, dict) for choices in value_map.values()
+            ):
+                return ["'value_map' must map each field to its value pairs."]
         if configuration is None:
             return []
 
-        # Item ids are only unique within an item type: under another type,
-        # existing links would address unrelated items with the same id.
-        def item_type(settings):
-            model_settings = get_model_settings(settings, cls.DEFAULT_MODEL_KEY)
-            return model_settings.get("table_name") or DEFAULT_ITEM_TYPE
-
-        old, new = item_type(configuration.settings), item_type(new_settings)
-        # Links whose item is still being created count too: its id would be
-        # stored under the new type.
-        linked = SyncMapping.objects.filter(configuration=configuration)
-        if old != new and linked.exists():
-            return [
-                f"The item type cannot change from {old} to {new} while objects "
-                "are linked through this configuration. Unlink them first."
-            ]
+        # A model's mapping is written for one item type, and its links name
+        # that type: under another one they would stop syncing.
+        for model_key in MODEL_ITEM_TYPES:
+            old = item_type_for(configuration.settings, model_key)
+            new = item_type_for(new_settings, model_key)
+            if not old or not new or old == new:
+                continue
+            spec = syncable.get_spec(model_key)
+            # Links whose item is still being created count too.
+            linked = SyncMapping.objects.filter(
+                configuration=configuration,
+                content_type__app_label=spec.app_label,
+                content_type__model=spec.model_name,
+            )
+            if linked.exists():
+                return [
+                    f"The item type cannot change from {old} to {new} while objects "
+                    "are linked through this configuration. Unlink them first."
+                ]
         return []
+
+    # --- Links ----------------------------------------------------------------
+
+    def push_changes(self, local_object, changed_fields: list[str]) -> bool:
+        self._qualify_link(local_object)
+        return super().push_changes(local_object, changed_fields)
+
+    def _qualify_link(self, local_object) -> None:
+        """A link made through the API can carry the bare GLPI id. It is
+        stored with the model's item type, like the ids this provider issues,
+        so that it cannot be taken for an item of another type."""
+        content_type = ContentType.objects.get_for_model(local_object)
+        model_key = syncable.model_key_for_content_type(content_type)
+        item_type = item_type_for(self.configuration.settings, model_key or "")
+        if not item_type:
+            return
+        mapping = SyncMapping.objects.filter(
+            configuration=self.configuration,
+            content_type=content_type,
+            local_object_id=local_object.pk,
+        ).first()
+        if mapping and mapping.remote_id.strip().isdigit():
+            mapping.remote_id = qualify(item_type, mapping.remote_id.strip())
+            mapping.save(update_fields=["remote_id"])
 
     # --- Webhooks -------------------------------------------------------------
     # GLPI webhooks (Setup > Webhooks) post {"event": ..., "item": {...}}, the
@@ -180,16 +209,25 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     def _extract_remote_data(self, payload: dict[str, Any]) -> dict[str, Any]:
         return GLPIClient.normalize_item(payload.get("item") or {})
 
-    def _is_linked(self, remote_id: str) -> bool:
-        return SyncMapping.objects.filter(
-            configuration=self.configuration, remote_id=remote_id
-        ).exists()
+    def _linked(self, item_id: str) -> list[tuple[str, str]]:
+        """``(model, remote id)`` of each link a delivery for this item id may
+        be about. A delivery does not name its item type, so the id is looked
+        up under the type of every model this configuration syncs."""
+        candidates = {}
+        for model_key in MODEL_ITEM_TYPES:
+            item_type = item_type_for(self.configuration.settings, model_key)
+            if item_type:
+                candidates[qualify(item_type, item_id)] = model_key
+        linked = SyncMapping.objects.filter(
+            configuration=self.configuration, remote_id__in=list(candidates)
+        ).values_list("remote_id", flat=True)
+        return [(candidates[remote_id], remote_id) for remote_id in set(linked)]
 
-    def _read_current(self, remote_id: str):
+    def _read_current(self, model_key: str, remote_id: str):
         """The item as GLPI holds it now: its data, None once it is gone, or
         _UNREACHABLE when GLPI cannot be asked."""
         try:
-            return self.client.read_item(remote_id)
+            return self.client_for(model_key).read_item(remote_id)
         except Exception:
             logger.warning(
                 "GLPI webhook not applied: the item could not be read back",
@@ -198,29 +236,31 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             )
             return _UNREACHABLE
 
-    def _is_outdated(self, remote_id: str, remote_data: dict[str, Any]) -> bool:
-        """True when this state of the item is older than the one already
-        synced: two workers can read the item back around the same time and
-        finish in the other order."""
-        incoming = _modified_at(remote_data)
-        if incoming is None:
-            return False
-        synced = _modified_at(
+    def _synced_state(self, remote_id: str) -> dict[str, Any] | None:
+        """The item as it was when last synced."""
+        return (
             SyncMapping.objects.filter(
                 configuration=self.configuration, remote_id=remote_id
             )
             .values_list("remote_data", flat=True)
             .first()
         )
+
+    @staticmethod
+    def _is_outdated(synced: dict | None, remote_data: dict[str, Any]) -> bool:
+        """True when this state of the item is older than the one already
+        synced: two workers can read the item back around the same time and
+        finish in the other order."""
+        incoming, known = _modified_at(remote_data), _modified_at(synced)
         try:
-            return synced is not None and incoming < synced
+            return incoming is not None and known is not None and incoming < known
         except TypeError:
             # One date carries an offset and the other does not.
             return False
 
     def handle_webhook_event(self, event_type: str, payload: dict[str, Any]) -> bool:
-        remote_id = self._extract_remote_id(payload)
-        if not remote_id:
+        item_id = self._extract_remote_id(payload)
+        if not item_id:
             logger.warning(
                 "Could not extract remote ID from GLPI webhook",
                 webhook_event=event_type,
@@ -233,15 +273,24 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
         if event_type not in ("update", "delete"):
             logger.warning("Unknown GLPI webhook event", webhook_event=event_type)
             return False
-        if not self._is_linked(remote_id):
-            # Most items in GLPI have nothing to do with CISO Assistant.
-            return False
 
+        # Most items in GLPI have nothing to do with CISO Assistant: no link,
+        # nothing to do. A linked item of another type that happens to share
+        # the id is read too: what gets applied is that item's own state, as
+        # after any delivery about it.
+        linked = self._linked(item_id)
+        results = [
+            self._sync_linked_item(model_key, remote_id, event_type)
+            for model_key, remote_id in linked
+        ]
+        return bool(results) and all(results)
+
+    def _sync_linked_item(self, model_key: str, remote_id: str, event_type: str):
         # GLPI renders the delivery when the change happens and sends it later,
         # possibly after newer changes or more than once. So the delivery only
         # says that something happened: what is acted on is the item as GLPI
         # holds it now, and nothing is done when GLPI cannot be asked.
-        current = self._read_current(remote_id)
+        current = self._read_current(model_key, remote_id)
         if current is _UNREACHABLE:
             return False
 
@@ -254,7 +303,7 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
                 remote_id=remote_id,
             )
             return True
-        if self._is_outdated(remote_id, current):
+        if self._is_outdated(self._synced_state(remote_id), current):
             logger.info(
                 "Ignoring a GLPI state older than the synced one",
                 remote_id=remote_id,
@@ -327,6 +376,16 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
     def refresh_schema(self, force: bool = True) -> list[dict]:
         return self._load_schema(force=force).tables
 
+    def _tables_for(self, model_key: str) -> list[dict]:
+        """Item types a model can sync with, among those the instance has."""
+        item_types = MODEL_ITEM_TYPES[model_key]
+
+        def offered(cache):
+            return [t for t in cache.tables if t.get("name") in item_types]
+
+        # A cache filled before this model was synced lists none of its types.
+        return offered(self._load_schema()) or offered(self._load_schema(force=True))
+
     # Cache-backed lookups, in the client's signature so the mapper can build
     # its suggestions without a live fetch.
     def get_table_columns(self, table_name: str) -> list[dict]:
@@ -348,8 +407,12 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
         if action == "refresh_schema":
             return self.refresh_schema()
 
+        model_key = params.get("model_key", self.DEFAULT_MODEL_KEY)
+        if not isinstance(model_key, str) or model_key not in MODEL_ITEM_TYPES:
+            raise ValueError(f"GLPI does not sync '{model_key}' objects")
+
         if action == "get_tables":
-            return self._load_schema().tables
+            return self._tables_for(model_key)
 
         table = params.get("table_name")
         if not table or not isinstance(table, str):
@@ -365,7 +428,6 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return self.get_field_choices(table, field)
 
         if action == "suggest_mapping":
-            model_key = params.get("model_key", self.DEFAULT_MODEL_KEY)
             return self.mapper_for(model_key).suggest_mapping_for_table(table, self)
 
         raise NotImplementedError(f"Unknown action: {action}")
@@ -378,6 +440,6 @@ IntegrationRegistry.register(
     mapper_class=GLPIFieldMapper,
     orchestrator_class=GLPIOrchestrator,
     display_name="GLPI",
-    description="Sync with GLPI assistance items (tickets, changes, problems)",
+    description="Sync with GLPI tickets, changes, problems and assets",
     config_schema=GLPI_CONFIG_SCHEMA,
 )

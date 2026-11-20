@@ -225,7 +225,7 @@ def test_picker_stays_closed_without_access_to_the_configuration(
 def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_folder):
     from django.contrib.contenttypes.models import ContentType
 
-    from core.models import AppliedControl
+    from core.models import AppliedControl, Asset
     from integrations.models import SyncMapping
 
     config = IntegrationConfiguration.objects.create(
@@ -263,7 +263,7 @@ def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_fo
         configuration=config,
         content_type=ContentType.objects.get_for_model(AppliedControl),
         local_object_id=control.id,
-        remote_id="7",
+        remote_id="Ticket:7",
     )
 
     response = save(table_name="Change")
@@ -276,77 +276,211 @@ def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_fo
     response = save(table_name="Ticket", enable_outgoing_sync=True)
     assert response.status_code == 200, response.content
 
+    # Each model has its own lock: a linked control does not hold the asset
+    # type, which is free until an asset is linked.
+    def save_assets(item_type):
+        return save(table_name="Ticket", models={"asset": {"table_name": item_type}})
 
-def test_glpi_refuses_settings_for_other_models(admin_client, root_folder):
-    credentials = {
-        "instance_url": "https://glpi.example.com",
-        "client_id": "cid",
-        "client_secret": "csecret",
-        "username": "sync",
-        "password": "pw",
-    }
+    assert save_assets("Computer").status_code == 200
+    assert save_assets("Software").status_code == 200
+
+    asset = Asset.objects.create(name="Linked", folder=root_folder)
+    SyncMapping.objects.create(
+        configuration=config,
+        content_type=ContentType.objects.get_for_model(Asset),
+        local_object_id=asset.id,
+        remote_id="Software:7",
+    )
+
+    response = save_assets("Computer")
+    assert response.status_code == 400, response.content
+    assert "Software to Computer" in str(response.json())
+    assert save_assets("Software").status_code == 200
+    # Turning asset sync off is not a change of type.
+    assert save_assets("").status_code == 200
+
+
+GLPI_SHOWN_CREDENTIALS = {
+    "instance_url": "https://glpi.example.com",
+    "client_id": "cid",
+    "username": "sync",
+}
+GLPI_CREDENTIALS = {
+    **GLPI_SHOWN_CREDENTIALS,
+    "client_secret": "csecret",
+    "password": "pw",
+}
+
+
+def test_glpi_checks_the_settings_of_each_model(admin_client, root_folder):
     payload = {
         "provider_id": str(IntegrationProvider.objects.get(name="glpi").id),
         "folder_id": str(root_folder.id),
-        "credentials": credentials,
+        "credentials": GLPI_CREDENTIALS,
         "settings": {
             "table_name": "Ticket",
             "models": {"asset": {"table_name": "Ticket"}},
         },
     }
 
+    # A ticket is not an asset type.
     response = admin_client.post(CONFIGS_URL, payload, format="json")
     assert response.status_code == 400, response.content
     assert "asset" in str(response.json())
 
+    payload["settings"]["models"] = {"finding": {"table_name": "Ticket"}}
+    response = admin_client.post(CONFIGS_URL, payload, format="json")
+    assert response.status_code == 400, response.content
+    assert "finding" in str(response.json())
+
     payload["settings"] = {"table_name": "Ticket"}
     created = admin_client.post(CONFIGS_URL, payload, format="json")
     assert created.status_code == 201, created.content
+    url = f"{CONFIGS_URL}{created.json()['id']}/"
 
-    response = admin_client.patch(
-        f"{CONFIGS_URL}{created.json()['id']}/",
-        {
-            "credentials": credentials,
-            "settings": {"models": {"asset": {"table_name": "Ticket"}}},
-        },
-        format="json",
-    )
-    assert response.status_code == 400, response.content
+    def save(asset_settings):
+        settings = {"table_name": "Ticket", "models": {"asset": asset_settings}}
+        return admin_client.patch(
+            url,
+            {"credentials": GLPI_SHOWN_CREDENTIALS, "settings": settings},
+            format="json",
+        )
+
+    assert save({"table_name": "Ticket"}).status_code == 400
+    assert save({"table_name": "Computer", "field_map": ["name"]}).status_code == 400
+    response = save({"table_name": "Computer", "field_map": {"name": "name"}})
+    assert response.status_code == 200, response.content
+    stored = IntegrationConfiguration.objects.get(pk=created.json()["id"]).settings
+    assert stored["models"]["asset"]["table_name"] == "Computer"
 
 
-def test_glpi_cannot_be_linked_to_objects_it_does_not_sync(admin_client, root_folder):
-    from core.models import Asset
+def _glpi_item(item_type, item_id, name="in GLPI"):
+    return {
+        "key": str(item_id),
+        "fields": {"id": int(item_id), "name": f"{item_type} {item_id} {name}"},
+        "updated": "2026-11-20T10:00:00+00:00",
+    }
+
+
+def test_glpi_ticket_and_asset_sharing_an_id_sync_apart(admin_client, root_folder):
+    """GLPI numbers each item type on its own, and a webhook does not name
+    the type it is about: ticket 4 and computer 4 must not be mixed up."""
+    from core.models import AppliedControl, Asset
+    from integrations.itsm.glpi.client import GLPIClient
     from integrations.models import SyncMapping
+    from integrations.registry import IntegrationRegistry
 
     config = IntegrationConfiguration.objects.create(
         provider=IntegrationProvider.objects.get(name="glpi"),
         folder=root_folder,
-        credentials={
-            "instance_url": "https://glpi.example.com",
-            "client_id": "cid",
-            "client_secret": "csecret",
-            "username": "sync",
-            "password": "pw",
+        credentials=GLPI_CREDENTIALS,
+        settings={
+            "table_name": "Ticket",
+            "models": {
+                "asset": {"table_name": "Computer", "field_map": {"name": "name"}}
+            },
         },
-        settings={"table_name": "Ticket"},
     )
-    asset = Asset.objects.create(name="Server", folder=root_folder)
+    control = AppliedControl.objects.create(name="Control", folder=root_folder)
+    asset = Asset.objects.create(name="Asset", folder=root_folder)
 
-    response = admin_client.patch(
-        f"/api/assets/{asset.id}/",
-        {"integration_config": str(config.id), "remote_object_id": "7"},
-        format="json",
+    # Linked through the API with the id GLPI shows.
+    with patch("core.views.sync_object_to_integrations"):
+        for url in (f"/api/applied-controls/{control.id}/", f"/api/assets/{asset.id}/"):
+            response = admin_client.patch(
+                url,
+                {"integration_config": str(config.id), "remote_object_id": "4"},
+                format="json",
+            )
+            assert response.status_code == 200, response.content
+
+    gone = set()
+    renamed = set()
+
+    def read(client, remote_id):
+        if client.table in gone:
+            return None
+        name = "renamed" if client.table in renamed else "in GLPI"
+        return _glpi_item(client.table, client._item_id(remote_id), name)
+
+    def links():
+        return {
+            mapping.content_type.model: mapping
+            for mapping in SyncMapping.objects.filter(configuration=config)
+        }
+
+    with (
+        patch("integrations.itsm.glpi.client.check_integration_url"),
+        patch.object(GLPIClient, "get_remote_object", autospec=True, side_effect=read),
+        patch.object(GLPIClient, "read_item", autospec=True, side_effect=read),
+    ):
+        # The push queued by the link stores each id under its item type.
+        orchestrator = IntegrationRegistry.get_orchestrator(config)
+        assert orchestrator.push_changes(control, []) is True
+        assert orchestrator.push_changes(asset, []) is True
+        assert links()["appliedcontrol"].remote_id == "Ticket:4"
+        assert links()["asset"].remote_id == "Computer:4"
+
+        # The computer is renamed in GLPI. The delivery only says "item 4":
+        # the asset follows its computer, and the control linked to ticket 4
+        # only ever gets the state of that ticket.
+        orchestrator = IntegrationRegistry.get_orchestrator(config)
+        renamed.add("Computer")
+        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
+        control.refresh_from_db()
+        asset.refresh_from_db()
+        assert asset.name == "Computer 4 renamed"
+        assert control.name == "Ticket 4 in GLPI"
+
+        # And the other way round.
+        renamed.add("Ticket")
+        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
+        control.refresh_from_db()
+        asset.refresh_from_db()
+        assert control.name == "Ticket 4 renamed"
+        assert asset.name == "Computer 4 renamed"
+
+        # The computer is deleted in GLPI: the ticket link is left alone.
+        gone.add("Computer")
+        assert orchestrator.handle_webhook_event("delete", {"item": {"id": 4}}) is True
+        assert links()["asset"].sync_status == SyncMapping.SyncStatus.FAILED
+        assert links()["appliedcontrol"].sync_status == SyncMapping.SyncStatus.SYNCED
+
+        # Items nobody linked are not read.
+        with patch.object(GLPIClient, "read_item") as read_item:
+            assert (
+                orchestrator.handle_webhook_event("update", {"item": {"id": 5}})
+                is False
+            )
+        read_item.assert_not_called()
+
+
+def test_glpi_asset_picker_lists_the_asset_item_type(admin_client, root_folder):
+    config = IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name="glpi"),
+        folder=root_folder,
+        credentials=GLPI_CREDENTIALS,
+        settings={"table_name": "Ticket", "models": {"asset": {"table_name": "Phone"}}},
     )
-    assert response.status_code == 400, response.content
-    assert "integration_config" in response.json()
-    assert not SyncMapping.objects.filter(configuration=config).exists()
+    answer = MagicMock(status_code=200)
+    answer.json.return_value = [{"id": 9, "name": "Desk phone"}]
 
-    with patch("integrations.views.IntegrationRegistry.get_client") as get_client:
+    with (
+        patch("integrations.itsm.glpi.client.check_integration_url"),
+        patch("integrations.itsm.glpi.client.GLPIClient._get_token", return_value="t"),
+        patch(
+            "integrations.itsm.glpi.client.requests.request", return_value=answer
+        ) as request,
+    ):
         response = admin_client.get(
             f"{CONFIGS_URL}{config.id}/remote-objects/", {"model_key": "asset"}
         )
-    assert response.status_code == 400, response.content
-    get_client.assert_not_called()
+
+    assert response.status_code == 200, response.content
+    assert response.json() == [
+        {"key": "Phone:9", "id": "Phone:9", "summary": "#9 - Desk phone"}
+    ]
+    assert request.call_args[0][1] == "https://glpi.example.com/api.php/v2/Assets/Phone"
 
 
 @pytest.mark.parametrize(

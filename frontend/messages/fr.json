@@ -8235,5 +8235,7 @@
 	"glpiWebhookSecretHelpText": "Le secret affiché dans l'onglet Sécurité de votre webhook GLPI.",
 	"glpiIntegrationMappingsHelpText": "Associez vos mesures locales aux éléments GLPI.",
 	"glpiTableHelpText": "Sélectionnez le type d'élément GLPI à synchroniser (ticket, changement ou problème).",
-	"glpiField": "Champ GLPI"
+	"glpiField": "Champ GLPI",
+	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
+	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...)."
 }

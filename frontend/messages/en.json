@@ -8238,5 +8238,7 @@
 	"glpiWebhookSecretHelpText": "The secret shown in the Security tab of your GLPI webhook.",
 	"glpiIntegrationMappingsHelpText": "Map your local controls to GLPI items.",
 	"glpiTableHelpText": "Select the GLPI item type to sync with (ticket, change or problem).",
-	"glpiField": "GLPI Field"
+	"glpiField": "GLPI Field",
+	"glpiAssetMappingsHelpText": "Map your assets to GLPI items. Assets are synced once an item type is selected.",
+	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...)."
 }

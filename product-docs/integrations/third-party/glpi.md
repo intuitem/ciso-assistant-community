@@ -4,7 +4,12 @@ description: GLPI Integration Guide
 
 # GLPI
 
-The GLPI integration synchronizes applied controls from CISO Assistant with assistance items in GLPI: tickets, changes or problems. It lets you:
+The GLPI integration synchronizes CISO Assistant objects with GLPI items:
+
+* **Applied controls** with assistance items: tickets, changes or problems.
+* **Assets** with GLPI assets, for example computers, software or appliances. See [Syncing assets](#syncing-assets).
+
+It lets you:
 
 * Create a GLPI item from an applied control, or link an applied control to an existing item.
 * Push updates (name, description, status, priority, ETA) from CISO Assistant to GLPI.
@@ -38,7 +43,7 @@ The instance URL must resolve to a public address. If your GLPI is on a private 
    * **Instance URL:** the base URL of your GLPI instance, for example `https://glpi.example.com`.
    * **Client ID** and **Client secret:** the values from the OAuth client.
    * **Username** and **Password:** the GLPI user the integration acts as.
-3. Press **Test Connection**. A successful test proves both the OAuth client and the user's API access. It does not check the user's rights on tickets, changes or problems: make sure its GLPI profile can read, create and update the item type you sync with.
+3. Press **Test Connection**. A successful test proves both the OAuth client and the user's API access. It does not check the user's rights on the items themselves: make sure its GLPI profile can read, create and update the item types you sync with.
 4. **Save**. The mapping section appears once the configuration is saved.
 
 ### Map the fields
@@ -69,6 +74,11 @@ The instance URL must resolve to a public address. If your GLPI is on a private 
 
 4. Adjust the rows to your process, then **Save**. Use **Refresh schema** after a GLPI upgrade or a change to its fields.
 
+5. **Asset mapping (optional):** below the applied control mappings, the **Assets** section works the same way:
+   * **Target Table:** pick the GLPI asset type: computer, monitor, network equipment, peripheral, phone, printer, software, software license, certificate, appliance, rack, enclosure or PDU.
+   * **Field Mapping:** map the asset fields you want to sync: Name, Description, ID, Type, Reference link and Observation. Name, Description (to `comment`) and ID (to `otherserial`, the inventory number) are suggested when the asset type has them.
+   * Leave this section empty if you don't want to sync assets. Assets are only synced once a target table is set, and only the fields you map.
+
 A local value with no mapping is not pushed. With the default mapping, the GLPI values that have no row of their own are still understood on incoming sync: `Processing (planned)` is read as In progress, `Closed` as Active, `Very low` as P4 and `Major` as P1.
 
 ## Part 2: Incoming sync
@@ -85,6 +95,7 @@ GLPI sends changes through its webhooks. Each webhook covers one item type and o
    * Keep the default payload.
 2. Open the webhook's **Security** tab and copy its **Secret**.
 3. Optionally add a second webhook for the `Delete` event, with the same URL and the same secret. CISO Assistant then flags the link when the GLPI item is moved to the trash.
+4. If you sync assets, add the same webhooks for the asset type, with the same URL and the same secret.
 
 ### Configure CISO Assistant
 
@@ -105,14 +116,25 @@ GLPI refuses to call addresses it considers unsafe, which includes private netwo
 * **Updating an applied control** pushes the changed fields to the linked item.
 * **Updating the item in GLPI** updates the applied control. The webhook only signals the change: CISO Assistant then reads the item from GLPI and applies its current state. If GLPI cannot be reached at that moment, nothing is applied and the control catches up with the next change. GLPI sends webhooks from a queue, so changes arrive with a short delay (about a minute with GLPI's default settings). If they never arrive, check that the `queuedwebhook` automatic action is enabled and running in GLPI, and look at the webhook queue.
 
-The applied control page shows the linked GLPI id, the last sync time and its status.
+The applied control page shows the linked GLPI item (its type and id, for example `Ticket:42`), the last sync time and its status.
+
+### Syncing assets
+
+Asset sync works differently from applied controls:
+
+* **Every new asset is pushed.** Once the **Assets** section has a target table, creating an asset in CISO Assistant creates an item of that type in GLPI. There is no `Create remote object` checkbox.
+* **Existing assets are pushed when a synced field changes.** Assets created before you set the table are not sent in bulk. Each one is created in GLPI the first time one of its mapped fields is edited.
+* **Linking to an existing item is API-only.** Update the asset through the API (`PATCH /api/assets/<id>/`) with `integration_config` set to the integration's ID and `remote_object_id` set to the GLPI id of the item. Later edits then update that item instead of creating a new one.
+* **Incoming sync only updates linked assets.** Changes made in GLPI are applied to the linked asset. Items created in GLPI do not create assets in CISO Assistant, so this is not an inventory import.
+* **Only plain fields can be mapped.** GLPI dropdowns such as status, type, location or manufacturer are not offered, and neither are relations between assets.
+* **One asset type per configuration.** As for applied controls, it can no longer be changed once assets are linked.
 
 ## Good to know
 
 * GLPI stores the item description as rich text. CISO Assistant sends plain paragraphs and reads formatted content back as plain text.
 * Items created directly in GLPI are not imported into CISO Assistant.
-* Links store GLPI item ids. Only change the instance URL when the new address serves the same GLPI instance, otherwise unlink the objects first.
+* Links store GLPI item types and ids. GLPI numbers each item type on its own, so ticket 12 and computer 12 can both be linked without being mixed up. Only change the instance URL when the new address serves the same GLPI instance, otherwise unlink the objects first.
 * The ETA is synced from GLPI 11.0.2 on. GLPI 11.0.0 and 11.0.1 do not expose the date through their API, so it is left out there.
 * Removing the ETA of an applied control does not remove the date in GLPI: its API cannot clear it.
 * With the default mapping, the `In progress` status is not sent to a change: GLPI changes have no matching status. Pick one in **Value Mapping** if you want it synced.
-* Assets are not synchronized with GLPI yet.
+* Custom asset definitions are not synchronized yet.

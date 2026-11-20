@@ -23,7 +23,9 @@ export const schema = z
 			// Enforced below for updates.
 			table_name: z.string().optional(),
 			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+			value_map: z.record(z.string(), z.any()).default({}).optional(),
+			// Per-model mapping (asset). AppliedControl stays at the top level.
+			models: z.record(z.string(), z.any()).default({}).optional()
 		})
 	})
 	.superRefine((data, ctx) => {
