@@ -11,9 +11,10 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '#lib/utils/types.js';
+import { fetchVendorAssignees } from '#lib/utils/vendorTasks.js';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, locals }) => {
 	// params.id is the assignment ID
 	const assignmentId = params.id;
 
@@ -87,6 +88,13 @@ export const load = (async ({ fetch, params }) => {
 		documentation_score: z.number().optional().nullable()
 	});
 
+	// The requirements all live in the audit's folder: one lookup serves them all.
+	const vendorAssignees = await fetchVendorAssignees(
+		fetch,
+		tableMode.requirement_assessments[0]?.folder,
+		!!locals.user?.is_third_party
+	);
+
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
 			const measureInitialData = {
@@ -105,7 +113,8 @@ export const load = (async ({ fetch, params }) => {
 			const taskTemplateCreateForm = await superValidate(
 				{
 					requirement_assessments: [requirementAssessment.id],
-					folder: requirementAssessment.folder.id
+					folder: requirementAssessment.folder.id,
+					assigned_to: vendorAssignees
 				},
 				zod(taskTemplateCreateSchema),
 				{ errors: false }
