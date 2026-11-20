@@ -8226,5 +8226,18 @@
 	"europeanUnion": "Union européenne",
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
-	"notShownOnMap": "Non représenté sur la carte"
+	"notShownOnMap": "Non représenté sur la carte",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "Configuration de l'intégration GLPI",
+	"glpiInstanceUrlHelpText": "URL de votre instance GLPI (ex. https://glpi.example.com/). GLPI 11 ou ultérieur est requis.",
+	"glpiClientIdHelpText": "Identifiant d'un client OAuth créé dans GLPI avec l'autorisation « password » et le périmètre « api ».",
+	"glpiUsernameHelpText": "Utilisateur GLPI au nom duquel l'intégration agit. Son profil détermine les éléments lisibles et modifiables.",
+	"glpiSecretsAlreadySetHelpText": "Le secret client et le mot de passe sont déjà définis.",
+	"glpiResetSecrets": "Réinitialiser les secrets",
+	"glpiWebhookSecretHelpText": "Le secret affiché dans l'onglet Sécurité de votre webhook GLPI.",
+	"glpiIntegrationMappingsHelpText": "Associez vos mesures locales aux éléments GLPI.",
+	"glpiTableHelpText": "Sélectionnez le type d'élément GLPI à synchroniser (ticket, changement ou problème).",
+	"glpiField": "Champ GLPI",
+	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
+	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...)."
 }

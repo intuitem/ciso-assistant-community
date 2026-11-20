@@ -265,6 +265,7 @@
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
+  * [GLPI](integrations/third-party/glpi.md)
 
 ## API documentation
 
