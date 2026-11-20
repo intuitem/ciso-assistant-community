@@ -25,19 +25,19 @@ objects:
     - ref_id: UAL-1
       name: Union assurance level 1
       description: Criteria a cloud computing service must meet to be recognised at Union assurance level
-        1.
+        1, including the criteria of the lower levels (Article 20(1)).
     - ref_id: UAL-2
       name: Union assurance level 2
       description: Criteria a cloud computing service must meet to be recognised at Union assurance level
-        2.
+        2, including the criteria of the lower levels (Article 20(1)).
     - ref_id: UAL-3
       name: Union assurance level 3
       description: Criteria a cloud computing service must meet to be recognised at Union assurance level
-        3.
+        3, including the criteria of the lower levels (Article 20(1)).
     - ref_id: UAL-4
       name: Union assurance level 4
       description: Criteria a cloud computing service must meet to be recognised at Union assurance level
-        4.
+        4, including the criteria of the lower levels (Article 20(1)).
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:scope
       assessable: false
@@ -50,6 +50,11 @@ objects:
         4, ‘software’ within the meaning of Regulation (EU) 2024/2847, Article 3, point (4) falls within
         the scope of this Annex and Annex III to this Regulation. ‘Hardware’ within the meaning of Regulation
         (EU) 2024/2847, Article 3, point (5) is outside of the scope.
+      implementation_groups:
+      - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-1
       assessable: false
       depth: 1
@@ -57,6 +62,9 @@ objects:
       name: Union assurance level 1
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-1:1.1
       assessable: false
       depth: 2
@@ -66,12 +74,18 @@ objects:
         cumulative criteria:'
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-1:1.1:a
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-1:1.1
       ref_id: 1.1(a)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: the cloud computing service provider is established in the Union;
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-1:1.1:b
@@ -80,6 +94,9 @@ objects:
       ref_id: 1.1(b)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: the infrastructure and assets of the cloud computing service provider, including those
         of its subcontractors which are involved in the provision of the service, are located in the Union
@@ -90,6 +107,9 @@ objects:
       ref_id: 1.1(c)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: the customer data, including metadata and telemetry data, that is processed, stored
         and transferred by the cloud computing service provider, and by the subcontractors, which are
@@ -102,6 +122,9 @@ objects:
       ref_id: 1.1(d)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: where the cloud computing service provider outsources the technical and operational
         support or assistance, including any subsequent sub-outsourcing arrangements, to third-party service
@@ -114,6 +137,9 @@ objects:
       ref_id: 1.1(e)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: the cloud computing service provider demonstrates that the service complies with the
         state-of-the-art cybersecurity standards;
@@ -123,6 +149,9 @@ objects:
       ref_id: 1.1(f)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: the cloud computing service provider provides full transparency around the use of subcontractors.
         The cloud computing service provider subjects subcontractors to due diligence, contractual obligations
@@ -133,6 +162,9 @@ objects:
       ref_id: 1.1(g)
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
       assessable: true
       description: Where the cloud computing service provider is subject to the control of a third country
         or a legal entity established in a third-country, the cloud computing service provider guarantees
@@ -150,6 +182,9 @@ objects:
         the cloud computing service.
       implementation_groups:
       - UAL-1
+      - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2
       assessable: false
       depth: 1
@@ -157,6 +192,8 @@ objects:
       name: Union assurance level 2
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1
       assessable: false
       depth: 2
@@ -166,12 +203,16 @@ objects:
         cumulative criteria:'
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:a
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1
       ref_id: 2.1(a)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion A – Union establishment
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -205,7 +246,13 @@ objects:
 
         (6) The auditing organisation should verify the presence of EU Member State establishment units
         or branches (for example, through lease contracts, utility bills, property documents, employment
-        contracts, timesheets, payroll records or purchase orders).'
+        contracts, timesheets, payroll records or purchase orders).
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited provider and the subcontractors which are involved in the provision of
         the audited service are established in the Union;
@@ -215,6 +262,8 @@ objects:
       ref_id: 2.1(b)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion B – Location of infrastructure, assets, and personnel
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -255,7 +304,13 @@ objects:
         including, but not limited to, libraries, the internal network needed for software components
         to communicate, cryptographic materials that enables the provision of the cloud computing service.
         ‘Personnel’, including personnel managed by subcontractors, means individuals who support the
-        delivery, administration, security, availability, or operation of the audited service.'
+        delivery, administration, security, availability, or operation of the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the infrastructure, assets, and personnel of the audited provider, including those
         of its subcontractors which are involved in the provision of the service are located in the Union;
@@ -265,6 +320,8 @@ objects:
       ref_id: 2.1(c)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion C – Data localisation in the Union
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -306,7 +363,13 @@ objects:
         records of who used the service, at what times, which functions, types of data involved and so
         on. It can also include information about the numbers of authorised users and their identities.
         It can also include any configuration or customisation data, where the cloud computing service
-        has such configuration and customisation functionalities.'
+        has such configuration and customisation functionalities.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the customer data, including metadata and telemetry data, that is processed, stored
         and transferred by the audited provider and the subcontractors which are involved in the provision
@@ -319,6 +382,8 @@ objects:
       ref_id: 2.1(d)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion D – Union citizenship
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -343,7 +408,13 @@ objects:
         throughout employment. NB: Personnel involved in the provision of the audited service could include
         personnel who have logical or physical access to infrastructure and assets used to operate the
         cloud computing service, as well as those who are responsible for customer support, and all personnel
-        who have management control of the cloud compunting service provider.'
+        who have management control of the cloud compunting service provider.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: if the public sector body determines that imposing additional personnel screening and
         Union citizenship requirements are necessary, the audited provider should ensure that presonnel
@@ -354,6 +425,8 @@ objects:
       ref_id: 2.1(e)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion E – European cybersecurity certification scheme adopted
         under Regulation 2019/881
 
@@ -379,7 +452,13 @@ objects:
         cloud computing service has been assessed and found compliant with the requirements under the
         national cybersecurity scheme currently in place in the Member State; (c) in the absence of a
         national scheme, evidence demonstrating adherence to the highest level of cybersecurity standards
-        available on the market.'
+        available on the market.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited service obtains a European cybersecurity certificate of at least assurance
         level ‘substantial’ under a European cybersecurity certification scheme covering cloud computing
@@ -395,6 +474,8 @@ objects:
       ref_id: 2.1(f)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion F – AI systems operated by a third country or third
         country legal entity
 
@@ -426,7 +507,13 @@ objects:
         has been used for.
 
         (7) A list of the subcontractors (indicating their country of establishment) that access the data
-        generated by using the audited service.'
+        generated by using the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the data generated by using the audited service are not used to train or fine-tune
         any AI system operated by a third country or a legal entity established in a third-country , and
@@ -437,6 +524,8 @@ objects:
       ref_id: 2.1(g)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -546,7 +635,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: false
       description: 'if the audited provider and the subcontractors which are involved in the provision
         of the audited service are subject to the control of a third country or a legal entity established
@@ -564,6 +659,8 @@ objects:
         perform the audited service;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -673,7 +770,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:ii
       assessable: true
       depth: 4
@@ -683,6 +786,8 @@ objects:
         data is prevented;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -792,7 +897,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:iii
       assessable: true
       depth: 4
@@ -802,6 +913,8 @@ objects:
         quality by a third country or a legal entity established in a third country is prevented;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -911,7 +1024,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:iv
       assessable: true
       depth: 4
@@ -924,6 +1043,8 @@ objects:
         are legitimate under the national laws of Member States or Union law
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -1033,13 +1154,21 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:h
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1
       ref_id: 2.1(h)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion H – No technical and operational support outside of
         the Union
 
@@ -1078,7 +1207,13 @@ objects:
 
         (8) evidence that the audited provider has procedures in place that there is no effective control
         of a third country or a legal entity established in a third country, including for subsequent
-        sub-outsourcing.'
+        sub-outsourcing.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the technical and operational support or assistance related to the audited service,
         including subsequent sub-outsourcing arrangements, are initiated and performed exclusively within
@@ -1089,6 +1224,8 @@ objects:
       ref_id: 2.1(i)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -1135,7 +1272,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: false
       description: 'the audited provider demonstrates that the following software supply chain measures
         are in place:'
@@ -1149,6 +1292,8 @@ objects:
         the provision of the service are documented and made available to the auditing organisation;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -1195,7 +1340,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:i:ii
       assessable: true
       depth: 4
@@ -1210,6 +1361,8 @@ objects:
         plan in the event that the vendor fails or a third country imposes restrictions;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -1256,7 +1409,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:i:iii
       assessable: true
       depth: 4
@@ -1269,6 +1428,8 @@ objects:
         to authorities of that third country prior to those vulnerabilities being known to have been exploited;
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -1315,13 +1476,21 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:j
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1
       ref_id: 2.1(j)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion J – Open-source software
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1351,7 +1520,13 @@ objects:
         (3) Where the audited provider uses software released under an open-source licence, the audited
         provider should implement mechanisms to detect and provide timely notice to the public sector
         body if the software is acquired by or comes under control of a third country or a legal entity
-        or foundation established in a third country.'
+        or foundation established in a third country.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: where software released under an open-source licence is used for the provision of the
         service, the audited provider demonstrates that it has implemented and documented the appropriate
@@ -1363,6 +1538,8 @@ objects:
       ref_id: 2.1(k)
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion K – Global services and subsidiaries in third-countries
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1386,7 +1563,13 @@ objects:
 
         (6) The auditing organisation should verify that all foreign government requests received by the
         subsidiary are formally redirected to the competent Union entity for legal assessment under Union
-        and Member State law.'
+        and Member State law.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: to the extent that the audited provider provides its services globally and maintains
         a subsidiary in a third country, the audited provider has implemented the necessary measures to
@@ -1403,6 +1586,8 @@ objects:
         computing service.
       implementation_groups:
       - UAL-2
+      - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3
       assessable: false
       depth: 1
@@ -1410,6 +1595,7 @@ objects:
       name: Union assurance level 3
       implementation_groups:
       - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1
       assessable: false
       depth: 2
@@ -1419,12 +1605,14 @@ objects:
         cumulative criteria:'
       implementation_groups:
       - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:a
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1
       ref_id: 3.1(a)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion A – Union establishment
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1458,7 +1646,13 @@ objects:
 
         (6) The auditing organisation should verify the presence of EU Member State establishment units
         or branches (for example, through lease contracts, utility bills, property documents, employment
-        contracts, timesheets, payroll records or purchase orders).'
+        contracts, timesheets, payroll records or purchase orders).
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited provider and the subcontractors which are involved in the provision of
         the audited service are established in the Union;
@@ -1468,6 +1662,7 @@ objects:
       ref_id: 3.1(b)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion B – Location of infrastructure, assets, and personnel
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1508,7 +1703,13 @@ objects:
         including, but not limited to, libraries, the internal network needed for software components
         to communicate, cryptographic materials that enables the provision of the cloud computing service.
         ‘Personnel’, including personnel managed by subcontractors, means individuals who support the
-        delivery, administration, security, availability, or operation of the audited service.'
+        delivery, administration, security, availability, or operation of the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the infrastructure, assets, and personnel of the audited provider, including those
         of the subcontractors which are involved in the provision of the service, are located in the Union;
@@ -1518,6 +1719,7 @@ objects:
       ref_id: 3.1(c)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion C – Data localisation in the Union
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1559,7 +1761,13 @@ objects:
         records of who used the service, at what times, which functions, types of data involved and so
         on. It can also include information about the numbers of authorised users and their identities.
         It can also include any configuration or customisation data, where the cloud computing service
-        has such configuration and customisation functionalities.'
+        has such configuration and customisation functionalities.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the customer data, including metadata and telemetry data, that is processed, stored
         and transferred by the audited provider and the subcontractors which are involved in the provision
@@ -1571,6 +1779,7 @@ objects:
       ref_id: 3.1(d)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion D – Union citizenship
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -1595,7 +1804,13 @@ objects:
         throughout employment. NB: Personnel involved in the provision of the audited service could include
         personnel who have logical or physical access to infrastructure and assets used to operate the
         cloud computing service, as well as those who are responsible for customer support, and all personnel
-        who have management control of the cloud compunting service provider.'
+        who have management control of the cloud compunting service provider.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the personnel, including the personnel of the subcontractors which are involved in
         the provision of the audited service are Union citizens and where appropriate, the personnel must
@@ -1607,6 +1822,7 @@ objects:
       ref_id: 3.1(e)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion E – European cybersecurity certification scheme adopted
         under Regulation 2019/881
 
@@ -1632,7 +1848,13 @@ objects:
         cloud computing service has been assessed and found compliant with the requirements under the
         national cybersecurity scheme currently in place in the Member State; (c) in the absence of a
         national scheme, evidence demonstrating adherence to the highest level of cybersecurity standards
-        available on the market.'
+        available on the market.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited service obtains a European cybersecurity certificate of at least assurance
         level ‘substantial’ under a European cybersecurity certification scheme covering cloud computing
@@ -1648,6 +1870,7 @@ objects:
       ref_id: 3.1(f)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion F – AI systems operated by a third country or third
         country legal entity
 
@@ -1679,7 +1902,13 @@ objects:
         has been used for.
 
         (7) A list of the subcontractors (indicating their country of establishment) that access the data
-        generated by using the audited service.'
+        generated by using the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the data generated by using the audited service are not used to train or fine-tune
         any AI system operated by a third country or a legal entity established in a third-country and
@@ -1690,6 +1919,7 @@ objects:
       ref_id: 3.1(g)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -1799,8 +2029,14 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
-      assessable: false
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
+      assessable: true
       description: 'the audited provider and the subcontractors which are involved in the provision of
         the audited service are not subject to the control of a third country or a legal entity established
         in a third-country. By way of derogation to this criterion, a cloud computing service provider
@@ -1811,6 +2047,9 @@ objects:
         and the subcontractors which are involved in the provision of the audited service must also demonstrate
         that the necessary legal, technical and organisational measures have been implemented to ensure
         that the:'
+      annotation: 'Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity
+        self-assessment. The implementing acts identifying associated third countries for UAL-3 are set
+        out in Article 18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:i
       assessable: true
       depth: 4
@@ -1823,6 +2062,7 @@ objects:
         perform the audited service. The audited provider should allow for reasonable access to the code;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -1932,7 +2172,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:ii
       assessable: true
       depth: 4
@@ -1942,6 +2188,7 @@ objects:
         data is prevented;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -2051,7 +2298,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:iii
       assessable: true
       depth: 4
@@ -2061,6 +2314,7 @@ objects:
         quality by a third country or a legal entity established in a third country is prevented;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -2170,7 +2424,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:iv
       assessable: true
       depth: 4
@@ -2183,6 +2443,7 @@ objects:
         are legitimate under the national laws of Member States or Union law;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion G – Absence of third-country control or third-country
         entity control
 
@@ -2292,13 +2553,20 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:h
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1
       ref_id: 3.1(h)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion H – No technical and operational support outside of
         the Union
 
@@ -2337,7 +2605,13 @@ objects:
 
         (8) evidence that the audited provider has procedures in place that there is no effective control
         of a third country or a legal entity established in a third country, including for subsequent
-        sub-outsourcing.'
+        sub-outsourcing.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the technical and operational support or assistance related to the audited service,
         including subsequent sub-outsourcing arrangements, are initiated and performed exclusively within
@@ -2349,6 +2623,7 @@ objects:
       ref_id: 3.1(i)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -2395,7 +2670,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: false
       description: 'the audited provider demonstrates that the following software supply chain measures
         are in place:'
@@ -2408,6 +2689,7 @@ objects:
         provision of the service are documented and made available to the auditing organisation;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -2454,7 +2736,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:i:ii
       assessable: true
       depth: 4
@@ -2468,6 +2756,7 @@ objects:
         vendor fails or a third country imposes restrictions;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -2514,7 +2803,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:i:iii
       assessable: true
       depth: 4
@@ -2527,6 +2822,7 @@ objects:
         to authorities of that third country prior to those vulnerabilities being known to have been exploited;
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion I – Ensuring the transparency of the software supply
         chain
 
@@ -2573,13 +2869,20 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:j
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1
       ref_id: 3.1(j)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion J – Open-source software
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -2609,7 +2912,13 @@ objects:
         (3) Where the audited provider uses software released under an open-source licence, the audited
         provider should implement mechanisms to detect and provide timely notice to the public sector
         body if the software is acquired by or comes under control of a third country or a legal entity
-        or foundation established in a third country.'
+        or foundation established in a third country.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: where software released under an open-source licence is used for the provision of the
         service, the audited provider demonstrates that it has implemented and documented the appropriate
@@ -2621,6 +2930,7 @@ objects:
       ref_id: 3.1(k)
       implementation_groups:
       - UAL-3
+      - UAL-4
       typical_evidence: 'Annex III, audit criterion K – Global services and subsidiaries in third-countries
 
         The auditing organisation should assess the audit criterion listed under Union assurance levels
@@ -2644,7 +2954,13 @@ objects:
 
         (6) The auditing organisation should verify that all foreign government requests received by the
         subsidiary are formally redirected to the competent Union entity for legal assessment under Union
-        and Member State law.'
+        and Member State law.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: to the extent that the audited provider provides its services outside of the Union
         and maintains a subsidiary in a third country, the audited provider demonstrates that it has implemented
@@ -2662,6 +2978,7 @@ objects:
         defined in Article 2, point (22), of Regulation (EU) 2021/697.
       implementation_groups:
       - UAL-3
+      - UAL-4
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-4
       assessable: false
       depth: 1
@@ -2717,7 +3034,13 @@ objects:
 
         (6) The auditing organisation should verify the presence of EU Member State establishment units
         or branches (for example, through lease contracts, utility bills, property documents, employment
-        contracts, timesheets, payroll records or purchase orders).'
+        contracts, timesheets, payroll records or purchase orders).
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited provider and the subcontractors which are involved in the provision of
         the audited service are established in the Union;
@@ -2767,7 +3090,13 @@ objects:
         including, but not limited to, libraries, the internal network needed for software components
         to communicate, cryptographic materials that enables the provision of the cloud computing service.
         ‘Personnel’, including personnel managed by subcontractors, means individuals who support the
-        delivery, administration, security, availability, or operation of the audited service.'
+        delivery, administration, security, availability, or operation of the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the infrastructure, assets, and personnel of the audited provider, including the subcontractors
         , which are involved in the provision of the service, are located in the Union;
@@ -2818,7 +3147,13 @@ objects:
         records of who used the service, at what times, which functions, types of data involved and so
         on. It can also include information about the numbers of authorised users and their identities.
         It can also include any configuration or customisation data, where the cloud computing service
-        has such configuration and customisation functionalities.'
+        has such configuration and customisation functionalities.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the customer data, including metadata and telemetry data, which, following a risk assessment,
         is identified as sensitive, that is processed, stored and transferred by the audited provider
@@ -2855,7 +3190,13 @@ objects:
         throughout employment. NB: Personnel involved in the provision of the audited service could include
         personnel who have logical or physical access to infrastructure and assets used to operate the
         cloud computing service, as well as those who are responsible for customer support, and all personnel
-        who have management control of the cloud compunting service provider.'
+        who have management control of the cloud compunting service provider.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the personnel, including the personnel of the subcontractors , which are involved in
         the provision of the audited service are Union citizens and, where appropriate, the personnel
@@ -2892,7 +3233,13 @@ objects:
         cloud computing service has been assessed and found compliant with the requirements under the
         national cybersecurity scheme currently in place in the Member State; (c) in the absence of a
         national scheme, evidence demonstrating adherence to the highest level of cybersecurity standards
-        available on the market.'
+        available on the market.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited service obtains a European cybersecurity certificate of at least assurance
         level ‘high’ under a European cybersecurity certification scheme covering cloud computing services
@@ -2939,7 +3286,13 @@ objects:
         has been used for.
 
         (7) A list of the subcontractors (indicating their country of establishment) that access the data
-        generated by using the audited service.'
+        generated by using the audited service.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the data generated by using the audited service are not used to train or fine-tune
         any AI system operated by a third country or a legal entity established in a third-country, and
@@ -3059,7 +3412,13 @@ objects:
         and a confirmation that the request has been refused; (f) All evidence demonstrating the maintenance
         of an up-to-date record of any request to access customer data, to disrupt service continuity
         or to degrade service quality from a third country or a legal entity established in a third country,
-        containing at least the request and the response to the request.'
+        containing at least the request and the response to the request.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the audited provider and the subcontractors which are involved in the provision of
         the audited service are not subject to the control of a third country or a legal entity established
@@ -3108,7 +3467,13 @@ objects:
 
         (8) evidence that the audited provider has procedures in place that there is no effective control
         of a third country or a legal entity established in a third country, including for subsequent
-        sub-outsourcing.'
+        sub-outsourcing.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: the technical and operational support or assistance related to the audited service,
         including subsequent sub-outsourcing arrangements, are initiated and performed exclusively within
@@ -3166,7 +3531,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: false
       description: 'the audited provider demonstrates that the following software supply chain measures
         are in place:'
@@ -3225,7 +3596,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-4:4.1:i:ii
       assessable: true
       depth: 4
@@ -3285,7 +3662,13 @@ objects:
         independent auditor is granted the right to access and audit the source code of such software.
         The audited provider must also ensure that all documentation, technical material, information
         necessary to evaluate and audit the source code are made available to the auditing organisation
-        in a complete, accurate, and accessible format.'
+        in a complete, accurate, and accessible format.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-4:4.1:j
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-4:4.1
@@ -3321,7 +3704,13 @@ objects:
         (3) Where the audited provider uses software released under an open-source licence, the audited
         provider should implement mechanisms to detect and provide timely notice to the public sector
         body if the software is acquired by or comes under control of a third country or a legal entity
-        or foundation established in a third country.'
+        or foundation established in a third country.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: where software released under an open-source licence is used, the audited provider
         demonstrates that it has implemented and documented the appropriate controls to prevent the use
@@ -3356,7 +3745,13 @@ objects:
 
         (6) The auditing organisation should verify that all foreign government requests received by the
         subsidiary are formally redirected to the competent Union entity for legal assessment under Union
-        and Member State law.'
+        and Member State law.
+
+
+        Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
+        or considered by the auditing organisations. While the evidence requested may be the same, the
+        aspects that need to be analysed will differ depending on the assurance level criteria and their
+        strictness.'
       assessable: true
       description: to the extent that the audited provider provides its services outside of the Union
         and maintains a subsidiary in a third country, the audited provider demonstrates that it has implemented

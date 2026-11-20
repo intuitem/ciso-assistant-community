@@ -6,7 +6,8 @@ description: 'Cloud Sovereignty Framework - Implementation guidance and Annex - 
   calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
   Each answer scores its official points rescaled to 0-100, and the audit''s weighted average equals the
   official sovereignty score divided by 10. Each answer also shows its SEAL level; the overall SEAL is
-  the lowest SEAL among the answers (not computed by the app).
+  the lowest SEAL among the answers (not computed by the app). Questions whose answers all grant SEAL-4
+  have no impact on the SEAL and are marked as such.
 
 
   SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third parties,
@@ -38,7 +39,8 @@ objects:
       calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
       Each answer scores its official points rescaled to 0-100, and the audit''s weighted average equals
       the official sovereignty score divided by 10. Each answer also shows its SEAL level; the overall
-      SEAL is the lowest SEAL among the answers (not computed by the app).
+      SEAL is the lowest SEAL among the answers (not computed by the app). Questions whose answers all
+      grant SEAL-4 have no impact on the SEAL and are marked as such.
 
 
       SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third
@@ -91,19 +93,19 @@ objects:
             owners
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:1
-            value: 1. Very likely (SEAL-4)
+            value: 1. Very likely (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:2
-            value: 2. Likely takeover by or transfer to a non-EU sovereign entity (SEAL-4)
+            value: 2. Likely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:3
-            value: 3. Somewhat likely takeover by or transfer to a non-EU sovereign entity (SEAL-4)
+            value: 3. Somewhat likely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:4
-            value: 4. Unlikely takeover by or transfer to a non-EU sovereign entity (SEAL-4)
+            value: 4. Unlikely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:5
-            value: 5. Very unlikely (SEAL-4)
+            value: 5. Very unlikely (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:
           type: unique_choice
@@ -129,38 +131,38 @@ objects:
             EU-based financing rather than external capital.
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:1
-            value: 1. Almost entirely relying on non-EU funding (SEAL-4)
+            value: 1. Almost entirely relying on non-EU funding (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:2
-            value: 2. Mostly relying on non-EU funding (SEAL-4)
+            value: 2. Mostly relying on non-EU funding (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:3
-            value: 3. Balanced mix of EU and non-EU funding (SEAL-4)
+            value: 3. Balanced mix of EU and non-EU funding (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:4
-            value: 4. Majority of funding is EU-based (SEAL-4)
+            value: 4. Majority of funding is EU-based (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:5
-            value: 5. Entirely EU-based funding (SEAL-4)
+            value: 5. Entirely EU-based funding (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:
           type: unique_choice
           text: 5. EU economic contribution - extent of investment, jobs, and value creation within EU/EEA.
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:1
-            value: 1. Minimal (SEAL-4)
+            value: 1. Minimal (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:2
-            value: 2. Some (SEAL-4)
+            value: 2. Some (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:3
-            value: 3. Balanced EU/non-EU (SEAL-4)
+            value: 3. Balanced EU/non-EU (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:4
-            value: 4. Majority in the EU (SEAL-4)
+            value: 4. Majority in the EU (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:5
-            value: 5. Fully in the EU (SEAL-4)
+            value: 5. Fully in the EU (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:
           type: unique_choice
@@ -168,13 +170,13 @@ objects:
             Horizon Europe, or Gaia-X.
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:1
-            value: No clear participation (SEAL-4)
+            value: No clear participation (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:2
-            value: Active participant in strategic projects (SEAL-4)
+            value: Active participant in strategic projects (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:3
-            value: Strategic projects depend on contractor's involvement (SEAL-4)
+            value: Strategic projects depend on contractor's involvement (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:
           type: unique_choice
@@ -182,17 +184,17 @@ objects:
             sovereignty objectives defined at EU level.
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:1
-            value: No evidence exist (SEAL-4)
+            value: No evidence exist (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:2
             value: Existing Action plan (how to measure ambition? Through means linked to the goals? Relative
-              to the size of the company?) (SEAL-4)
+              to the size of the company?) (no SEAL impact)
             add_score: 33
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:3
-            value: Already measured achievement and existing dedicated governance (SEAL-4)
+            value: Already measured achievement and existing dedicated governance (no SEAL impact)
             add_score: 66
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:4
-            value: Bold ambition and dedicated means (SEAL-4)
+            value: Bold ambition and dedicated means (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:
           type: unique_choice
@@ -311,19 +313,19 @@ objects:
             (all).
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:1
-            value: 1. Entirely outside the EU (SEAL-4)
+            value: 1. Entirely outside the EU (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:2
-            value: 2. Mostly outside the EU (SEAL-4)
+            value: 2. Mostly outside the EU (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:3
-            value: 3. Mixed within/outside the EU (SEAL-4)
+            value: 3. Mixed within/outside the EU (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:4
-            value: 4. Mostly within the EU (SEAL-4)
+            value: 4. Mostly within the EU (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:5
-            value: 5. Fully within the EU (SEAL-4)
+            value: 5. Fully within the EU (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:
           type: unique_choice
@@ -466,6 +468,9 @@ objects:
         and evolve a technology independently of foreign control. It focuses on continuity of operations,
         skill availability, and resilience against external dependencies.
       weight: 15
+      annotation: 'Source note: in the official calculator, the answers to question 6 (subcontractor and
+        suppliers jurisdiction) repeat the cut-off resilience scale of SOV-1 question 8. They are reproduced
+        as published.'
       questions:
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:
           type: unique_choice
@@ -606,6 +611,9 @@ objects:
         of the technology supply chain, focusing on the extent to which critical components and processes
         remain under EU control   or exposed to non-EU dependencies.
       weight: 10
+      annotation: 'Source note: in the official calculator, the upper answers to question 2 (manufacturing
+        location) describe EU development teams rather than manufacturing locations. They are reproduced
+        as published.'
       questions:
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:
           type: unique_choice
@@ -652,19 +660,19 @@ objects:
             firmwares
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:1
-            value: No disclosure (SEAL-4)
+            value: No disclosure (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:2
-            value: Partial disclosure (SEAL-4)
+            value: Partial disclosure (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:3
-            value: Transparent with exceptions (SEAL-4)
+            value: Transparent with exceptions (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:4
-            value: Full transparency (SEAL-4)
+            value: Full transparency (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:5
-            value: EU-certified provenance (SEAL-4)
+            value: EU-certified provenance (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:
           type: unique_choice
@@ -919,23 +927,23 @@ objects:
             frameworks
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:1
-            value: 1. No evident adherence to any EU Regulations (SEAL-4)
+            value: 1. No evident adherence to any EU Regulations (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:2
             value: 2. Limited compliance to some well-known EU Regulations (basic practices exist but
-              informal, incomplete, or non-systematic) (SEAL-4)
+              informal, incomplete, or non-systematic) (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:3
             value: 3. Moderate compliance to some well-know EU Regulations (controls exist but gaps remain;
-              compliance not fully demonstrated) (SEAL-4)
+              compliance not fully demonstrated) (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:4
             value: 4. Partial compliance to most of the well-known EU Regulations (requirements implemented
-              and operational with minor exceptions) (SEAL-4)
+              and operational with minor exceptions) (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:5
             value: 5. Fully compliant to all well-know EU regulations (verified compliance, independently
-              audited) (SEAL-4)
+              audited) (no SEAL impact)
             add_score: 100
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:
           type: unique_choice
@@ -1064,6 +1072,10 @@ objects:
       description: Environmental sustainability assesses autonomy and resilience of cloud services over
         the long term in relation to energy usage, dependency and raw material scarcity.
       weight: 5
+      annotation: 'Source note: in the official calculator, questions 2, 3 and 4 each list one answer
+        twice with different scores ("Circular economy EU-aligned", "Detailed EU methodology", "Only EU
+        energy supplies"). They are reproduced as published; answers are ordered from lowest to highest
+        score.'
       questions:
         urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:
           type: unique_choice
@@ -1131,17 +1143,17 @@ objects:
             and operations
           choices:
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:1
-            value: Non traceable (SEAL-4)
+            value: Non traceable (no SEAL impact)
             add_score: 0
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:2
-            value: Only EU energy supplies (SEAL-4)
+            value: Only EU energy supplies (no SEAL impact)
             add_score: 25
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:3
-            value: Mix of EU and non-EU supplies (SEAL-4)
+            value: Mix of EU and non-EU supplies (no SEAL impact)
             add_score: 50
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:4
-            value: Only EU energy supplies (SEAL-4)
+            value: Only EU energy supplies (no SEAL impact)
             add_score: 75
           - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:5
-            value: Only green EU energy supplies (SEAL-4)
+            value: Only green EU energy supplies (no SEAL impact)
             add_score: 100
