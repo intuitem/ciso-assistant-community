@@ -65,7 +65,7 @@ def _render(incident_obj, lang="en"):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_renders_in_each_locale(incident, lang):
     _entries(incident, ["detection", "mitigation"])
     pdf, _ = _render(incident, lang)
@@ -73,7 +73,7 @@ def test_renders_in_each_locale(incident, lang):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_every_entry_type_and_optional_block_compiles(incident, lang):
     """Each entry type takes its own branch for label and accent colour, and the
     optional blocks only compile when their data exists — the trap that let a
@@ -140,6 +140,7 @@ def test_endpoint_returns_a_pdf(admin_client, incident):  # noqa: F811
 def test_locale_fallback_is_whole_document():
     assert localized_template("incident_report", "de") == "incident_report_en.typ"
     assert localized_template("incident_report", "fr") == "incident_report_fr.typ"
+    assert localized_template("incident_report", "hu") == "incident_report_hu.typ"
     assert localized_template("incident_report", "tr") == "incident_report_tr.typ"
 
 
@@ -155,6 +156,7 @@ def test_no_weasyprint_template_remains():
     [
         ("en", "Critical", "Ongoing", "Internal"),
         ("fr", "Critique", "En cours", "Interne"),
+        ("hu", "Kritikus", "Folyamatban", "Belső"),
         ("tr", "Kritik", "Devam ediyor", "İç"),
     ],
 )
