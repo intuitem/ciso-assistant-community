@@ -12,8 +12,8 @@ description:
   across CISO Assistant reference these controls to drive applied-control suggestions.
   URN namespace preserved from the legacy `doc-pol` library."
 copyright: "\xA9 intuitem - 2026"
-version: 9
-publication_date: 2026-10-30
+version: 10
+publication_date: 2026-11-20
 provider: intuitem
 packager: intuitem
 translations:
@@ -1167,7 +1167,7 @@ objects:
         settings, system configurations, and user policies across a Windows environment.
         It ensures consistent implementation of organizational policies for secure and
         compliant IT operations.
-      annotation: "A.5.23
+      annotation: "A.8.9
 
         cis-v8: 4.1, 4.3, 4.6, 4.7, 4.8, 4.10, 9.1, 9.4, 10.3"
       translations:
@@ -1971,7 +1971,9 @@ objects:
           name: Richtlinie zur Sicherung von Backups und Wiederherstellung
         es:
           name: "Pol\xEDtica de copia de seguridad y restauraci\xF3n"
-      annotation: "cis-v8: 11.1, 11.2, 11.3, 11.4, 11.5"
+      annotation: "A.8.13
+
+        cis-v8: 11.1, 11.2, 11.3, 11.4, 11.5"
       typical_evidence:
         - Signed policy document
         - Backup schedule and retention rules
@@ -2720,19 +2722,11 @@ objects:
         \ incidents."
       annotation: "7.2
 
-        7.12
+        A.6.3
 
-        7.13
+        A.8.15
 
-        7.14
-
-        A.5.12
-
-        A.5.13
-
-        A.5.14
-
-        A.5.15
+        A.8.16
 
         cis-v8: 8.11"
       translations:
@@ -2820,13 +2814,9 @@ objects:
         and improve overall system resilience."
       annotation: "7.2
 
-        A.5.23
+        A.6.3
 
-        A.5.12
-
-        A.5.16
-
-        A.5.35"
+        A.8.9"
       translations:
         fr:
           name: "Formation sur le Durcissement des Syst\xE8mes"
@@ -2928,9 +2918,7 @@ objects:
       name: Access Logging
       category: technical
       csf_function: detect
-      annotation: "A.5.12
-
-        A.5.15
+      annotation: "A.8.15
 
         cis-v8: 8.2, 8.8"
       translations:
@@ -2956,9 +2944,9 @@ objects:
       name: Event Detection and Response (EDR) Capacity
       category: technical
       csf_function: detect
-      annotation: "A.5.12
+      annotation: "A.8.7
 
-        A.5.15
+        A.8.16
 
         cis-v8: 10.5, 10.7, 13.2, 13.7"
       translations:
@@ -3031,7 +3019,9 @@ objects:
         endpoints, including desktops, laptops, mobile devices, and IoT devices, through
         a single platform. It ensures secure configuration, policy enforcement, application
         management, and monitoring across an organization's endpoint ecosystem.
-      annotation: A.5.23
+      annotation: "A.8.1
+
+        A.8.9"
       translations:
         fr:
           name: "Syst\xE8me unifi\xE9 de gestion des terminaux"
@@ -3183,7 +3173,9 @@ objects:
       description:
         A centralized repository that stores and manages information about
         IT assets, their configurations, and relationships to support effective IT management.
-      annotation: A.5.23
+      annotation: "A.5.9
+
+        A.8.9"
       translations:
         fr:
           name: "Base de donn\xE9es de gestion des configurations (CMDB)"
@@ -3215,7 +3207,7 @@ objects:
       description:
         A system that collects, analyzes, and correlates security data from
         multiple sources to detect and respond to threats.
-      annotation: "A.5.12
+      annotation: "A.8.16
 
         cis-v8: 3.14, 8.3, 8.9, 13.1, 13.6, 13.11"
       translations:
@@ -3314,7 +3306,9 @@ objects:
       description:
         system that filters, monitors, and protects email communications
         against spam, malware, and unauthorized access
-      annotation: "A.5.23
+      annotation: "A.8.7
+
+        A.5.14
 
         cis-v8: 9.6, 9.7"
       translations:
