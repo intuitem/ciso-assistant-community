@@ -31,4 +31,22 @@ describe('fetchVendorAssignees', () => {
 	it('prefills nothing when the lookup fails', async () => {
 		expect(await fetchVendorAssignees(respondWith({}, false), enclave, false)).toEqual([]);
 	});
+
+	it('prefills nothing, without failing the page, when the request throws', async () => {
+		const fetch = vi.fn(async () => {
+			throw new TypeError('fetch failed');
+		});
+
+		expect(await fetchVendorAssignees(fetch, enclave, false)).toEqual([]);
+	});
+
+	it('prefills the respondents of every page', async () => {
+		const pages = [
+			{ results: [{ id: 'alice' }], next: 'page-2' },
+			{ results: [{ id: 'carol' }], next: null }
+		];
+		const fetch = vi.fn(async () => ({ ok: true, json: async () => pages.shift() }) as Response);
+
+		expect(await fetchVendorAssignees(fetch, enclave, false)).toEqual(['alice', 'carol']);
+	});
 });

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 export const isOpenTask = (task: Record<string, any>) =>
 	['pending', 'in_progress'].includes(task.status ?? task.next_occurrence_status);
@@ -23,10 +24,15 @@ export async function fetchVendorAssignees(
 	isThirdParty: boolean
 ): Promise<string[]> {
 	if (!folder || folder.content_type !== 'EN' || isThirdParty) return [];
-	const res = await fetch(
-		`${BASE_API_URL}/actors/?respondents_of=${folder.id}&respondents_only=true&limit=200`
-	);
-	return res.ok ? (await res.json()).results.map((actor: { id: string }) => actor.id) : [];
+	try {
+		const actors = await fetchAllPages<{ id: string }>(
+			fetch,
+			`${BASE_API_URL}/actors/?respondents_of=${folder.id}&respondents_only=true`
+		);
+		return actors.map((actor) => actor.id);
+	} catch {
+		return [];
+	}
 }
 
 export async function countOpenTasks(fetch: typeof globalThis.fetch): Promise<number> {
