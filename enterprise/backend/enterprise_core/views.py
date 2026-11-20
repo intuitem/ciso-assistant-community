@@ -60,6 +60,7 @@ from core.models import (
     FindingsAssessment,
     RiskAssessment,
     SecurityException,
+    RequirementAssessment,
 )
 from global_settings.models import GlobalSettings
 from resilience.models import BusinessImpactAnalysis
@@ -1354,30 +1355,48 @@ class ObjectAuditTrailView(APIView):
         shown = None
         if model_class is User and not self._has_full_user_view(request, obj):
             shown = self.USER_BASE_VIEW_LOG_FIELDS
-        entries = LogEntry.objects.filter(
-            content_type=content_type, object_pk=str(object_id)
-        )
+
+        # Current label of each object in the trail, by pk (UUIDs, so unique across
+        # models). An audit's trail also holds its requirement assessments' changes.
+        labels = {str(object_id): str(obj) if obj else None}
+        entry_filter = Q(content_type=content_type, object_pk=str(object_id))
+        if model_class is ComplianceAssessment:
+            ra_labels = {
+                str(ra.id): str(ra)
+                for ra in RequirementAssessment.objects.filter(
+                    compliance_assessment_id=object_id
+                ).select_related("requirement")
+            }
+            labels.update(ra_labels)
+            entry_filter |= Q(
+                content_type=ContentType.objects.get_for_model(RequirementAssessment),
+                object_pk__in=list(ra_labels),
+            )
+
+        entries = LogEntry.objects.filter(entry_filter)
         if shown is not None:
-            # Leave out, in the query, updates that touch no shown field: every
-            # sign-in logs one (last_login), so filtering after the limit could leave
-            # nothing of an active user's trail. auditlog keys changes by field name.
             entries = entries.filter(
                 ~Q(action=LogEntry.Action.UPDATE) | Q(changes__has_any_keys=list(shown))
             )
-        entries = entries.select_related("actor").order_by("-timestamp")[
-            : self.MAX_ENTRIES
-        ]
-        fk_models = {
-            f.name: f.related_model
-            for f in model_class._meta.get_fields()
-            if getattr(f, "many_to_one", False) and f.related_model
-        }
+        entries = entries.select_related("actor", "content_type").order_by(
+            "-timestamp"
+        )[: self.MAX_ENTRIES]
+        fk_models_by_type = {}
         label_cache = {}
         results = []
         for entry in entries:
+            entry_model = entry.content_type.model_class()
+            if entry.content_type_id not in fk_models_by_type:
+                fk_models_by_type[entry.content_type_id] = {
+                    f.name: f.related_model
+                    for f in entry_model._meta.get_fields()
+                    if getattr(f, "many_to_one", False) and f.related_model
+                }
             changes = self._mask(
-                model_name,
-                self._humanize(entry.changes, fk_models, label_cache),
+                entry.content_type.model,
+                self._humanize(
+                    entry.changes, fk_models_by_type[entry.content_type_id], label_cache
+                ),
                 shown,
             )
             # An update touching no shown field would still tell when the others
@@ -1397,6 +1416,11 @@ class ObjectAuditTrailView(APIView):
                     or (entry.actor.email if entry.actor else None),
                     "timestamp": entry.timestamp,
                     "changes": changes,
+                    "object": {
+                        "model": entry.content_type.model,
+                        "id": entry.object_pk,
+                        "label": labels.get(entry.object_pk) or entry.object_repr,
+                    },
                 }
             )
         return Response(results)

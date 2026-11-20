@@ -4,9 +4,16 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { getLocale } from '#paraglide/runtime.js';
+	import { localNameForDjangoName } from '#lib/utils/crud.js';
 	import { onMount } from 'svelte';
 
 	type M2MChange = { type: 'm2m'; operation: string; objects: string[] };
+
+	interface AuditObject {
+		model: string;
+		id: string;
+		label: string | null;
+	}
 
 	interface AuditEntry {
 		id: number;
@@ -15,6 +22,7 @@
 		actor: string | null;
 		timestamp: string;
 		changes: Record<string, [unknown, unknown] | M2MChange> | string | null;
+		object?: AuditObject;
 	}
 
 	interface AuditEvent {
@@ -22,6 +30,8 @@
 		action: string;
 		actor: string | null;
 		timestamp: string;
+		/** Set when the event is about another object than the audited one. */
+		object: AuditObject | null;
 		changes: { field: string; from: unknown; to: unknown }[];
 	}
 
@@ -72,11 +82,19 @@
 		>();
 
 		for (const e of raw) {
-			const key = e.cid ?? `id:${e.id}`;
+			const key = `${e.object?.model ?? model}:${e.object?.id ?? objectId}:${e.cid ?? `id:${e.id}`}`;
+			const other = e.object && e.object.id !== objectId ? e.object : null;
 			let g = byKey.get(key);
 			if (!g) {
 				g = {
-					event: { key, action: e.action, actor: e.actor, timestamp: e.timestamp, changes: [] },
+					event: {
+						key,
+						action: e.action,
+						actor: e.actor,
+						timestamp: e.timestamp,
+						object: other,
+						changes: []
+					},
 					scalar: new Map(),
 					m2m: new Map()
 				};
@@ -122,6 +140,11 @@
 	};
 
 	const events = $derived(groupEvents(entries));
+
+	const modelLabel = (name: string): string => {
+		const localName = localNameForDjangoName(name);
+		return localName ? safeTranslate(localName) : name;
+	};
 
 	const fmt = (value: unknown): string => {
 		if (Array.isArray(value)) {
@@ -181,6 +204,12 @@
 									>{formatDateOrDateTime(event.timestamp, getLocale())}</span
 								>
 							</div>
+							{#if event.object}
+								<div class="mt-1 text-sm text-surface-600-400" data-testid="audit-trail-object">
+									<span class="font-medium">{modelLabel(event.object.model)}</span>:
+									{event.object.label ?? event.object.id}
+								</div>
+							{/if}
 							{#if event.changes.length > 0}
 								<div class="mt-3 space-y-2 text-sm">
 									{#each event.changes as change (change.field)}

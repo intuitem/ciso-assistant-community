@@ -142,3 +142,93 @@ class TestUserAuditTrailFullViewFields:
             self._trail(_client(analyst), target_id)
         )
         assert "expiry_date" in self._fields(self._trail(admin_client, target_id))
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentAuditTrail:
+    """An audit's trail also holds the changes to its requirement assessments, each
+    entry naming the object it is about."""
+
+    @pytest.fixture
+    def audit(self, app_config):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        root = Folder.get_root_folder()
+        framework = Framework.objects.create(name="Trail framework", folder=root)
+        nodes = [
+            RequirementNode.objects.create(
+                framework=framework,
+                folder=root,
+                ref_id=ref_id,
+                name=name,
+                assessable=True,
+            )
+            for ref_id, name in (("R.1", "Backups"), ("R.2", "Logging"))
+        ]
+        perimeter = Perimeter.objects.create(name="Trail perimeter", folder=root)
+        audit = ComplianceAssessment.objects.create(
+            name="Trail audit", framework=framework, perimeter=perimeter, folder=root
+        )
+        for node in nodes:
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit, requirement=node, folder=root
+            )
+        return audit
+
+    @staticmethod
+    def _trail(client, audit_id):
+        response = client.get(
+            reverse("object-audit-trail"),
+            {"content_type": "complianceassessment", "object_id": str(audit_id)},
+        )
+        assert response.status_code == 200, response.content
+        return response.data
+
+    def test_trail_holds_requirement_assessment_changes(self, audit, admin_client):
+        ra = audit.requirement_assessments.get(requirement__ref_id="R.1")
+        ra.result = "compliant"
+        ra.save()
+
+        trail = self._trail(admin_client, audit.id)
+        ra_entries = [e for e in trail if e["object"]["id"] == str(ra.id)]
+        assert ra_entries
+        assert all(
+            e["object"]
+            == {"model": "requirementassessment", "id": str(ra.id), "label": str(ra)}
+            for e in ra_entries
+        )
+        assert "R.1" in ra_entries[0]["object"]["label"]
+        assert any("result" in (e["changes"] or {}) for e in ra_entries)
+        assert any(
+            e["object"]
+            == {
+                "model": "complianceassessment",
+                "id": str(audit.id),
+                "label": str(audit),
+            }
+            for e in trail
+        )
+
+    def test_trail_leaves_out_other_audits(self, audit, admin_client):
+        from core.models import ComplianceAssessment, RequirementAssessment
+
+        other = ComplianceAssessment.objects.create(
+            name="Other audit",
+            framework=audit.framework,
+            perimeter=audit.perimeter,
+            folder=audit.folder,
+        )
+        other_ra = RequirementAssessment.objects.create(
+            compliance_assessment=other,
+            requirement=audit.framework.requirement_nodes.first(),
+            folder=audit.folder,
+        )
+        ids = {e["object"]["id"] for e in self._trail(admin_client, audit.id)}
+        assert str(other.id) not in ids
+        assert str(other_ra.id) not in ids
