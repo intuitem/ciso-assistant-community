@@ -42,6 +42,10 @@ OVERRIDES = {
         "Rev. 3 covers accounts; access by devices is not restated",
     ),
     ("3.1.9", "03.01.09"): ("subset", "Rev. 3 requires display before granting access"),
+    ("3.1.10", "03.01.10"): (
+        "intersect",
+        "Rev. 3 allows a user-initiated lock instead of an inactivity lock",
+    ),
     ("3.1.12", "03.01.12"): (
         "intersect",
         "Rev. 3 drops monitoring of remote access sessions",
@@ -81,6 +85,10 @@ OVERRIDES = {
         "Rev. 3 replaces the change of characters with organization-defined rules",
     ),
     ("3.6.1", "03.06.01"): ("intersect", "Rev. 3 drops user response activities"),
+    ("3.7.3", "03.08.03"): (
+        "intersect",
+        "03.08.03 does not cover maintenance under organizational control",
+    ),
     ("3.8.3", "03.08.03"): (
         "subset",
         "Rev. 3 adds release out of organizational control",
@@ -132,8 +140,8 @@ ADDITIONS = [
     (
         "3.5.6",
         "03.01.01",
-        "subset",
-        "03.01.01 f.2: disable accounts inactive for a defined period",
+        "intersect",
+        "03.01.01 f.2: disable accounts inactive for a defined period (device identifiers not covered)",
     ),
     (
         "3.10.1",

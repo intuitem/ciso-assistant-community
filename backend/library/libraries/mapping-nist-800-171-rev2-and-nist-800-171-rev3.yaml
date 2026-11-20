@@ -71,9 +71,10 @@ objects:
         granting access'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.10
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 allows a user-initiated lock instead of an inactivity lock'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.11
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.11
       relationship: equal
@@ -332,10 +333,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
       annotation: 'Not in the NIST change analysis: 03.01.01 f.2: disable accounts inactive
-        for a defined period'
+        for a defined period (device identifiers not covered)'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
       relationship: intersect
@@ -379,9 +380,10 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.07.04 and 03.07.06.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.03
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.08.03.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.08.03.; 03.08.03 does not cover
+        maintenance under organizational control'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.4
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.07.04
       relationship: subset
@@ -744,9 +746,10 @@ objects:
         granting access'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.10
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 allows a user-initiated lock instead of an inactivity lock'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.11
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.11
       relationship: equal
@@ -1005,10 +1008,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
-      relationship: superset
+      relationship: intersect
       rationale: semantic
       annotation: 'Not in the NIST change analysis: 03.01.01 f.2: disable accounts inactive
-        for a defined period'
+        for a defined period (device identifiers not covered)'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
       relationship: intersect
@@ -1052,9 +1055,10 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.07.04 and 03.07.06.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.3
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.08.03.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.08.03.; 03.08.03 does not cover
+        maintenance under organizational control'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.07.04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.4
       relationship: superset
