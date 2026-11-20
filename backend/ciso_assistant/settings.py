@@ -171,7 +171,6 @@ structlog.configure(
         structlog.contextvars.merge_contextvars,
         quiet_healthcheck,
         redact_sensitive_query_params,
-        redact_upload_tokens,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
@@ -181,6 +180,9 @@ structlog.configure(
         # Include stack information in log entries
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
+        # After the positional arguments and the traceback are rendered, so a
+        # path passed as a %s argument is redacted too.
+        redact_upload_tokens,
         structlog.processors.UnicodeDecoder(),
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     ],

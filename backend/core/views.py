@@ -12755,6 +12755,9 @@ class EvidenceFilterSet(GenericFilterSet):
 
 
 class EvidenceViewSet(BaseModelViewSet):
+    # upload_url is a POST that changes an existing evidence: RBAC would
+    # otherwise check add_evidence.
+    permission_overrides = {"upload_url": "change_evidence"}
     """
     API endpoint that allows evidences to be viewed or edited.
     """
@@ -12848,8 +12851,13 @@ class EvidenceViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         # A revision always exists once a token is issued (see evidence_upload_state).
-        latest_or_new_revision(evidence)
-        return Response(issue_evidence_upload_url(request.user, evidence, filename))
+        # Locked, so parallel requests do not each create a first revision and
+        # invalidate each other's URL.
+        with transaction.atomic():
+            evidence = Evidence.objects.select_for_update().get(id=evidence.id)
+            latest_or_new_revision(evidence)
+            issued = issue_evidence_upload_url(request.user, evidence, filename)
+        return Response(issued)
 
     # --- Bulk / directory upload (experimental) -----------------------------
 
@@ -13493,7 +13501,7 @@ class EvidenceTokenUploadView(APIView):
 
     def post(self, request, token):
         from django.core import signing
-        from django.core.files.base import ContentFile
+        from django.core.files.uploadedfile import TemporaryUploadedFile
 
         gone = Response(
             {"detail": "This upload URL has expired or was already used."},
@@ -13545,16 +13553,24 @@ class EvidenceTokenUploadView(APIView):
         # Read the raw stream (no parser, and not request.body, which
         # DATA_UPLOAD_MAX_MEMORY_SIZE caps). The in-loop check guards servers
         # that do not bound the stream by the declared length.
-        chunks, total = [], 0
+        # Spooled to disk like any large Django upload, not held in memory.
+        upload = TemporaryUploadedFile(
+            claims["f"], "application/octet-stream", declared, None
+        )
+        total = 0
         while True:
             chunk = request._request.read(1024 * 1024)
             if not chunk:
                 break
             total += len(chunk)
             if total > limit:
+                upload.close()
                 return too_large
-            chunks.append(chunk)
+            upload.write(chunk)
+        upload.size = total
+        upload.seek(0)
         if not total:
+            upload.close()
             return Response(
                 {"detail": "The request body is empty: send the file bytes."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -13564,23 +13580,25 @@ class EvidenceTokenUploadView(APIView):
         # request.user lazily, so this credits the token's user. (A nested
         # auditlog set_actor would leave the middleware's receiver connected.)
         request.user = user
-        with transaction.atomic():
-            # The row lock serializes concurrent replays of the same token.
-            evidence = (
-                Evidence.objects.select_for_update().filter(id=claims["e"]).first()
-            )
-            if evidence is None:
-                return not_found
-            # Single use: the first upload changed the state the token saw.
-            if evidence_upload_state(evidence) != claims["h"]:
-                return gone
-            revision = latest_or_new_revision(evidence)
-            refused = attach_file_to_revision(
-                revision, ContentFile(b"".join(chunks), name=claims["f"]), user
-            )
-            if refused is not None:
-                transaction.set_rollback(True)
-                return refused
+        try:
+            with transaction.atomic():
+                # The row lock serializes concurrent replays of the same token.
+                evidence = (
+                    Evidence.objects.select_for_update().filter(id=claims["e"]).first()
+                )
+                if evidence is None:
+                    return not_found
+                # Single use: the first upload changed the state the token saw.
+                if evidence_upload_state(evidence) != claims["h"]:
+                    return gone
+                revision = latest_or_new_revision(evidence)
+                refused = attach_file_to_revision(revision, upload, user)
+                if refused is not None:
+                    transaction.set_rollback(True)
+                    return refused
+        finally:
+            # Deletes the temporary file; storage holds its own copy by now.
+            upload.close()
 
         return Response(
             {"evidence": str(evidence.id), "filename": claims["f"], "size": total},
