@@ -1142,10 +1142,13 @@
 								</div>
 								{#if Object.values(fw.results || {}).reduce((a, b) => a + (b as number), 0) > 0}
 									{@const results = fw.results || {}}
-									{@const total = Object.values(results).reduce(
+									{@const inferred = Object.values(results).reduce(
 										(a: number, b: any) => a + (b as number),
 										0
 									)}
+									<!-- share of all assessable requirements, so partial coverage stays visible -->
+									{@const total = Math.max(fw.assessable_requirements_count, inferred)}
+									{@const unmappedPct = ((total - inferred) / total) * 100}
 									<div class="flex h-5 rounded-md overflow-hidden gap-px">
 										{#each RESULT_KEYS as key}
 											{@const count = results[key] || 0}
@@ -1164,6 +1167,15 @@
 												</div>
 											{/if}
 										{/each}
+										{#if unmappedPct > 0}
+											<div
+												class="flex items-center justify-center text-[10px] font-medium text-surface-500 bg-surface-100-900 last:rounded-r-md"
+												style="width: {unmappedPct}%"
+												title="{m.unmapped()}: {total - inferred} ({unmappedPct.toFixed(1)}%)"
+											>
+												{#if unmappedPct > 8}{m.unmapped()} {Math.round(unmappedPct)}%{/if}
+											</div>
+										{/if}
 									</div>
 								{/if}
 							</div>
