@@ -79,7 +79,7 @@ A szabályzat hatálya kiterjed a(z) [Szervezet neve] tulajdonában lévő, ált
 
 - **Létesítménygazdálkodás**: a fizikai biztonsági kontrollok bevezetése és fenntartása, a beléptetőrendszerek kezelése.
 - **IT-biztonsági csapat**: a fizikai biztonsági követelmények meghatározása, kockázatértékelések elvégzése.
-- **Minden munkavállaló**: a fizikai biztonsági eljárások betartása, a biztonsági aggályok jelzése, a kíséret nélküli látogatók megszólítása.
+- **Minden munkavállaló**: a fizikai biztonsági eljárások betartása, a biztonsági aggályok jelzése, a kíséret nélküli látogatók megszólítása és jogosultságuk tisztázása.
 - **Recepció/biztonsági személyzet**: a látogatók nyilvántartásba vétele és a belépési pontok felügyelete.
 
 ## 9. Megfelelőség

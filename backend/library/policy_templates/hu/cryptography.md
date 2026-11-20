@@ -65,7 +65,7 @@ A szabályzat hatálya kiterjed a(z) [Szervezet neve] tulajdonában vagy kezelé
 
 ## 6. Tiltott gyakorlatok
 
-- Egyedi fejlesztésű vagy nem ellenőrzött titkosítási algoritmusok használata tilos.
+- Zárt (nem nyilvános) vagy nem ellenőrzött titkosítási algoritmusok használata tilos.
 - A titkosítási kulcsok beégetése a forráskódba tilos.
 - A titkosítási kulcsok továbbítása titkosítatlan csatornán tilos.
 - A titkosítási kontrollok letiltása vagy megkerülése dokumentált jóváhagyás nélkül tilos.
