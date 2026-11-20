@@ -5640,21 +5640,23 @@ class LoadFileView(APIView):
                                         "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
                                     }
                                 )
+                        # The audit export names the implementation score
+                        # implementation_score when the audit has a documentation
+                        # score, score otherwise. Each score is read on its own:
+                        # a row may carry only one of them.
                         impl_score = record.get("implementation_score")
+                        if impl_score in (None, ""):
+                            impl_score = record.get("score")
                         doc_score = record.get("documentation_score")
-                        score = record.get("score")
-                        enable_doc_score = False
-                        if impl_score not in (None, "") and doc_score not in (None, ""):
+                        if impl_score not in (None, ""):
                             requirement_data.update(
-                                {
-                                    "score": impl_score,
-                                    "documentation_score": doc_score,
-                                    "is_scored": True,
-                                }
+                                {"score": impl_score, "is_scored": True}
                             )
-                            enable_doc_score = True
-                        elif score not in (None, ""):
-                            requirement_data.update({"score": score, "is_scored": True})
+                        # is_scored follows the implementation score alone: a
+                        # documentation score does not make a requirement scored.
+                        enable_doc_score = doc_score not in (None, "")
+                        if enable_doc_score:
+                            requirement_data["documentation_score"] = doc_score
 
                         # Build answers from the "answers" cell
                         answers_cell = record.get("answers")
