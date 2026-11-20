@@ -100,3 +100,37 @@ class TestAsdEssentialsLibrary:
         )
         assert sources | targets <= known
         assert len(targets) > 100
+
+    def test_essentials_reach_iso27001_through_nist_csf(self, framework):
+        from core.mappings.engine import MappingEngine
+
+        for ref_id in (
+            "nist-csf-2.0",
+            "iso27001-2022",
+            f"mapping-{REF_ID}-and-nist-csf-2.0",
+            "mapping-nist-csf-2.0-to-iso27001-2022",
+        ):
+            load(ref_id)
+        essentials = f"urn:intuitem:risk:framework:{REF_ID}"
+        csf = "urn:intuitem:risk:framework:nist-csf-2.0"
+        iso = "urn:intuitem:risk:framework:iso27001-2022"
+
+        def audit(framework_urn):
+            nodes = RequirementNode.objects.filter(
+                framework__urn=framework_urn, assessable=True
+            )
+            return {
+                "min_score": 0,
+                "max_score": 100,
+                "requirement_assessments": {
+                    n.urn: {"result": "compliant", "name": n.ref_id, "id": str(n.id)}
+                    for n in nodes
+                },
+            }
+
+        for source, dest in ((essentials, iso), (iso, essentials)):
+            inferences, path = MappingEngine().best_mapping_inferences(
+                audit(source), source, dest
+            )
+            assert path == [source, csf, dest]
+            assert inferences["requirement_assessments"]

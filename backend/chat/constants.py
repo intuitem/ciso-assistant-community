@@ -78,4 +78,5 @@ LANG_MAP = {
     "lt": "Lithuanian",
     "ko": "Korean",
     "nb": "Norwegian Bokmål",
+    "hu": "Hungarian",
 }

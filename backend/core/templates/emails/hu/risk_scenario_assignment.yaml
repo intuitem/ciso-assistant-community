@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${scenario_name}” kockázati forgatókönyvet"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő kockázati forgatókönyvet:
+
+  - Név: ${scenario_name}
+  - Leírás: ${scenario_description}
+  - Hivatkozási azonosító: ${scenario_ref_id}
+  - Kockázatértékelés: ${risk_assessment_name}
+  - Kezelés: ${scenario_treatment}
+  - Tartomány: ${folder_name}
+
+  A kockázati forgatókönyv megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

@@ -1,0 +1,17 @@
+subject: "CISO Assistant: Önhöz rendeltek egy kérdőívet"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  **Az Ön átfogó GRC-platformja**
+
+  Tisztelt Felhasználó!
+
+  Önhöz rendeltek egy kérdőívet. A folytatáshoz kattintson az alábbi hivatkozásra:
+
+  [A kérdőív megnyitása](${questionnaire_url})
+
+  Ha a hivatkozás nem működik, másolja be az alábbi címet a böngészőjébe:
+  ${questionnaire_url}
+
+  Üdvözlettel:
+  a CISO Assistant csapata

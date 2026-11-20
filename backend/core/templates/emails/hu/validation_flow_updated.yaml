@@ -1,0 +1,14 @@
+subject: "CISO Assistant: A(z) „${validation_ref_id}” validálás új állapota: ${new_status}"
+body: |
+  Tisztelt Felhasználó!
+
+  A(z) „${validation_ref_id}” validálási kérelem frissült:
+
+  - Új állapot: ${new_status}
+  - Módosította: ${actor_name}
+  - Tartomány: ${folder_name}
+  - Megjegyzések: ${event_notes}
+
+  A validálási kérelem itt tekinthető meg: [A validálási folyamat megtekintése](${validation_url})
+
+  Köszönjük.

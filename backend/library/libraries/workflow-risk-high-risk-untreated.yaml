@@ -5,10 +5,17 @@ name: Untreated high risks — weekly sweep
 description: Lists risk scenarios rated at or above the threshold whose treatment is still open. The level
   index depends on your matrix; adjust it.
 copyright: © intuitem
-version: 1
+version: 2
 publication_date: 2026-08-28
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: Unbehandelte hohe Risiken – Wochenprüfung
+    description: |-
+      Listet Risikoszenarien auf, deren Bewertung den Schwellenwert erreicht oder überschreitet und deren Behandlung noch offen ist. Der Stufenindex hängt von Ihrer Risikomatrix ab und muss entsprechend angepasst werden.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
 objects:
   workflows:
   - urn: urn:intuitem:risk:library:workflow-risk-high-risk-untreated:workflow:high-risk-untreated
