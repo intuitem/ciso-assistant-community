@@ -14254,6 +14254,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
+    # Preparing an audit is its own right: without this, a POST on an audit
+    # would also ask for add_complianceassessment.
+    permission_overrides = {
+        "auditor_preread_pair": "change_auditpreparation",
+        "auditor_preread_preparation": "change_auditpreparation",
+    }
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)

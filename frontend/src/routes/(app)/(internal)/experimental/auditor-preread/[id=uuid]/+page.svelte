@@ -432,7 +432,14 @@
 	let editing: { kind: 'audit' | 'role' | 'session'; key: string } | null = $state(null);
 	let draft = $state({ stage: '', start_date: '', end_date: '', auditors: '' });
 	let slot = $state({ date: '', start_time: '', end_time: '', location: '' });
-	const ids = (list?: ActorRef[]) => (list ?? []).map((a) => a.id);
+	// Participants the reader may not view come back empty: the server keeps
+	// them on save, the page names the others and counts them.
+	const ids = (list?: ActorRef[]) => (list ?? []).flatMap((a) => (a.id ? [a.id] : []));
+	const names = (list: ActorRef[]) => {
+		const shown = list.flatMap((a) => (a.str ? [a.str] : []));
+		const hidden = list.length - shown.length;
+		return [...shown, ...(hidden ? [m.hiddenLinksCount({ count: hidden })] : [])].join(', ');
+	};
 	function edit(kind: 'audit' | 'role' | 'session', key = '') {
 		editing = { kind, key };
 		const s = prep?.sessions[key];
@@ -617,7 +624,12 @@
 				<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
 					<i class="fa-solid fa-calendar-check text-surface-500"></i>
 					<span class={stageLabel || dates ? '' : 'text-surface-600-400'}
-						>{[stageLabel, dates, prep?.certification_body?.str, prep?.auditors]
+						>{[
+							stageLabel,
+							dates,
+							names(prep?.certification_body ? [prep.certification_body] : []),
+							prep?.auditors
+						]
 							.filter(Boolean)
 							.join(' · ') || m.prereadPrepNone()}</span
 					>
@@ -1672,7 +1684,7 @@
 											: ''}{planned.location ? ` · ${planned.location}` : ''}</span
 									>
 									{#if planned.attendees.length}<span class="text-surface-600-400"
-											>{planned.attendees.map((a) => a.str).join(', ')}</span
+											>{names(planned.attendees)}</span
 										>{/if}
 								{:else}
 									<span class="text-surface-600-400">{m.prereadNoDate()}</span>
@@ -1899,7 +1911,7 @@
 							<p class="text-sm flex flex-wrap items-center gap-x-2">
 								<i class="fa-solid fa-user-check text-surface-500"></i>
 								<span class={named.length ? '' : 'text-surface-600-400'}
-									>{named.map((a) => a.str).join(', ') || m.prereadNobodyYet()}</span
+									>{names(named) || m.prereadNobodyYet()}</span
 								>
 								{#if canPrepare}<button class="anchor text-xs" onclick={() => edit('role', who)}
 										>{m.prereadAssign()}</button

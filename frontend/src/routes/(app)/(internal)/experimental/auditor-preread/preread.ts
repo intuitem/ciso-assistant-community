@@ -100,7 +100,8 @@ export interface PrereadItem {
 	reasons: string[];
 }
 
-export type ActorRef = { id: string; str: string };
+/** Empty when the reader may not view it: it still counts, unnamed. */
+export type ActorRef = { id?: string; str?: string };
 
 /** What the organisation decided for this audit; null until the first decision. */
 export interface Preparation {

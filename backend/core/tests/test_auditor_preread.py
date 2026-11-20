@@ -522,6 +522,60 @@ def test_preparation_is_lazy_and_drives_readiness():
 
 
 @pytest.mark.django_db
+def test_hidden_participants_are_masked_and_survive_an_edit():
+    """A reader who may not view the certification body or an actor gets {} in
+    its place, like in the audit API, and an edit of theirs does not remove it."""
+    from tprm.models import Entity
+
+    root = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root, name="masked")
+    framework = Framework.objects.create(name="ISO", urn=ISO, folder=root)
+    RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.18",
+        ref_id="A.5.18",
+        assessable=True,
+        folder=root,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name="a",
+        framework=framework,
+        perimeter=Perimeter.objects.create(name="p", folder=folder),
+        folder=folder,
+    )
+    audit.create_requirement_assessments()
+    admin = User.objects.create_superuser(email="admin@test.local", password="x")
+    nobody = User.objects.create_user(email="nobody@test.local")
+    body = Entity.objects.create(name="Certifier", folder=folder)
+    actor = Actor.objects.get(user=admin)
+
+    def edit(user, body_id, actor_ids):
+        for change in (
+            {"fields": {"stage": "stage_2", "certification_body": body_id}},
+            {"role": {"role": "ciso", "actors": actor_ids}},
+            {"session": {"session": "access", "attendees": actor_ids}},
+        ):
+            assert update_preparation(audit, user, change) is None
+
+    def seen(user):
+        prep = auditor_preread(audit, user)["preparation"]
+        attendees = prep["sessions"]["access"]["attendees"]
+        return prep["certification_body"], prep["roles"]["ciso"], attendees
+
+    edit(admin, body.id, [actor.id])
+    named = {"id": actor.id, "str": str(actor)}
+    everything = ({"id": body.id, "str": str(body)}, [named], [named])
+    assert seen(admin) == everything
+    assert seen(nobody) == ({}, [{}], [{}])
+    # The page sends back what it was given: for this reader, nothing.
+    edit(nobody, None, [])
+    assert seen(admin) == everything
+    # Who sees them can remove them.
+    edit(admin, None, [])
+    assert seen(admin) == (None, [], [])
+
+
+@pytest.mark.django_db
 def test_findings_count_for_every_viewer():
     root = Folder.get_root_folder()
     folder = Folder.objects.create(parent_folder=root, name="seen")
@@ -713,6 +767,35 @@ def test_guide_validation_catches_what_would_break_the_preread():
         assert AuditGuideImporter(_guide(**over)).is_valid(), over
 
 
+def test_guide_ids_fit_what_the_preparation_stores():
+    """Request, role and session ids are stored as written: too long or a
+    number, the guide would load and they could never be paired or assigned."""
+    from library.utils import AuditGuideImporter
+
+    def entry(**over):
+        return {"entries": {"a.5.18": {**_guide()["entries"]["A.05.18"], **over}}}
+
+    def request(rid):
+        return entry(requests=[{"id": rid, "label": "x", "kind": "record"}])
+
+    def session(sid):
+        return {"sessions": [{"id": sid, "members": ["a.5.18"]}]}
+
+    for fits in (request("r" * 16), session("s" * 32), entry(interviewees=["ciso", "x" * 32])):  # fmt: skip
+        assert AuditGuideImporter(_guide(**fits)).is_valid() is None, fits
+    broken = [
+        request("r" * 17),
+        request(1),
+        entry(interviewees=["ciso", "x" * 33]),
+        entry(interviewees="ciso"),
+        session("s" * 33),
+        session(1),
+        {"entries": {"9." * 33: _guide()["entries"]["A.05.18"]}},
+    ]
+    for over in broken:
+        assert AuditGuideImporter(_guide(**over)).is_valid(), over
+
+
 def test_guide_keys_are_normalized_like_requirements():
     fields = AuditGuide.fields_from(
         _guide(
@@ -883,6 +966,17 @@ def test_preread_permissions_with_builtin_roles():
     ComplianceAssessment.objects.filter(id=audit.id).update(is_locked=True)
     locked = analyst.post(url(audit, "pair/"), pair, format="json")
     assert locked.status_code == 403
+    # Preparing is its own right: a role without add_complianceassessment (what
+    # a POST on an audit asks for by default) still prepares and pairs.
+    from django.contrib.auth.models import Permission
+
+    Role.objects.get(name="BI-RL-ANA").permissions.remove(
+        Permission.objects.get(codename="add_complianceassessment")
+    )
+    own = Evidence.objects.create(name="Mine", folder=mine)
+    ra.evidences.add(own)
+    assert analyst.post(url(audit, "preparation/"), {"fields": {"stage": "stage_1"}}, format="json").status_code == 204  # fmt: skip
+    assert analyst.post(url(audit, "pair/"), {**pair, "evidence": str(own.id), "attach": False}, format="json").status_code == 204  # fmt: skip
 
 
 def test_paired_evidence_keeps_its_request_verdict():

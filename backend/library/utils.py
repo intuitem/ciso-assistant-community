@@ -10,6 +10,9 @@ from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregatio
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     AuditGuide,
+    AuditPreparationRole,
+    AuditPreparationSession,
+    AuditPreparationSetAside,
     Framework,
     QuickForm,
     QuickFormPage,
@@ -859,9 +862,19 @@ class AuditGuideImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn", "framework", "entries"}
     KINDS = {"document", "record", "technical", "observation"}
+    # The preparation stores these ids as they are written in the guide: one
+    # that does not fit its column loads, then can never be paired or assigned.
+    MAX_ENTRY = AuditPreparationSetAside._meta.get_field("entry").max_length
+    MAX_ITEM_ID = AuditPreparationSetAside._meta.get_field("request").max_length
+    MAX_ROLE = AuditPreparationRole._meta.get_field("role").max_length
+    MAX_SESSION_ID = AuditPreparationSession._meta.get_field("session").max_length
 
     def __init__(self, guide_data: dict):
         self.guide_data = guide_data
+
+    @staticmethod
+    def _is_text(value, max_length: int) -> bool:
+        return isinstance(value, str) and 0 < len(value) <= max_length
 
     def is_valid(self) -> Union[str, None]:
         from core.auditor_preread import normalize_key
@@ -879,10 +892,21 @@ class AuditGuideImporter:
         keys = [normalize_key(k) for k in entries]
         if len(set(keys)) != len(keys):
             return "two entries are keyed by the same requirement number"
+        if not all(self._is_text(k, self.MAX_ENTRY) for k in keys):
+            return "an entry is keyed by a requirement number, of at most {} characters".format(
+                self.MAX_ENTRY
+            )
         for key, entry in entries.items():
             if not isinstance(entry, dict):
                 return "entry {} must be a mapping".format(key)
-            people = set(entry.get("interviewees") or [])
+            interviewees = entry.get("interviewees") or []
+            if not isinstance(interviewees, list) or not all(
+                self._is_text(who, self.MAX_ROLE) for who in interviewees
+            ):
+                return "entry {}: interviewees must be a list of role names, of at most {} characters each".format(
+                    key, self.MAX_ROLE
+                )
+            people = set(interviewees)
             ids = []
             for part in ("questions", "requests", "pitfalls", "sampling"):
                 items = entry.get(part) or []
@@ -891,12 +915,13 @@ class AuditGuideImporter:
                 ):
                     return "entry {}: {} must be a list of mappings".format(key, part)
                 ids += [item.get("id") for item in items]
-            # Translations key every item of an entry in one flat mapping.
-            if None in ids or len(set(ids)) != len(ids):
-                return (
-                    "entry {}: every item needs an id, unique across the entry".format(
-                        key
-                    )
+            # Translations key every item of an entry in one flat mapping, and
+            # stored keys are text: a number would never be found again.
+            if not all(self._is_text(i, self.MAX_ITEM_ID) for i in ids) or len(
+                set(ids)
+            ) != len(ids):
+                return "entry {}: every item needs an id (text, at most {} characters), unique across the entry".format(
+                    key, self.MAX_ITEM_ID
                 )
             for q in entry.get("questions") or []:
                 if q.get("stage") not in (1, 2) or not q.get("text"):
@@ -930,11 +955,13 @@ class AuditGuideImporter:
         sessions = data.get("sessions") or []
         if not isinstance(sessions, list) or any(
             not isinstance(x, dict)
-            or not x.get("id")
+            or not self._is_text(x.get("id"), self.MAX_SESSION_ID)
             or not isinstance(x.get("members"), list)
             for x in sessions
         ):
-            return "every session needs an id and a members list"
+            return "every session needs an id (text, at most {} characters) and a members list".format(
+                self.MAX_SESSION_ID
+            )
         translations = data.get("translations") or {}
         if not isinstance(translations, dict) or any(
             not isinstance(t, dict)

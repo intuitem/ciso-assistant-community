@@ -96,6 +96,7 @@ objects:
 
 Rules the loader checks:
 * every item has an id, unique within its entry; never reuse a retired id;
+* an item id is text of at most 16 characters (quote a number: `"1"`); a role name in `interviewees` and a session `id` are text of at most 32 characters;
 * a question's `stage` is 1 or 2 and its `who` stays within the entry's `interviewees`;
 * a request has a `label` and one of the four kinds;
 * every session has an `id` and a `members` list.

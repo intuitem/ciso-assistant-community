@@ -725,39 +725,58 @@ def auditor_preread(compliance_assessment, user, forced_guide=None) -> dict:
         "guide": _guide_summary(fit),
         "items": items,
         "sessions": load_audit_sessions(locale).get(fit["guide"], []),
-        "preparation": _preparation_payload(prep),
+        "preparation": _preparation_payload(prep, user),
         "previous_set_asides": []
         if set_asides
         else _previous_set_asides(compliance_assessment, fit["guide"], user),
     }
 
 
-def _actors(qs) -> list:
-    return [{"id": a.id, "str": str(a)} for a in qs]
+def _viewable(model, ids, user) -> set:
+    """Those of `ids` the user may view."""
+    return set(
+        model.objects.filter(id__in=ids)
+        .filter(id__in=RoleAssignment.get_viewable_object_ids(user, model))
+        .values_list("id", flat=True)
+    )
 
 
-def _preparation_payload(prep) -> dict | None:
+def _ref(obj, viewable) -> dict:
+    # Like the audit API: {} stands for a related object the reader may not view.
+    return {"id": obj.id, "str": str(obj)} if obj.id in viewable else {}
+
+
+def _preparation_payload(prep, user) -> dict | None:
     if prep is None:
         return None
     body = prep.certification_body
+    roles = {r.role: list(r.actors.all()) for r in prep.roles.all()}
+    sessions = {s: list(s.attendees.all()) for s in prep.sessions.all()}
+    actors = _viewable(
+        Actor,
+        {a.id for named in (*roles.values(), *sessions.values()) for a in named},
+        user,
+    )
     return {
         "id": prep.id,
         "guide": prep.guide,
         "stage": prep.stage,
         "start_date": prep.start_date,
         "end_date": prep.end_date,
-        "certification_body": body and {"id": body.id, "str": str(body)},
+        "certification_body": body and _ref(body, _viewable(Entity, [body.id], user)),
         "auditors": prep.auditors,
-        "roles": {r.role: _actors(r.actors.all()) for r in prep.roles.all()},
+        "roles": {
+            role: [_ref(a, actors) for a in named] for role, named in roles.items()
+        },
         "sessions": {
             s.session: {
                 "date": s.date,
                 "start_time": s.start_time,
                 "end_time": s.end_time,
                 "location": s.location,
-                "attendees": _actors(s.attendees.all()),
+                "attendees": [_ref(a, actors) for a in named],
             }
-            for s in prep.sessions.all()
+            for s, named in sessions.items()
         },
     }
 
@@ -849,6 +868,14 @@ def _ids(model, values, user=None):
     return found if len(found) == len(set(values)) else None
 
 
+def _unseen(linked, user) -> list:
+    """Linked actors the user may not view. The pre-read shows them as hidden
+    and the page never sends them back, so an edit keeps them."""
+    return list(
+        linked.exclude(id__in=RoleAssignment.get_viewable_object_ids(user, Actor))
+    )
+
+
 def update_preparation(compliance_assessment, user, data) -> str | None:
     """Store one decision of the audit's preparation, creating it on the way.
 
@@ -893,7 +920,11 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                     found = _ids(Entity, [body] if body else [], user)
                     if found is None:
                         raise _Rejected(PREPARATION_ERRORS[1])
-                    prep.certification_body = found[0] if found else None
+                    # A body hidden from this user was not theirs to clear:
+                    # only naming another one replaces it.
+                    current = prep.certification_body_id
+                    if found or not current or _viewable(Entity, [current], user):
+                        prep.certification_body = found[0] if found else None
                 for name, value in fields.items():
                     setattr(
                         prep,
@@ -959,7 +990,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                 row, _ = AuditPreparationRole.objects.get_or_create(
                     preparation=prep, role=role["role"]
                 )
-                row.actors.set(actors)
+                row.actors.set([*actors, *_unseen(row.actors, user)])
             elif "session" in data:
                 session = data["session"] or {}
                 attendees = _ids(Actor, session.get("attendees"), user)
@@ -978,7 +1009,7 @@ def update_preparation(compliance_assessment, user, data) -> str | None:
                         )
                 row.full_clean(exclude=["preparation"])
                 row.save()
-                row.attendees.set(attendees)
+                row.attendees.set([*attendees, *_unseen(row.attendees, user)])
             else:
                 raise _Rejected(PREPARATION_ERRORS[0])
             prep.updated_by = user
