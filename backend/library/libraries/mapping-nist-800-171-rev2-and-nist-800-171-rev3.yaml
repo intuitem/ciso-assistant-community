@@ -7,7 +7,7 @@ description: Mapping between NIST SP 800-171 Rev. 2 and NIST SP 800-171 Rev. 3, 
 copyright: Public domain (NIST)
 version: 1
 publication_date: 2026-11-19
-provider: NIST
+provider: intuitem
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:nist-800-171-rev2
@@ -24,9 +24,10 @@ objects:
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 covers accounts; access by devices is not restated'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.02
       relationship: equal
@@ -64,9 +65,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.9
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.09
-      relationship: equal
+      relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 requires display before
+        granting access'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.10
       relationship: subset
@@ -79,14 +81,22 @@ objects:
       annotation: 'NIST change analysis: no significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops monitoring of remote
+        access sessions'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.12.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.12.; 03.01.12 does not require
+        encrypting remote sessions'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.08
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: remote session confidentiality, for CUI
+        in transmission'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.14
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
       relationship: subset
@@ -124,9 +134,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.21
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.20
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.20.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.20.; Rev. 3 covers organization-controlled
+        portable storage only'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.22
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.22
       relationship: subset
@@ -149,19 +160,26 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.02.01.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        03.03.01 selects event types; creation and retention are in 03.03.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.03
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: generation and retention of audit records'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.02
       relationship: subset
       rationale: semantic
       annotation: 'NIST change analysis: significant change'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.3
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.03
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.01
       relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'Not in the NIST change analysis: 03.03.01 b: review and update of the event
+        types'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.4
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.04
       relationship: subset
@@ -179,9 +197,10 @@ objects:
       annotation: 'NIST change analysis: significant change'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.7
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.07
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 drops clock synchronization with an authoritative source'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.8
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.08
       relationship: subset
@@ -194,9 +213,15 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.03.08.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        inventories moved to 03.04.10'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.10
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: system component inventory'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.02
       relationship: subset
@@ -269,14 +294,26 @@ objects:
         and 03.12.03.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 splits users (03.05.01) from devices (03.05.02)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.02
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: device identification'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.02
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 splits users (03.05.01) from devices (03.05.02)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.01
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: user authentication'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.03
       relationship: subset
@@ -286,18 +323,25 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.04
       relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 drops the network-access
+      annotation: 'NIST change analysis: no significant change; Rev. 3 drops the network-access
         limitation (local access included)'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.5
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.05
       relationship: subset
       rationale: semantic
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
       relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'Not in the NIST change analysis: 03.01.01 f.2: disable accounts inactive
+        for a defined period'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
+      relationship: intersect
+      rationale: semantic
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 replaces the change of characters with organization-defined rules'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.10
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
       relationship: subset
@@ -310,9 +354,9 @@ objects:
       annotation: 'NIST change analysis: no significant change'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops user response activities'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.02
       relationship: subset
@@ -367,13 +411,13 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.03
       relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 adds release out
-        of organizational control'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds release out of
+        organizational control'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.4
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.04
-      relationship: equal
+      relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds handling caveats'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.5
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.05
       relationship: subset
@@ -411,14 +455,21 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        03.10.01 manages the access list; enforcement is in 03.10.07'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.07
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: enforcement of physical access authorizations'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.02
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 drops protection of the support infrastructure'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.07
       relationship: subset
@@ -441,9 +492,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 narrows the risk to unauthorized disclosure of CUI'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.2
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.02
       relationship: subset
@@ -469,11 +521,21 @@ objects:
       relationship: subset
       rationale: semantic
       annotation: 'NIST change analysis: minor change'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
+      relationship: subset
+      rationale: semantic
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.1
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.01
       relationship: subset
       rationale: semantic
       annotation: 'NIST change analysis: significant change'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.16.01
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: systems security engineering principles'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
       relationship: intersect
@@ -550,8 +612,8 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.08
       relationship: subset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 adds protection
-        while in storage and drops the alternative physical safeguards exception'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds protection while
+        in storage and drops the alternative physical safeguards exception'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.9
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.09
       relationship: subset
@@ -564,14 +626,16 @@ objects:
       annotation: 'NIST change analysis: minor change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.11
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.11
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 no longer requires FIPS-validated cryptography'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.12
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 allows organization-defined exceptions to the remote activation ban'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.13
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.13
       relationship: subset
@@ -599,9 +663,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.3
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.03
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops taking action in
+        response to alerts'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.4
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.02
       relationship: subset
@@ -622,11 +687,6 @@ objects:
       relationship: subset
       rationale: semantic
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.14.06.'
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
-      relationship: subset
-      rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
   - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-800-171-rev2-and-nist-800-171-rev3-revert
     ref_id: mapping-nist-800-171-rev2-and-nist-800-171-rev3-revert
     name: nist-800-171-rev2 <-> nist-800-171-rev3
@@ -637,9 +697,10 @@ objects:
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 covers accounts; access by devices is not restated'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.2
       relationship: equal
@@ -677,9 +738,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.09
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.9
-      relationship: equal
+      relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 requires display before
+        granting access'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.10
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
       relationship: superset
@@ -692,14 +754,22 @@ objects:
       annotation: 'NIST change analysis: no significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.12
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops monitoring of remote
+        access sessions'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.12.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.12.; 03.01.12 does not require
+        encrypting remote sessions'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.08
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: remote session confidentiality, for CUI
+        in transmission'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.14
       relationship: superset
@@ -737,9 +807,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.20
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.21
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.20.'
+      annotation: 'Withdrawn in Rev. 3: Incorporated into 03.01.20.; Rev. 3 covers organization-controlled
+        portable storage only'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.22
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.22
       relationship: superset
@@ -762,19 +833,26 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.02.01.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        03.03.01 selects event types; creation and retention are in 03.03.03'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.03
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: generation and retention of audit records'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.2
       relationship: superset
       rationale: semantic
       annotation: 'NIST change analysis: significant change'
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.3
       relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'Not in the NIST change analysis: 03.03.01 b: review and update of the event
+        types'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.4
       relationship: superset
@@ -792,9 +870,10 @@ objects:
       annotation: 'NIST change analysis: significant change'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.07
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.7
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 drops clock synchronization with an authoritative source'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.08
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.8
       relationship: superset
@@ -807,9 +886,15 @@ objects:
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.03.08.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        inventories moved to 03.04.10'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: system component inventory'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.2
       relationship: superset
@@ -882,14 +967,26 @@ objects:
         and 03.12.03.'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 splits users (03.05.01) from devices (03.05.02)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.02
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: device identification'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 splits users (03.05.01) from devices (03.05.02)'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.01
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: user authentication'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.3
       relationship: superset
@@ -899,18 +996,25 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.4
       relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 drops the network-access
+      annotation: 'NIST change analysis: no significant change; Rev. 3 drops the network-access
         limitation (local access included)'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.5
       relationship: superset
       rationale: semantic
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
       relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'Not in the NIST change analysis: 03.01.01 f.2: disable accounts inactive
+        for a defined period'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+      relationship: intersect
+      rationale: semantic
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 replaces the change of characters with organization-defined rules'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.10
       relationship: superset
@@ -923,9 +1027,9 @@ objects:
       annotation: 'NIST change analysis: no significant change'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops user response activities'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.2
       relationship: superset
@@ -980,13 +1084,13 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.3
       relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 adds release out
-        of organizational control'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds release out of
+        organizational control'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.4
-      relationship: equal
+      relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds handling caveats'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.5
       relationship: superset
@@ -1024,14 +1128,21 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        03.10.01 manages the access list; enforcement is in 03.10.07'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.07
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: enforcement of physical access authorizations'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.2
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 drops protection of the support infrastructure'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.07
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.3
       relationship: superset
@@ -1054,9 +1165,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.1
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 narrows the risk to unauthorized disclosure of CUI'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.2
       relationship: superset
@@ -1082,11 +1194,21 @@ objects:
       relationship: superset
       rationale: semantic
       annotation: 'NIST change analysis: minor change'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
+      relationship: superset
+      rationale: semantic
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.1
       relationship: superset
       rationale: semantic
       annotation: 'NIST change analysis: significant change'
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.16.01
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.2
+      relationship: intersect
+      rationale: semantic
+      annotation: 'Not in the NIST change analysis: systems security engineering principles'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.3
       relationship: intersect
@@ -1163,8 +1285,8 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.8
       relationship: superset
       rationale: semantic
-      annotation: 'NIST change analysis: no significant change, but Rev. 3 adds protection
-        while in storage and drops the alternative physical safeguards exception'
+      annotation: 'NIST change analysis: no significant change; Rev. 3 adds protection while
+        in storage and drops the alternative physical safeguards exception'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.09
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.9
       relationship: superset
@@ -1177,14 +1299,16 @@ objects:
       annotation: 'NIST change analysis: minor change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.11
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.11
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change, new organization-defined parameter'
+      annotation: 'NIST change analysis: significant change, new organization-defined parameter;
+        Rev. 3 no longer requires FIPS-validated cryptography'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.12
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.12
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
+      annotation: 'NIST change analysis: minor change, new organization-defined parameter;
+        Rev. 3 allows organization-defined exceptions to the remote activation ban'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.13
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.13
       relationship: superset
@@ -1212,9 +1336,10 @@ objects:
       annotation: 'NIST change analysis: significant change, new organization-defined parameter'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.3
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: 'NIST change analysis: significant change'
+      annotation: 'NIST change analysis: significant change; Rev. 3 drops taking action in
+        response to alerts'
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.4
       relationship: superset
@@ -1235,8 +1360,3 @@ objects:
       relationship: superset
       rationale: semantic
       annotation: 'Withdrawn in Rev. 3: Incorporated into 03.14.06.'
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
-      relationship: superset
-      rationale: semantic
-      annotation: 'NIST change analysis: minor change, new organization-defined parameter'
