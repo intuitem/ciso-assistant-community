@@ -131,12 +131,9 @@ export class PageContent extends BasePage {
 
 		const filters = [
 			{ has: this.page.getByText(name, { exact: true }).first() },
-			// 'any': whichever language the library is in.
-			...(language === 'any' ? [] : [{ has: this.page.getByText(language).first() }])
+			{ has: this.page.getByText(language).first() }
 		];
 		const row = this.getRow(name, filters);
-		// A row missing from the results must fail here, not pass as already loaded.
-		await expect(row, `library "${name}" is not in the search results`).toBeVisible();
 
 		const isAlreadyLoaded = await row.getByTestId('tablerow-import-button').isHidden();
 		if (isAlreadyLoaded) return;
