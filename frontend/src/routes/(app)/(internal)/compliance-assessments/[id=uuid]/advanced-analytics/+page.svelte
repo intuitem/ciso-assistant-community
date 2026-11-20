@@ -1140,7 +1140,7 @@
 										>{fw.assessable_requirements_count} {m.assessable()}</span
 									>
 								</div>
-								{#if Object.values(fw.results || {}).reduce((a, b) => a + (b as number), 0) > 0}
+								{#if fw.assessable_requirements_count > 0}
 									{@const results = fw.results || {}}
 									{@const inferred = Object.values(results).reduce(
 										(a: number, b: any) => a + (b as number),
@@ -1176,6 +1176,12 @@
 												{#if unmappedPct > 8}{m.unmapped()} {Math.round(unmappedPct)}%{/if}
 											</div>
 										{/if}
+									</div>
+									<!-- visible text, so the split doesn't live only in hover titles -->
+									<div class="mt-1 text-[11px] text-surface-500 tabular-nums">
+										{m.mapped()}: {inferred} · {m.unmapped()}: {total - inferred} ({Math.round(
+											unmappedPct
+										)}%)
 									</div>
 								{/if}
 							</div>
