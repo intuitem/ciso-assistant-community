@@ -119,6 +119,19 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
 />
+{#key $folderId}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={$folderId ? [['folder', $folderId]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		nullable
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+	/>
+{/key}
 
 {#if auditData}
 	<AutocompleteSelect
