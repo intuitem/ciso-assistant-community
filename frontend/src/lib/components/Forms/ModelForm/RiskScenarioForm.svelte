@@ -72,6 +72,14 @@
 		}
 	}}
 />
+<TextField
+	type="date"
+	{form}
+	field="target_treatment_date"
+	label={m.targetTreatmentDate()}
+	cacheLock={cacheLocks['target_treatment_date']}
+	bind:cachedValue={formDataCache['target_treatment_date']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple

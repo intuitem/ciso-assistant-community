@@ -8439,6 +8439,7 @@ class RiskScenarioFilter(GenericFilterSet):
         fields = {
             "name": ["exact"],
             "ref_id": ["exact"],
+            "target_treatment_date": ["exact", "lte", "gte"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
             "current_level": ["exact"],
@@ -8483,6 +8484,10 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "source": "risk_assessment.name",
                 "label": "risk_assessment",
                 "escape": True,
+            },
+            "target_treatment_date": {
+                "source": "target_treatment_date",
+                "label": "target_treatment_date",
             },
             "treatment": {"source": "treatment", "label": "treatment"},
             "justification": {

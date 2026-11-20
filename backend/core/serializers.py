@@ -1810,6 +1810,31 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
+    late_extra_controls_count = serializers.SerializerMethodField()
+
+    def get_late_extra_controls_count(self, obj: RiskScenario) -> int:
+        target_treatment_date = obj.target_treatment_date
+        if target_treatment_date is None:
+            return 0
+
+        # Iterate the prefetched relation (RiskScenarioViewSet.get_queryset):
+        # .filter() would bypass the prefetch and add one COUNT per row.
+        viewable_ids = self._viewable_applied_control_ids()
+        return sum(
+            1
+            for control in obj.applied_controls.all()
+            if control.eta is not None
+            and control.eta > target_treatment_date
+            and control.id in viewable_ids
+        )
+
+    def _viewable_applied_control_ids(self) -> set:
+        # One permission query per request, shared by every serialized row.
+        if "viewable_applied_control_ids" not in self.context:
+            self.context["viewable_applied_control_ids"] = set(
+                self._viewable_ids(AppliedControl)
+            )
+        return self.context["viewable_applied_control_ids"]
 
     class Meta:
         model = RiskScenario
@@ -1839,6 +1864,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "name",
             "description",
             "risk_assessment",
+            "target_treatment_date",
             "treatment",
             "threats",
             "vulnerabilities",

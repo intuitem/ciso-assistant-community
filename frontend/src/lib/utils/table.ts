@@ -2046,6 +2046,7 @@ export const listViewFields = {
 			'threats',
 			'name',
 			'owner',
+			'targetTreatmentDate',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -2060,6 +2061,7 @@ export const listViewFields = {
 			'threats',
 			'name',
 			'owner',
+			'target_treatment_date',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -2087,6 +2089,7 @@ export const listViewFields = {
 			top_level: TOP_RISK_LEVEL_FILTER,
 			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			qualifications: QUALIFICATION_FILTER,
+			target_treatment_date: dateFilter('target_treatment_date'),
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER

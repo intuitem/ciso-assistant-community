@@ -8227,5 +8227,16 @@
 	"europeanUnion": "European Union",
 	"europeanEconomicArea": "European Economic Area",
 	"otherCountries": "Other Countries",
-	"notShownOnMap": "Not shown on map"
+	"notShownOnMap": "Not shown on map",
+	"targetTreatmentDate": "Target treatment date",
+	"controlsEtaAfterTargetDate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} control with an ETA after the target treatment date",
+				"countPlural=other": "{count} controls with an ETA after the target treatment date"
+			}
+		}
+	]
 }
