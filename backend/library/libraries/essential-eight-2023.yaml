@@ -13,10 +13,13 @@ description: |-
   https://www.cyber.gov.au/publication/essential-eight-maturity-model
 copyright: © Commonwealth of Australia. Material from cyber.gov.au is provided under a Creative Commons
   Attribution 4.0 International licence and is attributed to the Australian Signals Directorate.
-version: 2
-publication_date: '2026-11-01'
+version: 3
+publication_date: '2026-11-20'
 provider: Australian Signals Directorate (ASD)
 packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+- urn:intuitem:risk:library:intuitem-common-catalog
 objects:
   framework:
     urn: urn:intuitem:risk:framework:essential-eight-2023
@@ -78,6 +81,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1808
       assessable: true
       depth: 2
@@ -89,6 +97,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1698
       assessable: true
       depth: 2
@@ -100,6 +113,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1699
       assessable: true
       depth: 2
@@ -112,6 +130,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1700
       assessable: true
       depth: 2
@@ -123,6 +147,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1876
       assessable: true
       depth: 2
@@ -135,6 +164,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1690
       assessable: true
       depth: 2
@@ -147,6 +181,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1691
       assessable: true
       depth: 2
@@ -158,6 +197,12 @@ objects:
       implementation_groups:
       - '1'
       - '2'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1692
       assessable: true
       depth: 2
@@ -169,6 +214,12 @@ objects:
         or when working exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1901
       assessable: true
       depth: 2
@@ -180,6 +231,12 @@ objects:
         and no working exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1693
       assessable: true
       depth: 2
@@ -191,6 +248,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1905
       assessable: true
       depth: 2
@@ -201,6 +263,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1704
       assessable: true
       depth: 2
@@ -212,6 +279,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-0304
       assessable: true
       depth: 2
@@ -222,6 +295,11 @@ objects:
         by vendors are removed.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos
       assessable: false
       depth: 1
@@ -237,6 +315,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.asset_discovery
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1808
       assessable: true
       depth: 2
@@ -248,6 +331,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1701
       assessable: true
       depth: 2
@@ -260,6 +348,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1702
       assessable: true
       depth: 2
@@ -272,6 +365,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1703
       assessable: true
       depth: 2
@@ -281,6 +380,12 @@ objects:
         updates for vulnerabilities in drivers.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1900
       assessable: true
       depth: 2
@@ -290,6 +395,12 @@ objects:
         updates for vulnerabilities in firmware.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1877
       assessable: true
       depth: 2
@@ -302,6 +413,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1694
       assessable: true
       depth: 2
@@ -314,6 +430,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1695
       assessable: true
       depth: 2
@@ -325,6 +446,12 @@ objects:
       implementation_groups:
       - '1'
       - '2'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1696
       assessable: true
       depth: 2
@@ -336,6 +463,12 @@ objects:
         exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1902
       assessable: true
       depth: 2
@@ -347,6 +480,12 @@ objects:
         working exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1879
       assessable: true
       depth: 2
@@ -357,6 +496,12 @@ objects:
         exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1697
       assessable: true
       depth: 2
@@ -367,6 +512,12 @@ objects:
         working exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1903
       assessable: true
       depth: 2
@@ -377,6 +528,12 @@ objects:
         exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1904
       assessable: true
       depth: 2
@@ -387,6 +544,12 @@ objects:
         working exploits exist.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1407
       assessable: true
       depth: 2
@@ -395,6 +558,11 @@ objects:
       description: The latest release, or the previous release, of operating systems are used.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:proc.update
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1501
       assessable: true
       depth: 2
@@ -405,6 +573,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa
       assessable: false
       depth: 1
@@ -420,6 +593,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1679
       assessable: true
       depth: 2
@@ -431,6 +609,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1680
       assessable: true
       depth: 2
@@ -442,6 +625,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1892
       assessable: true
       depth: 2
@@ -453,6 +641,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1893
       assessable: true
       depth: 2
@@ -464,6 +657,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1681
       assessable: true
       depth: 2
@@ -475,6 +673,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1173
       assessable: true
       depth: 2
@@ -484,6 +687,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0974
       assessable: true
       depth: 2
@@ -493,6 +702,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1505
       assessable: true
       depth: 2
@@ -501,6 +715,11 @@ objects:
       description: Multi-factor authentication is used to authenticate users of data repositories.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1401
       assessable: true
       depth: 2
@@ -512,6 +731,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1872
       assessable: true
       depth: 2
@@ -521,6 +745,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1873
       assessable: true
       depth: 2
@@ -530,6 +759,11 @@ objects:
         provides a phishing-resistant option.
       implementation_groups:
       - '2'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1874
       assessable: true
       depth: 2
@@ -539,6 +773,11 @@ objects:
         is phishing-resistant.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1682
       assessable: true
       depth: 2
@@ -548,6 +787,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1894
       assessable: true
       depth: 2
@@ -556,6 +800,11 @@ objects:
       description: Multi-factor authentication used for authenticating users of data repositories is phishing-resistant.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1683
       assessable: true
       depth: 2
@@ -565,6 +814,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1815
       assessable: true
       depth: 2
@@ -574,6 +829,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1906
       assessable: true
       depth: 2
@@ -584,6 +845,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1907
       assessable: true
       depth: 2
@@ -593,6 +860,12 @@ objects:
         cyber security events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0109
       assessable: true
       depth: 2
@@ -602,6 +875,12 @@ objects:
         events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1228
       assessable: true
       depth: 2
@@ -611,6 +890,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0123
       assessable: true
       depth: 2
@@ -621,6 +906,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0140
       assessable: true
       depth: 2
@@ -631,6 +922,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1819
       assessable: true
       depth: 2
@@ -641,6 +938,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap
       assessable: false
       depth: 1
@@ -656,6 +958,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1647
       assessable: true
       depth: 2
@@ -666,6 +973,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1648
       assessable: true
       depth: 2
@@ -675,6 +987,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:tech.iam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0445
       assessable: true
       depth: 2
@@ -686,6 +1003,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1508
       assessable: true
       depth: 2
@@ -695,6 +1017,11 @@ objects:
         what is required for users and services to undertake their duties.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1175
       assessable: true
       depth: 2
@@ -706,6 +1033,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1883
       assessable: true
       depth: 2
@@ -717,6 +1050,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1898
       assessable: true
       depth: 2
@@ -725,6 +1063,10 @@ objects:
       description: Secure Admin Workstations are used in the performance of administrative activities.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1380
       assessable: true
       depth: 2
@@ -735,6 +1077,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1687
       assessable: true
       depth: 2
@@ -745,6 +1092,10 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1688
       assessable: true
       depth: 2
@@ -755,6 +1106,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1689
       assessable: true
       depth: 2
@@ -766,6 +1122,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1649
       assessable: true
       depth: 2
@@ -774,6 +1135,10 @@ objects:
       description: Just-in-time administration is used for administering systems and applications.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1387
       assessable: true
       depth: 2
@@ -783,6 +1148,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1685
       assessable: true
       depth: 2
@@ -793,6 +1163,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+      - urn:intuitem:risk:function:doc-pol:proc.pam
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1896
       assessable: true
       depth: 2
@@ -801,6 +1177,11 @@ objects:
       description: Memory integrity functionality is enabled.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1861
       assessable: true
       depth: 2
@@ -809,6 +1190,12 @@ objects:
       description: Local Security Authority protection functionality is enabled.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1686
       assessable: true
       depth: 2
@@ -817,6 +1204,12 @@ objects:
       description: Credential Guard functionality is enabled.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1897
       assessable: true
       depth: 2
@@ -825,6 +1218,12 @@ objects:
       description: Remote Credential Guard functionality is enabled.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-012
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1509
       assessable: true
       depth: 2
@@ -834,6 +1233,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1650
       assessable: true
       depth: 2
@@ -843,6 +1247,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1815
       assessable: true
       depth: 2
@@ -852,6 +1261,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1906
       assessable: true
       depth: 2
@@ -862,6 +1276,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1907
       assessable: true
       depth: 2
@@ -871,6 +1290,11 @@ objects:
         cyber security events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0109
       assessable: true
       depth: 2
@@ -880,6 +1304,11 @@ objects:
         events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1228
       assessable: true
       depth: 2
@@ -889,6 +1318,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0123
       assessable: true
       depth: 2
@@ -899,6 +1333,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0140
       assessable: true
       depth: 2
@@ -909,6 +1348,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1819
       assessable: true
       depth: 2
@@ -919,6 +1363,10 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac
       assessable: false
       depth: 1
@@ -933,6 +1381,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1490
       assessable: true
       depth: 2
@@ -942,6 +1396,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1656
       assessable: true
       depth: 2
@@ -950,6 +1410,12 @@ objects:
       description: Application control is implemented on non-internet-facing servers.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1870
       assessable: true
       depth: 2
@@ -961,6 +1427,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1871
       assessable: true
       depth: 2
@@ -971,6 +1443,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
       assessable: true
       depth: 2
@@ -983,6 +1461,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1658
       assessable: true
       depth: 2
@@ -992,6 +1476,12 @@ objects:
         set.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1544
       assessable: true
       depth: 2
@@ -1001,6 +1491,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1659
       assessable: true
       depth: 2
@@ -1009,6 +1504,11 @@ objects:
       description: Microsoft’s vulnerable driver blocklist is implemented.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1582
       assessable: true
       depth: 2
@@ -1018,6 +1518,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1660
       assessable: true
       depth: 2
@@ -1027,6 +1533,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_control
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1815
       assessable: true
       depth: 2
@@ -1036,6 +1548,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1906
       assessable: true
       depth: 2
@@ -1046,6 +1564,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1907
       assessable: true
       depth: 2
@@ -1055,6 +1579,12 @@ objects:
         cyber security events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0109
       assessable: true
       depth: 2
@@ -1064,6 +1594,12 @@ objects:
         events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1228
       assessable: true
       depth: 2
@@ -1073,6 +1609,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0123
       assessable: true
       depth: 2
@@ -1083,6 +1625,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0140
       assessable: true
       depth: 2
@@ -1093,6 +1641,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1819
       assessable: true
       depth: 2
@@ -1103,6 +1657,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom
       assessable: false
       depth: 1
@@ -1118,6 +1677,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:proc.exception_mgmt
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1674
       assessable: true
       depth: 2
@@ -1127,6 +1692,12 @@ objects:
         Location or that are digitally signed by a trusted publisher are allowed to execute.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1890
       assessable: true
       depth: 2
@@ -1136,6 +1707,12 @@ objects:
         being digitally signed or placed within Trusted Locations.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1487
       assessable: true
       depth: 2
@@ -1145,6 +1722,12 @@ objects:
         of malicious code can write to and modify content within Trusted Locations.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1675
       assessable: true
       depth: 2
@@ -1154,6 +1737,12 @@ objects:
         via the Message Bar or Backstage View.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1891
       assessable: true
       depth: 2
@@ -1163,6 +1752,12 @@ objects:
         be enabled via the Message Bar or Backstage View.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1676
       assessable: true
       depth: 2
@@ -1172,6 +1767,12 @@ objects:
         basis.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1488
       assessable: true
       depth: 2
@@ -1182,6 +1783,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1672
       assessable: true
       depth: 2
@@ -1192,6 +1799,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1673
       assessable: true
       depth: 2
@@ -1201,6 +1814,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1489
       assessable: true
       depth: 2
@@ -1211,6 +1830,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-002
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah
       assessable: false
       depth: 1
@@ -1225,6 +1850,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1486
       assessable: true
       depth: 2
@@ -1235,6 +1865,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1485
       assessable: true
       depth: 2
@@ -1245,6 +1880,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1412
       assessable: true
       depth: 2
@@ -1255,6 +1895,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1585
       assessable: true
       depth: 2
@@ -1265,6 +1910,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1667
       assessable: true
       depth: 2
@@ -1274,6 +1924,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1668
       assessable: true
       depth: 2
@@ -1283,6 +1939,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1669
       assessable: true
       depth: 2
@@ -1292,6 +1954,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1542
       assessable: true
       depth: 2
@@ -1302,6 +1970,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1859
       assessable: true
       depth: 2
@@ -1312,6 +1986,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1823
       assessable: true
       depth: 2
@@ -1321,6 +2001,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1670
       assessable: true
       depth: 2
@@ -1330,6 +2016,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1860
       assessable: true
       depth: 2
@@ -1340,6 +2031,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1824
       assessable: true
       depth: 2
@@ -1349,6 +2045,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:tech.uem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1655
       assessable: true
       depth: 2
@@ -1357,6 +2058,11 @@ objects:
       description: .NET Framework 3.5 (includes .NET 2.0 and 3.0) is disabled or removed.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1621
       assessable: true
       depth: 2
@@ -1365,6 +2071,11 @@ objects:
       description: Windows PowerShell 2.0 is disabled or removed.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1622
       assessable: true
       depth: 2
@@ -1373,6 +2084,11 @@ objects:
       description: PowerShell is configured to use Constrained Language Mode.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1623
       assessable: true
       depth: 2
@@ -1383,6 +2099,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
       assessable: true
       depth: 2
@@ -1392,6 +2113,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1815
       assessable: true
       depth: 2
@@ -1401,6 +2127,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1906
       assessable: true
       depth: 2
@@ -1411,6 +2143,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1907
       assessable: true
       depth: 2
@@ -1420,6 +2158,12 @@ objects:
         cyber security events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0109
       assessable: true
       depth: 2
@@ -1429,6 +2173,12 @@ objects:
         events.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1228
       assessable: true
       depth: 2
@@ -1438,6 +2188,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0123
       assessable: true
       depth: 2
@@ -1448,6 +2204,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0140
       assessable: true
       depth: 2
@@ -1458,6 +2220,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1819
       assessable: true
       depth: 2
@@ -1468,6 +2236,11 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-009
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb
       assessable: false
       depth: 1
@@ -1483,6 +2256,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:proc.bia
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1810
       assessable: true
       depth: 2
@@ -1494,6 +2273,11 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1811
       assessable: true
       depth: 2
@@ -1504,6 +2288,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1515
       assessable: true
       depth: 2
@@ -1515,6 +2305,13 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-022
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+      - urn:intuitem:risk:function:doc-pol:proc.bcp_exercise
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1812
       assessable: true
       depth: 2
@@ -1525,6 +2322,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1813
       assessable: true
       depth: 2
@@ -1533,6 +2336,12 @@ objects:
       description: Unprivileged user accounts cannot access their own backups.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1705
       assessable: true
       depth: 2
@@ -1543,6 +2352,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1706
       assessable: true
       depth: 2
@@ -1552,6 +2367,12 @@ objects:
         own backups.
       implementation_groups:
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:pol.access
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1814
       assessable: true
       depth: 2
@@ -1562,6 +2383,12 @@ objects:
       - '1'
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-001
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:pol.backup
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1707
       assessable: true
       depth: 2
@@ -1572,6 +2399,12 @@ objects:
       implementation_groups:
       - '2'
       - '3'
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:pol.backup
     - urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1708
       assessable: true
       depth: 2
@@ -1581,3 +2414,10 @@ objects:
         their retention period.
       implementation_groups:
       - '3'
+
+      threats:
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+      - urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:pol.backup
