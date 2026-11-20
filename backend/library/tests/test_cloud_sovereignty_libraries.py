@@ -65,6 +65,12 @@ def test_cada_third_country_control_is_assessable_with_article_note():
     node = next(n for n in _nodes("eu-cada-proposal") if n["ref_id"] == "3.1(g)")
     assert node["assessable"] is True
     assert "Article 18" in node["annotation"]
+    article_19 = [
+        n
+        for n in _nodes("eu-cada-proposal")
+        if "Article 19" in n.get("typical_evidence", "")
+    ]
+    assert article_19 and all("Article 18" in n["typical_evidence"] for n in article_19)
 
 
 def test_cada_evidence_carries_annex_iii_strictness_note():

@@ -641,7 +641,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
       assessable: false
       description: 'if the audited provider and the subcontractors which are involved in the provision
         of the audited service are subject to the control of a third country or a legal entity established
@@ -776,7 +781,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:ii
       assessable: true
       depth: 4
@@ -903,7 +913,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:iii
       assessable: true
       depth: 4
@@ -1030,7 +1045,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:g:iv
       assessable: true
       depth: 4
@@ -1160,7 +1180,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1:h
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-2:2.1
@@ -2035,7 +2060,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
       assessable: true
       description: 'the audited provider and the subcontractors which are involved in the provision of
         the audited service are not subject to the control of a third country or a legal entity established
@@ -2178,7 +2208,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:ii
       assessable: true
       depth: 4
@@ -2304,7 +2339,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:iii
       assessable: true
       depth: 4
@@ -2430,7 +2470,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:g:iv
       assessable: true
       depth: 4
@@ -2559,7 +2604,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
     - urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1:h
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:eu-cada-proposal:ual-3:3.1
@@ -3418,7 +3468,12 @@ objects:
         Note (Annex III): This Annex is indicative and does not limit the evidence that may be requested
         or considered by the auditing organisations. While the evidence requested may be the same, the
         aspects that need to be analysed will differ depending on the assurance level criteria and their
-        strictness.'
+        strictness.
+
+
+        Editorial note: the proposal text refers to Article 19, which covers the UAL-1 conformity self-assessment.
+        The implementing acts identifying associated third countries for UAL-3 are set out in Article
+        18.'
       assessable: true
       description: the audited provider and the subcontractors which are involved in the provision of
         the audited service are not subject to the control of a third country or a legal entity established

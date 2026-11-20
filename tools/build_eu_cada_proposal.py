@@ -102,6 +102,13 @@ evidence = {
     k: f"{fmt_evidence(v)}\n\nNote (Annex III): {NOTE}" for k, v in evidence.items()
 }
 assert sorted(evidence) == list("abcdefghijk"), sorted(evidence)
+ART18_NOTE = (
+    "Editorial note: the proposal text refers to Article 19, which covers the "
+    "UAL-1 conformity self-assessment. The implementing acts identifying "
+    "associated third countries for UAL-3 are set out in Article 18."
+)
+assert "Article 19" in evidence["g"]
+evidence["g"] += f"\n\n{ART18_NOTE}"
 
 nodes = []
 annex2 = section("ANNEX II", "ANNEX III")
@@ -126,6 +133,7 @@ level_starts = [
     for n, l in enumerate(body)
     if re.match(r"^[1-4]\. Union assurance level [1-4]$", l.strip())
 ]
+assert len(level_starts) == len(LEVELS), level_starts
 level_starts.append(len(body))
 for li, (a, b) in enumerate(itertools.pairwise(level_starts), start=1):
     blk = body[a + 1 : b]
@@ -166,7 +174,7 @@ for li, (a, b) in enumerate(itertools.pairwise(level_starts), start=1):
         else:
             cur[1].append(l)
     letters = [c[0] for c in crits]
-    assert letters == list("abcdefghijk"[: len(letters)]), letters
+    assert letters == list("abcdefg" if li == 1 else "abcdefghijk"), (li, letters)
     for letter, chunk in crits:
         parts = re.split(r"(?:^|\n)(i{1,3}|iv)\. ", "\n".join(chunk))
         crit_urn = f"{lvl_urn}:{li}.1:{letter}"
@@ -189,11 +197,7 @@ for li, (a, b) in enumerate(itertools.pairwise(level_starts), start=1):
             "description": clean([parts[0]]),
         }
         if "Article 19" in crit["description"]:
-            crit["annotation"] = (
-                "Editorial note: the proposal text refers to Article 19, which covers the "
-                "UAL-1 conformity self-assessment. The implementing acts identifying "
-                "associated third countries for UAL-3 are set out in Article 18."
-            )
+            crit["annotation"] = ART18_NOTE
         nodes.append(crit)
         for roman, text in zip(parts[1::2], parts[2::2]):
             nodes.append(

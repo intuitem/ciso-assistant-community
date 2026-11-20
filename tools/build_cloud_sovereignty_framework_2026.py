@@ -6,8 +6,8 @@ Implementation guidance under "Cloud Sovereignty Framework" on
 https://commission.europa.eu/funding-and-tenders/find-calls-tender/tender-opportunities-department/tender-opportunities-digital-services_en
 
 Each answer scores its official points rescaled to 0-100 per question; objective weights are
-the official weights (%), so the audit's weighted average equals the official sovereignty
-score / 10. Answer labels carry their SEAL level, or "no SEAL impact" when every answer of the
+the official weights (%), so the audit's weighted average approximates the official sovereignty
+score / 10 (answer and requirement scores are rounded to integers). Answer labels carry their SEAL level, or "no SEAL impact" when every answer of the
 question grants SEAL-4 (guidance rule). Calculator anomalies are kept and noted per objective.
 
 Usage:
@@ -140,8 +140,8 @@ SEAL = [
 DESC = (
     "Cloud Sovereignty Framework - Implementation guidance and Annex - Sovereignty assessment calculator, "
     "European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives. "
-    "Each answer scores its official points rescaled to 0-100, and the audit's weighted average equals the "
-    "official sovereignty score divided by 10. Each answer also shows its SEAL level; the overall SEAL is the "
+    "Each answer scores its official points rescaled to 0-100, and the audit's weighted average approximates "
+    "the official sovereignty score divided by 10 (scores are rounded to integers). Each answer also shows its SEAL level; the overall SEAL is the "
     "lowest SEAL among the answers (not computed by the app). Questions whose answers all grant SEAL-4 have no "
     "impact on the SEAL and are marked as such.\n\n"
     + "\n".join(f"{r} - {n}: {d}" for r, n, d in SEAL)

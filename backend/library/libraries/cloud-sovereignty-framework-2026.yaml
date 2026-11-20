@@ -4,10 +4,10 @@ ref_id: cloud-sovereignty-framework-2026
 name: Cloud Sovereignty Framework (June 2026)
 description: 'Cloud Sovereignty Framework - Implementation guidance and Annex - Sovereignty assessment
   calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
-  Each answer scores its official points rescaled to 0-100, and the audit''s weighted average equals the
-  official sovereignty score divided by 10. Each answer also shows its SEAL level; the overall SEAL is
-  the lowest SEAL among the answers (not computed by the app). Questions whose answers all grant SEAL-4
-  have no impact on the SEAL and are marked as such.
+  Each answer scores its official points rescaled to 0-100, and the audit''s weighted average approximates
+  the official sovereignty score divided by 10 (scores are rounded to integers). Each answer also shows
+  its SEAL level; the overall SEAL is the lowest SEAL among the answers (not computed by the app). Questions
+  whose answers all grant SEAL-4 have no impact on the SEAL and are marked as such.
 
 
   SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third parties,
@@ -37,10 +37,10 @@ objects:
     name: Cloud Sovereignty Framework (June 2026)
     description: 'Cloud Sovereignty Framework - Implementation guidance and Annex - Sovereignty assessment
       calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
-      Each answer scores its official points rescaled to 0-100, and the audit''s weighted average equals
-      the official sovereignty score divided by 10. Each answer also shows its SEAL level; the overall
-      SEAL is the lowest SEAL among the answers (not computed by the app). Questions whose answers all
-      grant SEAL-4 have no impact on the SEAL and are marked as such.
+      Each answer scores its official points rescaled to 0-100, and the audit''s weighted average approximates
+      the official sovereignty score divided by 10 (scores are rounded to integers). Each answer also
+      shows its SEAL level; the overall SEAL is the lowest SEAL among the answers (not computed by the
+      app). Questions whose answers all grant SEAL-4 have no impact on the SEAL and are marked as such.
 
 
       SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third
