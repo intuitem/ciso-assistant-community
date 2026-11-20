@@ -6,8 +6,8 @@ ref_id: intuitem-common-catalog
 name: INTUITEM Common Catalog
 description: INTUITEM Common Catalog - Threats
 copyright: "\xA9 intuitem - 2025"
-version: 3
-publication_date: 2025-06-14
+version: 4
+publication_date: 2026-11-20
 provider: intuitem
 packager: intuitem
 translations:
@@ -336,3 +336,77 @@ objects:
         name: Nichteinhaltung regulatorischer Anforderungen
         description: Die Nichteinhaltung gesetzlicher und regulatorischer Anforderungen führt zu Sanktionen,
           rechtlichen Verfahren, betrieblichen Einschränkungen und Reputationsschäden.
+  - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-024
+    ref_id: ICT-024
+    name: Exploitation of Known Vulnerabilities
+    description: Exploiting publicly known vulnerabilities in unpatched or unsupported applications, operating
+      systems, firmware or online services, often with publicly available exploits
+    translations:
+      fr:
+        name: Exploitation de vulnérabilités connues
+        description: Exploitation de vulnérabilités publiques dans des applications, systèmes d'exploitation,
+          micrologiciels ou services en ligne non corrigés ou plus maintenus, souvent à l'aide d'exploits
+          publiquement disponibles.
+      de:
+        name: Ausnutzung bekannter Schwachstellen
+        description: Ausnutzung öffentlich bekannter Schwachstellen in nicht gepatchten oder nicht mehr unterstützten
+          Anwendungen, Betriebssystemen, Firmware oder Online-Diensten, häufig mit öffentlich verfügbaren Exploits.
+  - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-025
+    ref_id: ICT-025
+    name: Privileged Account Compromise and Abuse
+    description: Compromise or misuse of administrative and other privileged accounts, including escalation
+      to privileged access, to take control of systems, disable security controls or move laterally
+    translations:
+      fr:
+        name: Compromission et abus de comptes à privilèges
+        description: Compromission ou détournement de comptes d'administration et d'autres comptes à privilèges,
+          y compris par élévation de privilèges, pour prendre le contrôle de systèmes, désactiver des mesures
+          de sécurité ou se déplacer latéralement.
+      de:
+        name: Kompromittierung und Missbrauch privilegierter Konten
+        description: Kompromittierung oder Missbrauch administrativer und anderer privilegierter Konten, auch
+          durch Rechteausweitung, um Systeme zu übernehmen, Sicherheitsmaßnahmen zu deaktivieren oder sich lateral
+          zu bewegen.
+  - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-026
+    ref_id: ICT-026
+    name: Malicious Documents and Macros
+    description: Office documents, macros, scripts or other content opened by users that execute malicious
+      code on their workstation
+    translations:
+      fr:
+        name: Documents et macros malveillants
+        description: Documents bureautiques, macros, scripts ou autres contenus ouverts par les utilisateurs
+          qui exécutent du code malveillant sur leur poste de travail.
+      de:
+        name: Schädliche Dokumente und Makros
+        description: Office-Dokumente, Makros, Skripte oder andere von Nutzern geöffnete Inhalte, die Schadcode
+          auf ihrem Arbeitsplatzrechner ausführen.
+  - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-027
+    ref_id: ICT-027
+    name: Multi-Factor Authentication Bypass
+    description: Circumventing multi-factor authentication through push fatigue, adversary-in-the-middle
+      phishing, session token theft, SIM swapping or weak fallback methods
+    translations:
+      fr:
+        name: Contournement de l'authentification multifacteur
+        description: Contournement de l'authentification multifacteur par saturation de demandes de validation,
+          hameçonnage avec interception en temps réel (adversary-in-the-middle), vol de jetons de session,
+          détournement de carte SIM ou recours à des méthodes de secours faibles.
+      de:
+        name: Umgehung der Multi-Faktor-Authentifizierung
+        description: Umgehung der Multi-Faktor-Authentifizierung durch Push-Bombing, Adversary-in-the-Middle-Phishing,
+          Diebstahl von Sitzungstoken, SIM-Swapping oder schwache Ausweichverfahren.
+  - urn: urn:intuitem:risk:threat:intuitem-common-catalog:ict-028
+    ref_id: ICT-028
+    name: Destruction of Data and Backups
+    description: Deliberate deletion, corruption or encryption of data and of its backups to prevent recovery
+      and maximise the impact of an attack
+    translations:
+      fr:
+        name: Destruction de données et de sauvegardes
+        description: Suppression, altération ou chiffrement délibérés des données et de leurs sauvegardes
+          afin d'empêcher la restauration et d'amplifier l'impact d'une attaque.
+      de:
+        name: Zerstörung von Daten und Sicherungen
+        description: Vorsätzliches Löschen, Beschädigen oder Verschlüsseln von Daten und deren Sicherungen,
+          um die Wiederherstellung zu verhindern und die Wirkung eines Angriffs zu maximieren.
