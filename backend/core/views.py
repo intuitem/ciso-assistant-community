@@ -14254,6 +14254,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
+    # Preparing an audit is its own right: without this, a POST on an audit
+    # would also ask for add_complianceassessment.
+    permission_overrides = {
+        "auditor_preread_pair": "change_auditpreparation",
+        "auditor_preread_preparation": "change_auditpreparation",
+    }
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
@@ -15851,6 +15857,142 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=True, methods=["get"], url_path="auditor_preread")
+    def auditor_preread(self, request, pk):
+        """Experimental: what a certification auditor will ask per requirement."""
+        from core.auditor_preread import auditor_preread
+
+        audit = self.get_object()
+        # Preparation work: respondents who only answer the audit do not see it.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_auditpreparation"),
+            folder=audit.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            auditor_preread(audit, request.user, request.query_params.get("guide"))
+        )
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/pair")
+    def auditor_preread_pair(self, request, pk):
+        """Experimental: mark an evidence as answering one auditor request."""
+        from core.auditor_preread import pair_request
+
+        audit = self.get_object()
+        # Pairing is preparation work; attaching the evidence to the
+        # requirement on the way also edits the requirement.
+        needed = ["change_auditpreparation"]
+        if request.data.get("attach") and not request.data.get("remove"):
+            if audit.is_locked:
+                return Response(
+                    {"error": "auditLocked"}, status=status.HTTP_403_FORBIDDEN
+                )
+            needed.append("change_requirementassessment")
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            error = pair_request(
+                audit, request.user, request.data, request.data.get("guide")
+            )
+        except DjangoValidationError, ValueError:  # an id that is not a UUID
+            error = "invalidField"
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/preparation")
+    def auditor_preread_preparation(self, request, pk):
+        """Experimental: store one decision of this audit's preparation."""
+        from core.auditor_preread import update_preparation
+
+        audit = self.get_object()
+        exists = hasattr(audit, "preparation")
+        needed = ["change_auditpreparation"] + (
+            [] if exists else ["add_auditpreparation"]
+        )
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        error = update_preparation(audit, request.user, request.data)
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="auditor_preread_audits")
+    def auditor_preread_audits(self, request):
+        """Experimental: audits an audit guide applies to, or is offered for, by framework."""
+        from core.auditor_preread import SUGGEST_COVERAGE, resolve_guide
+
+        # Only audits whose pre-read the user may open (analyst and up).
+        perm = Permission.objects.get(codename="view_auditpreparation")
+        allowed = {}
+        audits = [
+            a
+            for a in self.get_queryset().select_related(
+                "framework", "folder", "perimeter"
+            )
+            if allowed.setdefault(
+                a.folder_id,
+                RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=a.folder
+                ),
+            )
+        ]
+        # A guide saved on the preparation ("apply anyway") wins over the
+        # framework's own match; each pair is resolved once.
+        saved = dict(
+            AuditPreparation.objects.filter(
+                compliance_assessment__in=[a.id for a in audits]
+            )
+            .exclude(guide="")
+            .values_list("compliance_assessment_id", "guide")
+        )
+        fits = {}
+        for a in audits:
+            if a.framework and (key := (a.framework_id, saved.get(a.id))) not in fits:
+                fits[key] = resolve_guide(a.framework, key[1])
+        rows = [
+            {
+                "id": a.id,
+                "name": a.name,
+                "status": a.status,
+                "framework": a.framework.name,
+                "folder": {"str": str(a.folder)} if a.folder else None,
+                "perimeter": {"id": str(a.perimeter_id), "str": str(a.perimeter)}
+                if a.perimeter
+                else None,
+                "exact": fit["exact"],
+                "coverage": round(fit["coverage"], 3),
+                "applies": fit["applies"],
+            }
+            for a in audits
+            if (fit := fits.get((a.framework_id, saved.get(a.id))))
+            and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
+        ]
+        # Masked like the audit list: no label for a perimeter the user cannot view.
+        fields = {"perimeter": Perimeter}
+        return Response(
+            self._filter_related_fields(
+                rows, fields, self._get_accessible_ids_map(set(fields.values()))
+            )
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
