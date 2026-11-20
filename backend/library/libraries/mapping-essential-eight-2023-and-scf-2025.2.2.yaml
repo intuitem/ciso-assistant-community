@@ -1,0 +1,1565 @@
+urn: urn:intuitem:risk:library:mapping-essential-eight-2023-and-scf-2025.2.2
+locale: en
+ref_id: mapping-essential-eight-2023-and-scf-2025.2.2
+name: Essential Eight Maturity Model (November 2023) <-> scf-2025.2.2
+description: 'Mapping between the Essential Eight Maturity Model (November 2023) and SCF: Secure Controls Framework
+  (2025.2.2), from SCF''s Set Theory Relationship Mapping (STRM) for Australia Essential 8 (SCF 2025.3). Each Essential
+  Eight control is matched through the ISM id given by the STRM.'
+copyright: SCF - CC BY-ND 4.0
+version: 1
+publication_date: '2026-11-19'
+provider: SCF
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:essential-eight-2023
+- urn:intuitem:risk:library:scf-2025.2.2
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-essential-eight-2023-and-scf-2025.2.2
+    ref_id: mapping-essential-eight-2023-and-scf-2025.2.2
+    name: Essential Eight Maturity Model (November 2023) <-> scf-2025.2.2
+    description: 'Mapping between the Essential Eight Maturity Model (November 2023) and SCF: Secure Controls Framework
+      (2025.2.2), from SCF''s Set Theory Relationship Mapping (STRM) for Australia Essential 8 (SCF 2025.3). Each
+      Essential Eight control is matched through the ISM id given by the STRM.'
+    source_framework_urn: urn:intuitem:risk:framework:essential-eight-2023
+    target_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0109
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0123
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0140
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0843
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1228
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1490
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1544
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1582
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02.1
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1656
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1658
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1659
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1660
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1815
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1819
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1870
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1871
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1906
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1907
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0109
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0123
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0140
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0974
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1173
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1228
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1401
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1504
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1505
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1679
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1680
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1681
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1682
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1683
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1815
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1819
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1872
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1873
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1874
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1892
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1893
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1894
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1906
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1907
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-0304
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1690
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1691
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1692
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1693
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1698
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1699
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1700
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1704
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1807
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1808
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06.1
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1876
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1901
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1905
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1407
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-07.1
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1501
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1694
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1695
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1696
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1697
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1701
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1702
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1703
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1807
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1808
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06.1
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1877
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1879
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1900
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1902
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1903
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1904
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0109
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0123
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0140
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1175
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1228
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1380
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1387
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-27
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1507
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1507
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1508
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1509
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1647
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1648
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-15.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1649
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1650
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1685
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-15.9
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1686
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1688
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-08
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1689
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1815
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1819
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1861
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1883
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1896
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1897
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1898
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-20.4
+      relationship: equal
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1906
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1907
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1511
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1515
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.5
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1705
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1706
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1707
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1708
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1810
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-01.4
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1811
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1812
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1813
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1814
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1487
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1488
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1489
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1671
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1672
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1673
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1674
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1675
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1676
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02.1
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1890
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1891
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0109
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0123
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0140
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1228
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1412
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1485
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1486
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1542
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1585
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1621
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1622
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1623
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1654
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1655
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1667
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1668
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1669
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1670
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1815
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1819
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      relationship: subset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1823
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1824
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1859
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1860
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1906
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1907
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-essential-eight-2023-and-scf-2025.2.2-revert
+    ref_id: mapping-essential-eight-2023-and-scf-2025.2.2-revert
+    name: Essential Eight Maturity Model (November 2023) <-> scf-2025.2.2
+    description: 'Mapping between the Essential Eight Maturity Model (November 2023) and SCF: Secure Controls Framework
+      (2025.2.2), from SCF''s Set Theory Relationship Mapping (STRM) for Australia Essential 8 (SCF 2025.3). Each
+      Essential Eight control is matched through the ISM id given by the STRM.'
+    source_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    target_framework_urn: urn:intuitem:risk:framework:essential-eight-2023
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0123
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0140
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0843
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1228
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1490
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1544
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1582
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1656
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1658
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1659
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1660
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1815
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1819
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1870
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1871
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1906
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1907
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0123
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0140
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0974
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1173
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1228
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1401
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1504
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1505
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1679
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1680
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1681
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1682
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1683
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1815
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1819
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1872
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1873
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1874
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1892
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1893
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1894
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1906
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1907
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-0304
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1690
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1691
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1692
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1693
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1698
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1699
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1700
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1704
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1807
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1808
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1876
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1901
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1905
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1407
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1501
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1694
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1695
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1696
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1697
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1701
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1702
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1703
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1807
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1808
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1877
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1879
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1900
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1902
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1903
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1904
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0123
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0140
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1175
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1228
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1380
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-27
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1387
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1507
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1507
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1508
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1509
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1647
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-15.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1648
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-16
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1649
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1650
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-15.9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1685
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1686
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-08
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1688
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1689
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1815
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1819
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1861
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-21
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1883
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1896
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1897
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iac-20.4
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1898
+      relationship: equal
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1906
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1907
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1511
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1515
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1705
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1706
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1707
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1708
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1810
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1811
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1812
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1813
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:bcd-11.10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1814
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1487
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1488
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1489
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1671
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1672
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1673
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1674
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1675
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1676
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1890
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1891
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0123
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0140
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1228
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1412
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1485
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1486
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1542
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1585
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1621
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1622
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1623
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1654
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1655
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1667
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1668
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1669
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1670
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-08
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1815
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1819
+      relationship: superset
+      rationale: functional
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1823
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1824
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1859
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1860
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cfg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-03.3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1906
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:mon-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1907
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 5
