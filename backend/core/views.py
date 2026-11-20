@@ -13431,12 +13431,16 @@ EVIDENCE_UPLOAD_MAX_AGE = 15 * 60
 
 
 def evidence_upload_state(evidence) -> str:
-    """Fingerprint of the evidence's revisions, carried by the upload token: the
-    first upload saves a revision (new `updated_at`), so a replayed token no
-    longer matches. Built from every revision's id and `updated_at`, which only
-    move forward: creating, deleting or changing a revision never brings the
-    fingerprint back to an earlier value. The issuer makes sure a revision
-    exists, so "no revision" is never a state a token was issued for."""
+    """Fingerprint of the evidence's revisions, carried by the upload token, which
+    is accepted only while the fingerprint still matches. Built from every
+    revision's id and `updated_at`.
+
+    Single use: an upload saves an existing revision (the issuer makes sure one
+    exists), moving its `updated_at` forward. Nothing brings that revision back
+    to its earlier `updated_at`, and deleting it removes its id, so a used token
+    never matches again. A change that is undone before any upload (a revision
+    created then deleted) can bring the fingerprint back, which only lets the
+    still-unused token be used once, as issued."""
     rows = evidence.revisions.order_by("id").values_list("id", "updated_at")
     raw = ";".join(f"{rev_id}@{updated.isoformat()}" for rev_id, updated in rows)
     return hashlib.sha256(raw.encode()).hexdigest()
@@ -13589,6 +13593,17 @@ class EvidenceTokenUploadView(APIView):
                 )
                 if evidence is None:
                     return not_found
+                # Again under the lock: access may have been revoked while the
+                # body was streaming.
+                if not RoleAssignment.is_object_accessible(
+                    user, "change", Evidence, claims["e"]
+                ):
+                    return Response(
+                        {
+                            "detail": "You do not have permission to change this evidence."
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
                 # Single use: the first upload changed the state the token saw.
                 if evidence_upload_state(evidence) != claims["h"]:
                     return gone
