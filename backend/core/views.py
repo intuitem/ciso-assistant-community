@@ -13584,9 +13584,14 @@ class EvidenceTokenUploadView(APIView):
         # No authenticated request user here: the audit log middleware reads
         # request.user lazily, so this credits the token's user. (A nested
         # auditlog set_actor would leave the middleware's receiver connected.)
-        request.user = user
         try:
             with transaction.atomic():
+                # Reloaded: the account may have been deactivated while the
+                # body was streaming.
+                user = User.objects.filter(id=claims["u"], is_active=True).first()
+                if user is None:
+                    return not_found
+                request.user = user
                 # The row lock serializes concurrent replays of the same token.
                 evidence = (
                     Evidence.objects.select_for_update().filter(id=claims["e"]).first()
