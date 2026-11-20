@@ -129,6 +129,13 @@ def fetch(source: Path | None, name: str) -> bytes:
         return response.read()
 
 
+def rationale(mappings: dict, entry: dict) -> str | None:
+    """A map's own matching-rationale wins over the collection's (OSCAL); None if neither sets it."""
+    return entry.get("matching-rationale") or mappings.get("provenance", {}).get(
+        "matching-rationale"
+    )
+
+
 def props(obj: dict) -> dict:
     return {p["name"]: p.get("value") for p in obj.get("props", [])}
 
@@ -325,12 +332,12 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
                 missing.add(ism)
             for source in by_ism.get(ism, []):
                 for urn in instances[action]:
-                    pairs.append((source, urn))
+                    pairs.append((source, urn, rationale(mappings, entry)))
     if missing:
         print(f"E8 ISM ids not in {E8}: {sorted(missing)}", file=sys.stderr)
     seen = set()
     rows = []
-    for source, target in pairs:
+    for source, target, matching in pairs:
         if (source, target) not in seen:
             seen.add((source, target))
             rows.append(
@@ -338,7 +345,7 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
                     "source_requirement_urn": source,
                     "target_requirement_urn": target,
                     "relationship": "intersect",
-                    "rationale": mappings["provenance"]["matching-rationale"],
+                    "rationale": matching,
                     "strength_of_relationship": None,
                 }
             )
@@ -395,7 +402,7 @@ def build_csf_mapping(mappings, instances, csf_path: Path):
                         "source_requirement_urn": source,
                         "target_requirement_urn": urn,
                         "relationship": "intersect",
-                        "rationale": mappings["provenance"]["matching-rationale"],
+                        "rationale": rationale(mappings, entry),
                         "strength_of_relationship": None,
                     }
                 )
