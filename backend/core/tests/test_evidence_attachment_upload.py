@@ -87,11 +87,15 @@ class TestEvidenceAttachmentUpload:
         assert revision.attachment.read() == b"\x89PNG\r\n\x1a\n raw"
         assert revision.original_filename == "alerte-été.png"
 
-    def test_second_upload_replaces_instead_of_clearing(self, admin_client, evidence):
+    def test_second_upload_replaces_instead_of_clearing(
+        self, admin_client, evidence, django_capture_on_commit_callbacks
+    ):
         _upload(admin_client, evidence, "first.pdf", b"%PDF-1.4 first")
         first_name = _stored(evidence).attachment.name
 
-        _upload(admin_client, evidence, "second.pdf", b"%PDF-1.4 second")
+        # The superseded file is deleted once the upload commits.
+        with django_capture_on_commit_callbacks(execute=True):
+            _upload(admin_client, evidence, "second.pdf", b"%PDF-1.4 second")
 
         revision = _stored(evidence)
         assert revision.attachment, "the evidence was emptied by the second upload"

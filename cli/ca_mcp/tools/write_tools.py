@@ -1972,6 +1972,54 @@ def _rollback_note(evidence_id) -> str:
     return f" (could not delete empty evidence {evidence_id}, remove it manually)"
 
 
+def _evidence_payload(
+    filename, name, description, folder_id, status, findings_assessments
+):
+    """Creation payload of an evidence holding `filename`, and an error string
+    instead when it cannot be built. Without folder_id the evidence goes to its
+    binders' folder, else Global."""
+    binder_ids = None
+    if findings_assessments is not None:
+        from ..resolvers import resolve_findings_assessment_id
+
+        binder_ids = [resolve_findings_assessment_id(x) for x in findings_assessments]
+
+    # Keep the evidence in its binders' folder rather than in Global.
+    if not folder_id and binder_ids:
+        binder_folders = set()
+        for binder_id in binder_ids:
+            binder_res = make_get_request(f"/findings-assessments/{binder_id}/")
+            if binder_res.status_code != 200:
+                return None, (
+                    f"Error creating evidence: {binder_res.status_code} - "
+                    f"{binder_res.text}"
+                )
+            folder = binder_res.json().get("folder")
+            if isinstance(folder, dict):
+                folder = folder.get("id")
+            binder_folders.add(folder)
+        if len(binder_folders) > 1:
+            return None, (
+                "Error: the findings assessments are in different folders, "
+                "pass folder_id"
+            )
+        folder_id = binder_folders.pop()
+
+    if not folder_id and GLOBAL_FOLDER_ID:
+        folder_id = GLOBAL_FOLDER_ID
+
+    payload = {"name": name or filename}
+    if folder_id:
+        payload["folder"] = resolve_folder_id(folder_id)
+    if description is not None:
+        payload["description"] = description
+    if status is not None:
+        payload["status"] = status
+    if binder_ids is not None:
+        payload["findings_assessments"] = binder_ids
+    return payload, None
+
+
 async def create_evidence(
     file_path: str,
     name: str = None,
@@ -2019,47 +2067,11 @@ async def create_evidence(
 
         # Opened before creating the evidence: an unreadable file leaves no record.
         with path.open("rb") as f:
-            binder_ids = None
-            if findings_assessments is not None:
-                from ..resolvers import resolve_findings_assessment_id
-
-                binder_ids = [
-                    resolve_findings_assessment_id(x) for x in findings_assessments
-                ]
-
-            # Keep the evidence in its binders' folder rather than in Global.
-            if not folder_id and binder_ids:
-                binder_folders = set()
-                for binder_id in binder_ids:
-                    binder_res = make_get_request(f"/findings-assessments/{binder_id}/")
-                    if binder_res.status_code != 200:
-                        return (
-                            f"Error creating evidence: {binder_res.status_code} - "
-                            f"{binder_res.text}"
-                        )
-                    folder = binder_res.json().get("folder")
-                    if isinstance(folder, dict):
-                        folder = folder.get("id")
-                    binder_folders.add(folder)
-                if len(binder_folders) > 1:
-                    return (
-                        "Error: the findings assessments are in different folders, "
-                        "pass folder_id"
-                    )
-                folder_id = binder_folders.pop()
-
-            if not folder_id and GLOBAL_FOLDER_ID:
-                folder_id = GLOBAL_FOLDER_ID
-
-            payload = {"name": name or filename}
-            if folder_id:
-                payload["folder"] = resolve_folder_id(folder_id)
-            if description is not None:
-                payload["description"] = description
-            if status is not None:
-                payload["status"] = status
-            if binder_ids is not None:
-                payload["findings_assessments"] = binder_ids
+            payload, error = _evidence_payload(
+                filename, name, description, folder_id, status, findings_assessments
+            )
+            if error:
+                return error
 
             res = make_post_request("/evidences/", payload)
             if res.status_code != 201:
@@ -2099,6 +2111,106 @@ async def create_evidence(
             return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
+
+
+async def prepare_evidence_upload(
+    filename: str,
+    evidence_id: str = None,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+    status: str = None,
+    findings_assessments: list = None,
+) -> str:
+    """Get a single-use upload URL to attach a chat file to an evidence
+
+    For files the user attached or pasted in the conversation (claude.ai):
+    creates the evidence (or targets an existing one with evidence_id) and
+    returns a ready `curl` command. Run that command with your code execution
+    tool, in the sandbox where the chat file is, after replacing
+    <sandbox path> with the file's path there: the file goes straight to the
+    instance, never through this tool. The URL is valid 15 minutes, for one
+    upload of this file. A refused upload (400 type, 411, 413 too large) does
+    not use it up. After 410 (expired or used) call again with
+    evidence_id=<the ID returned>, never without it: that would create a
+    second evidence.
+
+    If curl cannot reach the host (DNS failure, connection refused, proxy 403),
+    tell the user to allow the instance domain in claude.ai settings, under
+    code execution network egress (allowed domains), then retry.
+
+    Args:
+        filename: Name to store the file under, with its extension (e.g.
+            "audit-report.pdf"). The server checks the file type and size
+        evidence_id: Existing evidence ID/name to attach the file to (a new
+            file replaces its current one); the other fields are then ignored
+        name: Evidence name for a new evidence (defaults to the file name)
+        description: Description of a new evidence
+        folder_id: Folder ID/name of a new evidence (defaults to the folder of
+            the given findings assessments, else Global)
+        status: draft | missing | in_review | approved | rejected | expired
+            (default: draft)
+        findings_assessments: List of findings assessment IDs/names a new
+            evidence is attached to; without folder_id they must share one
+            folder
+    """
+    try:
+        filename = str(filename or "").replace("\\", "/").rsplit("/", 1)[-1].strip()
+        if not filename:
+            return "Error: filename is required (with its extension)"
+
+        created = None  # ID of the evidence this call created, for rollback
+        if evidence_id:
+            from ..resolvers import resolve_evidence_id
+
+            evidence_id = resolve_evidence_id(evidence_id)
+        else:
+            payload, error = _evidence_payload(
+                filename, name, description, folder_id, status, findings_assessments
+            )
+            if error:
+                return error
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
+            evidence = res.json()
+            evidence_id = created = evidence.get("id")
+            created_name = evidence.get("name")
+
+        res = make_post_request(
+            f"/evidences/{evidence_id}/upload-url/", {"filename": filename}
+        )
+        if res.status_code != 200:
+            note = _rollback_note(evidence_id) if created is not None else ""
+            return f"Error getting an upload URL: {res.status_code} - {res.text}{note}"
+        issued = res.json()
+        url = issued["url"]
+
+        head = (
+            f"Created evidence: {created_name} (ID: {evidence_id})"
+            if created is not None
+            else f"Evidence ID: {evidence_id}"
+        )
+        command = (
+            "curl -sS --fail-with-body -X POST "
+            "-H 'Content-Type: application/octet-stream' "
+            f"--data-binary @<sandbox path> '{url}'"
+        )
+        return (
+            f"{head}\n"
+            f"Upload URL for {filename}, single use, expires {issued.get('expires_at')}.\n"
+            "Run in your code execution sandbox, <sandbox path> being the chat "
+            "file's path there:\n"
+            f"{command}\n"
+            "A JSON answer with the evidence ID and size means the file is "
+            "stored. On 410, call this tool again with "
+            f"evidence_id={evidence_id}. If the host is unreachable, ask the "
+            "user to allow the instance domain in claude.ai code execution "
+            "network settings."
+        )
+    except Exception as e:
+        note = _rollback_note(created) if created is not None else ""
+        return f"Error in prepare_evidence_upload: {str(e)}{note}"
 
 
 DOCUMENT_TYPES = [

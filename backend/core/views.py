@@ -169,6 +169,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
+from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 from rest_framework.exceptions import (
     NotFound,
@@ -12815,6 +12816,41 @@ class EvidenceViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Evidence.Status.choices))
 
+    @action(methods=["post"], detail=True, url_path="upload-url")
+    def upload_url(self, request, pk=None):
+        """Issue a single-use upload URL (15 min) for this evidence, bound to the
+        caller and to `filename`: POST the raw file bytes to it, no credential."""
+        evidence = self.get_object()
+        if not RoleAssignment.is_object_accessible(
+            request.user, "change", Evidence, evidence.id
+        ):
+            return Response(
+                {"detail": "You do not have permission to change this evidence."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        from core.validators import ALLOWED_UPLOAD_EXTENSIONS
+
+        data = request.data if isinstance(request.data, dict) else {}
+        filename = clean_upload_filename(data.get("filename"))
+        if filename is None:
+            return Response(
+                {"filename": "A valid file name is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Refuse an unsupported type now rather than after the upload.
+        extension = os.path.splitext(filename)[1].lstrip(".").lower()
+        if extension not in ALLOWED_UPLOAD_EXTENSIONS:
+            return Response(
+                {
+                    "filename": f"Unsupported file extension '.{extension}'. "
+                    f"Allowed extensions: {', '.join(ALLOWED_UPLOAD_EXTENSIONS)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # A revision always exists once a token is issued (see evidence_upload_state).
+        latest_or_new_revision(evidence)
+        return Response(issue_evidence_upload_url(request.user, evidence, filename))
+
     # --- Bulk / directory upload (experimental) -----------------------------
 
     class BatchConflictStrategy(models.TextChoices):
@@ -13296,6 +13332,47 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
         return response
 
 
+def attach_file_to_revision(revision, attachment, user):
+    """Store `attachment` on `revision` as uploaded by `user`, with the model
+    validators, the review reopening and the superseded file's removal shared by
+    every upload path. Returns a 400 `Response` if the file is refused, else None."""
+    old_attachment = revision.attachment
+    old_original_filename = revision.original_filename
+    superseded_name = revision.set_new_attachment(attachment)
+    revision.uploaded_by = user
+
+    try:
+        revision.full_clean()
+    except ValidationError as e:
+        revision.attachment = old_attachment
+        revision.original_filename = old_original_filename
+        messages = []
+        if hasattr(e, "message_dict"):
+            for field_messages in e.message_dict.values():
+                messages.extend(field_messages)
+        elif hasattr(e, "messages"):
+            messages = e.messages
+        else:
+            messages = [str(e.message)]
+        return Response(
+            {"detail": " ".join(messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    revision.save()
+    revision.reopen_evidence_review()
+    if superseded_name and superseded_name != revision.attachment.name:
+        storage = revision.attachment.storage
+        # After commit: a rolled-back save must still find its old file.
+        transaction.on_commit(lambda: storage.delete(superseded_name))
+    return None
+
+
+def latest_or_new_revision(evidence):
+    return evidence.revisions.order_by(
+        "-version"
+    ).first() or EvidenceRevision.objects.create(evidence=evidence)
+
+
 class UploadAttachmentView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = AttachmentUploadSerializer
@@ -13327,40 +13404,188 @@ class UploadAttachmentView(APIView):
                 )
 
         if revision is None:
-            revision = evidence.revisions.order_by(
-                "-version"
-            ).first() or EvidenceRevision.objects.create(evidence=evidence)
+            revision = latest_or_new_revision(evidence)
 
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
-            old_attachment = revision.attachment
-            old_original_filename = revision.original_filename
-            superseded_name = revision.set_new_attachment(attachment)
-            revision.uploaded_by = request.user
-
-            try:
-                revision.full_clean()
-            except ValidationError as e:
-                revision.attachment = old_attachment
-                revision.original_filename = old_original_filename
-                messages = []
-                if hasattr(e, "message_dict"):
-                    for field_messages in e.message_dict.values():
-                        messages.extend(field_messages)
-                elif hasattr(e, "messages"):
-                    messages = e.messages
-                else:
-                    messages = [str(e.message)]
-                return Response(
-                    {"detail": " ".join(messages)},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            revision.save()
-            revision.reopen_evidence_review()
-            if superseded_name and superseded_name != revision.attachment.name:
-                revision.attachment.storage.delete(superseded_name)
+            refused = attach_file_to_revision(revision, attachment, request.user)
+            if refused is not None:
+                return refused
 
         return Response(status=status.HTTP_200_OK)
+
+
+# --- Single-use upload URL (remote MCP: curl from the claude.ai sandbox) ------
+
+EVIDENCE_UPLOAD_SALT = "evidence-upload"
+EVIDENCE_UPLOAD_MAX_AGE = 15 * 60
+
+
+def evidence_upload_state(evidence) -> str:
+    """Fingerprint of the evidence's revisions, carried by the upload token: the
+    first upload saves a revision (new `updated_at`), so a replayed token no
+    longer matches. Built from every revision's id and `updated_at`, which only
+    move forward: creating, deleting or changing a revision never brings the
+    fingerprint back to an earlier value. The issuer makes sure a revision
+    exists, so "no revision" is never a state a token was issued for."""
+    rows = evidence.revisions.order_by("id").values_list("id", "updated_at")
+    raw = ";".join(f"{rev_id}@{updated.isoformat()}" for rev_id, updated in rows)
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def clean_upload_filename(filename) -> str | None:
+    name = os.path.basename(str(filename or "").replace("\\", "/")).strip()
+    if not name or name in (".", "..") or len(name) > 255:
+        return None
+    # The name is stored as original_filename and sent back in headers.
+    if any(ord(c) < 32 or ord(c) == 127 for c in name):
+        return None
+    return name
+
+
+def issue_evidence_upload_url(user, evidence, filename) -> dict:
+    from django.core import signing
+
+    token = signing.dumps(
+        {
+            "u": str(user.id),
+            "e": str(evidence.id),
+            "f": filename,
+            "h": evidence_upload_state(evidence),
+        },
+        salt=EVIDENCE_UPLOAD_SALT,
+    )
+    base = str(settings.CISO_ASSISTANT_URL).rstrip("/")
+    expires_at = timezone.now() + timedelta(seconds=EVIDENCE_UPLOAD_MAX_AGE)
+    return {
+        "url": f"{base}/api/evidences/upload/{token}/",
+        "expires_at": expires_at.isoformat(),
+    }
+
+
+class EvidenceUploadThrottle(SimpleRateThrottle):
+    """Per sender IP, resolved like the login rate limits (trailing
+    X-Forwarded-For entry, appended by the frontend passthrough or the proxy)."""
+
+    scope = "evidence_upload_token"
+
+    def get_rate(self):
+        return getattr(settings, "EVIDENCE_UPLOAD_THROTTLE_RATE", "60/min")
+
+    def get_cache_key(self, request, view):
+        from core.custom_middleware import resolve_client_ip
+
+        ident = resolve_client_ip(request)
+        return self.cache_format % {"scope": self.scope, "ident": ident or "anon"}
+
+
+class EvidenceTokenUploadView(APIView):
+    """POST /api/evidences/upload/<token>/: the raw request body becomes the
+    evidence's file. Unauthenticated: the signed, short-lived, single-use token
+    issued by `EvidenceViewSet.upload_url` is the credential, and its user must
+    still hold `change` on the evidence. The token is a credential: never log
+    it (the log processors redact it from request paths)."""
+
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [EvidenceUploadThrottle]
+    parser_classes = []
+
+    def post(self, request, token):
+        from django.core import signing
+        from django.core.files.base import ContentFile
+
+        gone = Response(
+            {"detail": "This upload URL has expired or was already used."},
+            status=status.HTTP_410_GONE,
+        )
+        not_found = Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            claims = signing.loads(
+                token, salt=EVIDENCE_UPLOAD_SALT, max_age=EVIDENCE_UPLOAD_MAX_AGE
+            )
+        except signing.SignatureExpired:
+            return gone
+        except signing.BadSignature:
+            return not_found
+        if not isinstance(claims, dict) or not {"u", "e", "f", "h"} <= claims.keys():
+            return not_found
+
+        user = User.objects.filter(id=claims["u"], is_active=True).first()
+        if user is None or not Evidence.objects.filter(id=claims["e"]).exists():
+            return not_found
+        if not RoleAssignment.is_object_accessible(
+            user, "change", Evidence, claims["e"]
+        ):
+            return Response(
+                {"detail": "You do not have permission to change this evidence."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        limit = int(settings.ATTACHMENT_MAX_SIZE_MB) * 1000000
+        too_large = Response(
+            {
+                "detail": "The maximum file size that can be uploaded is "
+                f"{settings.ATTACHMENT_MAX_SIZE_MB} MB"
+            },
+            status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        )
+        # WSGI bounds the body by Content-Length: a chunked upload without it
+        # would read as empty, so say what is missing instead.
+        try:
+            declared = int(request.META.get("CONTENT_LENGTH") or "")
+        except ValueError:
+            return Response(
+                {"detail": "Content-Length is required: send the file in one body."},
+                status=status.HTTP_411_LENGTH_REQUIRED,
+            )
+        if declared > limit:
+            return too_large
+
+        # Read the raw stream (no parser, and not request.body, which
+        # DATA_UPLOAD_MAX_MEMORY_SIZE caps). The in-loop check guards servers
+        # that do not bound the stream by the declared length.
+        chunks, total = [], 0
+        while True:
+            chunk = request._request.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > limit:
+                return too_large
+            chunks.append(chunk)
+        if not total:
+            return Response(
+                {"detail": "The request body is empty: send the file bytes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # No authenticated request user here: the audit log middleware reads
+        # request.user lazily, so this credits the token's user. (A nested
+        # auditlog set_actor would leave the middleware's receiver connected.)
+        request.user = user
+        with transaction.atomic():
+            # The row lock serializes concurrent replays of the same token.
+            evidence = (
+                Evidence.objects.select_for_update().filter(id=claims["e"]).first()
+            )
+            if evidence is None:
+                return not_found
+            # Single use: the first upload changed the state the token saw.
+            if evidence_upload_state(evidence) != claims["h"]:
+                return gone
+            revision = latest_or_new_revision(evidence)
+            refused = attach_file_to_revision(
+                revision, ContentFile(b"".join(chunks), name=claims["f"]), user
+            )
+            if refused is not None:
+                transaction.set_rollback(True)
+                return refused
+
+        return Response(
+            {"evidence": str(evidence.id), "filename": claims["f"], "size": total},
+            status=status.HTTP_200_OK,
+        )
 
 
 class QuickStartView(APIView):

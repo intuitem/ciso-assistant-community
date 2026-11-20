@@ -17,6 +17,7 @@ from ca_mcp import server  # noqa: E402
 from ca_mcp.tools import write_tools  # noqa: E402
 from tests.mcp.helpers import (  # noqa: E402
     UUID_A,
+    UUID_B,
     UUID_F,
     _response,
     run,
@@ -307,3 +308,194 @@ def test_create_evidence_is_not_registered_over_http():
 
     assert "create_evidence" in names(False)
     assert "create_evidence" not in names(True)
+
+
+# ---------------------------------------------------------------------------
+# prepare_evidence_upload (remote: the client curls the file itself)
+# ---------------------------------------------------------------------------
+
+UPLOAD_URL = "https://ca.example.com/api/evidences/upload/tok.en:sig/"
+ISSUED = {"url": UPLOAD_URL, "expires_at": "2026-11-20T10:15:00+00:00"}
+
+
+class TestPrepareEvidenceUpload:
+    def _post(self, *responses):
+        sent = []
+        queue = list(responses)
+
+        def fake(endpoint, payload):
+            sent.append((endpoint, payload))
+            return queue.pop(0)
+
+        fake.sent = sent
+        return fake
+
+    def _patches(self, post, delete=None):
+        return (
+            patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
+            patch.object(write_tools, "resolve_folder_id", return_value=UUID_F),
+            patch.object(write_tools, "make_post_request", side_effect=post),
+            patch.object(
+                write_tools,
+                "make_delete_request",
+                return_value=delete or _response(204),
+            ),
+        )
+
+    def test_creates_the_evidence_and_returns_the_curl(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "Audit"}), _response(200, ISSUED)
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4:
+            out = run(
+                write_tools.prepare_evidence_upload(
+                    filename="audit.pdf", name="Audit", folder_id="Acme"
+                )
+            )
+        assert post.sent == [
+            ("/evidences/", {"name": "Audit", "folder": UUID_F}),
+            (f"/evidences/{UUID_A}/upload-url/", {"filename": "audit.pdf"}),
+        ]
+        assert f"(ID: {UUID_A})" in out
+        assert ISSUED["expires_at"] in out
+        assert (
+            "curl -sS --fail-with-body -X POST "
+            "-H 'Content-Type: application/octet-stream' "
+            f"--data-binary @<sandbox path> '{UPLOAD_URL}'"
+        ) in out
+
+    def test_never_puts_a_credential_in_the_curl(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "a"}), _response(200, ISSUED)
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4:
+            out = run(write_tools.prepare_evidence_upload(filename="a.pdf"))
+        assert "Authorization" not in out
+        assert "Token " not in out and "Bearer" not in out
+
+    def test_existing_evidence_is_not_recreated(self):
+        post = self._post(_response(200, ISSUED))
+        p1, p2, p3, p4 = self._patches(post)
+        with (
+            p1,
+            p2,
+            p3,
+            p4,
+            patch("ca_mcp.resolvers.resolve_evidence_id", return_value=UUID_B),
+        ):
+            out = run(
+                write_tools.prepare_evidence_upload(
+                    filename="new.pdf", evidence_id="Existing"
+                )
+            )
+        assert post.sent == [
+            (f"/evidences/{UUID_B}/upload-url/", {"filename": "new.pdf"})
+        ]
+        assert f"Evidence ID: {UUID_B}" in out
+        assert UPLOAD_URL in out
+
+    def test_existing_evidence_without_change_permission(self):
+        post = self._post(_response(403, text="denied"))
+        p1, p2, p3, p4 = self._patches(post)
+        with (
+            p1,
+            p2,
+            p3,
+            p4 as delete,
+            patch("ca_mcp.resolvers.resolve_evidence_id", return_value=UUID_B),
+        ):
+            out = run(
+                write_tools.prepare_evidence_upload(
+                    filename="a.pdf", evidence_id=UUID_B
+                )
+            )
+        assert out == "Error getting an upload URL: 403 - denied"
+        delete.assert_not_called()
+
+    def test_new_evidence_is_rolled_back_when_no_url_is_issued(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "a"}), _response(500, text="boom")
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4 as delete:
+            out = run(write_tools.prepare_evidence_upload(filename="a.pdf"))
+        assert out.startswith("Error getting an upload URL: 500 - boom")
+        delete.assert_called_once_with(f"/evidences/{UUID_A}/")
+
+    def test_new_evidence_is_rolled_back_on_an_unexpected_error(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "a"}), _response(200, {})
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4 as delete:
+            out = run(write_tools.prepare_evidence_upload(filename="a.pdf"))
+        assert out.startswith("Error in prepare_evidence_upload:")
+        delete.assert_called_once_with(f"/evidences/{UUID_A}/")
+
+    def test_retry_hint_names_the_evidence(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "a"}), _response(200, ISSUED)
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4:
+            out = run(write_tools.prepare_evidence_upload(filename="a.pdf"))
+        assert f"evidence_id={UUID_A}" in out
+
+    def test_creation_failure_is_reported(self):
+        post = self._post(_response(400, text="bad status"))
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4:
+            out = run(
+                write_tools.prepare_evidence_upload(filename="a.pdf", status="nope")
+            )
+        assert out == "Error creating evidence: 400 - bad status"
+        assert len(post.sent) == 1
+
+    def test_filename_is_required_and_reduced_to_its_base_name(self):
+        post = self._post(
+            _response(201, {"id": UUID_A, "name": "x"}), _response(200, ISSUED)
+        )
+        p1, p2, p3, p4 = self._patches(post)
+        with p1, p2, p3, p4:
+            assert "filename is required" in run(
+                write_tools.prepare_evidence_upload(filename="  ")
+            )
+            run(write_tools.prepare_evidence_upload(filename="/mnt/data/x.pdf"))
+        assert post.sent[0][1]["name"] == "x.pdf"
+        assert post.sent[1][1] == {"filename": "x.pdf"}
+
+
+def test_prepare_evidence_upload_needs_create_and_update():
+    assert write_tools.prepare_evidence_upload in server.WRITE_TOOLS
+    assert server.needed_actions("prepare_evidence_upload") == {
+        server.actions.CREATE,
+        server.actions.UPDATE,
+    }
+
+
+def test_prepare_evidence_upload_is_only_registered_remotely():
+    from mcp.server.mcpserver import MCPServer
+
+    def names(is_http):
+        fresh = MCPServer("test")
+        with (
+            patch.object(server, "mcp", fresh),
+            patch.object(server, "_registered", False),
+            patch.object(server.config, "IS_HTTP", is_http),
+        ):
+            server.register_tools(read_only=False)
+            return {t.name for t in asyncio.run(fresh.list_tools())}
+
+    assert "prepare_evidence_upload" not in names(False)
+    assert "prepare_evidence_upload" in names(True)
+
+
+def test_the_oauth_server_offers_prepare_evidence_upload(monkeypatch):
+    monkeypatch.setattr(server.config, "IS_HTTP", False)
+    app = server.ActionFilteredServer("test")
+    server._register_on(app, read_only=False, remote=True)
+    names = {tool.name for tool in app._tool_manager.list_tools()}
+    assert "prepare_evidence_upload" in names
+    assert "create_evidence" not in names
