@@ -643,6 +643,27 @@ class TestWordReport:
         assert table[0] == ["Category", "Average", "Scored", "Items"]
         assert rows["Category B"] == ["5", "1", "1"]
 
+    def test_audit_without_scores_has_no_score_table(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        """As in the PDF: hidden scores print no table, not a table of zeros."""
+        layered_audit.scoring_enabled = False
+        layered_audit.save()
+        url = reverse(
+            "compliance-assessments-word-report",
+            kwargs={"pk": str(layered_audit.pk)},
+        )
+
+        response = admin_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        doc = Document(io.BytesIO(b"".join(response.streaming_content)))
+        headers = [[cell.text for cell in table.rows[0].cells] for table in doc.tables]
+        assert not any("Scored" in header for header in headers)
+        assert not any("Scores by category" in p.text for p in doc.paragraphs)
+
     def test_french_template(
         self,
         admin_client,  # noqa: F811

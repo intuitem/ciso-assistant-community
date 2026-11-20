@@ -14923,16 +14923,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
+        reader_role = audit_reader_role(request.user, audit_obj)
         context = gen_audit_context(
             pk,
             tree,
             user_lang,
             tz=get_report_timezone(),
             readable=ViewableFilter(request.user).allows,
-            score_layers=visible_layers(
-                audit_obj, audit_reader_role(request.user, audit_obj)
-            ),
+            score_layers=visible_layers(audit_obj, reader_role),
         )
+        if not is_field_visible_to(audit_obj, "score", reader_role):
+            # No score table where the reader has no scores, as in the PDF; an
+            # audit that does not use scores would otherwise print zeros.
+            context["category_scores"] = {}
+            context["overall_scores"] = None
 
         # Custom overrides support any language; auto-generated strings only en/fr.
         custom_template = None
