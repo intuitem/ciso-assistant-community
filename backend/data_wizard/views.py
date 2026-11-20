@@ -1336,6 +1336,34 @@ class AssetRecordConsumer(RecordConsumer[list]):
             index.setdefault(_normalize_key(name), {})[name] = pk
         return index
 
+    def find_existing(self, record_data: dict) -> Optional[Asset]:
+        """Return the asset of the folder matching every non-blank field of
+        `Asset.fields_to_check` (ref_id and name, trimmed, case-insensitive),
+        or None.
+
+        Same rule as `Asset.is_unique_in_scope`: two assets may share a name when
+        their ref_ids differ, which the generic ref_id-or-name lookup refuses.
+        Values are trimmed because the serializer trims them before saving.
+
+        Raises FolderScopeError when no folder is known.
+        """
+        folder = record_data.get("folder") or self.folder_id
+        if folder is None:
+            raise FolderScopeError(
+                "Cannot resolve existing record without folder context: "
+                "provide an X-Folder-Id header or a 'domain' column"
+            )
+        query = {}
+        for field in Asset.fields_to_check:
+            value = record_data.get(field)
+            if isinstance(value, str):
+                value = value.strip()
+            if value not in (None, ""):
+                query[f"{field}__iexact"] = value
+        if not query:
+            return None
+        return Asset.objects.filter(folder=folder, **query).first()
+
     def create_context(self):
         return _get_security_objective_scale(), None
 
@@ -5640,21 +5668,23 @@ class LoadFileView(APIView):
                                         "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
                                     }
                                 )
+                        # The audit export names the implementation score
+                        # implementation_score when the audit has a documentation
+                        # score, score otherwise. Each score is read on its own:
+                        # a row may carry only one of them.
                         impl_score = record.get("implementation_score")
+                        if impl_score in (None, ""):
+                            impl_score = record.get("score")
                         doc_score = record.get("documentation_score")
-                        score = record.get("score")
-                        enable_doc_score = False
-                        if impl_score not in (None, "") and doc_score not in (None, ""):
+                        if impl_score not in (None, ""):
                             requirement_data.update(
-                                {
-                                    "score": impl_score,
-                                    "documentation_score": doc_score,
-                                    "is_scored": True,
-                                }
+                                {"score": impl_score, "is_scored": True}
                             )
-                            enable_doc_score = True
-                        elif score not in (None, ""):
-                            requirement_data.update({"score": score, "is_scored": True})
+                        # is_scored follows the implementation score alone: a
+                        # documentation score does not make a requirement scored.
+                        enable_doc_score = doc_score not in (None, "")
+                        if enable_doc_score:
+                            requirement_data["documentation_score"] = doc_score
 
                         # Build answers from the "answers" cell
                         answers_cell = record.get("answers")

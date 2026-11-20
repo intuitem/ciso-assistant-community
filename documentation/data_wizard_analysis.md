@@ -250,7 +250,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |
 | `documentation_score` | No | |
-| `score` | No | Single-score mode (when no documentation_score) |
+| `score` | No | Same as `implementation_score`, read when that cell is blank. Either score can be filled without the other |
 | `Q: <question text>` | No | Flattened questionnaire answers (see below) |
 
 **Dynamic Questionnaire Support (Q: columns):**
