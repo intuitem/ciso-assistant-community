@@ -12755,12 +12755,13 @@ class EvidenceFilterSet(GenericFilterSet):
 
 
 class EvidenceViewSet(BaseModelViewSet):
-    # upload_url is a POST that changes an existing evidence: RBAC would
-    # otherwise check add_evidence.
-    permission_overrides = {"upload_url": "change_evidence"}
     """
     API endpoint that allows evidences to be viewed or edited.
     """
+
+    # upload_url is a POST that changes an existing evidence: RBAC would
+    # otherwise check add_evidence.
+    permission_overrides = {"upload_url": "change_evidence"}
 
     search_fields = ["name", "description", "ref_id"]
 
