@@ -15962,23 +15962,30 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         for a in audits:
             if a.framework and (key := (a.framework_id, saved.get(a.id))) not in fits:
                 fits[key] = resolve_guide(a.framework, key[1])
+        rows = [
+            {
+                "id": a.id,
+                "name": a.name,
+                "status": a.status,
+                "framework": a.framework.name,
+                "folder": {"str": str(a.folder)} if a.folder else None,
+                "perimeter": {"id": str(a.perimeter_id), "str": str(a.perimeter)}
+                if a.perimeter
+                else None,
+                "exact": fit["exact"],
+                "coverage": round(fit["coverage"], 3),
+                "applies": fit["applies"],
+            }
+            for a in audits
+            if (fit := fits.get((a.framework_id, saved.get(a.id))))
+            and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
+        ]
+        # Masked like the audit list: no label for a perimeter the user cannot view.
+        fields = {"perimeter": Perimeter}
         return Response(
-            [
-                {
-                    "id": a.id,
-                    "name": a.name,
-                    "status": a.status,
-                    "framework": a.framework.name,
-                    "folder": {"str": str(a.folder)} if a.folder else None,
-                    "perimeter": {"str": str(a.perimeter)} if a.perimeter else None,
-                    "exact": fit["exact"],
-                    "coverage": round(fit["coverage"], 3),
-                    "applies": fit["applies"],
-                }
-                for a in audits
-                if (fit := fits.get((a.framework_id, saved.get(a.id))))
-                and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
-            ]
+            self._filter_related_fields(
+                rows, fields, self._get_accessible_ids_map(set(fields.values()))
+            )
         )
 
     @action(detail=True, methods=["get"])

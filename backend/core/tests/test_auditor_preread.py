@@ -833,6 +833,11 @@ def test_preread_permissions_with_builtin_roles():
     assert reader.get(url(audit)).status_code == 403
     assert reader.post(url(audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 403  # fmt: skip
     assert analyst.get(url(audit)).status_code == 200
+    # The audit list masks a perimeter the analyst cannot view.
+    audit.perimeter = Perimeter.objects.get(name="theirs")
+    audit.save()
+    listed = analyst.get("/api/compliance-assessments/auditor_preread_audits/").json()
+    assert [a["perimeter"] for a in listed] == [{}]
     assert analyst.post(url(audit, "preparation/"), {"fields": {"stage": "stage_2"}}, format="json").status_code == 204  # fmt: skip
     # Another domain's audit does not exist for them.
     assert analyst.get(url(other_audit)).status_code == 404
