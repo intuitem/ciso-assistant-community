@@ -81,6 +81,7 @@ from .generators import (
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
+    report_reader_role,
     render_docx_report,
     render_docx_report_bounded,
     DocxRenderCrash,
@@ -88,6 +89,7 @@ from .generators import (
     DocxRenderTimeout,
     DocxTemplateError,
 )
+from .framework_report import visible_layers
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
@@ -539,6 +541,41 @@ def escape_csv_row(row):
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
+    ]
+
+
+def audit_reader_role(user, audit):
+    """The viewer role a user reads the audit with."""
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders and audit.folder_id in respondent_folders:
+        return "respondent"
+    return "auditor"
+
+
+def export_shows_documentation_score(user, audit):
+    """Whether an audit export may carry the documentation and maturity scores."""
+    return audit.show_documentation_score and "documentation_score" in (
+        visible_layers(audit, audit_reader_role(user, audit))
+    )
+
+
+def export_documentation_and_maturity(audit, ra):
+    """The documentation score as recorded and the maturity score as the audit
+    counts it (Framework Insights' requirement figures), for an audit export.
+    Empty for a not applicable requirement, like its implementation score."""
+    if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+        return [None, None]
+    maturity = audit.requirement_layer_scores(
+        result=ra.result,
+        is_scored=ra.is_scored,
+        score=ra.score,
+        documentation_score=ra.documentation_score,
+        min_score=ra.requirement.min_score,
+        max_score=ra.requirement.max_score,
+    )["maturity_score"]
+    return [
+        ra.documentation_score,
+        None if maturity is None else round_score(maturity),
     ]
 
 
@@ -14654,9 +14691,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "applied_controls",
                 "answers",
             ]
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            # Appended, so the existing columns keep their place; `score` stays
+            # the implementation score.
+            show_documentation_score = export_shows_documentation_score(
+                request.user, compliance_assessment
+            )
+            if show_documentation_score:
+                columns += ["documentation_score", "maturity_score"]
             writer.writerow(columns)
 
-            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
             reqs = list(
                 compliance_assessment.get_requirement_assessments(
                     include_non_assessable=True
@@ -14679,7 +14723,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         req.result,
                         req.extended_result,
                         req.status,
-                        req.score,
+                        None
+                        if req.result == RequirementAssessment.Result.NOT_APPLICABLE
+                        else req.score,
                         req.observation,
                         ",".join(c.name for c in viewable(req.applied_controls.all())),
                     ]
@@ -14691,6 +14737,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         build_answers_dict(req.answers.all()),
                     )
                 )
+                if show_documentation_score:
+                    row += export_documentation_and_maturity(compliance_assessment, req)
                 writer.writerow(escape_csv_row(row))
 
             return response
@@ -14710,7 +14758,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
-        show_documentation_score = audit.show_documentation_score
+        show_documentation_score = export_shows_documentation_score(request.user, audit)
         requirement_assessments = audit.get_requirement_assessments(
             include_non_assessable=True
         )
@@ -14758,11 +14806,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     for c in viewable(req.applied_controls.all())
                 ),
             }
+            is_na = req.result == RequirementAssessment.Result.NOT_APPLICABLE
+            score = None if is_na else req.score
             if show_documentation_score:
-                entry["implementation_score"] = req.score
-                entry["documentation_score"] = req.documentation_score
+                entry["implementation_score"] = score
+                entry["documentation_score"] = (
+                    None if is_na else req.documentation_score
+                )
             else:
-                entry["score"] = req.score
+                entry["score"] = score
 
             if has_questions:
                 # Round-tripped so re-import keeps the override state.
@@ -14774,6 +14826,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     questions_by_node.get(req_node.id),
                     answers_by_req.get(req.id, {}),
                 )
+
+            if show_documentation_score:
+                # Last, and read by no import: it is computed from the two
+                # scores, which are the ones to edit.
+                entry["maturity_score"] = export_documentation_and_maturity(audit, req)[
+                    1
+                ]
 
             entries.append(entry)
 
@@ -14887,13 +14946,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
+        reader_role = audit_reader_role(request.user, audit_obj)
         context = gen_audit_context(
             pk,
             tree,
             user_lang,
             tz=get_report_timezone(),
             readable=ViewableFilter(request.user).allows,
+            score_layers=visible_layers(audit_obj, reader_role),
         )
+        if not is_field_visible_to(audit_obj, "score", reader_role):
+            # No score table where the reader has no scores, as in the PDF; an
+            # audit that does not use scores would otherwise print zeros.
+            context["category_scores"] = {}
+            context["overall_scores"] = None
 
         # Custom overrides support any language; auto-generated strings only en/fr.
         custom_template = None
@@ -14957,12 +15023,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         audit = self.get_object()
-        respondent_folders = get_respondent_scoped_folder_ids(request.user)
-        role = (
-            "respondent"
-            if respondent_folders and audit.folder_id in respondent_folders
-            else "auditor"
-        )
+        role = audit_reader_role(request.user, audit)
 
         framework = audit.framework
         # Object-level permission is not enough: a respondent sees only their
@@ -15000,6 +15061,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             charts=wants_charts,
             tz=get_report_timezone(),
             readable=viewable.allows,
+            # Scores this reader may see, so the radar is drawn for them.
+            score_layers=visible_layers(audit, report_reader_role(role, profile)),
         )
         payload, images = audit_context_for_typst(
             context,
