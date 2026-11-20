@@ -296,8 +296,13 @@ def test_glpi_item_type_is_locked_while_objects_are_linked(admin_client, root_fo
     assert response.status_code == 400, response.content
     assert "Software to Computer" in str(response.json())
     assert save_assets("Software").status_code == 200
-    # Turning asset sync off is not a change of type.
+    # Turning asset sync off is not a change of type, and does not free it:
+    # the links still name software.
     assert save_assets("").status_code == 200
+    response = save_assets("Computer")
+    assert response.status_code == 400, response.content
+    assert "Software to Computer" in str(response.json())
+    assert save_assets("Software").status_code == 200
 
 
 GLPI_SHOWN_CREDENTIALS = {
@@ -354,33 +359,101 @@ def test_glpi_checks_the_settings_of_each_model(admin_client, root_folder):
     assert stored["models"]["asset"]["table_name"] == "Computer"
 
 
-def _glpi_item(item_type, item_id, name="in GLPI"):
-    return {
-        "key": str(item_id),
-        "fields": {"id": int(item_id), "name": f"{item_type} {item_id} {name}"},
-        "updated": "2026-11-20T10:00:00+00:00",
-    }
+class FakeGLPI:
+    """Stands in for the GLPI client's item calls: items live in ``items``,
+    keyed by item type and id, and every write is recorded."""
+
+    def __init__(self):
+        self.items: dict[tuple[str, str], dict] = {}
+        self.writes: list[tuple[str, str, dict]] = []
+        self.clock = 0
+
+    def put(self, item_type, item_id, **fields):
+        item = self.items.setdefault((item_type, str(item_id)), {"id": int(item_id)})
+        item.update(fields)
+        self.clock += 1
+        item["date_mod"] = f"2026-11-20T10:00:{self.clock:02d}+00:00"
+
+    def _read(self, client, remote_id):
+        item = self.items.get((client.table, client._item_id(remote_id)))
+        return None if item is None else client.normalize_item(dict(item))
+
+    def _get(self, client, remote_id):
+        return self._read(client, remote_id)
+
+    def _update(self, client, remote_id, changes):
+        item_id = client._item_id(remote_id)
+        self.writes.append((client.table, item_id, dict(changes)))
+        self.put(client.table, item_id, **changes)
+        return True
+
+    def _create(self, client, local_object):
+        raise AssertionError("no item is expected to be created")
+
+    def __enter__(self):
+        from contextlib import ExitStack
+
+        from integrations.itsm.glpi.client import GLPIClient
+
+        self._stack = ExitStack()
+        self._stack.enter_context(
+            patch("integrations.itsm.glpi.client.check_integration_url")
+        )
+        for method, fake in (
+            ("read_item", self._read),
+            ("get_remote_object", self._get),
+            ("update_remote_object", self._update),
+            ("create_remote_object", self._create),
+        ):
+            self._stack.enter_context(
+                patch.object(GLPIClient, method, autospec=True, side_effect=fake)
+            )
+        return self
+
+    def __exit__(self, *exc):
+        self._stack.close()
+
+
+def _glpi_config(root_folder, **settings):
+    return IntegrationConfiguration.objects.create(
+        provider=IntegrationProvider.objects.get(name="glpi"),
+        folder=root_folder,
+        credentials=GLPI_CREDENTIALS,
+        settings={"table_name": "Ticket", **settings},
+    )
+
+
+COMPUTERS = {"asset": {"table_name": "Computer", "field_map": {"name": "name"}}}
+
+
+def _orchestrator(config):
+    from integrations.registry import IntegrationRegistry
+
+    config.refresh_from_db()
+    return IntegrationRegistry.get_orchestrator(config)
+
+
+def _link(config, local_object, remote_id, **fields):
+    from django.contrib.contenttypes.models import ContentType
+
+    from integrations.models import SyncMapping
+
+    return SyncMapping.objects.create(
+        configuration=config,
+        content_type=ContentType.objects.get_for_model(local_object),
+        local_object_id=local_object.id,
+        remote_id=remote_id,
+        **fields,
+    )
 
 
 def test_glpi_ticket_and_asset_sharing_an_id_sync_apart(admin_client, root_folder):
     """GLPI numbers each item type on its own, and a webhook does not name
     the type it is about: ticket 4 and computer 4 must not be mixed up."""
     from core.models import AppliedControl, Asset
-    from integrations.itsm.glpi.client import GLPIClient
     from integrations.models import SyncMapping
-    from integrations.registry import IntegrationRegistry
 
-    config = IntegrationConfiguration.objects.create(
-        provider=IntegrationProvider.objects.get(name="glpi"),
-        folder=root_folder,
-        credentials=GLPI_CREDENTIALS,
-        settings={
-            "table_name": "Ticket",
-            "models": {
-                "asset": {"table_name": "Computer", "field_map": {"name": "name"}}
-            },
-        },
-    )
+    config = _glpi_config(root_folder, models=COMPUTERS)
     control = AppliedControl.objects.create(name="Control", folder=root_folder)
     asset = Asset.objects.create(name="Asset", folder=root_folder)
 
@@ -394,65 +467,167 @@ def test_glpi_ticket_and_asset_sharing_an_id_sync_apart(admin_client, root_folde
             )
             assert response.status_code == 200, response.content
 
-    gone = set()
-    renamed = set()
-
-    def read(client, remote_id):
-        if client.table in gone:
-            return None
-        name = "renamed" if client.table in renamed else "in GLPI"
-        return _glpi_item(client.table, client._item_id(remote_id), name)
-
     def links():
         return {
             mapping.content_type.model: mapping
             for mapping in SyncMapping.objects.filter(configuration=config)
         }
 
-    with (
-        patch("integrations.itsm.glpi.client.check_integration_url"),
-        patch.object(GLPIClient, "get_remote_object", autospec=True, side_effect=read),
-        patch.object(GLPIClient, "read_item", autospec=True, side_effect=read),
-    ):
-        # The push queued by the link stores each id under its item type.
-        orchestrator = IntegrationRegistry.get_orchestrator(config)
+    def names():
+        control.refresh_from_db()
+        asset.refresh_from_db()
+        return control.name, asset.name
+
+    with FakeGLPI() as glpi:
+        glpi.put("Ticket", 4, name="Ticket 4")
+        glpi.put("Computer", 4, name="Computer 4")
+
+        # The push queued by the link stores each id under its item type. A
+        # link copies nothing either way.
+        orchestrator = _orchestrator(config)
         assert orchestrator.push_changes(control, []) is True
         assert orchestrator.push_changes(asset, []) is True
         assert links()["appliedcontrol"].remote_id == "Ticket:4"
         assert links()["asset"].remote_id == "Computer:4"
+        assert glpi.writes == []
+        assert names() == ("Control", "Asset")
 
         # The computer is renamed in GLPI. The delivery only says "item 4":
-        # the asset follows its computer, and the control linked to ticket 4
-        # only ever gets the state of that ticket.
-        orchestrator = IntegrationRegistry.get_orchestrator(config)
-        renamed.add("Computer")
-        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
-        control.refresh_from_db()
-        asset.refresh_from_db()
-        assert asset.name == "Computer 4 renamed"
-        assert control.name == "Ticket 4 in GLPI"
+        # the asset follows, the control linked to ticket 4 is left alone.
+        glpi.put("Computer", 4, name="Computer 4 renamed")
+        update = {"item": {"id": 4}}
+        assert _orchestrator(config).handle_webhook_event("update", update) is True
+        assert names() == ("Control", "Computer 4 renamed")
 
         # And the other way round.
-        renamed.add("Ticket")
-        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
-        control.refresh_from_db()
-        asset.refresh_from_db()
-        assert control.name == "Ticket 4 renamed"
-        assert asset.name == "Computer 4 renamed"
+        glpi.put("Ticket", 4, name="Ticket 4 renamed")
+        assert _orchestrator(config).handle_webhook_event("update", update) is True
+        assert names() == ("Ticket 4 renamed", "Computer 4 renamed")
 
         # The computer is deleted in GLPI: the ticket link is left alone.
-        gone.add("Computer")
-        assert orchestrator.handle_webhook_event("delete", {"item": {"id": 4}}) is True
+        del glpi.items[("Computer", "4")]
+        assert _orchestrator(config).handle_webhook_event("delete", update) is True
         assert links()["asset"].sync_status == SyncMapping.SyncStatus.FAILED
         assert links()["appliedcontrol"].sync_status == SyncMapping.SyncStatus.SYNCED
 
         # Items nobody linked are not read.
-        with patch.object(GLPIClient, "read_item") as read_item:
-            assert (
-                orchestrator.handle_webhook_event("update", {"item": {"id": 5}})
-                is False
-            )
-        read_item.assert_not_called()
+        glpi.put("Ticket", 5, name="Unlinked")
+        other = {"item": {"id": 5}}
+        assert _orchestrator(config).handle_webhook_event("update", other) is False
+
+
+def test_glpi_bare_id_link_syncs_with_outgoing_sync_off(root_folder):
+    """Nothing is pushed then, so the id stays as the API call gave it until
+    the first delivery about it."""
+    from core.models import AppliedControl, Asset
+
+    config = _glpi_config(root_folder, models=COMPUTERS, enable_incoming_sync=True)
+    asset = Asset.objects.create(name="Asset", folder=root_folder)
+    control = AppliedControl.objects.create(name="Control", folder=root_folder)
+    asset_link = _link(config, asset, "4")
+    # Linked under an asset type by mistake: a control is never synced with a
+    # computer.
+    control_link = _link(config, control, "Computer:7")
+
+    with FakeGLPI() as glpi:
+        glpi.put("Computer", 4, name="Computer 4")
+        glpi.put("Computer", 7, name="Computer 7")
+        glpi.put("Ticket", 7, name="Ticket 7")
+        orchestrator = _orchestrator(config)
+        assert orchestrator.handle_webhook_event("update", {"item": {"id": 4}}) is True
+        assert orchestrator.handle_webhook_event("update", {"item": {"id": 7}}) is False
+
+    asset_link.refresh_from_db()
+    asset.refresh_from_db()
+    control.refresh_from_db()
+    control_link.refresh_from_db()
+    assert asset_link.remote_id == "Computer:4"
+    assert asset.name == "Computer 4"
+    assert control.name == "Control"
+    assert control_link.remote_data == {}
+
+
+def test_glpi_relinked_object_takes_the_first_update_of_its_new_item(root_folder):
+    from core.models import Asset
+
+    config = _glpi_config(root_folder, models=COMPUTERS, enable_incoming_sync=True)
+    asset = Asset.objects.create(name="Asset", folder=root_folder)
+    # Was linked to computer 4, read at 16:05, then pointed at computer 5.
+    link = _link(
+        config,
+        asset,
+        "Computer:5",
+        remote_data={
+            "key": "4",
+            "fields": {"id": 4, "name": "Computer 4"},
+            "updated": "2026-11-20T16:05:00+00:00",
+        },
+    )
+
+    with FakeGLPI() as glpi:
+        glpi.put("Computer", 5, name="Computer 5")
+        glpi.items[("Computer", "5")]["date_mod"] = "2026-11-20T16:02:00+00:00"
+        update = {"item": {"id": 5}}
+        assert _orchestrator(config).handle_webhook_event("update", update) is True
+
+    asset.refresh_from_db()
+    link.refresh_from_db()
+    assert asset.name == "Computer 5"
+    assert link.remote_data["key"] == "5"
+
+
+def test_glpi_pending_local_edit_and_glpi_change_both_survive(root_folder):
+    """A rename waits to be pushed while GLPI changes the priority, and the
+    delivery comes twice. Then the other order: the push runs first, and its
+    read-back already holds a GLPI change nobody applied yet."""
+    from core.models import AppliedControl
+
+    config = _glpi_config(root_folder, enable_incoming_sync=True)
+    control = AppliedControl.objects.create(
+        name="Old name", priority=3, folder=root_folder
+    )
+    link = _link(config, control, "Ticket:4")
+    update = {"item": {"id": 4}}
+
+    with FakeGLPI() as glpi:
+        glpi.put("Ticket", 4, name="Old name", priority=3, status={"id": 1})
+        assert _orchestrator(config).push_changes(control, []) is True
+
+        # Renamed locally, not pushed yet. GLPI raises the priority.
+        control.name = "Renamed locally"
+        control.save(skip_sync=True)
+        glpi.put("Ticket", 4, priority=5)
+        for _ in range(2):
+            assert _orchestrator(config).handle_webhook_event("update", update) is True
+            control.refresh_from_db()
+            assert (control.name, control.priority) == ("Renamed locally", 1)
+
+        # The rename is pushed. Meanwhile GLPI lowered the priority again:
+        # the push reads that back, and the delivery about it comes after.
+        glpi.put("Ticket", 4, priority=2)
+        assert _orchestrator(config).push_changes(control, ["name"]) is True
+        assert glpi.writes == [("Ticket", "4", {"name": "Renamed locally"})]
+        link.refresh_from_db()
+        assert link.remote_data["fields"]["name"] == "Renamed locally"
+        assert link.remote_data["fields"]["priority"] == 5
+
+        assert _orchestrator(config).handle_webhook_event("update", update) is True
+        control.refresh_from_db()
+        assert (control.name, control.priority) == ("Renamed locally", 4)
+        assert glpi.items[("Ticket", "4")]["name"] == "Renamed locally"
+
+
+def test_glpi_asset_without_a_mapped_field_is_not_pushed(root_folder):
+    from core.models import Asset
+    from integrations.models import SyncMapping
+
+    config = _glpi_config(root_folder, models={"asset": {"table_name": "Computer"}})
+    asset = Asset.objects.create(name="Asset", folder=root_folder)
+
+    with FakeGLPI() as glpi:
+        assert _orchestrator(config).push_changes(asset, []) is False
+        assert glpi.writes == []
+    assert not SyncMapping.objects.filter(configuration=config).exists()
 
 
 def test_glpi_asset_picker_lists_the_asset_item_type(admin_client, root_folder):
@@ -566,8 +741,17 @@ def test_glpi_saved_secrets_stay_with_their_connection(admin_client, root_folder
     # Neither secret, then only one of the two: the other would follow along.
     assert save(**elsewhere).status_code == 400
     assert save(**elsewhere, password=fresh["password"]).status_code == 400
+    assert save(client_id="other", password=fresh["password"]).status_code == 400
     config.refresh_from_db()
     assert config.credentials == stored
+
+    # On the same connection, either secret can be replaced on its own.
+    for key in ("password", "client_secret"):
+        assert save(**{key: fresh[key]}).status_code == 200
+        config.refresh_from_db()
+        assert config.credentials == {**stored, key: fresh[key]}
+        config.credentials = dict(stored)
+        config.save(update_fields=["credentials"])
 
     moved = {**elsewhere, **fresh}
     assert save(**moved).status_code == 200

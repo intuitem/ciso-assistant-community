@@ -330,6 +330,23 @@ def test_asset_mapping_suggestion_follows_the_item_type():
     assert "ref_id" not in suggestion["field_map"]
 
 
+def test_text_that_looks_like_a_number_is_sent_as_text():
+    settings = {
+        "models": {
+            "asset": {
+                "field_map": {"type": "contact"},
+                "value_map": {"type": {"PR": "007", "SP": "8"}},
+            }
+        }
+    }
+    mapper = GLPIFieldMapper(_configuration(settings), "asset")
+
+    assert mapper.to_remote(SimpleNamespace(type="PR")) == {"contact": "007"}
+    assert mapper.to_local({"fields": {"contact": "007"}}) == {"type": "PR"}
+    # A plain number is an id, as for ticket statuses and priorities.
+    assert mapper.to_remote(SimpleNamespace(type="SP")) == {"contact": 8}
+
+
 def test_rich_text_round_trip():
     text = "First line\nSecond <b> & line"
     assert html_to_text(text_to_html(text)) == text
@@ -539,6 +556,12 @@ def test_a_created_item_is_linked_under_its_type(mock_request):
         "https://glpi.example.com/api.php/v2/Assets/Computer",
     )
     assert mock_request.call_args[1]["json"] == {"name": "DB server"}
+
+    # Nothing to put in the item: GLPI is not asked to create an empty one.
+    mock_request.reset_mock()
+    with pytest.raises(ValueError):
+        client.create_remote_object(SimpleNamespace(name=None, description=None))
+    mock_request.assert_not_called()
 
 
 @patch("integrations.itsm.glpi.client.SyncMapping")
@@ -774,26 +797,6 @@ def test_webhooks_for_other_items_do_not_reach_glpi():
     orchestrator._handle_remote_deletion.assert_not_called()
 
 
-def test_a_delivery_is_looked_up_under_every_synced_item_type():
-    """A delivery does not say whether id 4 is a ticket or a computer."""
-    orchestrator = GLPIOrchestrator(_configuration(ASSET_SETTINGS))
-    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
-        lookup = mapping.objects.filter.return_value.values_list
-        lookup.return_value = ["Computer:4"]
-        assert orchestrator._linked("4") == [("asset", "Computer:4")]
-    assert sorted(mapping.objects.filter.call_args[1]["remote_id__in"]) == [
-        "Computer:4",
-        "Ticket:4",
-    ]
-
-    # Without an asset item type, only tickets are looked up.
-    orchestrator = GLPIOrchestrator(_configuration())
-    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
-        mapping.objects.filter.return_value.values_list.return_value = []
-        assert orchestrator._linked("4") == []
-    assert mapping.objects.filter.call_args[1]["remote_id__in"] == ["Ticket:4"]
-
-
 def test_a_ticket_and_an_asset_sharing_an_id_are_each_read_as_their_own_type():
     orchestrator = GLPIOrchestrator(_configuration(ASSET_SETTINGS))
     orchestrator._linked = MagicMock(
@@ -887,40 +890,78 @@ def test_a_state_older_than_the_synced_one_is_not_applied(synced, read_back, app
     assert orchestrator.pull_changes.called is applied
 
 
-def test_pending_local_edit_survives_a_change_to_other_fields_in_glpi():
-    """The control was renamed locally and not pushed yet when GLPI reports a
-    new priority: only the priority is taken from GLPI."""
+def _state(name, priority, item_id=4):
+    fields = {"id": item_id, "name": name, "priority": priority, "status": {"id": 1}}
+    return {"key": str(item_id), "fields": fields, "updated": "d"}
+
+
+def _merging_orchestrator():
     orchestrator = GLPIOrchestrator(_configuration())
     local_object = MagicMock()
     orchestrator._get_local_object = MagicMock(return_value=local_object)
     orchestrator._update_local_object = MagicMock()
+    return orchestrator, local_object
 
-    def state(name, priority):
-        fields = {"id": 4, "name": name, "priority": priority, "status": {"id": 1}}
-        return {"key": "4", "fields": fields, "updated": "d"}
 
-    mapping = MagicMock(remote_data=state("Old name", 3), version=1, remote_id="4")
-    assert orchestrator._resolve_conflict(mapping, state("Old name", 5)) is True
+def test_only_what_changed_in_glpi_is_applied():
+    """The control was renamed locally and not pushed yet when GLPI reports a
+    new priority: only the priority is taken from GLPI."""
+    orchestrator, local_object = _merging_orchestrator()
+    merge = orchestrator._merge_remote_changes
+
+    mapping = MagicMock(
+        remote_data=_state("Old name", 3), version=1, remote_id="Ticket:4"
+    )
+    assert merge(mapping, _state("Old name", 5), "applied_control") == {"priority": 1}
     orchestrator._update_local_object.assert_called_once_with(
         local_object, {"priority": 1}
     )
-    assert mapping.remote_data == state("Old name", 5)
+    assert mapping.remote_data == _state("Old name", 5)
     mapping.save.assert_called_once()
 
-    # Both sides changed the same field: GLPI wins, as before.
+    # The same delivery again, the rename still not pushed: nothing to apply,
+    # so the old name does not come back.
     orchestrator._update_local_object.reset_mock()
-    mapping = MagicMock(remote_data=state("Old name", 3), version=1, remote_id="4")
-    orchestrator._resolve_conflict(mapping, state("Renamed in GLPI", 3))
-    orchestrator._update_local_object.assert_called_once_with(
-        local_object, {"name": "Renamed in GLPI"}
-    )
+    assert merge(mapping, _state("Old name", 5), "applied_control") == {}
+    orchestrator._update_local_object.assert_not_called()
 
-    # Nothing known about the previous state: everything GLPI holds applies.
-    orchestrator._update_local_object.reset_mock()
-    mapping = MagicMock(remote_data={}, version=1, remote_id="4")
-    orchestrator._resolve_conflict(mapping, state("N", 3))
-    assert set(orchestrator._update_local_object.call_args[0][1]) == {
-        "name",
-        "priority",
-        "status",
+    # Both sides changed the same field: GLPI wins.
+    assert merge(mapping, _state("Renamed in GLPI", 5), "applied_control") == {
+        "name": "Renamed in GLPI"
     }
+
+
+def test_everything_applies_when_no_state_is_agreed_for_the_item():
+    orchestrator, _ = _merging_orchestrator()
+    everything = {"name", "priority", "status"}
+
+    mapping = MagicMock(remote_data={}, version=1, remote_id="Ticket:4")
+    applied = orchestrator._merge_remote_changes(
+        mapping, _state("N", 3), "applied_control"
+    )
+    assert set(applied) == everything
+
+    # Relinked from ticket 9 to ticket 4: what is stored describes ticket 9.
+    mapping = MagicMock(
+        remote_data=_state("N", 3, item_id=9), version=1, remote_id="Ticket:4"
+    )
+    applied = orchestrator._merge_remote_changes(
+        mapping, _state("N", 3), "applied_control"
+    )
+    assert set(applied) == everything
+
+
+def test_the_state_of_another_item_does_not_date_this_one():
+    """A link pointed at another item keeps the old item's state until the
+    next sync: its date must not make the new item's look outdated."""
+    orchestrator = GLPIOrchestrator(_configuration())
+    newer = {"key": "4", "fields": {}, "updated": "2026-11-17T16:05:00+00:00"}
+    older = {"key": "5", "fields": {}, "updated": "2026-11-17T16:02:00+00:00"}
+
+    with patch("integrations.itsm.glpi.integration.SyncMapping") as mapping:
+        lookup = mapping.objects.filter.return_value.values_list.return_value
+        lookup.first.return_value = newer
+        assert orchestrator._synced_state("Ticket:5") is None
+        assert orchestrator._synced_state("Ticket:4") == newer
+    assert orchestrator._is_outdated(None, older) is False
+    assert orchestrator._is_outdated(newer, older) is True

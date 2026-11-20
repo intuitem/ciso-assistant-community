@@ -49,6 +49,8 @@ export const actions: Actions = {
 		}
 
 		const { id, ...data } = form.data;
+		// Only informs validation: it is not a stored field.
+		delete data.has_webhook_secret;
 
 		const body = {
 			...data
@@ -93,6 +95,7 @@ export const actions: Actions = {
 		// saves without waiting for the invalidateAll-triggered reload to settle.
 		const saved = await response.json();
 		form.data.id = saved.id;
+		form.data.has_webhook_secret = saved.has_webhook_secret ?? form.data.has_webhook_secret;
 		setFlash({ type: 'success', message: 'Successfully saved GLPI integration config' }, event);
 		return { form };
 	}

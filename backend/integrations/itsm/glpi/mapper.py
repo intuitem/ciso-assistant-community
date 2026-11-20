@@ -272,8 +272,15 @@ class GLPIFieldMapper(BaseFieldMapper):
             mapped = self.value_map_to_remote.get(field, {}).get(str(value))
             if mapped is None:
                 return None
-            # GLPI enums are integer ids.
-            remote = int(mapped) if str(mapped).isdigit() else mapped
+            # GLPI enums are integer ids. Text that only looks like a number
+            # ("007") is kept: sent as 7, it would not map back.
+            remote = mapped
+            if (
+                isinstance(mapped, str)
+                and mapped.isdigit()
+                and str(int(mapped)) == mapped
+            ):
+                remote = int(mapped)
             if self.field_map.get(field) == STATUS_FIELD:
                 # GLPI 11.0.0 and 11.0.1 ignore a status sent as a bare id;
                 # every release takes the form the API itself returns.

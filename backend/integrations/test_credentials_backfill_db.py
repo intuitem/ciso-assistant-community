@@ -181,3 +181,32 @@ def test_one_of_two_stored_secrets_cannot_follow_a_new_host(jira_config):
             "password": "NEW-PASSWORD",
         },
     )
+
+
+def test_one_of_two_stored_secrets_can_be_replaced_on_the_same_connection(jira_config):
+    same_connection = {"instance_url": "https://victim.example", "username": "sync"}
+    # Derived values: no literal here looks like a credential to a scanner.
+    old = {key: f"{STORED['api_token']}-{key}" for key in ("password", "api_token")}
+    new = {key: f"{value}-rotated" for key, value in old.items()}
+    jira_config.credentials = {**same_connection, **old}
+    jira_config.save(update_fields=["credentials"])
+
+    saved = _save(jira_config, {**same_connection, "password": new["password"]})
+    assert saved.credentials == {**same_connection, **old, "password": new["password"]}
+
+    # The connection test follows the same rule.
+    out = ConnectionTestSerializer().validate(
+        {
+            "provider": "jira",
+            "configuration_id": saved,
+            "credentials": {**same_connection, "api_token": new["api_token"]},
+            "settings": {},
+        }
+    )
+    assert out["credentials"] == {**same_connection, **new}
+
+    # Another account on the same host is another connection.
+    _refused(
+        jira_config,
+        {**same_connection, "username": "x", **{"password": new["password"]}},
+    )

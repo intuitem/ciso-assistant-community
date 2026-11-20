@@ -307,6 +307,12 @@ class GLPIClient(BaseIntegrationClient):
 
     def create_remote_object(self, local_object) -> str:
         payload = self.mapper.to_remote(local_object)
+        if not payload:
+            # GLPI would create an empty item.
+            raise ValueError(
+                f"No mapped field of this object has a value to create a GLPI "
+                f"{self.table} from"
+            )
         try:
             response = self._request("POST", self._collection_path(), json=payload)
         except requests.exceptions.RequestException:

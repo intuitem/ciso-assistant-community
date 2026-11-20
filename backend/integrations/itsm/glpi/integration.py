@@ -13,7 +13,13 @@ from integrations.models import IntegrationSchemaCache, SyncMapping
 from integrations.registry import IntegrationRegistry
 from integrations.settings_access import get_model_settings
 
-from .client import MODEL_ITEM_TYPES, GLPIClient, item_type_for, qualify
+from .client import (
+    MODEL_ITEM_TYPES,
+    GLPIClient,
+    item_type_for,
+    qualify,
+    split_remote_id,
+)
 from .mapper import GLPIFieldMapper
 
 logger = get_logger(__name__)
@@ -131,47 +137,101 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
         # A model's mapping is written for one item type, and its links name
         # that type: under another one they would stop syncing.
         for model_key in MODEL_ITEM_TYPES:
-            old = item_type_for(configuration.settings, model_key)
             new = item_type_for(new_settings, model_key)
-            if not old or not new or old == new:
+            if not new:
+                # Sync turned off for this model: its links keep their type.
                 continue
             spec = syncable.get_spec(model_key)
             # Links whose item is still being created count too.
-            linked = SyncMapping.objects.filter(
-                configuration=configuration,
-                content_type__app_label=spec.app_label,
-                content_type__model=spec.model_name,
+            linked = list(
+                SyncMapping.objects.filter(
+                    configuration=configuration,
+                    content_type__app_label=spec.app_label,
+                    content_type__model=spec.model_name,
+                ).values_list("remote_id", flat=True)
             )
-            if linked.exists():
+            # The type the links name comes first: the setting may have been
+            # emptied in between, and must not come back as another type.
+            types = sorted({split_remote_id(r)[0] for r in linked} - {None, new})
+            old = item_type_for(configuration.settings, model_key)
+            if linked and old and old != new:
+                types.append(old)
+            if types:
                 return [
-                    f"The item type cannot change from {old} to {new} while objects "
-                    "are linked through this configuration. Unlink them first."
+                    f"The item type cannot change from {types[0]} to {new} while "
+                    "objects are linked through this configuration. Unlink them "
+                    "first."
                 ]
         return []
 
     # --- Links ----------------------------------------------------------------
 
     def push_changes(self, local_object, changed_fields: list[str]) -> bool:
-        self._qualify_link(local_object)
-        return super().push_changes(local_object, changed_fields)
-
-    def _qualify_link(self, local_object) -> None:
-        """A link made through the API can carry the bare GLPI id. It is
-        stored with the model's item type, like the ids this provider issues,
-        so that it cannot be taken for an item of another type."""
         content_type = ContentType.objects.get_for_model(local_object)
         model_key = syncable.model_key_for_content_type(content_type)
-        item_type = item_type_for(self.configuration.settings, model_key or "")
-        if not item_type:
-            return
+        if model_key not in MODEL_ITEM_TYPES:
+            return super().push_changes(local_object, changed_fields)
+        if not self.mapper_for(model_key).field_map:
+            # An item type chosen with no field mapped yet: nothing to send,
+            # and a creation would leave an empty item in GLPI.
+            logger.info(
+                "Skipping push: no field is mapped for this model",
+                model=model_key,
+                config_id=str(self.configuration.id),
+            )
+            return False
+
         mapping = SyncMapping.objects.filter(
             configuration=self.configuration,
             content_type=content_type,
             local_object_id=local_object.pk,
         ).first()
-        if mapping and mapping.remote_id.strip().isdigit():
+        agreed = None
+        if mapping:
+            self._qualify(mapping, model_key)
+            agreed = self._agreed_state(mapping.remote_id, mapping.remote_data)
+
+        pushed = super().push_changes(local_object, changed_fields)
+        if pushed and agreed:
+            self._keep_unpulled_state(mapping, model_key, agreed, changed_fields)
+        return pushed
+
+    def _qualify(self, mapping, model_key: str) -> None:
+        """A link made through the API can carry the bare GLPI id. It is
+        stored with the model's item type, like the ids this provider issues,
+        so that it cannot be taken for an item of another type."""
+        item_type = item_type_for(self.configuration.settings, model_key)
+        if item_type and mapping.remote_id.strip().isdigit():
             mapping.remote_id = qualify(item_type, mapping.remote_id.strip())
             mapping.save(update_fields=["remote_id"])
+
+    @staticmethod
+    def _agreed_state(remote_id: str, remote_data: dict | None) -> dict | None:
+        """The state of the linked item that both sides last agreed on: what
+        was pulled from GLPI or pushed to it. None when nothing is stored for
+        this item, as right after a link is pointed at another one."""
+        if not remote_data or not remote_id:
+            return None
+        if str(remote_data.get("key")) != split_remote_id(remote_id)[1]:
+            return None
+        return remote_data
+
+    def _keep_unpulled_state(self, mapping, model_key, agreed, changed_fields) -> None:
+        """After a push, the agreed state only moves on the fields that were
+        pushed. The read that follows a push can already hold a change made in
+        GLPI meanwhile: storing it as agreed would make the delivery about it
+        look like nothing new, and it would never reach the local object."""
+        mapping.refresh_from_db()
+        fresh = mapping.remote_data or {}
+        if self._agreed_state(mapping.remote_id, fresh) is None:
+            return
+        field_map = self.mapper_for(model_key).field_map
+        fields = dict(agreed.get("fields") or {})
+        for remote_field in {field_map.get(field) for field in changed_fields}:
+            if remote_field in (fresh.get("fields") or {}):
+                fields[remote_field] = fresh["fields"][remote_field]
+        mapping.remote_data = {**fresh, "fields": fields}
+        mapping.save(update_fields=["remote_data"])
 
     # --- Webhooks -------------------------------------------------------------
     # GLPI webhooks (Setup > Webhooks) post {"event": ..., "item": {...}}, the
@@ -213,15 +273,25 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
         """``(model, remote id)`` of each link a delivery for this item id may
         be about. A delivery does not name its item type, so the id is looked
         up under the type of every model this configuration syncs."""
-        candidates = {}
-        for model_key in MODEL_ITEM_TYPES:
-            item_type = item_type_for(self.configuration.settings, model_key)
-            if item_type:
-                candidates[qualify(item_type, item_id)] = model_key
-        linked = SyncMapping.objects.filter(
-            configuration=self.configuration, remote_id__in=list(candidates)
-        ).values_list("remote_id", flat=True)
-        return [(candidates[remote_id], remote_id) for remote_id in set(linked)]
+        item_types = {
+            model_key: item_type_for(self.configuration.settings, model_key)
+            for model_key in MODEL_ITEM_TYPES
+        }
+        candidates = [qualify(t, item_id) for t in item_types.values() if t]
+        linked = []
+        for mapping in SyncMapping.objects.filter(
+            configuration=self.configuration, remote_id__in=[*candidates, item_id]
+        ).select_related("content_type"):
+            model_key = syncable.model_key_for_content_type(mapping.content_type)
+            if not item_types.get(model_key):
+                continue
+            # A bare id: linked through the API and not pushed since, which
+            # is the normal case when outgoing sync is off.
+            self._qualify(mapping, model_key)
+            # A link naming another model's item type is not this model's.
+            if mapping.remote_id == qualify(item_types[model_key], item_id):
+                linked.append((model_key, mapping.remote_id))
+        return linked
 
     def _read_current(self, model_key: str, remote_id: str):
         """The item as GLPI holds it now: its data, None once it is gone, or
@@ -237,14 +307,15 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return _UNREACHABLE
 
     def _synced_state(self, remote_id: str) -> dict[str, Any] | None:
-        """The item as it was when last synced."""
-        return (
+        """The linked item as it was when last synced."""
+        stored = (
             SyncMapping.objects.filter(
                 configuration=self.configuration, remote_id=remote_id
             )
             .values_list("remote_data", flat=True)
             .first()
         )
+        return self._agreed_state(remote_id, stored)
 
     @staticmethod
     def _is_outdated(synced: dict | None, remote_data: dict[str, Any]) -> bool:
@@ -311,19 +382,68 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
             return True
         return self.pull_changes(remote_id, current)
 
-    def _resolve_conflict(self, mapping, remote_data, model_key=None) -> bool:
-        """A local edit not pushed yet meets a change in GLPI. GLPI wins, but
-        only on what it changed: a webhook arriving in the second before a
-        local edit is pushed carries the item's other fields unchanged, and
-        applying those would undo the edit, which the push would then send
-        back to GLPI as if it were new."""
+    def pull_changes(self, remote_id: str, remote_data: dict[str, Any]) -> bool:
+        """Apply what changed in GLPI since the state both sides agreed on.
+
+        The other fields are left alone: a local edit waiting to be pushed is
+        not undone by a delivery about something else, whether that delivery
+        comes once or several times, and a link made by hand does not copy
+        the GLPI item over the local object."""
         strategy = self.configuration.settings.get("conflict_resolution", "remote_wins")
         if strategy != "remote_wins":
-            return super()._resolve_conflict(mapping, remote_data, model_key)
+            return super().pull_changes(remote_id, remote_data)
 
-        mapper = self.mapper_for(model_key or self.DEFAULT_MODEL_KEY)
+        try:
+            mapping = SyncMapping.objects.get(
+                configuration=self.configuration, remote_id=remote_id
+            )
+        except SyncMapping.DoesNotExist:
+            logger.warning("No mapping found for GLPI item", remote_id=remote_id)
+            return False
+        except SyncMapping.MultipleObjectsReturned:
+            logger.error(
+                "Several objects are linked to one GLPI item; skipping pull",
+                remote_id=remote_id,
+                config_id=str(self.configuration.id),
+            )
+            return False
+
+        model_key = (
+            syncable.model_key_for_content_type(mapping.content_type)
+            or self.DEFAULT_MODEL_KEY
+        )
+        try:
+            changed = self._merge_remote_changes(mapping, remote_data, model_key)
+        except Exception as error:
+            logger.error(
+                "Failed to pull changes from GLPI", remote_id=remote_id, exc_info=True
+            )
+            mapping.sync_status = SyncMapping.SyncStatus.FAILED
+            mapping.error_message = str(error)
+            mapping.save()
+            self._log_sync_event(
+                mapping,
+                SyncMapping.SyncDirection.PULL,
+                [],
+                success=False,
+                error=str(error),
+            )
+            return False
+
+        self._log_sync_event(
+            mapping, SyncMapping.SyncDirection.PULL, sorted(changed), success=True
+        )
+        return True
+
+    def _merge_remote_changes(self, mapping, remote_data, model_key) -> dict[str, Any]:
+        """Apply the fields whose GLPI value differs from the agreed state,
+        which then becomes what GLPI holds. With no agreed state, everything
+        GLPI holds applies. Returns the applied fields."""
+        mapper = self.mapper_for(model_key)
         incoming = mapper.to_local(remote_data)
-        known = mapper.to_local(mapping.remote_data or {})
+        known = mapper.to_local(
+            self._agreed_state(mapping.remote_id, mapping.remote_data) or {}
+        )
         changed = {
             field: value
             for field, value in incoming.items()
@@ -339,11 +459,11 @@ class GLPIOrchestrator(BaseITSMOrchestrator):
         mapping.error_message = ""
         mapping.save()
         logger.info(
-            "Applied the fields GLPI changed over a pending local edit",
+            "Pulled changes from GLPI",
             remote_id=mapping.remote_id,
             fields=sorted(changed),
         )
-        return True
+        return changed
 
     # --- Schema cache ---------------------------------------------------------
     # The schema comes from the instance's OpenAPI document, a multi-megabyte

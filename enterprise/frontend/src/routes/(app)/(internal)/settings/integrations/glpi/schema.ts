@@ -8,6 +8,9 @@ export const schema = z
 		folder_id: z.string(),
 		is_active: z.boolean().default(true),
 		webhook_secret: z.string().optional(),
+		// Read from the saved configuration, never stored: tells whether an
+		// empty webhook secret means "keep the stored one" or "there is none".
+		has_webhook_secret: z.boolean().optional(),
 		credentials: z.object({
 			instance_url: z.string().url(),
 			client_id: z.string(),
@@ -38,9 +41,14 @@ export const schema = z
 				message: 'A target table must be selected'
 			});
 		}
-		// On creation there is no stored secret to fall back on, and GLPI
-		// deliveries are refused without one.
-		if (!data.id && data.settings.enable_incoming_sync && !data.webhook_secret) {
+		// GLPI deliveries are refused without a secret. An empty value keeps the
+		// stored one, so it is only accepted when there is one.
+		if (
+			data.is_active &&
+			data.settings.enable_incoming_sync &&
+			!data.webhook_secret &&
+			!data.has_webhook_secret
+		) {
 			ctx.addIssue({
 				code: z.ZodIssueCode.custom,
 				path: ['webhook_secret'],

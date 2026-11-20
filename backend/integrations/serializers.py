@@ -35,14 +35,18 @@ def with_stored_credentials(submitted: dict, stored: dict | None, keys) -> dict 
     A stored value is only reusable for the connection it was stored for: every
     other submitted value must match what is stored, including keys the row
     lacks or stores empty, otherwise an empty stored host would let a stored
-    secret be sent to any host. Empty stored values (e.g. a stale
+    secret be sent to any host. A new value for a secret the row already holds
+    is not part of what identifies the connection: one of two secrets can be
+    replaced while the other is kept. Empty stored values (e.g. a stale
     ``password: null`` written by older saves) are not secrets to reuse and pin
     nothing."""
     stored = {k: v for k, v in (stored or {}).items() if v}
     reused = {k for k in keys if k in stored and not submitted.get(k)}
-    if reused and any(
-        v != stored.get(k) for k, v in submitted.items() if k not in reused
-    ):
+    replaced = {k for k in SECRET_CREDENTIAL_KEYS if k in stored and submitted.get(k)}
+    identity = {
+        k: v for k, v in submitted.items() if k not in reused and k not in replaced
+    }
+    if reused and any(v != stored.get(k) for k, v in identity.items()):
         return None
     return {**submitted, **{k: stored[k] for k in reused}}
 

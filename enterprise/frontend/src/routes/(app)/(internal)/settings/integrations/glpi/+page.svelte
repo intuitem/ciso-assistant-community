@@ -31,6 +31,13 @@
 
 	const formStore = _form.form;
 
+	// Both directions talk to GLPI: incoming sync reads the item back after a
+	// webhook, so the connection is needed even with outgoing sync off.
+	const connectionInUse = $derived(
+		$formStore.is_active &&
+			($formStore.settings.enable_outgoing_sync || $formStore.settings.enable_incoming_sync)
+	);
+
 	// The OAuth client secret and the user password are stored together, so one
 	// flag covers both.
 	let showSecretFields = $state(!data?.config?.has_api_token);
@@ -110,7 +117,7 @@
 						valuePath="credentials.instance_url"
 						label={m.instanceUrl()}
 						helpText={m.glpiInstanceUrlHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+						disabled={!connectionInUse}
 					/>
 					<TextField
 						{form}
@@ -119,7 +126,7 @@
 						autocomplete="off"
 						label={m.clientId()}
 						helpText={m.glpiClientIdHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+						disabled={!connectionInUse}
 					/>
 					<TextField
 						{form}
@@ -128,7 +135,7 @@
 						autocomplete="new-password"
 						label={m.username()}
 						helpText={m.glpiUsernameHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+						disabled={!connectionInUse}
 					/>
 					{#if showSecretFields}
 						<TextField
@@ -138,7 +145,7 @@
 							valuePath="credentials.client_secret"
 							autocomplete="new-password"
 							label={m.clientSecret()}
-							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+							disabled={!connectionInUse}
 						/>
 						<TextField
 							{form}
@@ -147,7 +154,7 @@
 							valuePath="credentials.password"
 							autocomplete="new-password"
 							label={m.password()}
-							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+							disabled={!connectionInUse}
 						/>
 					{:else}
 						<p class="font-semibold text-sm -mb-4">{m.clientSecret()} / {m.password()}</p>
@@ -157,7 +164,7 @@
 							<p>{m.glpiSecretsAlreadySetHelpText()}</p>
 							<button
 								type="button"
-								disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+								disabled={!connectionInUse}
 								class="btn preset-filled"
 								onclick={() => {
 									showSecretFields = true;
@@ -170,7 +177,7 @@
 					{/if}
 					<span class="flex flex-row justify-between gap-4">
 						<button
-							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+							disabled={!connectionInUse}
 							type="button"
 							class="btn preset-filled-secondary-500"
 							onclick={testConnection}>{m.testConnection()}</button
