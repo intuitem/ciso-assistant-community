@@ -1,0 +1,2324 @@
+urn: urn:intuitem:risk:library:mapping-cmmc-2.0-and-nist-csf-2.0
+locale: en
+ref_id: mapping-cmmc-2.0-and-nist-csf-2.0
+name: cmmc-2.0 <-> nist-csf-2.0
+description: |-
+  Mapping between CMMC version 2.0 (Levels 1 and 2) and NIST Cybersecurity Framework (CSF) 2.0. Built by intuitem from the practice and subcategory texts; NIST's chain (SP 800-171 Rev. 2 to Rev. 3 change analysis, then the draft NIST OLIR mapping of CSF 2.0 to SP 800-171 Rev. 3) was used as candidate evidence only.
+copyright: intuitem
+version: 1
+publication_date: '2026-11-20'
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:cmmc-2.0
+- urn:intuitem:risk:library:nist-csf-2.0
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cmmc-2.0-and-nist-csf-2.0
+    ref_id: mapping-cmmc-2.0-and-nist-csf-2.0
+    name: cmmc-2.0 <-> nist-csf-2.0
+    description: |-
+      Mapping between CMMC version 2.0 (Levels 1 and 2) and NIST Cybersecurity Framework (CSF) 2.0. Built by intuitem from the practice and subcategory texts; NIST's chain (SP 800-171 Rev. 2 to Rev. 3 change analysis, then the draft NIST OLIR mapping of CSF 2.0 to SP 800-171 Rev. 3) was used as candidate evidence only.
+    source_framework_urn: urn:intuitem:risk:framework:cmmc-2.0
+    target_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Limiting system access to authorized users, processes and devices is enforcement of access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Access limited to authorized users and devices presupposes managed identities for them
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting system access protects environments from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Restricting users to permitted transactions and functions is enforcement of defined entitlements
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Information flow control across systems protects networks and environments from unauthorized use
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Restricting where CUI flows protects the confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Separation of duties is named explicitly in PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Least privilege is named explicitly in PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Using non-privileged accounts for nonsecurity functions applies least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Preventing non-privileged users from executing privileged functions enforces entitlements; the logging element is outside PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Execution of privileged functions must be captured in log records
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Limiting unsuccessful logon attempts hardens the authentication of users
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Pattern-hiding session lock prevents viewing of data in use on unattended screens
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Session lock forces re-authentication after inactivity
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Terminating sessions on defined conditions bounds an authenticated session
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling remote access sessions enforces access authorizations; the monitoring element is outside PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling remote access protects the network from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring remote access sessions is part of monitoring network services for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting remote access sessions protects confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Routing remote access through managed access control points protects the network from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Authorizing remote privileged commands is enforcement of privileged entitlements
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Authorizing wireless access before connection protects the network from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless connections require an explicit authorization decision
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless access is protected by authenticating users and devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless access is protected by encrypting data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting wireless access protects the network from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling mobile device connections protects networks from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Mobile device connections are subject to access authorization
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.19
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI on mobile devices protects confidentiality of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling connections to external systems protects environments from unauthorized access and usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Use of external systems is limited by authorization
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.21
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting portable storage on external systems prevents CUI at rest leaving organizational control
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.22
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Only authorized individuals may post or process information on public systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Making users aware of security risks and applicable policies is general awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Managers and system administrators are specialized roles needing role-specific awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Training personnel for assigned security duties is role-based training
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Training for assigned duties also builds general knowledge of cybersecurity risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Insider-threat recognition and reporting is a topic of personnel awareness training
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Creating and retaining audit logs to enable monitoring is log generation for continuous monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Traceability of user actions requires log records attributable to users
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Reviewing and updating logged events tunes which log records are generated
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Alerting on logging failure keeps log records available for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Correlating audit review across processes correlates information from multiple sources; investigation and response go beyond DE.AE-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Correlated audit analysis supports analysis of potentially adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Audit reduction and reporting support on-demand analysis of events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Report generation makes log records available for monitoring and analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Synchronized time stamps make log records usable for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting logs from modification and deletion keeps log records available and trustworthy
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Audit information at rest must be protected for confidentiality and integrity
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Restricting audit management to a subset of privileged users applies least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting who can manage logging protects log generation
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Baseline configurations are a core configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Maintaining hardware and firmware inventories
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Maintaining software and system inventories
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Baselines and inventories are maintained throughout the system development life cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Establishing and enforcing security configuration settings applies configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Tracking, reviewing, approving and logging changes is managing, recording and tracking changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Change control is part of configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Security impact analysis before implementation assesses changes for risk impact
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logical access restrictions on change are defined and enforced authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Physical access restrictions on change are managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Access restrictions for change support configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Configuring systems for only essential capabilities is a configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Disabling nonessential functions, ports, protocols and services is secure configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Restricting nonessential programs prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Deny-list or allow-list execution policy prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling user-installed software prevents installation of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring user-installed software is monitoring software for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Identifying users, processes and devices is identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: |-
+        Authenticating users, processes and devices before access is within PR.AA-03, which also covers re-authentication and authentication strength
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Multifactor authentication is a specific authentication requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Replay-resistant mechanisms are a specific authentication requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Preventing identifier reuse is identifier lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Disabling inactive identifiers is identifier lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Password complexity rules are credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Prohibiting password reuse is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Forcing change of temporary passwords is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Cryptographically protecting stored and transmitted passwords is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Stored passwords are data at rest needing cryptographic protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Transmitted passwords are data in transit needing cryptographic protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Obscuring authentication feedback protects the authentication process
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: An operational incident-handling capability requires established and maintained incident response plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Incident handling capability executes the response plan once an incident is declared
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Containment is an explicit phase of the capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Recovery is an explicit phase of the capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detection and analysis phases cover analysis of adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detection phase includes declaring incidents against criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis phase establishes what happened and the root cause
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Eradication follows containment within incident handling
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis within incident handling includes triage and validation of incident reports
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis within incident handling includes categorizing and prioritizing incidents
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Recovery within incident handling selects and performs recovery actions
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Reporting incidents to internal and external officials and authorities is stakeholder notification
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Incident reporting shares information with designated stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Tracking and documenting incidents records actions taken
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Testing the incident response capability is a security exercise that yields improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Testing keeps incident response plans maintained and improved
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Performing maintenance on systems covers hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Performing maintenance on systems covers software maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling maintenance tools and personnel governs how hardware maintenance is done
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Sanitizing equipment before off-site maintenance protects CUI at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Sanitization is a safeguard within hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Checking diagnostic media for malicious code monitors software for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Multifactor authentication for nonlocal maintenance is authentication; terminating sessions at completion
+        is not
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Supervising maintenance personnel is monitoring personnel activity
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Unescorted maintenance personnel need managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Physically controlling and securely storing media protects data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Secure storage of media relies on managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Limiting access to CUI on media enforces access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Limiting media access protects confidentiality of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Sanitizing or destroying media before disposal manages assets at end of life
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Sanitization prevents disclosure of data at rest on disposed media
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-07
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: CUI markings and distribution limitations are labels and metadata on designated data
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling media in transport protects confidentiality of the stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI on digital media during transport protects data at rest on that media
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling removable media limits CUI leaving managed storage
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Removable media use is restricted through system configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Prohibiting ownerless portable storage reduces data-at-rest exposure
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting confidentiality of backup CUI is protecting backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Screening individuals before access is a cybersecurity human resources practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Protecting systems during terminations and transfers is a cybersecurity human resources practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Personnel actions trigger revocation or adjustment of access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Personnel actions trigger revocation of credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Limiting physical access to authorized individuals is managed and enforced physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring the physical facility finds potentially adverse physical events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting the facility includes enforcing physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting support infrastructure protects technology assets from environmental threats
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Escorting visitors is managing physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Monitoring visitor activity is monitoring the physical environment
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Physical access logs are part of monitoring physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Physical access logs support monitoring of the physical environment
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling keys, badges and other physical access devices manages physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Safeguarding CUI at alternate work sites protects data outside the primary facility
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Alternate work sites need physical safeguards for systems handling CUI
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Risk assessment identifies impacts and likelihoods
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Risk assessment uses threats, vulnerabilities, likelihoods and impacts to understand risk
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Risk assessment identifies threats to operations, assets and individuals
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Vulnerability scanning identifies and records vulnerabilities in assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Remediating vulnerabilities per risk assessment is a planned and tracked risk response
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Remediation typically maintains or replaces vulnerable software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Periodic control assessments are evaluations from which improvements are identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Control effectiveness assessment evaluates cybersecurity performance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Plans of action plan and track risk responses to deficiencies
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Plans of action implement improvements identified from evaluations
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Ongoing control monitoring evaluates cybersecurity risk management performance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Ongoing monitoring identifies improvements to controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: System security plans describe connections to other systems and environments
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: System security plans document system boundaries and components
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: A system security plan is a cybersecurity plan that is established, maintained and periodically updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting communications at external and internal boundaries protects networks from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring communications at boundaries is monitoring networks for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Protecting boundary communications protects data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Software development techniques that promote security are secure software development practices
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security engineering principles apply across the system life cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Separating user and management functionality applies separation of duties and least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Separating management interfaces protects environments from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Preventing transfer via shared resources protects data in use
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Preventing residual information transfer protects stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Separated subnetworks for public components is network segmentation
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Deny-by-default traffic policy protects networks from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Preventing split tunneling protects networks from unauthorized usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI during transmission protects confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Terminating idle network connections limits unauthorized use of network sessions
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Key management underpins cryptographic protection of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Key management underpins cryptographic protection of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: FIPS-validated cryptography protects confidentiality of CUI at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: FIPS-validated cryptography protects confidentiality of CUI in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Disabling remote activation of collaborative devices is enforced by configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling mobile code prevents execution of unauthorized code
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring mobile code use is monitoring runtime environments for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling VoIP protects network environments from unauthorized usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring VoIP is monitoring network services for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Protecting session authenticity protects integrity of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Session authenticity relies on authenticated endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.16
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      relationship: subset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting confidentiality of CUI at rest is protecting data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Correcting flaws maintains and patches software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Identifying and reporting flaws identifies and records vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Malicious code protection monitors hardware, software and runtime environments for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Malicious code protection prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring security alerts and advisories is receiving threat intelligence from sharing sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Acting on vendor advisories overlaps with processes for receiving vulnerability disclosures
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security alerts and advisories identify internal and external threats to record
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Updating malicious code protection keeps software monitoring effective
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Updating protection mechanisms is software maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: subset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Periodic and real-time scanning monitors systems and files for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Monitoring inbound and outbound traffic to detect attacks is network monitoring; host monitoring is outside
+        DE.CM-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Monitoring organizational systems for attacks and indicators of attack is monitoring computing hardware, software and runtime environments
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detecting indicators of attack involves analysis of adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Identifying unauthorized use is monitoring personnel activity and technology usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Network monitoring helps identify unauthorized use
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cmmc-2.0-and-nist-csf-2.0-revert
+    ref_id: mapping-cmmc-2.0-and-nist-csf-2.0-revert
+    name: cmmc-2.0 <-> nist-csf-2.0
+    description: |-
+      Mapping between CMMC version 2.0 (Levels 1 and 2) and NIST Cybersecurity Framework (CSF) 2.0. Built by intuitem from the practice and subcategory texts; NIST's chain (SP 800-171 Rev. 2 to Rev. 3 change analysis, then the draft NIST OLIR mapping of CSF 2.0 to SP 800-171 Rev. 3) was used as candidate evidence only.
+    source_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
+    target_framework_urn: urn:intuitem:risk:framework:cmmc-2.0
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Limiting system access to authorized users, processes and devices is enforcement of access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Access limited to authorized users and devices presupposes managed identities for them
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting system access protects environments from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Restricting users to permitted transactions and functions is enforcement of defined entitlements
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Information flow control across systems protects networks and environments from unauthorized use
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Restricting where CUI flows protects the confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.4
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Separation of duties is named explicitly in PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.5
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Least privilege is named explicitly in PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.6
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Using non-privileged accounts for nonsecurity functions applies least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Preventing non-privileged users from executing privileged functions enforces entitlements; the logging element is outside PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Execution of privileged functions must be captured in log records
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.8
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Limiting unsuccessful logon attempts hardens the authentication of users
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Pattern-hiding session lock prevents viewing of data in use on unattended screens
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Session lock forces re-authentication after inactivity
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Terminating sessions on defined conditions bounds an authenticated session
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling remote access sessions enforces access authorizations; the monitoring element is outside PR.AA-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling remote access protects the network from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring remote access sessions is part of monitoring network services for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.13
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting remote access sessions protects confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.14
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Routing remote access through managed access control points protects the network from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.15
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Authorizing remote privileged commands is enforcement of privileged entitlements
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Authorizing wireless access before connection protects the network from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless connections require an explicit authorization decision
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless access is protected by authenticating users and devices
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Wireless access is protected by encrypting data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting wireless access protects the network from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling mobile device connections protects networks from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Mobile device connections are subject to access authorization
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.19
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI on mobile devices protects confidentiality of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling connections to external systems protects environments from unauthorized access and usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Use of external systems is limited by authorization
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.21
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting portable storage on external systems prevents CUI at rest leaving organizational control
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.22
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Only authorized individuals may post or process information on public systems
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Making users aware of security risks and applicable policies is general awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Managers and system administrators are specialized roles needing role-specific awareness
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Training personnel for assigned security duties is role-based training
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Training for assigned duties also builds general knowledge of cybersecurity risks
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Insider-threat recognition and reporting is a topic of personnel awareness training
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Creating and retaining audit logs to enable monitoring is log generation for continuous monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Traceability of user actions requires log records attributable to users
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Reviewing and updating logged events tunes which log records are generated
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Alerting on logging failure keeps log records available for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Correlating audit review across processes correlates information from multiple sources; investigation and response go beyond DE.AE-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Correlated audit analysis supports analysis of potentially adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Audit reduction and reporting support on-demand analysis of events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Report generation makes log records available for monitoring and analysis
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Synchronized time stamps make log records usable for monitoring
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting logs from modification and deletion keeps log records available and trustworthy
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Audit information at rest must be protected for confidentiality and integrity
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Restricting audit management to a subset of privileged users applies least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Limiting who can manage logging protects log generation
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Baseline configurations are a core configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Maintaining hardware and firmware inventories
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Maintaining software and system inventories
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Baselines and inventories are maintained throughout the system development life cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Establishing and enforcing security configuration settings applies configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Tracking, reviewing, approving and logging changes is managing, recording and tracking changes
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Change control is part of configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.4
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Security impact analysis before implementation assesses changes for risk impact
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Logical access restrictions on change are defined and enforced authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Physical access restrictions on change are managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Access restrictions for change support configuration management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.6
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Configuring systems for only essential capabilities is a configuration management practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Disabling nonessential functions, ports, protocols and services is secure configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Restricting nonessential programs prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.8
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Deny-list or allow-list execution policy prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling user-installed software prevents installation of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring user-installed software is monitoring software for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Identifying users, processes and devices is identity management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: |-
+        Authenticating users, processes and devices before access is within PR.AA-03, which also covers re-authentication and authentication strength
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.3
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Multifactor authentication is a specific authentication requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.4
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Replay-resistant mechanisms are a specific authentication requirement
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.5
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Preventing identifier reuse is identifier lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.6
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Disabling inactive identifiers is identifier lifecycle management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.7
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Password complexity rules are credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.8
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Prohibiting password reuse is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.9
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Forcing change of temporary passwords is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Cryptographically protecting stored and transmitted passwords is credential management
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Stored passwords are data at rest needing cryptographic protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Transmitted passwords are data in transit needing cryptographic protection
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Obscuring authentication feedback protects the authentication process
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: An operational incident-handling capability requires established and maintained incident response plans
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Incident handling capability executes the response plan once an incident is declared
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Containment is an explicit phase of the capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Recovery is an explicit phase of the capability
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detection and analysis phases cover analysis of adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detection phase includes declaring incidents against criteria
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis phase establishes what happened and the root cause
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Eradication follows containment within incident handling
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis within incident handling includes triage and validation of incident reports
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Analysis within incident handling includes categorizing and prioritizing incidents
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Recovery within incident handling selects and performs recovery actions
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Reporting incidents to internal and external officials and authorities is stakeholder notification
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Incident reporting shares information with designated stakeholders
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Tracking and documenting incidents records actions taken
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Testing the incident response capability is a security exercise that yields improvements
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Testing keeps incident response plans maintained and improved
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Performing maintenance on systems covers hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Performing maintenance on systems covers software maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling maintenance tools and personnel governs how hardware maintenance is done
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Sanitizing equipment before off-site maintenance protects CUI at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Sanitization is a safeguard within hardware maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Checking diagnostic media for malicious code monitors software for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Multifactor authentication for nonlocal maintenance is authentication; terminating sessions at completion
+        is not
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Supervising maintenance personnel is monitoring personnel activity
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Unescorted maintenance personnel need managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Physically controlling and securely storing media protects data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Secure storage of media relies on managed physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Limiting access to CUI on media enforces access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Limiting media access protects confidentiality of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Sanitizing or destroying media before disposal manages assets at end of life
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Sanitization prevents disclosure of data at rest on disposed media
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: CUI markings and distribution limitations are labels and metadata on designated data
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.5
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling media in transport protects confidentiality of the stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.6
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI on digital media during transport protects data at rest on that media
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling removable media limits CUI leaving managed storage
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Removable media use is restricted through system configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.8
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Prohibiting ownerless portable storage reduces data-at-rest exposure
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.9
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting confidentiality of backup CUI is protecting backups
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Screening individuals before access is a cybersecurity human resources practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Protecting systems during terminations and transfers is a cybersecurity human resources practice
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Personnel actions trigger revocation or adjustment of access authorizations
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Personnel actions trigger revocation of credentials
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.1
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Limiting physical access to authorized individuals is managed and enforced physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring the physical facility finds potentially adverse physical events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting the facility includes enforcing physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Protecting support infrastructure protects technology assets from environmental threats
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Escorting visitors is managing physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Monitoring visitor activity is monitoring the physical environment
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Physical access logs are part of monitoring physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Physical access logs support monitoring of the physical environment
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.5
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Controlling keys, badges and other physical access devices manages physical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Safeguarding CUI at alternate work sites protects data outside the primary facility
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Alternate work sites need physical safeguards for systems handling CUI
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Risk assessment identifies impacts and likelihoods
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Risk assessment uses threats, vulnerabilities, likelihoods and impacts to understand risk
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Risk assessment identifies threats to operations, assets and individuals
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.2
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Vulnerability scanning identifies and records vulnerabilities in assets
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Remediating vulnerabilities per risk assessment is a planned and tracked risk response
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Remediation typically maintains or replaces vulnerable software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Periodic control assessments are evaluations from which improvements are identified
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Control effectiveness assessment evaluates cybersecurity performance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Plans of action plan and track risk responses to deficiencies
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Plans of action implement improvements identified from evaluations
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.ov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Ongoing control monitoring evaluates cybersecurity risk management performance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Ongoing monitoring identifies improvements to controls
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: System security plans describe connections to other systems and environments
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: System security plans document system boundaries and components
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: A system security plan is a cybersecurity plan that is established, maintained and periodically updated
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting communications at external and internal boundaries protects networks from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring communications at boundaries is monitoring networks for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Protecting boundary communications protects data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Software development techniques that promote security are secure software development practices
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security engineering principles apply across the system life cycle
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Separating user and management functionality applies separation of duties and least privilege
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Separating management interfaces protects environments from unauthorized logical access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Preventing transfer via shared resources protects data in use
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Preventing residual information transfer protects stored data
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.5
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Separated subnetworks for public components is network segmentation
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.6
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Deny-by-default traffic policy protects networks from unauthorized access
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.7
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Preventing split tunneling protects networks from unauthorized usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.8
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Encrypting CUI during transmission protects confidentiality of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Terminating idle network connections limits unauthorized use of network sessions
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Key management underpins cryptographic protection of data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Key management underpins cryptographic protection of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: FIPS-validated cryptography protects confidentiality of CUI at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: FIPS-validated cryptography protects confidentiality of CUI in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.12
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Disabling remote activation of collaborative devices is enforced by configuration
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Controlling mobile code prevents execution of unauthorized code
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring mobile code use is monitoring runtime environments for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Controlling VoIP protects network environments from unauthorized usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Monitoring VoIP is monitoring network services for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Protecting session authenticity protects integrity of data in transit
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Session authenticity relies on authenticated endpoints
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.16
+      relationship: superset
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Protecting confidentiality of CUI at rest is protecting data at rest
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Correcting flaws maintains and patches software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Identifying and reporting flaws identifies and records vulnerabilities
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Malicious code protection monitors hardware, software and runtime environments for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Malicious code protection prevents execution of unauthorized software
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Monitoring security alerts and advisories is receiving threat intelligence from sharing sources
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Acting on vendor advisories overlaps with processes for receiving vulnerability disclosures
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Security alerts and advisories identify internal and external threats to record
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+      annotation: Updating malicious code protection keeps software monitoring effective
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Updating protection mechanisms is software maintenance
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.5
+      relationship: superset
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Periodic and real-time scanning monitors systems and files for adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+      annotation: Monitoring inbound and outbound traffic to detect attacks is network monitoring; host monitoring is outside
+        DE.CM-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: |-
+        Monitoring organizational systems for attacks and indicators of attack is monitoring computing hardware, software and runtime environments
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Detecting indicators of attack involves analysis of adverse events
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+      annotation: Identifying unauthorized use is monitoring personnel activity and technology usage
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+      annotation: Network monitoring helps identify unauthorized use
