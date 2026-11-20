@@ -271,7 +271,7 @@ These tasks perform automated actions without sending emails:
 
 | Task | Schedule | Action |
 |------|----------|--------|
-| `lock_overdue_compliance_assessments` | 02:30 | Lock overdue assessments (with campaign/entity), set status to `in_review` |
+| `lock_overdue_compliance_assessments` | 02:30 | Lock overdue assessments (with campaign/entity), set status to `in_review`. Only when the `auto_lock_overdue_assessments` general setting is on |
 | `deactivate_expired_users` | 03:00 | Deactivate users past `expiry_date` (except superusers) |
 | `mark_expired_evidences` | 03:35 | Set evidence status to `expired` |
 | `check_expired_organisation_issues` | 06:50 | Set expired OrganisationIssue status to `inactive` |

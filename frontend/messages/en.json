@@ -286,6 +286,8 @@
 	"evidenceFourEyes": "Four-eyes review of evidences",
 	"reviewEvidences": "Review evidences",
 	"evidenceFourEyesHelpText": "When enabled, whoever uploaded a file cannot approve or reject it",
+	"autoLockOverdueAssessments": "Auto-lock overdue assessments",
+	"autoLockOverdueAssessmentsHelpText": "When enabled, audits from a campaign or a third-party assessment are locked and moved to \"In review\" the night after their due date",
 	"autoRefId": "Automatic reference IDs",
 	"autoRefIdHelpText": "When enabled, objects created without a reference ID get one numbered within their parent (e.g. AC.01 in its domain, R.01 in its risk assessment). Existing reference IDs are never changed",
 	"autoRefIdPrefixes": "Prefixes",

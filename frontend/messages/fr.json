@@ -270,6 +270,8 @@
 	"evidenceFourEyes": "Double contrôle des preuves",
 	"reviewEvidences": "Examiner les preuves",
 	"evidenceFourEyesHelpText": "Lorsque cette option est activée, la personne qui a déposé un fichier ne peut ni l'approuver ni le rejeter",
+	"autoLockOverdueAssessments": "Verrouillage automatique des évaluations en retard",
+	"autoLockOverdueAssessmentsHelpText": "Lorsque cette option est activée, les audits issus d'une campagne ou d'une évaluation de tiers sont verrouillés et passés « En revue » la nuit suivant leur date d'échéance",
 	"autoRefId": "Identifiants de référence automatiques",
 	"autoRefIdHelpText": "Lorsque cette option est activée, les objets créés sans identifiant de référence en reçoivent un, numéroté au sein de leur parent (par ex. AC.01 dans son domaine, R.01 dans son analyse de risques). Les identifiants existants ne sont jamais modifiés",
 	"autoRefIdPrefixes": "Préfixes",
