@@ -2545,6 +2545,13 @@ def startup(sender=None, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="glpi",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating GLPI IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")

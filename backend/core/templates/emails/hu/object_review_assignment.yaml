@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Felülvizsgálóként hozzáadva: ${object_type} „${object_name}”"
+body: |
+  Tisztelt Felhasználó!
+
+  Felülvizsgálóként hozzáadták Önt a következő elemhez:
+
+  - Típus: ${object_type}
+  - Név: ${object_name}
+  - Tartomány: ${folder_name}
+
+  A felülvizsgálatához jelentkezzen be a CISO Assistantba: [Az elem felülvizsgálata](${object_url})
+
+  Köszönjük.

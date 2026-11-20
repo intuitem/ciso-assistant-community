@@ -1,0 +1,14 @@
+subject: "CISO Assistant: A(z) „${acceptance_name}” kockázatelfogadás az Ön döntésére vár"
+body: |
+  Tisztelt Felhasználó!
+
+  ${actor_name} jóváhagyásra beküldte Önnek a következő kockázatelfogadást:
+
+  - Név: ${acceptance_name}
+  - Kockázati forgatókönyvek: ${risk_scenarios}
+  - Lejárati dátum: ${expiry_date}
+  - Tartomány: ${folder_name}
+
+  Az elfogadásához vagy elutasításához jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

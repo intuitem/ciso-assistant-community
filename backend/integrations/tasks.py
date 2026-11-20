@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from huey.contrib.djhuey import HUEY, lock_task, task
 from structlog import get_logger
 
+from integrations.itsm.glpi.integration import *
 from integrations.itsm.jira.integration import *
 from integrations.itsm.servicenow.integration import *
 from integrations.models import IntegrationConfiguration

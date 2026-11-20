@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Az Ön hozzárendelésének felülvizsgálati eredménye a(z) „${assessment_name}” auditon: ${decision}"
+body: |
+  Tisztelt Felhasználó!
+
+  Az Ön hozzárendelését a következő auditon felülvizsgálták:
+
+  - Audit: ${assessment_name}
+  - Döntés: ${decision}
+  ${reviewer_observation}
+
+  A részletekért jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url}/auditee-dashboard)
+
+  Köszönjük.

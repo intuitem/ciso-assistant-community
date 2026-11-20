@@ -1,0 +1,16 @@
+subject: "CISO Assistant: A(z) „${document_name}” dokumentum (${version_number}. verzió): ${decision}"
+body: |
+  Tisztelt Felhasználó!
+
+  Megváltozott egy Ön által írt revízió állapota:
+
+  - Dokumentum: ${document_name}
+  - Verzió: ${version_number}
+  - Állapot: ${decision}
+  - Az állapotot módosította: ${actor_name}
+  - Felülvizsgálói megjegyzések: ${reviewer_comments}
+  - Tartomány: ${folder_name}
+
+  A megtekintéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Újranyitották szerkesztésre az Ön hozzárendelését a(z) „${assessment_name}” auditon"
+body: |
+  Tisztelt Felhasználó!
+
+  Az Ön hozzárendelését a következő auditon szüneteltették:
+
+  - Audit: ${assessment_name}
+  ${reviewer_observation}
+
+  További információért forduljon az illetékes csapathoz.
+
+  Köszönjük.
