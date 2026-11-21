@@ -89,10 +89,11 @@ export const load = (async ({ fetch, params, locals }) => {
 	});
 
 	// The requirements all live in the audit's folder: one lookup serves them all.
+	// getUser(), not locals.user: the layout load that sets it runs alongside this one.
 	const vendorAssignees = await fetchVendorAssignees(
 		fetch,
 		tableMode.requirement_assessments[0]?.folder,
-		!!locals.user?.is_third_party
+		!!(await locals.getUser())?.is_third_party
 	);
 
 	const requirement_assessments = await Promise.all(

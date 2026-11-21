@@ -175,10 +175,11 @@ export const load = (async ({ fetch, params, locals }) => {
 		{
 			requirement_assessments: [params.id],
 			folder: requirementAssessment.folder.id,
+			// getUser(), not locals.user: the layout load that sets it runs alongside this one.
 			assigned_to: await fetchVendorAssignees(
 				fetch,
 				requirementAssessment.folder,
-				!!locals.user?.is_third_party
+				!!(await locals.getUser())?.is_third_party
 			)
 		},
 		zod(taskTemplateCreateSchema),
