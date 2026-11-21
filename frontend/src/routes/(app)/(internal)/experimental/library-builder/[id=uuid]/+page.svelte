@@ -6,6 +6,7 @@
 	import TranslationsEditor from '../TranslationsEditor.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { apiErrorMessage } from '#lib/utils/api-error.js';
 	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
@@ -157,10 +158,7 @@
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
-			setStatus(
-				err.detail || (err.error ? safeTranslate(err.error) : JSON.stringify(err)),
-				'error'
-			);
+			setStatus(apiErrorMessage(err), 'error');
 			return false;
 		}
 		await reload();
@@ -939,6 +937,7 @@
 								class="input"
 								type="text"
 								bind:value={meta.packager}
+								maxlength="32"
 								disabled={draft.identity_locked}
 							/>
 						</label>
