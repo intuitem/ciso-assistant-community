@@ -15,6 +15,17 @@
   not_applicable: "Nem alkalmazható",
   not_assessed: "Nem értékelt",
 )
+// Score layers in display order; more than one when the audit has a
+// documentation score.
+#let layers = d.at("score_layers", default: ("implementation_score",))
+#let layered = layers.len() > 1
+#let layer-label = (
+  implementation_score: "Megvalósítás",
+  documentation_score: "Dokumentáció",
+  maturity_score: "Érettség",
+)
+#let score-text(value) = if value == none { "–" } else { str(value) }
+#let out-of(ra) = if field(ra, "max_score", fallback: none) != none [\/#ra.max_score]
 // Keyed on the raw value: labels are localised.
 #let result-color(key) = (
   compliant: rgb("#dcfce7"),
@@ -180,10 +191,10 @@
         + if "extended_result" in ra and ra.extended_result != "-" {
           ([*Bővített eredmény:* #ra.extended_result],)
         } else { () }
-        + if "score" in ra and ra.score != none {
-          ([*Pontszám:* #ra.score#if field(ra, "max_score", fallback: none) != none [
-              \/#ra.max_score
-            ]],)
+        + if layered and ra.at("maturity_score", default: none) != none {
+          layers.map(l => [*#layer-label.at(l):* #score-text(ra.at(l, default: none))#if ra.at(l, default: none) != none { out-of(ra) }])
+        } else if "score" in ra and ra.score != none {
+          ([*Pontszám:* #ra.score#out-of(ra)],)
         } else { () }
     )
     #if meta.len() > 0 [#meta.join(h(10pt))]
