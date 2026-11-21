@@ -36,8 +36,9 @@ from core.models import (
 )
 from data_wizard.tests.conftest import make_excel_file
 from ebios_rm.models import ElementaryAction
-from iam.models import User
+from iam.models import Folder, User
 from privacy.models import Processing
+from rest_framework.test import APIClient
 from tprm.models import EntityAssessment
 
 URL = "/api/data-wizard/load-file/"
@@ -170,16 +171,20 @@ class TestConflictModes:
         assert resp.json()["results"]["updated"] == 1
         assert Asset.objects.get(ref_id="AST-UPD").description == "new description"
 
-    def test_update_mode_deduplicates_by_ref_id_not_name(
-        self, api_client, domain_folder, all_accessible
-    ):
-        """ref_id match must win even when the CSV name differs from the stored name."""
+    def test_update_mode_renames_an_asset_matched_by_internal_id(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        """An asset is identified by ref_id and name together, so renaming one
+        through an import goes through its internal_id."""
         asset = Asset.objects.create(
             name="Old Name", ref_id="AST-REF", folder=domain_folder
         )
         resp = _post(
             api_client,
-            _csv("name,ref_id,description\nNew Name,AST-REF,updated\n"),
+            _csv(
+                "internal_id,name,ref_id,description\n"
+                f"{asset.id},New Name,AST-REF,updated\n"
+            ),
             "a.csv",
             "Asset",
             domain_folder.id,
@@ -187,7 +192,7 @@ class TestConflictModes:
         )
         assert resp.json()["results"]["updated"] == 1
         asset.refresh_from_db()
-        assert asset.description == "updated"
+        assert (asset.name, asset.description) == ("New Name", "updated")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

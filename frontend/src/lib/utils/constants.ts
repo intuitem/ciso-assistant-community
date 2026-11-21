@@ -233,7 +233,8 @@ export const LOCALE_DISPLAY_MAP = {
 	et: '🇪🇪 Eesti',
 	sk: '🇸🇰 Slovenčina',
 	sl: '🇸🇮 Slovenščina',
-	nb: '🇳🇴 Norsk bokmål'
+	nb: '🇳🇴 Norsk bokmål',
+	hu: '🇭🇺 Magyar'
 };
 
 export const ISO_8601_REGEX =

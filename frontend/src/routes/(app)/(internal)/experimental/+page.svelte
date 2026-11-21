@@ -62,6 +62,12 @@
 		link="/experimental/domain-tree"
 		tags={['PRO', 'audit', 'domains', 'analytics', 'prototype']}
 	/>
+	<Article
+		title={m.prereadTitle()}
+		desc={m.prereadDescription()}
+		link="/experimental/auditor-preread"
+		tags={['audit', 'iso27001', 'certification', 'prototype']}
+	/>
 	{#each experimentalExtras as extra (extra.link)}
 		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
 	{/each}

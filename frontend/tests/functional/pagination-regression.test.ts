@@ -13,22 +13,11 @@
 import { randomBytes } from 'crypto';
 import { LoginPage } from '../utils/login-page.js';
 import { test, expect, getUniqueValue, type Page } from '../utils/test-utils.js';
-import type { BrowserContext } from '@playwright/test';
-
-/** Resolve the backend base URL the SvelteKit app was built with. */
-const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
+import { BACKEND_API_URL, getAuthToken } from '../utils/api.js';
 
 /** Default backend page size — objects created must exceed this. */
 const PAGE_SIZE = 100;
 const SEED_COUNT = 60;
-
-/** Extract the auth token the frontend stored after login. */
-async function getAuthToken(context: BrowserContext): Promise<string> {
-	const cookies = await context.cookies();
-	const token = cookies.find((c) => c.name === 'token')?.value;
-	if (!token) throw new Error('No `token` cookie found — is the user logged in?');
-	return token;
-}
 
 function authHeaders(token: string) {
 	return {

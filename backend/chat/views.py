@@ -554,10 +554,18 @@ class ChatSessionViewSet(BaseModelViewSet):
             # general questions — skip when on action pages (detail/edit)
             # where workflows and attach proposals are the expected path.
             graph_context = ""
+            frameworks = []
             if not (parsed_context and parsed_context.object_id):
                 graph_context = _get_graph_context(user_content)
+                frameworks = _named_frameworks(user_content)
 
-            results = search(user_content, request.user, top_k=10, scope=scope)
+            results = search(
+                user_content,
+                request.user,
+                top_k=10,
+                scope=scope,
+                frameworks=frameworks,
+            )
 
             structured = [r for r in results if r.get("source_type") == "model"]
             expanded = graph_expand(structured, scope) if structured else []
@@ -2400,6 +2408,14 @@ def _enrich_context(parsed_context, scope) -> str:
                 parts.append(line + ")")
 
     return "\n".join(parts)
+
+
+def _named_frameworks(user_message: str) -> list[str]:
+    from .knowledge_graph import get_graph
+    from .tools import _detect_framework_names
+
+    graph = get_graph()
+    return [graph[urn]["name"] for urn in _detect_framework_names(user_message)]
 
 
 def _get_graph_context(user_message: str) -> str:

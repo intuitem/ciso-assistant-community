@@ -1,10 +1,11 @@
 """Scenario selection: `scenario__*` params narrow every view of a risk assessment."""
 
+from io import BytesIO
 import csv
 import io
 from uuid import uuid4
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 from django.contrib.auth.models import Permission
 from django.db import connection
@@ -599,9 +600,7 @@ def test_action_plan_excel_follows_the_action_plan(admin_client, setup):
 
 
 def _pdf_text(content):
-    return "".join(
-        page.get_text() for page in pymupdf.open(stream=content, filetype="pdf")
-    )
+    return "".join(page.extract_text() for page in PdfReader(BytesIO(content)).pages)
 
 
 @pytest.mark.django_db
