@@ -16,7 +16,7 @@ from core import tasks
 from core.email_utils import TEMPLATE_BASE_PATH
 from notifications.registry import NOTIFICATION_REGISTRY
 
-LOCALES = ("en", "fr", "de", "nl")
+LOCALES = ("en", "fr", "de", "nl", "hu")
 CATEGORIES = {"assignments", "approvals", "deadlines", "updates", "account"}
 MODES = {"condition", "event"}
 CHANNELS = {"in_app", "email"}

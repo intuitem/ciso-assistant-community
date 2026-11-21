@@ -26,6 +26,8 @@ from iam.models import User
         (30, "en-US", "days"),
         (1, "fr", "jour"),
         (7, "fr-FR", "jours"),
+        (1, "hu", "nap"),
+        (7, "hu-HU", "nap"),
         (1, "nl", "dag"),
         (7, "nl-NL", "dagen"),
     ],
@@ -50,6 +52,9 @@ def test_localize_day_unit(days, locale, expected):
             "fr",
             "renvoyée avec des modifications demandées",
         ),
+        ("closed", "hu", "Lezárva"),
+        ("reopened", "hu-HU", "Újranyitva"),
+        ("changes_requested", "hu", "Módosításra visszaküldve"),
         ("changes_requested", "nl", "teruggestuurd met gevraagde wijzigingen"),
     ],
 )
@@ -112,6 +117,7 @@ def test_german_assignment_reviewed_subject_localizes_decision():
         ("de", "Fällig: 30.09.2026", "Status: Ausstehend"),
         ("en", "Due: 09/30/2026", "Status: Pending"),
         ("fr", "Échéance: 30/09/2026", "Statut: En attente"),
+        ("hu", "Határidő: 2026.09.30.", "Állapot: Függőben"),
         ("nl", "Vervaldatum: 30-9-2026", "Status: In behandeling"),
     ],
 )

@@ -2052,6 +2052,10 @@ def send_validation_deadline_notification(approver_email, validations, days):
 @db_periodic_task(crontab(hour="2", minute="30"))
 def lock_overdue_compliance_assessments():
     """Lock ComplianceAssessments that have exceeded their due_date and move status to in_review"""
+    if not GlobalSettings.objects.filter(
+        name=GlobalSettings.Names.GENERAL, value__auto_lock_overdue_assessments=True
+    ).exists():
+        return
     overdue_assessments = (
         ComplianceAssessment.objects.filter(
             due_date__lt=date.today(), due_date__isnull=False, is_locked=False

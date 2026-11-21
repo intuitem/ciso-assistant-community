@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${days_remaining} nap múlva esedékes feladat"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${task_count} feladata esedékes ${days_remaining} nap múlva:
+
+  ${task_list}
+
+  A feladatok áttekintéséhez és teljesítéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
