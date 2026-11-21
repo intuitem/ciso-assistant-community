@@ -58,6 +58,13 @@ class TestMsiaClLibrary(TestCase):
             "estandar",
             "reforzado",
         ]
+        # Base is pre-selected in the audit form; an empty selection would show all 43.
+        defaults = [
+            g["ref_id"]
+            for g in framework.implementation_groups_definition
+            if g.get("default_selected")
+        ]
+        assert defaults == ["base"]
         gob01 = nodes.get(ref_id="GOB-01")
         assert gob01.typical_evidence
         assert gob01.annotation.startswith("Riesgo que reduce:")

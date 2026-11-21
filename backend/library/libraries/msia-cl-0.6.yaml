@@ -18,10 +18,10 @@ publication_date: 2026-11-16
 provider: Athanor Tech
 packager: Athanor Tech
 labels:
-- IA
-- CHILE
 - GOBERNANZA-IA
 - MSIA-CL
+- IA
+- CHILE
 translations:
   en:
     name: "MSIA-CL v0.6 \u2014 AI Security and Governance Framework for Chile"
@@ -51,6 +51,7 @@ objects:
       name: Perfil Base
       description: "Riesgo bajo o autonom\xEDa A0-A1. Aprueba el due\xF1o del sistema\
         \ con visto bueno del responsable de IA."
+      default_selected: true
       translations:
         en:
           name: Base profile
