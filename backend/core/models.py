@@ -13225,6 +13225,33 @@ class FindingsAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
         verbose_name=_("Reference link"),
     )
 
+    @classmethod
+    def binder_of(cls, audit):
+        """The findings binder of an audit, or None: where findings raised on its
+        requirements live. An audit can carry more than one findings assessment,
+        so get_or_create would raise MultipleObjectsReturned. Oldest wins, for a
+        stable choice."""
+        return (
+            cls.objects.filter(compliance_assessment=audit)
+            .order_by("created_at")
+            .first()
+        )
+
+    @classmethod
+    def create_binder(cls, audit):
+        """A new findings binder for `audit`. Callers authorize it and look for
+        an existing one first (binder_of)."""
+        return cls.objects.create(
+            compliance_assessment=audit,
+            # Distinguishable at a glance from the audit it belongs to.
+            name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
+            folder=audit.folder,
+            perimeter=audit.perimeter,
+            category=cls.Category.AUDIT,
+            description=str(_("Findings raised from %(audit)s"))
+            % {"audit": audit.name},
+        )
+
     def get_findings_metrics(self):
         findings = self.findings.all()
         total_count = findings.count()
