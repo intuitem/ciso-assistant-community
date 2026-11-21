@@ -229,6 +229,7 @@ from core.utils import (
     visible_questions,
     _generate_occurrences,
     _create_task_dict,
+    UserGroupCodename,
 )
 from dateutil import relativedelta as rd
 
@@ -9459,11 +9460,29 @@ class ActorViewSet(BaseModelViewSet):
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
 
+        try:
+            workspace = UUID(self.request.query_params.get("respondents_of", ""))
+        except ValueError:
+            workspace = None
+        # Only the respondents of that workspace: other vendors' stay hidden.
+        respondents = (
+            User.objects.filter(
+                user_groups__folder_id=workspace,
+                user_groups__name=UserGroupCodename.THIRD_PARTY_RESPONDENT.value,
+            )
+            if workspace
+            else User.objects.none()
+        )
+        if self.request.query_params.get("respondents_only", "").lower() == "true":
+            queryset = queryset.filter(user__in=respondents)
+
         include_third_parties = self.request.query_params.get(
             "include_third_parties", "false"
         )
         if include_third_parties.lower() != "true":
-            third_parties = Actor.objects.filter(user__is_third_party=True)
+            third_parties = Actor.objects.filter(user__is_third_party=True).exclude(
+                user__in=respondents
+            )
             queryset = queryset.exclude(id__in=third_parties)
 
         # Service account users are managed via /api/iam/service-accounts/
