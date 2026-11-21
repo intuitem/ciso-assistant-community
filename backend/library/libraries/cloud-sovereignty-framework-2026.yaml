@@ -1,0 +1,1159 @@
+urn: urn:intuitem:risk:library:cloud-sovereignty-framework-2026
+locale: en
+ref_id: cloud-sovereignty-framework-2026
+name: Cloud Sovereignty Framework (June 2026)
+description: 'Cloud Sovereignty Framework - Implementation guidance and Annex - Sovereignty assessment
+  calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
+  Each answer scores its official points rescaled to 0-100, and the audit''s weighted average approximates
+  the official sovereignty score divided by 10 (scores are rounded to integers). Each answer also shows
+  its SEAL level; the overall SEAL is the lowest SEAL among the answers (not computed by the app). Questions
+  whose answers all grant SEAL-4 have no impact on the SEAL and are marked as such.
+
+
+  SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third parties,
+  governed entirely by non-EU jurisdictions.
+
+  SEAL-1 - Jurisdictional Sovereignty: EU law formally applies with limited practical enforceability;
+  service, technology or operations under exclusive control of non-EU third parties.
+
+  SEAL-2 - Data Sovereignty: EU jurisdictions apply, with material dependencies remain; service, technology
+  or operations under indirect control of non-EU third parties.
+
+  SEAL-3 - Technological Sovereignty: EU jurisdictions apply, EU actors exercising meaningful but not
+  full influence; service, technology or operations under marginal control of non-EU third parties.
+
+  SEAL-4 - Full Digital Sovereignty: Technology and operations under complete EU control, subject only
+  to EU jurisdiction, with no critical non-EU dependencies.'
+copyright: © European Union, 2026. Reuse is authorised provided the source is acknowledged (Commission
+  Decision 2011/833/EU).
+version: 1
+publication_date: '2026-06-01'
+provider: EUROPEAN COMMISSION
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cloud-sovereignty-framework-2026
+    ref_id: cloud-sovereignty-framework-2026
+    name: Cloud Sovereignty Framework (June 2026)
+    description: 'Cloud Sovereignty Framework - Implementation guidance and Annex - Sovereignty assessment
+      calculator, European Commission, 1 June 2026. 48 specific objectives across 8 sovereignty objectives.
+      Each answer scores its official points rescaled to 0-100, and the audit''s weighted average approximates
+      the official sovereignty score divided by 10 (scores are rounded to integers). Each answer also
+      shows its SEAL level; the overall SEAL is the lowest SEAL among the answers (not computed by the
+      app). Questions whose answers all grant SEAL-4 have no impact on the SEAL and are marked as such.
+
+
+      SEAL-0 - No Sovereignty: Service, technology or operations under exclusive control of non-EU third
+      parties, governed entirely by non-EU jurisdictions.
+
+      SEAL-1 - Jurisdictional Sovereignty: EU law formally applies with limited practical enforceability;
+      service, technology or operations under exclusive control of non-EU third parties.
+
+      SEAL-2 - Data Sovereignty: EU jurisdictions apply, with material dependencies remain; service, technology
+      or operations under indirect control of non-EU third parties.
+
+      SEAL-3 - Technological Sovereignty: EU jurisdictions apply, EU actors exercising meaningful but
+      not full influence; service, technology or operations under marginal control of non-EU third parties.
+
+      SEAL-4 - Full Digital Sovereignty: Technology and operations under complete EU control, subject
+      only to EU jurisdiction, with no critical non-EU dependencies.'
+    min_score: 0
+    max_score: 100
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1
+      assessable: true
+      depth: 1
+      ref_id: SOV-1
+      name: Strategic Sovereignty
+      description: Strategic sovereignty captures the degree to which a cloud provider (or technology
+        actor) is anchored within the European Union/EEA legal, financial, and industrial ecosystem. It
+        assesses ownership stability, governance influence, and alignment with EU strategic priorities.
+      weight: 20
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:1:
+          type: unique_choice
+          text: 1. EU/EEA legal entity control - ensuring that ultimate decision-making authority resides
+            within EU jurisdiction.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:1:choice:1
+            value: 1. Entirely outside the EU (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:1:choice:2
+            value: 2. Mostly outside the EU (SEAL-1)
+            add_score: 33
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:1:choice:3
+            value: 3. Mostly within the EU (SEAL-3)
+            add_score: 67
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:1:choice:4
+            value: 4. Entirely within the EU (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:
+          type: unique_choice
+          text: 2. Change of Control Risk - evaluating the likelihood of takeover or transfer to non-sovereign
+            owners
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:1
+            value: 1. Very likely (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:2
+            value: 2. Likely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:3
+            value: 3. Somewhat likely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:4
+            value: 4. Unlikely takeover by or transfer to a non-EU sovereign entity (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:2:choice:5
+            value: 5. Very unlikely (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:
+          type: unique_choice
+          text: 3. Control Over Roadmap - measuring the capacity of EU stakeholders to shape the provider’s
+            technological and service evolution.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:choice:1
+            value: 1. No influence possible (SEAL-2)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:choice:2
+            value: 2. Through "voice of the customer" public channels (e.g. feedback portals, online communities)
+              (SEAL-2)
+            add_score: 33
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:choice:3
+            value: 3. Governance bodies exist with EU actors participation (SEAL-3)
+            add_score: 67
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:3:choice:4
+            value: 4. Full influence of EU actors (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:
+          type: unique_choice
+          text: 4. Financial independence from non-EU capital - degree to which the provider relies on
+            EU-based financing rather than external capital.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:1
+            value: 1. Almost entirely relying on non-EU funding (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:2
+            value: 2. Mostly relying on non-EU funding (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:3
+            value: 3. Balanced mix of EU and non-EU funding (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:4
+            value: 4. Majority of funding is EU-based (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:4:choice:5
+            value: 5. Entirely EU-based funding (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:
+          type: unique_choice
+          text: 5. EU economic contribution - extent of investment, jobs, and value creation within EU/EEA.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:1
+            value: 1. Minimal (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:2
+            value: 2. Some (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:3
+            value: 3. Balanced EU/non-EU (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:4
+            value: 4. Majority in the EU (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:5:choice:5
+            value: 5. Fully in the EU (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:
+          type: unique_choice
+          text: 6. Participation in EU strategic programs - involvement in initiatives such as IPCEI-CIS,
+            Horizon Europe, or Gaia-X.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:1
+            value: No clear participation (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:2
+            value: Active participant in strategic projects (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:6:choice:3
+            value: Strategic projects depend on contractor's involvement (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:
+          type: unique_choice
+          text: 7. Alignment with EU industrial strategies - consistency with digital, green, and industrial
+            sovereignty objectives defined at EU level.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:1
+            value: No evidence exist (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:2
+            value: Existing Action plan (how to measure ambition? Through means linked to the goals? Relative
+              to the size of the company?) (no SEAL impact)
+            add_score: 33
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:3
+            value: Already measured achievement and existing dedicated governance (no SEAL impact)
+            add_score: 66
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:7:choice:4
+            value: Bold ambition and dedicated means (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:
+          type: unique_choice
+          text: 8. Resilience to Cut-off - ability to sustain secure operations even if vendor support
+            is withdrawn or disrupted.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:choice:1
+            value: 1. Immediate shutdown of the service is expected (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:choice:2
+            value: 2. Service would likely stop but with a delay to provide time for customer reaction
+              (SEAL-0)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:choice:3
+            value: 3. Can continue temporarily based on contractual agreement with EC (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:choice:4
+            value: 4. Ability to source alternative suppliers or internalise key functions (SEAL-2)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-1:question:8:choice:5
+            value: 5. Full autonomy and continuity (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2
+      assessable: true
+      depth: 1
+      ref_id: SOV-2
+      name: Legal & Jurisdictional Sovereignty
+      description: Legal & Jurisdictional sovereignty evaluates the legal environment, exposure to foreign
+        authority, and enforceability of rights that govern a technology provider and its services. It
+        determines the extent to which a provider is anchored in European jurisdiction and insulated from
+        external legal claims.
+      weight: 10
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:1:
+          type: unique_choice
+          text: 1. Primary Legal Jurisdiction - the national legal system governing the provider’s operations
+            and contracts.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:1:choice:1
+            value: 1. Non-EU only (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:1:choice:2
+            value: 2. Mixed EU/non-EU (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:1:choice:3
+            value: 3. Exclusively EU law (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:
+          type: unique_choice
+          text: 2. Extraterritorial Laws - degree of exposure to non-EU laws with cross-border reach (all).
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:choice:1
+            value: Fully exposed to non-EU laws (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:choice:2
+            value: Mitigation clauses, exposure remains (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:choice:3
+            value: EU subsidiary with contractual protections (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:choice:4
+            value: Legal structures shielding from foreign law (SEAL-2)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:2:choice:5
+            value: Verified legal immunity, non-EU laws unenforceable (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:
+          type: unique_choice
+          text: 3. Data Access Pathways - existence of legal, contractual, or technical channels through
+            which non-EU authorities could compel access to data or systems.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:choice:1
+            value: 1. Non-EU authorities can compel access to data or systems without customers being
+              notified (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:choice:2
+            value: 2. Non-EU authorities can compel access to data or systems without customers being
+              notified, in specific cases (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:choice:3
+            value: 3. Non-EU authorities can compel access to data or systems with customers being notified
+              in all cases (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:choice:4
+            value: 4. Non-EU authorities requests to access data or systems are disputed by the provider
+              and eventually in some cases are accepted with customers being notified (SEAL-1)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:3:choice:5
+            value: 5. Non-EU authorities requests to access data or systems are always rejected by the
+              provider (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:
+          type: unique_choice
+          text: 4. Export Control Restrictions - applicability of international regimes such as ITAR or
+            EAR, which may restrict usage or transfer.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:choice:1
+            value: Restrictions exists towards a EU MS (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:choice:2
+            value: Restrictions exists towards EU citizens or international organisations (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:choice:3
+            value: Share of revenues >50% in the EU (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:choice:4
+            value: Part of the offer cannot be exposed to restrictions towards EU MSs (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:4:choice:5
+            value: Part of the offer cannot be exposed to restrictions towards EU MSs or international
+              organisations (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:
+          type: unique_choice
+          text: 5. Origin of IP - location of intellectual property creation, registration, and development
+            (all).
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:1
+            value: 1. Entirely outside the EU (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:2
+            value: 2. Mostly outside the EU (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:3
+            value: 3. Mixed within/outside the EU (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:4
+            value: 4. Mostly within the EU (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:5:choice:5
+            value: 5. Fully within the EU (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:
+          type: unique_choice
+          text: 6. IP Holder Jurisdiction - legal jurisdiction where IP rights are owned and enforced.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:choice:1
+            value: non-EU law, one single country (SEAL-3)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:choice:2
+            value: non-EU law, mixed non-EU countries (SEAL-3)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:choice:3
+            value: Mixed law, some EU (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:choice:4
+            value: EU law with exceptions (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-2:question:6:choice:5
+            value: fully under EU law (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3
+      assessable: true
+      depth: 1
+      ref_id: SOV-3
+      name: Data & AI Sovereignty
+      description: Data & AI sovereignty focuses on the protection, control, and independence of data
+        assets and AI services within the EU/EEA. It addresses how data is secured, where it is processed,
+        and the degree of autonomy customers retain over AI   capabilities.
+      weight: 10
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:
+          type: unique_choice
+          text: 1. Customer control over encryption keys
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:choice:1
+            value: 1. Provider only (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:choice:2
+            value: 2. Primarily the provider but not exclusively (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:choice:3
+            value: 3. Shared - provider has override keys (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:choice:4
+            value: 4. Customer primary control but provider can read the data or some of the data (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:1:choice:5
+            value: 5. Customer exclusive control - provider can not read the data (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:
+          type: unique_choice
+          text: 2. Transparent data flows & access logs - visibility into when, where, and by whom data
+            is accessed, including auditability of AI model usage.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:choice:1
+            value: 1. No data usage logs (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:choice:2
+            value: 2. Basic logs incomplete (missing date; missing user; missing type of access; missing
+              means of access etc.) (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:choice:3
+            value: 3. Logs exist but not real-time or controlled by vendor (vendor is replaced by CUSTOMER
+              in the survey) (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:choice:4
+            value: 4. Full customer controlled visibility of log access but not in real time (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:2:choice:5
+            value: 5. Real-time customer oversight and independent auditability (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:
+          type: unique_choice
+          text: 3. Secure deletion & proof of erasure od data - mechanisms guaranteeing irreversible removal
+            of data, with verifiable evidence.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:choice:1
+            value: 1. No, irreversible deletion is neither guaranteed nor verifiable (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:choice:2
+            value: 2. Manual confirmation only (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:choice:3
+            value: 3. Internal validation based on policies - no proof of validation left (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:choice:4
+            value: 4. Deletion is technically verified with access logs (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:3:choice:5
+            value: 5. Yes, irreversible deletion is systematically enforced and independently verified
+              (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:
+          type: unique_choice
+          text: 4. Data location strictly in EU/EEA – strict confinement of storage and processing to
+            European jurisdictions, with no fallback to third countries.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:choice:1
+            value: 1. Data location largely unknown and includes third countries without controls (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:choice:2
+            value: 2. Data partly in the EU, significant reliance on third countries and limited control
+              (SEAL-0)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:choice:3
+            value: 3. Data mainly in the EU, some third-country use with standard safeguards (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:choice:4
+            value: 4. Data in the EU by default, tightly controlled exceptions (SEAL-1)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:4:choice:5
+            value: 5. All data exclusively in the EU with no third-country fallback (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:
+          type: unique_choice
+          text: 5. AI services - extent to which AI models and data pipelines are developed, trained,
+            hosted, and governed under EU control, minimizing dependence on non-EU technology stacks.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:choice:1
+            value: 'Non-EU or undetermined: Black-box AI, restricted chips (SEAL-2)'
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:choice:2
+            value: 'Mostly non-EU dependencies: Licensed AI, chip dependency (SEAL-2)'
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:choice:3
+            value: 'Mixed Control with alternatives: Auditable or open source AI, foreign chips (SEAL-2)'
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:choice:4
+            value: EU-led AI, foreign accelerators (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-3:question:5:choice:5
+            value: EU-origin models and chips - no dependencies from outside EU (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4
+      assessable: true
+      depth: 1
+      ref_id: SOV-4
+      name: Operational Sovereignty
+      description: Operational sovereignty measures the practical ability of EU actors to run, support,
+        and evolve a technology independently of foreign control. It focuses on continuity of operations,
+        skill availability, and resilience against external dependencies.
+      weight: 15
+      annotation: 'Source note: in the official calculator, the answers to question 6 (subcontractor and
+        suppliers jurisdiction) repeat the cut-off resilience scale of SOV-1 question 8. They are reproduced
+        as published.'
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:
+          type: unique_choice
+          text: 1. Portability & Interoperability - ease of migrating workloads or integrating with alternative
+            EU-controlled solutions without vendor lock-in.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:choice:1
+            value: 1. No guarantees are provided for data or workload portability (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:choice:2
+            value: 2. Data export and workload portability is provided on a "best-effort" basis (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:choice:3
+            value: 3. Standard documented methods for data export are available (SEAL-4)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:choice:4
+            value: 4. Formal migration services are available to assist with moving data and workloads
+              (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:1:choice:5
+            value: 5. Solution already deployed on sovereign infrastructure (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:
+          type: unique_choice
+          text: 2. Ability to Operate Without Foreign Dependencies - capacity for EU operators to manage,
+            maintain, and support the technology without requiring non-EU vendor involvement
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:choice:1
+            value: 1. Critical operational services are delivered by non-EU teams (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:choice:2
+            value: 2. Operational services are partially sourced from within the EU (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:choice:3
+            value: 3. Operational responsibilities are balanced between EU and non-EU teams (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:choice:4
+            value: 4. Operational services are predominantly delivered by EU-based teams (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:2:choice:5
+            value: 5. The entire technology stack is managed and supported by a fully EU-based team (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:
+          type: unique_choice
+          text: 3. Skill Availability- existence of an EU-based talent pool with the expertise to operate
+            and sustain the service.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:choice:1
+            value: Global team, mainly non-EU (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:choice:2
+            value: Mixed, majority outside EU (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:choice:3
+            value: Majority EU, escalation abroad (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:choice:4
+            value: All EU staff (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:3:choice:5
+            value: 100% EU staff + clearance (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:
+          type: unique_choice
+          text: 4. Support Channels - assurance that operational support is delivered from within the
+            EU and subject exclusively to EU/EEA legal frameworks
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:choice:1
+            value: 1. The support team is global with the majority of staff located outside the EU (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:choice:2
+            value: 2. The team is mixed but the majority of support staff reside outside the EU (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:choice:3
+            value: 3. The majority of support staff are in the EU but escalations are handled by non-EU
+              teams (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:choice:4
+            value: 4. All support staff are located within the EU (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:4:choice:5
+            value: 5. All support staff are located within the EU and hold relevant security clearances
+              (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:
+          type: unique_choice
+          text: 5. Documentation & Knowledge Transfer - availability of full technical documentation,
+            source code, and operational know-how enabling long-term autonomy.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:choice:1
+            value: 1. Global/non-EU exposure - Documentation/knowledge is stored or managed outside EU
+              and may be subject to non-EU jurisdiction or access (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:choice:2
+            value: 2. EU optional, not enforced - EU storage is available as an option, but it is not
+              enforced (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:choice:3
+            value: 3. EU primary with non-EU fallback - Stored/managed in the EU by default, but some
+              storage/replication/access outside the EU may occur (e.g., disaster recovery/support) (SEAL-4)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:choice:4
+            value: 4. EU-only primary repositories - All primary documentation and knowledge repositories
+              are stored in the EU (no routine non-EU storage/processing) (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:5:choice:5
+            value: 5. EU-only end-to-end - Content, metadata, and backups/replicas are stored in the EU
+              and privileged administration/support access is restricted to EU-based staff under EU jurisdiction
+              (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:
+          type: unique_choice
+          text: 6. Subcontractor & Suppliers jurisdiction - location and legal control of critical suppliers
+            or subcontractors involved in service delivery.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:choice:1
+            value: 1. Immediate shutdown of the service is expected (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:choice:2
+            value: 2. Service would likely stop but with a delay to provide time for customer reaction
+              (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:choice:3
+            value: 3. Can continue temporarily based on contractual agreement with EC (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:choice:4
+            value: 4. Ability to source alternative suppliers or internalise key functions (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-4:question:6:choice:5
+            value: 5. Full autonomy and continuity (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5
+      assessable: true
+      depth: 1
+      ref_id: SOV-5
+      name: Supply Chain Sovereignty
+      description: Supply chain sovereignty evaluates the geographic origin, transparency, and resilience
+        of the technology supply chain, focusing on the extent to which critical components and processes
+        remain under EU control   or exposed to non-EU dependencies.
+      weight: 10
+      annotation: 'Source note: in the official calculator, the upper answers to question 2 (manufacturing
+        location) describe EU development teams rather than manufacturing locations. They are reproduced
+        as published.'
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:
+          type: unique_choice
+          text: 1. Origin of Components - geographic source of key physical parts
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:choice:1
+            value: No disclosure (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:choice:2
+            value: Partial disclosure (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:choice:3
+            value: Transparent with exceptions (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:choice:4
+            value: Full transparency (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:1:choice:5
+            value: EU-certified provenance (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:
+          type: unique_choice
+          text: '2. Origin of Components: Manufacturing Location - countries where hardware is manufactured
+            or assembled'
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:choice:1
+            value: Fully foreign, black box (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:choice:2
+            value: Foreign origin, partial disclosure (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:choice:3
+            value: Mixed sourcing, EU audit rights (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:choice:4
+            value: Build by EU Teams, on the basis of a foreign code (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:2:choice:5
+            value: Exclusive designed and build by EU Teams (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:
+          type: unique_choice
+          text: 3. Origin of Components - jurisdiction and provenance of embedded code controlling hardware,
+            firmwares
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:1
+            value: No disclosure (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:2
+            value: Partial disclosure (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:3
+            value: Transparent with exceptions (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:4
+            value: Full transparency (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:3:choice:5
+            value: EU-certified provenance (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:
+          type: unique_choice
+          text: 4. Origin of Software (all) - where and by whom software is architected and programmed
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:choice:1
+            value: 1. Software is of fully foreign origin with no transparency ('black box') (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:choice:2
+            value: 2. Software is of foreign origin with partial disclosure on its development (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:choice:3
+            value: 3. Core and essential parts of the software are designed and maintained by EU teams
+              (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:choice:4
+            value: 4. A large majority of the software is designed and maintained by EU teams (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:4:choice:5
+            value: 5. The software is exclusively designed and maintained by EU teams (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:
+          type: unique_choice
+          text: 5. Origin of Software (all) - location and jurisdiction governing software packaging,
+            distribution, and updates.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:choice:1
+            value: 1. Non-EU control & execution - Build/release/deployment is executed and governed by
+              non-EU teams, with pipeline control and approvals under non-EU jurisdiction (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:choice:2
+            value: 2. EU control, non-EU execution - Execution is performed by non-EU teams, but pipeline
+              administration and final release approvals are under EU jurisdiction (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:choice:3
+            value: 3. Non-EU control, EU execution - Execution is performed by EU teams, but pipeline
+              administration and/or final release approvals (incl. signing) are under non-EU jurisdiction
+              (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:choice:4
+            value: 4. EU control & execution - Build/release/deployment is executed by EU teams and governed
+              from within the EU (pipeline administration, signing, approvals) (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:5:choice:5
+            value: 5. EU control and EU policy gates - As (4), plus EU-based compliance/security gates
+              enforced in the pipeline (e.g., signing under your control, vulnerability checks, segregation
+              of duties, auditable approvals) (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:
+          type: unique_choice
+          text: 6. Single Point of Dependency - degree of reliance on non-EU vendors, facilities, or proprietary
+            technologies
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:choice:1
+            value: Only non-EU vendors or facilities involved (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:choice:2
+            value: Mostly non-EU vendors or facilities involved in critical services, non documented (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:choice:3
+            value: Few non-EU vendors or facilities involved in critical services, non documented, or
+              non-EU vendors/facilities transparently documented (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:choice:4
+            value: Few non-EU vendors or facilities involved in non-critical services, documented (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:6:choice:5
+            value: No depedency on non-EU vendor or facility (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:
+          type: unique_choice
+          text: 7. Supply Chain Transparency - visibility into the entire supplier and sub-supplier chain,
+            including audit rights.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:choice:1
+            value: No suppliers can be audited (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:choice:2
+            value: Some suppliers and subcontractors can be audited (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:choice:3
+            value: Critical suppliers and subcontractors can be audited (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:choice:4
+            value: Most suppliers and subcontractors can be audited (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-5:question:7:choice:5
+            value: All suppliers and subcontractors can be audited (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6
+      assessable: true
+      depth: 1
+      ref_id: SOV-6
+      name: Technology Sovereignty
+      description: Technology sovereignty evaluates the degree of openness, transparency, and independence
+        in the underlying technological stack, ensuring EU actors can interoperate, audit, and evolve
+        solutions without lock-in to foreign proprietary systems.
+      weight: 15
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:
+          type: unique_choice
+          text: 1. Interoperability & Open interfaces - ability to integrate with other technologies through
+            well-documented and non-proprietary APIs or protocols.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:choice:1
+            value: 1. Closed proprietary interfaces - Integrations rely on closed or proprietary interfaces
+              and formats controlled by the vendor (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:choice:2
+            value: 2. Restricted proprietary APIs - Some vendor APIs exist, but they are limited/restricted
+              (access, scope, licensing) and interoperability remains vendor-controlled (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:choice:3
+            value: 3. Mixed (partial openness) - Key interfaces are documented and partly standards-based,
+              but important functions or data formats remain proprietary/vendor-specific (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:choice:4
+            value: 4. Standards-based and broadly compatible - Interfaces and data formats predominantly
+              follow recognised open standards (e.g., ETSI/CEN/CENELEC, ISO/IEC, IETF/W3C) with stable
+              versioning and full documentation (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:1:choice:5
+            value: 5. Open-by-default with portability - All critical functions are accessible via open,
+              well-documented, non-proprietary APIs and standard formats, with published specifications
+              and minimal vendor-specific dependencies enabling easy third-party integration (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:
+          type: unique_choice
+          text: 2. Open Standards Compliance - extent to which the solution adheres to publicly governed
+            and widely adopted standards, reducing dependency on single vendors
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:choice:1
+            value: 1. No open standards - Core services (e.g., identity and access management, data formats,
+              messaging, security, logging, integration protocols) rely mainly on proprietary technologies
+              (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:choice:2
+            value: 2. Ad hoc use - Open standards are used inconsistently on a case-by-case basis, without
+              documented rationale or governance (SEAL-0)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:choice:3
+            value: 3. Partial core adoption - Open standards are used and documented for some core services,
+              while other core services remain proprietary/vendor-specific (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:choice:4
+            value: 4. Policy for most core services - A formal policy mandates and documents open standards
+              for most core services, with managed exceptions (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:2:choice:5
+            value: 5. Policy for all core services - A formal policy mandates and documents open standards
+              for all core services (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:
+          type: unique_choice
+          text: 3. Open Source Availability - whether software is accessible under open licenses, with
+            rights to audit, modify, and redistribute, ensuring transparency and adaptability
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:choice:1
+            value: 1. The software is fully closed-source with no rights to audit or modify and its governance
+              is vendor-controlled (SEAL-2)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:choice:2
+            value: 2. Source code is available for review but modification and handover rights are under
+              very strict conditions (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:choice:3
+            value: 3. The software is open source , permitting modification and redistribution, but governance
+              is centralised (e.g., single-company or non-open foundation), limiting strategic autonomy
+              or smooth handover (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:choice:4
+            value: 4. The software is open source with significant EU contributions but governance is
+              restricted and handover is possible (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:3:choice:5
+            value: 5. Fully open-source software is governed by an independent or EU-based entity, granting
+              full rights to audit, modify, redistribute, and seamlessly transfer stewardship (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:
+          type: unique_choice
+          text: 4. Service Architecture Transparency - visibility into the design and functioning of the
+            service, including architectural documentation, data flows, and dependencies
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:choice:1
+            value: No insight provided (SEAL-2)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:choice:2
+            value: Insight accessible during audits (SEAL-2)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:choice:3
+            value: Some public insight exists (all) (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:choice:4
+            value: Large corpus of public insight exists (all) (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:4:choice:5
+            value: Customers can contribute to adapt and enhance the service (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:
+          type: unique_choice
+          text: 5. HPC Soveriegnty - degree of European independence in high-performance computing capabilities,
+            including processors, accelerators, and software ecosystems.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:choice:1
+            value: Imported black-box HPC computers (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:choice:2
+            value: EU-hosted, foreign stack (SEAL-3)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:choice:3
+            value: Co-designed or integrated in EU (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:choice:4
+            value: EU processor IP, non-EU fabs (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-6:question:5:choice:5
+            value: EU design + EU fab + EU ops (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7
+      assessable: true
+      depth: 1
+      ref_id: SOV-7
+      name: Security & Compliance Sovereignty
+      description: Security & Compliance sovereignty measures the extent to which security operations,
+        compliance obligations, and resilience measures are controlled within the EU  , ensuring independence
+        from foreign jurisdictions and long-term operational assurance.
+      weight: 15
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:
+          type: unique_choice
+          text: 1. Security Certification - attainment of EU and internationally recognized certifications
+            (all)
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:choice:1
+            value: ELA0 (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:choice:2
+            value: ELA1 (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:choice:3
+            value: EAL2 (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:choice:4
+            value: ELA3 (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:1:choice:5
+            value: EAL4-5 (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:
+          type: unique_choice
+          text: 2. EU Regulatory compliance - demonstrable adherence to GDPR, NIS2, DORA, and other EU
+            frameworks
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:1
+            value: 1. No evident adherence to any EU Regulations (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:2
+            value: 2. Limited compliance to some well-known EU Regulations (basic practices exist but
+              informal, incomplete, or non-systematic) (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:3
+            value: 3. Moderate compliance to some well-know EU Regulations (controls exist but gaps remain;
+              compliance not fully demonstrated) (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:4
+            value: 4. Partial compliance to most of the well-known EU Regulations (requirements implemented
+              and operational with minor exceptions) (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:2:choice:5
+            value: 5. Fully compliant to all well-know EU regulations (verified compliance, independently
+              audited) (no SEAL impact)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:
+          type: unique_choice
+          text: 3. EU-based SOC & incident handling - security operations centers and response teams operating
+            exclusively under EU jurisdiction.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:choice:1
+            value: 1. The SOC and incident response teams are located outside the EU (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:choice:2
+            value: 2. A hybrid model is used with SOC functions split between EU and non-EU locations
+              (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:choice:3
+            value: 3. The primary SOC is in the EU but incidents may be escalated to non-EU teams (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:choice:4
+            value: 4. The entire incident lifecycle is handled by teams operating exclusively within the
+              EU. Threat intelligence and incident data obtained mostly via EU sources (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:3:choice:5
+            value: 5. The full incident lifecycle is handled by EU-based teams with active participation
+              in ENISA's information sharing frameworks. Threat intelligence and incident data are gathered
+              worldwide (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:
+          type: unique_choice
+          text: 4. Control over security monitoring/logging - customer or EU authority ability to oversee
+            logs, alerts, and monitoring functions directly.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:choice:1
+            value: 1. The provider retains full control over all security logs and monitoring (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:choice:2
+            value: 2. Customers receive periodic reports based on security logs (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:choice:3
+            value: 3. Customers have access to a basic portal for monitoring (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:choice:4
+            value: 4. Customers have full direct access to their security monitoring and logs which are
+              stored in the EU (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:4:choice:5
+            value: 5. Customers have full access to immutable tamper-proof logs stored exclusively within
+              the EU (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:
+          type: unique_choice
+          text: 5. Disclosure of incidents - transparent, timely, and EU-compliant reporting of breaches
+            or vulnerabilities
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:choice:1
+            value: 1. No compliance - ad-hoc or absent breach reporting workflow, with no possibility
+              to collaborate with EU CSIRTs or to support EU-led investigations (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:choice:2
+            value: 2. Limited compliance - reporting is reactive with limited transparency and unguaranteed
+              timelines; CSIRT cooperation possible on best-effort basis (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:choice:3
+            value: 3. Moderate compliance - GDPR/NIS2-aligned reporting procedures in place with vulnerabilities
+              and breaches communicated within mandated timelines; CSIRT cooperation available but not
+              real-time (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:choice:4
+            value: 4. Partial compliance - there is a monitored reporting flow with internal SLAs equal
+              or below regulatory maximums; contractually prepared to support EU-directed investigations;
+              data sharing with EU CSIRTs available but not in real-time (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:5:choice:5
+            value: 5. Full compliance - full EU-compliant breach disclosure with real-time data sharing
+              to EU CSIRTs with audit-backed processes, proactive vulnerability disclosure and threat
+              intel sharing; proven readiness for investigations (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:
+          type: unique_choice
+          text: 6. Maintenance Autonomy - ability to develop, test, and apply security patches independently
+            of non-EU vendors
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:choice:1
+            value: 1. No autonomy in the deployment of security patches (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:choice:2
+            value: 2. Limited Autonomy - security patches are deployed according to vendor schedules;
+              basic testing is possible (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:choice:3
+            value: 3. Moderate Autonomy - security patches are deployed with sufficient notice to the
+              customer and testing is possible, except for zero-day patching (SEAL-4)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:choice:4
+            value: 4. High Autonomy - security patches can be deployed independently by the customer,
+              without customers' checks (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:6:choice:5
+            value: 5. Full Autonomy - security patches can be deployed independently by the customer,
+              with customers' checks (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:
+          type: unique_choice
+          text: 7. Auditability - capacity for EU entities to perform independent security and compliance
+            audits with full access.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:choice:1
+            value: 1. No access to entities other than the vendor (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:choice:2
+            value: 2. Limited access to independent entities to the data provided by the vendor (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:choice:3
+            value: 3. Partial control by independent entities on the data provided by the vendor (SEAL-1)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:choice:4
+            value: 4. High control by independent entities to request data from the vendor (SEAL-1)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-7:question:7:choice:5
+            value: 5. Full control by any idependent entity to perform security and compliance audits
+              (SEAL-4)
+            add_score: 100
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8
+      assessable: true
+      depth: 1
+      ref_id: SOV-8
+      name: Environmental Sustainability
+      description: Environmental sustainability assesses autonomy and resilience of cloud services over
+        the long term in relation to energy usage, dependency and raw material scarcity.
+      weight: 5
+      annotation: 'Source note: in the official calculator, questions 2, 3 and 4 each list one answer
+        twice with different scores ("Circular economy EU-aligned", "Detailed EU methodology", "Only EU
+        energy supplies"). They are reproduced as published; answers are ordered from lowest to highest
+        score.'
+      questions:
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:
+          type: unique_choice
+          text: 1. Energy efficiency - adoption of energy-efficient infrastructure (all) and measurable
+            improvement targets.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:choice:1
+            value: PUE > 0 (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:choice:2
+            value: PUE < 3 (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:choice:3
+            value: PUE < 1.5 + roadmap (SEAL-4)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:choice:4
+            value: PUE < 1.3 (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:1:choice:5
+            value: PUE < 1.2 EU verified (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:
+          type: unique_choice
+          text: 2. Hardware reuse & recycling - circular economy practices ensuring reuse, refurbishment,
+            and responsible end-of-life treatment of hardware.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:choice:1
+            value: No policy (SEAL-0)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:choice:2
+            value: Circular economy EU-aligned (SEAL-0)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:choice:3
+            value: Documented program (SEAL-3)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:choice:4
+            value: Circular economy EU-aligned (SEAL-4)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:2:choice:5
+            value: EU-certified lifecycle (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:
+          type: unique_choice
+          text: 3. Environmental impact reporting - transparent measurement and disclosure of carbon emissions,
+            water usage, and other sustainability indicators.
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:choice:1
+            value: No reporting (SEAL-1)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:choice:2
+            value: Detailed EU methodology (SEAL-1)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:choice:3
+            value: Annual report (SEAL-2)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:choice:4
+            value: Detailed EU methodology (SEAL-3)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:3:choice:5
+            value: EU-audited reporting (SEAL-4)
+            add_score: 100
+        urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:
+          type: unique_choice
+          text: 4. Energy supplies - sourcing of renewable or low-carbon energy to power infrastructure
+            and operations
+          choices:
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:1
+            value: Non traceable (no SEAL impact)
+            add_score: 0
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:2
+            value: Only EU energy supplies (no SEAL impact)
+            add_score: 25
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:3
+            value: Mix of EU and non-EU supplies (no SEAL impact)
+            add_score: 50
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:4
+            value: Only EU energy supplies (no SEAL impact)
+            add_score: 75
+          - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework-2026:sov-8:question:4:choice:5
+            value: Only green EU energy supplies (no SEAL impact)
+            add_score: 100

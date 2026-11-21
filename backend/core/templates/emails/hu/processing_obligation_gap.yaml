@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${processing_count} adatkezelés GDPR-nyilvántartása hiányos"
+body: |
+  Tisztelt Felhasználó!
+
+  Az Önhöz rendelt következő adatkezelések esetében hiányos az adatkezelési tevékenységek nyilvántartása:
+
+  ${gap_list}
+
+  [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

@@ -6,6 +6,7 @@
 
 	import { page } from '$app/state';
 	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { afterNavigate } from '$app/navigation';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { setContext } from 'svelte';
 	import SuperForm from '#lib/components/Forms/Form.svelte';
@@ -449,7 +450,25 @@
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
 	}
-	let group = $state(pickDefaultTab());
+	// ?tab= opens a given tab (e.g. evidences from the auditor pre-read), if the user may see it.
+	const TAB_SHOWN: Record<string, () => boolean> = {
+		applied_controls: () => canShowAppliedControls,
+		task_templates: () => showTaskTemplates,
+		evidences: () => showEvidences,
+		findings: () => showFindings,
+		security_exceptions: () => isAuditor
+	};
+	const askedTab = page.url.searchParams.get('tab') ?? '';
+	const openAskedTab = !!TAB_SHOWN[askedTab]?.();
+	let group = $state(openAskedTab ? askedTab : pickDefaultTab());
+	let tabsEl: HTMLElement | undefined = $state();
+	// After SvelteKit's own scroll to the top, on a client-side visit too.
+	// ?focus=result lands on the result field (assess or justify from the auditor pre-read).
+	afterNavigate(() => {
+		if (page.url.searchParams.get('focus') === 'result')
+			document.querySelector('[data-testid="result-field"]')?.scrollIntoView({ block: 'center' });
+		else if (openAskedTab) tabsEl?.scrollIntoView({ block: 'start' });
+	});
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);
@@ -710,7 +729,7 @@
 		>
 			{#snippet children({ form, data })}
 				{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings || isAuditor}
-					<div class="card shadow-lg bg-surface-50-950">
+					<div class="card shadow-lg bg-surface-50-950 scroll-mt-28" bind:this={tabsEl}>
 						<Tabs
 							value={group}
 							onValueChange={(e) => {
