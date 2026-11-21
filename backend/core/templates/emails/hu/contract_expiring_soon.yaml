@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${contract_count} szerződés ${days_remaining} nap múlva lejár"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő szerződések ${days_remaining} nap múlva lejárnak:
+
+  ${contract_list}
+
+  Tekintse át a megújításukat és a beszállító megfelelőségét: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

@@ -377,6 +377,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "due_date",
             "priority",
             "findings_assessment",
+            "requirement_assessment",
         ],
         computed={
             "severity": lambda o: o.get_severity_display(),
@@ -391,7 +392,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 else None
             ),
         },
-        select_related=["findings_assessment"],
+        # str(requirement_assessment) is its requirement's display_short.
+        select_related=["findings_assessment", "requirement_assessment__requirement"],
     ),
     "compliance_assessment": ReadEntry(
         model=ComplianceAssessment,

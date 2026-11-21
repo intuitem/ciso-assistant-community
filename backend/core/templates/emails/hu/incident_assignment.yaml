@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${incident_name}” incidenst"
+body: |
+  Tisztelt Felhasználó!
+
+  Önhöz rendelték a következő incidenst:
+
+  - Név: ${incident_name}
+  - Hivatkozási azonosító: ${incident_ref_id}
+  - Súlyosság: ${incident_severity}
+  - Állapot: ${incident_status}
+  - Tartomány: ${folder_name}
+
+  Az incidens megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

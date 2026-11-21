@@ -758,6 +758,30 @@ _SOA_LABELS = {
         "deprecated": "Veraltet",
         "--": "Nicht definiert",
     },
+    "hu": {
+        "ref_id": "Hiv.",
+        "name": "Kontroll",
+        "applicable": "Alkalmazható",
+        "justification": "Indoklás",
+        "result": "Megfelelőségi eredmény",
+        "controls": "Alkalmazott kontrollok (állapot)",
+        "risks": "Kapcsolt kockázati forgatókönyvek",
+        True: "Igen",
+        False: "Nem",
+        "compliant": "Megfelel",
+        "partially_compliant": "Részben megfelel",
+        "non_compliant": "Nem felel meg",
+        "not_applicable": "Nem alkalmazható",
+        "not_assessed": "Nem értékelt",
+        # applied control statuses
+        "to_do": "Teendő",
+        "in_progress": "Folyamatban",
+        "on_hold": "Felfüggesztve",
+        "active": "Aktív",
+        "degraded": "Leromlott",
+        "deprecated": "Elavult",
+        "--": "Nincs meghatározva",
+    },
 }
 
 

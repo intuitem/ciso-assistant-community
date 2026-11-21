@@ -1,0 +1,13 @@
+subject: "CISO Assistant: A(z) „${response_name}” gyors űrlap kitöltésre kész"
+body: |
+  Tisztelt Felhasználó!
+
+  Önt válaszadónak jelölték ki a következő gyors űrlaphoz:
+
+  - Űrlapválasz: ${response_name}
+  - Űrlap: ${quick_form_name}
+  - Határidő: ${due_date}
+
+  A kitöltéséhez jelentkezzen be a CISO Assistantba: [Az űrlap megnyitása](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Köszönjük.
