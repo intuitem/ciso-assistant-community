@@ -15,6 +15,17 @@
   not_applicable: "Nem alkalmazható",
   not_assessed: "Nem értékelt",
 )
+// Score layers in display order; more than one when the audit has a
+// documentation score.
+#let layers = d.at("score_layers", default: ("implementation_score",))
+#let layered = layers.len() > 1
+#let layer-label = (
+  implementation_score: "Megvalósítás",
+  documentation_score: "Dokumentáció",
+  maturity_score: "Érettség",
+)
+#let score-text(value) = if value == none { "–" } else { str(value) }
+#let out-of(ra) = if field(ra, "max_score", fallback: none) != none [\/#ra.max_score]
 // Keyed on the raw value: labels are localised.
 #let result-color(key) = (
   compliant: rgb("#dcfce7"),
@@ -181,23 +192,29 @@
 // -------------------------------------------------------------- category view
 
 #let categories = field(d, "category_scores", fallback: (:))
+#let overall = field(d, "overall_scores", fallback: none)
 #if shown("score") and categories.len() > 0 [
   = Pontszámok kategóriánként
 
+  // Implementation, documentation and maturity scores when the audit has a
+  // documentation score; the one score otherwise.
+  #let heads = if layered { layers.map(l => [*#layer-label.at(l)*]) } else { ([*Átlag*],) }
+  #let scores(c) = if layered {
+    layers.map(l => align(right)[#score-text(c.at(l, default: none))])
+  } else { (align(right)[#field(c, "average_score", fallback: 0)],) }
+  #let row(name, c) = (
+    name,
+    ..scores(c),
+    align(right)[#field(c, "scored_count", fallback: 0)],
+    align(right)[#field(c, "item_count", fallback: 0)],
+  )
   #table(
-    columns: (1fr, auto, auto, auto),
+    columns: (1fr, ..heads.map(h => auto), auto, auto),
     stroke: 0.5pt + rgb("#cbd5e1"),
     fill: (_, y) => if y == 0 { rgb("#e8edf7") },
-    [*Kategória*], [*Átlag*], [*Pontozott*], [*Tételek*],
-    ..categories
-      .values()
-      .map(c => (
-        field(c, "name"),
-        align(right)[#field(c, "average_score", fallback: 0)],
-        align(right)[#field(c, "scored_count", fallback: 0)],
-        align(right)[#field(c, "item_count", fallback: 0)],
-      ))
-      .flatten(),
+    [*Kategória*], ..heads, [*Pontozott*], [*Tételek*],
+    ..categories.values().map(c => row(field(c, "name"), c)).flatten(),
+    ..if overall != none { row([*Összesen*], overall) } else { () },
   )
 
   #v(0.8em)
@@ -262,10 +279,10 @@
         + if "extended_result" in ra and ra.extended_result != "-" {
           ([*Bővített eredmény:* #ra.extended_result],)
         } else { () }
-        + if "score" in ra and ra.score != none {
-          ([*Pontszám:* #ra.score#if field(ra, "max_score", fallback: none) != none [
-              \/#ra.max_score
-            ]],)
+        + if layered and ra.at("maturity_score", default: none) != none {
+          layers.map(l => [*#layer-label.at(l):* #score-text(ra.at(l, default: none))#if ra.at(l, default: none) != none { out-of(ra) }])
+        } else if "score" in ra and ra.score != none {
+          ([*Pontszám:* #ra.score#out-of(ra)],)
         } else { () }
     )
     #if meta.len() > 0 [#meta.join(h(10pt))]
