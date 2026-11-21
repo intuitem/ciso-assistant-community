@@ -7,20 +7,23 @@ from huggingface_hub import try_to_load_from_cache
 
 from chat.embedding_models import (
     DEFAULT_EMBEDDING_MODEL,
+    EMBEDDING_REVISION,
     RERANKER_MODEL,
+    RERANKER_REVISION,
     OnnxCrossEncoder,
     OnnxEmbedder,
 )
 
 
-def _require_cached(repo):
+def _require_cached(repo, revision):
     # shortcut: skips where the models were never downloaded (CI), run locally or in the image
-    if not isinstance(try_to_load_from_cache(repo, "onnx/model.onnx"), str):
+    path = try_to_load_from_cache(repo, "onnx/model.onnx", revision=revision)
+    if not isinstance(path, str):
         pytest.skip(f"{repo} ONNX model not in the local HF cache")
 
 
 def test_embedder_matches_former_torch_vectors():
-    _require_cached(DEFAULT_EMBEDDING_MODEL)
+    _require_cached(DEFAULT_EMBEDDING_MODEL, EMBEDDING_REVISION)
     vectors = OnnxEmbedder().encode(
         ["La politique de contrôle d'accès doit être revue chaque année.", "ok"]
     )
@@ -34,7 +37,7 @@ def test_embedder_matches_former_torch_vectors():
 
 
 def test_reranker_matches_former_torch_scores():
-    _require_cached(RERANKER_MODEL)
+    _require_cached(RERANKER_MODEL, RERANKER_REVISION)
     query = "how often is the access policy reviewed?"
     scores = OnnxCrossEncoder().predict(
         [
