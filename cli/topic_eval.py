@@ -7,8 +7,8 @@ Retrieval stages, all over one framework's assessable requirements:
   rerank    cross-encoder over the hybrid top-N
 Then optionally an LLM filter (LM Studio) keeps the relevant candidates (--filter-models).
 
-Needs numpy and sentence-transformers: run it with the repo's backend venv
-(they are not CLI dependencies, which ship ca_mcp to users).
+Needs numpy and sentence-transformers (no longer in the backend venv): run it with
+`uv run --with sentence-transformers` from backend/ (not CLI dependencies, which ship ca_mcp to users).
 
 Usage:
   python topic_eval.py                                   # retrieval metrics only
