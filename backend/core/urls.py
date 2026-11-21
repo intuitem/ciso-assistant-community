@@ -242,6 +242,11 @@ urlpatterns = [
         name="upload",
     ),
     path(
+        "evidences/upload/<str:token>/",
+        EvidenceTokenUploadView.as_view(),
+        name="evidence-token-upload",
+    ),
+    path(
         "evidence-revisions/<uuid:pk>/upload/",
         UploadAttachmentView.as_view(),
         name="upload",

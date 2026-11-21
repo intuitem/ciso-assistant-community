@@ -754,6 +754,12 @@ Once connected, try these example prompts:
 
 `create_evidence` uploads one local file per call. It is only offered over the local stdio transport: over HTTP the path would point at the server's disk. The server checks the file type and size. When the upload fails, the new evidence is deleted; when the outcome is unknown (a network error after the file was sent), the evidence is kept and the tool gives its ID: check whether it holds the file before trying again, to avoid a duplicate. Screenshots pasted into the chat work only when the client saved them on disk and shows their path, as Claude Code does.
 
+**Evidence from a chat attachment** (remote/HTTP only, e.g. claude.ai):
+
+- "Add the attached PDF as evidence of the firewall control"
+
+Over the remote server, `prepare_evidence_upload` takes the place of `create_evidence`. It creates the evidence (or targets an existing one) and returns a single-use upload URL, valid 15 minutes, with a ready `curl` command that Claude runs in its code execution sandbox, where chat attachments are stored. The file goes straight from the sandbox to your instance, without passing through MCP, and the URL carries no OAuth token or PAT. The usual file type and size checks (`ATTACHMENT_MAX_SIZE_MB`) apply, and the file is recorded as uploaded by you. Prerequisite: in claude.ai, code execution must be on and your instance's domain (the host of `CISO_ASSISTANT_URL`) must be allowed in the code execution network egress settings; otherwise the sandbox cannot reach the instance and Claude asks you to allow it. Your reverse proxy must accept `POST /api/evidences/upload/…` from the internet with a body limit of at least `ATTACHMENT_MAX_SIZE_MB` (e.g. nginx `client_max_body_size`). Uploads are rate-limited to 60 per minute per client IP. The URL itself is the credential: CISO Assistant redacts it from its own logs, but proxy and server access logs may record it, and a logged URL stays usable until it is used or expires (15 minutes): redact the `/api/evidences/upload/<token>/` path from your reverse proxy and server access logs. As with any new file, an upload to an evidence that was approved sends it back to review.
+
 **EBIOS RM:**
 
 - "List our EBIOS RM studies"

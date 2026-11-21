@@ -89,6 +89,7 @@ from .tools.write_tools import (
     create_findings_assessment,
     create_finding,
     create_evidence,
+    prepare_evidence_upload,
     create_incident,
     create_timeline_entry,
     create_document,
@@ -271,6 +272,7 @@ CREATE_TOOLS = [
     create_findings_assessment,
     create_finding,
     create_evidence,
+    prepare_evidence_upload,
     create_incident,
     create_timeline_entry,
     create_entity,
@@ -361,6 +363,8 @@ ALSO_NEEDS = {
     publish_document.__name__: {actions.CREATE},
     # sets the content on the revision it creates
     create_document.__name__: {actions.UPDATE},
+    # sets the file on the evidence it creates, or changes an existing one
+    prepare_evidence_upload.__name__: {actions.UPDATE},
 }
 
 
@@ -443,6 +447,9 @@ def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
     for tool in WRITE_TOOLS:
         # reads files from the server's disk: only for a local stdio user
         if (remote or config.IS_HTTP) and tool is create_evidence:
+            continue
+        # the client uploads from its own sandbox: only for a remote/HTTP client
+        if not (remote or config.IS_HTTP) and tool is prepare_evidence_upload:
             continue
         if remote and tool in ADMIN_TOOLS:
             continue

@@ -75,6 +75,36 @@ def redact_sensitive_query_params(_, __, event_dict):
     return event_dict
 
 
+# Single-use evidence upload URLs carry their credential in the path.
+_UPLOAD_TOKEN_IN_PATH = re.compile(r"(/evidences/upload/)[^/?\s\"']+")
+
+
+def _redact_upload_token(value):
+    return _UPLOAD_TOKEN_IN_PATH.sub(r"\1REDACTED", value)
+
+
+def redact_upload_tokens(_, __, event_dict):
+    for key, value in event_dict.items():
+        if isinstance(value, str) and "/evidences/upload/" in value:
+            event_dict[key] = _redact_upload_token(value)
+    return event_dict
+
+
+class RedactUploadTokenFilter(logging.Filter):
+    """Same redaction for plain stdlib records (e.g. django.request's
+    "Gone: /api/evidences/upload/<token>/"), which bypass structlog's chain."""
+
+    def filter(self, record):
+        if isinstance(record.msg, str):
+            try:
+                message = record.getMessage()
+            except Exception:
+                return True
+            if "/evidences/upload/" in message:
+                record.msg, record.args = _redact_upload_token(message), ()
+        return True
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -91,6 +121,7 @@ LOGGING = {
     # Warning and above go to stderr, the rest to stdout, so systemd/journald
     # assigns error vs info priority correctly.
     "filters": {
+        "redact_upload_token": {"()": RedactUploadTokenFilter},
         "below_warning": {
             "()": "django.utils.log.CallbackFilter",
             "callback": lambda record: record.levelno < logging.WARNING,
@@ -101,13 +132,14 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
             "formatter": LOG_FORMAT,
-            "filters": ["below_warning"],
+            "filters": ["redact_upload_token", "below_warning"],
         },
         "stderr": {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stderr",
             "level": "WARNING",
             "formatter": LOG_FORMAT,
+            "filters": ["redact_upload_token"],
         },
     },
     "loggers": {
@@ -130,6 +162,7 @@ if LOG_OUTFILE:
         "class": "logging.handlers.WatchedFileHandler",
         "filename": LOG_OUTFILE,
         "formatter": "json",
+        "filters": ["redact_upload_token"],
     }
     LOGGING["loggers"][""]["handlers"].append("file")
 
@@ -147,6 +180,9 @@ structlog.configure(
         # Include stack information in log entries
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
+        # After the positional arguments and the traceback are rendered, so a
+        # path passed as a %s argument is redacted too.
+        redact_upload_tokens,
         structlog.processors.UnicodeDecoder(),
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
     ],
