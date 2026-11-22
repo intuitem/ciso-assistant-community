@@ -8229,5 +8229,18 @@
 	"europeanUnion": "Európai Unió",
 	"europeanEconomicArea": "Európai Gazdasági Térség",
 	"otherCountries": "Egyéb országok",
-	"notShownOnMap": "A térképen nem jelenik meg"
+	"notShownOnMap": "A térképen nem jelenik meg",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "GLPI-integráció beállításai",
+	"glpiInstanceUrlHelpText": "A GLPI-példány URL-je (pl. https://glpi.example.com/). GLPI 11 vagy újabb verzió szükséges.",
+	"glpiClientIdHelpText": "A GLPI-ben „password” engedélytípussal (grant) és „api” hatókörrel (scope) létrehozott OAuth-kliens azonosítója.",
+	"glpiUsernameHelpText": "Az a GLPI-felhasználó, akinek a nevében az integráció működik. A profilja határozza meg, mely elemek olvashatók és írhatók.",
+	"glpiSecretsAlreadySetHelpText": "A klienstitok és a jelszó már be van állítva.",
+	"glpiResetSecrets": "Titkok lecserélése",
+	"glpiWebhookSecretHelpText": "A GLPI-webhook „Security” (Biztonság) lapján megjelenő titok.",
+	"glpiIntegrationMappingsHelpText": "Rendelje hozzá a helyi kontrollokat GLPI-elemekhez.",
+	"glpiTableHelpText": "Válassza ki a szinkronizálandó GLPI-elemtípust (bejelentés, változás vagy probléma).",
+	"glpiField": "GLPI-mező",
+	"glpiAssetMappingsHelpText": "Rendelje hozzá az eszközöket GLPI-elemekhez. Az eszközök szinkronizálása az elemtípus kiválasztása után indul.",
+	"glpiAssetTableHelpText": "Válassza ki a szinkronizálandó GLPI-eszköztípust (számítógép, szoftver, készülék…)."
 }
