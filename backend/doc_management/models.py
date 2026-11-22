@@ -319,11 +319,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             else None
         )
         super().delete(*args, **kwargs)
-        # Only drop the blobs once the row deletion is durable.
-        if self.pdf_snapshot:
-            self.pdf_snapshot.delete(save=False)
-        if self.file:
-            self.file.delete(save=False)
+        # Files go through the shared pre_delete handler, which waits for commit
+        # and keeps a name another row still uses.
         if container:
             recompute_references(container)
 
@@ -361,11 +358,6 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.file:
-            self.file.delete(save=False)
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"Attachment for {self.document.display_name}"

@@ -357,3 +357,59 @@ def test_promoted_evidence_keeps_the_shared_file(
     with django_capture_on_commit_callbacks(execute=True):
         evidence.delete()
     assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_deleting_one_shared_revision_keeps_the_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    folder = _domain()
+    container = DocumentContainer.objects.create(name="Policy", folder=folder)
+    document = ManagedDocument.objects.create(
+        name="Policy", container=container, folder=folder
+    )
+    first = DocumentRevision.objects.create(
+        document=document,
+        version_number=1,
+        source=DocumentRevision.Source.UPLOADED,
+        status=DocumentRevision.Status.PUBLISHED,
+        file=_upload("policy.pdf"),
+    )
+    storage, name = _stored(first, "file")
+    second = DocumentRevision(
+        document=document,
+        version_number=2,
+        source=DocumentRevision.Source.UPLOADED,
+        status=DocumentRevision.Status.DEPRECATED,
+    )
+    second.file = name
+    second.save()
+    assert second.file.name == name
+
+    with django_capture_on_commit_callbacks(execute=True):
+        first.delete()
+    assert storage.exists(name)
+    with django_capture_on_commit_callbacks(execute=True):
+        second.delete()
+    assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_deleting_one_shared_document_attachment_keeps_the_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    first, document, stored = _document_attachment()
+    storage, name = stored[0]
+    second = DocumentAttachment(document=document)
+    second.file = name
+    second.save()
+    assert second.file.name == name
+
+    with django_capture_on_commit_callbacks(execute=True):
+        first.delete()
+    assert storage.exists(name)
+    with django_capture_on_commit_callbacks(execute=True):
+        second.delete()
+    assert not storage.exists(name)
