@@ -360,8 +360,6 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         locked = self._locked(assessment)
         if locked:
             return locked
-        if run.attachment:
-            run.attachment.delete(save=False)
         run.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

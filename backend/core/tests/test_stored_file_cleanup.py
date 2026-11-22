@@ -413,3 +413,37 @@ def test_deleting_one_shared_document_attachment_keeps_the_file(
     with django_capture_on_commit_callbacks(execute=True):
         second.delete()
     assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_deleting_one_shared_posture_run_keeps_the_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    first, assessment, stored = _posture_run()
+    storage, name = stored[0]
+    second = PostureRun(posture_assessment=assessment, started_at=timezone.now())
+    second.attachment = name
+    second.save()
+    assert second.attachment.name == name
+
+    with django_capture_on_commit_callbacks(execute=True):
+        first.delete()
+    assert storage.exists(name)
+    with django_capture_on_commit_callbacks(execute=True):
+        second.delete()
+    assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_a_rolled_back_posture_run_delete_keeps_the_file(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    run, _assessment, stored = _posture_run()
+    storage, name = stored[0]
+    pk = run.pk
+    with pytest.raises(RuntimeError):
+        with transaction.atomic():
+            run.delete()
+            raise RuntimeError("nope")
+    assert storage.exists(name)
+    assert PostureRun.objects.filter(pk=pk).exists()

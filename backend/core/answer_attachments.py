@@ -128,15 +128,24 @@ def add_attachment(answer, upload, user):
 def promote_to_evidence(attachment, user):
     """Attachment -> Evidence, idempotent. On the audit side it also lands on the
     requirement assessment."""
-    if attachment.promoted_to_id:
-        return attachment.promoted_to, False
-
-    answer = attachment.answer
-    parent = answer.owner
-    label = getattr(parent, "ref_id", None) or getattr(parent, "name", "") or ""
-    question_text = (answer.question.text or answer.question.ref_id or "")[:120]
-
     with transaction.atomic():
+        # Hold the source row until the new revision commits, so a cleanup of
+        # this stored name cannot delete the bytes in between.
+        attachment = (
+            AnswerAttachment.objects.select_for_update()
+            .filter(pk=attachment.pk)
+            .first()
+        )
+        if attachment is None:
+            return None, False
+        if attachment.promoted_to_id:
+            return attachment.promoted_to, False
+
+        answer = attachment.answer
+        parent = answer.owner
+        label = getattr(parent, "ref_id", None) or getattr(parent, "name", "") or ""
+        question_text = (answer.question.text or answer.question.ref_id or "")[:120]
+
         evidence = Evidence(
             name=f"{label} — {question_text}".strip(" —")[:200] or attachment.filename,
             description=(

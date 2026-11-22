@@ -32,16 +32,23 @@ def _fields_on_storage(storage):
 def _referenced_elsewhere(name, storage, using):
     """Some row still points at this stored name.
 
-    Promotion reuses a name across models (an answer attachment and the evidence
-    revision). The check runs after commit, so the deleted row is already gone.
+    Locks those rows, in model order, until the surrounding transaction ends.
+    A writer that holds the same rows (promotion locks the source attachment)
+    cannot commit a new reference between this check and the storage delete.
     """
-    for model, names in _fields_on_storage(storage).items():
+    referenced = False
+    for model, field_names in _fields_on_storage(storage).items():
         query = Q()
-        for field_name in names:
+        for field_name in field_names:
             query |= Q(**{field_name: name})
-        if model._base_manager.using(using).filter(query).exists():
-            return True
-    return False
+        rows = list(
+            model._base_manager.using(using)
+            .select_for_update()
+            .filter(query)
+            .order_by("pk")
+        )
+        referenced = referenced or bool(rows)
+    return referenced
 
 
 def _delete_field_file(instance, field_file, using):
@@ -54,10 +61,11 @@ def _delete_field_file(instance, field_file, using):
     field_name = field_file.field.name
 
     def cleanup():
-        if _referenced_elsewhere(name, storage, using):
-            return
         try:
-            storage.delete(name)
+            with transaction.atomic(using=using):
+                if _referenced_elsewhere(name, storage, using):
+                    return
+                storage.delete(name)
         except Exception as e:
             logger.warning(
                 "Failed to delete stored file",
