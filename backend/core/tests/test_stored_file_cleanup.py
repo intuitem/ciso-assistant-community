@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from automation.models import PostureAssessment, PostureRun
 from chat.models import IndexedDocument, QuestionnaireRun
+from core.answer_attachments import promote_to_evidence
 from core.models import (
     Answer,
     AnswerAttachment,
@@ -332,4 +333,27 @@ def test_deleting_the_last_owner_removes_the_file(
     storage, name = stored[0]
     with django_capture_on_commit_callbacks(execute=True):
         document.delete()
+    assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_promoted_evidence_keeps_the_shared_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    attachment, answer, stored = _answer_attachment()
+    storage, name = stored[0]
+    user = User.objects.create_user(email="promoter@example.com")
+    evidence, created = promote_to_evidence(attachment, user)
+    assert created
+    revision = evidence.revisions.get()
+    assert revision.attachment.name == name
+
+    with django_capture_on_commit_callbacks(execute=True):
+        answer.delete()
+    with storage.open(name) as handle:
+        assert handle.read() == b"stored-bytes"
+
+    with django_capture_on_commit_callbacks(execute=True):
+        evidence.delete()
     assert not storage.exists(name)

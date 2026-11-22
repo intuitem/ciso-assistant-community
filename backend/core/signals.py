@@ -6,20 +6,42 @@ from structlog import get_logger
 
 logger = get_logger(__name__)
 
+# File fields that share a storage object. Built once; models do not appear later.
+_fields_by_storage = {}
 
-def _referenced_elsewhere(instance, name, using):
-    """Another row of this model still points at the same stored name.
 
-    Runs after commit, when the deleted row is already gone. Excluding its pk
-    would hide a replacement that reused that pk and the same file.
+def _fields_on_storage(storage):
+    cached = _fields_by_storage.get(id(storage))
+    if cached is not None:
+        return cached
+    found = {}
+    for model in apps.get_models():
+        if not model._meta.managed:
+            continue
+        names = [
+            field.name
+            for field in model._meta.local_concrete_fields
+            if isinstance(field, models.FileField) and field.storage is storage
+        ]
+        if names:
+            found[model] = names
+    _fields_by_storage[id(storage)] = found
+    return found
+
+
+def _referenced_elsewhere(name, storage, using):
+    """Some row still points at this stored name.
+
+    Promotion reuses a name across models (an answer attachment and the evidence
+    revision). The check runs after commit, so the deleted row is already gone.
     """
-    query = Q()
-    for field in instance._meta.concrete_fields:
-        if isinstance(field, models.FileField):
-            query |= Q(**{field.name: name})
-    if not query:
-        return False
-    return instance._meta.model._base_manager.using(using).filter(query).exists()
+    for model, names in _fields_on_storage(storage).items():
+        query = Q()
+        for field_name in names:
+            query |= Q(**{field_name: name})
+        if model._base_manager.using(using).filter(query).exists():
+            return True
+    return False
 
 
 def _delete_field_file(instance, field_file, using):
@@ -32,7 +54,7 @@ def _delete_field_file(instance, field_file, using):
     field_name = field_file.field.name
 
     def cleanup():
-        if _referenced_elsewhere(instance, name, using):
+        if _referenced_elsewhere(name, storage, using):
             return
         try:
             storage.delete(name)
