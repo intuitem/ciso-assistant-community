@@ -259,6 +259,7 @@
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
+* [Paul, the EBIOS RM model](integrations/paul.md)
 * [MCP setup guide](integrations/mcp.md)
   * [MCP sign-in with OAuth](integrations/mcp-oauth.md)
 * [Power BI connector](integrations/powerbi.md)
