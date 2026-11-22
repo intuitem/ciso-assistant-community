@@ -303,3 +303,33 @@ def test_queryset_delete_of_rows_sharing_a_file_removes_it(
     with django_capture_on_commit_callbacks(execute=True):
         PublicDocument.objects.filter(pk__in=(first.pk, second.pk)).delete()
     assert not storage.exists(name)
+
+
+@pytest.mark.django_db
+def test_recreating_the_row_with_the_same_pk_keeps_the_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    document, _folder, stored = _public_document()
+    storage, name = stored[0]
+    pk = document.pk
+    with django_capture_on_commit_callbacks(execute=True):
+        with transaction.atomic():
+            document.delete()
+            revived = PublicDocument(id=pk, name="Policy", folder_id=document.folder_id)
+            revived.file = name
+            revived.save()
+    assert storage.exists(name)
+    assert PublicDocument.objects.get(pk=pk).file.name == name
+
+
+@pytest.mark.django_db
+def test_deleting_the_last_owner_removes_the_file(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    document, _folder, stored = _public_document()
+    storage, name = stored[0]
+    with django_capture_on_commit_callbacks(execute=True):
+        document.delete()
+    assert not storage.exists(name)

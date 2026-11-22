@@ -7,13 +7,11 @@ from structlog import get_logger
 logger = get_logger(__name__)
 
 
-def _referenced_elsewhere(instance, name, using, pk):
+def _referenced_elsewhere(instance, name, using):
     """Another row of this model still points at the same stored name.
 
-    Demo reseed reuses one blob across domains, and a cascade must not remove
-    it while that other row exists. Checked again after commit: every
-    pre_delete in one delete runs before any row is removed, so two rows that
-    share a file would otherwise each see the other and both keep it.
+    Runs after commit, when the deleted row is already gone. Excluding its pk
+    would hide a replacement that reused that pk and the same file.
     """
     query = Q()
     for field in instance._meta.concrete_fields:
@@ -21,12 +19,7 @@ def _referenced_elsewhere(instance, name, using, pk):
             query |= Q(**{field.name: name})
     if not query:
         return False
-    return (
-        instance._meta.model._base_manager.using(using)
-        .exclude(pk=pk)
-        .filter(query)
-        .exists()
-    )
+    return instance._meta.model._base_manager.using(using).filter(query).exists()
 
 
 def _delete_field_file(instance, field_file, using):
@@ -39,7 +32,7 @@ def _delete_field_file(instance, field_file, using):
     field_name = field_file.field.name
 
     def cleanup():
-        if _referenced_elsewhere(instance, name, using, pk):
+        if _referenced_elsewhere(instance, name, using):
             return
         try:
             storage.delete(name)
