@@ -343,6 +343,8 @@
 	"evidenceFourEyes": "Bizonyítékok felülvizsgálata a négy szem elve szerint",
 	"reviewEvidences": "Bizonyítékok felülvizsgálata",
 	"evidenceFourEyesHelpText": "Ha engedélyezett, a fájl feltöltője nem hagyhatja jóvá és nem utasíthatja el a fájlt",
+	"autoLockOverdueAssessments": "Lejárt határidejű értékelések automatikus zárolása",
+	"autoLockOverdueAssessmentsHelpText": "Ha engedélyezett, a kampányból vagy szervezetértékelésből származó auditokat a rendszer a határidejüket követő éjszakán zárolja, és „Felülvizsgálat alatt” állapotba helyezi",
 	"autoRefId": "Automatikus hivatkozási azonosítók",
 	"autoRefIdHelpText": "Ha engedélyezett, a hivatkozási azonosító nélkül létrehozott objektumok a szülőobjektumukon belül sorszámozott azonosítót kapnak (pl. AC.01 a tartományában, R.01 a kockázatértékelésében). A meglévő hivatkozási azonosítók soha nem változnak",
 	"autoRefIdPrefixes": "Előtagok",
