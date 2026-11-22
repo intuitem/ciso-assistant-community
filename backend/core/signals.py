@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.db.models.signals import pre_delete
 from structlog import get_logger
 
+from core.storage_locks import lock_stored_name
+
 logger = get_logger(__name__)
 
 # File fields that share a storage object. Built once; models do not appear later.
@@ -32,23 +34,16 @@ def _fields_on_storage(storage):
 def _referenced_elsewhere(name, storage, using):
     """Some row still points at this stored name.
 
-    Locks those rows, in model order, until the surrounding transaction ends.
-    A writer that holds the same rows (promotion locks the source attachment)
-    cannot commit a new reference between this check and the storage delete.
+    Caller holds `lock_stored_name(name)` for this transaction, so no writer
+    can insert another reference until we finish.
     """
-    referenced = False
     for model, field_names in _fields_on_storage(storage).items():
         query = Q()
         for field_name in field_names:
             query |= Q(**{field_name: name})
-        rows = list(
-            model._base_manager.using(using)
-            .select_for_update()
-            .filter(query)
-            .order_by("pk")
-        )
-        referenced = referenced or bool(rows)
-    return referenced
+        if model._base_manager.using(using).filter(query).exists():
+            return True
+    return False
 
 
 def _delete_field_file(instance, field_file, using):
@@ -63,6 +58,7 @@ def _delete_field_file(instance, field_file, using):
     def cleanup():
         try:
             with transaction.atomic(using=using):
+                lock_stored_name(name)
                 if _referenced_elsewhere(name, storage, using):
                     return
                 storage.delete(name)

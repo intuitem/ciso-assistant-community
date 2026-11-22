@@ -10,6 +10,7 @@ import mimetypes
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
+from core import storage_locks
 from core.models import Answer, AnswerAttachment, Evidence, EvidenceRevision, Question
 from core.validators import sanitize_file_name
 
@@ -129,13 +130,9 @@ def promote_to_evidence(attachment, user):
     """Attachment -> Evidence, idempotent. On the audit side it also lands on the
     requirement assessment."""
     with transaction.atomic():
-        # Hold the source row until the new revision commits, so a cleanup of
-        # this stored name cannot delete the bytes in between.
-        attachment = (
-            AnswerAttachment.objects.select_for_update()
-            .filter(pk=attachment.pk)
-            .first()
-        )
+        if attachment.file and attachment.file.name:
+            storage_locks.lock_stored_name(attachment.file.name)
+        attachment = AnswerAttachment.objects.filter(pk=attachment.pk).first()
         if attachment is None:
             return None, False
         if attachment.promoted_to_id:

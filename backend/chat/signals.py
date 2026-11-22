@@ -223,6 +223,12 @@ def _queue(source, source_type, file, filename, content_type):
     # nightly catch-up queues whatever is missing.
     try:
         with transaction.atomic():
+            # A string is an existing stored name (evidence or uploaded revision),
+            # not a new copy. Hold it until this index row commits.
+            if isinstance(file, str) and file:
+                from core.storage_locks import lock_stored_name
+
+                lock_stored_name(file)
             doc.save()
     except Exception:
         logger.exception(
