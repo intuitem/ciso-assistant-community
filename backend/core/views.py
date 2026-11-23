@@ -2699,7 +2699,12 @@ class IntegrationLinkViewSetMixin:
 
         super().perform_create(serializer)
 
-        if integration_config:
+        # Skip configs already pushed to by the model's save(), which would
+        # otherwise create a duplicate remote object.
+        if (
+            integration_config
+            and integration_config.id not in self.model.auto_sync_config_ids()
+        ):
             from django.contrib.contenttypes.models import ContentType
 
             try:
@@ -6187,8 +6192,12 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         super().perform_create(serializer)
         instance = serializer.instance
 
-        # Selecting an integration provider on creation implies creating the remote object
-        if integration_config:
+        # Selecting an integration provider on creation implies creating the
+        # remote object, unless the model's save() already pushed to this config.
+        if (
+            integration_config
+            and integration_config.id not in self.model.auto_sync_config_ids()
+        ):
             try:
                 logger.info(
                     "Creating remote object for Applied Control",
