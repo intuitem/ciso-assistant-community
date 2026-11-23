@@ -936,6 +936,25 @@ class TestCelErrorContainment:
         # A pathological __str__ must not mask the original failure.
         assert _cel_error(Boom()) == ("Boom", False)
 
+    def test_deferred_evaluation_failure_is_contained(
+        self, cel_setup, django_capture_on_commit_callbacks
+    ):
+        """A failure in the on_commit outcome evaluation must not escape the
+        commit hook: it runs after the transaction (a publish snapshot, say) has
+        committed, so propagating would fail the request with nothing to roll
+        back. It is logged and swallowed; the next audit change recomputes it."""
+        from core.models import defer_outcome_evaluation
+
+        # execute=True runs the captured callbacks on block exit; the raise would
+        # surface here if it were not contained.
+        with (
+            patch(
+                "core.cel_service.evaluate_outcomes", side_effect=RuntimeError("boom")
+            ),
+            django_capture_on_commit_callbacks(execute=True),
+        ):
+            defer_outcome_evaluation(cel_setup["ca"].pk)
+
     def test_missing_key_chained_or_fails_open(self):
         """A rule whose terms all error (reading a missing answer key) and are
         chained with `||` must be skipped, not crash the whole evaluation."""
