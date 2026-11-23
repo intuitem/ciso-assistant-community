@@ -481,6 +481,9 @@ async def update_evidence(
     name: str = None,
     description: str = None,
     folder_id: str = None,
+    add_requirement_assessments: list = None,
+    remove_requirement_assessments: list = None,
+    compliance_assessment: str = None,
 ) -> str:
     """Update an evidence - only provided fields are updated
 
@@ -489,11 +492,42 @@ async def update_evidence(
         name: New name
         description: New description
         folder_id: Folder ID/name to move the evidence to
+        add_requirement_assessments: Audit requirements to link, as
+            requirement assessment UUIDs or ref IDs (e.g. "AM-02.04B");
+            existing links are kept
+        remove_requirement_assessments: Audit requirements to unlink (same forms)
+        compliance_assessment: Compliance assessment (audit) ID/name in which
+            ref IDs are looked up
     """
     try:
         resolved_id = resolve_evidence_id(evidence_id)
 
         payload = {}
+
+        if add_requirement_assessments or remove_requirement_assessments:
+            from ..resolvers import resolve_requirement_assessment_ids
+
+            to_add = resolve_requirement_assessment_ids(
+                add_requirement_assessments, compliance_assessment
+            )
+            to_remove = set(
+                resolve_requirement_assessment_ids(
+                    remove_requirement_assessments, compliance_assessment
+                )
+            )
+            current = make_get_request(f"/evidences/{resolved_id}/")
+            if current.status_code != 200:
+                return (
+                    f"Error reading evidence links: {current.status_code} - "
+                    f"{current.text}"
+                )
+            linked = [
+                ra.get("id") if isinstance(ra, dict) else ra
+                for ra in current.json().get("requirement_assessments") or []
+            ]
+            merged = [ra for ra in linked if ra not in to_remove]
+            merged += [ra for ra in to_add if ra not in merged]
+            payload["requirement_assessments"] = merged
 
         if name is not None:
             payload["name"] = name

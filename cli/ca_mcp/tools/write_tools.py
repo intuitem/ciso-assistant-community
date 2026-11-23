@@ -1979,6 +1979,8 @@ async def create_evidence(
     folder_id: str = None,
     status: str = None,
     findings_assessments: list = None,
+    requirement_assessments: list = None,
+    compliance_assessment: str = None,
 ) -> str:
     """Create a new evidence with one attachment read from a local file
 
@@ -2005,6 +2007,11 @@ async def create_evidence(
         findings_assessments: List of findings assessment IDs/names the
             evidence is attached to; without folder_id they must share one
             folder
+        requirement_assessments: Audit requirements the evidence supports, as
+            requirement assessment UUIDs or requirement ref IDs (e.g.
+            "AM-02.04B"); ref IDs need compliance_assessment
+        compliance_assessment: Compliance assessment (audit) ID/name in which
+            the ref IDs of requirement_assessments are looked up
     """
     try:
         path = Path(file_path).expanduser().resolve()
@@ -2016,6 +2023,15 @@ async def create_evidence(
         if not size:
             return f"Error: file is empty: {file_path}"
         filename = path.name
+
+        # Resolved before creating the evidence: an unknown requirement leaves no record.
+        requirement_ids = None
+        if requirement_assessments:
+            from ..resolvers import resolve_requirement_assessment_ids
+
+            requirement_ids = resolve_requirement_assessment_ids(
+                requirement_assessments, compliance_assessment
+            )
 
         # Opened before creating the evidence: an unreadable file leaves no record.
         with path.open("rb") as f:
@@ -2060,6 +2076,8 @@ async def create_evidence(
                 payload["status"] = status
             if binder_ids is not None:
                 payload["findings_assessments"] = binder_ids
+            if requirement_ids:
+                payload["requirement_assessments"] = requirement_ids
 
             res = make_post_request("/evidences/", payload)
             if res.status_code != 201:

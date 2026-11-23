@@ -301,6 +301,56 @@ def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
     )
 
 
+def resolve_requirement_assessment_ids(
+    refs: list, compliance_assessment: str = None
+) -> list:
+    """Resolve requirement assessments given as UUIDs or as requirement ref IDs
+    ("AM-02.04B", case-insensitive) within one compliance assessment.
+
+    Ref IDs need `compliance_assessment` (ID or name). Raises ValueError naming
+    every reference that is not found, before anything is written.
+    """
+    refs = [str(r).strip() for r in (refs or []) if str(r).strip()]
+    by_ref = None
+    resolved, missing = [], []
+    for ref in refs:
+        if _is_uuid(ref):
+            resolved.append(ref)
+            continue
+        if by_ref is None:
+            if not compliance_assessment:
+                raise ValueError(
+                    f"Requirement '{ref}' is not a UUID: pass compliance_assessment "
+                    "to resolve ref IDs"
+                )
+            ca_id = resolve_compliance_assessment_id(compliance_assessment)
+            # max_items=None: a capped fetch would report existing requirements as missing
+            ras, error = fetch_all_results(
+                "/requirement-assessments/",
+                params={"compliance_assessment": ca_id},
+                max_items=None,
+            )
+            if error:
+                raise ValueError(f"Requirement assessments API error: {error}")
+            by_ref = {}
+            for ra in ras:
+                req = ra.get("requirement")
+                key = req.get("ref_id") if isinstance(req, dict) else None
+                key = key or ra.get("ref_id")
+                if key:
+                    by_ref[key.strip().lower()] = ra["id"]
+        ra_id = by_ref.get(ref.lower())
+        if ra_id:
+            resolved.append(ra_id)
+        else:
+            missing.append(ref)
+    if missing:
+        raise ValueError(
+            f"Requirements not found in '{compliance_assessment}': {', '.join(missing)}"
+        )
+    return list(dict.fromkeys(resolved))
+
+
 def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
     """Helper function to resolve compliance assessment (audit) name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
