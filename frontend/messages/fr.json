@@ -270,6 +270,8 @@
 	"evidenceFourEyes": "Double contrôle des preuves",
 	"reviewEvidences": "Examiner les preuves",
 	"evidenceFourEyesHelpText": "Lorsque cette option est activée, la personne qui a déposé un fichier ne peut ni l'approuver ni le rejeter",
+	"autoLockOverdueAssessments": "Verrouillage automatique des évaluations en retard",
+	"autoLockOverdueAssessmentsHelpText": "Lorsque cette option est activée, les audits issus d'une campagne ou d'une évaluation de tiers sont verrouillés et passés « En revue » la nuit suivant leur date d'échéance",
 	"autoRefId": "Identifiants de référence automatiques",
 	"autoRefIdHelpText": "Lorsque cette option est activée, les objets créés sans identifiant de référence en reçoivent un, numéroté au sein de leur parent (par ex. AC.01 dans son domaine, R.01 dans son analyse de risques). Les identifiants existants ne sont jamais modifiés",
 	"autoRefIdPrefixes": "Préfixes",
@@ -8221,6 +8223,382 @@
 	"reviewToastRejected": "Rejetée : {name}",
 	"reviewUndoError": "La décision n'a pas pu être annulée.",
 	"evidenceExportTooLarge": "La sélection représente {size} Mo de fichiers, au-delà de la limite de {max} Mo. Réduisez la sélection et relancez l'export.",
+	"prereadTitle": "Anticiper l'auditeur",
+	"prereadDescription": "Pour un audit ISO/IEC 27001:2022 : ce que l'auditeur de certification demandera, les enregistrements qu'il réclamera, ses échantillons et les personnes qu'il interrogera, exigence par exigence, face aux preuves déjà liées. Avec la liste des preuves demandées et le plan d'entretiens.",
+	"prereadIntro": "Prenez de l'avance sur l'auditeur de certification. Pour chaque exigence : ce qu'il demandera, les enregistrements attendus, ses échantillons et les personnes qu'il interrogera, face aux preuves déjà présentes dans l'audit.",
+	"prereadReadinessPerRequirement": "Préparation par exigence",
+	"prereadRequestList": "Liste des preuves demandées",
+	"prereadInterviewPlan": "Plan d'entretiens",
+	"prereadNoAudit": "Aucun audit ISO/IEC 27001:2022 visible pour vous pour l'instant. Les audits sur une copie de la norme qui garde la même numérotation apparaissent aussi ici.",
+	"prereadGoToAudits": "Aller aux audits",
+	"prereadSearchAudits": "Rechercher des audits",
+	"prereadSearchAuditsPlaceholder": "Rechercher audits, domaines, périmètres",
+	"prereadAuditCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit",
+				"countPlural=other": "{count} audits"
+			}
+		}
+	],
+	"prereadByNumberHint": "Le guide est appliqué par numéro d'exigence",
+	"prereadByNumber": "· par numéro",
+	"prereadPartial": "· partiel",
+	"prereadPartialHint": "Le guide ne couvre qu'une partie de ce référentiel ; ouvrez l'audit pour l'appliquer",
+	"prereadNoPerimeter": "Sans périmètre",
+	"prereadOpen": "Anticiper cet audit",
+	"prereadNoAuditMatches": "Aucun audit ne correspond à « {query} ».",
+	"prereadPageTitle": "Anticiper l'auditeur : {name}",
+	"prereadRoleTop": "Direction",
+	"prereadRoleCiso": "Responsable SMSI / RSSI",
+	"prereadRoleRisk": "Propriétaire de risque",
+	"prereadRoleAuditor": "Auditeur interne",
+	"prereadRoleHr": "RH",
+	"prereadRoleLegal": "Juridique / conformité",
+	"prereadRoleDpo": "Délégué à la protection des données",
+	"prereadRoleProc": "Achats",
+	"prereadRoleFacilities": "Services généraux",
+	"prereadRoleItLead": "Responsable informatique",
+	"prereadRoleIam": "Administration des identités et des accès",
+	"prereadRoleInfra": "Infrastructure et hébergement",
+	"prereadRoleNetwork": "Administration réseau",
+	"prereadRoleEndpoint": "Postes de travail et terminaux",
+	"prereadRoleServiceDesk": "Support utilisateurs",
+	"prereadRoleSecOps": "Exploitation de la sécurité",
+	"prereadRoleDev": "Responsable du développement",
+	"prereadRoleStaff": "Collaborateurs (au hasard)",
+	"prereadGap": "Écart",
+	"prereadWeak": "Fragile",
+	"prereadToConfirm": "À confirmer",
+	"prereadReady": "Prêt",
+	"prereadExcluded": "Exclu",
+	"prereadNoGuidance": "Sans guide",
+	"prereadReasonOpenFinding": "Constat ouvert d'un audit précédent, non-conformité potentielle",
+	"prereadReasonOpenMinorFinding": "Point de vigilance ouvert d'un audit précédent",
+	"prereadReasonNothingLinked": "Aucune preuve liée",
+	"prereadReasonNonCompliant": "Évalué non conforme",
+	"prereadReasonQualityError": "Le contrôle qualité de l'audit signale une erreur",
+	"prereadReasonNotAssessed": "Pas encore évalué",
+	"prereadReasonStaleEvidence": "Un enregistrement demandé est plus ancien que prévu",
+	"prereadReasonRequestNotOnFile": "Une preuve demandée manque au dossier",
+	"prereadReasonEvidenceToConfirm": "Des preuves sont au dossier, sans confirmation qu'elles répondent aux demandes",
+	"prereadReasonMissingFile": "Une preuve n'a encore ni fichier ni lien : elle ne compte pas",
+	"prereadReasonQualityWarning": "Le contrôle qualité de l'audit signale un avertissement",
+	"prereadSectionClauses": "Chapitres 4 à 10",
+	"prereadSectionA5": "A.5 Organisationnelles",
+	"prereadSectionA6": "A.6 Liées aux personnes",
+	"prereadSectionA7": "A.7 Physiques",
+	"prereadSectionA8": "A.8 Technologiques",
+	"prereadSectionOther": "Autres exigences",
+	"prereadKindDocument": "Document",
+	"prereadKindRecord": "Enregistrement",
+	"prereadKindTechnical": "Export technique",
+	"prereadKindObservation": "Observé sur site",
+	"prereadStage1Long": "Étape 1 : revue documentaire",
+	"prereadStage2Long": "Étape 2 : mise en œuvre, vérifiée sur échantillons",
+	"prereadColReadiness": "Préparation",
+	"prereadColRef": "Réf.",
+	"prereadColRequirement": "Exigence",
+	"prereadColRequest": "Demande",
+	"prereadColKind": "Type",
+	"prereadColMaxAgeDays": "Ancienneté max. (jours)",
+	"prereadColMaxAge": "Ancienneté max.",
+	"prereadColOwner": "Responsable",
+	"prereadColOnFile": "Au dossier",
+	"prereadTsvToConfirm": "à confirmer",
+	"prereadTsvMissing": "manquant",
+	"prereadVerdictGap": "Pas prêt. En l'état, l'auditeur relèverait probablement un manquement (une « non-conformité »).",
+	"prereadVerdictWeak": "Presque prêt. Il manque un détail : l'auditeur ferait sans doute une remarque, rarement plus.",
+	"prereadVerdictToConfirm": "Sans doute prêt, à vérifier. Des preuves sont au dossier : indiquez à quelle demande chacune répond.",
+	"prereadVerdictReady": "Le jour de l'audit, ayez les preuves ci-dessous sous la main.",
+	"prereadVerdictExcluded": "Hors périmètre : l'auditeur demandera tout de même pourquoi, préparez la justification.",
+	"prereadVerdictNoGuidance": "Pas encore de guide d'audit pour cette exigence.",
+	"prereadCannotEdit": "Vous ne pouvez pas modifier cet audit.",
+	"prereadPairNotSaved": "Le rattachement n'a pas été enregistré.",
+	"prereadNoRevision": "aucune révision",
+	"prereadSummary": "Synthèse de préparation",
+	"prereadOpenAudit": "Ouvrir l'audit",
+	"prereadShowAll": "Afficher toutes les exigences",
+	"prereadShowOnly": "Afficher uniquement « {state} »",
+	"prereadSummaryHint": "{count} exigences. Cliquez sur un total pour n'afficher que celles-ci. La préparation est estimée à partir des preuves liées à l'audit et de ses contrôles qualité.",
+	"prereadUnsupported": "Pas encore de guide d'audit pour ce référentiel. Seule l'ISO/IEC 27001:2022 est couverte, y compris ses copies qui gardent la même numérotation.",
+	"prereadSuggestion": "Sa numérotation recoupe en partie « {guide} » : {pct} % du guide s'applique à {matched} de ses {total} exigences.",
+	"prereadApplyAnyway": "Appliquer le guide quand même",
+	"prereadProjected": "Guide ISO/IEC 27001:2022 appliqué par numéro d'exigence : {matched} exigences retrouvées sur {total}.",
+	"prereadLettered": "Les points en lettres reprennent le guide de leur exigence parente.",
+	"prereadSearchRequirements": "Rechercher des exigences",
+	"prereadSearchRequirementsPlaceholder": "Rechercher par référence ou titre",
+	"prereadAuditStage": "Étape d'audit",
+	"prereadBothStages": "Les deux étapes",
+	"prereadStage1": "Étape 1",
+	"prereadStage2": "Étape 2",
+	"prereadBothStagesHint": "Questions des deux étapes",
+	"prereadClearFilters": "Effacer les filtres",
+	"prereadSection": "Partie",
+	"prereadAllSections": "Toutes les parties",
+	"prereadByRequirement": "Par exigence",
+	"prereadSessions": "Séances d'audit",
+	"prereadRequirements": "Exigences",
+	"prereadOpenFindingHint": "Constat ouvert d'un audit précédent",
+	"prereadNothingMatches": "Aucun résultat avec ces filtres.",
+	"prereadResultHint": "Résultat enregistré dans l'audit",
+	"prereadOpenInAuditHint": "Modifier cette exigence dans l'audit. Annuler vous ramène ici.",
+	"prereadOpenInAudit": "Modifier dans l'audit",
+	"prereadQualityFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} remarque du contrôle qualité",
+				"countPlural=other": "{count} remarques du contrôle qualité"
+			}
+		}
+	],
+	"prereadEarlierAudit": "Relevé lors d'un audit précédent",
+	"prereadEarlierAuditHint": "Suivi en premier : apportez l'action menée et sa preuve",
+	"prereadWillAsk": "Ce que l'auditeur demandera",
+	"prereadHowChecked": "Comment ce sera vérifié",
+	"prereadSample": "Échantillon",
+	"prereadSampleFrom": "Parmi : {population}",
+	"prereadNoSampling": "Revue documentaire seule, pas d'échantillonnage prévu.",
+	"prereadInterviews": "Entretiens",
+	"prereadRequestedVsOnFile": "Preuves demandées",
+	"prereadRequestedAside": "demandées : {toFile} · fournies : {matched} · à rattacher : {other}",
+	"prereadWillAskFor": "L'auditeur demandera",
+	"prereadFreshHint": "Le plus récent doit être plus jeune que cela",
+	"prereadDays": "{days} j",
+	"prereadEvidenceHidden": "Preuve non visible pour vous",
+	"prereadFiledElsewhereHint": "Liée à une autre exigence qui demande la même preuve",
+	"prereadFiledElsewhere": "· au dossier ailleurs dans l'audit",
+	"prereadPairedByHand": "· rattachée à la main",
+	"prereadUnpairHint": "Détacher : cette preuve ne répond pas à cette demande, ici comme partout où la même preuve est demandée",
+	"prereadUnpair": "Détacher {name}",
+	"prereadToConfirmPick": "À confirmer : choisissez la preuve qui y répond",
+	"prereadNotOnFile": "Absent du dossier",
+	"prereadAlsoOnFile": "Aussi au dossier, non rattachées",
+	"prereadOnFile": "Déjà au dossier",
+	"prereadViaTask": "via la tâche {name}",
+	"prereadTaskHiddenLower": "une tâche non visible pour vous",
+	"prereadControlHiddenLower": "une mesure non visible pour vous",
+	"prereadOlderThanWindow": "Plus ancien que la fraîcheur attendue",
+	"prereadAttachedToRequirement": "jointe à l'exigence",
+	"prereadVia": "via {name}",
+	"prereadNoFile": "ni fichier ni lien",
+	"prereadAllAnswer": "Chaque preuve liée répond à l'une des demandes.",
+	"prereadNothingLinkedYet": "Rien n'est encore lié.",
+	"prereadAttachHint": "Ajoutez des preuves aux mesures appliquées de cette exigence, ou à l'exigence elle-même.",
+	"prereadAppliedControls": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} mesure appliquée",
+				"countPlural=other": "{count} mesures appliquées"
+			}
+		}
+	],
+	"prereadControlHidden": "Mesure non visible pour vous",
+	"prereadPitfalls": "Là où les auditeurs relèvent souvent un écart",
+	"prereadPrevious": "Précédent",
+	"prereadNext": "Suivant",
+	"prereadKeysHint": "· ↑ ↓ dans la liste",
+	"prereadSessionsIntro": "L'étape 2 se déroule par thème, pas dans l'ordre de la norme : chaque séance parcourt des chapitres et des mesures liés, avec les mêmes interlocuteurs. Préparez un dossier et un responsable par séance.",
+	"prereadSessionCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} exigence · {asks} enregistrements à fournir",
+				"countPlural=other": "{count} exigences · {asks} enregistrements à fournir"
+			}
+		}
+	],
+	"prereadSessionItems": "{count} éléments à préparer",
+	"prereadRequestsIntro": "Tout ce que l'auditeur demandera probablement, une seule fois, en commençant par le moins prêt. Une preuve demandée par plusieurs exigences tient sur une ligne. Les exigences exclues n'y figurent pas. Copiez la liste dans un tableur pour la partager avec les responsables avant l'audit.",
+	"prereadCopied": "Copié",
+	"prereadCopyRows": "Copier {count} lignes",
+	"prereadToConfirmHint": "Des preuves sont liées à l'exigence : confirmez celle qui répond à cette demande",
+	"prereadSeenOnSite": "Vu sur site",
+	"prereadMissing": "Manquant",
+	"prereadWalkThrough": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} exigence à parcourir",
+				"countPlural=other": "{count} exigences à parcourir"
+			}
+		}
+	],
+	"prereadStartTitle": "Par où commencer",
+	"prereadStartConfirm": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Rattachez les preuves déjà au dossier : {count} exigence à confirmer",
+				"countPlural=other": "Rattachez les preuves déjà au dossier : {count} exigences à confirmer"
+			}
+		}
+	],
+	"prereadStartFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Traitez les constats encore ouverts des audits précédents : {count} exigence",
+				"countPlural=other": "Traitez les constats encore ouverts des audits précédents : {count} exigences"
+			}
+		}
+	],
+	"prereadStartDocuments": "Réunissez d'abord les preuves les plus demandées : une même preuve répond souvent à plusieurs exigences",
+	"prereadAnswers": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "répond à {count} exigence",
+				"countPlural=other": "répond à {count} exigences"
+			}
+		}
+	],
+	"prereadSeeAllRequests": "Toute la liste des preuves demandées",
+	"prereadStartStage1": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Puis parcourez l'étape 1, la revue documentaire : {count} exigence",
+				"countPlural=other": "Puis parcourez l'étape 1, la revue documentaire : {count} exigences"
+			}
+		}
+	],
+	"prereadPrepareInterview": "Préparer l'entretien",
+	"prereadPrepareInterviewAside": "questions, échantillon, interlocuteurs, écarts fréquents",
+	"prereadOpenFindingsFilter": "Constats ouverts",
+	"prereadTodoTitle": "À faire",
+	"prereadTodoFinding": "Un audit précédent a relevé un problème ici. Montrez ce qui a été fait pour le corriger, preuve à l'appui (voir plus bas).",
+	"prereadTodoGather": "Pour chaque demande marquée « Absent du dossier » ci-dessous : déposez la preuve, ou choisissez-la si elle est déjà dans l'outil. Rien d'écrit pour l'instant ? Rédigez une note courte : l'auditeur veut surtout une trace écrite.",
+	"prereadTodoPair": "Des preuves sont déjà sur cette exigence. Sous chaque demande, « Choisir une preuve existante » les propose en premier : choisissez celle qui y répond.",
+	"prereadTodoRefresh": "Une preuve est plus ancienne que ce qu'attend l'auditeur. Ajoutez-en une version récente.",
+	"prereadTodoFix": "L'audit indique que cette exigence n'est pas respectée. Prévoyez une correction avant la venue de l'auditeur, et gardez-en une trace.",
+	"prereadTodoAssess": "Indiquez dans l'audit si cette exigence est respectée.",
+	"prereadTodoQuality": "Corrigez les points signalés par les contrôles qualité de l'audit (ci-dessous).",
+	"prereadTodoJustify": "Notez pourquoi cette exigence ne s'applique pas à vous.",
+	"prereadTodoRehearse": "Relisez les questions que posera l'auditeur, pour ne pas être pris au dépourvu.",
+	"prereadActionEvidence": "Ajouter une preuve",
+	"prereadActionAssess": "Évaluer",
+	"prereadActionJustify": "Justifier",
+	"prereadActionPrep": "Voir les questions",
+	"prereadResultIn": "Dans l'audit : {result}",
+	"prereadUpload": "Déposer la preuve",
+	"prereadUploadHint": "L'ajoute comme preuve de cette exigence, déjà rattachée à cette demande",
+	"prereadPickExisting": "Choisir une preuve existante",
+	"prereadPickHint": "La rattache à cette exigence et à cette demande",
+	"prereadPickSearch": "Rechercher une preuve par son nom",
+	"prereadPickOnRequirement": "déjà sur cette exigence",
+	"prereadTodoNoGuide": "Cette exigence vous est propre : pas de guide d'audit pour elle. Évaluez-la dans l'audit comme d'habitude.",
+	"prereadHiddenUnusable": "Ne compte pas (refusée, expirée ou manquante)",
+	"prereadHiddenToValidate": "Pas encore validée",
+	"prereadHiddenExpires": "Expire avant l'audit",
+	"prereadReasonUnusableEvidence": "Une preuve est refusée, expirée ou marquée manquante : elle ne compte pas",
+	"prereadReasonEvidenceToValidate": "Une preuve est encore en brouillon ou en revue",
+	"prereadReasonExpiresBeforeAudit": "Une preuve expire avant la date de l'audit",
+	"prereadTodoUnusable": "Une preuve ci-dessous est refusée, expirée ou marquée manquante : elle ne compte pas. Remplacez-la ou renouvelez-la.",
+	"prereadTodoValidate": "Une preuve ci-dessous est encore en brouillon ou en revue : faites-la valider avant l'audit, l'auditeur le demandera.",
+	"prereadTodoExpiresBeforeAudit": "Une preuve ci-dessous expire avant la date de l'audit : renouvelez-la d'ici là.",
+	"prereadReach": "Compte aussi pour {what}",
+	"prereadReachAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} autre audit du domaine, là où cette preuve figure",
+				"countPlural=other": "{count} autres audits du domaine, là où cette preuve figure"
+			}
+		}
+	],
+	"prereadReadOnly": "Lecture seule : vous pouvez suivre la préparation, les modifications sont faites par les personnes qui peuvent modifier cet audit.",
+	"prereadExpiredOn": "expirée le {date}",
+	"prereadExpires": "expire le {date}",
+	"prereadPrepare": "Préparer l'audit",
+	"prereadPrepNone": "Étape, dates et organisme pas encore renseignés",
+	"prereadStageField": "Étape préparée",
+	"prereadStageNone": "Non renseignée",
+	"prereadStage_stage_1": "Étape 1 (revue documentaire)",
+	"prereadStage_stage_2": "Étape 2 (sur site)",
+	"prereadStage_surveillance": "Audit de surveillance",
+	"prereadStage_recertification": "Audit de renouvellement",
+	"prereadFirstDay": "Premier jour d'audit",
+	"prereadLastDay": "Dernier jour d'audit",
+	"prereadLastDayHint": "Les preuves doivent encore être valides ce jour-là.",
+	"prereadCertificationBody": "Organisme de certification",
+	"prereadAuditors": "Auditeur(s)",
+	"prereadNotSaved": "Non enregistré.",
+	"prereadSetAside": "Ne s'applique pas",
+	"prereadSetAsideHint": "Cette demande ne concerne pas cet audit : elle ne compte plus comme manquante.",
+	"prereadSetAsideReason": "Pourquoi ? L'auditeur le demandera.",
+	"prereadSetAsideShown": "Écartée : {reason}",
+	"prereadRestore": "Reprendre",
+	"prereadCarryOver": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} demande avait été écartée lors du précédent audit de ce domaine.",
+				"countPlural=other": "{count} demandes avaient été écartées lors du précédent audit de ce domaine."
+			}
+		}
+	],
+	"prereadCarryOverAction": "Les reprendre",
+	"prereadStartSessions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Planifiez les séances avec l'organisme : {count} séance n'a pas de date",
+				"countPlural=other": "Planifiez les séances avec l'organisme : {count} séances n'ont pas de date"
+			}
+		}
+	],
+	"prereadSchedule": "Planifier",
+	"prereadStartTime": "Début",
+	"prereadEndTime": "Fin",
+	"prereadLocation": "Lieu ou lien",
+	"prereadAttendees": "Participants",
+	"prereadAssign": "Désigner",
+	"prereadNobodyYet": "Personne de désigné",
+	"prereadWho": "Qui répond",
+	"prereadHiddenFinding": "Un constat d'un audit précédent (non visible pour vous)",
+	"prereadNoDate": "Pas encore de date",
+	"prereadWalk": "Préparer cette séance",
+	"prereadWalkSession": "Préparation de la séance : {label}",
+	"prereadWalkCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} exigence encore à traiter",
+				"countPlural=other": "{count} exigences encore à traiter"
+			}
+		}
+	],
+	"prereadWalkExit": "Revenir à la vue complète",
+	"prereadWalkDone": "Tout est traité pour cette séance.",
+	"prereadStartWalk": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Puis préparez séance par séance, en commençant par « {label} » : {count} exigence à traiter",
+				"countPlural=other": "Puis préparez séance par séance, en commençant par « {label} » : {count} exigences à traiter"
+			}
+		}
+	],
+	"prereadTodoAddFile": "Une preuve ci-dessous n'a encore ni fichier ni lien : elle ne compte pas tant que vous ne l'avez pas complétée avec « Ajouter le fichier ».",
+	"prereadAddFile": "Ajouter le fichier",
 	"europeanUnion": "Union européenne",
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
@@ -8235,5 +8613,18 @@
 				"countPlural=other": "{count} mesures dont l'ETA est postérieur à la date cible de traitement"
 			}
 		}
-	]
+	],
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "Configuration de l'intégration GLPI",
+	"glpiInstanceUrlHelpText": "URL de votre instance GLPI (ex. https://glpi.example.com/). GLPI 11 ou ultérieur est requis.",
+	"glpiClientIdHelpText": "Identifiant d'un client OAuth créé dans GLPI avec l'autorisation « password » et le périmètre « api ».",
+	"glpiUsernameHelpText": "Utilisateur GLPI au nom duquel l'intégration agit. Son profil détermine les éléments lisibles et modifiables.",
+	"glpiSecretsAlreadySetHelpText": "Le secret client et le mot de passe sont déjà définis.",
+	"glpiResetSecrets": "Réinitialiser les secrets",
+	"glpiWebhookSecretHelpText": "Le secret affiché dans l'onglet Sécurité de votre webhook GLPI.",
+	"glpiIntegrationMappingsHelpText": "Associez vos mesures locales aux éléments GLPI.",
+	"glpiTableHelpText": "Sélectionnez le type d'élément GLPI à synchroniser (ticket, changement ou problème).",
+	"glpiField": "Champ GLPI",
+	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
+	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...)."
 }

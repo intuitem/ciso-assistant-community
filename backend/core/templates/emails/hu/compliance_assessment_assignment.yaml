@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Önhöz rendelték a(z) „${assessment_name}” auditot"
+body: |
+  Tisztelt Felhasználó!
+
+  Szerzőként hozzárendelték Önt a következő audithoz:
+
+  - Név: ${assessment_name}
+  - Leírás: ${assessment_description}
+  - Keretrendszer: ${framework_name}
+  - Állapot: ${assessment_status}
+  - Határidő: ${assessment_due_date}
+  - Tartomány: ${folder_name}
+
+  Az audit megtekintéséhez és kezeléséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

@@ -37,6 +37,7 @@
 	const { value: frequency } = formFieldProxy(form, 'schedule.frequency');
 	const { tainted: taskDateTainted } = formFieldProxy(form, 'task_date');
 	const { tainted: scheduleTainted } = formFieldProxy(form, 'schedule');
+	const { value: folder } = formFieldProxy(form, 'folder');
 
 	function scheduleTaintedHandler(data) {
 		if (Array.isArray(data)) {
@@ -53,21 +54,26 @@
 </script>
 
 {#if !isVendor}
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="actors?user__is_third_party=False"
-		lazy
-		optionsLabelField="str"
-		optionsInfoFields={{
-			fields: [{ field: 'type', translate: true }],
-			position: 'prefix'
-		}}
-		field="assigned_to"
-		cacheLock={cacheLocks['assigned_to']}
-		bind:cachedValue={formDataCache['assigned_to']}
-		label={m.assignedTo()}
-	/>
+	<!-- Remounted per folder: the picker fetches its options once, and the vendor
+	     respondents it offers depend on the workspace the task is filed in. -->
+	{#key $folder}
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="actors?user__is_third_party=False"
+			optionsDetailedUrlParameters={[['respondents_of', $folder ?? '']]}
+			lazy
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
+			field="assigned_to"
+			cacheLock={cacheLocks['assigned_to']}
+			bind:cachedValue={formDataCache['assigned_to']}
+			label={m.assignedTo()}
+		/>
+	{/key}
 {/if}
 {#if !$is_recurrent}
 	<TextField

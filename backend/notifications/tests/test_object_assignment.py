@@ -64,7 +64,7 @@ def test_every_wired_model_has_a_label_and_m2m_fields():
             assert notification_type in NOTIFICATION_REGISTRY, notification_type
 
 
-@pytest.mark.parametrize("locale", ["en", "fr", "de", "nl"])
+@pytest.mark.parametrize("locale", ["en", "fr", "de", "nl", "hu"])
 def test_email_labels_match_the_paraglide_catalog(locale):
     path = Path(settings.BASE_DIR).parent / "frontend" / "messages" / f"{locale}.json"
     if not path.exists():
@@ -207,7 +207,11 @@ def test_reviewers_get_the_review_type(
 
 @pytest.mark.parametrize(
     "locale,expected",
-    [("fr", "Actif 'Payroll DB'"), ("nl", "Aan u toegewezen: Middel 'Payroll DB'")],
+    [
+        ("fr", "Actif 'Payroll DB'"),
+        ("hu", "Önhöz rendelve: Eszköz „Payroll DB”"),
+        ("nl", "Aan u toegewezen: Middel 'Payroll DB'"),
+    ],
 )
 def test_email_names_the_model_in_the_recipient_language(
     folder, alice, locale, expected, django_capture_on_commit_callbacks

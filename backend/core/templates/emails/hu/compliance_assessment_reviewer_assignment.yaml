@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Felülvizsgálóként hozzáadták Önt a(z) „${assessment_name}” audithoz"
+body: |
+  Tisztelt Felhasználó!
+
+  Felülvizsgálóként hozzáadták Önt a következő audithoz:
+
+  - Név: ${assessment_name}
+  - Leírás: ${assessment_description}
+  - Keretrendszer: ${framework_name}
+  - Állapot: ${assessment_status}
+  - Határidő: ${assessment_due_date}
+  - Tartomány: ${folder_name}
+
+  Az audit felülvizsgálatához jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.
