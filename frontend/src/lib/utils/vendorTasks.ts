@@ -14,9 +14,9 @@ export async function fetchTasks(
 
 /**
  * Actor ids to prefill as the assignees of a task a reviewer raises in `folder`: the
- * respondents of the vendor's workspace (enclave), the same actors the assignee picker
- * offers there. Empty outside an enclave, for a vendor raising a task in their own
- * workspace, and when the lookup fails.
+ * preferred representatives among the respondents of the vendor's workspace (enclave),
+ * or all of its respondents when none is preferred. Empty outside an enclave, for a
+ * vendor raising a task in their own workspace, and when the lookup fails.
  */
 export async function fetchVendorAssignees(
 	fetch: typeof globalThis.fetch,
@@ -24,11 +24,15 @@ export async function fetchVendorAssignees(
 	isThirdParty: boolean
 ): Promise<string[]> {
 	if (!folder || folder.content_type !== 'EN' || isThirdParty) return [];
+	const respondentsUrl = `${BASE_API_URL}/actors/?respondents_of=${folder.id}&respondents_only=true`;
 	try {
-		const actors = await fetchAllPages<{ id: string }>(
+		const preferred = await fetchAllPages<{ id: string }>(
 			fetch,
-			`${BASE_API_URL}/actors/?respondents_of=${folder.id}&respondents_only=true`
+			`${respondentsUrl}&preferred_only=true`
 		);
+		const actors = preferred.length
+			? preferred
+			: await fetchAllPages<{ id: string }>(fetch, respondentsUrl);
 		return actors.map((actor) => actor.id);
 	} catch {
 		return [];

@@ -965,6 +965,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                     "description": esc(representative.description),
                     "phone": esc(representative.phone),
                     "role": esc(representative.role),
+                    "is_preferred": "Yes" if representative.is_preferred else "No",
                     "provider_entity_ref_id": esc(representative.entity.ref_id),
                     "provider": esc(representative.entity.name),
                 }
@@ -1019,6 +1020,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "description",
             "phone",
             "role",
+            "is_preferred",
             "provider_entity_ref_id",
             "provider",
         ]

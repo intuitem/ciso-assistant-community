@@ -421,6 +421,9 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     role = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    is_preferred = models.BooleanField(
+        default=False, verbose_name=_("Preferred representative")
+    )
 
     fields_to_check = ["email"]
 

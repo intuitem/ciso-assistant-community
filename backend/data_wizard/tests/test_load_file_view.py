@@ -19,6 +19,7 @@ Pattern mirrors tprm/test/test_views.py:
 import io
 
 import openpyxl
+import pandas as pd
 import pytest
 
 from core.models import (
@@ -39,7 +40,7 @@ from ebios_rm.models import ElementaryAction
 from iam.models import Folder, User
 from privacy.models import Processing
 from rest_framework.test import APIClient
-from tprm.models import EntityAssessment
+from tprm.models import Entity, EntityAssessment, Representative
 
 URL = "/api/data-wizard/load-file/"
 
@@ -1765,6 +1766,148 @@ class TestTprmEntityResolutionByName:
         results = resp.json()["results"]
         assert results["entities"]["successful"] == 1, results["entities"]
         assert results["solutions"]["failed"] == 1, results["solutions"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Representative `is_preferred` round-trip
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestRepresentativePreferredRoundTrip:
+    def test_export_writes_the_preferred_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        vendor = Entity.objects.create(name="Vendor", folder=domain_folder)
+        Representative.objects.create(
+            entity=vendor, email="lead@vendor.test", is_preferred=True
+        )
+        Representative.objects.create(entity=vendor, email="other@vendor.test")
+
+        response = api_client.get("/api/entities/export_ecosystem/")
+
+        assert response.status_code == 200
+        rows = pd.read_excel(io.BytesIO(response.content), sheet_name="Representatives")
+        assert dict(zip(rows["email"], rows["is_preferred"])) == {
+            "lead@vendor.test": "Yes",
+            "other@vendor.test": "No",
+        }
+
+    def test_import_reads_the_preferred_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Vendor", "description": ""}],
+                "Representatives": [
+                    {
+                        "email": "lead@vendor.test",
+                        "provider_entity_name": "Vendor",
+                        "is_preferred": "Yes",
+                    },
+                    {
+                        "email": "other@vendor.test",
+                        "provider_entity_name": "Vendor",
+                        "is_preferred": "No",
+                    },
+                ],
+            }
+        )
+
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert dict(Representative.objects.values_list("email", "is_preferred")) == {
+            "lead@vendor.test": True,
+            "other@vendor.test": False,
+        }
+
+    def test_import_without_the_column_keeps_the_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        vendor = Entity.objects.create(name="Vendor", folder=domain_folder)
+        Representative.objects.create(
+            entity=vendor, email="lead@vendor.test", is_preferred=True
+        )
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Vendor", "description": ""}],
+                "Representatives": [
+                    {
+                        "email": "lead@vendor.test",
+                        "provider_entity_name": "Vendor",
+                        "role": "CISO",
+                    }
+                ],
+            }
+        )
+
+        resp = _post(
+            api_client,
+            excel.read(),
+            "tprm.xlsx",
+            "TPRM",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+
+        assert resp.status_code == 200, resp.json()
+        lead = Representative.objects.get(email="lead@vendor.test")
+        assert (lead.role, lead.is_preferred) == ("CISO", True)
+
+    def test_reimport_clears_the_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        vendor = Entity.objects.create(name="Vendor", folder=domain_folder)
+        Representative.objects.create(
+            entity=vendor, email="lead@vendor.test", is_preferred=True
+        )
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Vendor", "description": ""}],
+                "Representatives": [
+                    {
+                        "email": "lead@vendor.test",
+                        "provider_entity_name": "Vendor",
+                        "is_preferred": "No",
+                    }
+                ],
+            }
+        )
+
+        resp = _post(
+            api_client,
+            excel.read(),
+            "tprm.xlsx",
+            "TPRM",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+
+        assert resp.status_code == 200, resp.json()
+        assert not Representative.objects.get(email="lead@vendor.test").is_preferred
+
+    def test_import_rejects_an_unreadable_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Vendor", "description": ""}],
+                "Representatives": [
+                    {
+                        "email": "lead@vendor.test",
+                        "provider_entity_name": "Vendor",
+                        "is_preferred": "Yse",
+                    }
+                ],
+            }
+        )
+
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["representatives"]["failed"] == 1
+        assert not Representative.objects.filter(email="lead@vendor.test").exists()
 
 
 # ─────────────────────────────────────────────────────────────────────────────

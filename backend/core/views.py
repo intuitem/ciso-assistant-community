@@ -9475,6 +9475,18 @@ class ActorViewSet(BaseModelViewSet):
         )
         if self.request.query_params.get("respondents_only", "").lower() == "true":
             queryset = queryset.filter(user__in=respondents)
+        if self.request.query_params.get("preferred_only", "").lower() == "true":
+            # A user may represent several vendors: only the one audited here counts.
+            preferred = (
+                Representative.objects.filter(
+                    user=OuterRef("user"),
+                    is_preferred=True,
+                    entity__entityassessment__compliance_assessment__folder_id=workspace,
+                )
+                if workspace
+                else Representative.objects.none()
+            )
+            queryset = queryset.filter(Exists(preferred))
 
         include_third_parties = self.request.query_params.get(
             "include_third_parties", "false"
