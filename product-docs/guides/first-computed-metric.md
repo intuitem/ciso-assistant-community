@@ -21,7 +21,7 @@ The **New computed metric** window opens with both metrics under **Metrics to co
 ## 2. Write the formula
 
 1. Under **Formula**, next to **Start from:**, click **Ratio (%)**. The formula becomes `employees_trained * 100.0 / headcount`.
-2. Round it to one decimal: change it to `round(employees_trained * 100.0 / headcount, 1)`.
+2. Leave the formula unrounded. The number of decimals shown is a setting of the metric, not part of the formula: a percentage shows one decimal unless you set **Decimals** otherwise, and the stored value keeps its precision.
 
 The **Latest result** box on the right computes it as you type: the current rate, how it moved since last month, a chart of the last twelve months and the last four values. Check them against what you expect before going further. Nothing is saved yet.
 
@@ -31,7 +31,7 @@ The **Latest result** box on the right computes it as you type: the current rate
 
 1. **Name**: *Training coverage · Spain*.
 2. **Domain** is already *ACME Spain*: the lowest domain holding both metrics. **Collection frequency** is already **Monthly**, taken from the metrics you picked.
-3. **Unit**: **Percentage**. **Target value**: `90`. Leave **Higher is better** ticked.
+3. **Unit**: **Percentage**. **Target value**: `90`. **Direction**: **Higher is better**, since a rise in coverage is good news.
 4. Click **Create metric**.
 
 The new metric's page opens. Within a few seconds its whole history is computed, one value per month since the first sample of its inputs, and the page fills in by itself.
@@ -45,7 +45,7 @@ A metric definition named *Training coverage · Spain* was created along with it
 Suppose the 20 trainers in the headcount should not count as trained.
 
 1. Click **Edit formula**. A drawer opens beside the page.
-2. Change the formula to `round((employees_trained - 20) * 100.0 / headcount, 1)`.
+2. Change the formula to `(employees_trained - 20) * 100.0 / headcount`.
 3. Look at the chart under **Latest result**: the dashed line is what the metric holds now, the solid line what it would hold with your formula.
 
 <figure><img src="../.gitbook/assets/metrics-drawer.png" alt="The formula drawer: the edited formula, and a chart with the current results dashed and the new ones solid"><figcaption><p>Every past month, before and after</p></figcaption></figure>
@@ -59,7 +59,7 @@ A level reads better on a dashboard than a percentage: *On track* or *Behind*.
 1. On *Training coverage · Spain*, click **Use in a formula**. The window opens with the metric already picked and its name, `training_coverage_spain`, in the formula.
 2. Next to **Result**, choose **Level**.
 3. Write `training_coverage_spain < 90.0 ? "Behind" : "On track"`. The **Levels** box fills with *Behind*, then *On track*, in the order the texts appear.
-4. Check the order: worst first, best last. With **Higher is better** ticked, the last level is the best, so moving up to *On track* shows as good news. Drag a level to change the order.
+4. Check the order: worst first, best last. With the direction **Higher is better**, the last level is the best, so moving up to *On track* shows as good news. Drag a level to change the order.
 5. Name it *Training status · Spain* and click **Create metric**.
 
 The status recomputes whenever the coverage does. Both metrics can go on a [dashboard](../features/dashboards.md).

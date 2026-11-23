@@ -38,6 +38,26 @@ def support(name, folder, availability, *parents):
     return asset
 
 
+def viewer_client(folder):
+    """A client for a user who can view the assets and assessments of `folder` only."""
+    user = User.objects.create_user("viewer@test.com")
+    role = Role.objects.create(name="viewer", folder=Folder.get_root_folder())
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=["view_folder", "view_asset", "view_assetassessment"]
+        )
+    )
+    assignment = RoleAssignment.objects.create(
+        user=user, role=role, folder=Folder.get_root_folder(), is_recursive=True
+    )
+    assignment.perimeter_folders.add(folder)
+    client = APIClient()
+    client.credentials(
+        HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+    )
+    return client
+
+
 @pytest.fixture
 def bia():
     folder = domain("infra")
@@ -117,21 +137,7 @@ def test_dependency_graph_hides_assessed_asset_user_cannot_view(bia):
     service = primary("service", hidden, 3)
     support("app", bia.folder, 1, service)
     aa = AssetAssessment.objects.create(bia=bia, asset=service, folder=bia.folder)
-    user = User.objects.create_user("viewer@test.com")
-    role = Role.objects.create(name="viewer", folder=Folder.get_root_folder())
-    role.permissions.set(
-        Permission.objects.filter(
-            codename__in=["view_folder", "view_asset", "view_assetassessment"]
-        )
-    )
-    assignment = RoleAssignment.objects.create(
-        user=user, role=role, folder=Folder.get_root_folder(), is_recursive=True
-    )
-    assignment.perimeter_folders.add(bia.folder)
-    client = APIClient()
-    client.credentials(
-        HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
-    )
+    client = viewer_client(bia.folder)
 
     response = client.get(
         f"/api/resilience/asset-assessments/{aa.id}/dependency-graph/"
@@ -141,3 +147,23 @@ def test_dependency_graph_hides_assessed_asset_user_cannot_view(bia):
     assert [n["label"] for n in response.json()["nodes"]] == ["app"]
     assert response.json()["roots"] == []
     assert response.json()["nodes"][0]["depth"] == 1
+
+
+@pytest.mark.django_db
+def test_asset_assessment_masks_descendants_user_cannot_view(bia):
+    # service <- app <- secret: secret sits below the assessed asset, in a domain
+    # the viewer cannot see.
+    service = primary("service", bia.folder, 3)
+    app = support("app", bia.folder, 1, service)
+    secret = support("secret", domain("hidden"), 1, app)
+    aa = AssetAssessment.objects.create(bia=bia, asset=service, folder=bia.folder)
+
+    response = viewer_client(bia.folder).get(
+        f"/api/resilience/asset-assessments/{aa.id}/"
+    )
+
+    assert response.status_code == 200
+    children = response.json()["children_assets"]
+    assert [c["id"] for c in children if c] == [str(app.id)]
+    assert children.count({}) == 1
+    assert str(secret.id) not in response.content.decode()

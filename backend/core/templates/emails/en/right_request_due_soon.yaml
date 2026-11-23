@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${request_count} data subject request(s) due in ${days_remaining} day(s)"
+body: |
+  Hello,
+
+  The following data subject requests are due in ${days_remaining} day(s):
+
+  ${request_list}
+
+  GDPR art. 12(3) requires an answer within one month of receipt. [Open CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

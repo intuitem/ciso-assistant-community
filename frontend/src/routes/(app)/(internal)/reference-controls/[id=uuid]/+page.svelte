@@ -59,14 +59,14 @@
 <DetailView {data}>
 	{#snippet actions()}
 		<button
-			class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+			class="btn btn-quiet h-fit"
 			data-testid="sync-to-actions-button"
 			onclick={async () => {
 				await modalConfirmSyncAppliedControls();
 			}}
 		>
 			<span class="mr-2">
-				<i class="fa-solid fa-arrows-rotate mr-2"></i>
+				<i class="fa-solid fa-arrows-rotate mr-2 text-cyan-500"></i>
 			</span>
 			{m.syncToAppliedControl()}
 		</button>

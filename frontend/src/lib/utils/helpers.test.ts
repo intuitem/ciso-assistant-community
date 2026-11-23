@@ -5,8 +5,26 @@ import {
 	getSearchTarget,
 	roundScore,
 	resolveResultTier,
-	aggregateTieredResults
+	aggregateTieredResults,
+	getFieldVisibility
 } from './helpers';
+
+describe('getFieldVisibility documentation score', () => {
+	const ca = (respondent: string) => ({
+		field_visibility: { documentation_score: { auditor: 'hidden', respondent } }
+	});
+	it('follows documentation scoring: hidden from the auditor hides it from everyone', () => {
+		// A map saved before the auditor >= respondent rule existed.
+		expect(getFieldVisibility(ca('edit'), 'respondent').showDocumentationScore).toBe(false);
+		expect(getFieldVisibility(ca('hidden'), 'auditor').showDocumentationScore).toBe(false);
+	});
+	it('shows it when the viewer and the auditor can read it', () => {
+		const shown = {
+			field_visibility: { documentation_score: { auditor: 'edit', respondent: 'read' } }
+		};
+		expect(getFieldVisibility(shown, 'respondent').showDocumentationScore).toBe(true);
+	});
+});
 
 describe('normalizeSearchString', () => {
 	it('lowercases and strips punctuation from Cyrillic text without emptying it', () => {

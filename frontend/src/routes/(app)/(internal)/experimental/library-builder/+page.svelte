@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import { apiErrorMessage } from '#lib/utils/api-error.js';
@@ -8,6 +9,8 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const modalStore = getModalStore();
 
 	$pageTitle = m.lbListLibraryBuilder();
 
@@ -295,7 +298,7 @@
 
 	// --- Delete ------------------------------------------------------------
 	async function deleteDraft(draft: any) {
-		if (!confirm(m.lbListDeleteConfirm({ name: draft.name }))) return;
+		if (!(await confirmModal(modalStore, m.lbListDeleteConfirm({ name: draft.name })))) return;
 		const res = await fetch(`/experimental/library-builder?id=${draft.id}`, { method: 'DELETE' });
 		if (res.ok) {
 			drafts = drafts.filter((d) => d.id !== draft.id);

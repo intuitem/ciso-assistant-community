@@ -5,8 +5,11 @@ import { type TableSource } from '#lib/components/ModelTable/types.js';
 import { headData } from '#lib/utils/table.js';
 import { discardBody } from '#lib/utils/responses.js';
 import type { urlModel } from '#lib/utils/types.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { loadValidationFlowFormData } from '#lib/utils/load.js';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async (event) => {
+	const { fetch, params } = event;
 	const URLModel = 'requirement-assessments';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const requirementAssessment = await fetch(baseEndpoint).then((res) => res.json());
@@ -44,6 +47,20 @@ export const load = (async ({ fetch, params }) => {
 		parent,
 		tables,
 		title: requirementAssessment.name,
-		viewerRole
+		viewerRole,
+		...(viewerRole === 'auditor'
+			? {
+					...(await loadValidationFlowFormData({
+						event,
+						folderId: requirementAssessment.folder?.id,
+						targetField: 'requirement_assessments',
+						targetIds: [params.id]
+					})),
+					validationFlows: await fetchAllPages(
+						fetch,
+						`${BASE_API_URL}/validation-flows/?requirement_assessments=${params.id}`
+					).catch(() => [])
+				}
+			: {})
 	};
 }) satisfies PageServerLoad;

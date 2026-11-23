@@ -35,6 +35,7 @@ _DAY_UNITS = {
     "de": ("Tag", "Tagen"),
     "en": ("day", "days"),
     "fr": ("jour", "jours"),
+    "hu": ("nap", "nap"),
     "nl": ("dag", "dagen"),
 }
 
@@ -53,6 +54,11 @@ _ASSIGNMENT_DECISIONS = {
         "closed": "clôturée",
         "reopened": "rouverte",
         "changes_requested": "renvoyée avec des modifications demandées",
+    },
+    "hu": {
+        "closed": "Lezárva",
+        "reopened": "Újranyitva",
+        "changes_requested": "Módosításra visszaküldve",
     },
     "nl": {
         "closed": "gesloten",
@@ -90,6 +96,15 @@ _STATE_LABELS = {
         "change_requested": "Modification demandée",
         "published": "Publiée",
         "validated": "Validé",
+    },
+    "hu": {
+        "accepted": "Elfogadva",
+        "approved": "Jóváhagyva",
+        "rejected": "Elutasítva",
+        "revoked": "Visszavonva",
+        "change_requested": "Változtatás kérve",
+        "published": "Közzétéve",
+        "validated": "Validált",
     },
     "nl": {
         "accepted": "Geaccepteerd",
@@ -168,6 +183,27 @@ _MODEL_LABELS = {
         "rightRequest": "Exercice de droit",
         "solution": "Solution",
     },
+    "hu": {
+        "asset": "Eszköz",
+        "businessImpactAnalysis": "Üzleti hatáselemzés",
+        "contract": "Szerződés",
+        "dataBreach": "Adatvédelmi incidens",
+        "ebiosRmStudy": "EBIOS RM tanulmány",
+        "documentContainer": "Dokumentum",
+        "entityAssessment": "Szervezetértékelés",
+        "evidence": "Bizonyíték",
+        "finding": "Megállapítás",
+        "findingsAssessment": "Megállapításgyűjtő",
+        "metricInstance": "Metrikapéldány",
+        "organisationObjective": "Célkitűzés",
+        "postureAssessment": "Technikai helyzetkép",
+        "processing": "Adatkezelés",
+        "quantitativeRiskScenario": "CRQ-forgatókönyv",
+        "quantitativeRiskStudy": "CRQ-tanulmány",
+        "riskAssessment": "Kockázatértékelés",
+        "rightRequest": "Érintetti kérelem",
+        "solution": "Megoldás",
+    },
     "nl": {
         "asset": "Middel",
         "businessImpactAnalysis": "Bedrijfsimpactanalyse",
@@ -210,6 +246,12 @@ _TASK_LIST_LABELS = {
         "not_set": "Non définie",
         "unknown": "Inconnue",
     },
+    "hu": {
+        "due": "Határidő",
+        "status": "Állapot",
+        "not_set": "Nincs megadva",
+        "unknown": "Ismeretlen",
+    },
     "nl": {
         "due": "Vervaldatum",
         "status": "Status",
@@ -237,6 +279,12 @@ _TASK_STATUSES = {
         "completed": "Terminé",
         "cancelled": "Annulé",
     },
+    "hu": {
+        "pending": "Függőben",
+        "in_progress": "Folyamatban",
+        "completed": "Teljesítve",
+        "cancelled": "Lemondva",
+    },
     "nl": {
         "pending": "In behandeling",
         "in_progress": "In uitvoering",
@@ -244,6 +292,66 @@ _TASK_STATUSES = {
         "cancelled": "Geannuleerd",
     },
 }
+
+
+# Keys match the frontend catalogs (paraglide), so the inbox and the email agree.
+_REGULATORY_LABELS = {
+    "de": {
+        "earlyWarning": "Frühwarnung (24 Std.)",
+        "incidentNotification": "Vorfallmeldung (72 Std.)",
+        "finalReport": "Abschlussbericht (1 Monat)",
+        "gdprBreachNotification": "DSGVO-Meldung der Datenpanne (72 Std.)",
+        "gapNoPurpose": "kein Zweck erfasst",
+        "gapDpiaMissing": "DSFA erforderlich, aber nicht vorhanden",
+        "gapRetentionMissing": "Aufbewahrungsfrist fehlt",
+        "gapTransferMechanismMissing": "Übermittlung ohne Übermittlungsmechanismus",
+    },
+    "en": {
+        "earlyWarning": "Early warning (24h)",
+        "incidentNotification": "Incident notification (72h)",
+        "finalReport": "Final report (1 month)",
+        "gdprBreachNotification": "GDPR breach notification (72h)",
+        "gapNoPurpose": "no purpose recorded",
+        "gapDpiaMissing": "DPIA required but missing",
+        "gapRetentionMissing": "retention period missing",
+        "gapTransferMechanismMissing": "transfer without a transfer mechanism",
+    },
+    "fr": {
+        "earlyWarning": "Alerte précoce (24 h)",
+        "incidentNotification": "Notification d'incident (72 h)",
+        "finalReport": "Rapport final (1 mois)",
+        "gdprBreachNotification": "Notification de violation RGPD (72 h)",
+        "gapNoPurpose": "aucune finalité renseignée",
+        "gapDpiaMissing": "AIPD requise mais absente",
+        "gapRetentionMissing": "durée de conservation manquante",
+        "gapTransferMechanismMissing": "transfert sans mécanisme de transfert",
+    },
+    "hu": {
+        "earlyWarning": "Korai előrejelzés (24 óra)",
+        "incidentNotification": "Incidensbejelentés (72 óra)",
+        "finalReport": "Zárójelentés (1 hónap)",
+        "gdprBreachNotification": "Adatvédelmi incidens GDPR szerinti bejelentése (72 óra)",
+        "gapNoPurpose": "nincs rögzített cél",
+        "gapDpiaMissing": "hiányzik a szükséges adatvédelmi hatásvizsgálat",
+        "gapRetentionMissing": "hiányzik a megőrzési idő",
+        "gapTransferMechanismMissing": "adattovábbítás továbbítási mechanizmus nélkül",
+    },
+    "nl": {
+        "earlyWarning": "Vroegtijdige waarschuwing (24 u)",
+        "incidentNotification": "Incidentmelding (72 u)",
+        "finalReport": "Eindverslag (1 maand)",
+        "gdprBreachNotification": "AVG-melding van datalek (72 u)",
+        "gapNoPurpose": "geen doeleinde geregistreerd",
+        "gapDpiaMissing": "GEB vereist maar ontbreekt",
+        "gapRetentionMissing": "bewaartermijn ontbreekt",
+        "gapTransferMechanismMissing": "doorgifte zonder doorgiftemechanisme",
+    },
+}
+
+
+def localize_regulatory_label(key: str, locale: Optional[str]) -> str:
+    """A regulatory deadline or GDPR record gap, phrased for the recipient."""
+    return _REGULATORY_LABELS[_language_code(locale)].get(key, key)
 
 
 def _language_code(locale: Optional[str]) -> str:
@@ -276,6 +384,38 @@ def paraglide_model_key(model) -> str:
     the model name (EbiosRMStudy -> ebiosRmStudy)."""
     name = model._meta.model_name
     return next((k for k in _MODEL_LABELS["en"] if k.lower() == name), name)
+
+
+MODEL_NAME_TO_FRONTEND_ROUTE: dict[str, str] = {
+    "asset": "assets",
+    "businessimpactanalysis": "business-impact-analysis",
+    "contract": "contracts",
+    "databreach": "data-breaches",
+    "documentcontainer": "document-containers",
+    "ebiosrmstudy": "ebios-rm",
+    "entityassessment": "entity-assessments",
+    "evidence": "evidences",
+    "finding": "findings",
+    "findingsassessment": "findings-assessments",
+    "metricinstance": "metric-instances",
+    "organisationobjective": "organisation-objectives",
+    "postureassessment": "posture-assessments",
+    "processing": "processings",
+    "quantitativeriskscenario": "quantitative-risk-scenarios",
+    "quantitativeriskstudy": "quantitative-risk-studies",
+    "riskassessment": "risk-assessments",
+    "rightrequest": "right-requests",
+    "securityexception": "security-exceptions",
+    "solution": "solutions",
+}
+"""Maps a django `model_name` to a frontend (SvelteKit) route."""
+
+
+def object_url(obj) -> str:
+    """Deep link to *obj*'s detail page, or the app root if its route is unknown."""
+    base = settings.CISO_ASSISTANT_URL
+    route = MODEL_NAME_TO_FRONTEND_ROUTE.get(obj._meta.model_name)
+    return f"{base}/{route}/{obj.pk}" if route else base
 
 
 def localize_model_name(key: str, locale: Optional[str]) -> str:
@@ -326,7 +466,7 @@ def format_email_date(value, locale: Optional[str], preference: str = "auto") ->
     if preference == "mmddyyyy":
         return value.strftime("%m/%d/%Y")
 
-    # Same de/en/fr/nl fallback as labels and templates, so an email never mixes languages.
+    # Same de/en/fr/hu/nl fallback as labels and templates, so an email never mixes languages.
     with override(_language_code(locale)):
         if preference == "long_dmy":
             return django_date_format(value, "j F Y")

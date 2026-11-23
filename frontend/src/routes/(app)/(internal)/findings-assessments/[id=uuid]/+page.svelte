@@ -108,31 +108,28 @@
 				<Anchor
 					breadcrumbAction="push"
 					href={`/compliance-assessments/${data.data.compliance_assessment.id}`}
-					class="btn preset-filled-secondary-500 w-full"
+					class="btn btn-quiet"
 					data-testid="go-to-audit-button"
-					><i class="fa-solid fa-list-check mr-2"></i>{m.complianceAssessment()}</Anchor
+					><i class="fa-solid fa-list-check mr-2 text-green-600"
+					></i>{m.complianceAssessment()}</Anchor
 				>
 			{/if}
-			<button
-				type="button"
-				class="btn preset-filled-primary-500 w-full"
-				onclick={modalExport}
-				data-testid="export-button"
-			>
-				<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+			<button type="button" class="btn btn-quiet" onclick={modalExport} data-testid="export-button">
+				<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 			</button>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+				class="btn btn-quiet h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-heart-pulse mr-2 text-red-500"></i>{m.actionPlan()}</Anchor
 			>
 			{#if !findings_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

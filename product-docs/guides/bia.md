@@ -124,6 +124,16 @@ From the BIA detail page, click **Impact over time** in the actions column. The 
 
 This is the key output you'll show to stakeholders — at a glance, "if X breaks, here's how the room turns red as time passes".
 
+### Trace the dependency chain
+
+**Dependencies chain** on the BIA page shows what every assessed asset relies on: its supporting assets down the asset tree, plus the **Extra dependency** links recorded on each asset assessment. Each asset is compared against the objectives it inherits: a supporting asset whose security or recovery capabilities fall short of the objectives of the primary assets above it is a **Cause**; the assets that depend on a cause are **Impacted**. The header counts the **Assessed assets**, assets, domains, **Cross-domain links**, causes and impacted assets. Three views:
+
+- **Dependency flow** — the chain from the assessed assets down, one column per depth. Tick **Only paths to gaps** to keep only the paths that lead to a cause. Click an asset to trace it: **Caused by** lists what drags it down, **Drags down** what it affects, with the **Failing objectives (actual vs expected)**. **Biggest causes** ranks the causes by reach.
+- **Domain map** — the same assets grouped by domain, to see where dependencies cross domain boundaries.
+- **Gap register** — one row per cause, with its domain, failing objectives, **Assessed assets impacted**, **Primary assets impacted** and **Reach**. When nothing fails, it reads _Every capability meets the objective it inherits._
+
+Each asset assessment has the same view, limited to its asset.
+
 ## Step 5 — Generate the Report
 
 The **Report** button (in the actions column) produces a printable summary:

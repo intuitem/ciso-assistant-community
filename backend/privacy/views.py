@@ -4,9 +4,12 @@ import uuid
 
 import pandas as pd
 
-from core.constants import COUNTRY_CHOICES
-from core.models import Actor, Terminology, ValidationFlow
-from core.serializers import ActorReadSerializer
+from core.constants import (
+    GDPR_INTERNAL_LOCATIONS,
+    NON_MAPPABLE_COUNTRY_CODES,
+    PRIVACY_COUNTRY_CHOICES,
+)
+from core.models import Terminology, ValidationFlow
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -14,6 +17,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -21,12 +25,16 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
-from django.db.models import Case, Count, F, Prefetch, Q, When
+from django.db.models import Case, Count, Exists, F, OuterRef, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
-from core.utils import camel_case
+from core.utils import camel_case, get_report_timezone
+from core.generators import breach_notification_context
+from core.typst_render import render_pdf
+from django.utils.text import slugify
 from iam.models import Folder, RoleAssignment
+from iam.utils import ViewableFilter
 from tprm.models import Entity
 
 from .models import (
@@ -47,36 +55,6 @@ from .models import (
 )
 
 DPIA_OVERVIEW_PAGE = 50
-
-EU_COUNTRIES_SET = {
-    "AT",
-    "BE",
-    "BG",
-    "HR",
-    "CY",
-    "CZ",
-    "DK",
-    "EE",
-    "FI",
-    "FR",
-    "DE",
-    "GR",
-    "HU",
-    "IE",
-    "IT",
-    "LV",
-    "LT",
-    "LU",
-    "MT",
-    "NL",
-    "PL",
-    "PT",
-    "RO",
-    "SK",
-    "SI",
-    "ES",
-    "SE",
-}
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -167,6 +145,15 @@ class PersonalDataViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Processing not found"},
                 status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_personaldata"),
+            folder=processing.folder,
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
             )
 
         category_terms = {
@@ -285,7 +272,7 @@ class DataContractorViewSet(BaseModelViewSet):
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(PRIVACY_COUNTRY_CHOICES))
 
 
 class DataTransferViewSet(BaseModelViewSet):
@@ -299,7 +286,7 @@ class DataTransferViewSet(BaseModelViewSet):
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
-        return Response(dict(COUNTRY_CHOICES))
+        return Response(dict(PRIVACY_COUNTRY_CHOICES))
 
     @action(detail=False, name="Get transfer mechanism choices")
     def transfer_mechanism(self, request):
@@ -321,17 +308,30 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
     for item in chain(transfer_countries, contractor_countries):
         country_counts[item["country"]] += item["count"]
 
-    # if country code is in EU (GDPR scope) set the dict color to #A7CC74 otherwise to #F4B83D
+    # green inside the EEA (GDPR applies directly), amber for third countries
     countries = [
         {
             "id": country,
             "count": count,
-            "color": "#A7CC74" if country in EU_COUNTRIES_SET else "#F4B83D",
+            "color": "#A7CC74" if country in GDPR_INTERNAL_LOCATIONS else "#F4B83D",
         }
         for country, count in country_counts.items()
+        if country and country not in NON_MAPPABLE_COUNTRY_CODES
     ]
 
-    return countries
+    # The map topology is keyed on ISO alpha-2, so regions and "Other Countries"
+    # have no feature to paint; surface their counts next to it instead.
+    regions = [
+        {
+            "id": code,
+            "count": country_counts[code],
+            "color": "#A7CC74" if code in GDPR_INTERNAL_LOCATIONS else "#F4B83D",
+        }
+        for code in sorted(NON_MAPPABLE_COUNTRY_CODES)
+        if country_counts.get(code)
+    ]
+
+    return countries, regions
 
 
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
@@ -352,9 +352,11 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "dpia_required",
         "dpia_required_source",
     ]
+    # The flag is computed on read, so sorting on it goes through an annotation
+    ordering_remap = {"has_sensitive_personal_data": "sensitive_personal_data_sort"}
 
     def get_queryset(self):
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related("folder", "dpia_screening")
@@ -374,6 +376,17 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 ),
             )
         )
+        if "has_sensitive_personal_data" in self.request.query_params.get(
+            "ordering", ""
+        ):
+            qs = qs.annotate(
+                sensitive_personal_data_sort=Exists(
+                    PersonalData.objects.filter(
+                        processing=OuterRef("pk"), is_sensitive=True
+                    )
+                )
+            )
+        return qs
 
     export_config = {
         "fields": {
@@ -666,12 +679,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_processings__isnull=False))
 
     @action(detail=False, name="Get DPIA requirement choices")
     def dpia_required(self, request):
@@ -1105,11 +1113,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                         }
                     )
 
+        countries, regions = agg_countries(
+            viewable_data_transfers, viewable_data_contractors
+        )
+
         return Response(
             {
-                "countries": agg_countries(
-                    viewable_data_transfers, viewable_data_contractors
-                ),
+                "countries": countries,
+                "country_regions": regions,
                 "processings_count": processings_count,
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,
@@ -1150,12 +1161,7 @@ class RightRequestViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all right request owners")
     def owner(self, request):
-        return Response(
-            ActorReadSerializer(
-                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
-                many=True,
-            ).data
-        )
+        return Response(self._viewable_actors(assigned_right_requests__isnull=False))
 
 
 class DataBreachViewSet(BaseModelViewSet):
@@ -1192,6 +1198,27 @@ class DataBreachViewSet(BaseModelViewSet):
                 "evidences",
             )
         )
+
+    @action(detail=True, methods=["get"], name="GDPR art. 33 notification worksheet")
+    def notification(self, request, pk):
+        # get_object enforces view permission (404 otherwise)
+        breach = self.get_object()
+        lang = request.user.preferences.get("lang") or "en"
+        payload = breach_notification_context(
+            breach,
+            lang,
+            tz=get_report_timezone(),
+            readable=ViewableFilter(request.user).allows,
+        )
+        response = HttpResponse(
+            render_pdf("breach_notification.typ", payload),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(breach.name) or "data-breach"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_notification.pdf"'
+        )
+        return response
 
     def _process_incident(self, request) -> None:
         """Turn a name typed into the incident picker into an incident.

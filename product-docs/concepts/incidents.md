@@ -42,7 +42,7 @@ An incident lives in a domain and aggregates everything about the event: the ass
 - **Detection** — internal vs external, optionally with a link to the source signal.
 - **Scope** — the affected assets, the threats believed to be in play, the entities (third parties) involved.
 - **Assignees** — the actors handling the response.
-- **Response and qualifications** — qualifying terminology, BCP-activation flag, resolution notes.
+- **Response and qualifications** — qualifying terminology, BCP-activation flag, **Root cause**, resolution notes.
 - **Linked controls and tasks** — the applied controls invoked during response, plus the task definitions that should run as follow-up (e.g. a post-mortem, a control review).
 
 ## Lifecycle
@@ -52,6 +52,20 @@ Incidents follow a five-state lifecycle:
 `new` → `ongoing` → `resolved` → `closed` (or `dismissed` at any point if the event turns out not to be a real incident)
 
 State transitions are recorded in the incident **timeline**, an append-only log of significant moments: detection, mitigation, free-form observation, severity changes, status changes. The timeline is what an auditor or a post-mortem author will read to reconstruct what happened.
+
+## NIS2 notification
+
+With the **NIS2 notification** [feature flag](../configuration/settings/feature-flags.md) on, the incident form gains a **NIS2 notification** section:
+
+- **Significant incident (NIS2)** — significant incidents must be notified to the national CSIRT (CCB in Belgium).
+- **Suspected malicious intent** and **Cross-border impact** — _Yes_, _No_ or _Uncertain_.
+- **Early warning sent at**, **Incident notification sent at**, **Final report sent at**, and the **Notification reference** the CSIRT gave you.
+
+For a significant incident, the page shows a **Regulatory follow-up** block with the three NIS2 stages, clocked from the moment the incident was reported (or created): **Early warning (24h)**, **Incident notification (72h)**, and **Final report (1 month)** after the notification, or, while no notification date is recorded, one month after the 72-hour deadline. Each stage reads **Due** with its deadline, or **Sent** with the date you entered; an overdue stage stands out. [Data breaches](privacy-register.md) linked to the incident join the block with their **GDPR breach notification (72h)**.
+
+**Export** then offers the **NIS2 notification worksheet**: a PDF pre-filled from the incident, following the CCB notification form, with the 24h / 72h / 1-month timeline and the fields still to complete. A data breach has its own **Notification worksheet (art. 33)**, on the breach page.
+
+Due and overdue stages also raise the **Regulatory notification deadline** [notification](../features/notifications.md).
 
 ## DORA incident reports
 

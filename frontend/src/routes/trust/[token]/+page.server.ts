@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-	const res = await fetch(`${BASE_API_URL}/public/portals/${params.token}/`);
+	const res = await fetch(`${BASE_API_URL}/public/portals/${encodeURIComponent(params.token)}/`);
 	if (!res.ok) error(404, 'Not found');
 	return { portal: await res.json() };
 };

@@ -106,7 +106,9 @@ Default URL: `http://localhost:6333`. Override with the `QDRANT_URL` environment
 .venv/bin/python backend/manage.py index_libraries --sync
 ```
 
-> `index_libraries` parses all YAML files in `backend/library/libraries/` and indexes requirement nodes, threats, and reference controls. This can take a few minutes.
+> `index_libraries` parses all YAML files in `backend/library/libraries/` and indexes requirement nodes, threats, and reference controls. This can take a few minutes. Unchanged entries are skipped, and the nightly catch-up reruns it so new libraries get indexed.
+>
+> Library search combines vectors with BM25 keyword matching (exact terms such as "SBOM"). Collections created before this need `init_qdrant --recreate` followed by both index commands; until then library search stays vector-only. Hybrid search needs Qdrant 1.15.2 or later; older servers fall back to vector-only.
 
 ### Start the background worker
 
@@ -149,9 +151,9 @@ In **Settings > General**, set:
 
 ### Option A: Sentence-Transformers (zero setup)
 
-Set `embedding_backend` to `sentence-transformers`. This uses `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU. Multilingual support included.
+Set `embedding_backend` to `sentence-transformers` (the setting keeps this name). This runs `paraphrase-multilingual-MiniLM-L12-v2` locally on CPU with ONNX Runtime, no torch. Multilingual support included.
 
-This is the default and requires no external service. This model and the cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L-6-v2`) are **pre-baked into the backend image** at build time (see `backend/Dockerfile`, ~500 MB for both) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access. Both model IDs live in `chat/embedding_models.py` (single source of truth, read by the code and the image bake).
+This is the default and requires no external service. This model and the cross-encoder reranker (`cross-encoder/ms-marco-MiniLM-L6-v2`) are **pre-baked into the backend image** at build time (see `backend/Dockerfile`, ~500 MB for both) and the runtime is forced offline (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`), so the AI works with no internet access. Both model IDs live in `chat/embedding_models.py` (single source of truth, read by the code and the image bake).
 
 > Deployment note: `HF_HOME` is set by the image to the baked cache (`/opt/hf-cache`) and must **not** be overridden, otherwise the baked models are not found and, with downloads disabled, model load fails hard. On read-only / hardened containers, redirect only `HOME` and `XDG_CACHE_HOME` to a writable tmpfs for scratch writes; model weights are read from the read-only `HF_HOME`.
 

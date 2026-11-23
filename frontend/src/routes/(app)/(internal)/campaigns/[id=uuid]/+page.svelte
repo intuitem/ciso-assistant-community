@@ -341,10 +341,10 @@
 		{#each frameworks as framework (framework.id)}
 			<a
 				href="/frameworks/{framework.id}/report?campaign={data.data.id}"
-				class="btn preset-filled-secondary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				data-testid="campaign-insights-button"
 			>
-				<i class="fa-solid fa-chart-line mr-2"></i>
+				<i class="fa-solid fa-chart-line mr-2 text-indigo-500"></i>
 				{frameworks.length > 1 ? `${m.insights()} — ${framework.str}` : m.insights()}
 			</a>
 		{/each}

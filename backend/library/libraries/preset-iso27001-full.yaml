@@ -3,7 +3,7 @@ locale: en
 ref_id: preset-iso27001-full
 name: "ISO 27001:2022 \u2014 Full Implementation"
 description: "Comprehensive ISO 27001 ISMS implementation following the Plan\u2013Do\u2013Check\u2013Act cycle. Creates a compliance assessment with suggested controls, organisational context, a risk assessment, metric definitions for KPIs, and periodic task templates for ongoing management."
-version: 3
+version: 4
 provider: intuitem
 packager: intuitem
 translations:
@@ -78,12 +78,13 @@ objects:
       # --- Organisation objectives (clause 6.2 - Information security objectives) ---
       - type: organisation_objective
         name: "Achieve ISO 27001 certification"
+        ref: certification_objective
         description: "Obtain ISO/IEC 27001:2022 certification through a successful Stage 1 and Stage 2 audit by an accredited certification body."
         status: in_progress
         translations:
           fr:
             name: "Obtenir la certification ISO 27001"
-            description: "Obtenir la certification ISO/IEC 27001:2022 par un audit de Phase 1 et Phase 2 r\u00e9ussi aupr\u00e8s d\u2019un organisme de certification accr\u00e9dit\u00e9."
+            description: "Obtenir la certification ISO/IEC 27001:2022 par des audits d\u2019\u00e9tape 1 et d\u2019\u00e9tape 2 r\u00e9ussis aupr\u00e8s d\u2019un organisme de certification accr\u00e9dit\u00e9."
 
       - type: organisation_objective
         name: "Maintain acceptable risk levels"
@@ -125,6 +126,9 @@ objects:
       # --- Periodic task templates ---
       - type: task_template
         name: "Internal ISMS audit"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["9.2.1", "9.2.2"]
         description: "Conduct a full internal audit of the ISMS to verify conformity with ISO 27001 requirements and the organisation's own policies (clause 9.2)."
         is_recurrent: true
         schedule:
@@ -137,6 +141,9 @@ objects:
 
       - type: task_template
         name: "Management review"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["9.3.1", "9.3.2", "9.3.3"]
         description: "Hold a management review meeting to evaluate ISMS performance, risk treatment effectiveness, and opportunities for improvement (clause 9.3)."
         is_recurrent: true
         schedule:
@@ -149,6 +156,9 @@ objects:
 
       - type: task_template
         name: "Access rights review"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["A.5.18"]
         description: "Review user access rights across all critical systems to ensure least-privilege and timely revocation of unnecessary access (Annex A 5.18)."
         is_recurrent: true
         schedule:
@@ -161,6 +171,9 @@ objects:
 
       - type: task_template
         name: "Risk assessment review"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["8.2"]
         description: "Review and update the information security risk assessment to account for changes in threats, vulnerabilities, assets, and business context (clause 8.2)."
         is_recurrent: true
         schedule:
@@ -173,6 +186,9 @@ objects:
 
       - type: task_template
         name: "Security awareness training"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["A.6.3"]
         description: "Deliver information security awareness training to all personnel, covering current threats, policies, and expected behaviours (Annex A 6.3)."
         is_recurrent: true
         schedule:
@@ -185,6 +201,9 @@ objects:
 
       - type: task_template
         name: "Business continuity testing"
+        # Its records count as evidence for these requirements of the audit.
+        audit: iso_audit
+        requirements: ["A.5.30"]
         description: "Test business continuity and disaster recovery plans to verify they meet recovery objectives and address current risks (Annex A 5.30)."
         is_recurrent: true
         schedule:
@@ -195,7 +214,25 @@ objects:
             name: "Test de continuit\u00e9 d\u2019activit\u00e9"
             description: "Tester les plans de continuit\u00e9 d\u2019activit\u00e9 et de reprise apr\u00e8s sinistre pour v\u00e9rifier qu\u2019ils r\u00e9pondent aux objectifs de reprise et traitent les risques actuels (Annexe A 5.30)."
 
-      # --- Findings assessment ---
+      # --- Findings assessments ---
+      - type: findings_assessment
+        name: "Certification audit \u2014 Stage 1"
+        category: audit
+        ref: stage1_findings
+        audit: iso_audit
+        translations:
+          fr:
+            name: "Audit de certification \u2014 \u00c9tape 1"
+
+      - type: findings_assessment
+        name: "Certification audit \u2014 Stage 2"
+        category: audit
+        ref: stage2_findings
+        audit: iso_audit
+        translations:
+          fr:
+            name: "Audit de certification \u2014 \u00c9tape 2"
+
       - type: findings_assessment
         name: "Penetration Test Findings"
         category: pentest
@@ -471,6 +508,15 @@ objects:
               title: "Configurer les t\u00e2ches r\u00e9currentes du SMSI"
               description: "Examinez les mod\u00e8les de t\u00e2ches p\u00e9riodiques (audits internes, revues de direction, revues d\u2019acc\u00e8s, sensibilisation) et ajustez les plannings selon votre organisation."
 
+        - key: auditor_preread
+          title: "Anticipate the auditor"
+          description: "See, requirement by requirement, what the certification auditor will ask and which records you can already show. Pair your evidence with the requests, fill the gaps, then prepare each audit session one requirement at a time."
+          target_url: "/experimental/auditor-preread/{{ref:iso_audit}}"
+          translations:
+            fr:
+              title: "Anticiper l\u2019auditeur"
+              description: "Voyez, exigence par exigence, ce que demandera l\u2019auditeur de certification et les enregistrements que vous pouvez d\u00e9j\u00e0 montrer. Rattachez vos preuves aux demandes, comblez les manques, puis pr\u00e9parez chaque s\u00e9ance d\u2019audit une exigence apr\u00e8s l\u2019autre."
+
         - key: audit_export
           title: "Prepare the export for your lead auditor"
           description: "Generate and review the compliance assessment export to share with your certification body's lead auditor ahead of the Stage 1 or Stage 2 audit."
@@ -479,4 +525,64 @@ objects:
           translations:
             fr:
               title: "Pr\u00e9parer l\u2019export pour votre auditeur principal"
-              description: "G\u00e9n\u00e9rez et examinez l\u2019export de l\u2019\u00e9valuation de conformit\u00e9 \u00e0 partager avec l\u2019auditeur principal de votre organisme de certification avant l\u2019audit de Phase 1 ou Phase 2."
+              description: "G\u00e9n\u00e9rez et examinez l\u2019export de l\u2019\u00e9valuation de conformit\u00e9 \u00e0 partager avec l\u2019auditeur principal de votre organisme de certification avant l\u2019audit d\u2019\u00e9tape 1 ou d\u2019\u00e9tape 2."
+
+        - key: stage1_findings
+          title: "Record the Stage 1 findings"
+          description: "After Stage 1, record each finding of the certification body and link it to its requirement. The auditor pre-read then flags them, so you can show what was done about each before Stage 2."
+          target_model: findings-assessments
+          target_ref: stage1_findings
+          translations:
+            fr:
+              title: "Consigner les constats de l\u2019\u00e9tape 1"
+              description: "Apr\u00e8s l\u2019\u00e9tape 1, consignez chaque constat de l\u2019organisme de certification et reliez-le \u00e0 son exigence. L\u2019anticipation de l\u2019auditeur les signale alors, pour montrer ce qui a \u00e9t\u00e9 fait sur chacun avant l\u2019\u00e9tape 2."
+
+        # ═══════════════ STAGE 2 ═══════════════
+        - key: stage1_followup
+          title: "Close the Stage 1 findings"
+          description: "For each Stage 1 finding, carry out the action, attach its proof and record what changed. The auditor checks them first at Stage 2; the auditor pre-read flags those still open."
+          target_url: "/experimental/auditor-preread/{{ref:iso_audit}}"
+          translations:
+            fr:
+              title: "Traiter les constats de l\u2019\u00e9tape 1"
+              description: "Pour chaque constat de l\u2019\u00e9tape 1, menez l\u2019action, joignez-en la preuve et notez ce qui a chang\u00e9. L\u2019auditeur les v\u00e9rifie en premier \u00e0 l\u2019\u00e9tape 2 ; l\u2019anticipation de l\u2019auditeur signale ceux qui restent ouverts."
+
+        - key: stage2_plan
+          title: "Plan Stage 2 with the certification body"
+          description: "Record the stage, the audit dates, the certification body and the auditors, schedule each audit session from the certification body's plan, and name who answers for each interview role."
+          target_url: "/experimental/auditor-preread/{{ref:iso_audit}}"
+          translations:
+            fr:
+              title: "Planifier l\u2019\u00e9tape 2 avec l\u2019organisme de certification"
+              description: "Renseignez l\u2019\u00e9tape, les dates d\u2019audit, l\u2019organisme et les auditeurs, planifiez chaque s\u00e9ance d\u2019apr\u00e8s le plan de l\u2019organisme, et d\u00e9signez qui r\u00e9pond pour chaque r\u00f4le interrog\u00e9."
+
+        - key: stage2_sessions
+          title: "Prepare session by session"
+          description: "Work through each audit session one requirement at a time: pair the evidence, fill the gaps, set aside what does not apply, and read the questions the auditor will ask."
+          target_url: "/experimental/auditor-preread/{{ref:iso_audit}}"
+          target_params:
+            view: sessions
+          translations:
+            fr:
+              title: "Pr\u00e9parer s\u00e9ance par s\u00e9ance"
+              description: "Parcourez chaque s\u00e9ance d\u2019audit une exigence apr\u00e8s l\u2019autre : rattachez les preuves, comblez les manques, \u00e9cartez ce qui ne s\u2019applique pas et relisez les questions que posera l\u2019auditeur."
+
+        - key: stage2_findings
+          title: "Record the Stage 2 findings and the corrective action plan"
+          description: "Record each finding of the Stage 2 report, link it to its requirement and plan the corrective action. Send the plan to the certification body within the deadline it sets, usually shorter for major nonconformities."
+          target_model: findings-assessments
+          target_ref: stage2_findings
+          translations:
+            fr:
+              title: "Consigner les constats de l\u2019\u00e9tape 2 et le plan d\u2019actions correctives"
+              description: "Consignez chaque constat du rapport d\u2019\u00e9tape 2, reliez-le \u00e0 son exigence et planifiez l\u2019action corrective. Envoyez le plan \u00e0 l\u2019organisme dans le d\u00e9lai qu\u2019il fixe, en g\u00e9n\u00e9ral plus court pour les non-conformit\u00e9s majeures."
+
+        - key: certification
+          title: "Obtain the certificate and plan the surveillance audit"
+          description: "Once the certification body has accepted the corrective actions, set this objective to Achieved, file the certificate with your evidence, then plan the first surveillance audit, usually within twelve months."
+          target_model: organisation-objectives
+          target_ref: certification_objective
+          translations:
+            fr:
+              title: "Obtenir le certificat et planifier l\u2019audit de surveillance"
+              description: "Une fois les actions correctives accept\u00e9es par l\u2019organisme, passez cet objectif \u00e0 Atteint, rangez le certificat avec vos preuves, puis planifiez le premier audit de surveillance, en g\u00e9n\u00e9ral dans les douze mois."

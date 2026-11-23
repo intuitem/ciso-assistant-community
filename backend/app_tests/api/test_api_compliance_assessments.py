@@ -413,6 +413,35 @@ class TestComplianceAssessmentListProgress:
 
         assert _list_progress(authenticated_client, audit.id) == 50
 
+    def test_score_only_audit_counts_not_applicable(self, authenticated_client):
+        """Score-only audit: a requirement marked not applicable (the
+        applicability toggle) is done, though it gets no score."""
+        framework = _make_framework()  # min_score=0, max_score=4
+        for i in range(2):
+            _make_requirement(framework, f"NA{i}")
+        audit = _make_audit(
+            Folder.get_root_folder(),
+            framework,
+            field_visibility=_content_mode(hide=["result"]),
+        )
+        audit.create_requirement_assessments()
+
+        ra = audit.requirement_assessments.first()
+        ra.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra.save(update_fields=["result"])
+
+        assert _list_progress(authenticated_client, audit.id) == 50
+        # The in-memory form agrees with the SQL one.
+        assert RequirementAssessment.progress_assessed_scalar(
+            "to_do",
+            RequirementAssessment.Result.NOT_APPLICABLE,
+            None,
+            None,
+            status_driven=False,
+            has_questions=False,
+            result_visible=False,
+        )
+
     def test_progress_all_assessed(self, authenticated_client):
         framework = _make_framework()
         for i in range(3):

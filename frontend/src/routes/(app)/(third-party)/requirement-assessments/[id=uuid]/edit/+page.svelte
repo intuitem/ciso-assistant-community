@@ -6,7 +6,9 @@
 
 	import { page } from '$app/state';
 	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { afterNavigate } from '$app/navigation';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { setContext } from 'svelte';
 	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
 	import Score from '#lib/components/Forms/Score.svelte';
@@ -20,6 +22,7 @@
 		getFieldVisibility,
 		isFieldVisible,
 		isFieldEditable,
+		showApplicabilityToggle,
 		alignmentColorMap
 	} from '#lib/utils/helpers.js';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
@@ -27,6 +30,8 @@
 	import { hideSuggestions } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import ApplicabilityToggle from '#lib/components/ComplianceAssessment/ApplicabilityToggle.svelte';
+	import NotApplicableScores from '#lib/components/ComplianceAssessment/NotApplicableScores.svelte';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import { countMasked } from '#lib/utils/related-visibility.js';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
@@ -54,7 +59,9 @@
 		displayScoreColor,
 		hasComputedScore,
 		resultBadgeStyle,
-		filterResultChoices
+		filterResultChoices,
+		maturityScore,
+		roundScore
 	} from '#lib/utils/helpers.js';
 
 	interface Props {
@@ -186,6 +193,10 @@
 				formAction: '?/createTaskTemplate',
 				model: data.taskTemplateModel,
 				invalidateAll: false,
+				// A third-party audit lives in an enclave: offer it, else the prefilled
+				// domain is not in the picker and shows blank.
+				folderContentTypes:
+					data.requirementAssessment.folder?.content_type === 'EN' ? ['DO', 'GL', 'EN'] : undefined,
 				debug: false
 			}
 		};
@@ -363,6 +374,9 @@
 		taintedMessage: m.taintedFormMessage(),
 		validationMethod: 'auto'
 	});
+	// This page edits an existing requirement assessment: its pickers keep the links
+	// the user cannot see until removed (a ModelForm on the page sets its own value).
+	setContext('formKeepsHiddenLinks', true);
 
 	let mappingInference = $derived(data.requirementAssessment.mapping_inference);
 
@@ -436,7 +450,25 @@
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
 	}
-	let group = $state(pickDefaultTab());
+	// ?tab= opens a given tab (e.g. evidences from the auditor pre-read), if the user may see it.
+	const TAB_SHOWN: Record<string, () => boolean> = {
+		applied_controls: () => canShowAppliedControls,
+		task_templates: () => showTaskTemplates,
+		evidences: () => showEvidences,
+		findings: () => showFindings,
+		security_exceptions: () => isAuditor
+	};
+	const askedTab = page.url.searchParams.get('tab') ?? '';
+	const openAskedTab = !!TAB_SHOWN[askedTab]?.();
+	let group = $state(openAskedTab ? askedTab : pickDefaultTab());
+	let tabsEl: HTMLElement | undefined = $state();
+	// After SvelteKit's own scroll to the top, on a client-side visit too.
+	// ?focus=result lands on the result field (assess or justify from the auditor pre-read).
+	afterNavigate(() => {
+		if (page.url.searchParams.get('focus') === 'result')
+			document.querySelector('[data-testid="result-field"]')?.scrollIntoView({ block: 'center' });
+		else if (openAskedTab) tabsEl?.scrollIntoView({ block: 'start' });
+	});
 
 	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);
@@ -445,6 +477,18 @@
 	// Entering a score is what makes a requirement scored (as in table mode).
 	function markScored() {
 		requirementAssessmentForm.form.update((d) => ({ ...d, is_scored: true }));
+	}
+
+	// Score-only audits mark N/A through the applicability toggle. The form's
+	// result starts from the requirement's applicability (see +page.server.ts),
+	// so it reads the same whether compliance is shown or not.
+	const applicabilityToggle = $derived(
+		page.data.compliance_assessment_score.scoring_enabled &&
+			showApplicabilityToggle(complianceAssessment, viewerRole)
+	);
+	const formNotApplicable = $derived($formStore.result === 'not_applicable');
+	function setApplicability(result: 'not_assessed' | 'not_applicable') {
+		requirementAssessmentForm.form.update((d) => ({ ...d, result }));
 	}
 
 	$effect(() => {
@@ -685,7 +729,7 @@
 		>
 			{#snippet children({ form, data })}
 				{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings || isAuditor}
-					<div class="card shadow-lg bg-surface-50-950">
+					<div class="card shadow-lg bg-surface-50-950 scroll-mt-28" bind:this={tabsEl}>
 						<Tabs
 							value={group}
 							onValueChange={(e) => {
@@ -1041,6 +1085,13 @@
 							{/if}
 						</div>
 					{/if}
+					{#if applicabilityToggle}
+						<ApplicabilityToggle
+							applicable={!formNotApplicable}
+							disabled={!canEditScore}
+							onChange={setApplicability}
+						/>
+					{/if}
 					{#if showExtendedResult}
 						<div data-testid="extended-result-field">
 							<Select
@@ -1054,7 +1105,21 @@
 						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
-						{#if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
+						{#if formNotApplicable}
+							<!-- Not applicable, computed score or not: what it counts for, greyed. -->
+							<NotApplicableScores
+								value={ra.anchored_score}
+								min={resolvedMin}
+								max={resolvedMax}
+								scoresDefinition={resolvedScoresDef}
+								showImplementation={showScore}
+								showDocumentation={showDocumentationScore &&
+									page.data.compliance_assessment_score.show_documentation_score}
+								implementationLabel={page.data.compliance_assessment_score.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
+							/>
+						{:else if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
 							{#if showScore}
 								<div class="flex flex-col space-y-2" data-testid="score-field">
 									<div class="flex flex-row items-center space-x-4">
@@ -1123,7 +1188,7 @@
 									{/if}
 								</div>
 							{/if}
-						{:else if data.result !== 'not_applicable'}
+						{:else}
 							{@const docScoreShown =
 								showDocumentationScore &&
 								page.data.compliance_assessment_score.show_documentation_score}
@@ -1185,6 +1250,17 @@
 									{/if}
 								{/snippet}
 							</ScorePair>
+							{#if docScoreShown && showScore && $formStore.is_scored && $formStore.score != null}
+								<ScoreControl
+									editable={false}
+									value={roundScore(
+										maturityScore($formStore.score, $formStore.documentation_score, resolvedMin)
+									)}
+									min={resolvedMin}
+									max={resolvedMax}
+									label={m.maturity()}
+								/>
+							{/if}
 						{/if}
 					{/if}
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { onMount } from 'svelte';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
@@ -12,6 +13,8 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const modalStore = getModalStore();
 
 	const toastStore = getToastStore();
 
@@ -319,12 +322,13 @@
 						0
 					);
 					if (
-						!confirm(
+						!(await confirmModal(
+							modalStore,
 							m.lbDraftPublishRemovesSteps({ count: deleted.length }) +
 								(withState ? m.lbDraftStepsWithUserProgress({ count: withState }) : '') +
 								'. ' +
 								m.lbDraftContinueQuestion()
-						)
+						))
 					) {
 						return;
 					}
@@ -344,7 +348,8 @@
 			}
 			if (result.error === 'libraryVersionOutdated') {
 				if (
-					confirm(
+					await confirmModal(
+						modalStore,
 						m.lbDraftVersionOutdatedConfirm({
 							version: draft.version,
 							maxVersion: result.max_version,
@@ -357,7 +362,9 @@
 				return;
 			}
 			if (result.error === 'versionBumpRequired') {
-				if (confirm(m.lbDraftVersionBumpConfirm({ version: draft.version }))) {
+				if (
+					await confirmModal(modalStore, m.lbDraftVersionBumpConfirm({ version: draft.version }))
+				) {
 					await publish({ ...extra, bump_version: true, _presetChecked: true });
 				}
 				return;
@@ -398,7 +405,7 @@
 			return true;
 		}
 		if (result.error === 'versionBumpRequired' && !bump) {
-			if (confirm(m.lbDraftVersionBumpConfirm({ version: draft.version }))) {
+			if (await confirmModal(modalStore, m.lbDraftVersionBumpConfirm({ version: draft.version }))) {
 				return commitOnly(true);
 			}
 			return false;
@@ -415,9 +422,9 @@
 	async function exportYaml() {
 		const clean = draft.identity_locked && !draft.has_unpublished_changes;
 		if (!clean) {
-			if (confirm(m.lbDraftExportPublishFirstConfirm())) {
+			if (await confirmModal(modalStore, m.lbDraftExportPublishFirstConfirm())) {
 				if (!(await commitOnly())) return;
-			} else if (!confirm(m.lbDraftExportWorkingCopyConfirm())) {
+			} else if (!(await confirmModal(modalStore, m.lbDraftExportWorkingCopyConfirm()))) {
 				return;
 			}
 		}
@@ -546,7 +553,10 @@
 	async function deleteObject(item: any, force = false) {
 		if (
 			!force &&
-			!confirm(m.lbDraftDeleteObjectConfirm({ name: item.name || item.ref_id || item.urn }))
+			!(await confirmModal(
+				modalStore,
+				m.lbDraftDeleteObjectConfirm({ name: item.name || item.ref_id || item.urn })
+			))
 		) {
 			return;
 		}
@@ -558,7 +568,8 @@
 		const result = await res.json();
 		if (res.status === 409 && result.error === 'objectIsReferenced') {
 			if (
-				confirm(
+				await confirmModal(
+					modalStore,
 					m.lbDraftObjectReferencedConfirm({
 						name: item.name || item.ref_id,
 						count: result.references.length
@@ -580,7 +591,7 @@
 
 	// The journey preset is a singular top-level key, removed by name.
 	async function deletePreset() {
-		if (!confirm(m.lbDraftRemovePresetConfirm())) return;
+		if (!(await confirmModal(modalStore, m.lbDraftRemovePresetConfirm()))) return;
 		const res = await fetch(base(), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },

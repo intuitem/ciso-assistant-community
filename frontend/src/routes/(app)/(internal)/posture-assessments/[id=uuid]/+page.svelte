@@ -350,10 +350,10 @@
 			<div class="flex flex-col space-y-2">
 				<Anchor
 					href="/posture-assessments/{data.data.id}/tree"
-					class="btn preset-filled-primary-500 h-fit w-full"
+					class="btn btn-quiet h-fit"
 					label={m.treeView()}
 				>
-					<i class="fa-solid fa-folder-tree mr-2"></i>{m.treeView()}
+					<i class="fa-solid fa-folder-tree mr-2 text-emerald-500"></i>{m.treeView()}
 				</Anchor>
 			</div>
 		{/snippet}

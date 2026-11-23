@@ -6,6 +6,7 @@
 	import { refreshAll } from '$app/navigation';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onMount } from 'svelte';
+	import { SENSITIVE_PERSONAL_DATA_CATEGORIES } from '#lib/utils/constants.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -142,6 +143,11 @@
 		})),
 		...(customCategories.length ? [{ label: 'pd_group_custom', categories: customCategories }] : [])
 	]);
+
+	// The backend marks these sensitive whatever the checkbox says
+	const hasSensitiveCategory = $derived(
+		selectedCategories.some((c) => SENSITIVE_PERSONAL_DATA_CATEGORIES.has(c))
+	);
 
 	const canSubmit = $derived(selectedCategories.length > 0 && !submitting);
 
@@ -337,6 +343,14 @@
 											class="checkbox"
 										/>
 										<span class="text-sm">{safeTranslate(category.value)}</span>
+										{#if SENSITIVE_PERSONAL_DATA_CATEGORIES.has(category.value)}
+											<i
+												class="fa-solid fa-lock text-xs text-orange-500"
+												role="img"
+												aria-label={m.sensitiveCategoryHelpText()}
+												title={m.sensitiveCategoryHelpText()}
+											></i>
+										{/if}
 									</label>
 								{/each}
 							</div>
@@ -383,6 +397,11 @@
 							<input type="checkbox" bind:checked={isSensitive} class="checkbox" />
 							<span class="text-sm font-medium text-surface-700-300">{m.isSensitive()}</span>
 						</label>
+						{#if hasSensitiveCategory}
+							<p class="text-xs text-surface-600-400 mt-1">
+								<i class="fa-solid fa-lock text-orange-500 mr-1"></i>{m.sensitiveCategoryHelpText()}
+							</p>
+						{/if}
 					</div>
 				</div>
 			</div>

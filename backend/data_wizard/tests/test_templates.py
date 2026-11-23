@@ -195,6 +195,8 @@ class TestSimpleTemplates:
         first = Asset.objects.get(ref_id="X.01")
         assert first.name == "alpha"
         assert first.type == Asset.Type.PRIMARY
+        assert first.lifecycle_stage.name == "active"
+        assert Asset.objects.get(ref_id="X.02").lifecycle_stage.name == "phasing_out"
 
     def test_applied_controls_template(
         self, api_client, domain_folder, template_domains, all_accessible

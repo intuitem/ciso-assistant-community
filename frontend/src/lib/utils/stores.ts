@@ -55,6 +55,9 @@ export const showAllEvents = persisted('showAllEvents', true, {
 
 export const lastAccordionItem = persisted('lastAccordionItem', ['']);
 
+// Whether the framework report's filter panel is unfolded, remembered per browser.
+export const frameworkReportFiltersOpen = persisted('frameworkReportFiltersOpen', true);
+
 const expandedNodes: string[] = [];
 
 export const expandedNodesState = persisted('expandedNodes', expandedNodes, {

@@ -156,6 +156,10 @@
 			{/if}
 		</td>
 	</tr>
+	<!-- An assessable requirement can still carry sub-requirements -->
+	{#each children as [childId, childNode], i}
+		<svelte:self nodeId={childId} node={childNode} depth={depth + 1} index={i} />
+	{/each}
 {:else if hasChildren}
 	<!-- Section header -->
 	<tr class="{sectionStyles} print:break-inside-avoid print:break-after-avoid">

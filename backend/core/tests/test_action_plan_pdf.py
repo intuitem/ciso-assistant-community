@@ -1,8 +1,9 @@
 """The action plan, rendered by Typst — one document serving two parents."""
 
+from io import BytesIO
 from uuid import uuid4
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 
 from core.generators import action_plan_context
@@ -77,7 +78,7 @@ def test_subject_omits_framework_when_the_parent_has_none(audit):
     assert payload["subject"]["framework"] == ""
 
     pdf, _ = _render(ParentWithoutFramework(), _controls(audit, ["active"]))
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert "Framework" not in text
 
 
@@ -86,7 +87,7 @@ def test_linked_items_reach_the_last_column(audit):
     controls = _controls(audit, ["to_do"])
     linked = {controls[0].id: ["REQ-1.1 - First requirement"]}
     pdf, _ = _render(audit, controls, linked=linked)
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert "REQ-1.1" in text
 
 
@@ -94,7 +95,7 @@ def test_linked_items_reach_the_last_column(audit):
 def test_cover_carries_traceability(audit):
     pdf, payload = _render(audit, _controls(audit, ["to_do"]))
     assert payload["generated_at"]
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert str(audit.id) in text
 
 
@@ -124,9 +125,9 @@ def test_column_titles_repeat_on_continuation_pages(audit):
     """A long group spans pages; every page must carry the column titles."""
     controls = _controls(audit, ["to_do"] * 60)
     pdf, _ = _render(audit, controls)
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
-    assert doc.page_count > 1, "not enough rows to spill onto a second page"
-    assert "Description" in doc[1].get_text()
+    doc = PdfReader(BytesIO(pdf)).pages
+    assert len(doc) > 1, "not enough rows to spill onto a second page"
+    assert "Description" in doc[1].extract_text()
 
 
 @pytest.mark.django_db
@@ -162,7 +163,7 @@ def test_status_and_category_are_localised_by_the_template(
     assert row["category_key"] == "technical"
     assert "category" not in row
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert status in text
     assert category in text
 
@@ -170,7 +171,7 @@ def test_status_and_category_are_localised_by_the_template(
 @pytest.mark.django_db
 def test_unset_status_group_is_named_by_the_template(audit):
     pdf, _ = _render(audit, _controls(audit, ["--"]))
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "No status" in text
 
 

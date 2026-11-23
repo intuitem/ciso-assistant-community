@@ -10,7 +10,10 @@
 	import { refreshAll } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
-	import { superForm } from 'sveltekit-superforms';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import { setContext } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { PageData } from './$types';
 
@@ -116,6 +119,11 @@
 		SPA: true
 	});
 	const linksForm = linksSuperForm.form;
+	// The drawer edits an existing activity: its pickers keep the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
+	// Linked ids of the open activity as last loaded or saved, from its raw object: the
+	// activity data masks the objects the user cannot see.
+	let drawerLinkIds: Record<string, string[]> = {};
 
 	// Suppress the synthetic emission that fires when we programmatically set the form
 	// in openDrawer(). Real user edits come AFTER and should auto-save.
@@ -131,7 +139,7 @@
 		if (!activity) return;
 		const patch: Record<string, string[]> = {};
 		for (const field of LINK_FIELDS) {
-			const current = (activity[field] ?? []).map((r) => r.id).sort();
+			const current = (drawerLinkIds[field] ?? []).slice().sort();
 			const next = (($f as any)[field] ?? []).slice().sort();
 			if (
 				current.length !== next.length ||
@@ -150,6 +158,7 @@
 			// {id, str} for every M2M link, so we don't need any client-side
 			// lookup pool to rehydrate the chips.
 			const fresh = await ops('update-activity', { id: activityId, ...patch });
+			if (drawerActivityId === activityId) drawerLinkIds = { ...drawerLinkIds, ...patch };
 			activities = activities.map((a) => {
 				if (a.id !== activityId) return a;
 				const next = { ...a };
@@ -165,16 +174,29 @@
 		}
 	}
 
-	function openDrawer(activity: Activity) {
-		drawerActivityId = activity.id;
+	let drawerRequest = 0;
+	async function openDrawer(activity: Activity) {
+		// The raw object first: without its ids a save would unlink the hidden objects,
+		// so the drawer does not open when it cannot be read.
+		const request = ++drawerRequest;
+		let raw: Record<string, string[]>;
+		try {
+			raw = await ops('activity-links', { id: activity.id });
+		} catch (e) {
+			console.error(e);
+			return;
+		}
+		if (request !== drawerRequest) return;
 		drawerDescription = activity.description ?? '';
 		drawerDescriptionPreview = true;
 		suppressNextLinksUpdate += 1;
 		const initial: Record<string, string[]> = {};
 		for (const field of LINK_FIELDS) {
-			initial[field] = (activity[field] ?? []).map((r) => r.id);
+			initial[field] = (raw[field] ?? []).map(String);
 		}
+		drawerLinkIds = initial;
 		linksForm.set(initial as any);
+		drawerActivityId = activity.id;
 	}
 	function closeDrawer() {
 		drawerActivityId = null;
@@ -196,7 +218,9 @@
 	}
 
 	const availableActors = $derived(
-		allActors.filter((a) => !matrixActors.some((ma) => ma.actor.id === a.id))
+		allActors
+			.filter((a) => !matrixActors.some((ma) => ma.actor.id === a.id))
+			.map((a) => ({ value: a.id, label: a.str }))
 	);
 
 	const cellMap = $derived.by(() => {
@@ -223,7 +247,12 @@
 	const gridTotal = $derived(activities.length * matrixActors.length);
 
 	let newActivityName = $state('');
-	let actorPickerValue = $state<string | undefined>(undefined);
+	const actorPickerSuperForm = superForm(
+		defaults(zod(z.object({ actor: z.string().optional() }))),
+		{ dataType: 'json', taintedMessage: false, SPA: true }
+	);
+	const actorPickerForm = actorPickerSuperForm.form;
+	const actorPickerValue = $derived($actorPickerForm.actor);
 
 	let editingActivityId = $state<string | null>(null);
 	let editingName = $state('');
@@ -310,7 +339,7 @@
 		if (!actorPickerValue) return;
 		const actorId = actorPickerValue;
 		if (matrixActors.some((ma) => ma.actor.id === actorId)) {
-			actorPickerValue = undefined;
+			$actorPickerForm.actor = undefined;
 			return;
 		}
 		const order = matrixActors.length;
@@ -321,7 +350,7 @@
 				...matrixActors,
 				{ id: created.id, actor: actorObj, order: created.order ?? order }
 			];
-			actorPickerValue = undefined;
+			$actorPickerForm.actor = undefined;
 		} catch (e) {
 			console.error(e);
 		}
@@ -481,17 +510,24 @@
 			{#if editMode}
 				<div class="actor-picker">
 					<i class="fa-solid fa-user-plus picker-icon"></i>
-					<select class="picker-select" bind:value={actorPickerValue}>
-						<option value={undefined}>{m.addActor?.() ?? 'Add actor…'}</option>
-						{#each availableActors as a (a.id)}
-							<option value={a.id}>{a.str}</option>
-						{/each}
-					</select>
+					<div class="picker-select">
+						<!-- AutocompleteSelect reads its options and value once: remount it whenever the list changes. -->
+						{#key availableActors}
+							<AutocompleteSelect
+								form={actorPickerSuperForm}
+								field="actor"
+								options={availableActors}
+								translateOptions={false}
+								placeholder={m.addActor()}
+								portalDropdown
+							/>
+						{/key}
+					</div>
 					<button
 						class="picker-btn"
 						onclick={addActor}
 						disabled={!actorPickerValue}
-						aria-label={m.addActor?.() ?? 'Add actor'}
+						aria-label={m.addActor()}
 					>
 						<i class="fa-solid fa-arrow-right"></i>
 					</button>
@@ -1048,19 +1084,23 @@
 	.picker-icon {
 		display: grid;
 		place-items: center;
-		padding: 0 0.65rem;
+		width: 2.25rem;
+		flex-shrink: 0;
 		color: var(--color-surface-500);
 		font-size: 0.85rem;
 	}
 	.picker-select {
 		flex: 1;
-		border: 0;
-		outline: 0;
-		background: transparent;
-		font-size: 0.85rem;
-		padding: 0.5rem 0.25rem;
 		min-width: 0;
-		color: inherit;
+		font-size: 0.85rem;
+	}
+	/* AutocompleteSelect forces its field look with !important Tailwind utilities, and a
+	   layered !important beats an unlayered one: the override has to sit in the same layer. */
+	@layer utilities {
+		.picker-select :global(.multiselect) {
+			background: transparent !important;
+			box-shadow: none !important;
+		}
 	}
 	.picker-btn {
 		padding: 0 0.85rem;

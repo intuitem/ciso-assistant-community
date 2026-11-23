@@ -167,24 +167,24 @@
 			{#if data.data.compliance_assessment}
 				<button
 					type="button"
-					class="btn preset-filled-primary-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={modalExport}
 					data-testid="export-button"
 				>
-					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>{m.exportButton()}
 				</button>
 				<button
-					class="btn preset-filled-secondary-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={handleClone}
 					disabled={isCloning}
 					data-testid="clone-assessment-button"
 				>
-					<i class="fa-solid fa-copy mr-2"></i>{m.newRevision()}
+					<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>{m.newRevision()}
 				</button>
 			{/if}
 			{#if reviewAssignments.length > 0}
-				<a href={reviewHref} class="btn preset-filled-secondary-500 h-fit">
-					<i class="fa-solid fa-clipboard-check mr-2"></i>{m.reviewResponses()}
+				<a href={reviewHref} class="btn btn-quiet h-fit">
+					<i class="fa-solid fa-clipboard-check mr-2 text-blue-500"></i>{m.reviewResponses()}
 				</a>
 			{/if}
 		{/snippet}

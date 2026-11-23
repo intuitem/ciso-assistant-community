@@ -148,6 +148,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## S
 
+- **Scenario selection** — The risk scenarios kept by the **Selection** bar of a risk assessment. The scenario table, the matrices, the action plan and the exports all work on that subset. See [Scenario selection](../features/scenario-selection.md).
 - **Security advisory** — A catalogued security warning published by a vendor or CERT (e.g. CVE entries). Linked to vulnerabilities and affected assets.
 - **Security exception** — A documented, time-bound deviation from a requirement, control or risk treatment, with owners and an expiration date. See [Security exceptions](../concepts/security-exceptions.md).
 - **Severity** — The shared ordinal scale used to qualify vulnerabilities, incidents, and findings: undefined / info / low / medium / high / critical. Drives SLA escalation and visual emphasis in dashboards.

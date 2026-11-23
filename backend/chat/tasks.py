@@ -4,11 +4,18 @@ Huey background tasks for document ingestion and object indexing.
 
 import structlog
 import uuid
+from datetime import timedelta
 
 from django.utils import timezone
-from huey.contrib.djhuey import db_task
+from huey import crontab
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 logger = structlog.get_logger(__name__)
+
+#: How long an ingestion may hold its claim on a document. A worker stopped
+#: mid-run never releases it, so the catch-up does once this has passed: keep
+#: it above the longest ingestion, or a run still in progress is started again.
+INGESTION_LEASE = timedelta(hours=6)
 
 
 @db_task()
@@ -21,14 +28,15 @@ def ingest_document(document_id: str):
     from .providers import get_embedder
     from .rag import COLLECTION_NAME, get_qdrant_client
 
-    try:
-        doc = IndexedDocument.objects.get(id=document_id)
-    except IndexedDocument.DoesNotExist:
-        logger.error("IndexedDocument %s not found", document_id)
+    # Claim it: the catch-up resubmits what looks stuck, and a second delivery
+    # must not extract and embed the same document again.
+    claimed = IndexedDocument.objects.filter(
+        id=document_id, status=IndexedDocument.Status.PENDING
+    ).update(status=IndexedDocument.Status.PROCESSING, updated_at=timezone.now())
+    doc = IndexedDocument.objects.filter(id=document_id).first() if claimed else None
+    if doc is None:
+        logger.info("Document is not waiting for ingestion", document_id=document_id)
         return
-
-    doc.status = IndexedDocument.Status.PROCESSING
-    doc.save(update_fields=["status"])
 
     try:
         # Get extractor for file type
@@ -63,6 +71,7 @@ def ingest_document(document_id: str):
                     "document_id": str(doc.id),
                     "chunk_index": chunk.index,
                     "filename": doc.filename,
+                    "name": doc.filename,
                     **chunk.metadata,
                 },
             )
@@ -70,6 +79,15 @@ def ingest_document(document_id: str):
         ]
 
         client.upsert(collection_name=COLLECTION_NAME, points=points)
+
+        # The document may have been dropped or moved while this ran.
+        if not IndexedDocument.objects.filter(id=doc.id).exists():
+            client.delete(
+                collection_name=COLLECTION_NAME,
+                points_selector=_document_filter([document_id]),
+            )
+            return
+        _stamp_current_folders(client, [document_id])
 
         doc.status = IndexedDocument.Status.INDEXED
         doc.chunk_count = len(chunks)
@@ -165,6 +183,101 @@ def remove_model_object(app_label: str, model_name: str, object_id: str):
         logger.error(
             "Failed to remove %s.%s/%s: %s", app_label, model_name, object_id, e
         )
+
+
+@db_task()
+def catch_up_indexing():
+    """Queue evidence attachments and published documents missing from the index."""
+    from .signals import index_missing_documents
+
+    evidence, documents = index_missing_documents()
+    logger.info(
+        "Checked documents for indexing", evidence=evidence, documents=documents
+    )
+    index_library_knowledge_base()
+
+
+@db_periodic_task(crontab(hour="3", minute="15"))
+def index_missing_documents_nightly():
+    """Catch up on documents the signals missed (chat disabled, worker down)."""
+    from django.conf import settings
+
+    from global_settings.utils import ff_is_enabled
+
+    if settings.ENABLE_CHAT and ff_is_enabled("chat_mode"):
+        catch_up_indexing.call_local()
+
+
+def _document_filter(document_ids):
+    from qdrant_client.models import FieldCondition, Filter, MatchAny, MatchValue
+
+    # object_id carries the document id on chunks and, unlike document_id, has a
+    # payload index (init_qdrant).
+    return Filter(
+        must=[
+            FieldCondition(key="object_type", match=MatchValue(value="document_chunk")),
+            FieldCondition(key="object_id", match=MatchAny(any=document_ids)),
+        ]
+    )
+
+
+@db_task(retries=3, retry_delay=60)
+def remove_document_chunks(document_id: str):
+    """Remove an indexed document's chunks from the vector store."""
+    from .rag import COLLECTION_NAME, get_qdrant_client
+
+    try:
+        get_qdrant_client().delete(
+            collection_name=COLLECTION_NAME,
+            points_selector=_document_filter([document_id]),
+        )
+    except Exception as e:
+        logger.error(
+            "Failed to remove document chunks", document_id=document_id, error=e
+        )
+        raise
+
+
+def _stamp_current_folders(client, document_ids):
+    """Write on each document's chunks the folder the database gives it now.
+
+    The folder is read when writing, never handed over by the caller: a retry
+    running late, or an ingestion racing with a move, would otherwise put an
+    older folder back. The second pass catches a move committed in between.
+    """
+    from .models import IndexedDocument
+    from .rag import COLLECTION_NAME
+
+    written = {}
+    for _ in range(2):
+        by_folder = {}
+        rows = IndexedDocument.objects.filter(id__in=document_ids).values_list(
+            "id", "folder_id"
+        )
+        for doc_id, folder_id in rows:
+            if written.get(doc_id) != folder_id:
+                written[doc_id] = folder_id
+                by_folder.setdefault(str(folder_id), []).append(str(doc_id))
+        for folder_id, ids in by_folder.items():
+            client.set_payload(
+                collection_name=COLLECTION_NAME,
+                payload={"folder_id": folder_id},
+                points=_document_filter(ids),
+            )
+
+
+@db_task(retries=3, retry_delay=60)
+def move_document_chunks(document_ids: list[str]):
+    """Point indexed documents' chunks at the folder their document is in now."""
+    from .rag import get_qdrant_client
+
+    try:
+        _stamp_current_folders(get_qdrant_client(), document_ids)
+    except Exception as e:
+        logger.error(
+            "Failed to move document chunks", document_ids=document_ids, error=e
+        )
+        raise
 
 
 def _resolve_folder_id(obj) -> str:
@@ -337,6 +450,33 @@ def _build_library_entry_text(entry: dict) -> str:
     return "\n".join(parts)
 
 
+def _library_point_id(entry: dict) -> str:
+    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"library:{entry['urn']}"))
+
+
+def _library_payload(entry: dict) -> dict:
+    return {
+        "text": _build_library_entry_text(entry),
+        "source_type": "library",
+        "object_type": entry["object_type"],
+        "urn": entry["urn"],
+        "ref_id": entry.get("ref_id", ""),
+        "name": entry.get("name", ""),
+        "framework": entry["framework"],
+        "framework_ref_id": entry.get("framework_ref_id", ""),
+        "provider": entry.get("provider", ""),
+        "locale": entry.get("locale", "en"),
+    }
+
+
+def _library_point_current(point, entry: dict, hybrid: bool) -> bool:
+    from .rag import BM25_VECTOR
+
+    if point is None or point.payload != _library_payload(entry):
+        return False
+    return not hybrid or BM25_VECTOR in (point.vector or {})
+
+
 @db_task()
 def index_library_knowledge_base():
     """
@@ -344,12 +484,19 @@ def index_library_knowledge_base():
     threats, and reference controls into Qdrant as shared knowledge.
 
     Uses source_type="library" — accessible to all authenticated users
-    without folder-based permission filtering.
+    without folder-based permission filtering. Entries already indexed with
+    the same text are skipped.
     """
     import time
 
     from .providers import get_embedder
-    from .rag import COLLECTION_NAME, get_qdrant_client
+    from .rag import (
+        BM25_MODEL,
+        BM25_VECTOR,
+        COLLECTION_NAME,
+        get_qdrant_client,
+        has_bm25,
+    )
 
     t0 = time.time()
     library_dir = _get_library_dir()
@@ -380,13 +527,35 @@ def index_library_knowledge_base():
     embedder = get_embedder()
     client = get_qdrant_client()
 
-    from qdrant_client.models import PointStruct
+    from qdrant_client.models import Document, PointStruct
 
+    hybrid = has_bm25(client)
     BATCH_SIZE = 100
     total_indexed = 0
 
     for batch_start in range(0, len(all_entries), BATCH_SIZE):
         batch = all_entries[batch_start : batch_start + BATCH_SIZE]
+        ids = [_library_point_id(e) for e in batch]
+        try:
+            indexed = {
+                str(p.id): p
+                for p in client.retrieve(
+                    COLLECTION_NAME,
+                    ids=ids,
+                    with_payload=True,
+                    with_vectors=[BM25_VECTOR] if hybrid else False,
+                )
+            }
+        except Exception as e:
+            logger.error("library_lookup_failed", batch_start=batch_start, error=e)
+            indexed = {}
+        batch = [
+            e
+            for e, point_id in zip(batch, ids)
+            if not _library_point_current(indexed.get(point_id), e, hybrid)
+        ]
+        if not batch:
+            continue
         texts = [_build_library_entry_text(e) for e in batch]
 
         try:
@@ -400,24 +569,19 @@ def index_library_knowledge_base():
             continue
 
         points = []
-        for entry, embedding in zip(batch, embeddings):
-            point_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"library:{entry['urn']}"))
+        for entry, text, embedding in zip(batch, texts, embeddings):
             points.append(
                 PointStruct(
-                    id=point_id,
-                    vector=embedding,
-                    payload={
-                        "text": _build_library_entry_text(entry),
-                        "source_type": "library",
-                        "object_type": entry["object_type"],
-                        "urn": entry["urn"],
-                        "ref_id": entry.get("ref_id", ""),
-                        "name": entry.get("name", ""),
-                        "framework": entry["framework"],
-                        "framework_ref_id": entry.get("framework_ref_id", ""),
-                        "provider": entry.get("provider", ""),
-                        "locale": entry.get("locale", "en"),
-                    },
+                    id=_library_point_id(entry),
+                    vector=(
+                        {
+                            "": embedding,
+                            BM25_VECTOR: Document(text=text, model=BM25_MODEL),
+                        }
+                        if hybrid
+                        else embedding
+                    ),
+                    payload=_library_payload(entry),
                 )
             )
 

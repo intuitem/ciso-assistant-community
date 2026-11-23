@@ -74,6 +74,10 @@ Click "Add contract" to initiate adding a new contract for the entity.
 
 ![Add New Contract](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2FhLVvBdoDyaNiZmFPgBPi4z%2F6wnHEsiqdhnp1rHRfmnUyS_doc.png?alt=media\&token=c7664085-74f2-430e-adb9-8d781681fe71)
 
+{% hint style="info" %}
+With the **dora** [feature flag](../configuration/settings/feature-flags.md) on, the contract form also has a **Contract type**: **Standalone arrangement** (the default), **Overarching arrangement** (a framework agreement that other contracts hang off) or **Subsequent or associated arrangement**. To attach a contract to a framework agreement, create the overarching contract first, then pick it under **More** > **Overarching Contract** on the subordinate one; only contracts of type _Overarching arrangement_ are offered there. The type feeds the [DORA register of information](../features/framework-specific/dora.md).
+{% endhint %}
+
 #### 13. Access Entity Assessments
 
 Click "Entity assessments" to view assessments related to the entity.

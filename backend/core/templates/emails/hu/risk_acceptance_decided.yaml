@@ -1,0 +1,16 @@
+subject: "CISO Assistant: A(z) „${acceptance_name}” kockázatelfogadás: ${decision}"
+body: |
+  Tisztelt Felhasználó!
+
+  Megváltozott egy olyan kockázatelfogadás állapota, amely az Ön felelősségébe tartozó kockázati forgatókönyveket érint:
+
+  - Név: ${acceptance_name}
+  - Állapot: ${decision}
+  - Elbírálta: ${actor_name}
+  - Indoklás: ${justification}
+  - Kockázati forgatókönyvek: ${risk_scenarios}
+  - Tartomány: ${folder_name}
+
+  A megtekintéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

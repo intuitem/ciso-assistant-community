@@ -54,6 +54,23 @@ Each piece of evidence keeps a versioned history through **evidence revisions**.
 
 The current attachment shown on the evidence page is always the latest revision; older revisions remain accessible for audit. This matters when an assessor asks "what proof did you have on date X?" — the historical revision is still there.
 
+## Review
+
+Each revision carries a **Review status**: _Pending_ when uploaded, then **Approved** or **Rejected**, with **Reviewed by**, **Reviewed at** and a **Review comment**. A new revision starts pending again, so the decision always applies to the file it was made on.
+
+**Review evidences** opens the review queue, one evidence at a time with its file or link previewed next to the decision:
+
+- From the **Evidences** list (the clipboard icon), the queue takes the list's current filters and search.
+- From an audit page, under the audit's actions, it is scoped to that audit: evidences attached to it directly and through its requirements, controls and tasks.
+
+The queue has four tabs: **To review**, **Approved**, **Rejected** and **All**. For each evidence it shows when it expires (**Expires soon**), the requirements it supports (**Requirements (…)**, with **Open requirement**), and its **History**. When a file is identical to an earlier version, the queue says so (_Same file as v…, approved by …_), and otherwise flags it as **Changed since v…**, so re-uploads of unchanged documents are quick to clear.
+
+- **Approve** or **Reject**. A rejection asks **Why is it rejected?**, with quick reasons (**Out of date**, **Wrong scope**, **Incomplete**, **Illegible**, **Not the expected document**) and a comment the owner will see.
+- Keyboard: `j` / `k` or the arrow keys to move, `a` to approve, `r` to reject, `Ctrl`/`⌘` + `Z` to undo your last decision.
+- If a newer version is uploaded while you look at an older one, the decision is refused and the latest version is shown, so an approval never lands on a file you didn't see.
+
+Reviewing needs permission to change the evidence. With **Four-eyes review of evidences** on in the [general settings](../configuration/settings/general.md#behaviour), the person who uploaded a file cannot decide on it.
+
 ## Related
 
 - [Applied controls](applied-controls.md)

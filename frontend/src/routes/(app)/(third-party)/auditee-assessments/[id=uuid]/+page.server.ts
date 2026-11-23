@@ -11,9 +11,10 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '#lib/utils/types.js';
+import { fetchVendorAssignees } from '#lib/utils/vendorTasks.js';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, locals }) => {
 	// params.id is the assignment ID
 	const assignmentId = params.id;
 
@@ -87,6 +88,14 @@ export const load = (async ({ fetch, params }) => {
 		documentation_score: z.number().optional().nullable()
 	});
 
+	// The requirements all live in the audit's folder: one lookup serves them all.
+	// getUser(), not locals.user: the layout load that sets it runs alongside this one.
+	const vendorAssignees = await fetchVendorAssignees(
+		fetch,
+		tableMode.requirement_assessments[0]?.folder,
+		!!(await locals.getUser())?.is_third_party
+	);
+
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
 			const measureInitialData = {
@@ -105,7 +114,8 @@ export const load = (async ({ fetch, params }) => {
 			const taskTemplateCreateForm = await superValidate(
 				{
 					requirement_assessments: [requirementAssessment.id],
-					folder: requirementAssessment.folder.id
+					folder: requirementAssessment.folder.id,
+					assigned_to: vendorAssignees
 				},
 				zod(taskTemplateCreateSchema),
 				{ errors: false }
@@ -133,15 +143,10 @@ export const load = (async ({ fetch, params }) => {
 				folder: requirementAssessment.folder.id,
 				requirement: requirementAssessment.requirement.id,
 				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				...(requirementAssessment.evidences !== undefined && {
-					evidences: requirementAssessment.evidences.map((evidence) => evidence.id)
-				}),
-				...(requirementAssessment.applied_controls !== undefined && {
-					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
-				}),
-				...(requirementAssessment.task_templates !== undefined && {
-					task_templates: requirementAssessment.task_templates.map((t) => t.id)
-				})
+				// Every link field this viewer reads, as ids: the read data holds objects
+				// and masks the ones the user cannot see, and the form must send those
+				// links back untouched.
+				...requirementAssessment.linked_ids
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {

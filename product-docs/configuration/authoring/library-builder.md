@@ -97,6 +97,12 @@ See [Implementation groups](../../concepts/audits.md#implementation-groups) for 
 2. Set **Minimum score** and **Maximum score** (e.g. 0–5 for CMMI-style, 0–100 for percentage).
 3. Choose **Aggregation**: _Average_ (leaf scores average up to the parent) or _Sum_.
 4. Under **Score scale**, **Add scale level** for each level and set its **score**, **name** (_Initial_, _Managed_, _Defined_…), and **description** (the criteria for reaching it).
+5. Set the defaults proposed to every new audit of the framework:
+   - **Score calculation method** — **Average**, **Sum**, or **Average of averages** (each category is averaged, then the category averages), as the [score calculation method](../../guides/customize-audit.md#score-calculation-method) of an audit.
+   - **Target score** — the score the audit aims at.
+   - **Anchor N/A to target score** — not-applicable requirements count as the target score instead of being left out. It needs a target score: clearing the target clears it too.
+
+   These are only defaults: each audit can change them on its own form. The CyFun 2025 framework uses them to match the CCB tools (see [CyFun](../../features/framework-specific/cyfun.md#before-you-export)).
 
 Match the standard the framework comes from (CMMI 0–5, NIST CSF 2.0 1–4) rather than inventing a scale, and document each level so an analyst can tell level 3 from level 4. (Per-requirement score overrides are a library-YAML feature, not exposed in the builder UI — author them in [Excel/YAML](excel.md) if you need them.)
 
@@ -129,6 +135,8 @@ Rules can do more than label a score:
 
 - **Number rules.** Set **Result** to **Number** to compute a value instead of a yes/no verdict (an average, a count). Number rules below it and every yes/no rule read it as `values.<ref_id>`; with a label, the value shows on the audit to those who see its **Score**.
 - **Rule order.** Number rules run first, in order, each seeing the ones above it. Yes/no rules then run in order and see the yes/no rules above them that fired, as `computed_outcomes` — so a summary rule such as `"maturity" in computed_outcomes && "exclusions" in computed_outcomes` goes below the rules it reads.
+- **Maturity level.** Set **Result** to **Maturity level** (offered when the framework has implementation groups) to give the audit the highest level fully met, level by level, as in Essential Eight. Pick the implementation groups under **Levels, lowest first** and name level 0 in **Name of level 0**. Only requirements tagged with a level count: a requirement with no implementation group is left out of every level, even though elsewhere an untagged requirement belongs to every group, so tag each requirement that must count. A level is met when the level below it is met and every requirement tagged with it passes: compliant or not applicable pass, partially compliant and non compliant fail, and a requirement not yet assessed leaves the level pending. Tick **One level per top-level section** to rate each section separately, the audit then getting the lowest of them; tick **Requirements tagged with a lower level count at higher levels too** when requirements carry only the level that introduces them. The **How the level is computed** panel shows the result in plain words. Every rule reads the level as `values.<ref_id>`.
+- **Weakest link.** Set **Result** to **Weakest link** to rate each node at a given **Depth of the rated nodes** (1 = top level) by its worst requirement, not applicable ones aside, as in ASD Essentials. The audit, or each top-level section with **One summary per top-level section**, is scored as the weighted mean of its rated nodes (compliant 1, partially compliant 0.5, non compliant 0, not assessed 0). A section where no rated node is assessed, or where all are not applicable, has no score and is left out of the overall score rather than counted as 0: one compliant section next to a wholly unassessed one gives 100%. **Result names (optional)** renames the results, for instance _Fully effective_. Number rules read the overall score, as a percentage, as `values.<ref_id>`.
 - **Applies to.** When the framework has implementation groups, limit a rule to some of them: it then applies only to audits whose scope includes one of these groups (or covers the whole framework, with no group selected). Use it for criteria that differ by level, as the CyFun 2025 [conformity criteria](../../features/framework-specific/cyfun.md#checking-the-ccb-conformity-criteria) do.
 
 What an expression can read:
@@ -172,6 +180,10 @@ The **Grid** section maps every `(probability, impact)` pair to a risk level:
 - **Click** a cell to cycle to the next risk level, or **hover** it and pick a level directly from the dropdown. Focusing a cell and pressing `Enter` / `Space` cycles too.
 
 Deleting a risk level that cells still point at is the most fragile operation: affected cells fall back to the first risk level. Prefer cloning to a new matrix over destructive level removal on a matrix already in use. (The publishable check surfaces such issues when you **Validate** on the draft page — see below.)
+
+### Customise the EBIOS RM scales
+
+The **EBIOS RM rating scales** section holds the scales EBIOS RM studies apply with this matrix: the **Workshop 2 · Pertinence of RO/TO couples** grid, and the **Workshop 4 · Likelihood of operating modes** grid (success probability × technical difficulty) used by the [standard and advanced quotation methods](../../guides/ebios-rm.md#standard-and-advanced). They start from the **EBIOS RM guide values**; click **Customise** to edit them, a cell click moving it to the next level, and **Back to the guide values** to undo.
 
 ### Apply a colour palette
 

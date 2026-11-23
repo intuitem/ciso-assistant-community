@@ -131,6 +131,19 @@ export function safeTranslate(key: string, params = {}, options = {}): string {
 	return unsafeTranslate(key, params, options) || key;
 }
 
+// Django model_name (`appliedcontrol`) has no word breaks to camelCase from.
+let messageKeyByLowercase: Map<string, string> | undefined;
+
+export function translateModelName(modelName: string): string {
+	messageKeyByLowercase ??= new Map(Object.keys(m).map((key) => [key.toLowerCase(), key]));
+	return safeTranslate(messageKeyByLowercase.get(modelName) ?? modelName);
+}
+
+export function translateEventKey(eventKey: string): string {
+	const [model, action] = eventKey.split('.');
+	return action ? `${translateModelName(model)} · ${safeTranslate(action)}` : eventKey;
+}
+
 /**
  * Translate a select option, preferring the key derived from its value.
  * Choice endpoints serve the English label from the Django choices, which is

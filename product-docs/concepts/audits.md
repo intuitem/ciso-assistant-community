@@ -148,6 +148,61 @@ On audits, **Comments** is governed by two controls: the `comments` [feature fla
 
 See [Comments](../features/comments.md) for the full feature reference — processed state, edit history, permissions, and author privacy.
 
+## Working on the audit page
+
+### Filtering the requirement tree
+
+**Filters** above the tree narrows the requirements shown by **Result**, **Status** and **Extended result** (when those fields are visible), and by coverage:
+
+- **Applied controls**: **With applied controls** or **Without applied controls**.
+- **Evidence**: **With evidences** or **Without evidences**, counting evidences attached directly or through applied controls.
+- **Only assessable** hides the non-assessable entries that have nothing below them; section headings that hold requirements stay visible.
+
+<figure><img src="../.gitbook/assets/audit-tree-filters.png" alt=""><figcaption><p>The <strong>Filters</strong> panel of the requirement tree, with the <strong>Applied controls</strong> and <strong>Evidence</strong> coverage filters</p></figcaption></figure>
+
+Filters are remembered per audit in your browser. Next to them, **Exclude not applicable requirements** hides the requirements marked _Not applicable_, in the tree and in table mode; click **Include not applicable requirements** to bring them back.
+
+### Table mode
+
+**Table mode** shows the requirements one after another, with a **Table of contents**, so you can set results, scores, observations, applied controls and evidences in a single pass without opening each requirement. Fields follow the audit's [field visibility](../guides/customize-audit.md#field-visibility). Without permission to change the audit, the page opens read only.
+
+### Evidences
+
+The **Evidences** button lists every evidence of the audit: those attached to the audit itself, to its requirement assessments, and those reached through the requirements' applied controls and task definitions. Only the evidences, applied controls and task definitions you can view are listed.
+
+### Insights
+
+When the framework defines them (see [outcome rules](../configuration/authoring/library-builder.md#add-outcome-rules)), the **Insights** block shows their results. The yes/no and number rules share one verdicts tile, counting the verdicts met; open it to see each rule. Two kinds of rule get a tile of their own:
+
+- **Maturity level** — the level reached, and a grid of each level (and section) as **Met**, **Not met**, **Pending: some requirements not assessed** or **Not in the audit scope**, with the requirements blocking the next level. On these frameworks, selecting a level on the audit form also selects the levels below it, since they are needed to tell which level is reached.
+- **Weakest link** — the rating of each node and the weighted score per section.
+
+These tiles show to whoever sees the audit's **Result**. When the audit has threats, or the advanced analytics feature is on, the block also links to the potential threats and the advanced analytics.
+
+### Exports
+
+**Export** opens **Export options**. Its **Action plan** group exports the applied controls (**Controls list**, **Controls workbook**, **Status-grouped report**); its **Audit** group offers, depending on your role and the framework:
+
+| Entry | Format | Content |
+|---|---|---|
+| **Requirements data** | CSV | Flat list of requirements with scores, observations and answers |
+| **Requirements workbook** | XLSX | Full data including answers, scoring and progress |
+| **Executive summary** | DOCX | Cover page, spider chart, category scores, framework tree, scored requirements |
+| **Audit posture** | PDF | Full detail: results, scores, charts and observations per requirement |
+| **Attestation to countersign** | PDF | Compliance status, commitments and tasks with a signature block, no scores or ratings |
+| **Bundle with evidences** | ZIP | HTML snapshot bundled with all attached evidence files |
+| **SoA builder** | HTML | ISO 27001 audits only: opens the Statement of Applicability report builder |
+
+<figure><img src="../.gitbook/assets/audit-export-options.png" alt=""><figcaption><p><strong>Export options</strong> on an ISO 27001 audit, with the <strong>Audit</strong> and <strong>Action plan</strong> groups</p></figcaption></figure>
+
+Exports leave the score of a _Not applicable_ requirement empty. Per-category scores in the reports follow the audit's scoring rules: N/A requirements are left out, or count at the target when **anchor N/A to target** is enabled. An **Overall** row closes the category table with the audit's own score. On a sum-based audit, category and overall scores are shown on the audit's scale.
+
+When the audit has a documentation score, the reports show the implementation, documentation and maturity scores side by side, per category and per requirement, as [Framework Insights](../features/framework-report.md) does. The maturity score leads: the category radar plots it. The pair follows the **Show the documentation score first** setting. A requirement shows its documentation score as recorded, empty when none was entered; its maturity score counts a missing documentation score at the bottom of the scale. A reader who may not see the documentation score gets the implementation score alone. The CSV export adds `documentation_score` and `maturity_score` columns, and the Excel export adds a `maturity_score` column after the others. The import ignores that column: edit the two scores it is computed from.
+
+Framework-specific exports, such as the [CyFun self-assessment](../features/framework-specific/cyfun.md#exporting-an-audit-to-the-workbook), are added to the list. Third-party respondents only get the posture and attestation PDFs and the bundle.
+
+The **Bundle with evidences** report opens with a table of contents, is written in the export language, and flags evidences whose file is missing instead of silently leaving them out.
+
 ## Evidence
 
 Evidence justifies the status of a compliance requirement or proves that an applied control has been implemented. It can be a description, a link, or an uploaded file, and it can be attached to any number of applied controls or requirement assessments.
