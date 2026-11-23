@@ -44,9 +44,7 @@
 
 			// If there's not enough space in the current widget line we jump to the next line.
 			if (endX > X_LIMIT) {
-				const currentLineWidgets = finalWidgets.filter(
-					({ position_y }) => position_y === currentY
-				);
+				const currentLineWidgets = finalWidgets.filter(({ position_y }) => position_y === currentY);
 				const currentLineHeights = currentLineWidgets.map(({ height }) => height);
 				const maxLineHeight = Math.max(0, ...currentLineHeights);
 				// Set the cursor(currentX,currentY) back to the beginning of the next line (X=0, Y=next line) .
