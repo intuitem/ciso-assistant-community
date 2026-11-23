@@ -898,3 +898,54 @@ class TestCelTrigger:
                 folder=cel_setup["folder"],
             )
             mock_eval.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# TestCelErrorContainment  (CA-1945)
+# ---------------------------------------------------------------------------
+class TestCelErrorContainment:
+    """celpy builds the error of `a || b` from the repr of both operands, so a
+    chain of failing `||` terms produces a message that grows exponentially.
+    Logging it in full (exc_info) while re-evaluating a framework's audits on
+    publish was enough to OOM the worker. The error must be contained: bounded
+    in the log and never crashing the evaluation (fail-open)."""
+
+    def test_cel_error_is_bounded(self):
+        from core.cel_service import _MAX_CEL_ERROR_CHARS, _cel_error
+
+        assert len(_cel_error(Exception("x" * 100_000))) <= _MAX_CEL_ERROR_CHARS
+
+    def test_cel_error_survives_a_broken_str(self):
+        from core.cel_service import _cel_error
+
+        class Boom(Exception):
+            def __str__(self):
+                raise RuntimeError("no str for you")
+
+        # A pathological __str__ must not mask the original failure.
+        assert _cel_error(Boom()) == "Boom"
+
+    def test_missing_key_chained_or_fails_open(self):
+        """A rule whose terms all error (reading a missing answer key) and are
+        chained with `||` must be skipped, not crash the whole evaluation."""
+        import celpy
+
+        from core.cel_service import _evaluate_rules
+
+        term = 'answers["Q"].value == true'
+        rules = [
+            {
+                "ref_id": "crash",
+                "expression": " || ".join([term] * 16),
+                "result": "broken",
+            },
+            {"ref_id": "ok", "expression": "true", "result": "fine", "label": "OK"},
+        ]
+        errors: list[str] = []
+        fired, _values = _evaluate_rules(
+            celpy.Environment(), rules, {"answers": {}}, errors=errors
+        )
+        # Fail-open: the broken rule is dropped, the sound rule still fires.
+        assert "crash" not in fired
+        assert fired["ok"] == {"result": "fine", "label": "OK"}
+        assert errors == ["crash"]

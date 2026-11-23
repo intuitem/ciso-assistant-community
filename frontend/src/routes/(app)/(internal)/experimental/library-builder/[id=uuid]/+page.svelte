@@ -345,7 +345,6 @@
 			if (res.ok) {
 				setStatus(m.lbDraftPublished({ urn: result.urn, version: result.version }), 'success');
 				validation = null;
-				await reload();
 				return;
 			}
 			if (result.error === 'libraryVersionOutdated') {
@@ -385,6 +384,11 @@
 			setStatus(safeTranslate(e.message), 'error');
 		} finally {
 			publishing = false;
+			// Reload after EVERY publish response (and after a failed request),
+			// not only on success: a publish can bump the draft's version on the
+			// backend and then fail to load, so a stale local copy would keep
+			// offering a fresh bump on each retry. Re-reading re-syncs the version.
+			await reload();
 		}
 	}
 

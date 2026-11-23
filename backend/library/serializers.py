@@ -250,6 +250,16 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {field: "identityFrozenAfterPublication"}
                     )
+        # A version already published is frozen in the corpus: editing the draft
+        # down to it (or below) would let a later publish re-stamp a shipped
+        # v{n} with different content. The publish action may still bump up.
+        if (
+            self.instance is not None
+            and self.instance.last_published_version is not None
+            and "version" in data
+            and data["version"] < self.instance.last_published_version
+        ):
+            raise serializers.ValidationError({"version": "versionBelowLastPublished"})
         return data
 
     def create(self, validated_data):

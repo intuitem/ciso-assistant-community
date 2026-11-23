@@ -778,6 +778,97 @@ def test_publish_score_change_retry_keeps_the_same_version(admin_client):
     assert LoadedLibrary.objects.get(urn="urn:me:risk:library:mylib").version == 2
 
 
+def _framework_draft(admin_client, name="My framework") -> dict:
+    return _create_draft(
+        admin_client,
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:mylib",
+                    "ref_id": "MYFW",
+                    "name": name,
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r1",
+                            "ref_id": "R1",
+                            "name": "Requirement 1",
+                            "assessable": True,
+                            "depth": 1,
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+
+
+@pytest.mark.django_db
+def test_publish_failed_load_reverts_the_version_bump(admin_client):
+    """CA-1945: a publish that bumps the version and then fails to load must
+    leave the draft at its previous version with no stored row behind, so a
+    retry does not climb the version on every attempt."""
+    from unittest.mock import patch as mock_patch
+
+    from core.models import LoadedLibrary as _LoadedLibrary
+
+    draft = _framework_draft(admin_client)
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    assert admin_client.post(publish_url, {}, format="json").status_code == 200
+
+    # Change the content so a republish needs a version bump.
+    content = admin_client.get(detail_url).data["content"]
+    content["frameworks"][0]["name"] = "My framework v2"
+    assert (
+        admin_client.patch(detail_url, {"content": content}, format="json").status_code
+        == 200
+    )
+
+    with mock_patch.object(_LoadedLibrary, "update", return_value="boom"):
+        failed = admin_client.post(publish_url, {"bump_version": True}, format="json")
+    assert failed.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, failed.content
+    assert failed.data["error"] == "libraryLoadFailed"
+
+    # The bump is undone and no orphan v2 remains behind.
+    assert admin_client.get(detail_url).data["version"] == 1
+    assert not StoredLibrary.objects.filter(
+        urn="urn:me:risk:library:mylib", version=2
+    ).exists()
+
+    # A clean retry (load no longer failing) succeeds at v2 — not v3.
+    retried = admin_client.post(publish_url, {"bump_version": True}, format="json")
+    assert retried.status_code == status.HTTP_200_OK, retried.content
+    assert retried.data["version"] == 2
+
+
+@pytest.mark.django_db
+def test_draft_version_cannot_drop_below_last_published(admin_client):
+    """CA-1945: once v{n} is published, PATCHing the draft's version below it is
+    refused — a later publish could otherwise re-stamp a shipped version with
+    different content. The same or a higher version stays editable."""
+    draft = _framework_draft(admin_client)
+    admin_client.patch(
+        reverse("library-drafts-detail", args=[draft["id"]]),
+        {"version": 3},
+        format="json",
+    )
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+    assert admin_client.post(publish_url, {}, format="json").status_code == 200
+    assert admin_client.get(detail_url).data["last_published_version"] == 3
+
+    refused = admin_client.patch(detail_url, {"version": 2}, format="json")
+    assert refused.status_code == status.HTTP_400_BAD_REQUEST, refused.content
+    assert "version" in str(refused.data)
+
+    assert (
+        admin_client.patch(detail_url, {"version": 3}, format="json").status_code == 200
+    )
+    assert (
+        admin_client.patch(detail_url, {"version": 4}, format="json").status_code == 200
+    )
+
+
 @pytest.mark.django_db
 def test_publish_refuses_a_draft_with_unresolved_references(admin_client):
     draft = _create_draft(

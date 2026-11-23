@@ -35,6 +35,29 @@ from core.quick_form_scoring import (
 
 logger = structlog.get_logger(__name__)
 
+_MAX_CEL_ERROR_CHARS = 200
+
+
+def _cel_error(exc: Exception) -> str:
+    """A bounded, one-line summary of a celpy evaluation error, for logging.
+
+    celpy builds the error of `a || b` from the repr of BOTH operands
+    (celtypes.logical_or raises ``TypeError(f"... {x!r} or {y!r}")``), so a
+    chain of failing ``||`` terms yields a message whose size doubles with each
+    term — megabytes for a handful of terms. Logging such an error with
+    ``exc_info=True`` reformats that whole message into the traceback and feeds
+    it to the handlers, and doing so once per audit while re-evaluating a
+    framework's audits on publish was enough to OOM the worker. So these errors
+    are never logged with ``exc_info``; only a bounded prefix of the message is
+    kept. The giant string celpy already built is dropped as soon as the
+    ``except`` block returns.
+    """
+    try:
+        text = str(exc)
+    except Exception:  # a pathological __str__ must not mask the real error
+        text = type(exc).__name__
+    return text[:_MAX_CEL_ERROR_CHARS]
+
 
 def _python_to_cel(value):
     """Recursively convert Python values to CEL types."""
@@ -309,13 +332,13 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 result = prog.evaluate(cel_context)
                 if not result:
                     hidden_urns.add(node["urn"])
-            except Exception:
+            except Exception as exc:
                 logger.warning(
                     "cel_visibility_error",
                     expression=vis_expr,
                     requirement_urn=node["urn"],
                     compliance_assessment_id=str(ca.pk),
-                    exc_info=True,
+                    error=_cel_error(exc),
                 )
                 # Fail-open: keep requirement visible on error
 
@@ -878,12 +901,12 @@ def _evaluate_rules(
     for rule in [r for r in rules if is_numeric_rule(r)]:
         try:
             result = run(rule)
-        except Exception:
+        except Exception as exc:
             logger.warning(
                 "cel_value_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                exc_info=True,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -908,12 +931,12 @@ def _evaluate_rules(
                 fired[rule["ref_id"]] = {
                     k: v for k, v in rule.items() if k not in _NOT_PASSED_ON
                 }
-        except Exception:
+        except Exception as exc:
             logger.warning(
                 "cel_evaluation_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                exc_info=True,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -1710,13 +1733,13 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
                 if not prog.evaluate(cel_context):
                     hidden_page_ids.add(page["id"])
                     hidden_page_urns.add(page["urn"])
-            except Exception:
+            except Exception as exc:
                 logger.warning(
                     "cel_visibility_error",
                     expression=expression,
                     page_urn=page["urn"],
                     quick_form_response_id=str(response.pk),
-                    exc_info=True,
+                    error=_cel_error(exc),
                 )
 
     context = (

@@ -2633,6 +2633,22 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
+        # A publish that bumps the version and then fails to load (e.g. the
+        # worker dies re-evaluating existing audits) must not leave the version
+        # climbing: every failed attempt would offer a fresh bump, so the
+        # customer's version crept up without a single successful publish. The
+        # bump is committed early so the documented score-change retry can
+        # re-publish at the SAME version; on any OTHER failure it is undone.
+        original_version = draft.version
+        bumped = False
+
+        def _revert_version_bump() -> None:
+            if bumped:
+                draft.version = original_version
+                LibraryDraft.objects.filter(pk=draft.pk).update(
+                    version=original_version, updated_at=now()
+                )
+
         # A published artifact is identified by URN + version: re-publishing
         # different content under the version already snapshotted would put
         # two different v{n} YAMLs in the wild.
@@ -2644,6 +2660,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             if request.data.get("bump_version"):
                 draft.version += 1
                 draft.save(update_fields=["version", "updated_at"])
+                bumped = True
             else:
                 return Response(
                     {
@@ -2725,6 +2742,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             if request.data.get("bump_version"):
                 draft.version = max_existing + 1
                 draft.save(update_fields=["version", "updated_at"])
+                bumped = True
             else:
                 return Response(
                     {"error": "libraryVersionOutdated", "max_version": max_existing},
@@ -2742,6 +2760,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             logger.exception(
                 "Failed to store published draft", urn=urn, locale=draft.locale
             )
+            _revert_version_bump()
             return Response(
                 {"error": "libraryPublishFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -2750,6 +2769,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # Publish is stateless (failed attempts leave no stored row
             # behind), so a store refusal genuinely means the content or
             # version already exists — nothing new to publish.
+            _revert_version_bump()
             return Response({"error": error}, status=HTTP_409_CONFLICT)
 
         # Publish is all-or-nothing: if loading does not complete, remove the
@@ -2781,12 +2801,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # here can carry internal state (DB, filesystem, paths).
             logger.exception("Failed to load published draft", urn=urn)
             stored.delete()
+            _revert_version_bump()
             return Response(
                 {"error": "libraryLoadFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is not None:
             stored.delete()
+            _revert_version_bump()
             if error_msg == "libraryHasNoUpdate":
                 return Response(
                     {"error": "noChangesToPublish"}, status=HTTP_409_CONFLICT
