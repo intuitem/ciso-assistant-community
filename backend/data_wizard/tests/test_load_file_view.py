@@ -1793,6 +1793,20 @@ class TestRepresentativePreferredRoundTrip:
             "other@vendor.test": "No",
         }
 
+    def test_list_export_writes_the_preferred_flag(
+        self, api_client: APIClient, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        vendor = Entity.objects.create(name="Vendor", folder=domain_folder)
+        Representative.objects.create(
+            entity=vendor, email="lead@vendor.test", is_preferred=True
+        )
+
+        response = api_client.get("/api/representatives/export_csv/")
+
+        assert response.status_code == 200
+        rows = pd.read_csv(io.StringIO(response.content.decode("utf-8-sig")), sep=";")
+        assert rows.loc[0, "is_preferred"] == "Yes"
+
     def test_import_reads_the_preferred_flag(
         self, api_client: APIClient, domain_folder: Folder, all_accessible: None
     ) -> None:

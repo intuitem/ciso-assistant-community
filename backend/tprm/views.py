@@ -2098,6 +2098,11 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
             },
             "phone": {"source": "phone", "label": "phone", "escape": True},
             "role": {"source": "role", "label": "role", "escape": True},
+            "is_preferred": {
+                "source": "is_preferred",
+                "label": "is_preferred",
+                "format": lambda x: "Yes" if x else "No",
+            },
             "provider_entity_ref_id": {
                 "source": "entity.ref_id",
                 "label": "provider_entity_ref_id",
