@@ -18,9 +18,38 @@ from typing import Iterator
 
 from django.apps import apps
 
-from iam.models import Folder
+from django.contrib.auth.models import Permission
+
+from iam.models import Folder, RoleAssignment
 from ..page_context import ParsedContext
 from .base import Workflow, WorkflowContext, SSEEvent
+
+WORKSHOP_ADD_PERMS = (
+    "add_asset",
+    "add_fearedevent",
+    "add_roto",
+    "add_strategicscenario",
+    "add_attackpath",
+    "add_operationalscenario",
+)
+WORKSHOP_COUNTS = (
+    "asset_count",
+    "feared_event_count",
+    "roto_count",
+    "strategic_scenario_count",
+    "attack_path_count",
+    "operational_scenario_count",
+)
+
+
+def _can_write(user, folder, codenames) -> bool:
+    return all(
+        RoleAssignment.is_access_allowed(
+            user=user, perm=Permission.objects.get(codename=c), folder=folder
+        )
+        for c in codenames
+    )
+
 
 logger = structlog.get_logger(__name__)
 
@@ -114,7 +143,7 @@ class EbiosRMAssistWorkflow(Workflow):
 
     def _resume_matrix_choice(self, ctx, data) -> Iterator[SSEEvent]:
         RiskMatrix = apps.get_model("core", "RiskMatrix")
-        matrices = list(RiskMatrix.objects.filter(is_enabled=True))
+        matrices = list(ctx.scope.queryset(RiskMatrix).filter(is_enabled=True))
         picked = self._match_choice(ctx.user_message, matrices)
         if not picked:
             self._clear_state(ctx)
@@ -128,7 +157,9 @@ class EbiosRMAssistWorkflow(Workflow):
 
     def _resume_framing(self, ctx, data) -> Iterator[SSEEvent]:
         RiskMatrix = apps.get_model("core", "RiskMatrix")
-        matrix = RiskMatrix.objects.filter(id=data.get("risk_matrix_id")).first()
+        matrix = (
+            ctx.scope.queryset(RiskMatrix).filter(id=data.get("risk_matrix_id")).first()
+        )
         ctx.parsed_context = ParsedContext(
             model_key="folder", object_id=data.get("folder_id"), page_type="detail"
         )
@@ -194,6 +225,13 @@ class EbiosRMAssistWorkflow(Workflow):
         except Folder.DoesNotExist:
             yield self._token("I couldn't find this domain.")
             return
+        if not _can_write(
+            ctx.scope.user, folder, ("add_ebiosrmstudy", *WORKSHOP_ADD_PERMS)
+        ):
+            yield self._token(
+                "You don't have permission to create an EBIOS RM study in this domain."
+            )
+            return
 
         # Check for existing assets in this domain
         Asset = apps.get_model("core", "Asset")
@@ -208,15 +246,10 @@ class EbiosRMAssistWorkflow(Workflow):
         if not risk_matrix:
             RiskMatrix = apps.get_model("core", "RiskMatrix")
             available_matrices = list(
-                RiskMatrix.objects.filter(
-                    is_enabled=True,
-                    folder_id__in=ctx.scope.folder_ids,
-                ).order_by("name")[:20]
+                ctx.scope.queryset(RiskMatrix)
+                .filter(is_enabled=True)
+                .order_by("name")[:20]
             )
-            if not available_matrices:
-                available_matrices = list(
-                    RiskMatrix.objects.filter(is_enabled=True).order_by("name")[:20]
-                )
             if not available_matrices:
                 yield self._token(
                     "No risk matrix is available. Please load a risk matrix "
@@ -352,8 +385,25 @@ class EbiosRMAssistWorkflow(Workflow):
                 "Please make sure you're on a study page."
             )
             return
-
         state = self._get_study_state(study)
+        start = "feared_events" if state["feared_event_count"] == 0 else None
+        if start is None and state["roto_count"] == 0:
+            start = "rotos"
+        if start is None and state["strategic_scenario_count"] == 0:
+            start = "strategic_scenarios"
+        if start is None and state["attack_path_count"] == 0:
+            start = "attack_paths"
+        if start is None and state["operational_scenario_count"] == 0:
+            start = "operational_scenarios"
+        needed = ["change_ebiosrmstudy"] + [
+            perm
+            for perm, count in zip(WORKSHOP_ADD_PERMS, WORKSHOP_COUNTS)
+            if state[count] == 0
+        ]
+        if not _can_write(ctx.scope.user, study["obj"].folder, needed):
+            yield self._token("You don't have permission to edit this EBIOS RM study.")
+            return
+
         yield self._thinking(
             f"Study: {study['name']}\n"
             f"Assets: {state['asset_count']}, "
@@ -387,17 +437,6 @@ class EbiosRMAssistWorkflow(Workflow):
             if assets:
                 created["assets"] = self._create_assets(study, assets)
                 yield self._thinking(f"Created {len(created['assets'])} assets.")
-
-        # Run remaining workshops
-        start = "feared_events" if state["feared_event_count"] == 0 else None
-        if start is None and state["roto_count"] == 0:
-            start = "rotos"
-        if start is None and state["strategic_scenario_count"] == 0:
-            start = "strategic_scenarios"
-        if start is None and state["attack_path_count"] == 0:
-            start = "attack_paths"
-        if start is None and state["operational_scenario_count"] == 0:
-            start = "operational_scenarios"
 
         if start:
             yield from self._run_workshops(ctx, study, created, start_from=start)

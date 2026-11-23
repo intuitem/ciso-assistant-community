@@ -245,11 +245,12 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` or `urn` | **Yes** | Used to match requirements |
 | `assessable` | No | Skips non-assessable items |
 | `compliance_result` | No | Maps to `result` |
+| `extended_result` | No | Maps to `extended_result` |
 | `requirement_progress` | No | Maps to `status` |
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |
 | `documentation_score` | No | |
-| `score` | No | Single-score mode (when no documentation_score) |
+| `score` | No | Same as `implementation_score`, read when that cell is blank. Either score can be filled without the other |
 | `Q: <question text>` | No | Flattened questionnaire answers (see below) |
 
 **Dynamic Questionnaire Support (Q: columns):**

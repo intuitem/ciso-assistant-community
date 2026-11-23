@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatActorName } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatActorName } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Approver {
 		id: string;

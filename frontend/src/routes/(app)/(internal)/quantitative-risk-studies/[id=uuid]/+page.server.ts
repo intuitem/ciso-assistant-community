@@ -1,9 +1,9 @@
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
 import { fail, type Actions } from '@sveltejs/kit';
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { nestedDeleteFormAction } from '#lib/utils/actions.js';
 
 export const load: PageServerLoad = async (event) => {
 	// Keep your existing loadDetail logic

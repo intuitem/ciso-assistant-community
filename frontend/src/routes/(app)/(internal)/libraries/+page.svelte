@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import UploadLibraryModal from '$lib/components/Modals/UploadLibraryModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import UploadLibraryModal from '#lib/components/Modals/UploadLibraryModal.svelte';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { navData } from '$lib/components/SideBar/navData';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { navData } from '#lib/components/SideBar/navData.js';
 
 	let { data } = $props();
 

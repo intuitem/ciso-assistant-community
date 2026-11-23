@@ -1,20 +1,24 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
+import {
+	defaultDeleteFormAction,
+	defaultWriteFormAction,
+	REDIRECT_AFTER_CREATE
+} from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import {
 	getModelInfo,
 	urlParamModelForeignKeyFields,
 	urlParamModelSelectFields
-} from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo, urlModel } from '$lib/utils/types';
+} from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo, urlModel } from '#lib/utils/types.js';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '$lib/components/ModelTable/types';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -62,12 +66,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'ebios-rm',
-			action: 'create'
-			// redirectToWrittenObject: redirectToWrittenObject
+			action: 'create',
+			redirectToWrittenObject: REDIRECT_AFTER_CREATE.has('ebios-rm')
 		});
 	},
 	delete: async (event) => {

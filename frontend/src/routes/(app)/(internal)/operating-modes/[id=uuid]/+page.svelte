@@ -1,29 +1,29 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import OperatingModeGraph from './graph/OperatingModeGraph.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { createModalCache } from '$lib/utils/stores';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -54,7 +54,7 @@
 	}
 
 	function handleSaved() {
-		invalidateAll();
+		refreshAll();
 	}
 
 	function handleCreateEA() {

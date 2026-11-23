@@ -2,12 +2,12 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -84,33 +84,36 @@
 		bind:cachedValue={formDataCache['link']}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	translateOptions={false}
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	allowUserOptions="append"
-/>
+{#if !page.data?.user?.is_third_party}
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		translateOptions={false}
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="actors"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="owner"
-	cacheLock={cacheLocks['owner']}
-	bind:cachedValue={formDataCache['owner']}
-	label={m.owner()}
-/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="actors"
+		lazy
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
+	/>
+{/if}
 
 <!-- Evidence status is an auditor-side review decision: respondents deposit
 	 evidence but must not set/change its status (e.g. self-approve). -->

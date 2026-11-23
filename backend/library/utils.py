@@ -9,6 +9,10 @@ from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregatio
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
+    AuditGuide,
+    AuditPreparationRole,
+    AuditPreparationSession,
+    AuditPreparationSetAside,
     Framework,
     QuickForm,
     QuickFormPage,
@@ -158,6 +162,8 @@ class RequirementNodeImporter:
                 ref_id=self.requirement_data.get("ref_id"),
                 annotation=self.requirement_data.get("annotation"),
                 typical_evidence=self.requirement_data.get("typical_evidence"),
+                evidence_required=self.requirement_data.get("evidence_required")
+                is True,
                 provider=framework_object.provider,
                 order_id=self.index,
                 name=self.requirement_data.get("name"),
@@ -445,6 +451,10 @@ class FrameworkImporter:
             "score_calculation_method", "average"
         )
         Framework.validate_score_calculation_method(score_calculation_method)
+        result_aggregation = self.framework_data.get(
+            "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+        )
+        Framework.validate_result_aggregation(result_aggregation)
         Framework.validate_scoring_defaults(
             min_score=min_score,
             max_score=max_score,
@@ -486,6 +496,7 @@ class FrameworkImporter:
                 annotation=self.framework_data.get("annotation"),
                 min_score=min_score,
                 max_score=max_score,
+                result_aggregation=result_aggregation,
                 scores_definition=scores_definition,
                 implementation_groups_definition=self.framework_data.get(
                     "implementation_groups_definition"
@@ -534,7 +545,9 @@ class QuickFormPageImporter:
         aggregation = self.page_data.get("aggregation")
         if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
             return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
-        return None
+        from core.quick_form_facts import facts_error
+
+        return facts_error([self.page_data])
 
     def import_page(self, quick_form: QuickForm):
         # update_or_create scoped to the form: create on fresh loads, in-place
@@ -554,6 +567,7 @@ class QuickFormPageImporter:
                 aggregation=normalize_page_aggregation(
                     self.page_data.get("aggregation")
                 ),
+                facts=self.page_data.get("facts") or [],
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -569,10 +583,19 @@ class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, quick_form_data: dict):
-        self.quick_form_data = quick_form_data
+        from core.quick_form_ratings import expand_scales, scales_error
+
+        # Checked first: expanding malformed scales would raise instead of answering.
+        self._scales_error = scales_error(quick_form_data)
+        # Questions on a scale get its levels as choices before any page is read.
+        self.quick_form_data = (
+            quick_form_data if self._scales_error else expand_scales(quick_form_data)
+        )
         self._pages: List[QuickFormPageImporter] = []
 
     def init(self) -> Union[str, None]:
+        if self._scales_error:
+            return f"[QUICK_FORM_ERROR] {self._scales_error}"
         if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
         pages = self.quick_form_data.get("pages")
@@ -598,6 +621,11 @@ class QuickFormImporter:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
+        if any(
+            isinstance(rule, dict) and rule.get("kind") == "weakest_link"
+            for rule in self.quick_form_data.get("outcomes_definition") or []
+        ):
+            return "[QUICK_FORM_ERROR] A weakest-link rule applies to frameworks, not quick forms"
         from core.quick_form_apply import validate_on_accept_document
 
         if errors := validate_on_accept_document(self.quick_form_data):
@@ -638,6 +666,7 @@ class QuickFormImporter:
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),
+                scales_definition=self.quick_form_data.get("scales_definition") or [],
                 urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
                 provider=library_object.provider,
                 locale=library_object.locale,
@@ -645,6 +674,10 @@ class QuickFormImporter:
                 translations=self.quick_form_data.get("translations", {}),
             ),
         )
+        if created and self.quick_form_data.get("always_review"):
+            # First load only: re-imports keep what the instance chose.
+            quick_form.always_review = True
+            quick_form.save(update_fields=["always_review"])
         for page in self._pages:
             page.import_page(quick_form)
         if not created:
@@ -824,18 +857,171 @@ class ReferenceControlImporter:
         )
 
 
+class AuditGuideImporter:
+    """An auditor's guide to a framework; format in the product docs, "Audit guides"."""
+
+    REQUIRED_FIELDS = {"ref_id", "urn", "framework", "entries"}
+    KINDS = {"document", "record", "technical", "observation"}
+    # The preparation stores these ids as they are written in the guide: one
+    # that does not fit its column loads, then can never be paired or assigned.
+    MAX_ENTRY = AuditPreparationSetAside._meta.get_field("entry").max_length
+    MAX_ITEM_ID = AuditPreparationSetAside._meta.get_field("request").max_length
+    MAX_ROLE = AuditPreparationRole._meta.get_field("role").max_length
+    MAX_SESSION_ID = AuditPreparationSession._meta.get_field("session").max_length
+
+    def __init__(self, guide_data: dict):
+        self.guide_data = guide_data
+
+    @staticmethod
+    def _is_text(value, max_length: int) -> bool:
+        return isinstance(value, str) and 0 < len(value) <= max_length
+
+    def is_valid(self) -> Union[str, None]:
+        from core.auditor_preread import normalize_key
+
+        data = self.guide_data
+        if not isinstance(data, dict):
+            return "an audit guide must be a mapping"
+        if missing_fields := self.REQUIRED_FIELDS - set(data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        if not all(isinstance(data[f], str) and data[f] for f in ("urn", "framework")):
+            return "urn and framework must be URNs"
+        entries = data["entries"]
+        if not isinstance(entries, dict):
+            return "entries must be a mapping keyed by requirement number"
+        keys = [normalize_key(k) for k in entries]
+        if len(set(keys)) != len(keys):
+            return "two entries are keyed by the same requirement number"
+        if not all(self._is_text(k, self.MAX_ENTRY) for k in keys):
+            return "an entry is keyed by a requirement number, of at most {} characters".format(
+                self.MAX_ENTRY
+            )
+        for key, entry in entries.items():
+            if not isinstance(entry, dict):
+                return "entry {} must be a mapping".format(key)
+            interviewees = entry.get("interviewees") or []
+            if not isinstance(interviewees, list) or not all(
+                self._is_text(who, self.MAX_ROLE) for who in interviewees
+            ):
+                return "entry {}: interviewees must be a list of role names, of at most {} characters each".format(
+                    key, self.MAX_ROLE
+                )
+            people = set(interviewees)
+            ids = []
+            for part in ("questions", "requests", "pitfalls", "sampling"):
+                items = entry.get(part) or []
+                if not isinstance(items, list) or not all(
+                    isinstance(item, dict) for item in items
+                ):
+                    return "entry {}: {} must be a list of mappings".format(key, part)
+                ids += [item.get("id") for item in items]
+            # Translations key every item of an entry in one flat mapping, and
+            # stored keys are text: a number would never be found again.
+            if not all(self._is_text(i, self.MAX_ITEM_ID) for i in ids) or len(
+                set(ids)
+            ) != len(ids):
+                return "entry {}: every item needs an id (text, at most {} characters), unique across the entry".format(
+                    key, self.MAX_ITEM_ID
+                )
+            for q in entry.get("questions") or []:
+                if q.get("stage") not in (1, 2) or not q.get("text"):
+                    return "entry {}: question {} needs a stage (1 or 2) and a text".format(
+                        key, q["id"]
+                    )
+                if not set(q.get("who") or []) <= people:
+                    return "entry {}: question {} names someone who is not an interviewee".format(
+                        key, q["id"]
+                    )
+            for r in entry.get("requests") or []:
+                if r.get("kind") not in self.KINDS or not r.get("label"):
+                    return (
+                        "entry {}: request {} needs a label and a kind among {}".format(
+                            key, r["id"], ", ".join(sorted(self.KINDS))
+                        )
+                    )
+                fresh = r.get("fresh_days")
+                if fresh is not None and (
+                    not isinstance(fresh, int) or isinstance(fresh, bool) or fresh <= 0
+                ):
+                    return "entry {}: request {}: fresh_days must be a positive number of days".format(
+                        key, r["id"]
+                    )
+                if not isinstance(r.get("reference_control", ""), str):
+                    return (
+                        "entry {}: request {}: reference_control must be a URN".format(
+                            key, r["id"]
+                        )
+                    )
+        sessions = data.get("sessions") or []
+        if not isinstance(sessions, list) or any(
+            not isinstance(x, dict)
+            or not self._is_text(x.get("id"), self.MAX_SESSION_ID)
+            or not isinstance(x.get("members"), list)
+            for x in sessions
+        ):
+            return "every session needs an id (text, at most {} characters) and a members list".format(
+                self.MAX_SESSION_ID
+            )
+        translations = data.get("translations") or {}
+        if not isinstance(translations, dict) or any(
+            not isinstance(t, dict)
+            or not isinstance(t.get("entries") or {}, dict)
+            or not isinstance(t.get("sessions") or {}, dict)
+            or not all(
+                isinstance(v, dict)
+                and all(isinstance(x, (str, dict)) for x in v.values())
+                for v in (t.get("entries") or {}).values()
+            )
+            or not all(isinstance(v, dict) for v in (t.get("sessions") or {}).values())
+            for t in translations.values()
+        ):
+            return (
+                "translations must map each locale to texts keyed by entry and item id"
+            )
+        return None
+
+    def import_audit_guide(self, library_object: LoadedLibrary):
+        AuditGuide.objects.create(
+            library=library_object,
+            urn=self.guide_data["urn"].lower(),
+            provider=library_object.provider,
+            locale=library_object.locale,
+            default_locale=library_object.default_locale,
+            **AuditGuide.fields_from(self.guide_data),
+        )
+
+
 class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
 
-    def __init__(self, metric_definition_data: dict):
+    def __init__(self, metric_definition_data: dict, shipped: dict | None = None):
         self.metric_definition_data = metric_definition_data
+        # Every definition of the library by URN: a formula may read one that
+        # is imported after it.
+        self.shipped = shipped or {}
 
     def is_valid(self) -> Union[str, None]:
+        from metrology.derived import validate_formula
+
         if missing_fields := self.REQUIRED_FIELDS - set(
             self.metric_definition_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        # A shipped formula is held to the same checks as one typed in: the
+        # sampler would otherwise fail on it at every tick.
+        formula_errors = validate_formula(
+            self.metric_definition_data.get("datasets"),
+            self.metric_definition_data.get("expression") or "",
+            self.metric_definition_data.get("inputs"),
+            shipped=self.shipped,
+            own_urn=self.metric_definition_data.get("urn"),
+        )
+        if formula_errors:
+            return "Invalid formula: {}".format(
+                "; ".join(message for _code, message in formula_errors)
+            )
 
         if (category := self.metric_definition_data.get("category")) is not None:
             if category not in MetricDefinitionImporter.CATEGORIES:
@@ -867,8 +1053,13 @@ class MetricDefinitionImporter:
             category=self.metric_definition_data.get("category", "quantitative"),
             unit=unit,
             choices_definition=self.metric_definition_data.get("choices_definition"),
-            higher_is_better=self.metric_definition_data.get("higher_is_better", True),
+            higher_is_better=self.metric_definition_data.get("higher_is_better"),
             default_target=self.metric_definition_data.get("default_target"),
+            # A formula ships with its definition. Inputs name other
+            # definitions by URN, resolved when an instance computes.
+            datasets=self.metric_definition_data.get("datasets"),
+            expression=self.metric_definition_data.get("expression") or "",
+            inputs=self.metric_definition_data.get("inputs"),
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -970,6 +1161,7 @@ class LibraryImporter:
         "requirement_mapping_sets",
         "preset",
         "workflows",
+        "audit_guides",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -990,6 +1182,7 @@ class LibraryImporter:
         self._risk_matrices = []
         self._requirement_mapping_sets = []
         self._workflows = []
+        self._audit_guides = []
 
     def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
         """Structural validation of workflow objects; actual
@@ -1096,15 +1289,28 @@ class LibraryImporter:
     ) -> Union[str, None]:
         metric_definition_importers = []
         import_errors = []
+        shipped = {
+            str(data["urn"]).lower(): data
+            for data in metric_definitions
+            if isinstance(data, dict) and data.get("urn")
+        }
+        seen_urns = set()
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
-                metric_definition_data
+                metric_definition_data, shipped
             )
             metric_definition_importers.append(metric_definition_importer)
             if (
                 metric_definition_error := metric_definition_importer.is_valid()
             ) is not None:
                 import_errors.append((index, metric_definition_error))
+                continue
+            urn = str(metric_definition_data["urn"]).lower()
+            if urn in seen_urns:
+                import_errors.append(
+                    (index, "Duplicate URN (ref_id already used): {}".format(urn))
+                )
+            seen_urns.add(urn)
 
         self._metric_definitions = metric_definition_importers
 
@@ -1341,6 +1547,24 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
+        if "audit_guides" in library_objects:
+            if not isinstance(library_objects["audit_guides"], list):
+                return "[AUDIT_GUIDE_ERROR] audit_guides must be a list"
+            importers = [AuditGuideImporter(g) for g in library_objects["audit_guides"]]
+            self._audit_guides = importers
+            urns = [
+                str(g.get("urn")).lower()
+                for g in library_objects["audit_guides"]
+                if isinstance(g, dict)
+            ]
+            if len(set(urns)) != len(urns):
+                return "[AUDIT_GUIDE_ERROR] two audit guides share a URN"
+            for index, importer in enumerate(importers):
+                if (error := importer.is_valid()) is not None:
+                    return "[AUDIT_GUIDE_ERROR] audit guide {}: {}".format(
+                        index + 1, error
+                    )
+
         if "metric_definitions" in library_objects:
             metric_definition_data = library_objects["metric_definitions"]
             if (
@@ -1442,6 +1666,9 @@ class LibraryImporter:
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        for audit_guide in self._audit_guides:
+            audit_guide.import_audit_guide(library_object)
 
         # after reference controls: techniques link to them and to parents
         for technique in self._techniques:

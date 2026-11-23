@@ -1,14 +1,16 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 const TIERS_ENDPOINT = `${BASE_API_URL}/tiers/`;
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [res, fedByRes] = await Promise.all([
+	const [res, fedByRes, fedBySolutionsRes, propagationRes] = await Promise.all([
 		fetch(`${TIERS_ENDPOINT}?ordering=-rank`),
-		fetch(`${TIERS_ENDPOINT}fed-by/`)
+		fetch(`${TIERS_ENDPOINT}fed-by/`),
+		fetch(`${TIERS_ENDPOINT}fed-by/?target=solution.tier`),
+		fetch(`${TIERS_ENDPOINT}propagation/`)
 	]);
 	if (!res.ok) {
 		error(res.status, 'Error loading tiers');
@@ -17,6 +19,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	return {
 		tiers: data.results ?? data,
 		fedBy: fedByRes.ok ? await fedByRes.json() : [],
+		fedBySolutions: fedBySolutionsRes.ok ? await fedBySolutionsRes.json() : [],
+		propagation: propagationRes.ok ? await propagationRes.json() : { mode: 'off', below_floor: 0 },
 		// Same words as the menu and the breadcrumb.
 		title: m.criticality()
 	};
@@ -62,6 +66,13 @@ export const actions: Actions = {
 			return fail(res.status, { error: body });
 		}
 		return { ok: true };
+	},
+	propagation: async ({ request, fetch }) => {
+		const form = await request.formData();
+		return forward(fetch, `${TIERS_ENDPOINT}propagation/`, {
+			method: 'PUT',
+			body: JSON.stringify({ mode: form.get('mode') })
+		});
 	},
 	reorder: async ({ request, fetch }) => {
 		const form = await request.formData();

@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${deadline_count} wettelijke meldingstermijn(en)"
+body: |
+  Hallo,
+
+  De volgende wettelijke meldingstermijnen vragen uw aandacht:
+
+  ${deadline_list}
+
+  Zodra een melding aan de autoriteit is verzonden, registreer de datum op het incident of het datalek: [Open CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

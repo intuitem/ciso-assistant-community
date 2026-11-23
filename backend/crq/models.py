@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import ETADueDateMixin, NameDescriptionMixin
+from core.base_models import AutoRefIdMixin, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
     Actor,
     AppliedControl,
@@ -24,7 +24,13 @@ from .utils import (
 from auditlog.registry import auditlog
 
 
-class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+class QuantitativeRiskStudy(
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    ETADueDateMixin,
+    FolderMixin,
+    FilteringLabelMixin,
+):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -34,6 +40,9 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     class Distribution_model(models.TextChoices):
         LOGNORMAL_CI90 = "lognormal_ci90", _("Lognormal - CI 90")
+
+    auto_ref_id_prefix = "QRS"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     status = models.CharField(
@@ -419,7 +428,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
 
-class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
+class QuantitativeRiskScenario(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     quantitative_risk_study = models.ForeignKey(
         QuantitativeRiskStudy, on_delete=models.CASCADE, related_name="risk_scenarios"
     )
@@ -488,18 +497,29 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    auto_ref_id_prefix = "QR"
+    auto_ref_id_parent = "quantitative_risk_study"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.quantitative_risk_study, prefix)
+
     ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=True)
 
     @classmethod
-    def get_default_ref_id(cls, quantitative_risk_study):
+    def get_default_ref_id(cls, quantitative_risk_study, prefix: str | None = None):
         """Return a unique reference ID for a given quantitative risk study."""
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         scenarios_ref_ids = [
             x.ref_id for x in quantitative_risk_study.risk_scenarios.all()
         ]
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"QR.{i:02d}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_scenarios + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in scenarios_ref_ids if r}
+        )
 
     @property
     def inherent_ale(self):
@@ -598,7 +618,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
 
 
 class QuantitativeRiskHypothesis(
-    NameDescriptionMixin, FilteringLabelMixin, FolderMixin
+    AutoRefIdMixin, NameDescriptionMixin, FilteringLabelMixin, FolderMixin
 ):
     RISK_STAGE_OPTIONS = [
         ("inherent", _("Inherent")),
@@ -633,6 +653,12 @@ class QuantitativeRiskHypothesis(
         verbose_name=_("risk stage"),
     )
 
+    auto_ref_id_prefix = "H"
+    auto_ref_id_parent = "quantitative_risk_scenario"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.quantitative_risk_scenario, prefix)
+
     ref_id = models.CharField(max_length=100, blank=True)
     parameters = models.JSONField(blank=True, null=True, default=dict)
     simulation_data = models.JSONField(blank=True, null=True, default=dict)
@@ -645,14 +671,19 @@ class QuantitativeRiskHypothesis(
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
 
     @classmethod
-    def get_default_ref_id(cls, quantitative_risk_scenario):
+    def get_default_ref_id(cls, quantitative_risk_scenario, prefix: str | None = None):
         """Return a unique reference ID for a given quantitative risk scenario."""
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         hypotheses_ref_ids = [
             x.ref_id for x in quantitative_risk_scenario.hypotheses.all()
         ]
         nb_hypotheses = len(hypotheses_ref_ids) + 1
-        candidates = [f"H.{i:02d}" for i in range(1, nb_hypotheses + 1)]
-        return next(x for x in candidates if x not in hypotheses_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_hypotheses + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in hypotheses_ref_ids if r}
+        )
 
     class Meta:
         verbose_name = _("Quantitative Risk Hypothesis")

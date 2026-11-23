@@ -3,14 +3,32 @@ import re
 import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.utils.translation import get_language
 
 _PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
+_URL_REF_RE = re.compile(r"\{\{ref:([A-Za-z0-9_]+)\}\}")
 
 # Reserved object_refs key for the perimeter the executor creates itself; it is
 # not a scaffolded item, so it has no author-supplied ref to track it by.
 _DEFAULT_PERIMETER_REF = "__default_perimeter__"
+
+
+def _resolve_url_refs(url: str | None, object_refs: dict) -> str | None:
+    """Substitute {{ref:<name>}} in a step's target_url (e.g. an audit id in the
+    path); a URL with an unresolved ref is not linkable, so None."""
+    if not url or "{{ref:" not in url:
+        return url
+    unresolved = False
+
+    def _sub(match):
+        nonlocal unresolved
+        resolved = object_refs.get(match.group(1))
+        unresolved = unresolved or not resolved
+        return resolved or ""
+
+    out = _URL_REF_RE.sub(_sub, url)
+    return None if unresolved else out
 
 
 def _resolve_param_refs(params: dict | None, object_refs: dict) -> dict | None:
@@ -59,6 +77,7 @@ from core.models import (
     Asset,
     Threat,
     ComplianceAssessment,
+    RequirementAssessment,
     FindingsAssessment,
     TaskTemplate,
     OrganisationObjective,
@@ -267,7 +286,9 @@ class PresetExecutor:
                 step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
                 step.target_ref = step_target_ref
-                step.target_url = step_def.get("target_url")
+                step.target_url = _resolve_url_refs(
+                    step_def.get("target_url"), object_refs
+                )
                 step.target_params = resolved_params
                 to_update.append(step)
             else:
@@ -280,7 +301,9 @@ class PresetExecutor:
                     translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
                     target_ref=step_target_ref,
-                    target_url=step_def.get("target_url"),
+                    target_url=_resolve_url_refs(
+                        step_def.get("target_url"), object_refs
+                    ),
                     target_params=resolved_params,
                     status=PresetJourneyStep.Status.NOT_STARTED,
                 )
@@ -353,10 +376,14 @@ class PresetExecutor:
         for flag in flags_config.get("disable", []):
             value[flag] = False
 
+        from global_settings.utils import (
+            apply_flag_requirements,
+            clear_feature_flags_cache,
+        )
+
+        apply_flag_requirements(value, set(flags_config.get("disable", [])))
         settings_obj.value = value
         settings_obj.save()
-
-        from global_settings.utils import clear_feature_flags_cache
 
         clear_feature_flags_cache()
 
@@ -419,7 +446,14 @@ class PresetExecutor:
         "responsibility_matrix": ResponsibilityMatrix,
     }
 
-    def _find_existing(self, folder: Folder, obj_type: str, item: dict, name: str):
+    def _find_existing(
+        self,
+        folder: Folder,
+        obj_type: str,
+        item: dict,
+        name: str,
+        object_refs: dict | None = None,
+    ):
         """Return a compatible existing object for this preset item, if any.
 
         Uses type-specific filters beyond just name to avoid false matches
@@ -441,6 +475,12 @@ class PresetExecutor:
             queryset = queryset.filter(risk_matrix=matrix)
         elif obj_type == "findings_assessment":
             queryset = queryset.filter(category=item.get("category", "pentest"))
+            # Never take over another audit's findings.
+            if audit_id := (object_refs or {}).get(item.get("audit") or ""):
+                queryset = queryset.filter(
+                    Q(compliance_assessment__isnull=True)
+                    | Q(compliance_assessment_id=audit_id)
+                )
         elif obj_type == "metric_instance":
             metric_def_urn = item.get("metric_definition")
             metric_def = (
@@ -478,6 +518,21 @@ class PresetExecutor:
             risk_assessment_id=risk_assessment_id, name=name
         ).first()
 
+    @staticmethod
+    def _link_requirements(task_template, item: dict, object_refs: dict) -> None:
+        """Link a task to the requirements it serves in a scaffolded audit
+        (`audit`: its ref, `requirements`: ref_ids), so the evidence its
+        occurrences file counts for them. Idempotent."""
+        audit_id = object_refs.get(item.get("audit") or "")
+        if not audit_id or not item.get("requirements"):
+            return
+        task_template.requirement_assessments.add(
+            *RequirementAssessment.objects.filter(
+                compliance_assessment_id=audit_id,
+                requirement__ref_id__in=item["requirements"],
+            )
+        )
+
     def _backfill_side_effects(
         self, obj_type: str, obj, item: dict, object_refs: dict
     ) -> None:
@@ -497,6 +552,17 @@ class PresetExecutor:
                 for ra in assessments:
                     ra.create_applied_controls_from_suggestions()
 
+        elif obj_type == "task_template":
+            self._link_requirements(obj, item, object_refs)
+
+        elif obj_type == "findings_assessment":
+            audit_id = object_refs.get(item.get("audit") or "")
+            if audit_id and not obj.compliance_assessment_id:
+                # Claimed only while still free and unlocked: never overwrites.
+                FindingsAssessment.objects.filter(
+                    id=obj.id, compliance_assessment__isnull=True, is_locked=False
+                ).update(compliance_assessment_id=audit_id)
+
         elif obj_type == "risk_scenario":
             asset_refs = item.get("asset_refs", [])
             asset_ids = [object_refs[r] for r in asset_refs if r in object_refs]
@@ -513,6 +579,16 @@ class PresetExecutor:
         existing_refs: dict | None = None,
     ) -> dict:
         scaffolded = self._preset.scaffolded_objects or []
+        # An item tied to an audit must come after it: before, the audit is not
+        # resolved yet and another audit's object could be reused.
+        listed = set()
+        for item in scaffolded:
+            if item.get("audit") and item["audit"] not in listed:
+                raise ValidationError(
+                    f"Preset item {item.get('ref') or item.get('name')!r} refers to "
+                    f"audit {item['audit']!r}, which must be listed before it."
+                )
+            listed.add(item.get("ref"))
         object_refs = {}
         deferred_scenarios = []
         context = {"request": self._request} if self._request else {}
@@ -530,7 +606,7 @@ class PresetExecutor:
                 continue
 
             # Reuse existing compatible object if found in this folder
-            existing = self._find_existing(folder, obj_type, item, name)
+            existing = self._find_existing(folder, obj_type, item, name, object_refs)
             if existing:
                 logger.info(
                     "Reusing existing object",
@@ -601,6 +677,7 @@ class PresetExecutor:
                 serializer = TaskTemplateWriteSerializer(data=data, context=context)
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
+                self._link_requirements(obj, item, object_refs)
 
             elif obj_type == "organisation_objective":
                 data = {
@@ -658,6 +735,8 @@ class PresetExecutor:
                     "name": name,
                     "category": item.get("category", "pentest"),
                 }
+                if audit_id := object_refs.get(item.get("audit") or ""):
+                    data["compliance_assessment"] = audit_id
                 serializer = FindingsAssessmentWriteSerializer(
                     data=data, context=context
                 )
@@ -918,7 +997,7 @@ class PresetExecutor:
                 translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
                 target_ref=step_target_ref,
-                target_url=step_def.get("target_url"),
+                target_url=_resolve_url_refs(step_def.get("target_url"), object_refs),
                 target_params=_resolve_param_refs(
                     step_def.get("target_params"), object_refs
                 ),

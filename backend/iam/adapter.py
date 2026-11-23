@@ -10,11 +10,15 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
-from rest_framework.authtoken.serializers import AuthTokenSerializer
+from django.utils.translation import gettext_lazy as _
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
+
+from core.custom_middleware import resolve_client_ip
+from iam.login_refusals import record_refused_login
 
 import structlog
 
@@ -23,6 +27,10 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
+
+# allauth puts the IdP's raw token endpoint response in the exception message,
+# so cap what we log of it.
+SSO_ERROR_MESSAGE_MAX_LENGTH = 500
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -39,24 +47,29 @@ class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return False
 
-    def authenticate(self, request, **credentials):
-        try:
-            serializer = AuthTokenSerializer(
-                data={
-                    "username": credentials.get("email"),
-                    "password": credentials.get("password"),
-                }
-            )
-            serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            if not user.is_local:
-                raise NotImplementedError(
-                    "This user is not allowed to use local login."
-                )
+    def get_client_ip(self, request):
+        client_ip = resolve_client_ip(request)
+        if client_ip is not None:
+            return client_ip
+        else:
+            return super().get_client_ip(request)
 
-            return user
-        except Exception:
-            return None
+    def pre_authenticate(self, request, **credentials):
+        try:
+            super().pre_authenticate(request, **credentials)
+        except ValidationError:  # refused by the failed-login rate limit
+            record_refused_login(request, credentials)
+            raise
+
+    def reauthenticate(self, user, password):
+        from allauth.mfa.utils import is_mfa_enabled
+
+        if is_mfa_enabled(user):
+            raise ValidationError(
+                _("Confirm with your second factor instead of your password."),
+                code="mfa_required",
+            )
+        return super().reauthenticate(user, password)
 
 
 class MFAAdapter(DefaultMFAAdapter):
@@ -66,7 +79,7 @@ class MFAAdapter(DefaultMFAAdapter):
 
         # Skip local MFA challenge for SSO logins — the IdP already
         # authenticated the user.
-        records = get_authentication_records(context.request)
+        records = get_authentication_records(context.request, user)
         if any(r.get("method") == "socialaccount" for r in records):
             return False
 
@@ -130,6 +143,32 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                     values.extend(v for v in value if isinstance(v, str) and v)
         return values
 
+    def on_authentication_error(
+        self, request, provider, error=None, exception=None, extra_context=None
+    ):
+        cause = exception.__cause__ if exception else None
+        logger.error(
+            "SSO authentication error",
+            provider=getattr(provider, "id", provider),
+            error=error,
+            # allauth passes "state_id" only when it found no stashed state for
+            # the callback (lost session cookie, expired or replayed callback).
+            state_lookup_failed="state_id" in (extra_context or {}),
+            error_type=type(exception).__name__ if exception else None,
+            error_message=str(exception)[:SSO_ERROR_MESSAGE_MAX_LENGTH]
+            if exception
+            else None,
+            cause_type=type(cause).__name__ if cause else None,
+            cause_message=str(cause)[:SSO_ERROR_MESSAGE_MAX_LENGTH] if cause else None,
+        )
+        return super().on_authentication_error(
+            request,
+            provider,
+            error=error,
+            exception=exception,
+            extra_context=extra_context,
+        )
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -176,6 +215,18 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
+        if any(
+            source.get("email_verified") in (False, "false")
+            for source in (extra, extra.get("userinfo", {}), extra.get("id_token", {}))
+            if isinstance(source, dict)
+        ):
+            logger.error(
+                "pre_social_login: IdP reports email as unverified",
+                provider=sociallogin.account.provider,
+            )
+            return Response(
+                {"message": "Email not verified."}, status=HTTP_401_UNAUTHORIZED
+            )
         logger.debug(
             "pre_social_login: resolved email from IdP",
             idp_email=email_address,
@@ -213,6 +264,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 provider=sociallogin.account.provider,
                 user_id=str(user.id),
             )
+            if not user.is_active:
+                logger.error(
+                    "pre_social_login: user account is inactive",
+                    provider=sociallogin.account.provider,
+                    user_id=str(user.id),
+                )
         except User.DoesNotExist:
             if not jit_provisioning_active:
                 logger.error(

@@ -15,7 +15,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from core.models import AppliedControl
+from core.models import AppliedControl, Finding, FindingsAssessment
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from automation.workflows.engine import run_identity, start_instance
 from automation.workflows.graph import save_graph
@@ -619,6 +619,112 @@ class TestAutomationEntryPoints:
         )
 
 
+def dispatch_in(folder, event_key, **fields):
+    from automation.workflows.events import dispatch_internal_event
+
+    payload = {"event_key": event_key, "folder_id": str(folder.id), **fields}
+    return dispatch_internal_event(event_key, payload, folder.id)
+
+
+@pytest.mark.django_db
+class TestEventVisibility:
+    """The run receives the event's payload, so an event only reaches a run
+    whose identity could read its object: seeing the folder is not enough."""
+
+    def test_object_the_identity_cannot_view_is_not_delivered(self, no_run):
+        domain = make_domain("EvtHidden")
+        control = AppliedControl.objects.create(name="Hidden", folder=domain)
+        runner = User.objects.create_user(email="evthidden@authz.test")
+        grant(runner, domain, ["view_asset"])
+        build_event_workflow("EvtHidden", domain, runner)
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert started == []
+
+    def test_object_the_identity_can_view_is_delivered(self, no_run):
+        domain = make_domain("EvtVisible")
+        control = AppliedControl.objects.create(name="Visible", folder=domain)
+        runner = User.objects.create_user(email="evtvisible@authz.test")
+        grant(runner, domain, ["view_appliedcontrol"])
+        build_event_workflow("EvtVisible", domain, runner)
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert len(started) == 1
+
+    def test_object_in_a_subfolder_outside_a_non_recursive_grant(self, no_run):
+        parent = make_domain("EvtParent")
+        child = Folder.objects.create(
+            name="EvtChild",
+            parent_folder=parent,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        control = AppliedControl.objects.create(name="In child", folder=child)
+        runner = User.objects.create_user(email="evtparent@authz.test")
+        grant(runner, parent, ["view_appliedcontrol"], recursive=False)
+        build_event_workflow("EvtParent", parent, runner)
+
+        started = dispatch_in(
+            child,
+            "appliedcontrol.updated",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(control.id),
+        )
+        assert started == []
+
+    def test_deleted_object_needs_view_permission_on_its_folder(self, no_run):
+        domain = make_domain("EvtDeleted")
+        viewer = User.objects.create_user(email="evtdelviewer@authz.test")
+        grant(viewer, domain, ["view_appliedcontrol"])
+        blind = User.objects.create_user(email="evtdelblind@authz.test")
+        grant(blind, domain, ["view_asset"])
+        seen, _ = build_event_workflow(
+            "EvtDelSeen", domain, viewer, event_key="appliedcontrol.deleted"
+        )
+        build_event_workflow(
+            "EvtDelBlind", domain, blind, event_key="appliedcontrol.deleted"
+        )
+
+        started = dispatch_in(
+            domain,
+            "appliedcontrol.deleted",
+            model="appliedcontrol",
+            app_label="core",
+            object_id=str(uuid.uuid4()),
+        )
+        assert [instance.workflow_id for instance in started] == [seen.id]
+
+    def test_custom_event_names_its_model_in_the_key(self, no_run):
+        domain = make_domain("EvtCustom")
+        viewer = User.objects.create_user(email="evtcustomviewer@authz.test")
+        grant(viewer, domain, ["view_quickformresponse"])
+        blind = User.objects.create_user(email="evtcustomblind@authz.test")
+        grant(blind, domain, ["view_asset"])
+        seen, _ = build_event_workflow(
+            "EvtCustomSeen", domain, viewer, event_key="quickformresponse.submitted"
+        )
+        build_event_workflow(
+            "EvtCustomBlind", domain, blind, event_key="quickformresponse.submitted"
+        )
+
+        started = dispatch_in(
+            domain, "quickformresponse.submitted", id=str(uuid.uuid4())
+        )
+        assert [instance.workflow_id for instance in started] == [seen.id]
+
+
 @pytest.mark.django_db
 class TestPrivilegeBranches:
     """Every codename required_permissions can emit must be enforced, not just
@@ -1117,3 +1223,73 @@ class TestNonRecursiveReadScope:
         output = instance.node_outputs["fetch_rows"]
         assert output["count"] == 1
         assert [row["name"] for row in output["results"]] == ["parent row"]
+
+
+@pytest.mark.django_db
+class TestReferenceVisibility:
+    """create_object authorizes the add where the row lands. What it links to
+    must also be visible to the run identity, or a known UUID would attach a
+    row the identity cannot see."""
+
+    def _setup(self):
+        parent = make_domain(f"RefParent-{uuid.uuid4()}")
+        enclave = Folder.objects.create(
+            name="RefEnclave",
+            parent_folder=parent,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        # Same name on purpose: an invisible row must not make a name ambiguous.
+        hidden = FindingsAssessment.objects.create(name="Binder", folder=enclave)
+        visible = FindingsAssessment.objects.create(name="Binder", folder=parent)
+        runner = User.objects.create_user(email=f"ref-{uuid.uuid4()}@authz.test")
+        grant(runner, parent, ["add_finding"])
+        # Non-recursive: the enclave's binders are out of the identity's sight,
+        # though inside the workflow's folder scope.
+        grant(runner, parent, ["view_findingsassessment"], recursive=False)
+        return parent, hidden, visible, runner
+
+    def _raise_finding(self, folder, identity, binder):
+        workflow = Workflow.objects.create(name=f"ref-{uuid.uuid4()}", folder=folder)
+        version = WorkflowVersion.objects.create(workflow=workflow)
+        trigger = node("trigger", trigger_config={"type": "manual"})
+        act = node(
+            "action",
+            action_config={
+                "type": "create_object",
+                "model": "finding",
+                "fields": {"name": "Raised", "findings_assessment": binder},
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, act, end],
+                "edges": [edge(trigger, act), edge(act, end)],
+                "variables": [],
+            },
+        )
+        publish_as(version, identity)
+        return start_instance(version)
+
+    def test_unviewable_reference_by_id_reads_as_missing(self):
+        parent, hidden, _visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, str(hidden.id))
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not Finding.objects.filter(findings_assessment=hidden).exists()
+        # Same answer as an unknown id: the error never confirms the row exists.
+        assert any(
+            "does not exist" in (log.message or "") for log in instance.logs.all()
+        )
+
+    def test_viewable_reference_by_id_links(self):
+        parent, _hidden, visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, str(visible.id))
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert Finding.objects.filter(findings_assessment=visible).count() == 1
+
+    def test_unviewable_row_does_not_make_a_name_ambiguous(self):
+        parent, _hidden, visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, "Binder")
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert Finding.objects.filter(findings_assessment=visible).count() == 1

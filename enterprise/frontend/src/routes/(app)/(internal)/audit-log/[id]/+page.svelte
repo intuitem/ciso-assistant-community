@@ -1,6 +1,6 @@
 <script lang="ts">
 	import RecursiveLogEntryChanges from './components/RecursiveLogEntryChanges.svelte';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -16,7 +16,7 @@
 <main class="flex flex-col space-y-4">
 	<DetailView
 		data={detailData}
-		fields={['actor', 'action', 'object_repr', 'timestamp', 'folder']}
+		fields={['actor', 'action', 'object_repr', 'timestamp', 'folder', 'remote_addr']}
 	/>
 
 	{#if Object.keys(data.log.changes ?? {}).length > 0}

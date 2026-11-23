@@ -2,11 +2,11 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { m } from '$paraglide/messages';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { getModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import { page } from '$app/state';
+	import { getModalStore, type ModalComponent } from '#lib/components/Modals/stores.js';
 	import WorkflowPreviewModal from './WorkflowPreviewModal.svelte';
 
 	interface Props {

@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   UV_NO_SYNC=1 \
   UV_PYTHON_DOWNLOADS=never
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
 
 WORKDIR /code
 

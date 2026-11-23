@@ -7,8 +7,9 @@ It checks for mandatory and recommended fields before generating the actual repo
 
 from typing import List, Dict, Any
 from tprm.models import Entity, Contract, Solution, SolutionSubcontractor
-from tprm.dora_export import IDENTIFIER_PRIORITY, get_entity_identifier
+from tprm.dora_export import IDENTIFIER_PRIORITY, ga_location, get_entity_identifier
 from core.models import Asset
+from core.constants import REGION_CODES
 from django.db.models import Q
 import re
 
@@ -49,10 +50,10 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
 
         # Check legal identifiers (mandatory)
         has_legal_identifier = False
-        if provider.legal_identifiers:
+        if provider.legal_identifiers_dict:
             identifier_types = IDENTIFIER_PRIORITY
             for id_type in identifier_types:
-                if provider.legal_identifiers.get(id_type):
+                if provider.legal_identifiers_dict.get(id_type):
                     has_legal_identifier = True
                     break
 
@@ -103,10 +104,10 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
         # Check parent entity has legal identifier (if parent exists)
         if provider.parent_entity:
             parent_has_identifier = False
-            if provider.parent_entity.legal_identifiers:
+            if provider.parent_entity.legal_identifiers_dict:
                 identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
-                    if provider.parent_entity.legal_identifiers.get(id_type):
+                    if provider.parent_entity.legal_identifiers_dict.get(id_type):
                         parent_has_identifier = True
                         break
 
@@ -171,11 +172,11 @@ def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
 
     # Check legal identifiers (mandatory)
     has_legal_identifier = False
-    if entity.legal_identifiers:
+    if entity.legal_identifiers_dict:
         # Check for any of the accepted identifiers: LEI, EUID, VAT, DUNS
         identifier_types = IDENTIFIER_PRIORITY
         for id_type in identifier_types:
-            if entity.legal_identifiers.get(id_type):
+            if entity.legal_identifiers_dict.get(id_type):
                 has_legal_identifier = True
                 break
 
@@ -205,8 +206,8 @@ def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
         )
 
     # Check LEI length if provided (must be exactly 20 characters)
-    if entity.legal_identifiers and entity.legal_identifiers.get("LEI"):
-        lei = entity.legal_identifiers.get("LEI")
+    if entity.legal_identifiers_dict and entity.legal_identifiers_dict.get("LEI"):
+        lei = entity.legal_identifiers_dict.get("LEI")
         if len(lei) != 20:
             results.append(
                 {
@@ -366,10 +367,10 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
     for subsidiary in subsidiaries:
         # Check legal identifiers (mandatory)
         has_legal_identifier = False
-        if subsidiary.legal_identifiers:
+        if subsidiary.legal_identifiers_dict:
             identifier_types = IDENTIFIER_PRIORITY
             for id_type in identifier_types:
-                if subsidiary.legal_identifiers.get(id_type):
+                if subsidiary.legal_identifiers_dict.get(id_type):
                     has_legal_identifier = True
                     break
 
@@ -387,8 +388,10 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
             )
 
         # Check LEI length if provided (must be exactly 20 characters)
-        if subsidiary.legal_identifiers and subsidiary.legal_identifiers.get("LEI"):
-            lei = subsidiary.legal_identifiers.get("LEI")
+        if subsidiary.legal_identifiers_dict and subsidiary.legal_identifiers_dict.get(
+            "LEI"
+        ):
+            lei = subsidiary.legal_identifiers_dict.get("LEI")
             if len(lei) != 20:
                 results.append(
                     {
@@ -503,10 +506,10 @@ def lint_branches(main_entity: Entity) -> List[Dict[str, Any]]:
 
     # Check that main entity (parent of all branches) has a legal identifier
     main_has_identifier = False
-    if main_entity.legal_identifiers:
+    if main_entity.legal_identifiers_dict:
         identifier_types = IDENTIFIER_PRIORITY
         for id_type in identifier_types:
-            if main_entity.legal_identifiers.get(id_type):
+            if main_entity.legal_identifiers_dict.get(id_type):
                 main_has_identifier = True
                 break
 
@@ -842,10 +845,10 @@ def lint_contracts() -> List[Dict[str, Any]]:
         else:
             # Check that beneficiary entity has a legal identifier
             beneficiary_has_identifier = False
-            if contract.beneficiary_entity.legal_identifiers:
+            if contract.beneficiary_entity.legal_identifiers_dict:
                 identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
-                    if contract.beneficiary_entity.legal_identifiers.get(id_type):
+                    if contract.beneficiary_entity.legal_identifiers_dict.get(id_type):
                         beneficiary_has_identifier = True
                         break
 
@@ -982,8 +985,8 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
         else:
             # Check that beneficiary entity has LEI specifically
             beneficiary_has_lei = False
-            if contract.beneficiary_entity.legal_identifiers:
-                if contract.beneficiary_entity.legal_identifiers.get("LEI"):
+            if contract.beneficiary_entity.legal_identifiers_dict:
+                if contract.beneficiary_entity.legal_identifiers_dict.get("LEI"):
                     beneficiary_has_lei = True
 
             if not beneficiary_has_lei:
@@ -1017,10 +1020,10 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
         else:
             # Check that provider entity has a legal identifier
             provider_has_identifier = False
-            if contract.provider_entity.legal_identifiers:
+            if contract.provider_entity.legal_identifiers_dict:
                 identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
-                    if contract.provider_entity.legal_identifiers.get(id_type):
+                    if contract.provider_entity.legal_identifiers_dict.get(id_type):
                         provider_has_identifier = True
                         break
 
@@ -1042,14 +1045,21 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
         # c0060 is a PK/typed dimension in b_02.02 (Nullable=No per the DORA
         # data model) and must not be empty per OneGate protocol §4.6. Solutions
         # without it produce an empty key column that the XBRL filer rejects.
+        # The export keeps one row per b_02.02 primary key; c0170/c0180 of the others are dropped.
+        rows = {}
         for solution in contract.solutions.all():
-            if business_function_asset_ids:
-                has_biz_fn = solution.assets.filter(
-                    id__in=business_function_asset_ids, is_business_function=True
-                ).exists()
-            else:
-                has_biz_fn = solution.assets.filter(is_business_function=True).exists()
-            if not has_biz_fn:
+            functions = solution.assets.filter(
+                id__in=business_function_asset_ids, is_business_function=True
+            )
+            for function in functions:
+                key = (
+                    function.ref_id or str(function.id),
+                    solution.dora_ict_service_type or "",
+                    ga_location(solution.data_location_storage),
+                    ga_location(solution.data_location_processing),
+                )
+                rows.setdefault(key, (function, []))[1].append(solution)
+            if not functions:
                 continue
             if not solution.dora_ict_service_type:
                 results.append(
@@ -1070,6 +1080,41 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                     }
                 )
                 contract_has_error = True
+
+        for function, solutions in rows.values():
+            if (
+                len(
+                    {
+                        (
+                            s.storage_of_data,
+                            s.dora_data_sensitiveness,
+                            s.dora_reliance_level,
+                        )
+                        for s in solutions
+                    }
+                )
+                < 2
+            ):
+                continue
+            names = ", ".join(f"'{s.name}'" for s in solutions)
+            results.append(
+                {
+                    "severity": "warning",
+                    "category": "B_02.02 Contracts",
+                    "message": (
+                        f"Solutions {names} on contract '{contract.name}' produce the "
+                        f"same b_02.02 row for function '{function.name}' (same ICT "
+                        f"service type and data locations as exported) but differ in "
+                        f"storage of data, data sensitiveness or level of reliance. "
+                        f"Only one row will be exported. Set specific countries as "
+                        f"data locations, or align these values."
+                    ),
+                    "field": "dora_data_sensitiveness",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
 
         if contract_has_error:
             contracts_with_errors += 1
@@ -1183,21 +1228,6 @@ def lint_solutions() -> List[Dict[str, Any]]:
             )
             solution_has_error = True
 
-        # Check data_location_storage (only required when storage_of_data is enabled)
-        if solution.storage_of_data and not solution.data_location_storage:
-            results.append(
-                {
-                    "severity": "warning",
-                    "category": "Solutions",
-                    "message": f"Solution '{solution.name}' must have location of data at rest (data storage location) set",
-                    "field": "data_location_storage",
-                    "object_type": "solutions",
-                    "object_id": str(solution.id),
-                    "object_name": solution.name,
-                }
-            )
-
-        # Warn if data locations are set but storage_of_data flag is not checked
         if not solution.storage_of_data and (
             solution.data_location_storage or solution.data_location_processing
         ):
@@ -1213,14 +1243,28 @@ def lint_solutions() -> List[Dict[str, Any]]:
                 }
             )
 
-        # Check data_location_processing (only required when storage_of_data is enabled)
-        if solution.storage_of_data and not solution.data_location_processing:
+        for field in ("data_location_storage", "data_location_processing"):
+            value = getattr(solution, field)
+            label = Solution._meta.get_field(field).verbose_name.lower()
+            if solution.storage_of_data and value in REGION_CODES | {""}:
+                message = f"Solution '{solution.name}' stores data, so its {label} must be a country"
+                if value:
+                    message += (
+                        f"; a region ({value}) would be reported as 'Not applicable'"
+                    )
+                severity = "error"
+                solution_has_error = True
+            elif value in REGION_CODES:
+                message = f"Solution '{solution.name}' has a region ({value}) as {label}; it would be reported as 'Not applicable' in the register. Set a country for a precise entry."
+                severity = "warning"
+            else:
+                continue
             results.append(
                 {
-                    "severity": "warning",
+                    "severity": severity,
                     "category": "Solutions",
-                    "message": f"Solution '{solution.name}' must have location of data processing set",
-                    "field": "data_location_processing",
+                    "message": message,
+                    "field": field,
                     "object_type": "solutions",
                     "object_id": str(solution.id),
                     "object_name": solution.name,
@@ -1517,8 +1561,8 @@ def lint_unique_leis(main_entity: Entity) -> List[Dict[str, Any]]:
     # Collect LEIs
     lei_map = {}  # lei -> list of entities with that LEI
     for entity in all_entities:
-        if entity.legal_identifiers and entity.legal_identifiers.get("LEI"):
-            lei = entity.legal_identifiers.get("LEI")
+        if entity.legal_identifiers_dict and entity.legal_identifiers_dict.get("LEI"):
+            lei = entity.legal_identifiers_dict.get("LEI")
             if lei not in lei_map:
                 lei_map[lei] = []
             lei_map[lei].append(entity)
@@ -1880,13 +1924,13 @@ def lint_dora_roi() -> Dict[str, Any]:
 
     # Build available identifiers for the frontend selector
     available_identifiers = []
-    if main_entity and main_entity.legal_identifiers:
+    if main_entity and main_entity.legal_identifiers_dict:
         priority = IDENTIFIER_PRIORITY
         for id_type in priority:
-            value = main_entity.legal_identifiers.get(id_type)
+            value = main_entity.legal_identifiers_dict.get(id_type)
             if value:
                 available_identifiers.append({"type": id_type, "value": value})
-        for key, value in main_entity.legal_identifiers.items():
+        for key, value in main_entity.legal_identifiers_dict.items():
             if value and key not in priority:
                 available_identifiers.append({"type": key, "value": value})
 

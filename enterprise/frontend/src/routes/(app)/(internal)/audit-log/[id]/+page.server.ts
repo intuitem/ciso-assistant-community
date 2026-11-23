@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import type { PageServerLoad } from './$types';
 
 type LogEntry = {
@@ -11,7 +11,7 @@ type LogEntry = {
 };
 
 export const load = (async ({ fetch, params }) => {
-	const endpoint = `${BASE_API_URL}/log-entries/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/log-entries/${encodeURIComponent(params.id)}/`;
 	try {
 		const res = await fetch(endpoint);
 		if (!res.ok) {

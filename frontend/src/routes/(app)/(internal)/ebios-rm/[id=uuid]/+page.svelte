@@ -1,18 +1,22 @@
 <script lang="ts">
-	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
+	import ClassificationBadge from '#lib/components/ClassificationBadge.svelte';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { ActionData, PageData } from './$types';
 	import Tile from './Tile.svelte';
-	import Card from '$lib/components/DataViz/Card.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import Card from '#lib/components/DataViz/Card.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -24,6 +28,36 @@
 	}
 
 	let { data, form }: Props = $props();
+
+	const canDuplicate = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'ebiosrmstudy',
+			object: data.data
+		})
+	);
+
+	function modalDuplicateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.ebiosRmStudyDuplicateForm,
+				model: data.ebiosRmStudyDuplicateModel,
+				// getModelInfo normalizes urlModel to 'ebios-rm', so ModelForm would
+				// otherwise validate against the full study schema; pass the minimal
+				// duplicate schema explicitly so name/version is all that's required.
+				schema: modelSchema('ebios-rm_duplicate'),
+				duplicate: true,
+				formAction: '?/duplicate'
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.duplicateEbiosRmStudy()
+		});
+	}
 
 	const workshopsData = {
 		ws1: [
@@ -246,9 +280,33 @@
 	}
 </script>
 
-<div class="h-full w-full p-8">
+<div class="h-full w-full p-8 flex flex-col gap-6">
+	<section class="card bg-surface-50-950 shadow-lg w-full p-6 border-l-4 border-pink-600 space-y-2">
+		<h2 class="text-2xl font-bold">
+			{data.data.name}
+			<span class="text-base font-normal text-surface-500">v{data.data.version}</span>
+		</h2>
+		{#if data.data.description}
+			<div class="line-clamp-4">
+				<MarkdownRenderer content={data.data.description} />
+			</div>
+		{:else}
+			<p class="alert preset-tonal-warning flex items-center gap-2">
+				<i class="fa-solid fa-triangle-exclamation"></i>
+				<span>{m.studyDescriptionMissing()}</span>
+			</p>
+
+			<Anchor
+				href={workshopsData.ws1[0].href}
+				class="anchor inline-flex items-center gap-2 text-sm"
+			>
+				{m.describeStudy()}
+				<i class="fa-solid fa-arrow-right"></i>
+			</Anchor>
+		{/if}
+	</section>
 	<div
-		class="card relative bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
+		class="card relative bg-surface-50-950 shadow-lg w-full flex-1 grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
 		{#if data.data.classification}
 			<ClassificationBadge
@@ -335,10 +393,20 @@
 						<i class="fa-solid fa-file-lines"></i>
 						<span>{m.report()}</span>
 					</a>
+					{#if canDuplicate}
+						<button
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
+							onclick={modalDuplicateForm}
+							data-testid="duplicate-button"
+						>
+							<i class="fa-solid fa-copy"></i>
+							<span>{m.duplicate()}</span>
+						</button>
+					{/if}
 					<!-- Export dropdown -->
 					<div class="relative">
 						<button
-							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full cursor-pointer"
 							onclick={() => (exportMenuOpen = !exportMenuOpen)}
 							onblur={() => setTimeout(() => (exportMenuOpen = false), 150)}
 						>

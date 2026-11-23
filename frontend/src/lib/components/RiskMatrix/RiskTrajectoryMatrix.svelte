@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { isDark } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import RiskTrajectoryBurndown from './RiskTrajectoryBurndown.svelte';
 	import RiskTrajectoryDot from './RiskTrajectoryDot.svelte';
 	import RiskTrajectoryTimeline from './RiskTrajectoryTimeline.svelte';

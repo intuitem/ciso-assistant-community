@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getModalStore } from './stores';
-	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import { onDestroy } from 'svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -29,10 +29,10 @@
 
 	const canChangeSettings = $derived(
 		canPerformAction({
-			user: $page.data.user,
+			user: page.data.user,
 			action: 'change',
 			model: 'globalsettings',
-			domain: $page.data.user?.root_folder_id
+			domain: page.data.user?.root_folder_id
 		})
 	);
 
@@ -233,9 +233,10 @@
 			</label>
 
 			<footer class="flex justify-end space-x-2">
-				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
-					{m.cancel()}
-				</button>
+				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}
+					>{m.cancel()}</button
+				>
+
 				<button
 					type="submit"
 					class="btn {parent.buttonPositive}"

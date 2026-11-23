@@ -1,7 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
+import { type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 // This directory holds a page only, so it shadows [model=urlmodel]/[id=uuid]/+server.ts
 // and every non-GET method 405s without a handler here. No GET: the page keeps it.
@@ -13,7 +14,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 		body: JSON.stringify(await request.json())
 	});
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status as NumericRange<400, 599>, await res.json());
 	}
 	return new Response(JSON.stringify(await res.json()), {
 		status: res.status,

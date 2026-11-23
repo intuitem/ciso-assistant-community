@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
 	interface Props {
 		name: string;

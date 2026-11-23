@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { m } from '#paraglide/messages.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
 
 	// leader / deputy / member -> teamLeader / teamDeputy / teamMember

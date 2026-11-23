@@ -200,6 +200,9 @@ class TestIAMFolder:
             try:
                 field = iam_scope_model._meta.get_field("folder")
             except FieldDoesNotExist:
+                if getattr(iam_scope_model, "IAM_SCOPE_FIELD", None):
+                    RoleAssignment.get_iam_folder_field(iam_scope_model)
+                    continue
                 errors.append(
                     f"The {model.__qualname__}.IAM_SCOPE_FIELD field is linked to a model ({iam_scope_model.__qualname__}) with no 'folder' field (an IAM scope model MUST have a 'folder' field)."
                 )

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		points?: any[];

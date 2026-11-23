@@ -114,7 +114,30 @@ class PortalWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         f"'{title}' has no {missing}; it would fail when clicked."
                     )
+        self._check_tile_targets_visible(value)
         return value
+
+    def _check_tile_targets_visible(self, content):
+        if self.context.get("request") is None:
+            return
+        snapshots, tokens = _tile_refs(content)
+        kept_snapshots, kept_tokens = _tile_refs(
+            getattr(self.instance, "content", None)
+        )
+        new_snapshots = snapshots - kept_snapshots
+        new_tokens = tokens - kept_tokens
+        if new_snapshots and not new_snapshots <= {
+            str(i) for i in self._viewable_ids(FrameworkSnapshot)
+        }:
+            raise PermissionDenied({"content": "framework snapshot not accessible"})
+        if new_tokens:
+            viewable_tokens = set(
+                PublicDocument.objects.filter(
+                    id__in=self._viewable_ids(PublicDocument)
+                ).values_list("token", flat=True)
+            )
+            if not new_tokens <= viewable_tokens:
+                raise PermissionDenied({"content": "document not accessible"})
 
     def validate(self, data):
         # Claiming the single global primary trust-center URL is an instance-wide effect,
@@ -131,6 +154,24 @@ class PortalWriteSerializer(BaseModelSerializer):
                     {"is_primary": "Only an administrator can set the primary portal."}
                 )
         return super().validate(data)
+
+
+def _tile_refs(content):
+    snapshots, tokens = set(), set()
+    if not isinstance(content, dict):
+        return snapshots, tokens
+    for section in content.get("sections") or []:
+        if not isinstance(section, dict):
+            continue
+        for item in section.get("items") or []:
+            target = item.get("target") if isinstance(item, dict) else None
+            if not isinstance(target, dict):
+                continue
+            if item.get("kind") == "framework" and target.get("snapshot"):
+                snapshots.add(str(target["snapshot"]))
+            if item.get("kind") == "certificationDocument" and target.get("token"):
+                tokens.add(str(target["token"]))
+    return snapshots, tokens
 
 
 # What a tile needs before anyone can click it. Mirrored by tile-validation.ts in the

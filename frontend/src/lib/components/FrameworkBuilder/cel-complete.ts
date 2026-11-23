@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { extractNodeId, type BuilderNode, type OutcomeRule, type Question } from './builder-state';
 import FIELDS from './cel-fields.json';
 
@@ -101,7 +101,14 @@ export function buildCelCatalog(
 export function readableValues(rules: OutcomeRule[], index: number): string[] {
 	const rule = rules[index];
 	return rules
-		.filter((r, i) => r.kind === 'number' && r.ref_id && (rule?.kind !== 'number' || i < index))
+		.filter(
+			(r, i) =>
+				r.ref_id &&
+				// staircases and weakest links are computed before every rule
+				(r.kind === 'staircase' ||
+					r.kind === 'weakest_link' ||
+					(r.kind === 'number' && (rule?.kind !== 'number' || i < index)))
+		)
 		.map((r) => r.ref_id);
 }
 
@@ -130,6 +137,7 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 				pages: m.builderCelGroupPages(),
 				answers: m.builderCelGroupAnswers(),
 				values: m.builderCelValues(),
+				ratings: m.builderCelGroupRatings(),
 				computed_outcomes: m.builderCelComputedOutcomes(),
 				hidden_pages: m.builderCelHiddenPages()
 			},

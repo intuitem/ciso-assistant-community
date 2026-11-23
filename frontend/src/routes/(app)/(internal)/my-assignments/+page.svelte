@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { listViewFields } from '$lib/utils/table';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
 
 	let { data }: { data: PageData } = $props();
 
@@ -30,7 +30,7 @@
 	let assignedToParams = $derived(buildMultiParam('assigned_to', actorIds));
 
 	function toggleTeamAssignments() {
-		goto(`/my-assignments?include_teams=${!data.includeTeams}`, { invalidateAll: true });
+		goto(`/my-assignments?include_teams=${!data.includeTeams}`, { refreshAll: true });
 	}
 </script>
 

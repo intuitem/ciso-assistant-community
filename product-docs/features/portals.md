@@ -33,9 +33,11 @@ A **portal** is a configurable grid of tiles you compose yourself. Two flavours 
 3. A portal is a list of **groups**, each holding **tiles**. Use **Add group** and **Add item** to build the grid.
 4. Each tile has an **Icon**, a **Title**, a **Kind**, and a kind-specific target. Internal portals offer these kinds:
    - **Create** — a button that opens the create form for a model (e.g. incidents, applied controls).
-   - **Navigate** — link to a model's list page or a built-in page.
+   - **Navigate** — link to a model's list page or a built-in page, picked under **Destination**. With documents as the destination, pick one **Document** to open it directly, or **Whole library (filtered by type below)** to list the documents, narrowed with **Document types** (leave all off to show every type).
    - **Questionnaire** — launch an audit from a framework you pick (see below).
    - **External** — open an external `https://` link in a new tab.
+
+   To move a tile to another group, use **Move to group** on the tile.
 5. Use the segmented **Edit / Preview / Settings** control at the top to preview the grid or open settings, then **Save**. Toggle availability with **Publish** / **Unpublish**.
 
 {% hint style="info" %}

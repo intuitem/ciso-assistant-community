@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		count: number;

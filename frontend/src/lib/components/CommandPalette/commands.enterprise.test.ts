@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { User } from '$lib/utils/types';
+import type { User } from '#lib/utils/types.js';
 
 // The Enterprise overlay REPLACES `SideBar/navData.ts` wholesale (see
 // `enterprise/frontend/Makefile` `pre-build`), and its copy lists pages the community sidebar

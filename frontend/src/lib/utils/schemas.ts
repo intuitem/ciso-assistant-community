@@ -7,7 +7,7 @@ import { z } from 'zod';
 export type FormDataShape = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ZodSchema = z.ZodObject<any>;
-import * as m from '$paraglide/messages';
+import * as m from '#paraglide/messages.js';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -84,6 +84,22 @@ export const loginSchema = z
 	})
 	.required();
 
+export const reauthenticateSchema = z
+	.object({
+		mode: z.enum(['password', 'webauthn', 'totp', 'recovery_codes']).optional(),
+		password: z.string().optional(),
+		code: z
+			.string()
+			.regex(/^(\d{6,8})?$/, { error: 'incorrectCode' })
+			.optional(),
+		credential: z.string().optional()
+	})
+	// An empty code is fine in the other modes (a leftover from switching), not in a code mode.
+	.refine((data) => !(data.mode === 'totp' || data.mode === 'recovery_codes') || !!data.code, {
+		error: 'incorrectCode',
+		path: ['code']
+	});
+
 export const emailSchema = z
 	.object({
 		email: z.string({
@@ -109,6 +125,7 @@ const NameDescriptionMixin = {
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
+	ref_id: z.string().max(100).optional(),
 	parent_folder: z.string(),
 	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional(),
@@ -151,6 +168,7 @@ export const WorkflowImportSchema = z.object({
 });
 
 export const RiskAssessmentSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
@@ -199,6 +217,7 @@ export const TacticSchema = z.object({
 });
 
 export const ThreatModelSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
@@ -290,6 +309,7 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	commitment_state: z.string().optional(),
 	commitment_notes: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
@@ -314,7 +334,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).optional(),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -340,6 +360,7 @@ export const AppliedControlSchema = z.object({
 	findings: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	control_documents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
@@ -352,11 +373,10 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
-	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
-});
+export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = z.object({
+	ref_id: z.string().optional(),
 	...NameDescriptionMixin,
 	folder: z.string(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -386,7 +406,9 @@ export const ValidationFlowSchema = z.object({
 	policies: z.array(z.string()).optional(),
 	processings: z.array(z.string()).optional(),
 	accreditations: z.array(z.string()).optional(),
-	contracts: z.array(z.string()).optional()
+	contracts: z.array(z.string()).optional(),
+	requirement_assessments: z.array(z.string()).optional(),
+	risk_scenarios: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -406,6 +428,7 @@ export const AssetSchema = z.object({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	asset_class: z.string().optional(),
+	lifecycle_stage: z.string().uuid().optional().nullable(),
 	parent_assets: z.string().optional().array().optional(),
 	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
@@ -520,6 +543,7 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	can_connect_apps: z.boolean().optional(),
 	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
@@ -529,6 +553,7 @@ export const UserEditSchema = z.object({
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	language: z.string().optional().default(''),
+	can_connect_apps: z.boolean().optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])
@@ -565,6 +590,7 @@ export const SetPasswordSchema = z.object({
 });
 
 export const ComplianceAssessmentSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
@@ -642,6 +668,7 @@ export const CampaignSchema = z.object({
 });
 
 export const EvidenceSchema = z.object({
+	ref_id: z.string().optional(),
 	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
 	folder: z.string(),
@@ -655,6 +682,7 @@ export const EvidenceSchema = z.object({
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	task_templates: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
@@ -713,6 +741,10 @@ export const GeneralSettingsSchema = z.object({
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
+	evidence_four_eyes: z.boolean().default(false).optional(),
+	auto_lock_overdue_assessments: z.boolean().default(false).optional(),
+	auto_ref_id: z.boolean().default(false).optional(),
+	auto_ref_id_prefixes: z.record(z.string(), z.string()).default({}).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	show_get_started: z.boolean().default(true).optional(),
 	personal_folders: z.boolean().default(false).optional(),
@@ -720,9 +752,11 @@ export const GeneralSettingsSchema = z.object({
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
 	default_date_format: z.string().default('auto').optional(),
+	report_timezone: z.string().default('UTC').optional(),
 	default_packager: z
 		.string()
-		.regex(/^[a-z0-9_-]+$/)
+		// eslint-disable-next-line no-useless-escape
+		.regex(/^[a-z0-9_\-]+$/)
 		.default('custom')
 		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
@@ -791,6 +825,8 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
+	mcp: z.boolean().optional(),
+	mcp_write: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	workflows: z.boolean().optional(),
@@ -800,6 +836,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	dpias: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	quick_forms: z.boolean().optional(),
@@ -811,6 +848,7 @@ export const FeatureFlagsSchema = z.object({
 	policy_documents: z.boolean().optional(),
 	document_management: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
+	vulnerability_sla: z.boolean().optional(),
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
@@ -818,6 +856,7 @@ export const FeatureFlagsSchema = z.object({
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
+	nis2: z.boolean().optional(),
 	external_ratings: z.boolean().optional(),
 	jit_provisioning: z.boolean().optional()
 });
@@ -963,6 +1002,8 @@ export const tierSchema = z.object({
 });
 
 export const EntityAssessmentSchema = z.object({
+	ref_id: z.string().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	create_audit: z.boolean().optional().default(false),
@@ -1003,14 +1044,17 @@ export const EntityAssessmentSchema = z.object({
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
-		.optional()
+		.optional(),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
+	is_active: z.boolean().optional().default(true),
 	tier: z.string().uuid().optional().nullable(),
+	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1100,8 +1144,14 @@ export const vulnerabilitySchema = z.object({
 	detected_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	remediated_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	observation: z.string().optional().nullable(),
+	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
+	task_templates: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	security_advisories: z.string().uuid().optional().array().optional(),
 	cwes: z.string().uuid().optional().array().optional(),
@@ -1110,7 +1160,9 @@ export const vulnerabilitySchema = z.object({
 });
 
 export const BusinessImpactAnalysisSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1153,7 +1205,8 @@ export const processingSchema = z.object({
 	status: z.string().optional(),
 	dpia_required: z.boolean().optional(),
 	dpia_reference: z.string().optional(),
-	has_sensitive_personal_data: z.boolean().optional(),
+	role: z.string().optional(),
+	controllers: z.string().uuid().optional().array().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
 	evidences: z.string().optional().array().optional(),
@@ -1309,6 +1362,7 @@ export const organisationIssueSchema = z.object({
 });
 
 export const quantitativeRiskStudySchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().optional(),
@@ -1395,6 +1449,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 export const ebiosRMSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
@@ -1415,6 +1470,14 @@ export const ebiosRMSchema = z.object({
 	responsibility_matrix: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
+// the user picks the destination domain (folder); it defaults to the source's
+export const ebiosRMDuplicateSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	version: z.string().optional(),
+	folder: z.string().optional()
 });
 
 export const fearedEventsSchema = z.object({
@@ -1511,6 +1574,7 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable().or(z.literal('')),
@@ -1632,6 +1696,7 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional(),
@@ -1652,7 +1717,15 @@ export const IncidentSchema = z.object({
 		})
 		.optional(),
 	resolution: z.string().optional().default(''),
-	is_bcp_activated: z.boolean().optional().nullable()
+	is_bcp_activated: z.boolean().optional().nullable(),
+	root_cause: z.string().optional().nullable(),
+	nis2_significant: z.boolean().optional().nullable(),
+	nis2_malicious_intent: z.string().optional().nullable(),
+	nis2_cross_border_impact: z.string().optional().nullable(),
+	nis2_early_warning_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_notification_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_final_report_at: z.string().datetime({ local: true }).optional().nullable(),
+	nis2_reference: z.string().max(255).optional().default('')
 });
 
 export const DoraIncidentReportSchema = z.object({
@@ -1741,6 +1814,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	requirement_assessments: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
@@ -1946,6 +2020,9 @@ export const GenericCollectionSchema = z.object({
 	documents: z.array(z.string().uuid().optional()).optional(),
 	security_exceptions: z.array(z.string().uuid().optional()).optional(),
 	policies: z.array(z.string().uuid().optional()).optional(),
+	applied_controls: z.array(z.string().uuid().optional()).optional(),
+	document_containers: z.array(z.string().uuid().optional()).optional(),
+	business_impact_analyses: z.array(z.string().uuid().optional()).optional(),
 	dependencies: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
@@ -2064,27 +2141,48 @@ export const MetricDefinitionSchema = z.object({
 	unit: z.string().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
-	higher_is_better: z.boolean().default(true),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
 	default_target: z.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable(),
+	datasets: jsonSchema.optional().nullable(),
+	inputs: jsonSchema.optional().nullable(),
+	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
+});
+
+// A metric made in one step: the definition's fields, created with it.
+export const InlineMetricDefinitionSchema = z.object({
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	higher_is_better: z.boolean().nullable().default(null),
+	decimals: z.coerce.number().int().min(0).max(6).optional().nullable(),
+	default_target: z.coerce.number().optional().nullable(),
+	default_collection_frequency: z.string().max(20).optional().nullable()
 });
 
 export const MetricInstanceSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	metric_definition: z.string().uuid(),
+	metric_definition: z.string().uuid().optional().nullable(),
+	definition: InlineMetricDefinitionSchema.optional().nullable(),
+	collection_grace_days: z.coerce.number().int().min(0).max(28).optional().nullable(),
 	status: z.string().default('draft'),
 	owner: z.array(z.string().uuid().optional()).optional(),
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	evidences: z.string().uuid().optional().nullable()
+	evidences: z.string().uuid().optional().nullable(),
+	input_choices: jsonSchema.optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
 	metric_instance: z.string().uuid(),
+	period_start: z.string().optional().nullable(),
 	timestamp: z.iso.datetime(),
 	value: jsonSchema,
 	observation: z.string().optional().nullable(),
@@ -2134,6 +2232,7 @@ export const teamSchema = z.object({
 });
 
 export const DocumentContainerSchema = z.object({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().max(100).optional().default(''),
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
@@ -2145,6 +2244,7 @@ export const DocumentContainerSchema = z.object({
 	task_templates: z.array(z.string().uuid()).optional().default([]),
 	processings: z.array(z.string().uuid()).optional().default([]),
 	assets: z.array(z.string().uuid()).optional().default([]),
+	reviewers: z.array(z.string().uuid()).optional().default([]),
 	filtering_labels: z.array(z.string()).optional().default([])
 });
 
@@ -2184,16 +2284,47 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
-export const ServiceAccountSchema = z.object({
-	name: z.string().min(1).max(100),
-	description: z.string().optional().nullable(),
-	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
-	permissions: z.array(z.number()).optional(),
-	role: z.string().uuid().optional().nullable(),
-	folders: z.array(z.string().uuid()).min(1),
-	is_recursive: z.boolean().default(true),
-	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+export const IdentityProviderSchema = z.object({
+	name: z.string().min(1).max(40),
+	provider_id: z
+		.string()
+		.min(1)
+		.max(200)
+		.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+	client_id: z.string().min(1).max(191),
+	server_url: z.string().url().max(1024)
 });
+
+export const ServiceAccountSchema = z
+	.object({
+		name: z.string().min(1).max(100),
+		description: z.string().optional().nullable(),
+		authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+		identity_source: z.enum(['local', 'federated']).default('local'),
+		social_app: z.coerce.number().int().positive().optional().nullable(),
+		federated_subject: z.string().max(255).optional().nullable(),
+		permissions: z.array(z.number()).optional(),
+		role: z.string().uuid().optional().nullable(),
+		folders: z.array(z.string().uuid()).min(1),
+		is_recursive: z.boolean().default(true),
+		expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+	})
+	// Mirrors the backend check: both are required together for a federated account.
+	// A blank input reaches us as null (superforms nullifies empty strings), so a
+	// per-field min(1) would never fire.
+	.superRefine((data, ctx) => {
+		if (data.identity_source !== 'federated') return;
+		if (data.social_app == null) {
+			ctx.addIssue({ code: 'custom', path: ['social_app'], message: 'socialAppRequired' });
+		}
+		if (!data.federated_subject) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['federated_subject'],
+				message: 'federatedSubjectRequired'
+			});
+		}
+	});
 
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
@@ -2224,6 +2355,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
+	'identity-providers': IdentityProviderSchema,
 	'service-accounts': ServiceAccountSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
@@ -2252,6 +2384,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'data-contractors': dataContractorSchema,
 	'data-transfers': dataTransferSchema,
 	'ebios-rm': ebiosRMSchema,
+	'ebios-rm_duplicate': ebiosRMDuplicateSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
 	stakeholders: StakeholderSchema,
@@ -2330,8 +2463,15 @@ export const auditSinkSchema = z.object({
 	transport: z.enum(['http', 'kafka']).default('http'),
 	url: z.string().url().optional().or(z.literal('')),
 	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	body_wrapper: z.enum(['none', 'array']).default('none'),
 	// HTTP: JSON of auth headers, parsed server-side.
 	headers: z.string().optional(),
+	auth_type: z.enum(['static', 'oauth2_client_credentials']).default('static'),
+	// OAuth2: assembled server-side into oauth_config.
+	token_url: z.string().url().optional().or(z.literal('')),
+	client_id: z.string().optional(),
+	client_secret: z.string().optional(),
+	scope: z.string().optional(),
 	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
 	bootstrap_servers: z.string().optional(),
 	topic: z.string().optional(),

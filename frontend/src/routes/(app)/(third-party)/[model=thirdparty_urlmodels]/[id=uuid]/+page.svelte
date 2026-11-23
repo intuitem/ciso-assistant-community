@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {

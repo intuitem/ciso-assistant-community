@@ -6,10 +6,10 @@ import type {
 	PendingAttachment,
 	SuggestedAction
 } from './types';
-import { browser } from '$app/environment';
-import { m } from '$paraglide/messages';
-import { getLocale } from '$paraglide/runtime';
-import { formatDate } from '$lib/utils/datetime';
+import { browser } from '$app/env';
+import { m } from '#paraglide/messages.js';
+import { getLocale } from '#paraglide/runtime.js';
+import { formatDate } from '#lib/utils/datetime.js';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -387,7 +387,7 @@ async function streamResponse(userMessage: string, documentIds: string[] = []) {
 					} else if (data.type === 'navigate') {
 						// Workflow wants to redirect — navigate without closing the chat
 						if (data.url) {
-							const { goto } = await import('$lib/utils/breadcrumbs');
+							const { goto } = await import('#lib/utils/breadcrumbs.js');
 							goto(data.url, { label: '', breadcrumbAction: 'push' });
 						}
 					} else if (data.type === 'pending_choice') {
@@ -592,7 +592,9 @@ export function sendMessage(text: string) {
 		role: 'user',
 		content,
 		timestamp: new Date(),
-		...(attachment && { attachments: [{ id: attachment.id, filename: attachment.filename }] })
+		...(attachment && {
+			attachments: [{ id: attachment.id, filename: attachment.filename }]
+		})
 	});
 	inputText = '';
 	removePendingAttachment();
@@ -779,7 +781,7 @@ export async function confirmAction(messageId: string) {
 			};
 			const basePath = action.modelKey ? navigableModels[action.modelKey] : undefined;
 			if (basePath && action.results!.length === 1 && action.results![0].id) {
-				const { goto } = await import('$lib/utils/breadcrumbs');
+				const { goto } = await import('#lib/utils/breadcrumbs.js');
 				goto(`${basePath}${action.results![0].id}`, { label: '', breadcrumbAction: 'push' });
 			} else {
 				window.location.reload();
@@ -902,6 +904,7 @@ export async function loadSessionHistory() {
 		if (!res.ok) throw new Error(`sessions: ${res.status}`);
 		const data = await res.json();
 		const sessions: any[] = Array.isArray(data) ? data : (data.results ?? []);
+
 		sessionHistory = sessions
 			.map((s: any) => ({
 				id: s.id,

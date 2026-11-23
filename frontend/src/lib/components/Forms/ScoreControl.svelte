@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '#lib/utils/helpers.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { getLocale } from '$paraglide/runtime';
-	import { localizedLevelField, type ScoreLevel } from '$lib/utils/score-scales';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { localizedLevelField, type ScoreLevel } from '#lib/utils/score-scales.js';
 
 	type ScoreDefinition = ScoreLevel;
 

@@ -111,6 +111,8 @@ services:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
     build:
       context: ./frontend
       dockerfile: Dockerfile

@@ -6,6 +6,8 @@ description: "Who a run acts as, what it can reach, what it may never write, and
 
 Workflows act on your data without a person in the loop, so the engine is strict about whose authority a run uses and what it can reach. This page explains the model so you can predict what a workflow will and will not be allowed to do.
 
+Quick reference: [cheat sheet](cheat-sheet.md#permissions-and-scope).
+
 ## Who a run acts as
 
 Every published version has a **run identity**: the user who published it. Every run of that version executes with that user's permissions, checked live against the roles they hold at the moment each step executes.

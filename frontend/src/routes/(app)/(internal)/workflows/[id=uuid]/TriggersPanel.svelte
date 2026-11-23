@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { translateEventKey } from '#lib/utils/i18n.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {
@@ -103,10 +104,7 @@
 	}
 </script>
 
-<div
-	class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
-	data-testid="triggers-panel"
->
+<div class="h-60 shrink-0 bg-surface-100-900 overflow-y-auto" data-testid="triggers-panel">
 	{#if !registrations.length}
 		<p class="p-4 text-xs text-surface-500 text-center mt-6">
 			<i class="fa-solid fa-bolt block text-lg mb-2 opacity-40"></i>
@@ -159,7 +157,9 @@
 							{relativeTime(registration.last_run_at)}
 						</span>
 					{:else if registration.type === 'internal_event'}
-						<span class="badge preset-tonal font-mono text-[9px]">{registration.event_key}</span>
+						<span class="badge preset-tonal text-[9px]"
+							>{translateEventKey(registration.event_key)}</span
+						>
 						<span
 							class="text-surface-500"
 							title="{m.triggerLastFired()}: {formatWhen(registration.last_triggered_at)}"

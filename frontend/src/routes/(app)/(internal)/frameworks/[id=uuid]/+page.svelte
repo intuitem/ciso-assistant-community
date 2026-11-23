@@ -1,14 +1,14 @@
 <script lang="ts">
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import type { TreeViewNode } from '$lib/components/TreeView/types';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import type { TreeViewNode } from '#lib/components/TreeView/types.js';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
 	interface Props {
 		data: PageData;
@@ -103,7 +103,7 @@
 
 		<div class="flex flex-col gap-2 shrink-0 w-64">
 			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/report/">{m.insights()}</a>
-			<a class="btn preset-filled-primary-500" href="/frameworks/{fw.id}/excel-template/">
+			<a class="btn btn-quiet" href="/frameworks/{fw.id}/excel-template/">
 				{m.downloadExcelTemplate()}
 			</a>
 			<p class="text-xs text-surface-600-400 leading-snug mt-1">

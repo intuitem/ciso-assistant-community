@@ -103,6 +103,16 @@ class TestLintSubcontractingChainsMissingLEI(LintSubcontractingChainsBase):
         self.assertIn("no legal identifier", errors[0]["message"])
         self.assertEqual(errors[0]["object_id"], str(no_id_sub.id))
 
+    def test_subcontractor_with_legacy_string_identifiers_errors(self):
+        """Legacy non-dict legal_identifiers is reported, not a crash."""
+        bad_sub = Entity.objects.create(name="Legacy Sub", folder=self.folder)
+        Entity.objects.filter(pk=bad_sub.pk).update(legal_identifiers="LEI123")
+        SolutionSubcontractor.objects.create(
+            solution=self.solution, subcontractor=bad_sub
+        )
+        results = lint_subcontracting_chains()
+        self.assertEqual(len(self._errors(results)), 1)
+
     def test_subcontractor_with_empty_string_lei_errors(self):
         """legal_identifiers with empty-string values also fails."""
         empty_id_sub = Entity.objects.create(
@@ -242,3 +252,97 @@ class TestLintSubcontractingChainsDraftExcluded(LintSubcontractingChainsBase):
         )
         results = lint_subcontracting_chains()
         self.assertEqual(len(self._errors(results)), 0)
+
+
+class TestLintSolutionsRegionDataLocation(LintSubcontractingChainsBase):
+    def _location_results(self, storage_of_data, storage, processing):
+        from core.models import Asset
+        from tprm.dora_linter import lint_solutions
+
+        asset = Asset.objects.create(
+            name="Payments", folder=self.folder, is_business_function=True
+        )
+        self.solution.assets.add(asset)
+        self.solution.storage_of_data = storage_of_data
+        self.solution.data_location_storage = storage
+        self.solution.data_location_processing = processing
+        self.solution.save()
+        return [
+            (r["severity"], r["field"])
+            for r in lint_solutions()
+            if r["field"] in ("data_location_storage", "data_location_processing")
+        ]
+
+    def test_stored_data_needs_a_country_not_a_region(self):
+        self.assertEqual(
+            self._location_results(True, "EU", "FR"),
+            [("error", "data_location_storage")],
+        )
+
+    def test_stored_data_needs_a_country_not_a_blank(self):
+        self.assertEqual(
+            self._location_results(True, "FR", ""),
+            [("error", "data_location_processing")],
+        )
+
+    def test_region_without_stored_data_only_warns(self):
+        self.assertEqual(
+            self._location_results(False, "EEA", ""),
+            [("warning", "data_location_storage")],
+        )
+
+
+class TestLintB0202KeyCollision(LintSubcontractingChainsBase):
+    def setUp(self):
+        from core.models import Asset
+
+        super().setUp()
+        self.function = Asset.objects.create(
+            name="Payments", folder=self.folder, is_business_function=True
+        )
+        self.other = Solution.objects.create(
+            name="Other Solution",
+            provider_entity=self.direct_provider,
+            dora_ict_service_type="eba_TA:S09",
+        )
+        self.contract.solutions.add(self.other)
+        for solution, location in ((self.solution, "EU"), (self.other, "EEA")):
+            solution.assets.add(self.function)
+            solution.data_location_storage = location
+            solution.dora_data_sensitiveness = "eba_ZZ:x791"
+            solution.save()
+
+    def _collisions(self):
+        from tprm.dora_linter import lint_b_02_02_contracts
+
+        return [
+            w
+            for w in self._warnings(lint_b_02_02_contracts())
+            if "same b_02.02 row" in w["message"]
+        ]
+
+    def test_differing_values_on_same_key_warn(self):
+        self.other.dora_data_sensitiveness = "eba_ZZ:x792"
+        self.other.save()
+        warnings = self._collisions()
+        self.assertEqual(len(warnings), 1)
+        self.assertEqual(warnings[0]["object_id"], str(self.contract.id))
+
+    def test_same_values_on_same_key_do_not_warn(self):
+        self.assertEqual(self._collisions(), [])
+
+    def test_differing_storage_of_data_on_same_key_warns(self):
+        self.other.storage_of_data = False
+        self.other.data_location_storage = ""
+        self.other.data_location_processing = "EEA"
+        self.other.save()
+        self.solution.storage_of_data = True
+        self.solution.data_location_processing = "EU"
+        self.solution.save()
+        self.assertEqual(len(self._collisions()), 1)
+
+    def test_distinct_locations_do_not_warn(self):
+        self.other.data_location_storage = "FR"
+        self.other.dora_data_sensitiveness = "eba_ZZ:x792"
+        self.other.save()
+        self.assertEqual(self._collisions(), [])

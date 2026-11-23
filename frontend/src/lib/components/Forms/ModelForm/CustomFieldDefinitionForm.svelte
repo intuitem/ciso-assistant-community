@@ -6,8 +6,8 @@
 	import NestedTranslationField from '../NestedTranslationField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -35,6 +35,7 @@
 		{ label: m.project(), value: 'pmbok.project' },
 		{ label: m.asset(), value: 'core.asset' },
 		{ label: m.appliedControl(), value: 'core.appliedcontrol' },
+		{ label: m.entityAssessment(), value: 'tprm.entityassessment' },
 		{ label: m.securityException(), value: 'core.securityexception' }
 	];
 

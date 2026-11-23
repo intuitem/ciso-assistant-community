@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getSecureRedirect } from '$lib/utils/helpers';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

@@ -2,19 +2,16 @@
 
 import json
 import re
-import uuid
 
 from .client import fetch_all_results, make_get_request
 
 
+# the canonical form only: an ID lands in a URL path, so nothing else may pass
+_UUID = re.compile(r"[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}")
+
+
 def _is_uuid(value) -> bool:
-    if not isinstance(value, str):
-        return False
-    try:
-        uuid.UUID(value)
-    except ValueError:
-        return False
-    return True
+    return isinstance(value, str) and _UUID.fullmatch(value) is not None
 
 
 def resolve_folder_id(folder_name_or_id: str) -> str:
@@ -22,12 +19,14 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     Returns the UUID string or raises ValueError with a clear message.
     """
-    # Check if it's already a UUID (contains hyphens in UUID format)
-    if "-" in folder_name_or_id and len(folder_name_or_id) == 36:
+    if _is_uuid(folder_name_or_id):
         return folder_name_or_id
 
-    # Otherwise, look up by name - return exactly one result
-    folders, error = fetch_all_results("/folders/", params={"name": folder_name_or_id})
+    # Otherwise, look up by name - return exactly one result. No item cap: a
+    # truncated list could hide a duplicate name and look unambiguous.
+    folders, error = fetch_all_results(
+        "/folders/", params={"name": folder_name_or_id}, max_items=None
+    )
 
     if error:
         raise ValueError(f"Folder '{folder_name_or_id}' API error: {error}")
@@ -51,7 +50,7 @@ def resolve_perimeter_id(perimeter_name_or_id: str) -> str:
     Returns the UUID string or raises ValueError with a clear message.
     """
     # Check if it's already a UUID
-    if "-" in perimeter_name_or_id and len(perimeter_name_or_id) == 36:
+    if _is_uuid(perimeter_name_or_id):
         return perimeter_name_or_id
 
     # Otherwise, look up by name - return exactly one result
@@ -80,7 +79,7 @@ def resolve_risk_matrix_id(matrix_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in matrix_name_or_id and len(matrix_name_or_id) == 36:
+    if _is_uuid(matrix_name_or_id):
         return matrix_name_or_id
 
     # Otherwise, look up by name
@@ -107,7 +106,7 @@ def resolve_framework_id(framework_name_or_urn_or_id: str) -> str:
     If already a UUID, returns it. If a name or URN, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in framework_name_or_urn_or_id and len(framework_name_or_urn_or_id) == 36:
+    if _is_uuid(framework_name_or_urn_or_id):
         return framework_name_or_urn_or_id
 
     # Try URN search first if it looks like a URN
@@ -140,7 +139,7 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+    if _is_uuid(assessment_name_or_id):
         return assessment_name_or_id
 
     # Otherwise, look up by name
@@ -173,7 +172,7 @@ def resolve_asset_id(asset_name_or_id: str, folder_id: str = None) -> str:
         folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
-    if "-" in asset_name_or_id and len(asset_name_or_id) == 36:
+    if _is_uuid(asset_name_or_id):
         return asset_name_or_id
 
     # Build query params with optional folder scoping
@@ -201,7 +200,7 @@ def resolve_asset_class_id(asset_class_name_or_id: str) -> str:
     """Helper function to resolve asset class name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in asset_class_name_or_id and len(asset_class_name_or_id) == 36:
+    if _is_uuid(asset_class_name_or_id):
         return asset_class_name_or_id
 
     asset_classes, error = fetch_all_results(
@@ -228,7 +227,7 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
+    if _is_uuid(scenario_name_or_id):
         return scenario_name_or_id
 
     # Otherwise, look up by name
@@ -240,11 +239,20 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' API error: {error}")
 
     if not scenarios:
+        scenarios, error = fetch_all_results(
+            "/risk-scenarios/", params={"ref_id": scenario_name_or_id}
+        )
+        if error:
+            raise ValueError(
+                f"Risk scenario '{scenario_name_or_id}' API error: {error}"
+            )
+
+    if not scenarios:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
 
     if len(scenarios) > 1:
         raise ValueError(
-            f"Ambiguous risk scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+            f"Ambiguous risk scenario '{scenario_name_or_id}', found {len(scenarios)}"
         )
 
     return scenarios[0]["id"]
@@ -259,7 +267,7 @@ def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -
         folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
-    if "-" in control_name_or_id and len(control_name_or_id) == 36:
+    if _is_uuid(control_name_or_id):
         return control_name_or_id
 
     # Build query params with optional folder scoping
@@ -285,7 +293,7 @@ def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -
 
 def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
     """Validate requirement assessment UUID (only UUIDs accepted, no names)"""
-    if "-" in requirement_assessment_id and len(requirement_assessment_id) == 36:
+    if _is_uuid(requirement_assessment_id):
         return requirement_assessment_id
 
     raise ValueError(
@@ -298,7 +306,7 @@ def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+    if _is_uuid(assessment_name_or_id):
         return assessment_name_or_id
 
     # Otherwise, look up by name
@@ -323,6 +331,30 @@ def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
     return assessments[0]["id"]
 
 
+def resolve_global_folder_id() -> str:
+    """Return the UUID of the Global folder"""
+    folders, error = fetch_all_results("/folders/", params={"content_type": "GL"})
+
+    if error:
+        raise ValueError(f"Global folder API error: {error}")
+
+    if not folders:
+        raise ValueError("Global folder not found")
+
+    return str(folders[0]["id"])
+
+
+def resolve_in_folder_or_global(resolver, name_or_id: str, folder_id: str = None):
+    """Resolve a name within folder_id (Global when None), falling back to Global"""
+    global_id = None if folder_id else resolve_global_folder_id()
+    try:
+        return resolver(name_or_id, folder_id=folder_id or global_id)
+    except ValueError as e:
+        if global_id or "not found" not in str(e):
+            raise
+        return resolver(name_or_id, folder_id=resolve_global_folder_id())
+
+
 def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
     """Generic helper function to resolve name to UUID for any endpoint
     If already a UUID, returns it. If a name, looks it up via API.
@@ -335,7 +367,7 @@ def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
         UUID of the object
     """
     # Check if it's already a UUID
-    if "-" in name_or_id and len(name_or_id) == 36:
+    if _is_uuid(name_or_id):
         return name_or_id
 
     # Otherwise, look up by name
@@ -370,7 +402,7 @@ def resolve_threat_id(
         UUID of the threat
     """
     # Check if it's already a UUID
-    if "-" in threat_name_or_id and len(threat_name_or_id) == 36:
+    if _is_uuid(threat_name_or_id):
         return threat_name_or_id
 
     # Build query params
@@ -406,7 +438,7 @@ def resolve_threat_id(
 
 def resolve_library_id(library_urn_or_id: str) -> str:
     """Resolve library URN to UUID"""
-    if "-" in library_urn_or_id and len(library_urn_or_id) == 36:
+    if _is_uuid(library_urn_or_id):
         return library_urn_or_id
 
     libraries, error = fetch_all_results(
@@ -433,7 +465,7 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     """
     # Check if it's already a UUID
-    if "-" in vulnerability_name_or_id and len(vulnerability_name_or_id) == 36:
+    if _is_uuid(vulnerability_name_or_id):
         return vulnerability_name_or_id
 
     # Otherwise, look up by name
@@ -458,11 +490,175 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_evidence_id(evidence_name_or_id: str) -> str:
+    """Helper function to resolve evidence name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if _is_uuid(evidence_name_or_id):
+        return evidence_name_or_id
+
+    ref = str(evidence_name_or_id or "").strip()
+    if not ref:
+        raise ValueError("Evidence reference is empty")
+
+    # No item cap: a truncated list could hide a duplicate name and make an
+    # ambiguous reference look unique.
+    evidences, error = fetch_all_results(
+        "/evidences/", params={"name": ref}, max_items=None
+    )
+
+    if error:
+        raise ValueError(f"Evidence '{ref}' API error: {error}")
+
+    if not evidences:
+        raise ValueError(f"Evidence '{ref}' not found")
+
+    if len(evidences) > 1:
+        labels = [
+            f"{e.get('name')} ({(e.get('folder') or {}).get('str')}, {e.get('id')})"
+            for e in evidences[:5]
+        ]
+        raise ValueError(
+            f"Ambiguous evidence name '{ref}', found {len(evidences)}: {labels}"
+        )
+
+    return str(evidences[0]["id"])
+
+
+def _resolve_unique_by_name(endpoint: str, label: str, name_or_id: str) -> str:
+    """Resolve an exact name to a UUID via a `name` filter, refusing ambiguity."""
+    if _is_uuid(name_or_id):
+        return name_or_id
+
+    ref = str(name_or_id or "").strip()
+    if not ref:
+        raise ValueError(f"{label} reference is empty")
+
+    # No item cap: a truncated list could hide a duplicate name and make an
+    # ambiguous reference look unique.
+    results, error = fetch_all_results(endpoint, params={"name": ref}, max_items=None)
+
+    if error:
+        raise ValueError(f"{label} '{ref}' API error: {error}")
+
+    if not results:
+        raise ValueError(f"{label} '{ref}' not found")
+
+    if len(results) > 1:
+        labels = [
+            f"{r.get('name')} ({(r.get('folder') or {}).get('str')}, {r.get('id')})"
+            for r in results[:5]
+        ]
+        raise ValueError(
+            f"Ambiguous {label.lower()} name '{ref}', found {len(results)}: {labels}"
+        )
+
+    return str(results[0]["id"])
+
+
+def resolve_findings_assessment_id(findings_assessment_name_or_id: str) -> str:
+    """Resolve a findings assessment (binder) name or UUID to its UUID."""
+    return _resolve_unique_by_name(
+        "/findings-assessments/",
+        "Findings assessment",
+        findings_assessment_name_or_id,
+    )
+
+
+def resolve_finding_id(finding_name_or_id: str) -> str:
+    """Resolve a finding name or UUID to its UUID.
+
+    Finding names are not unique (even within one binder): an ambiguous name
+    is refused, pass the UUID instead.
+    """
+    return _resolve_unique_by_name("/findings/", "Finding", finding_name_or_id)
+
+
+def resolve_incident_id(incident_name_or_id: str) -> str:
+    """Resolve an incident name or UUID to its UUID.
+
+    The incidents endpoint has no `name` filter, so names are looked up via
+    `search` and then matched exactly (case-sensitive) on `name`.
+    """
+    if _is_uuid(incident_name_or_id):
+        return incident_name_or_id
+
+    # No item cap: search also matches description/ref_id, so the exact
+    # name may sit beyond the default limit.
+    results, error = fetch_all_results(
+        "/incidents/",
+        params={"search": incident_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Incident '{incident_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("name") == incident_name_or_id]
+    if not matches:
+        raise ValueError(f"Incident '{incident_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous incident name '{incident_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
+def resolve_policy_id(policy_name_or_id: str) -> str:
+    """Resolve a policy name or UUID to its UUID (search, then exact name match)."""
+    if _is_uuid(policy_name_or_id):
+        return policy_name_or_id
+
+    results, error = fetch_all_results(
+        "/policies/",
+        params={"search": policy_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Policy '{policy_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("name") == policy_name_or_id]
+    if not matches:
+        raise ValueError(f"Policy '{policy_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous policy name '{policy_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
+def resolve_managed_document_id(document_name_or_id: str) -> str:
+    """Resolve a managed document's name or UUID to its UUID.
+
+    The managed-documents endpoint has no `name` filter, so names are looked
+    up via `search` and then matched exactly (case-sensitive) on
+    `display_name` (the document's own name, falling back to its container's).
+    """
+    if _is_uuid(document_name_or_id):
+        return document_name_or_id
+
+    results, error = fetch_all_results(
+        "/managed-documents/",
+        params={"search": document_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Document '{document_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("display_name") == document_name_or_id]
+    if not matches:
+        raise ValueError(f"Document '{document_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous document name '{document_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
 def resolve_team_id(team_name_or_id: str) -> str:
     """Helper function to resolve team name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in team_name_or_id and len(team_name_or_id) == 36:
+    if _is_uuid(team_name_or_id):
         return team_name_or_id
 
     teams, error = fetch_all_results("/teams/", params={"name": team_name_or_id})
@@ -482,31 +678,38 @@ def resolve_team_id(team_name_or_id: str) -> str:
     return str(teams[0]["id"])
 
 
-def resolve_task_template_id(task_name_or_id: str) -> str:
-    """Helper function to resolve task template name to UUID
-    If already a UUID, returns it. If a name, looks it up via API.
+def resolve_task_template_id(task_name_or_id: str, folder_id: str = None) -> str:
+    """Resolve a task template name or UUID to its UUID.
+
+    The task templates endpoint has no `name` filter, so names are looked up
+    via `search` and then matched on `name`, ignoring case and surrounding
+    whitespace. `folder_id` optionally scopes the lookup.
     """
-    # Check if it's already a UUID
-    if "-" in task_name_or_id and len(task_name_or_id) == 36:
+    if _is_uuid(task_name_or_id):
         return task_name_or_id
 
-    # Otherwise, look up by name
+    params = {"search": task_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+    # No item cap: search also matches ref_id, so the exact name may sit
+    # beyond the default limit.
     tasks, error = fetch_all_results(
-        "/task-templates/", params={"name": task_name_or_id}
+        "/task-templates/",
+        params=params,
+        max_items=None,
     )
-
     if error:
         raise ValueError(f"Task template '{task_name_or_id}' API error: {error}")
 
-    if not tasks:
+    wanted = task_name_or_id.strip().casefold()
+    matches = [t for t in tasks if (t.get("name") or "").strip().casefold() == wanted]
+    if not matches:
         raise ValueError(f"Task template '{task_name_or_id}' not found")
-
-    if len(tasks) > 1:
+    if len(matches) > 1:
         raise ValueError(
-            f"Ambiguous task template name '{task_name_or_id}', found {len(tasks)}"
+            f"Ambiguous task template name '{task_name_or_id}', found {len(matches)}"
         )
-
-    return tasks[0]["id"]
+    return matches[0]["id"]
 
 
 # ============================================================================
@@ -518,7 +721,7 @@ def resolve_entity_id(entity_name_or_id: str) -> str:
     """Helper function to resolve entity name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in entity_name_or_id and len(entity_name_or_id) == 36:
+    if _is_uuid(entity_name_or_id):
         return entity_name_or_id
 
     entities, error = fetch_all_results(
@@ -543,7 +746,7 @@ def resolve_solution_id(solution_name_or_id: str) -> str:
     """Helper function to resolve solution name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in solution_name_or_id and len(solution_name_or_id) == 36:
+    if _is_uuid(solution_name_or_id):
         return solution_name_or_id
 
     solutions, error = fetch_all_results(
@@ -568,7 +771,7 @@ def resolve_contract_id(contract_name_or_id: str) -> str:
     """Helper function to resolve contract name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in contract_name_or_id and len(contract_name_or_id) == 36:
+    if _is_uuid(contract_name_or_id):
         return contract_name_or_id
 
     contracts, error = fetch_all_results(
@@ -593,7 +796,7 @@ def resolve_entity_assessment_id(assessment_name_or_id: str) -> str:
     """Helper function to resolve entity assessment name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+    if _is_uuid(assessment_name_or_id):
         return assessment_name_or_id
 
     assessments, error = fetch_all_results(
@@ -620,7 +823,7 @@ def resolve_representative_id(representative_email_or_id: str) -> str:
     """Helper function to resolve representative email to UUID
     If already a UUID, returns it. If an email, looks it up via API.
     """
-    if "-" in representative_email_or_id and len(representative_email_or_id) == 36:
+    if _is_uuid(representative_email_or_id):
         return representative_email_or_id
 
     # Search by email since that's the unique identifier for representatives
@@ -653,7 +856,7 @@ def resolve_ebios_rm_study_id(study_name_or_id: str) -> str:
     """Helper function to resolve EBIOS RM study name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in study_name_or_id and len(study_name_or_id) == 36:
+    if _is_uuid(study_name_or_id):
         return study_name_or_id
 
     studies, error = fetch_all_results(
@@ -678,7 +881,7 @@ def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
     """Helper function to resolve feared event name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in feared_event_name_or_id and len(feared_event_name_or_id) == 36:
+    if _is_uuid(feared_event_name_or_id):
         return feared_event_name_or_id
 
     feared_events, error = fetch_all_results(
@@ -703,7 +906,7 @@ def resolve_ro_to_id(ro_to_id: str) -> str:
     """Helper function to resolve RoTo couple ID
     RoTo couples don't have names, so only UUIDs are accepted.
     """
-    if "-" in ro_to_id and len(ro_to_id) == 36:
+    if _is_uuid(ro_to_id):
         return ro_to_id
 
     raise ValueError(f"RoTo couple '{ro_to_id}' is not a valid UUID")
@@ -713,7 +916,7 @@ def resolve_stakeholder_id(stakeholder_id: str) -> str:
     """Helper function to resolve stakeholder ID
     Stakeholders are identified by entity+category, so only UUIDs are accepted.
     """
-    if "-" in stakeholder_id and len(stakeholder_id) == 36:
+    if _is_uuid(stakeholder_id):
         return stakeholder_id
 
     raise ValueError(f"Stakeholder '{stakeholder_id}' is not a valid UUID")
@@ -723,7 +926,7 @@ def resolve_strategic_scenario_id(scenario_name_or_id: str) -> str:
     """Helper function to resolve strategic scenario name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
+    if _is_uuid(scenario_name_or_id):
         return scenario_name_or_id
 
     scenarios, error = fetch_all_results(
@@ -750,7 +953,7 @@ def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
     """Helper function to resolve attack path name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in attack_path_name_or_id and len(attack_path_name_or_id) == 36:
+    if _is_uuid(attack_path_name_or_id):
         return attack_path_name_or_id
 
     attack_paths, error = fetch_all_results(
@@ -775,7 +978,7 @@ def resolve_operational_scenario_id(scenario_id: str) -> str:
     """Helper function to resolve operational scenario ID
     Operational scenarios derive their name from attack paths, so only UUIDs are accepted.
     """
-    if "-" in scenario_id and len(scenario_id) == 36:
+    if _is_uuid(scenario_id):
         return scenario_id
 
     raise ValueError(f"Operational scenario '{scenario_id}' is not a valid UUID")
@@ -785,7 +988,7 @@ def resolve_elementary_action_id(action_name_or_id: str) -> str:
     """Helper function to resolve elementary action name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in action_name_or_id and len(action_name_or_id) == 36:
+    if _is_uuid(action_name_or_id):
         return action_name_or_id
 
     actions, error = fetch_all_results(
@@ -810,7 +1013,7 @@ def resolve_operating_mode_id(mode_name_or_id: str) -> str:
     """Helper function to resolve operating mode name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
     """
-    if "-" in mode_name_or_id and len(mode_name_or_id) == 36:
+    if _is_uuid(mode_name_or_id):
         return mode_name_or_id
 
     modes, error = fetch_all_results(
@@ -835,7 +1038,7 @@ def resolve_kill_chain_id(kill_chain_id: str) -> str:
     """Helper function to resolve kill chain step ID
     Kill chain steps don't have names, so only UUIDs are accepted.
     """
-    if "-" in kill_chain_id and len(kill_chain_id) == 36:
+    if _is_uuid(kill_chain_id):
         return kill_chain_id
 
     raise ValueError(f"Kill chain step '{kill_chain_id}' is not a valid UUID")
@@ -999,32 +1202,40 @@ def resolve_user_id(user_ref: str) -> str:
     if not ref:
         raise ValueError("User reference is empty")
 
-    params = {"email": ref} if "@" in ref else {"search": ref}
-    users, error = fetch_all_results("/users/", params=params)
+    params = {"email__icontains": ref} if "@" in ref else {"search": ref}
+    # No item cap: the exact match (or a second one) may sit beyond the
+    # default limit of a fuzzy search.
+    users, error = fetch_all_results("/users/", params=params, max_items=None)
     if error:
         raise ValueError(f"User '{ref}' API error: {error}")
 
     if not users:
         raise ValueError(f"User '{ref}' not found")
 
-    if len(users) > 1:
-        needle = ref.lower()
-        exact = [
-            u
-            for u in users
-            if needle
-            in {
-                (u.get("first_name") or "").lower(),
-                (u.get("last_name") or "").lower(),
-                f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
-            }
-        ]
-        if len(exact) == 1:
-            return str(exact[0]["id"])
-        labels = [u.get("email") for u in users[:5]]
-        raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
+    # ?search= is a partial match: require an exact email or name match even
+    # for a single result, so "Ann" never silently resolves to "Joanna Smith".
+    needle = ref.lower()
+    exact = [
+        u
+        for u in users
+        if needle
+        in {
+            (u.get("email") or "").lower(),
+            (u.get("first_name") or "").lower(),
+            (u.get("last_name") or "").lower(),
+            f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
+        }
+    ]
+    if len(exact) == 1:
+        return str(exact[0]["id"])
 
-    return str(users[0]["id"])
+    if not exact:
+        labels = [u.get("email") for u in users[:5]]
+        raise ValueError(
+            f"User '{ref}' not found as an exact email or name. Candidates: {labels}"
+        )
+    labels = [u.get("email") for u in exact[:5]]
+    raise ValueError(f"Ambiguous user '{ref}', found {len(exact)}: {labels}")
 
 
 def resolve_user_ids(user_refs) -> list:

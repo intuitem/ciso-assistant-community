@@ -67,12 +67,15 @@ The following metrics are exposed:
 - `ciso_assistant_nb_risk_assessments`: Number of risk assessments
 - `ciso_assistant_nb_risk_scenarios`: Number of risk scenarios
 - `ciso_assistant_nb_risk_acceptances`: Number of risk acceptances
-- `ciso_assistant_nb_seats`: Number of seats
-- `ciso_assistant_nb_editors`: Number of editors
-- `ciso_assistant_license_expiration`: License expiration timestamp
 - `ciso_assistant_created_at`: Instance creation timestamp
 - `ciso_assistant_last_login`: Last login timestamp
 - `ciso_assistant_build_info`: Build information (version, build, schema_version, debug)
+
+The enterprise edition adds its license metrics:
+
+- `ciso_assistant_nb_seats`: Number of license seats
+- `ciso_assistant_nb_editors`: Number of editors, the users holding a seat
+- `ciso_assistant_license_expiration`: License expiration timestamp (-1 when unset)
 
 ## Prometheus Configuration
 

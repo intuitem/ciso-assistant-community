@@ -1,8 +1,8 @@
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
-import { toCamelCase } from '$lib/utils/locales';
-import { formatDateOrDateTime } from '$lib/utils/datetime';
-import { getLocale } from '$paraglide/runtime';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { toCamelCase } from '#lib/utils/locales.js';
+import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+import { getLocale } from '#paraglide/runtime.js';
 
 export type SeverityKey = 'errors' | 'warnings' | 'info';
 

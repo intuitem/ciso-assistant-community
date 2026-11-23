@@ -1,13 +1,16 @@
 <script lang="ts">
-	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
-	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
+	import LevelEditor from '#lib/components/RiskMatrixEditor/LevelEditor.svelte';
+	import GridEditor from '#lib/components/RiskMatrixEditor/GridEditor.svelte';
 	import EbiosRmSectionEditor from './EbiosRmSectionEditor.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { LOCALE_MAP, language } from '$lib/utils/locales';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { LOCALE_MAP, language } from '#lib/utils/locales.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+
+	const modalStore = getModalStore();
 
 	const toastStore = getToastStore();
 
@@ -315,9 +318,11 @@
 					<button
 						type="button"
 						class="pr-2 pl-0 py-1 opacity-50 hover:opacity-100 transition-opacity"
-						onclick={(e) => {
+						onclick={async (e) => {
 							e.stopPropagation();
-							if (confirm(m.removeLanguageConfirm({ lang: localeLabel(lang) }))) {
+							if (
+								await confirmModal(modalStore, m.removeLanguageConfirm({ lang: localeLabel(lang) }))
+							) {
 								removeLanguage(lang);
 							}
 						}}

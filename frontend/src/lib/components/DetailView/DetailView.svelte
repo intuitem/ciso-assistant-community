@@ -1,52 +1,70 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { urlModelForDjangoName } from '$lib/utils/crud';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
-	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
-	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
-	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isURL } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { urlModelForDjangoName } from '#lib/utils/crud.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '#lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '#lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '#lib/components/Modals/RiskAcceptanceModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '#lib/components/Forms/CustomFieldsDisplay.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
+	import { type ModelMapEntry, type ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '#lib/utils/crud.js';
+	import { formatDate, formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { isURL } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getListViewFields } from '$lib/utils/table';
+	import { goto, refreshAll } from '$app/navigation';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
 	import {
 		canPerformActionOnObject,
 		hasPermissionAnywhere,
 		resolveObjectDomain
-	} from '$lib/utils/access-control';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
+	} from '#lib/utils/access-control.js';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
+
+	// The one setting an instance owns on a library form (see QuickForm.always_review).
+	async function setAlwaysReview(box: HTMLInputElement) {
+		const ok = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ always_review: box.checked })
+		})
+			.then((res) => res.ok)
+			.catch(() => false);
+		if (!ok) {
+			// The page data did not change, so the box would keep showing the refused value.
+			box.checked = !box.checked;
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+			return;
+		}
+		await refreshAll();
+	}
 
 	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
 
@@ -85,6 +103,8 @@
 		/** Lets a caller keep the widget column out of the layout when its only
 		 * widget is behind a feature flag that is off. */
 		widgetsEnabled?: boolean;
+		/** List every field instead of folding them after MAX_ROWS behind "view more". */
+		showAllFields?: boolean;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
@@ -100,6 +120,7 @@
 		dateFieldsToFormat = DATE_FIELDS_TO_FORMAT,
 		widgets,
 		widgetsEnabled = true,
+		showAllFields = false,
 		actions,
 		disableCreate = false,
 		disableEdit = false,
@@ -138,6 +159,7 @@
 	let visibleDetailViewFields = $derived(
 		data.model?.detailViewFields?.filter((fieldConfig) => {
 			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			if (fieldConfig.visibleWhen && !data.data?.[fieldConfig.visibleWhen]) return false;
 			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
 		})
 	);
@@ -447,19 +469,21 @@
 	let relatedModels = $derived(getSortedRelatedModels());
 	let relatedModelsNames: Set<string> = $state(new Set());
 
-	let group = $state(
-		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
-	);
+	// Open on the first tab not known to be empty (an unknown count may hold rows), else the first.
+	function firstTabKey(models: [string, any][]): string | undefined {
+		return (models.find(([, model]) => model.count !== 0) ?? models[0])?.[0];
+	}
+
+	let group = $state(firstTabKey(getSortedRelatedModels()));
 	// Tabs.Content renders hidden panels too, so gate on first visit. Kept once
 	// visited, so switching back costs no refetch. Reassigned: a Set is not deep state.
-	let visitedTabs = $state(
-		new Set(
-			Object.keys(data?.relatedModels ?? {}).length > 0 ? [getSortedRelatedModels()[0][0]] : []
-		)
-	);
+	let visitedTabs = $state(new Set(group ? [group] : []));
 	$effect(() => {
 		if (group && !visitedTabs.has(group)) visitedTabs = new Set(visitedTabs).add(group);
 	});
+	// Plain (non-reactive) marker: navigating to another record of the same model keeps the same
+	// tab names but different counts, so the default tab must be recomputed then too.
+	let shownRecordId = data?.data?.id;
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
@@ -467,10 +491,12 @@
 		const setsAreDifferent =
 			relatedModelsNames.size !== newRelatedModelsNames.size ||
 			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
+		const recordChanged = data?.data?.id !== shownRecordId;
 
-		if (setsAreDifferent) {
+		if (setsAreDifferent || recordChanged) {
+			shownRecordId = data?.data?.id;
 			relatedModelsNames = newRelatedModelsNames;
-			const firstTab = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+			const firstTab = firstTabKey(relatedModels);
 			group = firstTab;
 			visitedTabs = new Set(firstTab ? [firstTab] : []);
 		}
@@ -604,7 +630,9 @@
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-100-900 sm:grid-cols-5 sm:gap-4 {index >=
-								MAX_ROWS && !expandedTable
+								MAX_ROWS &&
+							!expandedTable &&
+							!showAllFields
 								? 'hidden'
 								: ''}"
 						>
@@ -667,9 +695,12 @@
 													: (safeTranslate(value) ?? m.undefined())}
 												{stringifiedSeverity}
 											{:else if key === 'children_assets'}
-												{#if Object.keys(value).length > 0}
+												{@const visibleChildren = Array.isArray(value)
+													? value.filter((item) => !isMaskedPlaceholder(item))
+													: []}
+												{#if visibleChildren.length > 0}
 													<ul class="inline-flex flex-wrap space-x-4">
-														{#each value as val}
+														{#each visibleChildren as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
 																{#if val.str && val.id}
 																	{@const itemHref = `/${
@@ -687,8 +718,13 @@
 															</li>
 														{/each}
 													</ul>
-												{:else}
-													--
+												{:else if hiddenCountForValue === 0}
+													<span class="text-surface-400-600">--</span>
+												{/if}
+												{#if hiddenCountForValue > 0}
+													<p class="mt-1 text-xs text-yellow-700">
+														{m.objectsNotVisible({ count: hiddenCountForValue })}
+													</p>
 												{/if}
 											{:else if key === 'translations'}
 												{#if Object.keys(value).length > 0}
@@ -701,7 +737,7 @@
 														{/each}
 													</div>
 												{:else}
-													--
+													<span class="text-surface-400-600">--</span>
 												{/if}
 												<!-- Values that are Arrays -->
 											{:else if Array.isArray(value)}
@@ -788,7 +824,7 @@
 														{m.objectsNotVisible({ count: hiddenCountForValue })}
 													</p>
 												{:else}
-													--
+													<span class="text-surface-400-600">--</span>
 												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
@@ -842,7 +878,7 @@
 												{(value.str || value.name) ?? value}
 											{/if}
 										{:else}
-											--
+											<span class="text-surface-400-600">--</span>
 										{/if}
 									</li>
 								</ul>
@@ -861,7 +897,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if !showAllFields && orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-primary-800-200"
@@ -873,7 +909,7 @@
 		{/if}
 
 		<!-- Bottom row for action buttons -->
-		<div class="flex flex-row justify-end mt-4 gap-2">
+		<div class="flex flex-row flex-wrap justify-end items-start mt-4 gap-2">
 			{#if mailing}
 				<button
 					class="btn preset-filled-primary-500 h-fit"
@@ -892,7 +928,9 @@
 						)}
 				>
 					<i class="fas fa-paper-plane mr-2"></i>
-					{m.sendQuestionnaire()}
+					{data.data.assignment_status && data.data.assignment_status !== 'draft'
+						? m.resendQuestionnaire()
+						: m.sendQuestionnaire()}
 				</button>
 			{/if}
 
@@ -954,21 +992,21 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						class="btn btn-quiet"
 						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
 						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-copy mr-2"></i>
+						<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>
 						{m.duplicate()}</button
 					>
 				{/if}
 				{#if data.urlModel === 'organisation-objectives'}
 					<button
-						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						class="btn btn-quiet"
 						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
-						<i class="fa-solid fa-copy mr-2"></i>
+						<i class="fa-solid fa-copy mr-2 text-fuchsia-500"></i>
 						{m.duplicate()}</button
 					>
 				{/if}
@@ -976,14 +1014,40 @@
 			{#if showRelations}
 				<button
 					type="button"
-					class="btn h-fit text-white bg-linear-to-l from-violet-500 to-indigo-600"
+					class="btn btn-quiet h-fit"
 					data-testid="relations-button"
 					onclick={() => (relationsOpen = true)}
 				>
-					<i class="fa-solid fa-circle-nodes mr-2"></i>{m.relationsGraph()}
+					<i class="fa-solid fa-circle-nodes mr-2 text-purple-500"></i>{m.relationsGraph()}
 				</button>
 			{/if}
-			{@render actions?.()}
+			<!-- Pages wrap their actions in a flex-col div; flatten it so every button joins this one
+			     right-aligned row (filled primary first, quiet ones after) instead of a stray column. -->
+			<div class="contents [&>div]:contents">{@render actions?.()}</div>
+			{#if data.urlModel === 'data-breaches'}
+				<a
+					class="btn preset-filled-primary-500 h-fit"
+					href={`/data-breaches/notification/${data.data?.id}`}
+					data-testid="breach-notification-button"
+					download
+				>
+					<i class="fa-solid fa-file-pdf mr-2"></i>{m.breachNotificationWorksheet()}
+				</a>
+			{/if}
+			{#if data.urlModel === 'quick-forms' && hasPermissionAnywhere(user, 'change_quickform')}
+				<label
+					class="flex h-fit items-center gap-2 text-sm"
+					title={m.alwaysReviewHelpText()}
+					data-testid="quick-form-always-review"
+				>
+					<input
+						type="checkbox"
+						class="checkbox"
+						checked={data.data?.always_review}
+						onchange={(e) => setAlwaysReview(e.currentTarget)}
+					/>{m.alwaysReview()}
+				</label>
+			{/if}
 			{#if data.urlModel === 'quick-forms'}
 				<!-- Answering a form is the only way to see what its conditions and outcomes
 				     actually do; the same preview serves drafts in the builder. -->
@@ -1046,7 +1110,7 @@
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#if visitedTabs.has(urlmodel)}
-						{#key urlmodel}
+						{#key `${data?.data?.id}:${urlmodel}`}
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
@@ -1158,7 +1222,7 @@
 {/if}
 
 {#if showRelations}
-	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
 		<RelationsDrawer
 			open={relationsOpen}
 			urlModel={data.urlModel}

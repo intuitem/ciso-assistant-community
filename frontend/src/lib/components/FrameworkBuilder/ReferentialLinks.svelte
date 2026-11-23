@@ -7,8 +7,8 @@
 		type ReferentialCatalogSource
 	} from './builder-api';
 	import { getReferentialCatalog } from './referential-catalog';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		node: BuilderNode;
@@ -310,7 +310,7 @@
 						</div>
 					{/if}
 					<textarea
-						class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded focus:border-blue-300 focus:outline-none resize-none"
+						class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded focus:border-blue-300 focus:outline-none resize-y"
 						placeholder={m.description()}
 						rows="2"
 						bind:value={createDescription}

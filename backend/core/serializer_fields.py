@@ -2,6 +2,7 @@ from hashlib import sha256
 from typing import Any, Optional, Type
 
 from django.db import models
+from django.utils.translation import get_language
 from rest_framework import serializers
 
 from structlog import get_logger
@@ -87,6 +88,9 @@ class FieldsRelatedField(serializers.RelatedField):
             field_value = getattr(value, field_name, None)
             if isinstance(field_value, models.Model):
                 return self.to_representation(field_value, ["id"])
+            accessor = getattr(value, "translated_fields", {}).get(field_name)
+            if accessor and field_value:
+                return self._translated(value, field_name, accessor)
             return field_value
 
         if isinstance(sub_fields, list):
@@ -94,6 +98,21 @@ class FieldsRelatedField(serializers.RelatedField):
             if nested_value and isinstance(nested_value, models.Model):
                 return self.to_representation(nested_value, fields=sub_fields)
             return None  # or some other default value as appropriate
+
+    def _translated(self, value, field_name: str, accessor: str):
+        """Translate once per object and language for the whole serialization:
+        list endpoints nest the same framework in every row. The cache lives in
+        the root serializer's context, which a many=True list shares."""
+        context = self.context
+        cache = (
+            context.setdefault("_translated_fields", {})
+            if isinstance(context, dict)
+            else {}
+        )
+        key = (value._meta.label, value.pk, field_name, get_language())
+        if key not in cache:
+            cache[key] = getattr(value, accessor)()
+        return cache[key]
 
 
 class PathField(serializers.SerializerMethodField):

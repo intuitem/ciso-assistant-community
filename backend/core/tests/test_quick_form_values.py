@@ -51,6 +51,16 @@ class TestDocumentEvaluation:
         assert result["computed_values"] == {"risk": 1.0}
         assert result["computed_outcome"] == {}
 
+    def test_rules_read_hidden_pages(self):
+        form = _with_rules(
+            [{"ref_id": "skipped", "expression": "size(hidden_pages) == 1"}]
+        )
+        form["pages"][-1]["visibility_expression"] = "false"
+        assert validate_quick_form_expressions(form) == []
+        result = evaluate_quick_form_document(form, _answers(_none_yes()))
+        assert result["hidden_pages"] == [form["pages"][-1]["urn"]]
+        assert "skipped" in result["computed_outcome"]
+
     def test_yes_no_rules_read_values(self):
         form = _with_rules(
             [

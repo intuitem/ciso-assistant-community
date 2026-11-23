@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import type { Quotation } from '$lib/utils/ebios-quotation';
+	import { m } from '#paraglide/messages.js';
+	import type { Quotation } from '#lib/utils/ebios-quotation.js';
 
 	interface Props {
 		id: string;

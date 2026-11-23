@@ -1,17 +1,19 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { afterNavigate } from '$app/navigation';
-	import { tableStates } from '$lib/utils/stores';
-	import { breadcrumbs } from '$lib/utils/breadcrumbs';
+	import { m } from '#paraglide/messages.js';
+	import { afterNavigate, goto } from '$app/navigation';
+	import { tableStates } from '#lib/utils/stores.js';
+	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
 	interface Props {
 		handler: DataHandler;
 		URLModel: string;
 		scrollTarget?: HTMLElement;
+		/** Mirror the page number in the URL (standalone tables only) */
+		syncToUrl?: boolean;
 	}
 
-	let { handler, URLModel, scrollTarget }: Props = $props();
+	let { handler, URLModel, scrollTarget, syncToUrl = false }: Props = $props();
 
 	const pageNumber = handler.getPageNumber();
 	const rowsPerPage = handler.getRowsPerPage();
@@ -24,17 +26,24 @@
 			pageNumber: $pageNumber,
 			rowsPerPage: $rowsPerPage as number
 		};
-		page.url.searchParams.set('page', $pageNumber.toString());
-		const fullPath = page.url.pathname + page.url.search;
-		const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
-		if (hrefPattern.test(fullPath)) {
-			breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
+		if (syncToUrl) {
+			const url = new URL(page.url.href);
+			url.searchParams.set('page', $pageNumber.toString());
+			if (url.href !== page.url.href) {
+				goto(url, { shallow: true, replace: true, state: page.state });
+			}
+			const fullPath = url.pathname + url.search;
+			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
+			if (hrefPattern.test(fullPath)) {
+				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
+			}
 		}
 		handler.invalidate();
 		scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (!page.url) return;
 
 		const parsed = parseInt(page.url.searchParams.get('page') ?? '1');

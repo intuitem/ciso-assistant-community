@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getBuilderContext, type Question } from './builder-state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		question: Question;

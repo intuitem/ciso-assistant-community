@@ -1,13 +1,15 @@
 import pytest
 from uuid import uuid4
 from django.contrib.auth.models import Permission
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from knox.models import AuthToken
 from core.models import User
 
-from iam.models import Folder, Role, RoleAssignment, UserGroup
+from iam.models import Folder, IdPGroup, Role, RoleAssignment, UserGroup
 from test_vars import GROUPS_PERMISSIONS, TEST_USER_EMAIL
 
 
@@ -316,6 +318,34 @@ class TestUserGroupMembership:
         )
         assert "d2member@tests.com" in [r["email"] for r in rows]
 
+    def test_group_filters_list_no_member_of_an_unreadable_group(self, app_config):
+        """Filtering users on a group must not list the members of a group the
+        caller can't read: a D1 manager gets D1's members, and nobody for D2's
+        user group or IdP group."""
+        _, d1_group, manager = self._setup_domain("D1")
+        d2, d2_group, _ = self._setup_domain("D2")
+        d1_member = User.objects.create_user("d1member@tests.com")
+        d1_group.user_set.add(d1_member)
+        d2_member = User.objects.create_user("d2member@tests.com")
+        d2_group.user_set.add(d2_member)
+        d2_idp_group = IdPGroup.objects.create(name="D2 directory", folder=d2)
+        d2_member.idp_groups.add(d2_idp_group)
+        client = _client_for(manager)
+
+        def emails(query):
+            response = client.get(reverse("users-list"), query)
+            assert response.status_code == status.HTTP_200_OK, response.content
+            rows = (
+                response.data["results"]
+                if isinstance(response.data, dict)
+                else response.data
+            )
+            return [row["email"] for row in rows]
+
+        assert emails({"user_groups": str(d1_group.id)}) == ["d1member@tests.com"]
+        assert emails({"user_groups": str(d2_group.id)}) == []
+        assert emails({"idp_groups": str(d2_idp_group.id)}) == []
+
     def test_cannot_rename_builtin_group_via_patch(self, app_config):
         """A builtin group's fields are immutable via the API even with
         change_usergroup: the name field is read-only, so a rename is ignored
@@ -403,3 +433,73 @@ class TestUserGroupMembership:
 
         assert response.status_code == status.HTTP_200_OK
         assert builtin_group.user_set.filter(pk=target.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserGroupListQueries:
+    """UserGroupFilter sorts — and searches — every visible group by its folder
+    path on each list request, before pagination: the path must not cost a query
+    per group, or the eager user-groups picker pays it on every page."""
+
+    @staticmethod
+    def _add_domains(start: int, count: int) -> None:
+        root = Folder.get_root_folder()
+        for i in range(start, start + count):
+            domain = Folder.objects.create(
+                name=f"QD{i}",
+                parent_folder=root,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            subdomain = Folder.objects.create(
+                name=f"QD{i} sub",
+                parent_folder=domain,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            UserGroup.objects.create(name=f"QD{i} team", folder=subdomain)
+
+    @staticmethod
+    def _measure(client, url) -> tuple[int, int]:
+        client.get(url)  # warm caches the added folders invalidated
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        return len(ctx.captured_queries), response.json()["count"]
+
+    @pytest.mark.parametrize("query", ["", "?search=QD"])
+    def test_query_count_does_not_grow_with_groups(self, authenticated_client, query):
+        url = reverse("user-groups-list") + query
+        self._add_domains(0, 3)
+        baseline_queries, baseline_count = self._measure(authenticated_client, url)
+
+        self._add_domains(3, 10)
+        queries, count = self._measure(authenticated_client, url)
+
+        assert count > baseline_count
+        assert queries == baseline_queries
+
+
+@pytest.mark.django_db
+class TestUserGroupAutocomplete:
+    """Lazy user-group pickers search and hydrate through autocomplete and label
+    options with `name`: it must match the list's, not a built-in group's code."""
+
+    def test_builtin_group_named_as_in_list(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="AC domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        group = UserGroup.objects.get(folder=domain, name="BI-UG-ANA")
+        query = f"?id={group.id}"
+
+        listed = authenticated_client.get(reverse("user-groups-list") + query)
+        completed = authenticated_client.get(
+            reverse("user-groups-autocomplete") + query
+        )
+
+        assert completed.status_code == status.HTTP_200_OK
+        name = completed.json()["results"][0]["name"]
+        assert name == listed.json()["results"][0]["name"] == str(group)
+        assert name != group.name

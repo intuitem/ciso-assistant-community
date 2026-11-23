@@ -7,7 +7,7 @@
 		useSvelteFlow,
 		type EdgeProps
 	} from '@xyflow/svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	// The one edge used everywhere (n8n behavior): a plain bezier while the
 	// target sits forward of the source, switching to a rounded step detour

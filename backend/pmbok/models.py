@@ -1,11 +1,15 @@
 from datetime import date
 from decimal import Decimal
 
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
+from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 from iam.models import Folder, FolderMixin
 from core.models import (
+    AppliedControl,
     FilteringLabelMixin,
     FindingsAssessment,
     Policy,
@@ -16,9 +20,12 @@ from core.models import (
     Terminology,
 )
 from crq.models import QuantitativeRiskStudy
+from doc_management.models import DocumentContainer
 from ebios_rm.models import EbiosRMStudy
+from resilience.models import BusinessImpactAnalysis
 from tprm.models import Entity, EntityAssessment
 from core.base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     NameDescriptionMixin,
 )
@@ -34,54 +41,103 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
 
 
 class GenericCollection(NameDescriptionFolderMixin, FilteringLabelMixin):
+    ITEM_TYPES = {
+        "compliance_assessments": ComplianceAssessment.objects.all(),
+        "risk_assessments": RiskAssessment.objects.all(),
+        "crq_studies": QuantitativeRiskStudy.objects.all(),
+        "ebios_studies": EbiosRMStudy.objects.all(),
+        "entity_assessments": EntityAssessment.objects.all(),
+        "findings_assessments": FindingsAssessment.objects.all(),
+        "documents": Evidence.objects.all(),
+        "security_exceptions": SecurityException.objects.all(),
+        "policies": Policy.objects.all(),
+        "applied_controls": AppliedControl.objects.exclude(category="policy"),
+        "document_containers": DocumentContainer.objects.all(),
+        "business_impact_analyses": BusinessImpactAnalysis.objects.all(),
+    }
+
     ref_id = models.CharField(max_length=100, blank=True)
-    compliance_assessments = models.ManyToManyField(
-        ComplianceAssessment,
-        blank=True,
-    )
-    risk_assessments = models.ManyToManyField(
-        RiskAssessment,
-        blank=True,
-    )
-    crq_studies = models.ManyToManyField(
-        QuantitativeRiskStudy,
-        blank=True,
-    )
-
-    ebios_studies = models.ManyToManyField(
-        EbiosRMStudy,
-        blank=True,
-    )
-    entity_assessments = models.ManyToManyField(
-        EntityAssessment,
-        blank=True,
-    )
-    findings_assessments = models.ManyToManyField(
-        FindingsAssessment,
-        blank=True,
-    )
-    documents = models.ManyToManyField(
-        Evidence,
-        blank=True,
-    )
-    security_exceptions = models.ManyToManyField(
-        SecurityException,
-        blank=True,
-    )
-
-    policies = models.ManyToManyField(
-        Policy,
-        blank=True,
-    )
-
     dependencies = models.ManyToManyField(
         "self",
         blank=True,
         symmetrical=False,
     )
 
+    def get_items(self, field):
+        queryset = self.ITEM_TYPES[field].all()
+        return queryset.filter(
+            pk__in=self.items.filter(
+                content_type=ContentType.objects.get_for_model(queryset.model)
+            ).values("object_id")
+        )
 
-class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
+    def set_items(self, field, objects):
+        content_type = ContentType.objects.get_for_model(self.ITEM_TYPES[field].model)
+        new = {obj.pk for obj in objects}
+        current = set(self.get_items(field).values_list("pk", flat=True))
+        self.items.filter(
+            content_type=content_type, object_id__in=current - new
+        ).delete()
+        for pk in new - current:
+            CollectionItem.objects.get_or_create(
+                collection=self, content_type=content_type, object_id=pk
+            )
+
+    @classmethod
+    def containing(cls, obj):
+        return cls.objects.filter(
+            items__content_type=ContentType.objects.get_for_model(obj),
+            items__object_id=obj.pk,
+        )
+
+    @classmethod
+    def set_collections_of(cls, obj, collections):
+        content_type = ContentType.objects.get_for_model(obj)
+        new = {collection.pk for collection in collections}
+        current = set(cls.containing(obj).values_list("pk", flat=True))
+        CollectionItem.objects.filter(
+            content_type=content_type,
+            object_id=obj.pk,
+            collection_id__in=current - new,
+        ).delete()
+        for pk in new - current:
+            CollectionItem.objects.get_or_create(
+                collection_id=pk, content_type=content_type, object_id=obj.pk
+            )
+
+
+class CollectionItem(AbstractBaseModel):
+    collection = models.ForeignKey(
+        GenericCollection, on_delete=models.CASCADE, related_name="items"
+    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    item = GenericForeignKey("content_type", "object_id")
+
+    IAM_SCOPE_FIELD = "collection"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "content_type", "object_id"],
+                name="unique_collection_item",
+            )
+        ]
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+
+
+def _delete_collection_items(sender, instance, **kwargs):
+    CollectionItem.objects.filter(
+        content_type=ContentType.objects.get_for_model(sender),
+        object_id=instance.pk,
+    ).delete()
+
+
+for _queryset in GenericCollection.ITEM_TYPES.values():
+    post_delete.connect(_delete_collection_items, sender=_queryset.model)
+
+
+class Accreditation(AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("in_progress", "In progress"),
@@ -97,6 +153,9 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("accreditation_restricted", "accreditationRestricted"),
         ("other", "Other"),
     )
+
+    auto_ref_id_prefix = "ACC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     category = models.ForeignKey(
@@ -170,7 +229,9 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
 
-class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin):
+class Project(
+    AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
+):
     class Kind(models.TextChoices):
         PORTFOLIO = "portfolio", _("Portfolio")
         PROGRAM = "program", _("Program")
@@ -216,6 +277,9 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
         choices=Kind.choices,
         default=Kind.PROJECT,
     )
+
+    auto_ref_id_prefix = "PRJ"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     ref_link = models.URLField(blank=True, max_length=2048)
@@ -617,6 +681,8 @@ class ResponsibilityMatrixActivity(AbstractBaseModel, FolderMixin):
     class Meta:
         ordering = ["order", "id"]
 
+    folder_from = "matrix"
+
     def save(self, *args, **kwargs):
         # Inherit folder from the parent matrix for IAM scoping.
         self.folder = self.matrix.folder
@@ -647,6 +713,8 @@ class ResponsibilityMatrixActor(AbstractBaseModel, FolderMixin):
                 name="unique_matrix_actor",
             )
         ]
+
+    folder_from = "matrix"
 
     def save(self, *args, **kwargs):
         self.folder = self.matrix.folder
@@ -681,6 +749,8 @@ class ResponsibilityAssignment(AbstractBaseModel, FolderMixin):
             )
         ]
 
+    folder_from = "activity"
+
     def save(self, *args, **kwargs):
         self.folder = self.activity.matrix.folder
         super().save(*args, **kwargs)
@@ -692,6 +762,10 @@ class ResponsibilityAssignment(AbstractBaseModel, FolderMixin):
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     GenericCollection,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    CollectionItem,
     exclude_fields=common_exclude,
 )
 auditlog.register(

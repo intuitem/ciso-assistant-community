@@ -11,8 +11,14 @@
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		remapGrid,
+		levelsInGroupOrder,
+		type OutcomeRule,
+		type Scale,
+		scoringDefaultsProblem
 	} from './builder-state';
+	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
 	import {
 		localeLabel,
@@ -20,9 +26,9 @@
 		createHandleGatedDragHandlers,
 		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
-	import { locales as supportedLocales } from '$paraglide/runtime';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { locales as supportedLocales } from '#paraglide/runtime.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -40,7 +46,7 @@
 	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
 	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
@@ -201,6 +207,32 @@
 		}
 	}
 
+	// Scales questions or ratings use: deleting one would break them.
+	let measuredScales = $derived(
+		$rootNodesStore
+			.flatMap((bn) =>
+				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
+			)
+			.filter(Boolean)
+	);
+	let usedScales = $derived(
+		[
+			...measuredScales,
+			...($frameworkStore.outcomes_definition ?? []).flatMap((r) =>
+				r.kind === 'rating' ? (r.dimensions ?? []) : []
+			)
+		].filter(Boolean)
+	);
+
+	// A scale that gains or loses levels resizes the grids that cross it.
+	function updateScales(scales: Scale[]) {
+		const before = ($frameworkStore.scales_definition ?? []) as Scale[];
+		const outcomes = ($frameworkStore.outcomes_definition ?? []).map((r: OutcomeRule) =>
+			r.kind === 'rating' && r.grid ? { ...r, grid: remapGrid(r, before, scales) } : r
+		);
+		builder.updateFramework({ scales_definition: scales, outcomes_definition: outcomes });
+	}
+
 	// Single-object reference questions that can name what a response is about.
 	// Only saved questions (with a URN) can be picked.
 	let subjectCandidates = $derived(
@@ -248,6 +280,23 @@
 							question.choices.some((c) => c.add_score !== null && c.add_score !== undefined)
 					) || walk(bn.children)
 			);
+		return walk($rootNodesStore);
+	});
+
+	const scoringProblem = $derived(scoringDefaultsProblem($frameworkStore));
+
+	// Anchoring needs a target: clearing the target clears it too.
+	function setTargetScore(raw: string) {
+		builder.updateFramework(
+			raw === ''
+				? { target_score: null, anchor_na_to_target: false }
+				: { target_score: Number(raw) }
+		);
+	}
+
+	const hasRequiredEvidence = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some((bn) => (bn.node.assessable && bn.node.evidence_required) || walk(bn.children));
 		return walk($rootNodesStore);
 	});
 
@@ -358,6 +407,7 @@
 	// the library-draft document is the persisted state (publishing is a
 	// separate, library-level concern).
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
@@ -380,8 +430,10 @@
 		)) {
 			return () => {};
 		}
+
 		const caret =
 			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+
 		el.blur();
 		return () => {
 			el.focus();
@@ -563,7 +615,7 @@
 									)}
 									placeholder={m.builderTranslateDescription()}
 									rows="2"
-									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 									onblur={(e) => {
 										builder.updateFramework({
 											translations: withTranslation(
@@ -593,7 +645,7 @@
 								? m.builderFormDescriptionPlaceholder()
 								: m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
 							}}
@@ -633,11 +685,11 @@
 									? 'fa-chevron-down'
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{mode === 'quick_form'
-									? m.builderFormSettings()
-									: m.builderFrameworkSettings()}</span
-							>
+
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider">
+								{mode === 'quick_form' ? m.builderFormSettings() : m.builderFrameworkSettings()}
+							</span>
+
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
@@ -657,7 +709,7 @@
 										? m.builderFormAnnotationPlaceholder()
 										: m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
-									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-y"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
 									}}
@@ -675,7 +727,7 @@
 											type="text"
 											value={$frameworkStore.urn_namespace ?? 'custom'}
 											placeholder="custom"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
@@ -696,7 +748,7 @@
 											type="text"
 											value={$frameworkStore.ref_id ?? ''}
 											placeholder="my-framework"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
@@ -750,7 +802,8 @@
 												type="number"
 												value={quickFormScore().min}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) => setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
+												onchange={(e) =>
+													setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
 											/>
 										</label>
 										<label class="block">
@@ -759,7 +812,7 @@
 												type="number"
 												value={quickFormScore().max}
 												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
-												onblur={(e) =>
+												onchange={(e) =>
 													setQuickFormScore({ max: intOr(e.currentTarget.value, 100) })}
 											/>
 										</label>
@@ -844,7 +897,7 @@
 														type="number"
 														value={$frameworkStore.min_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																min_score: parseInt(e.currentTarget.value) || 0
 															});
@@ -857,7 +910,7 @@
 														type="number"
 														value={$frameworkStore.max_score}
 														class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-														onblur={(e) => {
+														onchange={(e) => {
 															builder.updateFramework({
 																max_score: parseInt(e.currentTarget.value) || 100
 															});
@@ -879,6 +932,58 @@
 											<p class="text-xs text-surface-500">
 												{m.builderAggregationHint()}
 											</p>
+
+											<!-- Defaults proposed for new audits -->
+											<div
+												class="border-t border-surface-200-800 pt-3 space-y-2"
+												data-testid="framework-audit-defaults"
+											>
+												<div class="grid grid-cols-2 gap-3">
+													<label class="block">
+														<span class="text-xs text-surface-600-400"
+															>{m.scoreCalculationMethod()}</span
+														>
+														<select
+															value={$frameworkStore.score_calculation_method ?? 'average'}
+															class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
+															onchange={(e) =>
+																builder.updateFramework({
+																	score_calculation_method: e.currentTarget.value
+																})}
+														>
+															<option value="average">{m.average()}</option>
+															<option value="sum">{m.sum()}</option>
+															<option value="average_of_averages">{m.averageOfAverages()}</option>
+														</select>
+													</label>
+													<label class="block">
+														<span class="text-xs text-surface-600-400">{m.targetScore()}</span>
+														<input
+															type="number"
+															step="any"
+															value={$frameworkStore.target_score ?? ''}
+															class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onchange={(e) => setTargetScore(e.currentTarget.value)}
+														/>
+													</label>
+												</div>
+												<label class="flex items-center gap-2 text-xs text-surface-600-400">
+													<input
+														type="checkbox"
+														class="checkbox"
+														checked={$frameworkStore.anchor_na_to_target ?? false}
+														disabled={$frameworkStore.target_score == null}
+														onchange={(e) =>
+															builder.updateFramework({
+																anchor_na_to_target: e.currentTarget.checked
+															})}
+													/>
+													{m.anchorNaToTarget()}
+												</label>
+												{#if scoringProblem}
+													<p class="text-xs text-error-500">{safeTranslate(scoringProblem)}</p>
+												{/if}
+											</div>
 
 											<!-- Scale entries editor -->
 											<div class="border-t border-surface-200-800 pt-3 space-y-2">
@@ -909,7 +1014,7 @@
 																			type="number"
 																			value={entry.score}
 																			class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-																			onblur={(e) => {
+																			onchange={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].score = parseInt(e.currentTarget.value) || 0;
 																				setScaleEntries(entries);
@@ -1035,6 +1140,16 @@
 									{/if}
 								</div>
 							{/if}
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD}>
+									<ScalesEditor
+										scales={$frameworkStore.scales_definition ?? []}
+										used={usedScales}
+										activeLanguage={$activeLanguageStore}
+										onupdate={updateScales}
+									/>
+								</div>
+							{/if}
 							<!-- Outcome rules -->
 							<div class={SECTION_CARD}>
 								<OutcomesEditor
@@ -1045,6 +1160,14 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									nodes={$rootNodesStore}
+									scales={$frameworkStore.scales_definition ?? []}
+									measured={measuredScales}
+									onaddscales={(added) =>
+										updateScales([
+											...(($frameworkStore.scales_definition ?? []) as Scale[]),
+											...added
+										])}
 								/>
 							</div>
 
@@ -1054,7 +1177,7 @@
 										value={($frameworkStore.on_accept ?? []) as any[]}
 										rules={$frameworkStore.outcomes_definition ?? []}
 										{subjectModel}
-										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										onaddsubject={addSubjectQuestion}
 										scored={formGivesPoints}
 										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 									/>
@@ -1079,7 +1202,16 @@
 											};
 										})}
 										onupdate={(groups) =>
-											builder.updateFramework({ implementation_groups_definition: groups })}
+											builder.updateFramework({
+												implementation_groups_definition: groups,
+												outcomes_definition: levelsInGroupOrder(
+													$frameworkStore.outcomes_definition ?? [],
+													($frameworkStore.implementation_groups_definition ?? []).map((g) =>
+														String((g as Record<string, unknown>).ref_id ?? '')
+													),
+													groups.map((g) => g.ref_id)
+												)
+											})}
 										activeLanguage={$activeLanguageStore}
 									/>
 								</div>
@@ -1089,6 +1221,7 @@
 									<VisibilityEditor
 										value={$frameworkStore.field_visibility}
 										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+										evidenceRequired={hasRequiredEvidence}
 									/>
 								</div>
 							{/if}
@@ -1169,7 +1302,7 @@
 					{#each $rootNodesStore as bn, i (bn.node.id)}
 						<div
 							class:opacity-50={rootDrag.draggedIndex === i}
-							draggable="true"
+							draggable="false"
 							onmousedown={rootDrag.recordMousedown}
 							ondragstart={(e) => rootDrag.handleDragStart(e, i)}
 							ondragover={rootDrag.handleDragOver}

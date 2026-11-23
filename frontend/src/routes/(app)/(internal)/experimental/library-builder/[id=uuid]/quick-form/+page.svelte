@@ -1,8 +1,8 @@
 <script lang="ts">
-	import FrameworkBuilder from '$lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
-	import type { Framework } from '$lib/components/FrameworkBuilder/builder-state';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import FrameworkBuilder from '#lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
+	import type { Framework } from '#lib/components/FrameworkBuilder/builder-state.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 

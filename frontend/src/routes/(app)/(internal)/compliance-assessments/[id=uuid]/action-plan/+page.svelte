@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '#lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	let { data } = $props();
 
@@ -154,17 +154,19 @@
 						breadcrumbAction="push"
 						href={`/compliance-assessments/${page.params.id}/action-plan/analytics`}
 						label={m.analytics()}
-						class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+						class="btn btn-quiet h-fit"
 						title={m.appliedControlsAnalytics()}
 						aria-label={m.appliedControlsAnalytics()}
 						data-testid="analytics-button"
-						><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+						><i class="fa-solid fa-chart-pie mr-2 text-indigo-500" aria-hidden="true"
+						></i>{m.analytics()}</Anchor
 					>
 					<Anchor
 						breadcrumbAction="push"
 						href={`/applied-controls/flash-mode?compliance_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-						><i class="fa-solid fa-bolt mr-2" aria-hidden="true"></i> {m.flashMode()}</Anchor
+						class="btn btn-quiet h-fit"
+						><i class="fa-solid fa-bolt mr-2 text-orange-500" aria-hidden="true"></i>
+						{m.flashMode()}</Anchor
 					>
 				</div>
 			</div>
@@ -208,11 +210,12 @@
 						breadcrumbAction="push"
 						href={`/task-templates/analytics?compliance_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
 						label={m.analytics()}
-						class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+						class="btn btn-quiet h-fit"
 						title={m.taskTemplatesAnalytics()}
 						aria-label={m.taskTemplatesAnalytics()}
 						data-testid="task-analytics-button"
-						><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+						><i class="fa-solid fa-chart-pie mr-2 text-indigo-500" aria-hidden="true"
+						></i>{m.analytics()}</Anchor
 					>
 				</div>
 			</div>

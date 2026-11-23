@@ -1,13 +1,13 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
-import { modelSchema } from '$lib/utils/schemas';
-import { defaultWriteFormAction, defaultDeleteFormAction } from '$lib/utils/actions';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { fetchAllByIds, fetchAllPages } from '#lib/utils/pagination.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { defaultWriteFormAction, defaultDeleteFormAction } from '#lib/utils/actions.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
-import { idOf } from '$lib/components/AssetGraph/links';
+import { idOf } from '#lib/components/AssetGraph/links.js';
 
 const BATCH = 40;
 

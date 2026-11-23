@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll } from '$app/navigation';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { page } from '$app/state';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -61,12 +61,12 @@
 	};
 
 	async function updateStepStatus(stepId: string, newStatus: string) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	function buildQueryString(params: Record<string, unknown> | null | undefined): string {
@@ -144,7 +144,7 @@
 		if (!touchedStepPickers[step.id]) return;
 		const targetRef = (Array.isArray(value) ? (value[0] ?? null) : value) || null;
 		// Compare against the live server state, not the load-time snapshot in
-		// editableSteps — after a PATCH + invalidateAll the snapshot is stale and
+		// editableSteps — after a PATCH + refreshAll the snapshot is stale and
 		// would silently drop a revert to the original value.
 		const liveStep = (data.steps ?? []).find((s: any) => s.id === step.id);
 		const currentRef = (liveStep ? liveStep.target_ref : step.target_ref) ?? null;
@@ -153,12 +153,12 @@
 	}
 
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	let renaming = $state(false);
@@ -175,13 +175,13 @@
 			renaming = false;
 			return;
 		}
-		await fetch(`/journeys/${$page.params.id}/rename`, {
+		await fetch(`/journeys/${page.params.id}/rename`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: trimmed })
 		});
 		renaming = false;
-		invalidateAll();
+		refreshAll();
 	}
 
 	let compactMode = $state(false);
@@ -190,11 +190,10 @@
 	async function upgradeJourney() {
 		upgrading = true;
 		try {
-			const response = await fetch(`/journeys/${$page.params.id}/upgrade`, {
-				method: 'POST'
-			});
+			const response = await fetch(`/journeys/${page.params.id}/upgrade`, { method: 'POST' });
+
 			if (response.ok) {
-				invalidateAll();
+				refreshAll();
 			}
 		} catch (e) {
 			console.error('Failed to upgrade journey', e);
@@ -216,9 +215,9 @@
 			},
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
-				const response = await fetch(`/journeys/${$page.params.id}`, {
-					method: 'DELETE'
-				});
+
+				const response = await fetch(`/journeys/${page.params.id}`, { method: 'DELETE' });
+
 				if (response.ok) {
 					goto('/presets', { label: m.presets(), breadcrumbAction: 'replace' });
 				}

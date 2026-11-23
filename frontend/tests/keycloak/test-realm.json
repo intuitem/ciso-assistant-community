@@ -112,6 +112,7 @@
 			"firstName": "John",
 			"lastName": "Doe",
 			"email": "admin@tests.com",
+			"emailVerified": true,
 			"credentials": [
 				{
 					"type": "password",

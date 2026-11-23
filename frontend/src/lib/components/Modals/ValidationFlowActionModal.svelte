@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
 
 	type ActionType = 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit';

@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Bewijs '${evidence_name}': ${decision}"
+body: |
+  Hallo,
+
+  Een bewijs waarvan u eigenaar bent, is beoordeeld:
+
+  - Naam: ${evidence_name}
+  - Status: ${decision}
+  - Beoordeeld door: ${actor_name}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om het te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

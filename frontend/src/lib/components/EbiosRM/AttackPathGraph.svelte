@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	// Track the app dark mode (`.dark` on <html>) so the SVG-rendered
 	// node fill and labels stay readable. Unovis only reacts to

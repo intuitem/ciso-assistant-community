@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { postureResultTailwindColorMap } from '$lib/utils/constants';
+	import { m } from '#paraglide/messages.js';
+	import { postureResultTailwindColorMap } from '#lib/utils/constants.js';
 
 	interface Props {
 		data: PageData;
@@ -29,10 +29,10 @@
 
 	function onAssetChange(event: Event) {
 		const value = (event.currentTarget as HTMLSelectElement).value;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (value) url.searchParams.set('asset', value);
 		else url.searchParams.delete('asset');
-		goto(url, { invalidateAll: true });
+		goto(url, { refreshAll: true });
 	}
 
 	function submitOnChange(event: Event) {
@@ -115,7 +115,7 @@
 							async ({ result, update }) => {
 								if (result.type === 'success' && result.data?.run_id)
 									sessionRunId = String(result.data.run_id);
-								await update({ reset: false });
+								await update({ reset: false, navigate: false });
 							}}
 					>
 						<input type="hidden" name="ref_id" value={node.ref_id} />

@@ -9,17 +9,8 @@
  */
 
 import { test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
-import type { BrowserContext } from '@playwright/test';
-
-const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
-
-async function getAuthToken(context: BrowserContext): Promise<string> {
-	const cookies = await context.cookies();
-	const token = cookies.find((c) => c.name === 'token')?.value;
-	if (!token) throw new Error('No `token` cookie found — is the user logged in?');
-	return token;
-}
+import { BACKEND_API_URL, getAuthToken } from '../../utils/api.js';
+import { m } from '#paraglide/messages.js';
 
 test('an applied control tab can attach an object that is not linked yet', async ({
 	logedPage,

@@ -181,6 +181,28 @@ class TestLightweightAutocompletePayloads:
         assert rows
         assert {r["type"] for r in rows} <= {"user", "team", "entity"}
 
+    def test_folder_paths_computed_only_for_payloads_with_a_path(
+        self, authenticated_client, monkeypatch
+    ):
+        """Precomputing paths reads the whole Folder table: pickers whose rows
+        show no path, such as actors, must not pay it on every keystroke."""
+        from core import views
+
+        computed = []
+        compute = views.get_optimized_object_data
+
+        def counted(objects):
+            computed.append(1)
+            return compute(objects)
+
+        monkeypatch.setattr(views, "get_optimized_object_data", counted)
+
+        authenticated_client.get(reverse("actors-autocomplete"))
+        assert computed == []
+
+        authenticated_client.get(reverse("user-groups-autocomplete"))
+        assert computed == [1]
+
     def test_vulnerability_payload_is_label_only(self, authenticated_client):
         root = Folder.get_root_folder()
         Vulnerability.objects.create(name="Log4Shell", ref_id="V-1", folder=root)
@@ -237,3 +259,42 @@ class TestLightweightAutocompletePayloads:
         large = _query_count(authenticated_client, url, {"limit": 12})
 
         assert large == small
+
+
+@pytest.mark.django_db
+class TestOptimizedObjectData:
+    def test_paths_read_only_the_needed_folders(self):
+        """Folder paths come from the objects' folders and their ancestors,
+        not from the whole Folder table."""
+        from core.views import get_optimized_object_data
+        from django.db.models.signals import post_init
+
+        root = Folder.get_root_folder()
+        domain = Folder.objects.create(
+            name="Paths A", parent_folder=root, content_type=Folder.ContentType.DOMAIN
+        )
+        subdomain = Folder.objects.create(
+            name="Paths B",
+            parent_folder=domain,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        for i in range(3):
+            Folder.objects.create(
+                name=f"Unrelated {i}",
+                parent_folder=root,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+        threat = Threat.objects.create(name="Nested", folder=subdomain)
+        loaded = []
+
+        def record(sender, instance, **kwargs):
+            loaded.append(instance.id)
+
+        post_init.connect(record, sender=Folder)
+        try:
+            data = get_optimized_object_data([threat])
+        finally:
+            post_init.disconnect(record, sender=Folder)
+
+        assert [p["id"] for p in data["paths"][threat.id]] == [domain.id, subdomain.id]
+        assert set(loaded) == {root.id, domain.id, subdomain.id}

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TTPMatrix from '$lib/components/TTPMatrix/TTPMatrix.svelte';
-	import { m } from '$paraglide/messages';
+	import TTPMatrix from '#lib/components/TTPMatrix/TTPMatrix.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {

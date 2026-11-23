@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { fly, fade, scale } from 'svelte/transition';
 	import { tick } from 'svelte';
-	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import { page } from '$app/state';
+	import { browser } from '$app/env';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 	import type { ChatMessage } from './types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import {
 		getView,
 		getMessages,
@@ -56,9 +56,9 @@
 
 	// Keep page context in sync with current route
 	$effect(() => {
-		const path = $page.url.pathname;
-		const model = $page.data?.modelVerboseName;
-		const title = $page.data?.title;
+		const path = page.url.pathname;
+		const model = page.data?.modelVerboseName;
+		const title = page.data?.title;
 		setPageContext({ path, model, title });
 	});
 
@@ -529,6 +529,7 @@
 			>
 				<i class="fa-solid fa-robot text-xs"></i>
 			</div>
+
 			<div class="flex items-center gap-1 rounded-2xl bg-surface-100-900 px-4 py-3">
 				<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"
 				></span>

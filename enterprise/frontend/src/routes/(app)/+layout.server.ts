@@ -2,8 +2,12 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { env } from '$env/dynamic/public';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { countOpenTasks } from '#lib/utils/vendorTasks.js';
+import {
+	PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS,
+	PUBLIC_LICENSE_EXPIRATION_MESSAGE
+} from '$app/env/public';
 
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
@@ -25,7 +29,8 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		!user.is_superuser &&
 		user.is_local &&
 		!user.is_sso &&
-		!url.pathname.startsWith('/setup-mfa')
+		!url.pathname.startsWith('/setup-mfa') &&
+		!url.pathname.startsWith('/reauthenticate')
 	) {
 		redirect(302, '/setup-mfa');
 	}
@@ -51,7 +56,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		children?: unknown[];
 	} | null = null;
 	const focusModeEnabled = featureflags?.focus_mode ?? false;
-	if (user && focusModeEnabled) {
+	if (user && focusModeEnabled && !user.is_third_party) {
 		try {
 			const treeRes = await fetch(
 				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
@@ -75,16 +80,16 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	} catch (e) {
 		console.error('Error fetching license status:', e);
 	}
-	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
-		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
-		: 7;
 
-	const LICENSE_EXPIRATION_MESSAGE = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_MESSAGE')
-		? env.PUBLIC_LICENSE_EXPIRATION_MESSAGE
-		: '';
+	const LICENSE_EXPIRATION_NOTIFY_DAYS = PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS ?? 7;
+	const LICENSE_EXPIRATION_MESSAGE = PUBLIC_LICENSE_EXPIRATION_MESSAGE ?? '';
+
+	const openTasks =
+		user?.is_third_party && featureflags?.tasks !== false ? await countOpenTasks(fetch) : 0;
 
 	return {
 		user,
+		openTasks,
 		settings,
 		featureflags,
 		licenseStatus,

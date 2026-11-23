@@ -1,6 +1,6 @@
 import { LoginPage } from '../utils/login-page.js';
 import { SideBar } from '../utils/sidebar.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 import {
 	test,

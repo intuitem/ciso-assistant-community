@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import { markdownToIsolatedHtml } from '$lib/utils/markdown';
+	import { m } from '#paraglide/messages.js';
+	import { markdownToIsolatedHtml } from '#lib/utils/markdown.js';
 	import SandboxedHtmlFrame from './SandboxedHtmlFrame.svelte';
 	import SheetPreview from './SheetPreview.svelte';
 	import { renderDocx } from './renderDocx';

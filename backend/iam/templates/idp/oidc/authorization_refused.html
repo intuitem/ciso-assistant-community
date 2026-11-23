@@ -1,0 +1,43 @@
+{% load i18n %}{% get_current_language as LANG %}<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Connection not allowed" %} - CISO Assistant</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f7; color: #1f2937; margin: 0; }
+    .card { max-width: 480px; margin: 8vh auto; background: #fff; border-radius: 12px;
+            padding: 2rem; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    .who { color: #6b7280; margin: 0 0 1.5rem; }
+    .reason { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+              padding: .75rem 1rem; margin-bottom: 1.5rem; font-size: .9rem; }
+    .actions { display: flex; justify-content: flex-end; }
+    a.button { border-radius: 8px; padding: .6rem 1.2rem; font-size: 1rem; background: #7c3aed;
+               color: #fff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>{% translate "You cannot connect this app" %}</h1>
+    <p class="who">{% blocktranslate with email=request.user.email %}Signed in as {{ email }}{% endblocktranslate %}</p>
+    {% if client %}
+      <p>{% blocktranslate with name=client.name %}<strong>{{ name }}</strong> wants to access CISO Assistant.{% endblocktranslate %}</p>
+    {% endif %}
+    <div class="reason">
+      {% if reason == "mcp_disabled" %}
+        {% translate "Your administrator has not enabled AI app connections on this instance." %}
+      {% elif reason == "no_shared_cache" %}
+        {% translate "This instance is not set up for AI app connections: it needs a shared cache. Contact your administrator." %}
+      {% elif reason == "no_profile" %}
+        {% translate "Your administrator has not set up what AI apps may do yet. Contact them if you need it." %}
+      {% else %}
+        {% translate "Your administrator has not allowed your account to connect AI apps. Contact them if you need it." %}
+      {% endif %}
+    </div>
+    {% if back_url %}
+      <div class="actions"><a class="button" href="{{ back_url }}">{% translate "Back to the app" %}</a></div>
+    {% endif %}
+  </main>
+</body>
+</html>

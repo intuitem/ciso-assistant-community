@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
-	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
-	import ALEComparisonChart from '$lib/components/Chart/ALEComparisonChart.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import LossExceedanceCurve from '#lib/components/Chart/LossExceedanceCurve.svelte';
+	import ALEComparisonChart from '#lib/components/Chart/ALEComparisonChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

@@ -3,9 +3,9 @@
 
 	import { setContext, onDestroy } from 'svelte';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
@@ -40,6 +40,7 @@
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import IdpGroupForm from './ModelForm/IdpGroupForm.svelte';
 	import ServiceAccountForm from './ModelForm/ServiceAccountForm.svelte';
+	import IdentityProviderForm from './ModelForm/IdentityProviderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
@@ -106,21 +107,21 @@
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { ModelInfo, urlModel, CacheLock } from '#lib/utils/types.js';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { browser } from '$app/env';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { createModalCache } from '$lib/utils/stores';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<FormDataShape>;
@@ -138,6 +139,8 @@
 		importFolder?: boolean;
 		customNameDescription?: boolean;
 		customFolder?: boolean;
+		/** Folder types the domain picker offers; overrides the per-model default. */
+		folderContentTypes?: string[];
 		onFolderChange?: (folderId: string) => void;
 		additionalInitialData?: any;
 		schema?: any;
@@ -161,6 +164,7 @@
 		importFolder = false,
 		customNameDescription = false,
 		customFolder = false,
+		folderContentTypes = undefined,
 		onFolderChange = undefined,
 		additionalInitialData = {},
 		schema = modelSchema(model.urlModel),
@@ -223,6 +227,9 @@
 	const defaultFolderWritePermission =
 		context === 'edit' ? `change_${model.name}` : `add_${model.name}`;
 	setContext('folderTreeDefaultWritePermission', defaultFolderWritePermission);
+	// Pickers keep links to objects the user cannot see only when this form edits an
+	// existing object: on a create, clone or duplicate every id is a new link.
+	setContext('formKeepsHiddenLinks', Boolean(object?.id) && context !== 'clone' && !duplicate);
 
 	function cancel(): void {
 		if (browser) {
@@ -256,8 +263,8 @@
 	let urlModelFromPage = $state();
 
 	run(() => {
-		if ($page) {
-			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+		if (page) {
+			urlModelFromPage = `${page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
 				const currentCache = createModalCache.data[model.urlModel];
@@ -298,6 +305,7 @@
 		createModalCache.garbageCollect();
 	});
 
+	let isLoading = $state(false);
 	const _form = superForm(form, {
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
@@ -308,6 +316,7 @@
 		taintedMessage,
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
+			isLoading = false;
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
@@ -317,10 +326,15 @@
 				}
 				createModalCache.deleteCache(model.urlModel);
 			}
+		},
+		onError: ({ result }) => {
+			// a transport-level failure never fires onUpdated; clear the busy state so
+			// the form doesn't stay stuck on "loading" until the modal is closed
+			isLoading = false;
+			console.error(result.error);
 		}
 	});
 
-	let isLoading = $state(false);
 	let previousFormErrors = $derived('');
 	const { form: formData, errors } = _form;
 
@@ -466,12 +480,15 @@
 					cacheLock={cacheLocks['folder']}
 					bind:cachedValue={formDataCache['folder']}
 					label={m.domain()}
-					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
+					hidden={HIDDEN_FOLDER_MODELS.has(URLModel) ||
+						(['evidences', 'task-templates'].includes(URLModel) && page.data?.user?.is_third_party)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
-					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
-						? ['DO', 'GL', 'EN']
-						: undefined}
+					contentTypes={folderContentTypes ??
+						(['compliance-assessments', 'evidences'].includes(URLModel)
+							? ['DO', 'GL', 'EN']
+							: undefined)}
+					onlyCurrentEnclave={['compliance-assessments', 'task-templates'].includes(URLModel)}
 					helpText={URLModel === 'campaigns'
 						? m.campaignDomainHelpText()
 						: URLModel === 'custom-fields'
@@ -515,6 +532,8 @@
 			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'service-accounts'}
 			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {object} />
+		{:else if URLModel === 'identity-providers'}
+			<IdentityProviderForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}
@@ -589,7 +608,7 @@
 				{formDataCache}
 				{object}
 				{initialData}
-				{$page}
+				$page={page}
 				{...rest}
 			/>
 		{:else if URLModel === 'validation-flows'}
@@ -741,7 +760,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -815,7 +842,16 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
+			<EbiosRmForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{context}
+				{object}
+				{duplicate}
+				{...rest}
+			/>
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -1103,6 +1139,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -1113,6 +1150,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
@@ -1185,6 +1223,22 @@
 					data-testid="save-button"
 					type="submit"
 					onclick={(e) => {
+						// a full-graph duplicate is a long request: show a busy state and block re-clicks
+						if (duplicate) {
+							if (isLoading) {
+								e.preventDefault();
+								e.stopPropagation();
+								return;
+							}
+							// only enter the busy state once the form is valid; otherwise the browser
+							// blocks the submit (e.g. empty required name), superForm never runs and
+							// isLoading would stay stuck on "loading" until the modal is closed.
+							// Validate against `schema` (the duplicate schema), not the full study
+							// schema modelSchema(URLModel) returns, which requires risk_matrix.
+							if (!schema.safeParse($formData).success) return;
+							isLoading = true;
+							return;
+						}
 						if (URLModel !== 'folders-import') return;
 						if (isLoading) {
 							e.preventDefault();
@@ -1192,14 +1246,19 @@
 							return;
 						}
 
-						const schema = modelSchema(URLModel);
-						const result = schema.safeParse($formData);
+						const importSchema = modelSchema(URLModel);
+						const result = importSchema.safeParse($formData);
 						if (!result.success) return;
 
 						isLoading = true;
 					}}
-					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
+					{#if isLoading}
+						{m.loading()} <LoadingSpinner />
+					{:else}
+						{m.save()}
+					{/if}
+				</button>
 			{:else}
 				{#if cancelButton}
 					<button

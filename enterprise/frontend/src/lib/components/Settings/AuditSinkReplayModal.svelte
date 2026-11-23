@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { m } from '$paraglide/messages';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';

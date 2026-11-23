@@ -181,9 +181,7 @@ class TestComplianceAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
-        perimeter2 = Perimeter.objects.create(
-            name="test2", folder=Folder.objects.create(name="test2")
-        )
+        perimeter2 = Perimeter.objects.create(name="test2", folder=test.folder)
         # Framework has no Meta ordering, so all()[0]/all()[1] are
         # nondeterministic on PostgreSQL — pin the import order explicitly.
         frameworks = list(Framework.objects.order_by("created_at", "pk"))
@@ -414,6 +412,35 @@ class TestComplianceAssessmentListProgress:
         ras[1].save(update_fields=["score"])
 
         assert _list_progress(authenticated_client, audit.id) == 50
+
+    def test_score_only_audit_counts_not_applicable(self, authenticated_client):
+        """Score-only audit: a requirement marked not applicable (the
+        applicability toggle) is done, though it gets no score."""
+        framework = _make_framework()  # min_score=0, max_score=4
+        for i in range(2):
+            _make_requirement(framework, f"NA{i}")
+        audit = _make_audit(
+            Folder.get_root_folder(),
+            framework,
+            field_visibility=_content_mode(hide=["result"]),
+        )
+        audit.create_requirement_assessments()
+
+        ra = audit.requirement_assessments.first()
+        ra.result = RequirementAssessment.Result.NOT_APPLICABLE
+        ra.save(update_fields=["result"])
+
+        assert _list_progress(authenticated_client, audit.id) == 50
+        # The in-memory form agrees with the SQL one.
+        assert RequirementAssessment.progress_assessed_scalar(
+            "to_do",
+            RequirementAssessment.Result.NOT_APPLICABLE,
+            None,
+            None,
+            status_driven=False,
+            has_questions=False,
+            result_visible=False,
+        )
 
     def test_progress_all_assessed(self, authenticated_client):
         framework = _make_framework()
@@ -875,3 +902,58 @@ class TestComplianceAssessmentDetailActionAuthorization:
                 f"/api/compliance-assessments/{missing}/{action}/"
             )
             assert resp.status_code == status.HTTP_404_NOT_FOUND, action
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentCreationScoring:
+    """Creation seeds the minimum score only where nobody else sets it:
+    question-driven requirements are scored by their answers, as when scoring
+    is turned on (a checklist without scores must never count as a 0)."""
+
+    def test_question_requirements_are_not_seeded(self, authenticated_client):
+        from core.models import Question, QuestionChoice
+        from core.utils import AUDITOR_ONLY
+
+        framework = _make_framework()
+        framework.field_visibility = {"score": AUDITOR_ONLY, "is_scored": AUDITOR_ONLY}
+        framework.save()
+        manual = _make_requirement(framework, "MANUAL")
+        for ref_id, add_scores in (("SCORED", (0, 4)), ("CHECKLIST", (None, None))):
+            node = _make_requirement(framework, ref_id)
+            question = Question.objects.create(
+                requirement_node=node,
+                urn=f"{node.urn}:question:1",
+                type=Question.Type.UNIQUE_CHOICE
+                if ref_id == "SCORED"
+                else Question.Type.MULTIPLE_CHOICE,
+            )
+            for i, add_score in enumerate(add_scores):
+                QuestionChoice.objects.create(
+                    question=question,
+                    urn=f"{question.urn}:choice:{i}",
+                    value=str(i),
+                    add_score=add_score,
+                    order=i,
+                )
+
+        response = authenticated_client.post(
+            "/api/compliance-assessments/",
+            {
+                "name": "seeding",
+                "folder": str(Folder.get_root_folder().id),
+                "framework": str(framework.id),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
+        ras = {
+            ra.requirement.ref_id: (ra.score, ra.is_scored)
+            for ra in RequirementAssessment.objects.filter(
+                compliance_assessment_id=response.json()["id"]
+            ).select_related("requirement")
+        }
+        assert ras == {
+            manual.ref_id: (0, True),
+            "SCORED": (None, False),
+            "CHECKLIST": (None, False),
+        }

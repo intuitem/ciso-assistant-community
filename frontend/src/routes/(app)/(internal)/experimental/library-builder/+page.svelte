@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
+
+	const modalStore = getModalStore();
 
 	$pageTitle = m.lbListLibraryBuilder();
 
@@ -301,7 +304,7 @@
 
 	// --- Delete ------------------------------------------------------------
 	async function deleteDraft(draft: any) {
-		if (!confirm(m.lbListDeleteConfirm({ name: draft.name }))) return;
+		if (!(await confirmModal(modalStore, m.lbListDeleteConfirm({ name: draft.name })))) return;
 		const res = await fetch(`/experimental/library-builder?id=${draft.id}`, { method: 'DELETE' });
 		if (res.ok) {
 			drafts = drafts.filter((d) => d.id !== draft.id);

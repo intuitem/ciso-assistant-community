@@ -8,7 +8,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 
 The flags set here are the ceiling. Each user can hide modules they don't need from their own navigation, under **My profile** → **Settings** → **Modules** (see [Personal module visibility](../../features/personal-module-visibility.md)). A user can't turn on anything that is off here: a flag you disable is shown to them greyed out as **Disabled by your organization.**
 
-- Only flags that gate a navigation area are offered to users, such as `compliance`, `risk_management`, `tprm`, `privacy`, `incidents` or `xrays`. Flags that change how data is displayed or behaves (`inherent_risk`, `dora`, `focus_mode`, `comments`, `custom_fields`, the integration and identity flags, …) stay instance-wide only, so every user reads the same data the same way.
+- Only flags that gate a navigation area are offered to users, such as `compliance`, `risk_management`, `tprm`, `privacy`, `incidents` or `xrays`. Flags that change how data is displayed or behaves (`inherent_risk`, `dora`, `nis2`, `focus_mode`, `comments`, `custom_fields`, the integration and identity flags, …) stay instance-wide only, so every user reads the same data the same way.
 - A user's hidden modules are personal. They don't affect other users and aren't a substitute for IAM: hiding a module removes it from that user's navigation but doesn't change their permissions.
 - When you enable a flag, it appears for every user who hasn't hidden it themselves.
 - This page always shows and saves the organisation's values, even if you have hidden modules for yourself.
@@ -40,6 +40,7 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 - **ebiosrm** — the EBIOS RM module.
 - **scoring_assistant** — the OWASP-based scoring assistant.
 - **vulnerabilities** — vulnerability tracking.
+- **vulnerability_sla** — labelled **Vulnerability SLA**: the [vulnerability SLA policy](vulnerability-sla.md), which gives vulnerabilities a due date from their severity and shows their SLA status. Turned off, no detection or due date is filled in automatically, **Refresh SLA due dates** is greyed out, and the **SLA** column, the SLA badge on a vulnerability's page and the settings tab are hidden; the policy is kept. Runs on vulnerabilities, so turning it on also turns on **vulnerabilities**.
 - **quantitative_risk_studies** — Monte-Carlo quantitative risk.
 - **inherent_risk** — surface inherent-risk columns alongside residual risk on assessments. _Default off._
 - **threat_modeling** — [threat models](../../concepts/ttps-and-threat-models.md#threat-models): attack graphs built from TTP catalog techniques. Needs `ttps` on as well. _Default off._
@@ -61,12 +62,14 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 - **tprm** — third-party risk management.
 - **contracts** — contracts surface inside TPRM. _Default off._
 - **dora** — the DORA-specific fields on entities, solutions, assets and contracts, plus the [DORA reporting](../../features/framework-specific/dora.md) capabilities.
+- **nis2** (**NIS2 notification**) — the NIS2 notification fields, deadlines, reminders and worksheet on incidents. See [NIS2 notification](../../concepts/incidents.md#nis2-notification).
 - **external_ratings** — [external ratings](../../concepts/third-party-risk.md#external-ratings): record scores published by rating services (SecurityScorecard, Bitsight, CyberVadis, …) against your third parties. _Default off._
 - **privacy** — the privacy register pillar (master switch).
 - **personal_data** — personal-data inventory inside the privacy register.
 - **purposes** — purposes register.
 - **right_requests** — data-subject right requests.
 - **data_breaches** — data-breach tracking.
+- **dpias** — labelled **DPIAs**: [DPIA screening and data protection impact assessments](../../concepts/dpia.md) on the processing register, and the **DPIAs** page. Runs on quick forms, so turning it on also turns on **quick_forms**. _Default off._
 
 ## Catalog
 
@@ -101,6 +104,7 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 
 - **journeys** — preset journeys for bootstrapping new organisations or domains.
 - **comments** — comments on objects.
+- **relations_graph** — the **Relations graph** button on the detail pages of applied controls, risk scenarios, assets and documents. See [Relations graph](../../features/relations-graph.md). _Default off._
 - **object_audit_trail** — per-object [audit trail](../../features/audit-log.md#per-object-audit-trail) button on detail pages, gated by the **Can view object audit trails** permission. _PRO._
 - **focus_mode** — UI mode that filters the entire workspace to a single domain. _PRO. Default off._
 

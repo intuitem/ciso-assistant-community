@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { CREATE_INTENT_PARAM, createIntentHref } from '$lib/utils/create-intent';
-import { NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '$lib/utils/crud';
-import type { User } from '$lib/utils/types';
+import { CREATE_INTENT_PARAM, createIntentHref } from '#lib/utils/create-intent.js';
+import { NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '#lib/utils/crud.js';
+import type { User } from '#lib/utils/types.js';
 import {
 	awaitingArgument,
 	buildCreateCommands,
@@ -175,8 +175,8 @@ describe('matchCommands', () => {
 
 describe('shipped command keywords', () => {
 	it('are single words in every locale', async () => {
-		const { baseLocale, locales } = await import('$paraglide/runtime');
-		const { commandKeywordAsk, commandKeywordSearch } = await import('$paraglide/messages');
+		const { baseLocale, locales } = await import('#paraglide/runtime.js');
+		const { commandKeywordAsk, commandKeywordSearch } = await import('#paraglide/messages.js');
 		for (const locale of locales) {
 			for (const message of [commandKeywordSearch, commandKeywordAsk]) {
 				const keyword = message({}, { locale });
@@ -282,5 +282,36 @@ describe('buildNavigationCommands', () => {
 	it('offers it to an admin', () => {
 		const hrefs = buildNavigationCommands(superuser, allFlags).map((command) => command.href);
 		expect(hrefs).toContain('/service-accounts');
+	});
+});
+
+// Users live in Global, so the Users entry follows permissions held there (see the
+// full-view-permissions ADR).
+describe('the Users destination', () => {
+	const DOMAIN = '11111111-1111-1111-1111-111111111111';
+	const holding = (codenames: string[], folder: string) =>
+		({
+			root_folder_id: ROOT,
+			permission_sets: [codenames],
+			domain_permissions: { [folder]: 0 }
+		}) as unknown as User;
+	const offersUsers = (user: User) =>
+		buildNavigationCommands(user, allFlags).some((command) => command.href === '/users');
+
+	it('is offered with the full view, or the change or add permission, on Global', () => {
+		expect(offersUsers(holding(['view_user', 'view_user_full'], ROOT))).toBe(true);
+		expect(offersUsers(holding(['view_user', 'change_user'], ROOT))).toBe(true);
+		expect(offersUsers(holding(['view_user', 'add_user'], ROOT))).toBe(true);
+	});
+
+	it('is not offered with the base view alone, or with the full view on a domain', () => {
+		expect(offersUsers(holding(['view_user'], ROOT))).toBe(false);
+		expect(offersUsers(holding(['view_user', 'view_user_full'], DOMAIN))).toBe(false);
+	});
+
+	it('lets a user creator create users from the palette', () => {
+		const creator = holding(['view_user', 'add_user'], ROOT);
+		const hrefs = buildCreateCommands(creator, allFlags).map((command) => command.href);
+		expect(hrefs.some((href) => href?.split('?')[0] === '/users')).toBe(true);
 	});
 });

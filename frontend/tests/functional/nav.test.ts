@@ -1,4 +1,4 @@
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import FrameworkBuilder from '$lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
-	import type { Framework } from '$lib/components/FrameworkBuilder/builder-state';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import FrameworkBuilder from '#lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
+	import type { Framework } from '#lib/components/FrameworkBuilder/builder-state.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 
@@ -33,6 +33,9 @@
 		implementation_groups_definition: meta.implementation_groups_definition ?? null,
 		outcomes_definition: (meta.outcomes_definition as Framework['outcomes_definition']) ?? null,
 		field_visibility: meta.field_visibility ?? {},
+		score_calculation_method: meta.score_calculation_method,
+		anchor_na_to_target: meta.anchor_na_to_target,
+		target_score: meta.target_score,
 		locale: meta.locale,
 		translations: meta.translations ?? {},
 		available_languages: meta.available_languages ?? [],

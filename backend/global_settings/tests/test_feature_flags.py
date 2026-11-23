@@ -96,6 +96,35 @@ def test_serializer_update_invalidates_cache(flags_row):
     assert ff_is_enabled("incidents") is False
 
 
+def _save_flags(row, **flags):
+    # Partial: a full update resets every flag left out to its default.
+    serializer = FeatureFlagsSerializer(row, data=flags, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    row.refresh_from_db()
+    return row.value
+
+
+def test_turning_on_dpias_turns_on_quick_forms(flags_row):
+    value = _save_flags(flags_row, dpias=True, quick_forms=False)
+    assert (value["dpias"], value["quick_forms"]) == (True, True)
+    assert ff_is_enabled("quick_forms") is True
+
+
+def test_turning_off_quick_forms_turns_off_dpias(flags_row):
+    _save_flags(flags_row, dpias=True, quick_forms=True)
+    value = _save_flags(flags_row, quick_forms=False)
+    assert (value["dpias"], value["quick_forms"]) == (False, False)
+
+
+def test_any_save_repairs_dpias_without_quick_forms(flags_row):
+    # A row written before the rule existed: DPIAs on, the forms they run on off.
+    flags_row.value = {**flags_row.value, "dpias": True, "quick_forms": False}
+    flags_row.save(update_fields=["value"])
+    value = _save_flags(flags_row, incidents=False)
+    assert (value["dpias"], value["quick_forms"]) == (True, True)
+
+
 def test_unsupported_flags_short_circuit_on_ce(flags_row, django_assert_num_queries):
     # Enterprise-only flags are outside CE's SUPPORTED_FEATURE_FLAGS:
     # False without any settings query, even when the row carries them.
@@ -141,6 +170,53 @@ def test_startup_seeds_declared_defaults(no_flags_row):
     row = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
     assert set(get_supported_feature_flags()) <= set(row.value)
     assert ff_is_enabled("incidents") is True
+
+
+@pytest.mark.parametrize("vulnerabilities", [True, False])
+def test_startup_seeds_a_dependent_flag_off_when_its_requirement_is(
+    db, vulnerabilities
+):
+    """vulnerability_sla defaults on but needs vulnerabilities: seeded on next to a
+    disabled module, the next save of the flags would switch that module back on."""
+    from core.startup import seed_feature_flag_defaults
+
+    row, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    )
+    row.value = {
+        name: value
+        for name, value in (row.value or {}).items()
+        if name != "vulnerability_sla"
+    } | {"vulnerabilities": vulnerabilities}
+    row.save()
+
+    seed_feature_flag_defaults()
+
+    row.refresh_from_db()
+    assert row.value["vulnerabilities"] is vulnerabilities
+    assert row.value["vulnerability_sla"] is vulnerabilities
+
+
+def test_full_put_leaving_out_a_dependent_flag_keeps_it(db):
+    """A full PUT fills in defaults for what it leaves out. vulnerability_sla
+    defaults on, which would switch vulnerabilities back on: it keeps its value."""
+    row, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    )
+    row.value = {
+        **(row.value or {}),
+        "vulnerabilities": False,
+        "vulnerability_sla": False,
+    }
+    row.save()
+
+    serializer = FeatureFlagsSerializer(row, data={"vulnerabilities": False})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+
+    row.refresh_from_db()
+    assert row.value["vulnerabilities"] is False
+    assert row.value["vulnerability_sla"] is False
 
 
 def test_startup_leaves_an_explicit_choice_alone(flags_row):

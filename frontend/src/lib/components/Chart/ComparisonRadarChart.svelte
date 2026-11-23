@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 
 	interface Props {
 		width?: string;
@@ -62,7 +63,7 @@
 						formatter: function (params: any) {
 							const dimensionName = indicators[params.dataIndex]?.name || '';
 							const suffix = maxValue === 100 ? '%' : '';
-							return `${params.name}<br/>${dimensionName}: ${params.value[params.dataIndex]}${suffix}`;
+							return `${escapeHtml(params.name)}<br/>${escapeHtml(dimensionName)}: ${params.value[params.dataIndex]}${suffix}`;
 						}
 					},
 					legend: {

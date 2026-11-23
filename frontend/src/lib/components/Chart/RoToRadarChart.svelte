@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { escapeHtml } from '$lib/utils/helpers';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart, isDarkTheme } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Couple {
 		id: string;

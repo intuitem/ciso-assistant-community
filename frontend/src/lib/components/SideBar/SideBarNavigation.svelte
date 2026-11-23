@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { navData } from '$lib/components/SideBar/navData';
+	import { navData } from '#lib/components/SideBar/navData.js';
 
-	import SideBarItem from '$lib/components/SideBar/SideBarItem.svelte';
-	import SideBarCategory from '$lib/components/SideBar/SideBarCategory.svelte';
+	import SideBarItem from '#lib/components/SideBar/SideBarItem.svelte';
+	import SideBarCategory from '#lib/components/SideBar/SideBarCategory.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
-	import { canSeeNavItem } from '$lib/components/SideBar/navVisibility';
-	import { driverInstance } from '$lib/utils/stores';
+	import { untrack } from 'svelte';
+	import { canSeeNavItem } from '#lib/components/SideBar/navVisibility.js';
+	import { driverInstance } from '#lib/utils/stores.js';
 
 	const user = page.data.user;
 
@@ -18,12 +19,37 @@
 		}))
 		.filter((item) => item.items.length > 0); // Filter out items with no sub-items
 
-	import { lastAccordionItem } from '$lib/utils/stores';
+	import { lastAccordionItem } from '#lib/utils/stores.js';
 	interface Props {
 		sideBarVisibleItems: Record<string, boolean>;
 	}
 
 	let { sideBarVisibleItems }: Props = $props();
+
+	// Open the section holding the current page, e.g. after jumping there from the command palette.
+	$effect(() => {
+		const { pathname, searchParams } = page.url;
+		let best: { section: string; length: number } | undefined;
+		for (const item of items) {
+			if (sideBarVisibleItems?.[item.name] === false) continue;
+			for (const subItem of item.items) {
+				if (!subItem.href || subItem.href === '/') continue;
+				if (sideBarVisibleItems?.[subItem.name] === false) continue;
+				const [href, query] = subItem.href.split('?');
+				const pathMatches = pathname === href || pathname.startsWith(href + '/');
+				const queryMatches = [...new URLSearchParams(query)].every(
+					([k, v]) => searchParams.get(k) === v
+				);
+				if (pathMatches && queryMatches && subItem.href.length > (best?.length ?? 0)) {
+					best = { section: item.name, length: subItem.href.length };
+				}
+			}
+		}
+		const section = best?.section;
+		untrack(() => {
+			if (section && !$lastAccordionItem.includes(section)) $lastAccordionItem = [section];
+		});
+	});
 
 	function handleValueChange(details: { value: string[] }) {
 		$lastAccordionItem = details.value;

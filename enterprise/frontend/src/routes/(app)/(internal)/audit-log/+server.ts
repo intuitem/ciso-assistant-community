@@ -1,6 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const endpoint = `${BASE_API_URL}/log-entries/${
@@ -9,7 +10,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status as NumericRange<400, 599>, await res.json());
 	}
 	const data = await res.json();
 

@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 /**
  * Generic proxy for the lightweight autocomplete action of any model whose
@@ -23,7 +23,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 		} catch {
 			parsed = body;
 		}
-		error(res.status as NumericRange<400, 599>, parsed as any);
+		errorFromBody(res.status, parsed as any);
 	}
 	return new Response(res.body, {
 		status: res.status,

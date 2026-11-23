@@ -169,7 +169,7 @@ def _convert(tmp_path, framework_meta, groups):
     source, output = tmp_path / "library.xlsx", tmp_path / "library.yaml"
     wb.save(source)
     converter.create_library(str(source), str(output))
-    return yaml.safe_load(output.read_text())["objects"]["framework"]
+    return yaml.safe_load(output.read_text())["objects"]["frameworks"][0]
 
 
 class TestConverter:

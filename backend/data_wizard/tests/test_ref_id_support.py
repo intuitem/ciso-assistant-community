@@ -3,6 +3,7 @@ Tests for ref_id support in the Data Wizard.
 
 Coverage:
   A. Base find_existing — priority: ref_id first, name as fallback
+  A'. Asset find_existing — same ref_id + name rule as the model
   B. _resolve_vulnerabilities — ref_id lookup before name / get_or_create
   C. VulnerabilityRecordConsumer relational resolvers — ref_id fallback
 """
@@ -15,6 +16,8 @@ from iam.models import Folder
 from data_wizard.views import (
     _resolve_vulnerabilities,
     AppliedControlRecordConsumer,
+    AssetRecordConsumer,
+    BaseContext,
     VulnerabilityRecordConsumer,
 )
 
@@ -113,6 +116,96 @@ class TestFindExistingRefIdPriority:
             {"ref_id": "AC-X", "name": "New Name", "folder": str(domain_folder.id)}
         )
         assert found is not None and found.id == ac_a.id
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A'. Asset find_existing — ref_id + name, as Asset.is_unique_in_scope
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestAssetFindExistingMatchesModelUniqueness:
+    @pytest.mark.parametrize(
+        ("existing_ref_id", "existing_name", "ref_id", "name"),
+        [
+            ("LAP-001", "Laptop", "LAP-002", "Laptop"),
+            ("LAP-001", "Laptop", "LAP-001", "Desktop"),
+            ("LAP-001", "Laptop", "LAP-002", "Desktop"),
+            ("LAP-001", "Laptop", "LAP-001", "Laptop"),
+            ("LAP-001", "Laptop", "lap-001", "LAPTOP"),
+            ("LAP-001", "Laptop", "", "Laptop"),
+            ("", "Laptop", "LAP-001", "Laptop"),
+            ("", "Laptop", "", "laptop"),
+        ],
+    )
+    def test_agrees_with_the_model_uniqueness_check(
+        self,
+        base_context: BaseContext,
+        domain_folder: Folder,
+        existing_ref_id: str,
+        existing_name: str,
+        ref_id: str,
+        name: str,
+    ) -> None:
+        Asset.objects.create(
+            ref_id=existing_ref_id, name=existing_name, folder=domain_folder
+        )
+        candidate = Asset(ref_id=ref_id, name=name, folder=domain_folder)
+        unique = candidate.is_unique_in_scope(
+            candidate.get_scope(), Asset.fields_to_check
+        )
+
+        found = AssetRecordConsumer(base_context).find_existing(
+            {"ref_id": ref_id, "name": name, "folder": str(domain_folder.id)}
+        )
+
+        assert (found is None) == unique
+
+    def test_two_assets_sharing_a_name_import_with_distinct_ref_ids(
+        self, base_context: BaseContext, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        Asset.objects.create(ref_id="LAP-001", name="Laptop", folder=domain_folder)
+
+        result = AssetRecordConsumer(base_context).process_records(
+            [
+                {"ref_id": "LAP-002", "name": "Laptop"},
+                {"ref_id": "LAP-003", "name": "Laptop"},
+            ]
+        )
+
+        assert result.failed == 0
+        assert result.created == 2
+        assert sorted(
+            Asset.objects.filter(folder=domain_folder, name="Laptop").values_list(
+                "ref_id", flat=True
+            )
+        ) == ["LAP-001", "LAP-002", "LAP-003"]
+
+    def test_padded_cells_match_the_existing_asset(
+        self, skip_context: BaseContext, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        Asset.objects.create(ref_id="LAP-001", name="Laptop", folder=domain_folder)
+
+        result = AssetRecordConsumer(skip_context).process_records(
+            [{"ref_id": " LAP-001 ", "name": " Laptop "}]
+        )
+
+        assert (result.skipped, result.failed, result.created) == (1, 0, 0)
+
+    def test_update_mode_leaves_a_namesake_with_another_ref_id_alone(
+        self, update_context: BaseContext, domain_folder: Folder, all_accessible: None
+    ) -> None:
+        existing = Asset.objects.create(
+            ref_id="LAP-001", name="Laptop", folder=domain_folder
+        )
+
+        result = AssetRecordConsumer(update_context).process_records(
+            [{"ref_id": "LAP-002", "name": "Laptop"}]
+        )
+
+        assert (result.created, result.updated) == (1, 0)
+        existing.refresh_from_db()
+        assert existing.ref_id == "LAP-001"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import TreeSelect from './TreeSelect.svelte';
 	import type { TreeSelectItem } from './TreeSelectNode.svelte';
 

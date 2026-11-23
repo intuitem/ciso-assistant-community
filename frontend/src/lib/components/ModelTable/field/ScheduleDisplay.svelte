@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { scheduleLabel, type TaskSchedule } from '$lib/utils/taskSchedule';
+	import { scheduleLabel, type TaskSchedule } from '#lib/utils/taskSchedule.js';
 
 	interface Props {
 		cell: TaskSchedule | null;

@@ -8,11 +8,11 @@
 		type BuilderQuestion,
 		type BuilderNode,
 		type Translations
-	} from '$lib/components/FrameworkBuilder/builder-state';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	} from '#lib/components/FrameworkBuilder/builder-state.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
 
 	let { data } = $props();
 

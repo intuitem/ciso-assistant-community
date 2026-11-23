@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import TimelineTable from '$lib/components/BIA/TimelineTable.svelte';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import TimelineTable from '#lib/components/BIA/TimelineTable.svelte';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '#lib/utils/constants.js';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 

@@ -1,17 +1,22 @@
 <script lang="ts">
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
+	import { setContext } from 'svelte';
 
 	const modalStore: ModalStore = getModalStore();
+
+	// This modal edits a field of an existing object, sent whole on save: its picker
+	// keeps the links the user cannot see.
+	setContext('formKeepsHiddenLinks', true);
 
 	// A lazy picker renders no options up front, so the card needs its own width.
 	const cBase =
@@ -87,7 +92,7 @@
 			});
 
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}

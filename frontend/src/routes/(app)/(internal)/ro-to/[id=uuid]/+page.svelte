@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { pageTitle } from '$lib/utils/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	interface Props {
 		data: PageData;
 	}
@@ -36,7 +36,7 @@
 	};
 
 	const user = page.data.user;
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	pageTitle.set(data.title);
 

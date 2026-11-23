@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
@@ -7,7 +7,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	const res = await fetch(
 		`${BASE_API_URL}/ebios-rm/studies/rating-kit-defaults/?size=${encodeURIComponent(size)}`
 	);
-	if (!res.ok) error(res.status as NumericRange<400, 599>, await res.text());
+	if (!res.ok) error(res.status, await res.text());
 	return new Response(JSON.stringify(await res.json()), {
 		headers: { 'Content-Type': 'application/json' }
 	});

@@ -6,6 +6,8 @@ description: "Starting runs, reading the Runs panel and the run log, time limits
 
 A run is one execution of one version of a workflow. This page covers starting runs, reading them, and what to do when one fails.
 
+Quick reference: [cheat sheet](cheat-sheet.md#runs).
+
 ## Starting a run
 
 | How | Who it runs as |

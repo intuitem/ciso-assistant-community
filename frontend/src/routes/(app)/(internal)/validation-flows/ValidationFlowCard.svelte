@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { formatDateOrDateTime, timeAgo } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { refreshAll } from '$app/navigation';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ValidationFlowActionModal from '#lib/components/Modals/ValidationFlowActionModal.svelte';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { formatDateOrDateTime, timeAgo } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import {
 		VALIDATION_ACTION_CLASSES,
 		VALIDATION_ACTION_ICONS,
@@ -16,9 +16,9 @@
 		validationFlowModelLabels,
 		validationStatusColor,
 		type ValidationFlowAction
-	} from '$lib/utils/validationFlows';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
+	} from '#lib/utils/validationFlows.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	interface Props {
 		flow: any;
@@ -76,7 +76,7 @@
 							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
-					onSuccess: () => invalidateAll()
+					onSuccess: () => refreshAll()
 				}
 			}
 		});

@@ -1,24 +1,21 @@
 <script lang="ts">
+	import Kbd from '#lib/components/utils/Kbd.svelte';
 	import '../../app.css';
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
-	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
-	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
-	import { initThemeFromUser } from '$lib/utils/theme';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
+	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
+	import { initThemeFromUser } from '#lib/utils/theme.js';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children?: import('svelte').Snippet } = $props();
-
-	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-	const modifierKey = isMac ? '⌘' : 'Ctrl';
 
 	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
 	let menuOpen = $state(false);
 	let switcherOpen = $state(false);
 
-	const current = $derived(data.portals.find((p) => p.id === $page.params.id));
+	const current = $derived(data.portals.find((p) => p.id === page.params.id));
 
 	// Admins-only nudge: personal folders enabled but no parent set, so "My space" is off.
 	const personalFoldersMisconfigured = $derived(
@@ -85,10 +82,7 @@
 				>
 					<i class="fa-solid fa-magnifying-glass"></i>
 					<span class="hidden sm:inline">{m.searchEllipsis()}</span>
-					<kbd
-						class="hidden sm:inline rounded border border-surface-200-800 px-1.5 py-0.5 font-mono text-[10px]"
-						>{modifierKey}K</kbd
-					>
+					<Kbd keys={['mod', 'K']} class="hidden sm:inline-flex" />
 				</button>
 			{/if}
 			<a

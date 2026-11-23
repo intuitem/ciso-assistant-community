@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import * as m from '$paraglide/messages';
-	import type { CacheLock } from '$lib/utils/types';
+	import * as m from '#paraglide/messages.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import TreeSelectNode, { type TreeSelectItem } from './TreeSelectNode.svelte';
 
 	interface Props {

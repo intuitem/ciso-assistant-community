@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { BaseEdge, EdgeLabel, getSmoothStepPath, type EdgeProps } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import type { Quotation } from '$lib/utils/ebios-quotation';
+	import { m } from '#paraglide/messages.js';
+	import type { Quotation } from '#lib/utils/ebios-quotation.js';
 
 	let {
 		source,

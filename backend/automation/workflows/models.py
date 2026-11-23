@@ -165,6 +165,8 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             )
         ]
 
+    folder_from = "workflow"
+
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
         # Inherit the TTL from the parent on first save so a new
@@ -339,6 +341,8 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         default=RetryBackoff.FIXED,
     )
 
+    folder_from = "version"
+
     def save(self, *args, **kwargs):
         self.folder = self.version.folder
         if not self.ref:
@@ -403,6 +407,8 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
     class Meta:
         ordering = ["created_at"]
 
+    folder_from = "version"
+
     def save(self, *args, **kwargs):
         self.folder = self.version.folder
         super().save(*args, **kwargs)
@@ -441,6 +447,8 @@ class WorkflowVariable(AbstractBaseModel, FolderMixin):
             )
         ]
 
+    folder_from = "version"
+
     def save(self, *args, **kwargs):
         self.folder = self.version.folder
         super().save(*args, **kwargs)
@@ -468,6 +476,8 @@ class ConditionBranch(AbstractBaseModel, FolderMixin):
 
     class Meta:
         ordering = ["order", "created_at"]
+
+    folder_from = "node"
 
     def save(self, *args, **kwargs):
         self.folder = self.node.folder
@@ -505,6 +515,8 @@ class ConditionGroup(AbstractBaseModel, FolderMixin):
     class Meta:
         ordering = ["order", "created_at"]
 
+    folder_from = "branch"
+
     def save(self, *args, **kwargs):
         self.folder = self.branch.folder
         super().save(*args, **kwargs)
@@ -539,6 +551,8 @@ class Condition(AbstractBaseModel, FolderMixin):
 
     class Meta:
         ordering = ["order", "created_at"]
+
+    folder_from = "group"
 
     def save(self, *args, **kwargs):
         self.folder = self.group.folder
@@ -696,6 +710,8 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
         related_name="loop_body_tokens",
     )
 
+    folder_from = "instance"
+
     def save(self, *args, **kwargs):
         self.folder = self.instance.folder
         super().save(*args, **kwargs)
@@ -742,6 +758,8 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
     class Meta:
         ordering = ["created_at"]
 
+    folder_from = "instance"
+
     def save(self, *args, **kwargs):
         self.folder = self.instance.folder
         super().save(*args, **kwargs)
@@ -775,6 +793,8 @@ class WorkflowSecret(AbstractBaseModel, FolderMixin):
                 name="unique_workflow_secret_name",
             )
         ]
+
+    folder_from = "workflow"
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
@@ -861,6 +881,8 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
             # The scheduler tick filters due rows on exactly these three.
             models.Index(fields=["type", "enabled", "next_run_at"]),
         ]
+
+    folder_from = "workflow"
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder

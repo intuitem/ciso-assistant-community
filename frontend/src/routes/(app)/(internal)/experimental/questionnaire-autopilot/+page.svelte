@@ -1,18 +1,21 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { pageTitle } from '$lib/utils/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onDestroy } from 'svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import * as m from '$paraglide/messages';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import * as m from '#paraglide/messages.js';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import type { PageData } from './$types';
+
+	const modalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -105,9 +108,10 @@
 	async function deleteRun(run: { id: string; title: string; filename: string }) {
 		const label = run.title || run.filename || 'this run';
 		if (
-			!confirm(
+			!(await confirmModal(
+				modalStore,
 				`Delete "${label}"? This removes the questionnaire, its extracted questions, and any agent runs / proposals attached to it.`
-			)
+			))
 		) {
 			return;
 		}
@@ -118,7 +122,7 @@
 			});
 			if (res.status === 204 || res.ok) {
 				toast.trigger({ message: `Deleted "${label}".` });
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const data = await res.json().catch(() => ({}));
 				toast.trigger({ message: data.detail || 'Failed to delete the run.' });
@@ -180,7 +184,7 @@
 				use:enhance={() => {
 					submitting = true;
 					return async ({ update }) => {
-						await update();
+						await update({ navigate: false });
 						submitting = false;
 					};
 				}}

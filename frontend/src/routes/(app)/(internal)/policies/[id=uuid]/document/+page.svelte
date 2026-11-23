@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DocumentEditor from '$lib/components/DocumentEditor/DocumentEditor.svelte';
+	import DocumentEditor from '#lib/components/DocumentEditor/DocumentEditor.svelte';
 	let { data } = $props();
 </script>
 

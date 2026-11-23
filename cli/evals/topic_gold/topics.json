@@ -1,0 +1,44 @@
+{
+  "_status": "labelled by an LLM, not yet reviewed by a person",
+  "_relevance": "core = the requirement is mainly about this topic, or explicitly requires it (an auditor would look at this topic's evidence first). related = the topic materially contributes to satisfying the requirement but is not its main subject (implementing the topic would partly satisfy it). Anything only loosely or generically connected is not tagged.",
+  "mfa": {
+    "query": "multi-factor authentication (MFA)",
+    "scope": "Multi-factor / strong / two-factor authentication. Related: authentication and credential requirements that MFA would partly satisfy (secure authentication, remote access authentication, privileged access authentication)."
+  },
+  "backup": {
+    "query": "backups",
+    "scope": "Backup of data, systems and configurations, backup protection, restore testing. Related: recovery and continuity requirements that rely on backups being available."
+  },
+  "logging": {
+    "query": "security logging and monitoring",
+    "scope": "Generating, protecting, retaining and reviewing security/audit logs; security monitoring, SIEM, anomaly detection. Related: detection and incident-detection requirements fed by logs."
+  },
+  "vuln_mgmt": {
+    "query": "vulnerability management and patching",
+    "scope": "Identifying technical vulnerabilities (scanning, penetration testing, threat intel on vulnerabilities), patching and remediation. Related: secure configuration/change requirements that depend on patching."
+  },
+  "encryption": {
+    "query": "encryption and cryptography",
+    "scope": "Use of cryptography, encryption of data at rest and in transit, key management. Related: data protection requirements that are typically met with encryption."
+  },
+  "incident_response": {
+    "query": "incident response",
+    "scope": "Incident management: planning, detection reporting, triage, response, notification to authorities/customers, lessons learned. Related: continuity and communication requirements activated by incidents."
+  },
+  "awareness_training": {
+    "query": "security awareness and training",
+    "scope": "Security awareness programmes, role-based security training, competence. Related: requirements where personnel must know/acknowledge security rules."
+  },
+  "access_control": {
+    "query": "access control and least privilege",
+    "scope": "Access control policy, least privilege, user provisioning/deprovisioning, access rights review, privileged access management. MFA requirements are related here, not core."
+  },
+  "third_party": {
+    "query": "third-party and supplier risk management",
+    "scope": "Supplier/vendor/ICT third-party risk: due diligence, contracts and security clauses, monitoring of suppliers, exit strategies, supply chain security."
+  },
+  "asset_inventory": {
+    "query": "asset inventory",
+    "scope": "Inventory of information assets, hardware, software, data, and their ownership/classification. Related: requirements that need an asset inventory to be met (e.g. scoping, configuration baselines)."
+  }
+}

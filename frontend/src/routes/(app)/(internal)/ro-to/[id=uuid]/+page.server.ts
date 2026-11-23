@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { headData } from '$lib/utils/table';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { getModelInfo } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { headData } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ro-to';

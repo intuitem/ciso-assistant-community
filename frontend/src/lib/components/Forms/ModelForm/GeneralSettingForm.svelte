@@ -4,21 +4,21 @@
 	import NumberField from '../NumberField.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
-	import { m } from '$paraglide/messages';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import { m } from '#paraglide/messages.js';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
-	import { page } from '$app/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-	import { setLocale } from '$paraglide/runtime';
-	import { invalidateAll } from '$app/navigation';
-	import type { DateFormatPreference } from '$lib/utils/datetime';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
+	import { page } from '$app/state';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { LOCALE_MAP, language, defaultLangLabels, toCamelCase } from '#lib/utils/locales.js';
+	import { setLocale } from '#paraglide/runtime.js';
+	import { refreshAll } from '$app/navigation';
+	import type { DateFormatPreference } from '#lib/utils/datetime.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import ScoreScaleEditor from '#lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
 
 	// The backend always returns a value; this only covers a missing one.
 	const ORGANISATION_SCALE_FALLBACK = {
@@ -73,6 +73,23 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
+	// Model labels come from Django in English; prefer the frontend translation.
+	const autoRefIdDefaults = $derived(
+		(
+			(page.data?.generalSettings?.auto_ref_id_defaults ?? []) as {
+				model: string;
+				label: string;
+				prefix: string;
+			}[]
+		)
+			.map((d) => {
+				const key = toCamelCase(d.label);
+				const translated = safeTranslate(key);
+				return { ...d, label: translated === key ? d.label : translated };
+			})
+			.sort((a, b) => a.label.localeCompare(b.label))
+	);
+
 	let openAccordionItems = $state([]);
 
 	// Track original currency for change detection
@@ -116,7 +133,7 @@
 									message: m.forceDateFormatSuccess(),
 									preset: 'success'
 								});
-								await invalidateAll();
+								await refreshAll();
 							} else {
 								toastStore.trigger({
 									message: data.error ? safeTranslate(data.error) : m.forceDateFormatFailed(),
@@ -132,6 +149,45 @@
 			}
 		};
 		modalStore.trigger(firstModal);
+	}
+
+	let backfillRefIdsInProgress = $state(false);
+	const autoRefIdTainted = $derived(
+		Boolean($tainted?.auto_ref_id || $tainted?.auto_ref_id_prefixes)
+	);
+
+	function handleBackfillRefIds() {
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.backfillRefIdsConfirmTitle(),
+			body: m.backfillRefIdsConfirmBody(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				backfillRefIdsInProgress = true;
+				try {
+					const res = await fetch('/settings/backfill-ref-ids', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' }
+					});
+					const data = await res.json();
+					toastStore.trigger(
+						res.ok
+							? {
+									message: m.backfillRefIdsSuccess({ count: data.updated ?? 0 }),
+									preset: 'success'
+								}
+							: {
+									message: data.error ? safeTranslate(data.error) : m.backfillRefIdsFailed(),
+									preset: 'error'
+								}
+					);
+				} catch {
+					toastStore.trigger({ message: m.backfillRefIdsFailed(), preset: 'error' });
+				} finally {
+					backfillRefIdsInProgress = false;
+				}
+			}
+		});
 	}
 
 	function handleForceLanguage() {
@@ -236,12 +292,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -281,12 +338,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -312,6 +370,16 @@
 					<i class="fa-solid fa-users mr-2"></i>
 					{m.forceDateFormatForAllUsers()}
 				</button>
+				<hr class="my-2" />
+				<Select
+					{form}
+					field="report_timezone"
+					options={model.selectOptions?.['report_timezone'] ?? []}
+					label={m.reportTimezone()}
+					helpText={m.reportTimezoneHelpText()}
+					translateOptions={false}
+					disableDoubleDash
+				/>
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
@@ -322,12 +390,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -369,6 +438,67 @@
 					label={m.settingsUseRiskCategoryLabel()}
 					helpText={m.settingsUseRiskCategoryLabelHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="auto_ref_id"
+					label={m.autoRefId()}
+					helpText={m.autoRefIdHelpText()}
+				/>
+				{#if $formStore.auto_ref_id}
+					<div class="space-y-2">
+						<p class="text-sm font-semibold">{m.autoRefIdPrefixes()}</p>
+						<p class="text-sm text-surface-600">{m.autoRefIdPrefixesHelpText()}</p>
+						<table class="table text-sm">
+							<thead>
+								<tr>
+									<th>{m.objectType()}</th>
+									<th>{m.defaultPrefix()}</th>
+									<th>{m.customPrefix()}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each autoRefIdDefaults as { model: modelName, label, prefix } (modelName)}
+									<tr>
+										<td>{label}</td>
+										<td class="font-mono">{prefix}</td>
+										<td>
+											<input
+												class="input font-mono w-32 placeholder:text-surface-400"
+												maxlength="8"
+												pattern="[A-Za-z0-9_\-]*"
+												aria-label="{label}: {m.customPrefix()}"
+												placeholder={prefix}
+												value={$formStore.auto_ref_id_prefixes?.[modelName] ?? ''}
+												oninput={(e) =>
+													form.form.update((d) => ({
+														...d,
+														auto_ref_id_prefixes: {
+															...(d.auto_ref_id_prefixes ?? {}),
+															[modelName]: e.currentTarget.value.trim()
+														}
+													}))}
+											/>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+						<hr class="my-2" />
+						<p class="text-sm text-surface-600-400">{m.backfillRefIdsHelpText()}</p>
+						{#if autoRefIdTainted}
+							<p class="text-sm text-warning-700-300">{m.saveSettingsBeforeForcing()}</p>
+						{/if}
+						<button
+							type="button"
+							class="btn preset-filled-warning-500 text-sm"
+							onclick={handleBackfillRefIds}
+							disabled={backfillRefIdsInProgress || autoRefIdTainted}
+						>
+							<i class="fa-solid fa-hashtag mr-2"></i>
+							{m.backfillRefIds()}
+						</button>
+					</div>
+				{/if}
 				<TextField
 					{form}
 					field="default_packager"
@@ -385,12 +515,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -407,12 +538,13 @@
 			<i class="fa-solid fa-gem mr-2"></i><span class="flex-1 text-left">{m.assets()}</span>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -435,12 +567,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -461,7 +594,7 @@
 					label={m.documentationScoreFirst()}
 					helpText={m.documentationScoreFirstHelpText()}
 				/>
-				{#if $page.data.featureflags?.audit_tree_inheritance}
+				{#if page.data.featureflags?.audit_tree_inheritance}
 					<Select
 						{form}
 						field="audit_tree_aggregation_strategy"
@@ -486,12 +619,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 flex flex-row gap-4">
@@ -566,12 +700,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -615,12 +750,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -676,12 +812,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -704,12 +841,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -718,6 +856,18 @@
 					field="allow_self_validation"
 					label={m.allowSelfValidation()}
 					helpText={m.allowSelfValidationHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="evidence_four_eyes"
+					label={m.evidenceFourEyes()}
+					helpText={m.evidenceFourEyesHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="auto_lock_overdue_assessments"
+					label={m.autoLockOverdueAssessments()}
+					helpText={m.autoLockOverdueAssessmentsHelpText()}
 				/>
 			</div>
 		</Accordion.ItemContent>
@@ -729,12 +879,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -753,7 +904,7 @@
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
-	{#if $page.data.featureflags?.chat_mode !== undefined}
+	{#if page.data.featureflags?.chat_mode !== undefined}
 		<Accordion.Item value="chatAi">
 			<Accordion.ItemTrigger
 				class="flex w-full items-center cursor-pointer"
@@ -764,12 +915,13 @@
 				>
 				<Accordion.ItemIndicator
 					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-						><path
-							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-						/></svg
-					></Accordion.ItemIndicator
 				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+						<path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						></path>
+					</svg>
+				</Accordion.ItemIndicator>
 			</Accordion.ItemTrigger>
 			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
@@ -778,10 +930,7 @@
 						field="llm_provider"
 						options={[
 							{ label: 'Ollama', value: 'ollama' },
-							{
-								label: 'OpenAI-compatible (LM Studio, vLLM, llama.cpp...)',
-								value: 'openai_compatible'
-							}
+							{ label: m.llmProviderOpenaiCompatible(), value: 'openai_compatible' }
 						]}
 						label={m.llmProvider()}
 						helpText={m.llmProviderHelpText()}
@@ -893,12 +1042,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">

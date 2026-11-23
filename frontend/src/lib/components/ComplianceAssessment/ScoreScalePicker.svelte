@@ -1,9 +1,9 @@
 <script lang="ts">
 	// Audit score scale: the framework's, the organisation's, a preset, or (for
 	// copies) the baseline audit's. Options come from scaleOptions().
-	import * as m from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { previewLevels, type ScaleOption } from '$lib/utils/score-scales';
+	import * as m from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { previewLevels, type ScaleOption } from '#lib/utils/score-scales.js';
 
 	interface Props {
 		options: ScaleOption[];

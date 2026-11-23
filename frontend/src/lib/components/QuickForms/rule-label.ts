@@ -1,4 +1,4 @@
-import { getLocale } from '$paraglide/runtime';
+import { getLocale } from '#paraglide/runtime.js';
 
 type Rule = {
 	label?: string;

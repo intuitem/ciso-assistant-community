@@ -1,11 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { contentDispositionHeader } from '$lib/utils/contentDisposition';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { contentDispositionHeader } from '#lib/utils/contentDisposition.js';
+import { getModelInfo, urlParamModelVerboseName } from '#lib/utils/crud.js';
 
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
-import { safeTranslate } from '$lib/utils/i18n';
-import { modelSchema } from '$lib/utils/schemas';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
@@ -82,7 +82,13 @@ export async function handleErrorResponse({
 	if (res.error || res.detail) {
 		const rawError = res.error || res.detail;
 		const errorKey = Array.isArray(rawError) ? rawError[0] : rawError;
-		setFlash({ type: 'error', message: safeTranslate(errorKey), timeout: 10000 }, event);
+		const translated = safeTranslate(errorKey);
+		setFlash({ type: 'error', message: translated, timeout: 10000 }, event);
+		// Flash toasts are reliable on redirects but not guaranteed on a form action
+		// that re-renders in place (e.g. inside a modal) — also surface it inline via
+		// the same non_field_errors path Form.svelte already renders (see below), so
+		// the error is never silently swallowed.
+		setError(form, 'non_field_errors', translated);
 		return message(form, { error: rawError });
 	}
 	Object.entries(res).forEach(([key, value]) => {
@@ -97,6 +103,8 @@ export async function handleErrorResponse({
 	// Structured values (e.g. a 409's impact summary) reach the form through the message.
 	return message(form, { status: response.status, data: res });
 }
+
+export { REDIRECT_AFTER_CREATE } from './redirect-after-create';
 
 export async function defaultWriteFormAction({
 	event,
@@ -209,10 +217,9 @@ export async function defaultWriteFormAction({
 }
 
 export function normalizeServiceAccountAuthorization(data: Record<string, any>): void {
+	// custom keeps permissions and drops role; role/global_admin keep role and drop permissions.
 	const mode = data.authorization_mode;
 	delete data.authorization_mode;
-	// 'role' and 'global_admin' both link a builtin role; global_admin is the
-	// explicit BI-RL-ADM case (form forces role + Global perimeter, recursive).
 	if (mode === 'custom') delete data.role;
 	else delete data.permissions;
 }
@@ -246,7 +253,9 @@ export async function defaultDeleteFormAction({
 	urlModel: string;
 }) {
 	const formData = await event.request.formData();
-	const schema = z.object({ id: z.string().uuid() });
+	// id is interpolated into a backend URL below: keep it to UUID or positive-integer
+	// pks (e.g. SocialApp) so it can't smuggle a path segment like "../other-model".
+	const schema = z.object({ id: z.union([z.string().uuid(), z.string().regex(/^[1-9]\d*$/)]) });
 	const deleteForm = await superValidate(formData, zod(schema));
 	const model = getModelInfo(urlModel);
 

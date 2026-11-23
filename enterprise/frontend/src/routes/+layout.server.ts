@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import type { GlobalSettings } from '$lib/utils/types';
+import type { GlobalSettings } from '#lib/utils/types.js';
 
 async function fetchClientSettings(
 	fetch: Parameters<LayoutServerLoad>[0]['fetch']

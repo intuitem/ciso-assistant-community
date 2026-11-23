@@ -1,7 +1,7 @@
 import { expect, test, TestContent, type Locator, type Page } from '../utils/test-utils';
 import { PageContent } from '../utils/page-content';
 import { LoginPage } from '../utils/login-page';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);

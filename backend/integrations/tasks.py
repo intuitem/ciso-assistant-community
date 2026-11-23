@@ -1,9 +1,11 @@
 import uuid
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from huey.contrib.djhuey import HUEY, lock_task, task
 from structlog import get_logger
 
+from integrations.itsm.glpi.integration import *
 from integrations.itsm.jira.integration import *
 from integrations.itsm.servicenow.integration import *
 from integrations.models import IntegrationConfiguration
@@ -21,10 +23,17 @@ def sync_object_to_integrations(
     changed_fields: list[str],
 ):
     """Push local changes to all configured integrations"""
-    from django.apps import apps
-
-    Model = apps.get_model(content_type.app_label, content_type.model)
-    obj = Model.objects.get(pk=object_id)
+    try:
+        obj = content_type.get_object_for_this_type(pk=object_id)
+    except ObjectDoesNotExist:
+        # Deleted after the save that queued this push (the queue can lag far
+        # behind when the consumer is down): there is no state left to push.
+        logger.warning(
+            "Object deleted before sync. Task aborted.",
+            model=content_type.model,
+            object_id=str(object_id),
+        )
+        return
 
     for config_id in config_ids:
         try:

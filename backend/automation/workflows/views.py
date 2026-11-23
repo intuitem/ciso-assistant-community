@@ -9,7 +9,7 @@ import uuid
 
 import structlog
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import BooleanField, Count, ExpressionWrapper, Prefetch, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -186,7 +186,11 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     },
                     # A built model is assembled, not matched.
                     "upsert": not entry.get("constructor"),
-                    "match_on": list(_match_fields(entry)),
+                    # The builder shows what an upsert matches on: its parents too.
+                    "match_on": [
+                        *_match_fields(entry),
+                        *(entry.get("match_scope") or ()),
+                    ],
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]
@@ -197,29 +201,16 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import READABLE_MODELS
+        from core.reads.registry import registry_payload
 
-        return Response(
-            [
-                {
-                    "key": key,
-                    "fields": entry.readable_fields(),
-                    # Output-only aggregates; not filterable/orderable.
-                    "computed": sorted(entry.computed.keys()),
-                    # Same, but only resolved when a node names them in
-                    # `include` — they cost too much to return by default.
-                    "includable": sorted(entry.optional_computed.keys()),
-                }
-                for key, entry in READABLE_MODELS.items()
-            ]
-        )
+        return Response(registry_payload())
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get updatable models", url_path="updatable-models")
     def updatable_models(self, request):
         """The update_object registry. `allowed_values` travels with it so the
         builder offers the same fenced values the backend enforces."""
-        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS, _writable_values
 
         return Response(
             [
@@ -227,8 +218,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "key": key,
                     "fields": entry.fields,
                     "allowed_values": {
-                        field: sorted(values)
-                        for field, values in entry.allowed_values.items()
+                        field: values
+                        for field in entry.fields
+                        if (values := sorted(_writable_values(entry, field) or []))
                     },
                     "m2m_fields": {
                         name: endpoint
@@ -745,11 +737,18 @@ class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
         active_tokens = WorkflowToken.objects.filter(
             status__in=ACTIVE_TOKEN_STATUSES
         ).select_related("current_node")
-        return queryset.select_related(
+        queryset = queryset.select_related(
             "version__run_as", "initiated_by", "workflow", "folder"
         ).prefetch_related(
             Prefetch("tokens", queryset=active_tokens, to_attr="active_tokens")
         )
+        if self.action == "list":
+            queryset = queryset.defer("node_outputs", "variables").annotate(
+                has_outputs=ExpressionWrapper(
+                    ~Q(node_outputs={}), output_field=BooleanField()
+                )
+            )
+        return queryset
 
     def create(self, request, *args, **kwargs):
         """Launching a run: POST {version: uuid, entry_node_ref?: str}.
@@ -879,9 +878,10 @@ class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
 
 
 class WebhookRateThrottle(SimpleRateThrottle):
-    """Rate-limit the unauthenticated hook ingress per sender IP. Keyed on the
-    TRAILING X-Forwarded-For entry: the frontend passthrough appends
-    the real client IP last, so the leading (client-supplied) entries are not
+    """Rate-limit the unauthenticated hook ingress per sender IP, resolved like
+    the login rate limits (core.custom_middleware.resolve_client_ip): the
+    TRAILING X-Forwarded-For entry, which the frontend passthrough or the
+    reverse proxy appends; the leading (client-supplied) entries are not
     trusted."""
 
     scope = "workflow_webhook"
@@ -892,10 +892,9 @@ class WebhookRateThrottle(SimpleRateThrottle):
         return getattr(settings, "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min")
 
     def get_cache_key(self, request, view):
-        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        ident = (
-            xff.split(",")[-1].strip() if xff else request.META.get("REMOTE_ADDR", "")
-        )
+        from core.custom_middleware import resolve_client_ip
+
+        ident = resolve_client_ip(request)
         return self.cache_format % {"scope": self.scope, "ident": ident or "anon"}
 
 

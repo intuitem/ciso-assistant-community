@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import List from '$lib/components/List/List.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import List from '#lib/components/List/List.svelte';
 
 	interface Props {
 		data: PageData;
@@ -59,14 +59,14 @@
 <DetailView {data}>
 	{#snippet actions()}
 		<button
-			class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+			class="btn btn-quiet h-fit"
 			data-testid="sync-to-actions-button"
 			onclick={async () => {
 				await modalConfirmSyncAppliedControls();
 			}}
 		>
 			<span class="mr-2">
-				<i class="fa-solid fa-arrows-rotate mr-2"></i>
+				<i class="fa-solid fa-arrows-rotate mr-2 text-cyan-500"></i>
 			</span>
 			{m.syncToAppliedControl()}
 		</button>

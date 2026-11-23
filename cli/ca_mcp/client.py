@@ -1,8 +1,9 @@
 """HTTP client utilities for CISO Assistant API"""
 
+import re
 import requests
 import sys
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 from rich import print as rprint
 from .auth import get_request_token
 from .config import (
@@ -15,6 +16,18 @@ from .config import (
 
 
 API_PATH = urlsplit(API_URL).path.rstrip("/")
+
+# The MCP server of an instance (ca_mcp.remote) sends each call with the caller's
+# own token, to the backend listener that token is valid on.
+# Called as transport(method, endpoint, params=, json=, data=, headers=) and must
+# return an object with status_code, text and json(). fetch_bytes also passes
+# stream=True and uses the answer as a context manager with iter_content().
+_transport = None
+
+
+def set_transport(transport):
+    global _transport
+    _transport = transport
 
 
 def get_headers():
@@ -56,8 +69,10 @@ def make_get_request(endpoint, params=None):
     try:
         requested = int(params["limit"])
         params["limit"] = max(1, min(requested, MAX_TOTAL_ITEMS))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         params["limit"] = DEFAULT_PAGE_LIMIT
+    if _transport:
+        return _transport("GET", endpoint, params=params)
     return requests.get(
         url,
         headers=get_headers(),
@@ -118,6 +133,32 @@ def pagination_hint(data, shown):
     )
 
 
+def fetch_bytes(endpoint, max_bytes):
+    """Stream a file: (status_code, bytes), bytes None when over max_bytes.
+
+    Stops reading at the cap, so an oversized file is never held in memory.
+    """
+    if _transport:
+        res = _transport("GET", endpoint, stream=True)
+    else:
+        res = requests.get(
+            f"{API_URL}{endpoint}",
+            headers=get_headers(),
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+            stream=True,
+        )
+    with res:
+        if res.status_code != 200:
+            return res.status_code, None
+        data = bytearray()
+        for chunk in res.iter_content(64 * 1024):
+            data.extend(chunk)
+            if len(data) > max_bytes:
+                return res.status_code, None
+        return res.status_code, bytes(data)
+
+
 def make_post_request(endpoint, payload):
     """
     Make a POST request to the API
@@ -129,6 +170,8 @@ def make_post_request(endpoint, payload):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("POST", endpoint, json=payload)
     url = f"{API_URL}{endpoint}"
     return requests.post(
         url,
@@ -150,11 +193,59 @@ def make_patch_request(endpoint, payload):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("PATCH", endpoint, json=payload)
     url = f"{API_URL}{endpoint}"
     return requests.patch(
         url,
         headers=get_json_headers(),
         json=payload,
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
+
+
+def content_disposition_header(filename):
+    """Content-Disposition for a raw-body upload, as the frontend builds it.
+
+    HTTP headers are Latin-1 only, so a raw UTF-8 filename cannot be sent
+    as-is: emit an ASCII-safe fallback plus an RFC 5987 `filename*`. The ASCII
+    pass also drops CR/LF and quoting characters, blocking header injection.
+    """
+    ascii_name = re.sub(r"[^\x20-\x7e]", "-", filename)
+    ascii_name = re.sub(r'[;"%\\]', "-", ascii_name)
+    return (
+        f'attachment; filename="{ascii_name}"; '
+        f"filename*=utf-8''{quote(filename, safe='')}"
+    )
+
+
+def make_upload_request(endpoint, filename, data):
+    """
+    POST a file as the raw request body (no multipart), as the frontend does
+
+    Args:
+        endpoint: API endpoint (e.g., "/evidences/{id}/upload/")
+        filename: Original file name, carried in Content-Disposition
+        data: File content (bytes or a binary file object, streamed)
+
+    Returns:
+        Response object
+    """
+    if _transport:
+        return _transport(
+            "POST",
+            endpoint,
+            data=data,
+            headers={"Content-Disposition": content_disposition_header(filename)},
+        )
+    url = f"{API_URL}{endpoint}"
+    headers = get_headers()
+    headers["Content-Disposition"] = content_disposition_header(filename)
+    return requests.post(
+        url,
+        headers=headers,
+        data=data,
         verify=VERIFY_CERTIFICATE,
         timeout=HTTP_TIMEOUT,
     )
@@ -170,6 +261,8 @@ def make_delete_request(endpoint):
     Returns:
         Response object
     """
+    if _transport:
+        return _transport("DELETE", endpoint)
     url = f"{API_URL}{endpoint}"
     return requests.delete(
         url,

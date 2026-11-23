@@ -14,6 +14,14 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 - **Default language** — fallback locale for users who haven't picked a preference and for system-generated emails. Must be one of the languages enabled in the instance build.
 
+## Date format
+
+- **Default date format** — the format new users start with. **Force date format for all users** applies the saved default to every existing user once. See [Date format](../date-format.md#set-a-default-for-the-organisation).
+
+## Reports
+
+- **Report time zone**: the time zone used for the times printed in reports and exports, `UTC` by default. See [Report time zone](../report-time-zone.md).
+
 ## Money
 
 - **Currency** — the unit used when displaying applied-control costs and quantitative-risk amounts.
@@ -25,6 +33,8 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 ## Behaviour
 
 - **Allow self-validation** — whether a user can validate workflows they themselves created. Off by default for separation-of-duty reasons.
+- **Four-eyes review of evidences** — when on, whoever uploaded an evidence file cannot approve or reject it in the [evidence review](../../concepts/evidence.md#review). Next to **Allow self-validation**, under **Workflows**.
+- **Auto-lock overdue assessments**: when on, audits that belong to a campaign or a third-party assessment are locked and moved to **In review** the night after their due date passes. Audits already **Done** or **Deprecated** are left as they are. Off by default, under **Workflows**.
 - **Show warning on external links** — interstitial prompt before opening links that leave the platform.
 - **Enforce MFA** — make multi-factor authentication mandatory for every user account.
 - **Allow assignments to entities** — whether requirements and tasks can be assigned to third-party entities (not just internal users).
@@ -42,7 +52,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 These settings drive the optional AI features (chat mode, agentic workflows, RAG over the knowledge base):
 
-- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)` for any server speaking the OpenAI chat completions API, hosted or local.
+- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (hosted gateway or local server)` for any server speaking the OpenAI chat completions API, hosted or local.
 - **Ollama base URL**, **Ollama model**, **Ollama embedding model** — used when the provider is Ollama.
 - **API base URL**, **Model name**, **API key** — used when the provider is OpenAI-compatible. The key is write-only and never returned by GET.
 - **Embedding backend** — which backend powers semantic search over knowledge. Local sentence transformers or Ollama; hosted providers are not offered here, so selecting one for the LLM leaves embeddings where they are.

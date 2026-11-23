@@ -2,10 +2,10 @@
 	import { run } from 'svelte/legacy';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import type { CacheLock } from '$lib/utils/types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import type { CacheLock } from '#lib/utils/types.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		class?: string;
@@ -170,7 +170,7 @@
 					onclick={() => (showPreview = false)}
 				>
 					<i class="fas fa-edit mr-1"></i>
-					Edit
+					{m.edit()}
 				</button>
 				<button
 					type="button"
@@ -178,7 +178,7 @@
 					onclick={() => (showPreview = true)}
 				>
 					<i class="fas fa-eye mr-1"></i>
-					Preview
+					{m.preview()}
 				</button>
 			</div>
 		</div>

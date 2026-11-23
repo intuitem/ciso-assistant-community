@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	interface Props {
 		name: string;
 		s_label?: string;
@@ -63,7 +64,7 @@
 						trigger: 'item',
 						formatter: function (params) {
 							// Return formatted tooltip content with just the name and value
-							return `${params.data.name}: ${params.data.value}`;
+							return `${escapeHtml(params.data.name)}: ${params.data.value}`;
 						}
 					},
 					title: {

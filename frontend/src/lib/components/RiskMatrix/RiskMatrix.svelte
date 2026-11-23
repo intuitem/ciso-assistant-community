@@ -4,11 +4,11 @@
 	import { buildRiskMatrix, reverseRows, transpose } from './utils';
 
 	import { page } from '$app/state';
-	import { isDark } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { ComponentType } from 'svelte';
 	import Legend from './Legend.svelte';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 
 	interface Props {
 		// --- Props ---

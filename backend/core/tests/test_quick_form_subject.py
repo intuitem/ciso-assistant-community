@@ -494,3 +494,72 @@ class TestStartWithSubject:
         )
         assert refused.status_code == 400
         assert refused.json() == {"error": "unreachableObjectReference"}
+
+
+@pytest.mark.django_db
+def test_solution_options_show_the_provider_domain():
+    from types import SimpleNamespace
+
+    from core.object_references import labels_for, options_for
+    from tprm.models import Solution
+
+    domain = Folder.objects.create(
+        name="vendors",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    solution = Solution.objects.create(
+        name="Payroll",
+        provider_entity=Entity.objects.create(name="Acme", folder=domain),
+    )
+    question = SimpleNamespace(config={"model": "solution"})
+    [row] = options_for(question, domain)["results"]
+    assert row["folder"] == "vendors"
+    assert labels_for(question, domain, [str(solution.id)])[0]["folder"] == "vendors"
+
+
+@pytest.mark.django_db
+class TestReviewerReferenceOptions:
+    """The reviewer's picker: `search` narrows the options, it does not look the
+    request up."""
+
+    def _options(self, setup, **query):
+        _user, client = _admin()
+        response = QuickFormResponse.objects.create(
+            name="Onboarding", quick_form=setup["form"], folder=setup["domain"]
+        )
+        return client.get(
+            f"/api/quick-form-responses/{response.id}/reference-options/",
+            {"question": Q_VENDOR, **query},
+        )
+
+    def test_without_a_search(self, setup):
+        result = self._options(setup)
+
+        assert result.status_code == 200, result.content
+        labels = [row["label"] for row in result.json()["results"]]
+        assert {"Acme", "Globex"} <= set(labels)
+
+    def test_search_narrows_the_options(self, setup):
+        result = self._options(setup, search="acm")
+
+        assert result.status_code == 200, result.content
+        assert [row["label"] for row in result.json()["results"]] == ["Acme"]
+
+    def test_stays_closed_without_access_to_the_request(self, setup):
+        response = QuickFormResponse.objects.create(
+            name="Onboarding", quick_form=setup["form"], folder=setup["domain"]
+        )
+        outsider = User.objects.create_user(email="qf-outsider@test.local")
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=outsider)[1]}"
+        )
+
+        result = client.get(
+            f"/api/quick-form-responses/{response.id}/reference-options/",
+            {"question": Q_VENDOR, "search": "acm"},
+        )
+
+        assert result.status_code in (403, 404), result.content
+        assert "results" not in result.json()

@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Document '${document_name}' (versie ${version_number}): ${decision}"
+body: |
+  Hallo,
+
+  Een revisie die u hebt geschreven heeft een nieuwe status:
+
+  - Document: ${document_name}
+  - Versie: ${version_number}
+  - Status: ${decision}
+  - Door: ${actor_name}
+  - Opmerkingen van de beoordelaar: ${reviewer_comments}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om het te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

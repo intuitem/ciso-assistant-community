@@ -66,6 +66,27 @@ class TestEvidenceAttachmentUpload:
         assert revision.attachment.read() == b"%PDF-1.4 first"
         assert revision.original_filename == "first.pdf"
 
+    def test_raw_upload_without_content_type_keeps_utf8_name(
+        self, admin_client, evidence
+    ):
+        """The MCP client's call: raw bytes, no Content-Type, RFC 5987 filename*."""
+        response = admin_client.generic(
+            "POST",
+            f"/api/evidences/{evidence.id}/upload/",
+            b"\x89PNG\r\n\x1a\n raw",
+            content_type="",
+            HTTP_CONTENT_DISPOSITION=(
+                'attachment; filename="alerte-t-.png"; '
+                "filename*=utf-8''alerte-%C3%A9t%C3%A9.png"
+            ),
+        )
+        assert response.status_code == status.HTTP_200_OK, response.content
+
+        revision = _stored(evidence)
+        assert revision.attachment
+        assert revision.attachment.read() == b"\x89PNG\r\n\x1a\n raw"
+        assert revision.original_filename == "alerte-été.png"
+
     def test_second_upload_replaces_instead_of_clearing(self, admin_client, evidence):
         _upload(admin_client, evidence, "first.pdf", b"%PDF-1.4 first")
         first_name = _stored(evidence).attachment.name

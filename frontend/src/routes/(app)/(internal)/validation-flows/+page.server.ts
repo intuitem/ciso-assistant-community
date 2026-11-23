@@ -1,15 +1,15 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, urlParamModelSelectFields } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 // Route-local Actions/RequestEvent so `transition(event, ...)` typechecks.
 import type { Actions, PageServerLoad, RequestEvent } from './$types';
 

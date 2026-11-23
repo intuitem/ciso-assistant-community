@@ -1,4 +1,6 @@
+import functools
 import hashlib
+from importlib.resources import files
 from decimal import Decimal
 from enum import Enum
 
@@ -6,9 +8,10 @@ import json
 import re
 from re import sub
 from typing import Literal
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone, tzinfo
+from zoneinfo import ZoneInfo
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 from django.conf import settings
 
 from rest_framework.exceptions import ValidationError
@@ -71,8 +74,87 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
     return None
 
 
+def resolve_result_tier(compute_results) -> str | None:
+    """The tier a question states, read from the results its choices can set.
+
+    A question that can set `compliant` states the top tier; one that can only
+    set `partially_compliant` states the middle tier; one that can only set
+    `non_compliant` is a blocking statement (the "at least one of these is
+    true" column of a maturity table). A question whose choices set nothing is
+    captured for the record only and states no tier.
+    """
+    resolved = {resolve_compute_result(value) for value in compute_results}
+    if "compliant" in resolved:
+        return "compliant"
+    if "partially_compliant" in resolved:
+        return "partially_compliant"
+    if "non_compliant" in resolved:
+        return "blocking"
+    return None
+
+
+def aggregate_tiered_results(question_results: list[tuple]) -> str | None:
+    """Aggregate answers where a tier is earned only if all of it holds.
+
+    `question_results` is one `(tier, selected)` pair per answered question,
+    `selected` being the resolved results of the choices the respondent picked.
+    A tier is earned when every question stating it was answered with that
+    tier's result; a blocking statement answered `non_compliant` denies every
+    tier outright. `not_applicable` answers stay neutral, as in
+    `aggregate_compute_results`, and an all-`not_applicable` set is
+    `not_applicable`.
+
+    Unlike per-answer aggregation, this can express "all of these must hold",
+    which is how assessment tables built on indicator statements are read (the
+    NCSC CAF being the reference case).
+    """
+    # Every entry is an answered question (the caller only records those), so a
+    # question that states a tier but whose answer affirms nothing - the False
+    # side of "all the following are true" - means that tier does not hold.
+    # Questions stating no tier at all are captured for the record only.
+    answered = [(tier, selected) for tier, selected in question_results if tier]
+    if not answered:
+        return None
+
+    # `not_applicable` is neutral, as in `aggregate_compute_results`: on a
+    # multiple choice answer it drops out of the selection rather than failing
+    # the tier, and a question answered entirely `not_applicable` stops
+    # contributing at all.
+    contributing = []
+    for tier, selected in answered:
+        effective = [result for result in selected if result != "not_applicable"]
+        if selected and not effective:
+            continue
+        contributing.append((tier, effective))
+    if not contributing:
+        return "not_applicable"
+
+    holds_by_tier: dict[str, list[bool]] = {"compliant": [], "partially_compliant": []}
+    for tier, selected in contributing:
+        if tier == "blocking":
+            if any(result == "non_compliant" for result in selected):
+                return "non_compliant"
+            continue
+        holds_by_tier[tier].append(
+            bool(selected) and all(result == tier for result in selected)
+        )
+
+    for tier in ("compliant", "partially_compliant"):
+        if holds_by_tier[tier] and all(holds_by_tier[tier]):
+            return tier
+
+    # Nothing states a tier - only blocking statements, none of them triggered.
+    if not holds_by_tier["compliant"] and not holds_by_tier["partially_compliant"]:
+        return "compliant"
+    return "non_compliant"
+
+
 def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
-    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    """Aggregate resolved compute_result values, each answer standing on its own.
+
+    not_applicable is neutral; unanimous answers carry, and answers that
+    disagree land on partially_compliant.
+    """
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None
@@ -132,7 +214,13 @@ def get_global_currency() -> str:
     from global_settings.models import GlobalSettings
 
     general_settings = GlobalSettings.objects.filter(name="general").first()
-    return general_settings.value.get("currency", "€") if general_settings else "€"
+    value = general_settings.value if general_settings else None
+    return (value or {}).get("currency") or "€"
+
+
+def duration_day_unit() -> str:
+    """Day suffix for compact durations: French writes "j" (jour)."""
+    return "j" if (get_language() or "").startswith("fr") else "d"
 
 
 def format_currency(value, currency: str) -> str:
@@ -1285,6 +1373,47 @@ def build_answers_dict(answers_qs):
     return result
 
 
+def question_score_bounds(scores, multiple: bool) -> tuple[int, int]:
+    """Lowest and highest total a completed choice question can reach.
+
+    `scores` is the contribution of every selectable choice, an unscored one counting
+    as 0. A completed question has at least one choice selected, so a unique choice
+    reaches exactly one score, and a multiple choice reaches every positive (or every
+    negative) one at once.
+    """
+    scores = list(scores)
+    if not scores:
+        return 0, 0
+    if multiple:
+        positives = [s for s in scores if s > 0]
+        negatives = [s for s in scores if s < 0]
+        hi = sum(positives) if positives else max(scores)
+        lo = sum(negatives) if negatives else min(scores)
+        return lo, hi
+    return min(scores), max(scores)
+
+
+def project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi):
+    """Map a weighted SUM total back onto the unweighted scale of the same questions.
+
+    Weights multiply the answers but not the scale the library author designed, so a
+    raw weighted total saturates at max_score whatever the answers. When the total can
+    reach 0, each side of it is scaled on its own, the positive one from weighted_hi to
+    hi and the negative one from weighted_lo to lo, so both ends of the original scale
+    stay reachable and a choice worth 0 stays neutral. When 0 sits outside the reachable
+    range, the whole range is mapped onto the unweighted one. With all weights at 1 the
+    two ranges coincide and the total comes back unchanged.
+    """
+    if weighted_lo > 0 or weighted_hi < 0:
+        span = weighted_hi - weighted_lo
+        if span <= 0:
+            return total
+        return lo + (total - weighted_lo) * (hi - lo) / span
+    if total >= 0:
+        return total * hi / weighted_hi if weighted_hi > 0 else total
+    return total * lo / weighted_lo if weighted_lo < 0 else total
+
+
 def _build_answer_context(questions_qs, answers_qs):
     """Build lookup dicts used for question visibility and score computation.
 
@@ -1796,6 +1925,22 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     }
 
 
+def restrict_to_respondent_assignments(user, qs, actor_lookup: str):
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if not respondent_folders:
+        return qs
+    from django.db.models import Q
+
+    from core.models import Actor
+
+    return qs.model.objects.filter(
+        id__in=qs.filter(
+            ~Q(folder_id__in=respondent_folders)
+            | Q(**{actor_lookup: Actor.get_all_for_user(user)})
+        ).values("id")
+    )
+
+
 # --- Field Visibility ---
 #
 # The compliance assessment's `field_visibility` is the single source of truth
@@ -1899,6 +2044,97 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
+def is_field_read_only_for(compliance_assessment, field_name, role):
+    """Whether a field is shown to the given role without being writable by it."""
+    return _role_access(compliance_assessment, field_name, role) == "read"
+
+
+# What the applicability toggle of score-only audits writes to `result`.
+APPLICABILITY_RESULTS = frozenset({"not_applicable", "not_assessed"})
+
+
+def is_applicability_readable(compliance_assessment, role):
+    """Whether `role` may read a requirement's applicability (`not_applicable`,
+    `anchored_score`) with its scores.
+
+    Yes where it reads compliance, or in a score-only audit, where compliance is
+    hidden from the auditor too and N/A comes from the applicability toggle.
+    Elsewhere N/A would disclose a verdict hidden from this role.
+    """
+    return is_field_visible_to(compliance_assessment, "score", role) and (
+        is_field_visible_to(compliance_assessment, "result", role)
+        or not is_field_visible_to(compliance_assessment, "result", "auditor")
+    )
+
+
+def is_applicability_write(compliance_assessment, field_name, value, role):
+    """Whether writing `value` to `field_name` only switches a requirement's
+    applicability in a score-only audit, which a role that edits scores may do
+    even though compliance is not editable for it.
+
+    Score-only: compliance is hidden from the auditor too, so no visible verdict
+    can be overwritten; only "not applicable" and "not assessed" pass.
+    """
+    return (
+        field_name == "result"
+        and isinstance(value, str)
+        and value in APPLICABILITY_RESULTS
+        and not is_field_visible_to(compliance_assessment, "result", "auditor")
+        and is_field_editable_by(compliance_assessment, "score", role)
+    )
+
+
+def is_open_assignee(user, requirement_assessment):
+    """Whether the user answers this requirement through an assignment that is still
+    open (not submitted or closed): the assignment page shows them the respondent
+    view whatever other role they hold."""
+    from core.models import Actor
+
+    return (
+        requirement_assessment.assignments.filter(
+            actor__in=Actor.get_all_for_user(user)
+        )
+        .exclude(status__in=["submitted", "closed"])
+        .exists()
+    )
+
+
+VISIBILITY_ROLES = ("auditor", "respondent")
+VISIBILITY_ACCESS = ("edit", "read", "hidden")
+
+
+def validate_field_visibility(value):
+    """Reject `field_visibility` maps the visibility editor cannot produce.
+
+    Pairs may be partial (a framework can override a single role). A missing
+    role resolves to "edit" at runtime, so hiding the auditor requires the
+    respondent to be explicitly hidden too.
+    """
+    from rest_framework import serializers
+
+    if value is None:
+        return value
+    if not isinstance(value, dict):
+        raise serializers.ValidationError("Field visibility must be an object.")
+    for field_name, pair in value.items():
+        if not isinstance(pair, dict):
+            raise serializers.ValidationError(
+                f"{field_name}: expected an object mapping roles to access levels."
+            )
+        for role, access in pair.items():
+            if role not in VISIBILITY_ROLES or access not in VISIBILITY_ACCESS:
+                raise serializers.ValidationError(
+                    f"{field_name}: invalid access '{access}' for role '{role}'."
+                )
+        # The auditor sees at least what the respondent sees.
+        auditor_hidden = pair.get("auditor") == "hidden"
+        if auditor_hidden and pair.get("respondent", "edit") != "hidden":
+            raise serializers.ValidationError(
+                f"{field_name}: cannot be visible to the respondent while hidden from the auditor."
+            )
+    return value
+
+
 def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
@@ -1928,17 +2164,27 @@ def respondent_progress_counts(
     Returns (units, answered units, requirements completed). Not the auditor's
     `ComplianceAssessment.progress`.
     """
-    from core.models import RequirementAssessment
-
     ca = compliance_assessment
+    overrides = ca.field_visibility or (
+        getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
+    )
     alignment_pair = resolve_visibility_from_overrides(
-        ca.field_visibility
-        or (
-            getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
-        ),
-        "respondent_alignment",
+        overrides, "respondent_alignment"
     )
     alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+    # Otherwise a requirement without questions follows the audit's own content
+    # rule: compliance when the audit shows it; N/A or a score above the minimum
+    # when it is score-only.
+    result_visible = (
+        resolve_visibility_from_overrides(overrides, "result").get("auditor", "edit")
+        != "hidden"
+    )
+    min_score_fallback = 0
+    if not result_visible:
+        if ca.min_score is not None:
+            min_score_fallback = ca.min_score
+        elif ca.framework_id is not None:
+            min_score_fallback = ca.framework.min_score
 
     total_q = 0
     answered_q = 0
@@ -1955,7 +2201,12 @@ def respondent_progress_counts(
         unit_done = (
             bool(ra.respondent_alignment)
             if alignment_in_use
-            else ra.result != RequirementAssessment.Result.NOT_ASSESSED
+            else ra.is_assessed_for_progress(
+                status_driven=False,
+                has_questions=False,
+                result_visible=result_visible,
+                min_score_fallback=min_score_fallback,
+            )
         )
         if unit_done:
             answered_q += 1
@@ -1969,6 +2220,112 @@ def compute_respondent_progress(compliance_assessment, requirement_assessments) 
         compliance_assessment, requirement_assessments
     )
     return int(answered_q / total_q * 100) if total_q else 0
+
+
+def assessable_requirement_assessments(audit):
+    """The rows an audit's own aggregates expect, read off a caller's prefetch:
+    assessable, and within the selected implementation groups.
+
+    Same selection rules as `get_requirement_assessments(include_non_assessable=False)`,
+    which would re-query per audit.
+    """
+    rows = [
+        ra for ra in audit.requirement_assessments.all() if ra.requirement.assessable
+    ]
+    selected = set(audit.selected_implementation_groups or [])
+    if not selected:
+        return rows
+    return [
+        ra for ra in rows if selected & set(ra.requirement.implementation_groups or [])
+    ]
+
+
+def viewable_audit_ids(user, audit_ids) -> set:
+    """Which of `audit_ids` the user may read.
+
+    Seeing a third-party assessment does not carry the right to read its
+    questionnaire: the audit sits in an enclave folder of its own, and a role
+    assignment only reaches sub-folders when it is recursive.
+    """
+    from core.models import ComplianceAssessment
+    from iam.models import RoleAssignment
+
+    audit_ids = list(audit_ids)
+    if not audit_ids or user is None:
+        return set()
+    return set(
+        ComplianceAssessment.objects.filter(id__in=audit_ids)
+        .filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
+        )
+        .values_list("id", flat=True)
+    )
+
+
+def compliance_overview(audit, requirement_assessments=None) -> dict:
+    """The questionnaire's compliance split and global score, as its own page shows them.
+
+    Built from the audit's own methods, so a third-party card and the audit
+    page cannot drift apart. Pass `requirement_assessments` to read a caller's
+    prefetch; left out, the rows are fetched in one query.
+    """
+    if requirement_assessments is None:
+        from core.models import RequirementAssessment
+
+        requirement_assessments = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+        )
+    return {
+        "donut": audit.get_donut_data(requirement_assessments)["result"],
+        "global_score": {
+            **audit.get_global_score(requirement_assessments),
+            "min_score": audit.min_score,
+            "max_score": audit.max_score,
+            "total_max_score": audit.get_total_max_score(requirement_assessments),
+            "score_calculation_method": audit.score_calculation_method,
+        },
+        "show_result": is_field_visible_to(audit, "result", "auditor"),
+        "show_score": is_field_visible_to(audit, "score", "auditor"),
+    }
+
+
+def compliance_overviews(audits) -> dict:
+    """`compliance_overview` for a page of audits, keyed by audit id.
+
+    Reads the requirement rows off the caller's prefetch and primes the
+    framework trees AVG_OF_AVG needs in a single query, so the cost stays flat
+    as the page grows.
+    """
+    from core.models import ComplianceAssessment
+
+    audits = list(audits)
+    tree_frameworks = {
+        audit.framework_id
+        for audit in audits
+        if audit.score_calculation_method
+        == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+    }
+    trees = (
+        ComplianceAssessment.framework_node_trees(tree_frameworks)
+        if tree_frameworks
+        else {}
+    )
+    overviews = {}
+    for audit in audits:
+        tree = trees.get(audit.framework_id)
+        if tree is not None:
+            audit.__dict__["framework_node_tree"] = tree
+        overviews[audit.id] = compliance_overview(
+            audit,
+            [
+                ra
+                for ra in audit.requirement_assessments.all()
+                if ra.requirement.assessable
+            ],
+        )
+    return overviews
 
 
 def build_third_party_field_visibility(framework):
@@ -2115,3 +2472,76 @@ def sanitize_xlsx_value(value):
     if isinstance(value, str):
         return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
     return value
+
+
+def get_report_timezone() -> ZoneInfo:
+    """Return the instance time zone used for times printed in reports and exports.
+
+    Falls back to UTC when the setting is missing or holds an unknown region, so a
+    corrupted setting never breaks an export.
+    """
+    from global_settings.models import GlobalSettings
+
+    general = GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL).first()
+    value = general.value if general and isinstance(general.value, dict) else {}
+    try:
+        return ZoneInfo(str(value.get("report_timezone") or "UTC"))
+    except ValueError, KeyError, OSError:
+        return ZoneInfo("UTC")
+
+
+def _utc_offset(local: datetime) -> str:
+    """Return `UTC` for a zero offset, else `UTC+hh:mm` (with seconds for the
+    historical offsets that had them)."""
+    return f"UTC{local:%:z}" if local.utcoffset() else "UTC"
+
+
+def format_report_timestamp(
+    value: datetime | None, tz: tzinfo, empty: str = "-"
+) -> str:
+    """Return the timezone-aware `value` as `YYYY-MM-DD HH:MM:SS (UTC+hh:mm)` in
+    `tz`, or `empty` when it is None.
+
+    The offset is worked out per timestamp because it changes at clock changes.
+    """
+    if value is None:
+        return empty
+    local = value.astimezone(tz)
+    return f"{local:%Y-%m-%d %H:%M:%S} ({_utc_offset(local)})"
+
+
+@functools.cache
+def get_report_timezone_names() -> tuple[str, ...]:
+    """Return `UTC` and the current IANA region names, one per zone and country.
+
+    Read from tzdata's `zone.tab` rather than `available_timezones()`, which also
+    holds the renamed regions (`Europe/Kiev`) and aliases (`US/Eastern`, `Factory`).
+    """
+    zone_tab = files("tzdata").joinpath("zoneinfo/zone.tab").read_text()
+    regions = {
+        line.split("\t")[2]
+        for line in zone_tab.splitlines()
+        if line and not line.startswith("#")
+    }
+    return ("UTC", *sorted(regions))
+
+
+def get_report_timezone_choices(
+    at: datetime | None = None, current: str | None = None
+) -> dict[str, str]:
+    """Return the report time zones as `{name: "(UTC+hh:mm) name"}`, from west to
+    east, labelled with the offset in force at `at` (now by default).
+
+    `current`, the stored zone, is offered even when renamed since (`Europe/Kiev`),
+    so the settings form can still show it.
+    """
+    moment = at or datetime.now(timezone.utc)
+    names = get_report_timezone_names()
+    if current and current not in names:
+        names = (*names, current)
+    offsets = {name: moment.astimezone(ZoneInfo(name)) for name in names}
+    ordered = sorted(
+        offsets,
+        key=lambda name: (offsets[name].utcoffset(), name != "UTC", name),
+    )
+    return {name: f"({_utc_offset(offsets[name])}) {name}" for name in ordered}

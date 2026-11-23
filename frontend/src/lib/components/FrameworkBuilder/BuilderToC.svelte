@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 	import { getTocCollapsedContext } from './collapse-state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	import type { BuilderNode } from './builder-state';
 

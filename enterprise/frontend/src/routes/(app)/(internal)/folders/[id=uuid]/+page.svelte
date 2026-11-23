@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import * as m from '$paraglide/messages';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import * as m from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -26,8 +26,8 @@
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2 justify-end">
 			<form class="flex justify-end" action={`${page.url.pathname}/export`}>
-				<button type="submit" class="btn preset-filled-primary-500 h-fit">
-					<i class="fa-solid fa-download mr-2"></i>
+				<button type="submit" class="btn btn-quiet h-fit">
+					<i class="fa-solid fa-download mr-2 text-sky-500"></i>
 					{m.exportButton()}
 				</button>
 			</form>

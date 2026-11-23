@@ -28,7 +28,7 @@
       "name": "Custom frameworks supported",
       "group": "Compliance & frameworks"
     },
-    { "name": "+220 frameworks included", "group": "Compliance & frameworks" },
+    { "name": "200+ frameworks included", "group": "Compliance & frameworks" },
     { "name": "Policies management", "group": "Compliance & frameworks" },
     { "name": "Document management", "group": "Compliance & frameworks" },
     { "name": "Evidence management", "group": "Compliance & frameworks" },
@@ -168,6 +168,6 @@
       "bento": false
     },
     { "name": "Open Source", "group": "Platform" },
-    { "name": "Available in +27 languages", "group": "Platform" }
+    { "name": "Available in 28 languages", "group": "Platform" }
   ]
 }

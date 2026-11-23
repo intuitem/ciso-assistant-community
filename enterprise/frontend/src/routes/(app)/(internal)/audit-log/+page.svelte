@@ -1,17 +1,17 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import ExportModal, {
 		type ExportGroup,
 		type ExportOption
-	} from '$lib/components/Modals/ExportModal.svelte';
+	} from '#lib/components/Modals/ExportModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { m } from '$paraglide/messages';
+	} from '#lib/components/Modals/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	const ACTION_FILTER = {
 		component: AutocompleteSelect,

@@ -6,6 +6,8 @@ description: "Declaring variables, where their values come from, and how secrets
 
 Open the **Variables** toggle in the top-left of the canvas. The panel at the bottom has two columns: variables on the left, secrets on the right.
 
+Quick reference: [cheat sheet](cheat-sheet.md#variables-and-secrets).
+
 <figure><img src="../../.gitbook/assets/workflows-variables-panel.png" alt="The Variables panel: one declared variable and one secret, with their creation forms"><figcaption><p>The Variables panel: one declared variable and one secret, with their creation forms</p></figcaption></figure>
 
 ## Variables

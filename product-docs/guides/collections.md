@@ -14,7 +14,7 @@ Collections live under the **Project management** module. If the sidebar doesn't
 
 ## What a collection holds
 
-A collection is a thin envelope around nine many-to-many relationships. Anything in CISO Assistant that can live in a project's scope can sit inside a collection:
+A collection is a thin envelope around twelve categories of related objects. Anything in CISO Assistant that can live in a project's scope can sit inside a collection:
 
 - **Audits** (`compliance_assessments`)
 - **Risk assessments**
@@ -22,9 +22,12 @@ A collection is a thin envelope around nine many-to-many relationships. Anything
 - **Ebios RM studies**
 - **Entity assessments** (third-party)
 - **Findings binders** (`findings_assessments`)
-- **Documents** — evidences attached to the collection
+- **Evidences**
 - **Exceptions** — security exceptions
 - **Policies**
+- **Applied controls**
+- **Documents** — managed documents
+- **Business Impact Analyses**
 
 A collection itself carries only an **ID**, a **Domain**, **labels**, an **observation**, and the relationships above. It has no status, lifecycle, or schedule — those belong to the objects inside it.
 
@@ -45,7 +48,7 @@ Creating a project auto-creates a collection named after it, then links it as th
    - **ID** — optional short reference (e.g. `COL-2026-Q1`).
    - **Domain** — the folder this collection belongs to. Drives IAM scoping.
    - **Labels** — optional filtering labels.
-   - **Relationships** (dropdown) — pre-attach existing objects in any of the nine categories above. You can also defer this and add objects from the detail page once the collection exists.
+   - **Relationships** (dropdown) — pre-attach existing objects in any of the twelve categories above. You can also defer this and add objects from the detail page once the collection exists.
 4. **Save**.
 
 ## Curate from the detail page
@@ -78,7 +81,7 @@ Because a collection is just a bag, you can point several objects at the same co
 - **Accreditation perimeter**: an [accreditation](accreditations.md) links to one collection holding the audits, evidences, and exceptions that justify it. The accreditation detail page surfaces all of them as **Associated objects**.
 - **Custom roll-ups**: a regulator pack, a board report bundle, a "things in flight this quarter" envelope. Spin up a fresh collection and stuff what's relevant.
 
-A single object (an audit, an evidence, a policy) can appear in more than one collection — the M2M relationships are independent.
+A single object (an audit, an evidence, a policy) can appear in more than one collection — each membership is independent. You only see the members you are allowed to view, and editing a collection never removes members hidden from you.
 
 ## Observation field
 

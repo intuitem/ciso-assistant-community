@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { pickWorkingRevision } from '$lib/utils/documentRevisions';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { pickWorkingRevision } from '#lib/utils/documentRevisions.js';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 

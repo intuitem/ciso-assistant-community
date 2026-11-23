@@ -1,5 +1,5 @@
 <script>
-	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import ForceCirclePacking from '#lib/components/DataViz/ForceCirclePacking.svelte';
 	const data = {
 		nodes: [
 			{ name: 'some threat', value: 10, items: ['abc', 'mno', 'xyz'] },

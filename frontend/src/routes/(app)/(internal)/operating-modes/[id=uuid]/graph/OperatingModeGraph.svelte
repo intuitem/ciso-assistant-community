@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { enhance } from '$app/forms';
 	import { setContext, tick, untrack } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -28,8 +28,8 @@
 		computeQuotation,
 		type RatingKit,
 		type RatingLevel
-	} from '$lib/utils/ebios-quotation';
-	import { ratingLevelLabel } from '$lib/utils/ebios-rating-kit';
+	} from '#lib/utils/ebios-quotation.js';
+	import { ratingLevelLabel } from '#lib/utils/ebios-rating-kit.js';
 
 	interface ElementaryActionItem {
 		id: string;
@@ -810,7 +810,7 @@
 												saveViewport();
 												onSaved?.();
 											}
-											await update();
+											await update({ navigate: false });
 										};
 									}}
 								>

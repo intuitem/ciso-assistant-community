@@ -1,6 +1,14 @@
 {
 	"quick_form": {
-		"roots": ["response", "pages", "answers", "values", "computed_outcomes", "hidden_pages"],
+		"roots": [
+			"response",
+			"pages",
+			"answers",
+			"values",
+			"ratings",
+			"computed_outcomes",
+			"hidden_pages"
+		],
 		"visibility_roots": ["response", "pages", "answers", "computed_outcomes", "hidden_pages"],
 		"response": [
 			"score",
@@ -12,7 +20,9 @@
 			"scored_complete"
 		],
 		"pages": ["visible", "score", "score_max", "answered_count", "total_count"],
-		"answers": ["value", "score", "selected_choices", "weight", "type", "answered"]
+		"answers": ["value", "score", "selected_choices", "weight", "type", "answered"],
+		"rating_points": ["page", "stage", "dims", "level", "rank"],
+		"rating_dims": ["level", "rank", "value"]
 	},
 	"framework": {
 		"roots": [

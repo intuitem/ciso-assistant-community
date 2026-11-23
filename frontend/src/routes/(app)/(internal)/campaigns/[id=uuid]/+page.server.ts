@@ -1,14 +1,14 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
 import {
 	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction
-} from '$lib/utils/actions';
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+} from '#lib/utils/actions.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 import { fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';

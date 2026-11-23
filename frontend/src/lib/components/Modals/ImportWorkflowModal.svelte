@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WorkflowImportSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import { WorkflowImportSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FileInput from '$lib/components/Forms/FileInput.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FileInput from '#lib/components/Forms/FileInput.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getModalStore } from './stores';
 

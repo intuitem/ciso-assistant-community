@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	interface Props {
 		data: PageData;
 	}

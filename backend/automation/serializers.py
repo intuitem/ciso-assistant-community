@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from core.models import Asset, FindingsAssessment
 from core.serializers import (
+    AssignmentNotificationMixin,
     AssessmentReadSerializer,
     BaseModelSerializer,
     FieldsRelatedField,
@@ -13,7 +14,14 @@ from iam.models import Folder, RoleAssignment
 from .models import PostureAssessment
 
 
-class PostureAssessmentWriteSerializer(BaseModelSerializer):
+class PostureAssessmentWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     create_follow_up_assessment = serializers.BooleanField(
         default=False, write_only=True, required=False
     )

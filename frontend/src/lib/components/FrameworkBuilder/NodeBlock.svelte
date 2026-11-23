@@ -12,10 +12,10 @@
 	import QuestionEditor from './QuestionEditor.svelte';
 	import CelInput from './CelInput.svelte';
 	import { getCelCatalogContext } from './cel-complete';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import ReferentialLinks from './ReferentialLinks.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		node: BuilderNode;
@@ -206,6 +206,7 @@
 		!!(
 			node.node.annotation ||
 			node.node.typical_evidence ||
+			node.node.evidence_required ||
 			node.node.visibility_expression ||
 			(node.node.translations &&
 				Object.values(node.node.translations).some((t) => t.annotation || t.typical_evidence))
@@ -800,7 +801,7 @@
 										value={node.node.weight}
 										min="1"
 										class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
-										onblur={(e) => {
+										onchange={(e) => {
 											const val = Number(e.currentTarget.value) || 1;
 											saveField('weight', val);
 										}}
@@ -838,6 +839,18 @@
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
+								<label
+									class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+									title={m.builderEvidenceRequiredHint()}
+								>
+									<input
+										type="checkbox"
+										checked={node.node.evidence_required}
+										onchange={(e) => saveField('evidence_required', e.currentTarget.checked)}
+										class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+									/>
+									{m.builderEvidenceRequiredLabel()}
+								</label>
 							{/if}
 						</div>
 					{/if}
@@ -942,7 +955,7 @@
 				{#each node.questions as bq, qIndex (bq.question.id)}
 					<div
 						class:opacity-50={questionDrag.draggedIndex === qIndex}
-						draggable="true"
+						draggable="false"
 						onmousedown={questionDrag.recordMousedown}
 						ondragstart={(e) => questionDrag.handleDragStart(e, qIndex)}
 						ondragover={questionDrag.handleDragOver}
@@ -1018,7 +1031,7 @@
 			{#each node.children as child, childIndex (child.node.id)}
 				<div
 					class:opacity-50={childDrag.draggedIndex === childIndex}
-					draggable="true"
+					draggable="false"
 					onmousedown={childDrag.recordMousedown}
 					ondragstart={(e) => childDrag.handleDragStart(e, childIndex)}
 					ondragover={childDrag.handleDragOver}

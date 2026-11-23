@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
-	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import MergeAppliedControlsModal from '#lib/components/Modals/MergeAppliedControlsModal.svelte';
 
 	interface Props {
 		row: any;

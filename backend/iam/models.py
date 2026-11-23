@@ -5,20 +5,24 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Final
+from typing import Any, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
 from allauth.account.models import EmailAddress
+from django.core.cache import cache
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
+from django.db.models import Q, F, Func, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
+from django.db.models.lookups import Exact
+from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
 from core.utils import (
@@ -38,7 +42,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.core.validators import validate_email
 from django.conf import settings
 
@@ -48,9 +52,10 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
-from allauth.mfa.models import Authenticator
 from allauth.idp.oidc.models import Client, Token
+from allauth.socialaccount.models import SocialApp
 from core.context import focus_folder_id_var
+from iam.delegation import delegation_allows
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -63,6 +68,15 @@ ALLOWED_PERMISSION_APPS = (
     "iam",
     "global_settings",
     "portals",
+    "automation",
+    "chat",
+    "custom_fields",
+    "data_wizard",
+    "doc_management",
+    "integrations",
+    "notifications",
+    "sec_intel",
+    "threat_modeling",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -75,7 +89,84 @@ IGNORED_PERMISSION_MODELS = (
     "idpgroup",
     "scimtoken",
     "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "conditionbranch",
+    "customfieldchoice",
+    "customfieldvalue",
+    "demomanifest",
+    "documentreference",
+    "flowevent",
+    "posturerun",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    "syncevent",
+    # Served without RBAC: a global catalog and a cache
+    "integrationprovider",
+    "integrationschemacache",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
+    # Never checked; mail settings are gated by *_mailerconfiguration
+    "mailer",
+    "mailerhealth",
 )
+
+# System-written, served read-only: only view (and custom rights) are ever checked
+READ_ONLY_PERMISSION_MODELS = (
+    "actor",
+    "assetcapability",
+    "chatmessage",
+    "commitment",
+    "documentedit",
+    "dpiarequirementchange",
+    "entitytierchange",
+    "quickformpage",
+    "responsibilityassignment",
+    "responsibilityrole",
+    "solutiontierchange",
+    "workflowinstancelog",
+)
+
+# Created only by the system; users still delete their own notifications
+SYSTEM_MANAGED_PERMISSIONS = (
+    "add_notification",
+    "add_workflowtoken",
+    "delete_workflowtoken",
+    "add_workflowtrigger",
+    "delete_workflowtrigger",
+)
+
+ADMINISTRATOR_ONLY_PERMISSIONS = (
+    "change_indexeddocument",
+    "add_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
+)
+
+IGNORED_PERMISSIONS = (
+    Q(content_type__model__in=IGNORED_PERMISSION_MODELS)
+    | Q(
+        codename__in=[
+            f"{action}_{model}"
+            for model in READ_ONLY_PERMISSION_MODELS
+            for action in ("add", "change", "delete")
+        ]
+    )
+    | Q(codename__in=SYSTEM_MANAGED_PERMISSIONS)
+    | Q(codename__in=ADMINISTRATOR_ONLY_PERMISSIONS)
+)
+
+
+def get_permission_catalog() -> QuerySet[Permission]:
+    """Return the permissions a custom role or a service account may be granted."""
+    return Permission.objects.filter(
+        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+    ).exclude(IGNORED_PERMISSIONS)
+
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
 """Default permission prefixes available for all models (django-native)."""
@@ -104,6 +195,31 @@ def _get_root_folder() -> Optional[Folder]:
 
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+# ASCII whitespace, trimmed alike by Folder.clean() and the ref_id unique index.
+_REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
+
+
+def _trimmed_ref_id(expression=None) -> Func:
+    # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        Value(_REF_ID_WHITESPACE),
+        function="TRIM",
+        output_field=models.CharField(),
+    )
+
+
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
+        output_field=models.CharField(),
+    )
 
 
 class Folder(NameDescriptionMixin):
@@ -172,6 +288,10 @@ class Folder(NameDescriptionMixin):
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
 
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -223,10 +343,57 @@ class Folder(NameDescriptionMixin):
                 ),
                 name="enclave_default_role_must_be_null",
             ),
+            # Backstop for clean(): blank ref_ids are not identifiers.
+            # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
+            models.UniqueConstraint(
+                Lower(_trimmed_ref_id()),
+                condition=~Q(Exact(_trimmed_ref_id(), Value(""))),
+                name="folder_ref_id_unique",
+            ),
         ]
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def clean(self) -> None:
+        # Whitespace-only is blank, and blank is stored as NULL.
+        if self.ref_id is not None:
+            self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
+        errors = {}
+        if self.ref_id and Folder.ref_id_in_use(self.ref_id, exclude_pk=self.pk):
+            errors["ref_id"] = [self._ref_id_taken_message()]
+        # Report a name clash alongside, so both can be fixed at once.
+        try:
+            super().clean()
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
+
+    @staticmethod
+    def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
+        """Whether another folder holds *ref_id*."""
+        return (
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
+            .exclude(pk=exclude_pk)
+            .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
+        )
+
+    def _ref_id_taken_message(self) -> str:
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
+        return f"{self.ref_id} is already used. Please choose another value."
 
     @staticmethod
     def _lock_folder_tree() -> None:
@@ -320,6 +487,15 @@ class Folder(NameDescriptionMixin):
         ).delete()
 
     def save(self, *args, **kwargs):
+        try:
+            self._save_in_tree_lock(*args, **kwargs)
+        except IntegrityError as e:
+            # SQLite takes no tree lock, so a concurrent write can slip past clean().
+            if "folder_ref_id_unique" not in str(e):
+                raise
+            raise ValidationError({"ref_id": self._ref_id_taken_message()}) from e
+
+    def _save_in_tree_lock(self, *args, **kwargs):
         """
         **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
 
@@ -540,6 +716,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
@@ -552,6 +729,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -802,6 +980,7 @@ class UserManager(BaseUserManager):
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
+                can_connect_apps=extra_fields.get("can_connect_apps", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
@@ -856,7 +1035,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
+            mailing=mailer.mailing_enabled(),
             initial_group=None,
             **extra_fields,
         )
@@ -870,9 +1049,7 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool(
-                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
-            ),
+            mailing=(not password) and mailer.mailing_enabled(),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -902,6 +1079,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         default=False,
         help_text=_(
             "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
+    can_connect_apps = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to connect AI apps (MCP) with their account."
         ),
     )
     is_third_party = models.BooleanField(default=False)
@@ -986,7 +1169,12 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name = _("user")
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
-        permissions = (("backup", "backup"), ("restore", "restore"))
+        permissions = (
+            ("backup", "backup"),
+            ("restore", "restore"),
+            # See the full-view-permissions ADR.
+            ("view_user_full", "Can view users' full record"),
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -996,7 +1184,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local and not self.is_scim_managed:
+        if not self.is_local and not (self.is_scim_managed and self.keep_local_login):
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -1142,76 +1330,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._send_email(subject, email, email)
 
     def _send_email(self, subject, body, html_body=None):
-        """Send an email with primary/rescue server fallback."""
+        """Send through the configured mailers; core.mailer handles failover."""
         try:
-            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-            with get_connection(ssl_context=ssl_context) as connection:
-                msg = EmailMessage(
-                    subject=subject,
-                    body=body,
-                    from_email=None,
-                    to=[self.email],
-                    connection=connection,
-                )
-                if html_body:
-                    msg.content_subtype = "html"
-                    msg.body = html_body
-                msg.send()
-            logger.info(
-                "Email sent successfully", recipient=self.email, subject=subject
-            )
-        except Exception as primary_exception:
+            mailer.send(subject, body, self.email, html_body=html_body)
+        except Exception as error:
             logger.error(
-                "Primary mail server failure, trying rescue",
+                "Email delivery failed",
                 recipient=self.email,
                 subject=subject,
-                error=str(primary_exception),
-                email_host=settings.EMAIL_HOST,
-                email_port=settings.EMAIL_PORT,
-                email_host_user=settings.EMAIL_HOST_USER,
-                email_use_tls=settings.EMAIL_USE_TLS,
+                error=str(error),
             )
-            if settings.EMAIL_HOST_RESCUE:
-                try:
-                    with get_connection(
-                        host=settings.EMAIL_HOST_RESCUE,
-                        port=settings.EMAIL_PORT_RESCUE,
-                        username=settings.EMAIL_HOST_USER_RESCUE,
-                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
-                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
-                    ) as new_connection:
-                        msg = EmailMessage(
-                            subject=subject,
-                            body=body,
-                            from_email=None,
-                            to=[self.email],
-                            connection=new_connection,
-                        )
-                        if html_body:
-                            msg.content_subtype = "html"
-                            msg.body = html_body
-                        msg.send()
-                    logger.info(
-                        "Email sent via rescue server",
-                        recipient=self.email,
-                        subject=subject,
-                    )
-                except Exception as rescue_exception:
-                    logger.error(
-                        "Rescue mail server failure",
-                        recipient=self.email,
-                        subject=subject,
-                        error=str(rescue_exception),
-                        email_host=settings.EMAIL_HOST_RESCUE,
-                        email_port=settings.EMAIL_PORT_RESCUE,
-                        email_username=settings.EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                    )
-                    raise rescue_exception
-            else:
-                raise primary_exception
+            raise
+        logger.info("Email sent successfully", recipient=self.email, subject=subject)
 
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
@@ -1290,26 +1420,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
-    # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {
-        "change_validationflow",
-        "add_chatsession",
-        "change_chatsession",
-        "delete_chatsession",
-        "change_notification",
-        "delete_notification",
-    }
-
-    @property
-    def is_editor(self) -> bool:
-        permissions = RoleAssignment.get_permissions(self)
-        editor_prefixes = {"add_", "change_", "delete_"}
-        return any(
-            any(perm.startswith(prefix) for prefix in editor_prefixes)
-            for perm in permissions
-            if perm not in self.NON_SEAT_PERMISSIONS
-        )
-
     @property
     def is_local(self) -> bool:
         """
@@ -1335,14 +1445,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             or not sso_settings.get("force_sso", False)
         )
 
-    @classmethod
-    def get_editors(cls) -> List["User"]:
-        return [
-            user
-            for user in cls.objects.exclude(service_account__isnull=False)
-            if user.is_editor and not user.is_third_party
-        ]
-
     @property
     def is_sso(self) -> bool:
         """
@@ -1357,7 +1459,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Check if the user has Multi-Factor Authentication (MFA) enabled.
         Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
         """
-        return Authenticator.objects.filter(user=self).exists()
+        # Through the reverse relation, so a prefetch (UserViewSet) answers it.
+        return self.authenticator_set.exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -1514,6 +1617,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         from core.models import FilteringLabel
 
         if not isinstance(user, User):
+            return False
+
+        if not delegation_allows(perm.codename):
             return False
 
         model = perm.content_type.model_class()
@@ -1709,6 +1815,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return GrantFolderSet.none()
 
         permission = RoleAssignment._resolve_permission(permission)
+        if not delegation_allows(permission.codename):
+            return GrantFolderSet.none()
 
         role_assignments, default_role_folders = (
             RoleAssignment._get_permission_grant_sources(user, permission)
@@ -1921,13 +2029,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if perm_prefix != "view":
             return Permission.objects.none().values_list("id", flat=True)
 
-        return (
-            Permission.objects.filter(
-                content_type__app_label__in=ALLOWED_PERMISSION_APPS
-            )
-            .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
-            .values_list("id", flat=True)
-        )
+        return get_permission_catalog().values_list("id", flat=True)
 
     @staticmethod
     def get_iam_folder_field(model: type[models.Model]) -> str:
@@ -1964,7 +2066,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
 
         if iam_scope_field_name in field_names:
-            return f"{iam_scope_field_name}__folder_id"
+            scope_model = model._meta.get_field(iam_scope_field_name).related_model
+            return f"{iam_scope_field_name}__{RoleAssignment.get_iam_folder_field(scope_model)}"
 
         raise NotImplementedError(f"Model {model.__qualname__} not supported.")
 
@@ -1986,8 +2089,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return obj.folder_id
 
         scope_field = iam_folder_field.split("__", 1)[0]
-        scope_obj = getattr(obj, scope_field)
-        return scope_obj.folder_id
+        return RoleAssignment.get_iam_folder_id(getattr(obj, scope_field))
 
     @staticmethod
     def _get_accessible_ids(
@@ -2098,11 +2200,67 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         if not isinstance(principal, (User, UserGroup)):
             return False
+        if not delegation_allows(codename):
+            return False
 
         permission = Permission.objects.get(codename=codename)
         return RoleAssignment._get_directly_granted_permissions(
             principal, permission
         ).exists()
+
+    @staticmethod
+    def users_with_permission_anywhere(
+        permissions: QuerySet[Permission],
+    ) -> QuerySet["User"]:
+        """
+        Batch form of `has_permission_anywhere` for users: the users holding any
+        of `permissions` on any `Folder`, in one query instead of one per user.
+
+        Same grant sources as `_get_permission_grant_sources`: the user's own,
+        group and (when inherited) IdP-group role assignments, and the
+        `folder.default_role` a builtin-group assignment grants on its folders
+        and their ancestors, outside enclaves and never to third parties.
+        Inactive users hold nothing.
+        """
+        from global_settings.utils import idp_group_role_inheritance_enabled
+
+        roles = Role.objects.filter(permissions__in=permissions)
+        default_role_folders = Folder.objects.filter(
+            default_role__permissions__in=permissions
+        )
+        # Folders whose builtin-group assignments grant one of those default roles.
+        default_role_grant_folders = (
+            Folder.objects.filter(
+                Q(id__in=default_role_folders) | Q(ancestors__in=default_role_folders)
+            )
+            .exclude(content_type=Folder.ContentType.ENCLAVE)
+            .exclude(ancestors__content_type=Folder.ContentType.ENCLAVE)
+        )
+
+        group_paths = ["user_groups"]
+        if idp_group_role_inheritance_enabled():
+            group_paths.append("idp_groups__user_groups")
+        grants = [Q(roleassignment__role__in=roles)]
+        for path in group_paths:
+            grants.append(Q(**{f"{path}__roleassignment__role__in": roles}))
+            grants.append(
+                Q(
+                    **{
+                        f"{path}__builtin": True,
+                        f"{path}__roleassignment__perimeter_folders__in": (
+                            default_role_grant_folders
+                        ),
+                    },
+                    is_third_party=False,
+                )
+            )
+
+        # One semi-join per grant source: OR-ing them in a single filter would
+        # join every relation at once.
+        holders = Q()
+        for grant in grants:
+            holders |= Q(id__in=User.objects.filter(grant).values("id"))
+        return User.objects.filter(holders, is_active=True)
 
     @staticmethod
     def get_permissions(
@@ -2285,20 +2443,40 @@ class SCIMToken(models.Model):
 
 
 class ServiceAccount(AbstractBaseModel):
-    """Machine principal (OIDC Client + dedicated User/Role/RoleAssignment) authenticating via client_credentials."""
+    """Machine principal with local or federated authentication."""
 
     SECRET_PREFIX = "ca_sa."
     _SECRET_PREVIEW_VISIBLE_CHARS = 3
     _SECRET_PREVIEW_MASK = "•" * 8
 
+    class IdentitySource(models.TextChoices):
+        LOCAL = "local", _("Local")
+        FEDERATED = "federated", _("Federated")
+
     # Capped at 100 to match allauth's Client.name, which it's copied into verbatim.
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, null=True)
+    identity_source = models.CharField(
+        max_length=16,
+        choices=IdentitySource.choices,
+        default=IdentitySource.LOCAL,
+        verbose_name=_("Identity source"),
+    )
     client = models.OneToOneField(
         Client,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="service_account",
     )
+    social_app = models.ForeignKey(
+        SocialApp,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="federated_service_accounts",
+    )
+    federated_subject = models.CharField(max_length=255, null=True, blank=True)
     user = models.OneToOneField(
         User,
         on_delete=models.PROTECT,
@@ -2332,10 +2510,7 @@ class ServiceAccount(AbstractBaseModel):
     class Meta:
         verbose_name = _("Service account")
         verbose_name_plural = _("Service accounts")
-
-    @property
-    def client_id(self) -> str:
-        return self.client.pk
+        unique_together = (("social_app", "federated_subject"),)
 
     @property
     def role_assignment(self) -> RoleAssignment | None:
@@ -2355,24 +2530,31 @@ class ServiceAccount(AbstractBaseModel):
         return visible + cls._SECRET_PREVIEW_MASK
 
     def deactivate(self):
-        """Block token issuance (no grant types) and revoke outstanding tokens."""
+        """Disable the account and revoke local tokens."""
         self.is_active = False
         self.save(update_fields=["is_active", "updated_at"])
-        self.client.set_grant_types([])
-        self.client.save(update_fields=["grant_types"])
-        Token.objects.filter(client=self.client).delete()
+        if self.identity_source == self.IdentitySource.LOCAL:
+            self.client.set_grant_types([])
+            self.client.save(update_fields=["grant_types"])
+            Token.objects.filter(client=self.client).delete()
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
 
     def activate(self):
         self.is_active = True
         self.save(update_fields=["is_active", "updated_at"])
-        self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
-        self.client.save(update_fields=["grant_types"])
+        if self.identity_source == self.IdentitySource.LOCAL:
+            self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
+            self.client.save(update_fields=["grant_types"])
         self.user.is_active = True
         self.user.save(update_fields=["is_active"])
 
     def rotate_secret(self, grace_period: timedelta | None = None) -> str:
+        """Rotate the local secret and revoke outstanding tokens."""
+        if self.identity_source != self.IdentitySource.LOCAL:
+            raise ValueError(
+                "Federated service accounts have no local secret to rotate."
+            )
         plain_secret = self.generate_secret()
         if grace_period:
             self.previous_secret_hash = self.client.secret  # already hashed
@@ -2398,7 +2580,8 @@ class ServiceAccount(AbstractBaseModel):
         client, user, role = self.client, self.user, self.role
         with transaction.atomic():
             result = super().delete(*args, **kwargs)
-            client.delete()  # cascades outstanding OIDC tokens
+            if client is not None:
+                client.delete()  # cascades outstanding OIDC tokens
             user.delete()  # cascades the role assignment
             if not role.builtin:
                 role.delete()
@@ -2406,6 +2589,163 @@ class ServiceAccount(AbstractBaseModel):
 
     def __str__(self):
         return self.name
+
+
+class ConnectedAppUse(models.Model):
+    """When a user authorized an app, and when its tokens were last accepted.
+
+    Kept apart from allauth's Token rows: access tokens are replaced every hour,
+    and the date would go with them.
+    """
+
+    THROTTLE = timedelta(minutes=1)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="connected_app_uses"
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    authorized_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client"], name="unique_connected_app_use"
+            )
+        ]
+
+    @classmethod
+    def record(cls, user_id, client_id) -> None:
+        # this runs on every call: within THROTTLE, the cache answers and the
+        # database is not touched
+        key = f"connected-app-use:{user_id}:{client_id}"
+        if not cache.add(key, True, cls.THROTTLE.total_seconds()):
+            return
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"last_used_at": timezone.now()},
+        )
+
+    @classmethod
+    def record_authorization(cls, user_id, client_id) -> None:
+        cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"authorized_at": timezone.now()},
+        )
+
+
+class ConnectionProfile(models.Model):
+    """What an AI app may do once connected: read always, plus any of create,
+    update and delete. It only narrows: the app never gets more than the user
+    who connects it, and never the control plane."""
+
+    ACTIONS = ("read", "create", "update", "delete")
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, default="")
+    can_create = models.BooleanField(default=False)
+    can_update = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+    builtin = models.BooleanField(default=False)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def actions(self) -> list[str]:
+        allowed = {
+            "read": True,
+            "create": self.can_create,
+            "update": self.can_update,
+            "delete": self.can_delete,
+        }
+        return [action for action in self.ACTIONS if allowed[action]]
+
+    @property
+    def rank(self) -> tuple[int, ...]:
+        return (len(self.actions), self.can_delete, self.can_update)
+
+    @staticmethod
+    def builtin_name(create: bool, update: bool, delete: bool) -> str:
+        words = ["create"] * create + ["update"] * update + ["delete"] * delete
+        if not words:
+            return "Read only"
+        if len(words) == 1:
+            return f"Read and {words[0]}"
+        return "Read, " + ", ".join(words[:-1]) + f" and {words[-1]}"
+
+    @classmethod
+    def default(cls) -> "ConnectionProfile | None":
+        return cls.objects.filter(is_default=True).first()
+
+    @classmethod
+    def matching(cls, create: bool, update: bool, delete: bool):
+        return cls.objects.filter(
+            builtin=True, can_create=create, can_update=update, can_delete=delete
+        ).first()
+
+    @classmethod
+    def sync_builtin(cls) -> None:
+        """One built-in profile per combination of create, update and delete."""
+        for create in (False, True):
+            for update in (False, True):
+                for delete in (False, True):
+                    cls.objects.update_or_create(
+                        name=cls.builtin_name(create, update, delete),
+                        defaults={
+                            "can_create": create,
+                            "can_update": update,
+                            "can_delete": delete,
+                            "is_default": not (create or update or delete),
+                            "builtin": True,
+                        },
+                    )
+
+
+class AppGrant(models.Model):
+    """Which profile a connection uses. Keyed by user and client, not by token:
+    allauth issues new tokens at each refresh and copies no data across."""
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="app_grants")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    # deleting a profile must go through revoking its connections, or their
+    # tokens would outlive the grant
+    profile = models.ForeignKey(
+        ConnectionProfile, on_delete=models.PROTECT, related_name="grants"
+    )
+    # {folder id: ["read", "update", ...]}: the nearest one wins over the
+    # profile. Stored now, read once domain overrides ship.
+    folder_overrides = models.JSONField(default=dict, blank=True)
+    granted_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "client"], name="unique_app_grant")
+        ]
+
+    @classmethod
+    def consent(cls, user_id, client_id, profile) -> "AppGrant":
+        grant, _ = cls.objects.update_or_create(
+            user_id=user_id,
+            client_id=client_id,
+            defaults={"profile": profile, "granted_at": timezone.now()},
+        )
+        return grant
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -2436,10 +2776,17 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(ConnectionProfile, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
 auditlog.register(ServiceAccount, exclude_fields=common_exclude)
+auditlog.register(
+    SocialApp,
+    exclude_fields=["secret", "key"],
+    mask_fields=["settings"],
+    mask_callable="iam.utils.mask_social_app_settings",
+)
 
 
 def _skip_builtin_rbac(sender, instance, **kwargs):
@@ -2450,3 +2797,40 @@ def _skip_builtin_rbac(sender, instance, **kwargs):
 
 for _rbac_model in (RoleAssignment, Role, UserGroup):
     pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)
+
+
+_APP_ACCESS_FIELDS = ("can_connect_apps", "is_active")
+
+
+def _note_lost_app_access(sender, instance, update_fields=None, **kwargs):
+    # unticking the flag or deactivating is a decision about this person: their
+    # connections must not come back if it is reverted, so the tokens go
+    instance._lost_app_access = None
+    if instance._state.adding or (
+        update_fields is not None and not set(update_fields) & set(_APP_ACCESS_FIELDS)
+    ):
+        return
+    before = User.objects.filter(pk=instance.pk).values(*_APP_ACCESS_FIELDS).first()
+    if not before:
+        return
+    if before["is_active"] and not instance.is_active:
+        instance._lost_app_access = "all"
+    elif before["can_connect_apps"] and not instance.can_connect_apps:
+        instance._lost_app_access = "mcp"
+
+
+def _revoke_lost_app_access(sender, instance, **kwargs):
+    lost = getattr(instance, "_lost_app_access", None)
+    instance._lost_app_access = None
+    if lost == "all":
+        from iam.mcp_access import revoke_app_tokens
+
+        revoke_app_tokens([instance.pk])
+    elif lost == "mcp":
+        from iam.mcp_access import revoke_mcp_connections
+
+        revoke_mcp_connections(instance.pk)
+
+
+models.signals.pre_save.connect(_note_lost_app_access, sender=User)
+models.signals.post_save.connect(_revoke_lost_app_access, sender=User)

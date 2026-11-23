@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { focusMode, setFocusMode, clearFocusMode } from '$lib/utils/stores';
-	import { invalidateAll } from '$app/navigation';
-	import * as m from '$paraglide/messages';
+	import { focusMode, setFocusMode, clearFocusMode } from '#lib/utils/stores.js';
+	import { refreshAll } from '$app/navigation';
+	import * as m from '#paraglide/messages.js';
 	import FolderTreeNode, { type TreeNode } from './FolderTreeNode.svelte';
 
 	interface Props {
@@ -57,14 +57,14 @@
 		setFocusMode(id, name);
 		isOpen = false;
 		searchQuery = '';
-		invalidateAll();
+		refreshAll();
 	}
 
 	function handleClear() {
 		clearFocusMode();
 		isOpen = false;
 		searchQuery = '';
-		invalidateAll();
+		refreshAll();
 	}
 
 	function toggleDropdown() {

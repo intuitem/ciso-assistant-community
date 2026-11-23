@@ -25,7 +25,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
   - **Draft** — never published; identity still editable.
   - **Published** — published, with no changes since.
   - **Published · unpublished changes** — published, but edited since; publish again to push the edits live.
-- **Save state** — separate from publication. Inside each object editor (framework/matrix/preset) the badge tracks whether your local edits are **saved to the draft** yet — **Empty**, **Saved to draft**, or **Unsaved changes**. You save in the editor; you publish from the draft page.
+- **Save state** — separate from publication. Inside each object editor (framework/matrix/quick form/preset) the badge tracks whether your local edits are **saved to the draft** yet — **Empty**, **Saved to draft**, or **Unsaved changes**. You save in the editor; you publish from the draft page.
 - **Adopt** — bring an existing custom library (or a library-less framework left by the old builders) into a draft so you can keep editing it, identity preserved.
 - **Clone** — copy objects _by value_ from another library or draft into yours, rebased onto your URN family so they evolve independently.
 
@@ -36,7 +36,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
 For the common case — one framework, or one matrix, with no other objects — you don't need to think about libraries at all.
 
 1. Open **Catalog → Library Builder**.
-2. Click **New framework** or **New matrix**.
+2. Click **New framework**, **New matrix** or **New quick form**.
 3. Enter a **name** and a **packager** (your namespace, e.g. `acme`). The packager is remembered after the first time, and the default can be set instance-wide (see [Set the default packager](#set-the-default-packager)).
 4. Click **Create and edit**. The wrapping library is minted behind the scenes — its ref_id is slugged from the name and de-duplicated against your corpus — and you land straight in the object's editor.
 5. Edit and save, then publish from the draft page.
@@ -76,6 +76,12 @@ A framework is a tree of **requirement nodes**. Open the framework editor from a
 5. Drag the grip handle (left of any node) to reorder against siblings.
 6. Save with `⌘ + S` / `Ctrl + S` as you go — the editor's badge flips between **Unsaved changes** and **Saved to draft**.
 
+### Require an evidence
+
+Under **Advanced** on an assessable node, tick **Evidence required**. Respondents then cannot submit an assignment while that requirement carries no evidence. See [Assignments](../../features/assignments.md#requirements-that-require-an-evidence).
+
+The **Typical evidence** field next to it stays descriptive: it tells the respondent what to look for, it does not make the evidence compulsory.
+
 ### Add implementation groups (IGs)
 
 For tiered selection (e.g. _Basic_ / _Standard_ / _Advanced_):
@@ -91,6 +97,12 @@ See [Implementation groups](../../concepts/audits.md#implementation-groups) for 
 2. Set **Minimum score** and **Maximum score** (e.g. 0–5 for CMMI-style, 0–100 for percentage).
 3. Choose **Aggregation**: _Average_ (leaf scores average up to the parent) or _Sum_.
 4. Under **Score scale**, **Add scale level** for each level and set its **score**, **name** (_Initial_, _Managed_, _Defined_…), and **description** (the criteria for reaching it).
+5. Set the defaults proposed to every new audit of the framework:
+   - **Score calculation method** — **Average**, **Sum**, or **Average of averages** (each category is averaged, then the category averages), as the [score calculation method](../../guides/customize-audit.md#score-calculation-method) of an audit.
+   - **Target score** — the score the audit aims at.
+   - **Anchor N/A to target score** — not-applicable requirements count as the target score instead of being left out. It needs a target score: clearing the target clears it too.
+
+   These are only defaults: each audit can change them on its own form. The CyFun 2025 framework uses them to match the CCB tools (see [CyFun](../../features/framework-specific/cyfun.md#before-you-export)).
 
 Match the standard the framework comes from (CMMI 0–5, NIST CSF 2.0 1–4) rather than inventing a scale, and document each level so an analyst can tell level 3 from level 4. (Per-requirement score overrides are a library-YAML feature, not exposed in the builder UI — author them in [Excel/YAML](excel.md) if you need them.)
 
@@ -119,6 +131,8 @@ Rules can do more than label a score:
 
 - **Number rules.** Set **Result** to **Number** to compute a value instead of a yes/no verdict (an average, a count). Number rules below it and every yes/no rule read it as `values.<ref_id>`; with a label, the value shows on the audit to those who see its **Score**.
 - **Rule order.** Number rules run first, in order, each seeing the ones above it. Yes/no rules then run in order and see the yes/no rules above them that fired, as `computed_outcomes` — so a summary rule such as `"maturity" in computed_outcomes && "exclusions" in computed_outcomes` goes below the rules it reads.
+- **Maturity level.** Set **Result** to **Maturity level** (offered when the framework has implementation groups) to give the audit the highest level fully met, level by level, as in Essential Eight. Pick the implementation groups under **Levels, lowest first** and name level 0 in **Name of level 0**. Only requirements tagged with a level count: a requirement with no implementation group is left out of every level, even though elsewhere an untagged requirement belongs to every group, so tag each requirement that must count. A level is met when the level below it is met and every requirement tagged with it passes: compliant or not applicable pass, partially compliant and non compliant fail, and a requirement not yet assessed leaves the level pending. Tick **One level per top-level section** to rate each section separately, the audit then getting the lowest of them; tick **Requirements tagged with a lower level count at higher levels too** when requirements carry only the level that introduces them. The **How the level is computed** panel shows the result in plain words. Every rule reads the level as `values.<ref_id>`.
+- **Weakest link.** Set **Result** to **Weakest link** to rate each node at a given **Depth of the rated nodes** (1 = top level) by its worst requirement, not applicable ones aside, as in ASD Essentials. The audit, or each top-level section with **One summary per top-level section**, is scored as the weighted mean of its rated nodes (compliant 1, partially compliant 0.5, non compliant 0, not assessed 0). A section where no rated node is assessed, or where all are not applicable, has no score and is left out of the overall score rather than counted as 0: one compliant section next to a wholly unassessed one gives 100%. **Result names (optional)** renames the results, for instance _Fully effective_. Number rules read the overall score, as a percentage, as `values.<ref_id>`.
 - **Applies to.** When the framework has implementation groups, limit a rule to some of them: it then applies only to audits whose scope includes one of these groups (or covers the whole framework, with no group selected). Use it for criteria that differ by level, as the CyFun 2025 [conformity criteria](../../features/framework-specific/cyfun.md#checking-the-ccb-conformity-criteria) do.
 
 What an expression can read:
@@ -163,9 +177,65 @@ The **Grid** section maps every `(probability, impact)` pair to a risk level:
 
 Deleting a risk level that cells still point at is the most fragile operation: affected cells fall back to the first risk level. Prefer cloning to a new matrix over destructive level removal on a matrix already in use. (The publishable check surfaces such issues when you **Validate** on the draft page — see below.)
 
+### Customise the EBIOS RM scales
+
+The **EBIOS RM rating scales** section holds the scales EBIOS RM studies apply with this matrix: the **Workshop 2 · Pertinence of RO/TO couples** grid, and the **Workshop 4 · Likelihood of operating modes** grid (success probability × technical difficulty) used by the [standard and advanced quotation methods](../../guides/ebios-rm.md#standard-and-advanced). They start from the **EBIOS RM guide values**; click **Customise** to edit them, a cell click moving it to the next level, and **Back to the guide values** to undo.
+
 ### Apply a colour palette
 
 Each level section offers four colour palettes — **classic** (green→red), **accessible** (Wong's colourblind-safe set), **warm**, and **cool** — as swatch buttons. Selecting one rewrites every colour in that section in order (overwriting custom hex). Apply the same palette across sections for a coherent look; the _accessible_ palette is the safe default, and keeps risk-level colours monotonic (green → yellow → orange → red).
+
+## Authoring quick forms
+
+A [quick form](../../concepts/quick-forms.md) is a short questionnaire made of pages. Start one with **New quick form** on the builder list, or copy a shipped one into a draft with [Import objects (clone)](#clone-objects-from-another-library-or-draft) and click **Edit visually**. Changing a copy is usually faster than starting blank: the vendor tiering forms are a good base for your own tiering method.
+
+### Build the pages and questions
+
+1. Use **Add page** (or **Add page below** on an existing page) and give each page a name. The table of contents on the left jumps between pages.
+2. On a page, click **Add question** and pick its type: **Single choice**, **Multiple choice**, **Boolean**, **Text**, **Number**, **Date**, **File upload**, or **Object reference** (pick an object of the platform, such as a vendor).
+3. For a choice question, **Add choice** and set, per choice, its value, a **score** (the points it contributes), and a **description**. Respondents see the description behind an info icon next to the choice: use it to say what the level means, so two people pick the same one.
+4. Under **Advanced** on a page, set a weight, an annotation, whether evidence is expected, and a visibility condition on earlier answers.
+5. Set each page's **Page score**: **Sum**, **Maximum** or **Average** of its question scores. Rules read it as `pages["PAGE_ID"].score`.
+
+### Score the form and name its subject
+
+Open **Form settings** at the top of the editor:
+
+- **Score** — how the form score is built from the answers: **Sum of questions**, **Average of questions**, **Sum of page scores** or **Average of page scores**, with a minimum and maximum. Rules read the unrounded value as `response.score`. Scores are decimals: write `3.0` rather than `3` when testing equality.
+- **Subject** — the question where respondents pick what the form is about, for example the vendor being assessed. Only a question that picks a single object can be used. A subject is required for [On accept](#write-back-on-accept).
+
+### Add rules to a form
+
+Rules work as they do for [frameworks](#add-outcome-rules): under **Outcome rules**, **Add rule**, then set an ID, a **CEL Expression**, a label and a color. Set **Result** to **Number** to compute a value instead of a yes/no verdict. Number rules run first, in order, and later rules read them as `values.<ref_id>`.
+
+To write an expression, **Insert condition** builds a test on a question's answer (_is_, _includes_, _is answered_…), and **Use a page's score** inserts a page score. For instance, the EBIOS RM tiering form computes its threat level as `values.dependency * values.penetration / (values.maturity * values.trust)`, from four number rules that turn each answer into a level from 1 to 4.
+
+| Variable | Fields |
+| --- | --- |
+| `response` | `score` (unrounded), `score_sum`, `score_max`, `answered_count`, `total_count`, `complete`, `scored_complete` (every scored question is answered) |
+| `pages["PAGE_ID"]` | `visible`, `score`, `score_max`, `answered_count`, `total_count` |
+| `answers["QUESTION_ID"]` | `value`, `score`, `selected_choices`, `weight`, `type`, `answered` |
+| `values.<ref_id>`, `computed_outcomes`, `hidden_pages` | number rules, yes/no rules above that fired, pages hidden by their condition |
+
+Page visibility conditions run before the rules and cannot read `values`. Saving refuses a rule that names a question, a page or a rule the form does not have, or reads a yes/no rule listed below it.
+
+### Write back on accept
+
+The **On accept** section of **Form settings** says what an accepted response writes onto its subject. It needs a subject question. Today it can set a vendor's criticality tier:
+
+1. Tick **Assign the vendor's criticality tier**.
+2. Choose where the tier comes from. You can combine both:
+   - **From the form score** — bands on `response.score`.
+   - **From rules** — **Use a rule** and pick a rule of the form. A number rule gets bands, like the form score. A yes/no rule gives at least its tier when it fires: a knock-out, such as _a regulated critical function makes the vendor Critical_.
+3. For bands, list the tiers from the most critical down, each with the lowest value that reaches it (**from**). Leave the last band empty to catch everything below. **Add a band** for more.
+
+When several bands and rules apply, the highest tier wins. A response where nothing applies writes nothing and goes to review.
+
+<figure><img src="../../.gitbook/assets/tiering-builder-on-accept.png" alt="The On accept section of the EBIOS RM tiering form: four bands on the threat level"><figcaption><p>Bands on a number rule: Critical from 2.5, Important from 0.9, Standard from 0.2, Low impact below</p></figcaption></figure>
+
+The editor warns when no question gives points but bands read the form score, and when a band names a tier your scale does not have. Bands must go from the most to the least critical tier with decreasing minimums.
+
+Use **Preview** to fill the form as a respondent would and check the computed values before you publish. See [Tiering your vendors](../../guides/vendor-tiering.md) for the full loop.
 
 ## Authoring journey presets
 
@@ -245,7 +315,7 @@ When a cloned framework references a control or threat _outside_ the selection, 
 
 ## Publishing and lifecycle
 
-Publishing is a **library-level** action on the draft page. The object editors (framework/matrix/preset) only **save to the draft**; you publish the whole library from the draft page toolbar, which has three controls: **Validate**, **Export**, and **Publish**.
+Publishing is a **library-level** action on the draft page. The object editors (framework/matrix/quick form/preset) only **save to the draft**; you publish the whole library from the draft page toolbar, which has three controls: **Validate**, **Export**, and **Publish**.
 
 ### Validate
 
@@ -308,7 +378,7 @@ The builder will let you do almost anything; the choices that age well are narro
 ## Builder vs Excel
 
 - **Builder** — for content that lives primarily on this instance (internal policies, forked variants, in-progress drafts), for iterative editing, and anywhere a translation pass matters (the side-by-side editing and coverage counter are hard to replicate in a spreadsheet).
-- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Designing your own libraries](../libraries/custom-libraries.md).
+- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Create a Library](../libraries/create-library.md).
 
 The two paths compose: an Excel-built library can be imported into a draft and tuned in place, and a builder draft can be exported to YAML for redistribution.
 
@@ -332,8 +402,8 @@ Individual users' most recently typed packager is also remembered locally and ta
 
 - [Libraries](../libraries/README.md) — how to load, upgrade, and clean up authored content.
 - [Excel-driven authoring](excel.md) — the alternative Excel-to-YAML workflow for cross-instance publishing.
-- [Designing your own libraries](../libraries/custom-libraries.md) — the library YAML format the builder produces.
-- [Getting your custom framework](../libraries/custom-frameworks.md) — quick-start for a single-framework library.
-- [Library upgrade](../libraries/library-upgrade.md) — what changes are safe to ship in a later version.
-- Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
+- [Library objects](../libraries/library-objects/README.md) — the available objects, with links to their Excel fields and YAML examples.
+- [Guided example: create your first framework](../libraries/guided-example.md) — a step-by-step framework workbook.
+- [Update a library](../libraries/update-library.md) — how to publish a new version and apply it to existing audits.
+- Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Quick forms](../../concepts/quick-forms.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community catalogue.

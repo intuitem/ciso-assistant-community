@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { CUSTOM_FIELD_HOST_MODELS } from '$lib/utils/customFields';
-	import { isURL } from '$lib/utils/helpers';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { CUSTOM_FIELD_HOST_MODELS } from '#lib/utils/customFields.js';
+	import { isURL } from '#lib/utils/helpers.js';
 
 	interface Choice {
 		value: string;

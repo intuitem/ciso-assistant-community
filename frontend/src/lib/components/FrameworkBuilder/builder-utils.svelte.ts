@@ -1,5 +1,5 @@
-import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-import { m } from '$paraglide/messages';
+import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
+import { m } from '#paraglide/messages.js';
 
 // ----- locale helpers (F1) -----
 
@@ -182,7 +182,9 @@ export const REFERENCEABLE_MODELS = [
 	'risk_scenario',
 	'vulnerability',
 	'perimeter',
-	'entity'
+	'entity',
+	'solution',
+	'processing'
 ] as const;
 
 /** Map from composite value to Font Awesome icon class. */
@@ -290,6 +292,10 @@ export function createHandleGatedDragHandlers(
 		},
 		recordMousedown(e: MouseEvent) {
 			lastMousedownTarget = e.target;
+			// A permanently draggable row blocks text selection and resizing in its textareas.
+			(e.currentTarget as HTMLElement).draggable = !!(e.target as HTMLElement)?.closest(
+				'[data-drag-handle]'
+			);
 		},
 		handleDragStart(e: DragEvent, index: number) {
 			if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {

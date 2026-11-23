@@ -13,6 +13,7 @@ from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
+from core.constants import REGION_CODES
 from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
@@ -154,6 +155,11 @@ def get_provider_chain(entity):
     return chain
 
 
+def ga_location(code: str) -> str:
+    """c0150/c0160 value: regions and blanks are reported as Not applicable."""
+    return f"eba_GA:{code}" if code and code not in REGION_CODES else "eba_GA:qx2007"
+
+
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
 ) -> tuple[str, str, str]:
@@ -170,7 +176,7 @@ def get_entity_identifier(
     if priority is None:
         priority = IDENTIFIER_PRIORITY
 
-    if not entity or not entity.legal_identifiers:
+    if not entity or not entity.legal_identifiers_dict:
         return "", "", ""
 
     def map_identifier_type(key: str) -> str:
@@ -190,15 +196,18 @@ def get_entity_identifier(
 
     # Try priority identifiers first
     for id_type in priority:
-        if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
+        if (
+            id_type in entity.legal_identifiers_dict
+            and entity.legal_identifiers_dict[id_type]
+        ):
             return (
-                entity.legal_identifiers[id_type],
+                entity.legal_identifiers_dict[id_type],
                 map_identifier_type(id_type),
                 id_type,
             )
 
     # Use first available identifier if we couldn't find any of the priority ones
-    for key, value in entity.legal_identifiers.items():
+    for key, value in entity.legal_identifiers_dict.items():
         if value:
             return value, map_identifier_type(key), key
 
@@ -234,8 +243,8 @@ def generate_b_01_01_main_entity(
 
     # Extract LEI from legal identifiers
     lei = ""
-    if main_entity.legal_identifiers:
-        lei = main_entity.legal_identifiers.get("LEI", "")
+    if main_entity.legal_identifiers_dict:
+        lei = main_entity.legal_identifiers_dict.get("LEI", "")
 
     # Format country with eba_GA: prefix
     country = ""
@@ -301,8 +310,8 @@ def generate_b_01_02_entities(
     # Write entity data for each entity
     for entity in all_entities:
         lei = ""
-        if entity.legal_identifiers:
-            lei = entity.legal_identifiers.get("LEI", "")
+        if entity.legal_identifiers_dict:
+            lei = entity.legal_identifiers_dict.get("LEI", "")
 
         country = ""
         if entity.country:
@@ -323,8 +332,10 @@ def generate_b_01_02_entities(
 
         # LEI of parent entity
         parent_entity_lei = ""
-        if entity.parent_entity and entity.parent_entity.legal_identifiers:
-            parent_entity_lei = entity.parent_entity.legal_identifiers.get("LEI", "")
+        if entity.parent_entity and entity.parent_entity.legal_identifiers_dict:
+            parent_entity_lei = entity.parent_entity.legal_identifiers_dict.get(
+                "LEI", ""
+            )
 
         if not parent_entity_lei:
             # If no parent or parent has no LEI, use entity's own LEI for c0060 as per EBA rules
@@ -656,21 +667,11 @@ def generate_b_02_02_ict_services(
                     "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
                 )
 
-                # c0150: Location of data at rest
-                data_location_storage = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                # c0150/c0160: key fields, cannot be empty (Rule 805)
+                data_location_storage = ga_location(solution.data_location_storage)
+                data_location_processing = ga_location(
+                    solution.data_location_processing
                 )
-                if solution.data_location_storage:
-                    data_location_storage = f"eba_GA:{solution.data_location_storage}"
-
-                # c0160: Location of data processing
-                data_location_processing = (
-                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
-                )
-                if solution.data_location_processing:
-                    data_location_processing = (
-                        f"eba_GA:{solution.data_location_processing}"
-                    )
 
                 # c0170: Data sensitiveness
                 data_sensitiveness = solution.dora_data_sensitiveness or ""

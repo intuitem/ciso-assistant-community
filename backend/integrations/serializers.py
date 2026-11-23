@@ -23,6 +23,34 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+# Write-only credential keys that are kept from the stored row when a save
+# omits them (the edit form hides a secret once it is set).
+SECRET_CREDENTIAL_KEYS = ("api_token", "password", "client_secret")
+
+
+def with_stored_credentials(submitted: dict, stored: dict | None, keys) -> dict | None:
+    """``submitted`` completed with the stored values of the ``keys`` it leaves
+    empty, or None when that would send a stored value to another connection.
+
+    A stored value is only reusable for the connection it was stored for: every
+    other submitted value must match what is stored, including keys the row
+    lacks or stores empty, otherwise an empty stored host would let a stored
+    secret be sent to any host. A new value for a secret the row already holds
+    is not part of what identifies the connection: one of two secrets can be
+    replaced while the other is kept. Empty stored values (e.g. a stale
+    ``password: null`` written by older saves) are not secrets to reuse and pin
+    nothing."""
+    stored = {k: v for k, v in (stored or {}).items() if v}
+    reused = {k for k in keys if k in stored and not submitted.get(k)}
+    replaced = {k for k in SECRET_CREDENTIAL_KEYS if k in stored and submitted.get(k)}
+    identity = {
+        k: v for k, v in submitted.items() if k not in reused and k not in replaced
+    }
+    if reused and any(v != stored.get(k) for k, v in identity.items()):
+        return None
+    return {**submitted, **{k: stored[k] for k in reused}}
+
+
 class ConnectionTestSerializer(serializers.Serializer):
     provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
@@ -58,18 +86,13 @@ class ConnectionTestSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"provider": "Provider does not match configuration."}
                 )
+            # The test may leave any stored value out, not only the secrets.
             stored = config.credentials or {}
-            # a stored secret is only replayable to the connection it was stored for
-            backfilled = {k for k in stored if not credentials.get(k)}
-            if backfilled and any(
-                v != stored.get(k)
-                for k, v in credentials.items()
-                if k not in backfilled
-            ):
+            credentials = with_stored_credentials(credentials, stored, stored)
+            if credentials is None:
                 raise serializers.ValidationError(
                     {"credentials": "reenterSecretToTestModifiedConnection"}
                 )
-            credentials.update({k: stored[k] for k in backfilled})
 
         is_valid, errors = IntegrationRegistry.validate_configuration(
             provider,
@@ -145,6 +168,15 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         ]
         read_only_fields = ["id", "last_sync_at", "webhook_url_full"]
 
+    def _check_m2m_visibility(self, validated_data: dict) -> None:
+        # Providers are a global catalog, listed to every authenticated user
+        # and served without RBAC: no role holds view on them, so the link
+        # check could never pass. ``provider_id`` already only accepts active
+        # providers; every other link is checked as usual.
+        super()._check_m2m_visibility(
+            {k: v for k, v in validated_data.items() if k != "provider"}
+        )
+
     def get_webhook_url_full(self, obj: IntegrationConfiguration) -> str:
         """Construct the full, absolute webhook URL"""
         if not obj.pk:
@@ -162,7 +194,7 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
     def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
         return bool(
             obj.credentials
-            and (obj.credentials.get("api_token") or obj.credentials.get("password"))
+            and any(obj.credentials.get(key) for key in SECRET_CREDENTIAL_KEYS)
         )
 
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
@@ -198,10 +230,10 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         # Get the default representation
         ret = super().to_representation(instance)
 
-        # Never expose the full credentials, especially the API token, in GET responses.
+        # Never expose stored secrets in GET responses.
         if "credentials" in ret and isinstance(ret["credentials"], dict):
-            ret["credentials"].pop("api_token", None)  # Remove api_token if it exists
-            ret["credentials"].pop("password", None)  # Remove password if it exists
+            for key in SECRET_CREDENTIAL_KEYS:
+                ret["credentials"].pop(key, None)
 
         return ret
 
@@ -214,18 +246,30 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
             "provider", config.provider if config else None
         )
 
+        # Work on a copy: the request dict must not be mutated, and only secrets
+        # the stored row actually holds are carried over. Writing a key the
+        # provider never uses (``password: None`` on Jira) pollutes the stored
+        # credentials and breaks the connection-test secret pinning.
+        credentials = dict(data.get("credentials") or {})
+        if config:
+            credentials = with_stored_credentials(
+                credentials, config.credentials, SECRET_CREDENTIAL_KEYS
+            )
+            if credentials is None:
+                raise serializers.ValidationError(
+                    {
+                        "credentials": "The connection details changed. "
+                        "Enter the secret again to save them."
+                    }
+                )
+        if "credentials" in data:
+            data["credentials"] = credentials
+
         # The full configuration dictionary to be validated
         config_data = {
-            "credentials": data.get("credentials", {}),
+            "credentials": credentials,
             "settings": data.get("settings", {}),
         }
-
-        if not config_data["credentials"].get("api_token") and config:
-            config_data["credentials"]["api_token"] = config.credentials.get(
-                "api_token"
-            )
-        if not config_data["credentials"].get("password") and config:
-            config_data["credentials"]["password"] = config.credentials.get("password")
 
         is_valid, errors = IntegrationRegistry.validate_configuration(
             provider.name, config_data
@@ -235,6 +279,14 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         if not is_valid:
             # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
+
+        registered = IntegrationRegistry.get_provider(provider.name)
+        if registered and "settings" in data:
+            errors = registered.orchestrator_class.settings_errors(
+                config, data["settings"] or {}
+            )
+            if errors:
+                raise serializers.ValidationError({"provider_specific_errors": errors})
 
         return super().validate(data)
 

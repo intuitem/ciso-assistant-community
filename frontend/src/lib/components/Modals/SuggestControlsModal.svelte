@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getModalStore, type ModalStore } from './stores';
-	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll } from '$app/navigation';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 	const flash = getFlash(page);
@@ -18,7 +18,6 @@
 		label: string;
 		status: SuggestionStatus;
 	}
-
 	interface Props {
 		parent: any;
 		items: Item[];
@@ -75,7 +74,7 @@
 					$modalStore[0].response?.(newControlIds);
 				}
 				modalStore.close();
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				flash.set({
 					type: 'error',
@@ -101,17 +100,20 @@
 
 {#snippet badge(status: SuggestionStatus)}
 	{#if status === 'create'}
-		<span class="badge preset-tonal-success text-xs whitespace-nowrap"
-			><i class="fa-solid fa-plus mr-1"></i>{m.suggestionStatusNew()}</span
-		>
+		<span class="badge preset-tonal-success text-xs whitespace-nowrap">
+			<i class="fa-solid fa-plus mr-1"></i>
+			{m.suggestionStatusNew()}
+		</span>
 	{:else if status === 'reuse'}
-		<span class="badge preset-tonal-warning text-xs whitespace-nowrap"
-			><i class="fa-solid fa-link mr-1"></i>{m.suggestionStatusReuse()}</span
-		>
+		<span class="badge preset-tonal-warning text-xs whitespace-nowrap">
+			<i class="fa-solid fa-link mr-1"></i>
+			{m.suggestionStatusReuse()}
+		</span>
 	{:else}
-		<span class="badge preset-tonal-surface text-xs whitespace-nowrap"
-			><i class="fa-solid fa-check mr-1"></i>{m.suggestionStatusLinked()}</span
-		>
+		<span class="badge preset-tonal-surface text-xs whitespace-nowrap">
+			<i class="fa-solid fa-check mr-1"></i>
+			{m.suggestionStatusLinked()}
+		</span>
 	{/if}
 {/snippet}
 

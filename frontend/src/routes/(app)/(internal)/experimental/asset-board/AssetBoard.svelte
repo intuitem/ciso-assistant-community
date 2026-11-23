@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext, tick, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -19,12 +19,12 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
-	import { computeLayout } from '$lib/components/AssetGraph/layout';
-	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
-	import { createPickerForm } from '$lib/components/AssetGraph/picker';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { fetchAllByIds } from '$lib/utils/pagination';
-	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
+	import { computeLayout } from '#lib/components/AssetGraph/layout.js';
+	import { createLinkWriter, idOf } from '#lib/components/AssetGraph/links.js';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { fetchAllByIds } from '#lib/utils/pagination.js';
+	import AssetEdgeComponent from '#lib/components/AssetGraph/AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
@@ -36,16 +36,16 @@
 		saveInstructionsOpen,
 		type XY
 	} from './positions';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { resolvedTheme } from '$lib/utils/theme';
+	} from '#lib/components/Modals/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { resolvedTheme } from '#lib/utils/theme.js';
 
 	interface AssetItem {
 		id: string;
@@ -331,7 +331,7 @@
 						void updateParents(newAssetId, (parents) =>
 							Array.from(new Set([...parents, parentToWire]))
 						).then((ok) => {
-							if (ok) invalidateAll();
+							if (ok) refreshAll();
 						});
 					}
 				}
@@ -399,7 +399,7 @@
 			);
 		} else {
 			toastStore.trigger({ message: 'Link saved', background: 'preset-tonal-success' });
-			void invalidateAll();
+			void refreshAll();
 		}
 	}
 
@@ -414,7 +414,7 @@
 			const ok = await updateParents(childId, (parents) =>
 				parents.filter((p) => !removedSources.has(p))
 			);
-			if (ok) void invalidateAll();
+			if (ok) void refreshAll();
 			if (!ok) {
 				// Re-add removed edges to local state. `type: 'asset'` is required —
 				// defaultEdgeOptions only applies to edges created via onConnect, not to
@@ -537,7 +537,7 @@
 				message: `Type set to ${nextType === 'PR' ? 'Primary' : 'Support'}`,
 				background: 'preset-tonal-success'
 			});
-			void invalidateAll();
+			void refreshAll();
 			return true;
 		} catch {
 			toastStore.trigger({
@@ -567,7 +567,7 @@
 			// Locally update the visible label so the change shows immediately,
 			// then re-fetch to keep the server state authoritative.
 			nodes = nodes.map((n) => (n.id === assetId ? { ...n, data: { ...n.data, label: name } } : n));
-			void invalidateAll();
+			void refreshAll();
 			return true;
 		} catch {
 			toastStore.trigger({
@@ -608,7 +608,7 @@
 			if (ok) {
 				edges = edges.filter((e) => !(e.source === source && e.target === target));
 				toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
-				void invalidateAll();
+				void refreshAll();
 			}
 		}
 	});

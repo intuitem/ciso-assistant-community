@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import AssessmentIssues from '$lib/components/XRays/AssessmentIssues.svelte';
-	import IssueSections from '$lib/components/XRays/IssueSections.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import AssessmentIssues from '#lib/components/XRays/AssessmentIssues.svelte';
+	import IssueSections from '#lib/components/XRays/IssueSections.svelte';
 	import {
 		DOMAIN_BLOCKS,
 		SEVERITIES,
@@ -13,7 +13,7 @@
 		hasVisibleIssues,
 		severityGroups,
 		type SeverityKey
-	} from '$lib/components/XRays/utils';
+	} from '#lib/components/XRays/utils.js';
 
 	interface Props {
 		data: PageData;

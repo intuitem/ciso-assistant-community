@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 // Local field definitions for the FieldMapper, per syncable model. Kept in sync
 // with the backend registry in integrations/syncable.py. AppliedControl fields

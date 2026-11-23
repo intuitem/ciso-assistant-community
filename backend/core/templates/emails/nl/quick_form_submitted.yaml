@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Het snelformulier '${response_name}' is ingediend"
+body: |
+  Hallo,
+
+  Een antwoord op een snelformulier dat u beoordeelt, is ingediend:
+
+  - Antwoord: ${response_name}
+  - Formulier: ${quick_form_name}
+
+  Meld u aan op CISO Assistant om het te beoordelen: [Antwoord openen](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Bedankt.

@@ -21,7 +21,9 @@ def _ids(entries):
 def test_searchable_model_has_the_base_fields(entry):
     """Both are searched unconditionally."""
     fields = _field_names(entry["model"])
-    assert "name" in fields, f"{entry['model'].__name__} has no `name` field"
+    assert "name" in fields or entry["name"] is not None, (
+        f"{entry['model'].__name__} has no `name` field"
+    )
     assert "description" in fields, (
         f"{entry['model'].__name__} has no `description` field"
     )

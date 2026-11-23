@@ -3,10 +3,10 @@
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -42,6 +42,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	field="owner"
 	cacheLock={cacheLocks['owner']}

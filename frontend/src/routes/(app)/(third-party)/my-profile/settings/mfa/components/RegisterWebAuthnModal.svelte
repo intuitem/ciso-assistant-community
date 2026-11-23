@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { startRegistration } from '@simplewebauthn/browser';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
@@ -41,7 +41,7 @@
 
 			if (response.ok) {
 				modalStore.close();
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				error = m.webAuthnError();
 			}

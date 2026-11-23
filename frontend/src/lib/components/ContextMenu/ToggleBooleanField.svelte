@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { applyUnreadCount } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import { getModelInfo } from '#lib/utils/crud.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { applyUnreadCount } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
 	import { getFlash } from 'sveltekit-flash-message';

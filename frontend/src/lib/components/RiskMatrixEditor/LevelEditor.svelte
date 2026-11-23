@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Level {
 		id: number;

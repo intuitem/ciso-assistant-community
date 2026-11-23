@@ -4,9 +4,9 @@
 // new-draft transitions; these are fast JSON mutations that don't fit the
 // form-action round-trip (same rationale as the responsibility-matrix editor).
 
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
-import { UUID_RE, proxyJson } from '$lib/utils/jsonProxy';
+import { UUID_RE, proxyJson } from '#lib/utils/jsonProxy.js';
 import type { RequestHandler } from './$types';
 
 function requireUuid(value: unknown, field: string): string {
@@ -197,6 +197,11 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 
 		case 'event-keys': {
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-triggers/event-keys/`, 'GET');
+		}
+
+		case 'get-instance': {
+			const instanceId = requireUuid(body.instance, 'instance');
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/${instanceId}/`, 'GET');
 		}
 
 		case 'instance-logs': {

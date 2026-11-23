@@ -146,7 +146,7 @@ if [[ $RESEED -eq 1 || ! -f "db/$DB_NAME" ]]; then
   $PYTHON manage.py migrate
   $PYTHON manage.py createsuperuser --noinput
 fi
-$PYTHON manage.py seed_docs_demo --flush
+$PYTHON manage.py seed_demo --docs --flush
 
 $PYTHON manage.py runserver "$BACKEND_PORT" --noreload >/dev/null 2>&1 &
 BACKEND_PID=$!

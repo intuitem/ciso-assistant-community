@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import AssetDependencyGraph from '$lib/components/Assets/AssetDependencyGraph.svelte';
-	import { m } from '$paraglide/messages';
+	import AssetDependencyGraph from '#lib/components/Assets/AssetDependencyGraph.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -18,35 +18,6 @@
 				{m.assetDependencies()}
 			</h1>
 			<p class="text-sm text-surface-600-400 mt-1">{m.assetDependenciesDescription()}</p>
-		</div>
-
-		<!-- Legend -->
-		<div class="flex items-center gap-6 text-sm">
-			<div class="flex items-center gap-2">
-				<div
-					class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-base"
-					style="background-color: #47e845; color: white;"
-				>
-					✓
-				</div>
-				<span class="text-surface-700-300">{m.objectivesMet()}</span>
-			</div>
-			<div class="flex items-center gap-2">
-				<div
-					class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-base"
-					style="background-color: #ffc226; color: white;"
-				>
-					⚠
-				</div>
-				<span class="text-surface-700-300">{m.objectivesNotMet()}</span>
-			</div>
-			<div class="flex items-center gap-2">
-				<div
-					class="w-7 h-7 rounded-full flex items-center justify-center"
-					style="background-color: #dddddd;"
-				></div>
-				<span class="text-surface-700-300">{m.noData()}</span>
-			</div>
 		</div>
 	</div>
 

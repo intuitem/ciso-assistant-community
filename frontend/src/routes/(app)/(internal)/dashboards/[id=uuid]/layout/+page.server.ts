@@ -1,11 +1,11 @@
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { modelSchema } from '$lib/utils/schemas';
+import { getModelInfo, urlParamModelSelectFields } from '#lib/utils/crud.js';
+import { loadDetail, formatSelectFieldData } from '#lib/utils/load.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import type { PageServerLoad } from './$types';
 import { type Actions, fail } from '@sveltejs/kit';
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 

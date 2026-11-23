@@ -1,5 +1,7 @@
+from django.db import transaction
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext as _
+from rest_framework.exceptions import ValidationError
 import math
 import random
 from global_settings.models import GlobalSettings
@@ -8,14 +10,27 @@ from .models import (
     AttackPath,
     EbiosRMStudy,
     FearedEvent,
+    KillChain,
+    OperatingMode,
     OperationalScenario,
     RoTo,
     Stakeholder,
     StrategicScenario,
+    get_initial_meta,
 )
 from core.models import AppliedControl, Asset, RiskScenario
 
 import textwrap
+
+
+# Workshop order (strategic scenario, then attack path) used to number generated risk scenarios
+OPERATIONAL_SCENARIO_ORDER = (
+    "attack_path__strategic_scenario__ref_id",
+    "attack_path__strategic_scenario__created_at",
+    "attack_path__ref_id",
+    "attack_path__created_at",
+    "id",
+)
 
 
 def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
@@ -367,6 +382,8 @@ def ebios_rm_visual_analysis(study):
             ],
         }
         for fe in ro_to.feared_events.all():
+            if f"{fe.id}-FE" not in nodes_idx:
+                continue  # feared event from another study has no node
             links.append(
                 {
                     "source": nodes_idx[f"{ro_to.id}-RO"],
@@ -553,7 +570,9 @@ def detect_sync_sources(ebios_rm_study):
         )
 
     # Level 1: selected operational scenarios (full EBIOS)
-    all_os = list(ebios_rm_study.operational_scenarios.all())
+    all_os = list(
+        ebios_rm_study.operational_scenarios.order_by(*OPERATIONAL_SCENARIO_ORDER)
+    )
     selected_os = [os for os in all_os if os.is_selected]
     if selected_os:
         result["operational_scenarios"] = selected_os
@@ -570,7 +589,15 @@ def detect_sync_sources(ebios_rm_study):
         _cover_feared_events(os_obj.ro_to)
 
     # Level 2: selected attack paths not covered by an operational scenario
-    selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
+    selected_ap = list(
+        ebios_rm_study.attackpath_set.filter(is_selected=True).order_by(
+            "strategic_scenario__ref_id",
+            "strategic_scenario__created_at",
+            "ref_id",
+            "created_at",
+            "id",
+        )
+    )
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
         result["attack_paths"] = uncovered_ap
@@ -579,7 +606,9 @@ def detect_sync_sources(ebios_rm_study):
             covered_ss_ids.add(ap.strategic_scenario_id)
 
     # Level 3: strategic scenarios not covered by attack paths or op scenarios
-    all_ss = list(ebios_rm_study.strategic_scenarios.all())
+    all_ss = list(
+        ebios_rm_study.strategic_scenarios.order_by("ref_id", "created_at", "id")
+    )
     uncovered_ss = [ss for ss in all_ss if ss.id not in covered_ss_ids]
     if uncovered_ss:
         result["strategic_scenarios"] = uncovered_ss
@@ -587,7 +616,11 @@ def detect_sync_sources(ebios_rm_study):
             _cover_feared_events(ss.ro_to_couple)
 
     # Level 4: selected feared events not already covered
-    selected_fe = list(ebios_rm_study.feared_events.filter(is_selected=True))
+    selected_fe = list(
+        ebios_rm_study.feared_events.filter(is_selected=True).order_by(
+            "ref_id", "created_at", "id"
+        )
+    )
     uncovered_fe = [fe for fe in selected_fe if fe.id not in covered_fe_ids]
     if uncovered_fe:
         result["feared_events"] = uncovered_fe
@@ -771,7 +804,6 @@ def _build_description(*parts):
 def _upsert_risk_scenario(
     risk_assessment,
     name,
-    ref_id,
     description,
     impact,
     likelihood,
@@ -800,7 +832,8 @@ def _upsert_risk_scenario(
         risk_scenario = RiskScenario(
             risk_assessment=risk_assessment,
             name=name,
-            ref_id=ref_id or RiskScenario.get_default_ref_id(risk_assessment),
+            # EBIOS ref_ids are only unique per parent (AP.01 under every strategic scenario)
+            ref_id=RiskScenario.get_default_ref_id(risk_assessment),
             description=description,
             risk_origin=risk_origin,
             **(extra_fields or {}),
@@ -871,7 +904,6 @@ def _sync_operational_scenarios(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=scenario_name,
-            ref_id=operational_scenario.ref_id,
             description=description,
             impact=operational_scenario.gravity,
             likelihood=operational_scenario.likelihood,
@@ -913,7 +945,6 @@ def _sync_attack_paths(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=scenario_name,
-            ref_id=attack_path.ref_id,
             description=description,
             impact=attack_path.gravity,
             likelihood=-1,
@@ -955,7 +986,6 @@ def _sync_strategic_scenarios(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=ss.name,
-            ref_id=ss.ref_id,
             description=description,
             impact=ss.gravity,
             likelihood=-1,
@@ -1000,7 +1030,6 @@ def _sync_feared_events(risk_assessment, selected):
         _rs, created = _upsert_risk_scenario(
             risk_assessment=risk_assessment,
             name=fe.name,
-            ref_id=fe.ref_id,
             description=description,
             impact=fe.gravity,
             likelihood=-1,
@@ -1053,3 +1082,249 @@ def sync_risk_assessment(risk_assessment, sources):
         "archived": total_archived,
         "total_scenarios": risk_assessment.risk_scenarios.count(),
     }
+
+
+def _copy_scalar_fields(instance):
+    """Scalar field values of `instance`, ready to recreate a copy of it.
+    Skips the pk, auto timestamps and every relation (set explicitly)."""
+    data = {}
+    for field in instance._meta.concrete_fields:
+        if field.primary_key or field.is_relation:
+            continue
+        if getattr(field, "auto_now", False) or getattr(field, "auto_now_add", False):
+            continue
+        data[field.name] = getattr(instance, field.name)
+    return data
+
+
+@transaction.atomic
+def duplicate_ebios_rm_study(
+    source,
+    *,
+    name,
+    description="",
+    ref_id="",
+    version=None,
+    folder=None,
+    before_copy=None,
+):
+    """Deep-copy an EBIOS RM study into `folder` (the source's folder by default).
+
+    Owned objects (feared events -> ro/to -> ... -> kill chains) are recreated
+    and their intra-study links remapped through old_id -> new_obj maps; shared
+    objects (assets, threats, controls, elementary actions, entities, ...) are
+    referenced. Ratings are recomputed from the copied inputs by the final save(),
+    so the clone matches the source.
+
+    Into another domain, shared objects follow the rule risk assessment
+    duplication applies (see `resolve_related_object`): kept when the target
+    domain can see them, else copied into it (`before_copy(model)` runs first).
+    Links that are not copied (compliance assessments, responsibility matrix)
+    are dropped when the target domain cannot see them.
+    """
+    from core.helpers import is_visible_from_folder, resolve_related_object
+
+    target_folder = folder or source.folder
+    cross_domain = target_folder.id != source.folder_id
+    if cross_domain:
+        target_parent_folders = list(target_folder.get_parent_folders())
+        sub_folders = list(target_folder.get_sub_folders())
+    # (model, source id) -> shared object the clone points at; `copied` holds the
+    # ones this run created in the target domain, with their source object
+    carried = {}
+    copied = {}
+
+    def carry(obj, on_copy=None):
+        """The shared object the clone points at instead of the source's `obj`."""
+        if not cross_domain or obj is None:
+            return obj
+        key = (type(obj), obj.pk)
+        if key not in carried:
+            target_obj, created = resolve_related_object(
+                obj,
+                target_folder,
+                target_parent_folders,
+                sub_folders,
+                before_copy=before_copy,
+            )
+            carried[key] = target_obj
+            if created:
+                copied[key] = (obj, target_obj)
+                if on_copy is not None:
+                    on_copy(obj, target_obj)
+        return carried[key]
+
+    def keep_if_visible(obj):
+        """`obj` when the target domain can see it, else None (link dropped)."""
+        if not cross_domain or obj is None:
+            return obj
+        if is_visible_from_folder(
+            obj, target_folder, target_parent_folders, sub_folders
+        ):
+            return obj
+        return None
+
+    def carry_shared(src_obj, dup_obj, field):
+        getattr(dup_obj, field).set(carry(obj) for obj in getattr(src_obj, field).all())
+
+    def carry_action_threat(action, action_copy):
+        # a copied elementary action must not point at a threat the target cannot see
+        if action.threat_id:
+            action_copy.threat = carry(action.threat)
+            action_copy.save(update_fields=["threat"])
+
+    clone = EbiosRMStudy.objects.create(
+        **{
+            **_copy_scalar_fields(source),
+            "name": name,
+            "description": description,
+            "ref_id": ref_id,
+            "version": version,
+            # the clone starts fresh: reset the study status and the workshop-step
+            # progress. Keeping them would leave workshop 5 marked done while its
+            # risk assessment is not copied over (see below).
+            "status": EbiosRMStudy.Status.PLANNED,
+            "meta": get_initial_meta(),
+        },
+        folder=target_folder,
+        risk_matrix=source.risk_matrix,
+        reference_entity=carry(source.reference_entity),
+        responsibility_matrix=keep_if_visible(source.responsibility_matrix),
+        classification=source.classification,
+    )
+
+    carry_shared(source, clone, "assets")
+    clone.compliance_assessments.set(
+        audit
+        for audit in source.compliance_assessments.all()
+        if keep_if_visible(audit) is not None
+    )
+    clone.authors.set(source.authors.all())
+    clone.reviewers.set(source.reviewers.all())
+    clone.filtering_labels.set(source.filtering_labels.all())
+
+    feared_events = {}
+    for fe in FearedEvent.objects.filter(ebios_rm_study=source):
+        new_fe = FearedEvent.objects.create(
+            **_copy_scalar_fields(fe), ebios_rm_study=clone
+        )
+        carry_shared(fe, new_fe, "assets")
+        new_fe.qualifications.set(fe.qualifications.all())
+        feared_events[fe.id] = new_fe
+
+    ro_tos = {}
+    for ro_to in RoTo.objects.filter(ebios_rm_study=source):
+        new_ro_to = RoTo.objects.create(
+            **_copy_scalar_fields(ro_to),
+            ebios_rm_study=clone,
+            risk_origin=ro_to.risk_origin,
+            target_objective_category=ro_to.target_objective_category,
+        )
+        # the id -> copy maps only hold this study's objects; the API does not
+        # forbid out-of-study references, so fall back to the original object
+        # (map.get(id, original)) rather than raising a KeyError.
+        new_ro_to.feared_events.set(
+            feared_events.get(fe.id, fe) for fe in ro_to.feared_events.all()
+        )
+        ro_tos[ro_to.id] = new_ro_to
+
+    stakeholders = {}
+    for stakeholder in Stakeholder.objects.filter(ebios_rm_study=source):
+        new_stakeholder = Stakeholder.objects.create(
+            **_copy_scalar_fields(stakeholder),
+            ebios_rm_study=clone,
+            entity=carry(stakeholder.entity),
+            category=stakeholder.category,
+        )
+        carry_shared(stakeholder, new_stakeholder, "applied_controls")
+        stakeholders[stakeholder.id] = new_stakeholder
+
+    strategic_scenarios = {}
+    for ss in StrategicScenario.objects.filter(ebios_rm_study=source):
+        new_ss = StrategicScenario.objects.create(
+            **_copy_scalar_fields(ss),
+            ebios_rm_study=clone,
+            ro_to_couple=ro_tos.get(ss.ro_to_couple_id, ss.ro_to_couple),
+            focused_feared_event=feared_events.get(
+                ss.focused_feared_event_id, ss.focused_feared_event
+            ),
+        )
+        strategic_scenarios[ss.id] = new_ss
+
+    attack_paths = {}
+    for ap in AttackPath.objects.filter(ebios_rm_study=source):
+        # ebios_rm_study is derived from strategic_scenario in save()
+        new_ap = AttackPath.objects.create(
+            **_copy_scalar_fields(ap),
+            strategic_scenario=strategic_scenarios[ap.strategic_scenario_id],
+        )
+        new_ap.stakeholders.set(
+            stakeholders.get(sh.id, sh) for sh in ap.stakeholders.all()
+        )
+        attack_paths[ap.id] = new_ap
+
+    operational_scenarios = {}
+    for scenario in OperationalScenario.objects.filter(ebios_rm_study=source):
+        attack_path = attack_paths.get(scenario.attack_path_id)
+        if attack_path is None:
+            # attack_path is a unique OneToOne already bound to the source scenario,
+            # so a foreign one cannot be reused. A scenario pointing at another
+            # study's attack path is malformed data we refuse with a clear error.
+            raise ValidationError(
+                f"Operational scenario '{scenario.name}' references an attack path "
+                "outside this study; the study cannot be duplicated."
+            )
+        new_scenario = OperationalScenario.objects.create(
+            **_copy_scalar_fields(scenario),
+            ebios_rm_study=clone,
+            attack_path=attack_path,
+        )
+        carry_shared(scenario, new_scenario, "threats")
+        new_scenario.techniques.set(scenario.techniques.all())
+        operational_scenarios[scenario.id] = new_scenario
+
+    operating_modes = {}
+    for om in OperatingMode.objects.filter(operational_scenario__ebios_rm_study=source):
+        new_om = OperatingMode.objects.create(
+            **_copy_scalar_fields(om),
+            operational_scenario=operational_scenarios[om.operational_scenario_id],
+        )
+        operating_modes[om.id] = new_om
+
+    source_steps = KillChain.objects.filter(
+        operating_mode__operational_scenario__ebios_rm_study=source
+    )
+    steps = {}
+    for step in source_steps:
+        new_step = KillChain.objects.create(
+            **_copy_scalar_fields(step),
+            operating_mode=operating_modes[step.operating_mode_id],
+            elementary_action=carry(
+                step.elementary_action, on_copy=carry_action_threat
+            ),
+        )
+        carry_shared(step, new_step, "assets")
+        steps[step.id] = new_step
+    # antecedents point at other steps, so wire them once every step exists.
+    # A concurrent write could add an antecedent after source_steps was read;
+    # skip any step that is not in the copied set rather than raising KeyError.
+    for step in source_steps:
+        antecedents = [steps[a.id] for a in step.antecedents.all() if a.id in steps]
+        if antecedents:
+            steps[step.id].antecedents.set(antecedents)
+
+    # The field copy leaves copied assets without their parents, which
+    # get_assets() and the workshop 5 risk assessment walk: rewire them on the
+    # copies only, never on assets that were reused as they are.
+    for (model, _), (asset, asset_copy) in copied.items():
+        if model is not Asset:
+            continue
+        parents = (
+            carried.get((Asset, parent.pk)) or keep_if_visible(parent)
+            for parent in asset.parent_assets.all()
+        )
+        asset_copy.parent_assets.add(*[p for p in parents if p is not None])
+
+    # recompute ratings from the copied inputs now that the graph is complete
+    clone.save()
+    return clone

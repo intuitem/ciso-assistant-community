@@ -1,7 +1,7 @@
-import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo(params.model);
@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	const optionsResponse = await res.json();
 

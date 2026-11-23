@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
 	import { addDays, type Milestone } from './trajectory';
 
 	interface Props {

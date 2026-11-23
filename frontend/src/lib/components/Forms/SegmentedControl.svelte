@@ -62,7 +62,7 @@
 >
 	{#each options as option (option.value)}
 		{@const selected = option.value === value}
-		{@const tint = colorMap[option.value] ?? '#94a3b8'}
+		{@const tint = colorMap[option.value]}
 		{@const hover = hovered === option.value && !selected}
 		<button
 			type="button"
@@ -72,19 +72,23 @@
 			onclick={() => onChange(option.value)}
 			onpointerenter={() => (hovered = option.value)}
 			onpointerleave={() => (hovered = null)}
-			style:background-color={selected
+			style:background-color={tint && selected
 				? tint
-				: hover
+				: tint && hover
 					? `color-mix(in srgb, ${tint} 18%, transparent)`
 					: undefined}
-			style:color={selected
+			style:color={tint && selected
 				? selectedFg(tint)
-				: hover
+				: tint && hover
 					? `color-mix(in srgb, ${tint} 60%, currentColor)`
 					: undefined}
-			class="rounded-md font-medium whitespace-nowrap transition-colors duration-150 {sizeClasses} {selected
-				? 'shadow-sm'
-				: 'text-surface-500'}"
+			class="rounded-md font-medium whitespace-nowrap transition-colors duration-150 {sizeClasses} {tint
+				? selected
+					? 'shadow-sm'
+					: 'text-surface-500'
+				: selected
+					? 'preset-filled-primary-500 shadow-sm'
+					: 'text-surface-500 hover:preset-tonal-primary'}"
 		>
 			{option.label}
 		</button>

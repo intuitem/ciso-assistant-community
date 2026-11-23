@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import type * as echarts from 'echarts';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	const flash = getFlash(page);
 
@@ -84,6 +85,7 @@
 				const sourceNode = data.nodes.find(
 					(node) => node.id === params.data.source || node.name === params.data.source
 				);
+
 				const targetNode = data.nodes.find(
 					(node) => node.id === params.data.target || node.name === params.data.target
 				);
@@ -91,24 +93,24 @@
 				// Get labels with fallback to 'unknown'
 				let sourceLabel = sourceNode ? sourceNode.name : 'unknown';
 				let targetLabel = targetNode ? targetNode.name : 'unknown';
-				const value = params.data.value || '';
+				const value = escapeHtml(params.data.value || '');
 
 				// Apply truncation
-				sourceLabel = truncate(sourceLabel);
-				targetLabel = truncate(targetLabel);
+				sourceLabel = escapeHtml(truncate(sourceLabel));
+				targetLabel = escapeHtml(truncate(targetLabel));
 
 				// Return formatted label with src and tgt in bold, value in italic
 				return `<b>${sourceLabel}</b> - <i>${value}</i> - <b>${targetLabel}</b>`;
 			} else if (params.dataType === 'node') {
 				// For nodes, truncate the name
 				const nodeName = params.name || params.data.name || 'unnamed';
-				const truncatedName = truncate(nodeName);
+				const truncatedName = escapeHtml(truncate(nodeName));
 
 				// You can add additional node properties here if needed
 				return `<b>${truncatedName}</b>`;
 			}
 
-			return params.name;
+			return escapeHtml(params.name);
 		};
 	};
 
@@ -229,14 +231,14 @@
 				top: legendPosition === 'top' ? legendSpace + 10 : 10,
 				left: 'right'
 			},
-			color: color,
+			color,
 			series: [
 				{
 					type: 'graph',
-					layout: layout,
+					layout,
 					symbolSize: 20,
 					animation: false,
-					zoom: zoom,
+					zoom,
 					animationDurationUpdate: 1500,
 					animationEasingUpdate: 'quinticInOut',
 					edgeSymbol: ['circle', 'arrow'],
@@ -273,14 +275,14 @@
 							show: true
 						}
 					},
-					categories: categories,
+					categories,
 					force: {
-						edgeLength: edgeLength,
+						edgeLength,
 						repulsion: 200,
 						gravity: 0.05,
 						layoutAnimation: true,
 						friction: 0.1,
-						initLayout: initLayout
+						initLayout
 					},
 					labelLayout: {
 						hideOverlap: true
@@ -452,7 +454,7 @@
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-					/>
+					></path>
 				</svg>
 			</button>
 		</span>

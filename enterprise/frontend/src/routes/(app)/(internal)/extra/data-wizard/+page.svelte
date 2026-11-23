@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -173,6 +173,7 @@
 	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate', 'Processing']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (modelId === 'EbiosRMStudyARM') return ['.xls', '.xlsx', '.zip'];
 		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}

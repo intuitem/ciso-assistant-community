@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { ratingLevelLabel } from '$lib/utils/ebios-rating-kit';
-	import type { RatingKit } from '$lib/utils/ebios-quotation';
+	import { m } from '#paraglide/messages.js';
+	import { ratingLevelLabel } from '#lib/utils/ebios-rating-kit.js';
+	import type { RatingKit } from '#lib/utils/ebios-quotation.js';
 
 	interface Props {
 		kit: RatingKit & {

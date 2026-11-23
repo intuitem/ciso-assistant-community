@@ -1,19 +1,19 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import WebhookEndpointCreateModal from '../../../routes/(app)/(internal)/settings/webhooks/endpoints/WebhookEndpointCreateModal.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { page } from '$app/state';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelEventsMap } from '$lib/utils/webhooks';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { modelEventsMap } from '#lib/utils/webhooks.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { z } from 'zod';
 
 	const modalStore: ModalStore = getModalStore();

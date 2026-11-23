@@ -9,9 +9,10 @@ what answers, so what the preview shows is what the run will compute.
 
 from __future__ import annotations
 
+from core.expressions import ExpressionError, evaluate, referenced_paths
+
 from .context import temporal_seeds
 from .engine import default_variables
-from .expressions import ExpressionError, evaluate, referenced_paths
 
 MAX_EXPRESSION_LENGTH = 2000
 MAX_ROWS = 50

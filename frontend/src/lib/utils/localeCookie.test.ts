@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { toLocale } from '$paraglide/runtime';
-import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
+import { toLocale } from '#paraglide/runtime.js';
+import { DEFAULT_LANGUAGE } from '#lib/utils/constants.js';
 
 // Guards the hooks.server.ts unmatched-route bail-out, which interpolates the
 // LOCALE cookie into the unescaped `<html lang="%lang%">` attribute.

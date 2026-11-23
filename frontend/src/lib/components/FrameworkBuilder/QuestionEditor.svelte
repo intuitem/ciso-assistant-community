@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { slide } from 'svelte/transition';
 	import {
 		getBuilderContext,
@@ -16,8 +17,10 @@
 		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+
+	const modalStore = getModalStore();
 
 	interface Props {
 		question: Question;
@@ -51,6 +54,37 @@
 	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
 
 	const fileConfig = $derived((question.config as Record<string, unknown> | null) ?? {});
+	// A question on one of the form's scales gets its levels as choices on import.
+	const scale = $derived.by(() => {
+		const ref = (question.config as { scale?: string } | null)?.scale;
+		return ref
+			? (($frameworkStore.scales_definition ?? []).find((s) => s.ref_id === ref) ?? {
+					ref_id: ref,
+					levels: []
+				})
+			: null;
+	});
+	const stage = $derived((question.config as { stage?: string } | null)?.stage);
+	const scales = $derived($frameworkStore.scales_definition ?? []);
+
+	// A scale replaces the question's own choices: offered only while it has none.
+	function setScale(ref: string) {
+		const {
+			scale: _s,
+			stage: _st,
+			...rest
+		} = (question.config as Record<string, unknown> | null) ?? {};
+		saveField('config', ref ? { ...rest, scale: ref } : Object.keys(rest).length ? rest : null);
+	}
+
+	function setStage(value: string) {
+		const { stage: _st, ...rest } = (question.config as Record<string, unknown> | null) ?? {};
+		const next = value
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9_]+/g, '_');
+		saveField('config', next && next !== 'current' ? { ...rest, stage: next } : rest);
+	}
 	const fileMultiple = $derived(!!fileConfig.multiple);
 	const fileMaxFiles = $derived(Number(fileConfig.max_files ?? 1));
 	const fileMaxSize = $derived(Number(fileConfig.max_size_mb ?? 10));
@@ -103,7 +137,7 @@
 			newStoredType !== 'multiple_choice' &&
 			question.choices.length > 0
 		) {
-			if (!confirm(m.builderChangeTypeWarning())) return;
+			if (!(await confirmModal(modalStore, m.builderChangeTypeWarning()))) return;
 		}
 		await builder.updateQuestion(question.id, {
 			type: newStoredType,
@@ -206,7 +240,7 @@
 							type="number"
 							value={sliderMin}
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ min: Number(e.currentTarget.value) })}
 						/>
 					</label>
 					<label class="block">
@@ -215,7 +249,7 @@
 							type="number"
 							value={sliderMax}
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ max: Number(e.currentTarget.value) })}
 						/>
 					</label>
 					<label class="block">
@@ -225,7 +259,7 @@
 							value={sliderStep}
 							min="0"
 							class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-							onblur={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
+							onchange={(e) => updateSliderConfig({ step: Number(e.currentTarget.value) })}
 						/>
 					</label>
 				</div>
@@ -316,7 +350,7 @@
 				</p>
 			{/if}
 
-			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2}
+			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2 && !scale}
 				<p class="text-xs text-amber-600">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 					{m.sliderNeedsAtLeastTwoChoices()}
@@ -337,7 +371,7 @@
 						value={getTranslation(question.translations, lang, 'text')}
 						placeholder={m.builderTranslateQuestion()}
 						rows="2"
-						class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+						class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 						onblur={(e) => {
 							saveField(
 								'translations',
@@ -351,7 +385,7 @@
 					value={question.text ?? ''}
 					placeholder={m.builderQuestionTextPlaceholder()}
 					rows="2"
-					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
+					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 					onblur={(e) => {
 						saveField('text', e.currentTarget.value);
 					}}
@@ -378,7 +412,7 @@
 						value={question.weight}
 						min="0"
 						class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40"
-						onblur={(e) => {
+						onchange={(e) => {
 							const val = Number(e.currentTarget.value) || 1;
 							saveField('weight', val);
 						}}
@@ -409,8 +443,53 @@
 				</label>
 			</div>
 
-			<!-- Choice list for choice types -->
-			{#if isChoiceType}
+			<!-- Choice list for choice types; a scale's levels are its choices. -->
+			{#if isChoiceType && (scale || (!question.choices.length && scales.length))}
+				<div
+					class="rounded-base border border-surface-200-800 p-2 text-xs space-y-2"
+					data-testid="question-scale"
+				>
+					<label class="flex flex-wrap items-center gap-2">
+						<span class="font-semibold text-surface-700-300"
+							><i class="fa-solid fa-ruler-horizontal mr-1"></i>{m.builderUseScale()}</span
+						>
+						<select
+							class="select w-auto text-xs py-1"
+							value={scale?.ref_id ?? ''}
+							onchange={(e) => setScale(e.currentTarget.value)}
+						>
+							<option value="">{m.builderCustomChoices()}</option>
+							{#each scales as s, i (i)}
+								<option value={s.ref_id}>{s.label || s.ref_id}</option>
+							{/each}
+						</select>
+					</label>
+					{#if scale}
+						{#if scale.levels.length}
+							<ol class="flex flex-wrap gap-1">
+								{#each scale.levels as level, i (i)}
+									<li class="badge preset-tonal-surface" title={level.description}>
+										{level.label}
+									</li>
+								{/each}
+							</ol>
+						{:else}
+							<p class="text-error-600-400">{m.builderQuestionScaleMissing()}</p>
+						{/if}
+						<label class="flex flex-wrap items-center gap-2">
+							<span class="text-surface-600-400">{m.builderQuestionStage()}</span>
+							<input
+								class="input w-40 text-xs py-1"
+								value={stage ?? ''}
+								placeholder="current"
+								onblur={(e) => setStage(e.currentTarget.value)}
+							/>
+							<span class="text-surface-500">{m.builderQuestionStageHelp()}</span>
+						</label>
+					{/if}
+				</div>
+			{/if}
+			{#if isChoiceType && !scale}
 				<ChoiceListEditor
 					choices={question.choices}
 					{reqNodeId}

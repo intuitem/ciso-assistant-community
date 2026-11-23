@@ -1,6 +1,15 @@
 """Write/Create MCP tools for CISO Assistant"""
 
-from ..client import make_post_request, make_get_request
+from pathlib import Path
+
+from ..client import (
+    make_post_request,
+    make_get_request,
+    make_patch_request,
+    make_upload_request,
+    make_delete_request,
+    get_paginated_results,
+)
 from ..resolvers import (
     resolve_ebios_rm_study_id,
     resolve_folder_id,
@@ -14,7 +23,13 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
+    resolve_task_template_id,
+    resolve_in_folder_or_global,
     parse_duration,
+    resolve_vulnerability_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -749,7 +764,6 @@ async def create_risk_scenario(
     description: str = "",
     risk_assessment_id: str = None,
     folder_id: str = None,
-    existing_controls: str = "",
     current_proba: int = None,
     current_impact: int = None,
     assets: list = None,
@@ -774,7 +788,6 @@ async def create_risk_scenario(
         description: Description
         risk_assessment_id: Risk assessment ID/name
         folder_id: Folder ID/name
-        existing_controls: Existing controls description
         current_proba: Probability 0-4 (0=very low, 4=very high)
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
@@ -817,9 +830,6 @@ async def create_risk_scenario(
 
         if risk_assessment_id:
             payload["risk_assessment"] = risk_assessment_id
-
-        if existing_controls:
-            payload["existing_controls"] = existing_controls
 
         if current_proba is not None:
             payload["current_proba"] = current_proba
@@ -1412,6 +1422,87 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
         return f"Error in refresh_quantitative_risk_study_simulations: {str(e)}"
 
 
+SCHEDULE_FREQUENCIES = ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+SCHEDULE_OVERDUE_BEHAVIORS = ["DELAY_NEXT", "NO_IMPACT"]
+
+
+def _build_schedule(
+    frequency=None,
+    interval=None,
+    days_of_week=None,
+    weeks_of_month=None,
+    months_of_year=None,
+    end_date=None,
+    occurrences=None,
+    overdue_behavior=None,
+):
+    """Build a TaskTemplate.schedule object from individual fields.
+
+    Mirrors the backend's SCHEDULE_JSONSCHEMA (interval/frequency required
+    together, everything else optional). Returns (schedule_dict, error) -
+    schedule_dict is None when no schedule_* field was given at all, and
+    error is a user-facing message when the given fields are invalid.
+    """
+    given = any(
+        v is not None
+        for v in (
+            frequency,
+            interval,
+            days_of_week,
+            weeks_of_month,
+            months_of_year,
+            end_date,
+            occurrences,
+            overdue_behavior,
+        )
+    )
+    if not given:
+        return None, None
+
+    if frequency is None or interval is None:
+        return (
+            None,
+            "Error: schedule_frequency and schedule_interval are both required "
+            "to set a schedule",
+        )
+    if frequency not in SCHEDULE_FREQUENCIES:
+        return (
+            None,
+            f"Error: Invalid schedule_frequency '{frequency}'. Must be one of: "
+            f"{', '.join(SCHEDULE_FREQUENCIES)}",
+        )
+    if (
+        overdue_behavior is not None
+        and overdue_behavior not in SCHEDULE_OVERDUE_BEHAVIORS
+    ):
+        return (
+            None,
+            f"Error: Invalid schedule_overdue_behavior '{overdue_behavior}'. "
+            f"Must be one of: {', '.join(SCHEDULE_OVERDUE_BEHAVIORS)}",
+        )
+
+    if months_of_year is not None and frequency != "YEARLY":
+        return (
+            None,
+            "Error: schedule_months_of_year only applies to schedule_frequency YEARLY",
+        )
+
+    schedule = {"interval": interval, "frequency": frequency}
+    if days_of_week is not None:
+        schedule["days_of_week"] = days_of_week
+    if weeks_of_month is not None:
+        schedule["weeks_of_month"] = weeks_of_month
+    if months_of_year is not None:
+        schedule["months_of_year"] = months_of_year
+    if end_date is not None:
+        schedule["end_date"] = end_date
+    if occurrences is not None:
+        schedule["occurrences"] = occurrences
+    if overdue_behavior is not None:
+        schedule["overdue_behavior"] = overdue_behavior
+    return schedule, None
+
+
 async def create_task_template(
     name: str,
     folder_id: str,
@@ -1420,19 +1511,32 @@ async def create_task_template(
     observation: str = None,
     evidences: list = None,
     task_date: str = None,
-    is_recurrent: bool = False,
+    is_recurrent: bool = None,
     ref_id: str = None,
-    schedule: str = None,
+    schedule_frequency: str = None,
+    schedule_interval: int = None,
+    schedule_days_of_week: list = None,
+    schedule_weeks_of_month: list = None,
+    schedule_months_of_year: list = None,
+    schedule_end_date: str = None,
+    schedule_occurrences: int = None,
+    schedule_overdue_behavior: str = None,
     enabled: bool = True,
     link: str = None,
     assigned_to: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     applied_controls: list = None,
     compliance_assessments: list = None,
     risk_assessments: list = None,
     findings_assessment: list = None,
 ) -> str:
     """Create task template
+
+    A task template is either a single occurrence (give task_date) or a
+    recurring one (give the schedule_* fields): setting any schedule_* field
+    makes the template recurrent automatically unless is_recurrent is passed
+    explicitly.
 
     Args:
         name: Task template name (required)
@@ -1442,13 +1546,27 @@ async def create_task_template(
         observation: Observation text
         evidences: Array of evidence UUIDs
         task_date: Task date (YYYY-MM-DD)
-        is_recurrent: Recurrent flag
+        is_recurrent: Recurrent flag (defaults to True when a schedule is
+            given, False otherwise)
         ref_id: Reference ID
-        schedule: Schedule definition
+        schedule_frequency: DAILY | WEEKLY | MONTHLY | YEARLY (required to set
+            a schedule)
+        schedule_interval: Number of periods between occurrences, e.g. 2 for
+            "every 2 weeks" (required to set a schedule)
+        schedule_days_of_week: Days of the week the task repeats on (Monday=1
+            .. Sunday=7)
+        schedule_weeks_of_month: Which week(s) of the month, for a given
+            weekday (1=first .. 4=fourth, -1=last)
+        schedule_months_of_year: Months of the year (1=January .. 12=December),
+            YEARLY only
+        schedule_end_date: Date the recurrence ends (YYYY-MM-DD)
+        schedule_occurrences: Number of occurrences before the recurrence stops
+        schedule_overdue_behavior: DELAY_NEXT | NO_IMPACT (default NO_IMPACT)
         enabled: Enabled flag
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: List of assignees as actor UUIDs, emails or names
         assets: List of asset IDs/names
+        vulnerabilities: List of vulnerability IDs/names
         applied_controls: List of applied control IDs/names
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1457,6 +1575,22 @@ async def create_task_template(
     try:
         # Resolve folder name to ID if needed
         folder_id = resolve_folder_id(folder_id)
+
+        schedule, schedule_error = _build_schedule(
+            schedule_frequency,
+            schedule_interval,
+            schedule_days_of_week,
+            schedule_weeks_of_month,
+            schedule_months_of_year,
+            schedule_end_date,
+            schedule_occurrences,
+            schedule_overdue_behavior,
+        )
+        if schedule_error:
+            return schedule_error
+
+        if is_recurrent is None:
+            is_recurrent = schedule is not None
 
         payload = {
             "name": name,
@@ -1506,6 +1640,11 @@ async def create_task_template(
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
 
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
+
         res = make_post_request("/task-templates/", payload)
 
         if res.status_code == 201:
@@ -1520,6 +1659,8 @@ async def create_task_template(
 async def create_vulnerability(
     name: str,
     description: str = None,
+    observation: str = None,
+    owner: list = None,
     ref_id: str = None,
     status: str = "--",
     severity: int = -1,
@@ -1528,12 +1669,22 @@ async def create_vulnerability(
     applied_controls: list = None,
     assets: list = None,
     security_exceptions: list = None,
+    evidences: list = None,
+    incidents: list = None,
+    task_templates: list = None,
+    detected_at: str = None,
+    published_date: str = None,
+    due_date: str = None,
+    eta: str = None,
+    remediated_at: str = None,
 ) -> str:
     """Create a new vulnerability
 
     Args:
         name: Vulnerability name (required)
         description: Description
+        observation: How the vulnerability is handled (markdown)
+        owner: List of owners as actor UUIDs, emails or names (users, teams, entities)
         ref_id: Reference ID (e.g. CVE identifier)
         status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
@@ -1542,9 +1693,23 @@ async def create_vulnerability(
         applied_controls: List of applied control IDs/names
         assets: List of asset IDs/names
         security_exceptions: List of security exception UUIDs
+        evidences: List of evidence IDs/names
+        incidents: List of incident IDs/names
+        task_templates: List of task IDs/names
+        detected_at: Detection date (YYYY-MM-DD)
+        published_date: Publication date of the advisory (YYYY-MM-DD)
+        due_date: Due date (YYYY-MM-DD); computed from the SLA policy when left empty
+        eta: Expected resolution date (YYYY-MM-DD)
+        remediated_at: Remediation date (YYYY-MM-DD); kept whatever the status, and set to today when the status becomes resolved without one
     """
     try:
-        from ..resolvers import resolve_asset_id, resolve_applied_control_id
+        from ..resolvers import (
+            resolve_applied_control_id,
+            resolve_asset_id,
+            resolve_evidence_id,
+            resolve_incident_id,
+            resolve_task_template_id,
+        )
 
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
@@ -1553,6 +1718,10 @@ async def create_vulnerability(
 
         if description is not None:
             payload["description"] = description
+        if observation is not None:
+            payload["observation"] = observation
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if status is not None:
@@ -1580,6 +1749,24 @@ async def create_vulnerability(
 
         if security_exceptions:
             payload["security_exceptions"] = security_exceptions
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if incidents is not None:
+            payload["incidents"] = [resolve_incident_id(x) for x in incidents]
+        if task_templates is not None:
+            payload["task_templates"] = [
+                resolve_task_template_id(x) for x in task_templates
+            ]
+        if detected_at is not None:
+            payload["detected_at"] = detected_at
+        if published_date is not None:
+            payload["published_date"] = published_date
+        if due_date is not None:
+            payload["due_date"] = due_date
+        if eta is not None:
+            payload["eta"] = eta
+        if remediated_at is not None:
+            payload["remediated_at"] = remediated_at
 
         res = make_post_request("/vulnerabilities/", payload)
 
@@ -1590,3 +1777,774 @@ async def create_vulnerability(
             return f"Error creating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_vulnerability: {str(e)}"
+
+
+# ---------------------------------------------------------------------------
+# Findings (severity given and returned as a label, shared with update_finding)
+# ---------------------------------------------------------------------------
+
+# Backend core.models.Severity
+SEVERITY_LEVELS = {
+    "undefined": -1,
+    "info": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4,
+}
+
+
+def _severity_value(label):
+    """Severity label (case-insensitive) to its backend value, None if unknown."""
+    if not isinstance(label, str):
+        return None
+    return SEVERITY_LEVELS.get(label.strip().lower())
+
+
+def _severity_label(value) -> str:
+    """Backend severity value to its label (the raw value if unknown)."""
+    for label, level in SEVERITY_LEVELS.items():
+        if level == value:
+            return label
+    return str(value)
+
+
+def _invalid_severity_error(label) -> str:
+    return f"Error: invalid severity '{label}' (allowed: {', '.join(SEVERITY_LEVELS)})"
+
+
+async def create_findings_assessment(
+    name: str,
+    folder_id: str = None,
+    category: str = None,
+    status: str = None,
+    start_date: str = None,
+    reported_at: str = None,
+    description: str = None,
+    ref_id: str = None,
+) -> str:
+    """Create a new findings assessment (findings binder, e.g. a pentest report)
+
+    The backend refuses a second binder with the same name and version in the
+    same folder; its error is returned as is.
+
+    Args:
+        name: Findings assessment name (required)
+        folder_id: Folder ID/name (default: Global)
+        category: -- | pentest | threat_hunting | red_teaming | audit | self_identified | posture | responsible_disclosure (default: --)
+        status: planned | in_progress | in_review | done | deprecated
+        start_date: Start date (YYYY-MM-DD)
+        reported_at: Report date (YYYY-MM-DD)
+        description: Description
+        ref_id: Reference ID
+    """
+    try:
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        optional = {
+            "category": category,
+            "status": status,
+            "start_date": start_date,
+            "reported_at": reported_at,
+            "description": description,
+            "ref_id": ref_id,
+        }
+        payload.update({k: v for k, v in optional.items() if v is not None})
+
+        res = make_post_request("/findings-assessments/", payload)
+
+        if res.status_code == 201:
+            binder = res.json()
+            return (
+                f"Created findings assessment: {binder.get('name')} "
+                f"(ID: {binder.get('id')})"
+            )
+        else:
+            return f"Error creating findings assessment: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_findings_assessment: {str(e)}"
+
+
+async def create_finding(
+    name: str,
+    findings_assessment_id: str,
+    severity: str = None,
+    description: str = None,
+    status: str = None,
+    eta: str = None,
+    evidences: list = None,
+    ref_id: str = None,
+) -> str:
+    """Create a new finding in a findings assessment (binder)
+
+    No duplicate check on the name: like the app, two findings may share the
+    same name in one binder. Callers that must not create duplicates (e.g.
+    report imports) have to check the existing findings first.
+    The finding takes the folder of its binder. A locked binder is refused by
+    the backend, whose error is returned as is.
+
+    Args:
+        name: Finding name (required)
+        findings_assessment_id: Findings assessment UUID or exact name (required)
+        severity: undefined | info | low | medium | high | critical (case-insensitive, default: undefined)
+        description: Description
+        status: -- | identified | confirmed | dismissed | assigned | in_progress | mitigated | resolved | closed | deprecated (default: --)
+        eta: Expected resolution date (YYYY-MM-DD)
+        evidences: List of evidence IDs/names
+        ref_id: Reference ID
+    """
+    if severity is not None and _severity_value(severity) is None:
+        return _invalid_severity_error(severity)
+    try:
+        from ..resolvers import resolve_evidence_id, resolve_findings_assessment_id
+
+        payload = {
+            "name": name,
+            "findings_assessment": resolve_findings_assessment_id(
+                findings_assessment_id
+            ),
+        }
+        if severity is not None:
+            payload["severity"] = _severity_value(severity)
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            payload["status"] = status
+        if eta is not None:
+            payload["eta"] = eta
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+
+        res = make_post_request("/findings/", payload)
+
+        if res.status_code == 201:
+            finding = res.json()
+            return (
+                f"Created finding: {finding.get('name')} (ID: {finding.get('id')}, "
+                f"severity: {_severity_label(finding.get('severity'))})"
+            )
+        else:
+            return f"Error creating finding: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_finding: {str(e)}"
+
+
+def _human_size(num_bytes: int) -> str:
+    """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
+    if num_bytes < 1000:
+        return f"{num_bytes} B"
+    if num_bytes < 1000**2:
+        return f"{num_bytes / 1000:.1f} KB"
+    return f"{num_bytes / 1000**2:.1f} MB"
+
+
+def _delete_evidence_quietly(evidence_id) -> bool:
+    """Roll back a just-created evidence; never raises, True on a 2xx."""
+    try:
+        res = make_delete_request(f"/evidences/{evidence_id}/")
+        return 200 <= res.status_code < 300
+    except Exception:
+        return False
+
+
+def _attachment_stored(evidence_id):
+    """True/False if the server says whether the file was stored, None when
+    that cannot be checked."""
+    try:
+        res = make_get_request(f"/evidences/{evidence_id}/")
+        if res.status_code != 200:
+            return None
+        return bool(res.json().get("attachment"))
+    except Exception:
+        return None
+
+
+def _rollback_note(evidence_id) -> str:
+    if _delete_evidence_quietly(evidence_id):
+        return ""
+    return f" (could not delete empty evidence {evidence_id}, remove it manually)"
+
+
+async def create_evidence(
+    file_path: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+    status: str = None,
+    findings_assessments: list = None,
+) -> str:
+    """Create a new evidence with one attachment read from a local file
+
+    One file per call: call again to attach several files (one evidence each).
+    Only available with the local stdio transport.
+    The returned evidence ID can then be linked through the `evidences`
+    parameter of other tools (e.g. task templates).
+
+    The file must exist on the user's disk. Screenshots pasted into the chat
+    work only when the client saved them locally and shows their path (Claude
+    Code does, e.g. "[Image: source: <path>]"): pass that path. Clients that
+    keep pasted images only in the conversation (e.g. Claude Desktop) give no
+    path: ask the user to save the file and give its path.
+
+    Args:
+        file_path: Local path to the file (~ is expanded); not inside a
+            hidden directory. The server checks the file type and size
+        name: Evidence name (defaults to the file name)
+        description: Description
+        folder_id: Folder ID/name (defaults to the folder of the given
+            findings assessments, else Global)
+        status: draft | missing | in_review | approved | rejected | expired
+            (default: draft)
+        findings_assessments: List of findings assessment IDs/names the
+            evidence is attached to; without folder_id they must share one
+            folder
+    """
+    try:
+        path = Path(file_path).expanduser().resolve()
+        if any(part.startswith(".") for part in path.parts):
+            return f"Error: refusing a hidden file or directory: {file_path}"
+        if not path.is_file():
+            return f"Error: file not found: {file_path}"
+        size = path.stat().st_size
+        if not size:
+            return f"Error: file is empty: {file_path}"
+        filename = path.name
+
+        # Opened before creating the evidence: an unreadable file leaves no record.
+        with path.open("rb") as f:
+            binder_ids = None
+            if findings_assessments is not None:
+                from ..resolvers import resolve_findings_assessment_id
+
+                binder_ids = [
+                    resolve_findings_assessment_id(x) for x in findings_assessments
+                ]
+
+            # Keep the evidence in its binders' folder rather than in Global.
+            if not folder_id and binder_ids:
+                binder_folders = set()
+                for binder_id in binder_ids:
+                    binder_res = make_get_request(f"/findings-assessments/{binder_id}/")
+                    if binder_res.status_code != 200:
+                        return (
+                            f"Error creating evidence: {binder_res.status_code} - "
+                            f"{binder_res.text}"
+                        )
+                    folder = binder_res.json().get("folder")
+                    if isinstance(folder, dict):
+                        folder = folder.get("id")
+                    binder_folders.add(folder)
+                if len(binder_folders) > 1:
+                    return (
+                        "Error: the findings assessments are in different folders, "
+                        "pass folder_id"
+                    )
+                folder_id = binder_folders.pop()
+
+            if not folder_id and GLOBAL_FOLDER_ID:
+                folder_id = GLOBAL_FOLDER_ID
+
+            payload = {"name": name or filename}
+            if folder_id:
+                payload["folder"] = resolve_folder_id(folder_id)
+            if description is not None:
+                payload["description"] = description
+            if status is not None:
+                payload["status"] = status
+            if binder_ids is not None:
+                payload["findings_assessments"] = binder_ids
+
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
+
+            evidence = res.json()
+            evidence_id = evidence.get("id")
+
+            created = (
+                f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+                f"with attachment {filename} ({_human_size(size)})"
+            )
+
+            try:
+                upload = make_upload_request(
+                    f"/evidences/{evidence_id}/upload/", filename, f
+                )
+            except Exception as e:
+                if _attachment_stored(evidence_id):
+                    return created
+                return (
+                    f"Error uploading attachment, outcome unknown: {e} "
+                    f"(evidence {evidence_id} kept: check it before retrying)"
+                )
+
+            if upload.status_code != 200:
+                return (
+                    f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                    f"{_rollback_note(evidence_id)}"
+                )
+            if _attachment_stored(evidence_id) is False:
+                return (
+                    "Error uploading attachment: the server stored no file"
+                    f"{_rollback_note(evidence_id)}"
+                )
+
+            return created
+    except Exception as e:
+        return f"Error in create_evidence: {str(e)}"
+
+
+DOCUMENT_TYPES = [
+    "policy",
+    "procedure",
+    "charter",
+    "record",
+    "meeting_minutes",
+    "other",
+]
+
+
+async def create_document(
+    name: str,
+    document_type: str = "policy",
+    description: str = "",
+    folder_id: str = None,
+    content: str = None,
+    locale: str = None,
+    template_used: str = None,
+    policy: str = None,
+) -> str:
+    """Create a managed document (a markdown policy, procedure, charter, record...)
+
+    This creates the document and its first (draft) revision in one call. The
+    content can be edited later with update_document as long as the revision
+    stays a draft (or has changes requested) — once submitted for review or
+    published, call create_document_draft first.
+
+    Args:
+        name: Document name
+        document_type: policy | procedure | charter | record | meeting_minutes | other
+        description: Description
+        folder_id: Folder ID/name
+        content: Markdown content for the initial draft revision
+        locale: Locale code, e.g. "en", "fr" (defaults to your preferred language)
+        template_used: Reference ID of a document template to seed the content from
+            (ignored if content is also given)
+        policy: Existing Policy ID/name to link this document to (groups it under
+            that policy's document container instead of creating a new one)
+    """
+    try:
+        from ..resolvers import resolve_policy_id
+
+        if document_type not in DOCUMENT_TYPES:
+            return f"Error: Invalid document_type '{document_type}'. Must be one of: {', '.join(DOCUMENT_TYPES)}"
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "description": description,
+            "document_type": document_type,
+        }
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if locale is not None:
+            payload["locale"] = locale
+        if template_used is not None:
+            payload["template_used"] = template_used
+        if policy is not None:
+            payload["policy"] = resolve_policy_id(policy)
+
+        res = make_post_request("/managed-documents/", payload)
+
+        if res.status_code != 201:
+            return f"Error creating document: {res.status_code} - {res.text}"
+
+        document = res.json()
+        document_id = document.get("id")
+        label = document.get("display_name") or document.get("name") or name
+        revision_id = document.get("current_revision")
+
+        if content is not None:
+            if not revision_id:
+                return (
+                    f"Created document: {label} (ID: {document_id}) but failed to "
+                    "set content: no revision returned"
+                )
+            rev_res = make_patch_request(
+                f"/document-revisions/{revision_id}/", {"content": content}
+            )
+            if rev_res.status_code != 200:
+                return (
+                    f"Created document: {label} (ID: {document_id}) but failed to "
+                    f"set content: {rev_res.status_code} - {rev_res.text}"
+                )
+
+        return f"Created document: {label} (ID: {document_id}, revision: 1)"
+    except Exception as e:
+        return f"Error in create_document: {str(e)}"
+
+
+def _get_latest_revision(document_id: str):
+    """Return (revision_dict, error) for a document's most recent revision.
+
+    This is the one any edit/submit/approve/publish action targets.
+    `current_revision` is NOT safe for this: it tracks the *published*
+    revision and only moves on publish(), so it goes stale as soon as a new
+    draft is created after a publish cycle. DocumentRevision's default
+    ordering is -version_number, so the first result here is always correct.
+    """
+    res = make_get_request("/document-revisions/", params={"document": document_id})
+    if res.status_code != 200:
+        return (
+            None,
+            f"Error fetching document revisions: {res.status_code} - {res.text}",
+        )
+
+    revisions = get_paginated_results(res.json())
+    if not revisions:
+        return None, "Error: Document has no revisions"
+
+    return revisions[0], None
+
+
+async def submit_document_for_review(document_id: str) -> str:
+    """Submit a document's draft (or change-requested) revision for review
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/submit-for-review/", {}
+        )
+        if res.status_code != 200:
+            return (
+                f"Error submitting document for review: {res.status_code} - {res.text}"
+            )
+
+        return (
+            f"Submitted for review: revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in submit_document_for_review: {str(e)}"
+
+
+async def approve_document(document_id: str) -> str:
+    """Approve (validate) a document's in-review revision
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/approve/", {})
+        if res.status_code != 200:
+            return f"Error approving document: {res.status_code} - {res.text}"
+
+        return (
+            f"Approved (validated): revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in approve_document: {str(e)}"
+
+
+async def request_document_changes(document_id: str, comments: str = None) -> str:
+    """Send a document's in-review revision back to the author for changes
+
+    Args:
+        document_id: Document ID or name
+        comments: Reviewer comments explaining what needs to change
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        payload = {"reviewer_comments": comments} if comments is not None else {}
+        res = make_post_request(
+            f"/document-revisions/{revision['id']}/request-changes/", payload
+        )
+        if res.status_code != 200:
+            return f"Error requesting changes: {res.status_code} - {res.text}"
+
+        return (
+            f"Requested changes on revision {revision.get('version_number', '?')} "
+            f"of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in request_document_changes: {str(e)}"
+
+
+async def publish_document(document_id: str) -> str:
+    """Publish a document's validated revision, making it the current one
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+        revision, error = _get_latest_revision(resolved_id)
+        if error:
+            return error
+
+        res = make_post_request(f"/document-revisions/{revision['id']}/publish/", {})
+        if res.status_code != 200:
+            return f"Error publishing document: {res.status_code} - {res.text}"
+
+        return (
+            f"Published: revision {revision.get('version_number', '?')} of document "
+            f"(ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in publish_document: {str(e)}"
+
+
+async def create_document_draft(document_id: str) -> str:
+    """Create a new draft revision for a document, cloned from its latest content
+
+    Needed to edit a document again once it has been published (a published
+    revision is locked). Fails if a draft already exists for the document.
+
+    Args:
+        document_id: Document ID or name
+    """
+    try:
+        from ..resolvers import resolve_managed_document_id
+
+        resolved_id = resolve_managed_document_id(document_id)
+
+        res = make_post_request(
+            f"/managed-documents/{resolved_id}/create-new-draft/", {}
+        )
+        if res.status_code != 201:
+            return f"Error creating draft: {res.status_code} - {res.text}"
+
+        draft = res.json()
+        return (
+            f"Created draft: revision {draft.get('version_number')} "
+            f"(ID: {draft.get('id')}) of document (ID: {resolved_id})"
+        )
+    except Exception as e:
+        return f"Error in create_document_draft: {str(e)}"
+
+
+async def create_incident(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    vulnerabilities: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    task_templates: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Create a new incident
+
+    Args:
+        name: Incident name (required)
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed (default: new)
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown) (default: 3)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601, defaults to now)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name (default: Global)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global)
+        owners: List of owners as actor UUIDs, emails or names
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global)
+        vulnerabilities: List of vulnerability IDs/names
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
+        entities: List of third-party entity IDs/names
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
+        task_templates: List of tasks (task templates) to link, as IDs/names (resolved within the incident's folder, then Global)
+        filtering_labels: List of label UUIDs
+    """
+    try:
+        scope_folder = resolve_folder_id(folder_id) if folder_id else None
+        folder = scope_folder or GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats:
+            payload["threats"] = [
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
+            ]
+        if owners:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets:
+            payload["assets"] = [
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
+            ]
+        if qualifications:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls:
+            payload["applied_controls"] = [
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
+                for c in applied_controls
+            ]
+        if task_templates:
+            payload["task_templates"] = [
+                resolve_in_folder_or_global(resolve_task_template_id, t, scope_folder)
+                for t in task_templates
+            ]
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
+
+        res = make_post_request("/incidents/", payload)
+
+        if res.status_code == 201:
+            incident = res.json()
+            return (
+                f"Created incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error creating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_incident: {str(e)}"
+
+
+# Backend TimelineEntry.EntryType.get_manual_entry_types(); severity_changed and
+# status_changed are system-generated history and never accepted as input.
+MANUAL_TIMELINE_ENTRY_TYPES = ("detection", "mitigation", "observation")
+INVALID_TIMELINE_ENTRY_TYPE_ERROR = (
+    f"Error: entry_type must be one of {', '.join(MANUAL_TIMELINE_ENTRY_TYPES)}"
+)
+
+
+async def create_timeline_entry(
+    incident_id: str,
+    entry: str,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Add an entry to an incident's timeline (detection, mitigation or observation)
+
+    The author is the API user and the folder is the incident's folder.
+
+    Args:
+        incident_id: Incident UUID or name (required)
+        entry: Short entry text, max 200 characters (required)
+        entry_type: detection | mitigation | observation (default: observation)
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; defaults to now, must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs
+    """
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        resolved_incident = resolve_incident_id(incident_id)
+
+        # Send the incident's folder so the backend RBAC add check is scoped to
+        # the incident's domain (it falls back to the root folder otherwise).
+        incident_res = make_get_request(f"/incidents/{resolved_incident}/")
+        if incident_res.status_code != 200:
+            return (
+                f"Error creating timeline entry: {incident_res.status_code} - "
+                f"{incident_res.text}"
+            )
+        folder = incident_res.json().get("folder")
+        if isinstance(folder, dict):
+            folder = folder.get("id")
+
+        payload = {"incident": resolved_incident, "entry": entry}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+        if evidences is not None:
+            payload["evidences"] = evidences
+
+        res = make_post_request("/timeline-entries/", payload)
+
+        if res.status_code == 201:
+            created = res.json()
+            return (
+                f"Created timeline entry: {created.get('entry')} "
+                f"(ID: {created.get('id')})"
+            )
+        else:
+            return f"Error creating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_timeline_entry: {str(e)}"

@@ -1,5 +1,5 @@
 // Constants shared across the workflow builder panels.
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 // Variable value kinds, offered wherever a variable's type is chosen.
 export const VARIABLE_TYPES = ['string', 'number', 'boolean', 'date', 'json'];

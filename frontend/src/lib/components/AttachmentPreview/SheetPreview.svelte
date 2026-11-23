@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import SpreadsheetWorker from './spreadsheet.worker?worker';
 	import SandboxedHtmlFrame from './SandboxedHtmlFrame.svelte';
 	import { parseCsv } from './parseCsv';

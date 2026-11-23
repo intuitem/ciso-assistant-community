@@ -1,7 +1,10 @@
 from dataclasses import dataclass
+from unittest import mock
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 
 from core.models import AppliedControl
 from iam.models import Folder, RoleAssignment, User, UserGroup, Role
@@ -907,3 +910,85 @@ class TestVerdictQueryBudget:
                 RoleAssignment.get_allowed_folder_ids(user, permission)
             )
         assert domain.id in allowed_folder_ids
+
+
+@pytest.mark.django_db
+class TestFolderRefId:
+    """A ref_id identifies a folder across the whole tree, ignoring case, padding and blanks."""
+
+    @pytest.fixture
+    def parent(self) -> Folder:
+        return Folder.objects.create(name="parent")
+
+    def test_duplicate_is_rejected(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="b", ref_id="dom.1", parent_folder=parent)
+        assert "ref_id" in exc.value.message_dict
+
+    def test_duplicate_elsewhere_in_the_tree_is_rejected(self, parent: Folder):
+        child = Folder.objects.create(name="child", parent_folder=parent)
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=child)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="b", ref_id="dom.1")
+        assert "ref_id" in exc.value.message_dict
+
+    def test_blank_ref_ids_do_not_collide(self, parent: Folder):
+        for i, ref_id in enumerate([None, None, "", "", "   ", "   "]):
+            folder = Folder.objects.create(
+                name=f"f{i}", ref_id=ref_id, parent_folder=parent
+            )
+            assert folder.ref_id is None
+
+    def test_ref_id_is_stripped(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        with pytest.raises(ValidationError):
+            Folder.objects.create(name="b", ref_id=" dom.1 ", parent_folder=parent)
+        with pytest.raises(ValidationError):
+            Folder.objects.create(name="c", ref_id="\tdom.1\n", parent_folder=parent)
+
+    def test_ref_id_and_name_clashes_are_reported_together(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="a", ref_id="dom.1", parent_folder=parent)
+        assert {"ref_id", "name"} <= set(exc.value.message_dict)
+
+    def test_saving_a_folder_keeps_its_own_ref_id(self, parent: Folder):
+        folder = Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        folder.description = "edited"
+        folder.save()
+
+    def test_database_rejects_duplicates_that_skip_clean(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        other = Folder.objects.create(name="b", parent_folder=parent)
+
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id="dom.1")
+
+    def test_database_rejects_padded_duplicates_across_parents(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        other = Folder.objects.create(name="b")
+
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id=" dom.1 ")
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id="\tdom.1\n")
+
+    def test_database_ignores_whitespace_only_ref_ids(self, parent: Folder):
+        folders = [
+            Folder.objects.create(name=f"f{i}", parent_folder=parent) for i in range(2)
+        ]
+        Folder.objects.filter(pk__in=[f.pk for f in folders]).update(ref_id="   ")
+        Folder.objects.filter(pk__in=[f.pk for f in folders]).update(ref_id="\t \n")
+
+    def test_write_that_slips_past_clean_is_a_validation_error(self, parent: Folder):
+        """Two concurrent writes can both pass clean() on SQLite (no tree lock)."""
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with mock.patch.object(Folder, "clean", lambda self: None):
+            with pytest.raises(ValidationError) as exc:
+                Folder.objects.create(name="b", ref_id="dom.1", parent_folder=parent)
+        assert "ref_id" in exc.value.message_dict

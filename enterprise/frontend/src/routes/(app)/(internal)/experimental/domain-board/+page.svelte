@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import DomainBoard from './DomainBoard.svelte';
 	import type { PageData } from './$types';
 

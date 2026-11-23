@@ -1,10 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { discardBody } from '$lib/utils/responses';
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
 
 export const load: PageServerLoad = async (event) => {
 	// read-only preview: the graph endpoint is enough, the palette needs no catalog here

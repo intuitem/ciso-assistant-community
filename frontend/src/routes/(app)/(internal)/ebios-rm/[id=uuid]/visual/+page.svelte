@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import GraphExplorer from '#lib/components/DataViz/GraphExplorer.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		data: PageData;

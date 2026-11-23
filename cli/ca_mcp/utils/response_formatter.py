@@ -121,6 +121,8 @@ def http_error_response(status_code: int, error_text: str) -> str:
     Returns:
         Formatted error response with next steps
     """
+    # a debug-mode error page is ~140k chars: enough to overflow the model's context
+    error_text = (error_text or "")[:500]
     if status_code == 401:
         return error_response(
             "Authentication Failed",

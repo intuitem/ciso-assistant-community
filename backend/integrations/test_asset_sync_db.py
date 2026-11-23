@@ -136,6 +136,51 @@ def test_asset_creation_triggers_sync(
     mock_task.schedule.assert_called_once()
 
 
+def test_sync_task_pushes_object(root_folder, servicenow_provider):
+    from django.contrib.contenttypes.models import ContentType
+
+    from core.models import AppliedControl
+    from integrations.tasks import sync_object_to_integrations
+
+    config = _config(servicenow_provider, {})
+    control = AppliedControl.objects.create(name="Control", folder=root_folder)
+
+    with patch.object(ServiceNowOrchestrator, "push_changes") as push:
+        sync_object_to_integrations.call_local(
+            ContentType.objects.get_for_model(control),
+            control.pk,
+            [config.id],
+            ["status"],
+        )
+
+    push.assert_called_once_with(control, ["status"])
+
+
+def test_sync_task_skips_object_deleted_before_it_runs(
+    root_folder, servicenow_provider
+):
+    """The push is queued on commit and runs later (days later if the consumer
+    was down): an object deleted meanwhile ends the task without pushing,
+    instead of raising DoesNotExist."""
+    from django.contrib.contenttypes.models import ContentType
+
+    from core.models import AppliedControl
+    from integrations.tasks import sync_object_to_integrations
+
+    config = _config(servicenow_provider, {})
+    control = AppliedControl.objects.create(name="Control", folder=root_folder)
+    content_type = ContentType.objects.get_for_model(control)
+    pk = control.pk
+    control.delete()
+
+    with patch.object(ServiceNowOrchestrator, "push_changes") as push:
+        sync_object_to_integrations.call_local(
+            content_type, pk, [config.id], ["status"]
+        )
+
+    push.assert_not_called()
+
+
 def test_applied_control_push_not_gated_by_mapping_config(
     root_folder, servicenow_provider
 ):

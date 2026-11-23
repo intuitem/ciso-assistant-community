@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import SoaTreeSection from './SoaTreeSection.svelte';
 	import type { PageData } from './$types';
 
@@ -130,13 +130,24 @@
 				</div>
 			</div>
 		</div>
-		<button
-			onclick={exportPDF}
-			class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-surface-50-950 border border-surface-300-700 text-surface-700-300 hover:bg-surface-50-950 transition-colors shadow-sm"
-		>
-			<i class="fas fa-file-pdf"></i>
-			PDF
-		</button>
+		<div class="flex gap-2 no-print">
+			<button
+				onclick={exportPDF}
+				class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-surface-50-950 border border-surface-300-700 text-surface-700-300 hover:bg-surface-50-950 transition-colors shadow-sm"
+			>
+				<i class="fas fa-file-pdf"></i>
+				PDF
+			</button>
+			<a
+				href={`/reports/soa/results/xlsx${page.url.search}`}
+				class="no-print flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-surface-50-950 border border-surface-300-700 text-surface-700-300 hover:bg-surface-50-950 transition-colors shadow-sm"
+				data-testid="soa-export-xlsx"
+				download
+			>
+				<i class="fas fa-file-excel"></i>
+				XLSX
+			</a>
+		</div>
 	</div>
 
 	<!-- SoA Table -->

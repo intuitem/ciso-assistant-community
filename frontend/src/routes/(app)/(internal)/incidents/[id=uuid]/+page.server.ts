@@ -1,17 +1,17 @@
-import { getModelInfo } from '$lib/utils/crud';
+import { getModelInfo } from '#lib/utils/crud.js';
 import { type Actions } from '@sveltejs/kit';
 import {
 	nestedDeleteFormAction,
 	defaultWriteFormAction,
 	nestedWriteFormAction
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { superValidate } from 'sveltekit-superforms';
-import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
+import { loadDetail, formatSelectFieldData } from '#lib/utils/load.js';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo('incidents');
@@ -89,6 +89,32 @@ export const load: PageServerLoad = async (event) => {
 		// DORA reports fetch is optional
 	}
 	data['doraReports'] = doraReports;
+
+	// One event, two qualifications: the breach form starts from the incident
+	const breaches: any = data.relatedModels['data-breaches'];
+	if (breaches) {
+		breaches.initialData = {
+			...breaches.initialData,
+			incident: data.data.id,
+			folder: data.data.folder.id,
+			name: data.data.name,
+			description: data.data.description ?? '',
+			discovered_on: data.data.reported_at ?? new Date().toISOString()
+		};
+		breaches.createForm = await superValidate(
+			breaches.initialData,
+			zod(modelSchema('data-breaches')),
+			{ errors: false }
+		);
+		try {
+			(data as any).dataBreaches = await fetchAllPages(
+				event.fetch,
+				`${BASE_API_URL}/privacy/data-breaches/?incident=${event.params.id}`
+			);
+		} catch {
+			(data as any).dataBreaches = [];
+		}
+	}
 
 	return data;
 };

@@ -1,5 +1,5 @@
 import type { GraphLink, Neighborhood } from './types';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 /** Ego graph that grows by explicit expansion; positions are assigned on arrival and never recomputed. */
 

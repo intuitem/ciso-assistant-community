@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -51,9 +51,15 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const creatableModels = listResults(creatableModelsRaw);
 	// Only the small relation targets are fetched as pickers; controls,
 	// evidences and assets are templated from an upstream node instead.
+	// Requirement assessments run to thousands (every requirement of every audit)
+	// and always come from the trigger or an upstream step, so their picker
+	// offers only variables.
+	const templatedOnly = new Set(['requirement-assessments']);
 	const fkEndpoints = [
 		...new Set([
-			...creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {})),
+			...creatableModels
+				.flatMap((entry: any) => Object.values(entry.fk_fields ?? {}))
+				.filter((endpoint: any) => !templatedOnly.has(endpoint)),
 			'folders',
 			'actors',
 			'filtering-labels',

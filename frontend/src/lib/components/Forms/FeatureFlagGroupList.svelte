@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import BackgroundCheckbox, { type CheckboxAccent } from './BackgroundCheckbox.svelte';
-	import type { FeatureFlagGroup } from '$lib/utils/feature-flag-groups';
+	import type { FeatureFlagGroup } from '#lib/utils/feature-flag-groups.js';
 
 	interface Props {
 		groups: FeatureFlagGroup[];

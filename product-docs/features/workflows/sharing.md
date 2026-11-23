@@ -6,6 +6,8 @@ description: "Export and import workflows as files, and install ready-made ones 
 
 A workflow can leave your instance as a file and come back in on another, or be installed from the library catalog.
 
+Quick reference: [cheat sheet](cheat-sheet.md#export-import-and-templates).
+
 ## Export
 
 Click **Export** in the builder header. You get a file named after the workflow. It contains the draft if one exists, otherwise the published version.

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { copy } from '@svelte-put/copy';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
 
 	const modalStore: ModalStore = getModalStore();

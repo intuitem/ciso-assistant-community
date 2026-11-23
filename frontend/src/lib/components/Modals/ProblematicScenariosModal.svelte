@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 

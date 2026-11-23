@@ -1,20 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { invalidateAll } from '$app/navigation';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { refreshAll } from '$app/navigation';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	interface Props {
 		data: PageData;
@@ -36,7 +36,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -95,22 +95,29 @@
 			</Popover>
 			<Anchor
 				href={`${page.url.pathname}/visual`}
-				class="btn preset-filled-primary-500 h-fit"
+				class="btn btn-quiet h-fit"
 				breadcrumbAction="push"
-				><i class="fa-solid fa-stopwatch mr-2"></i>{m.impactOverTime()}</Anchor
+				><i class="fa-solid fa-stopwatch mr-2 text-pink-500"></i>{m.impactOverTime()}</Anchor
+			>
+			<Anchor
+				href={`${page.url.pathname}/dependencies`}
+				class="btn btn-quiet h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-sitemap mr-2 text-emerald-500"></i>{m.assetDependencies()}</Anchor
 			>
 			<Anchor
 				href={`${page.url.pathname}/report`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
+				class="btn btn-quiet h-fit"
+				breadcrumbAction="push"
+				><i class="fa-solid fa-file-lines mr-2 text-blue-500"></i>{m.report()}</Anchor
 			>
 			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn btn-quiet h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
-					<i class="fa-solid fa-check-circle mr-2"></i>
+					<i class="fa-solid fa-check-circle mr-2 text-amber-500"></i>
 					{m.requestValidation()}
 				</button>
 			{/if}

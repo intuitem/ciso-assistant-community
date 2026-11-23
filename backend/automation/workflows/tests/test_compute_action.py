@@ -7,12 +7,6 @@ import pytest
 from iam.models import Folder
 from automation.workflows.actions import validate_compute_config
 from automation.workflows.engine import start_instance
-from automation.workflows.expressions import (
-    ExpressionError,
-    compile_expression,
-    evaluate,
-    referenced_paths,
-)
 from automation.workflows.graph import save_graph
 from automation.workflows.models import (
     Workflow,
@@ -86,114 +80,6 @@ def error_messages(instance):
         log.message
         for log in instance.logs.filter(event_type=WorkflowInstanceLog.EventType.ERROR)
     ]
-
-
-class TestEvaluate:
-    """The evaluator on its own: types in, JSON-shaped values out."""
-
-    def test_int_arithmetic_stays_int(self):
-        assert evaluate("(a + b) * 2", {"a": 3, "b": 4}) == 14
-        assert isinstance(evaluate("a / 2", {"a": 7}), int)
-
-    def test_mixing_int_and_double_promotes_to_double(self):
-        # A `number` variable does not say int or double; the payload decides.
-        context = {"count": 3, "weight": 2.5}
-        assert evaluate("count * weight", context) == 7.5
-        assert evaluate("weight + count > 5", context) is True
-        assert evaluate("count == 3.0", context) is True
-        # Promoted comparisons still feed CEL's own logic and ternary.
-        assert evaluate("count > weight ? 'more' : 'less'", context) == "more"
-        assert evaluate("count < weight || count == 3.0", context) is True
-        assert evaluate("double(count) * weight", context) == 7.5
-        # All-int expressions keep CEL's int semantics, so indexes still work.
-        assert evaluate("[9, 8][count - 2]", context) == 8
-        with pytest.raises(ExpressionError, match="cannot combine int and string"):
-            evaluate("count + 'x'", context)
-
-    def test_dotted_paths_reach_node_outputs_and_lists(self):
-        context = {"nodes": {"fetch": {"count": 7, "results": [{"score": 3}]}}}
-        assert evaluate("nodes.fetch.count * 2", context) == 14
-        assert evaluate("nodes.fetch.results[0].score", context) == 3
-
-    def test_aggregates_over_lists(self):
-        rows = {"rows": [{"score": 3}, {"score": 5}], "empty": []}
-        assert evaluate("sum(rows.map(r, r.score))", rows) == 8
-        assert evaluate("avg(rows.map(r, r.score))", rows) == 4.0
-        assert evaluate("max(rows.map(r, r.score))", rows) == 5
-        assert evaluate("min(rows.map(r, r.score))", rows) == 3
-        assert evaluate("size(rows)", rows) == 2
-        assert evaluate("sum(empty)", rows) == 0
-        with pytest.raises(ExpressionError, match="empty list"):
-            evaluate("avg(empty)", rows)
-        assert evaluate("sum([1, 2.5])", {}) == 3.5
-        assert evaluate("max([1, 2.5])", {}) == 2.5
-
-    def test_min_and_max_over_strings_and_timestamps(self):
-        dates = {"dates": ["2026-03-01", "2026-01-15"]}
-        assert evaluate("max(dates)", dates) == "2026-03-01"
-        assert evaluate("min(dates)", dates) == "2026-01-15"
-        assert (
-            evaluate("max(dates.map(d, timestamp(d + 'T00:00:00Z')))", dates)
-            == "2026-03-01T00:00:00+00:00"
-        )
-        with pytest.raises(ExpressionError, match="one kind"):
-            evaluate("max(['a', 1])", {})
-        with pytest.raises(ExpressionError, match="takes a list of numbers"):
-            evaluate("sum(['a', 'b'])", {})
-
-    def test_rounding_helpers(self):
-        assert evaluate("round(2.567, 2)", {}) == 2.57
-        assert evaluate("round(2.5)", {}) == 3  # half up, not banker's
-        assert evaluate("floor(2.7)", {}) == 2
-        assert evaluate("ceil(2.1)", {}) == 3
-        assert evaluate("abs(-3)", {}) == 3
-        assert evaluate("abs(-2.5)", {}) == 2.5
-
-    def test_conditionals_and_strings(self):
-        context = {"severity": "critical", "n": 3}
-        assert evaluate("severity == 'critical' ? 1 : 30", context) == 1
-        assert evaluate("string(n) + ' items'", context) == "3 items"
-        assert evaluate("n > 2 && severity != 'low'", context) is True
-
-    def test_null_is_a_value(self):
-        assert evaluate("missing == null", {"missing": None}) is True
-        assert evaluate("has(m.x) ? m.x : 0", {"m": {}}) == 0
-
-    def test_runtime_failures_are_named(self):
-        with pytest.raises(ExpressionError, match="division by zero"):
-            evaluate("1 / n", {"n": 0})
-        with pytest.raises(ExpressionError, match="not a variable"):
-            evaluate("unknown + 1", {})
-        with pytest.raises(ExpressionError, match="sub-expression of '\\?:'"):
-            evaluate("unknown > 1 ? 'a' : 'b'", {})
-        with pytest.raises(ExpressionError, match="no field 'x'"):
-            evaluate("m.x", {"m": {}})
-        with pytest.raises(ExpressionError, match="integer overflow"):
-            evaluate("9223372036854775807 + 1", {})
-        with pytest.raises(ExpressionError, match="syntax error"):
-            evaluate("1 +", {})
-        with pytest.raises(ExpressionError, match="empty"):
-            evaluate("  ", {})
-
-    def test_results_are_json_shaped(self):
-        assert evaluate("[1, 2]", {}) == [1, 2]
-        assert evaluate("{'a': 1}", {}) == {"a": 1}
-        assert evaluate("timestamp('2026-01-01T00:00:00Z') + duration('72h')", {}) == (
-            "2026-01-04T00:00:00+00:00"
-        )
-
-
-class TestReferencedPaths:
-    def test_paths_and_prefixes_without_function_names_or_literals(self):
-        paths = referenced_paths(
-            "nodes.fetch.count * weight + size(rows) + 'nodes.fake.z' + double(n)"
-        )
-        assert {"nodes.fetch.count", "weight", "rows", "n"} <= paths
-        assert "size" not in paths and "double" not in paths
-        assert "nodes.fake.z" not in paths and "nodes.fake" not in paths
-
-    def test_unparsable_expression_references_nothing(self):
-        assert referenced_paths("a +") == set()
 
 
 @pytest.mark.django_db
@@ -625,58 +511,6 @@ class TestAiProvenanceThroughCompute:
         assert "action_update_ai_value_on_fenced_field" not in self.codes(
             self.graph("'high'")
         )
-
-
-class TestReviewRegressions:
-    """Behaviours pinned by the review of the compute action."""
-
-    def test_round_is_half_up(self):
-        assert evaluate("round(2.5)", {}) == 3
-        assert evaluate("round(-2.5)", {}) == -3
-        assert evaluate("round(0.125, 2)", {}) == 0.13
-        assert evaluate("round(1234.5, -2)", {}) == 1200.0
-
-    def test_modulo_is_int_only_with_a_hint(self):
-        assert evaluate("7 % 2", {}) == 1
-        with pytest.raises(ExpressionError, match=r"int\(\.\.\.\)"):
-            evaluate("7 % 2.5", {})
-
-    def test_non_finite_results_are_refused(self):
-        for expression in ["1.0 / 0.0", "0.0 / 0.0", "[1.0 / 0.0]", "{'a': 0.0 / 0.0}"]:
-            with pytest.raises(ExpressionError, match="not a finite number"):
-                evaluate(expression, {})
-
-    def test_helpers_on_non_finite_input_are_an_expression_error(self):
-        # floor(inf) raised a single-arg OverflowError that _describe mishandled.
-        for expression in ["floor(1.0 / 0.0)", "ceil(0.0 / 0.0)", "round(x / 0.0)"]:
-            with pytest.raises(ExpressionError, match="non-finite"):
-                evaluate(expression, {"x": 1.0})
-
-    def test_index_access_is_a_path(self):
-        assert referenced_paths("nodes['ai'].answer") == {"nodes.ai.answer"}
-        assert referenced_paths('nodes["a"]["b"]') == {"nodes.a.b"}
-
-    def test_a_computed_index_is_a_wildcard(self):
-        assert referenced_paths("nodes[key].x") == {"nodes.*.x", "key"}
-
-    def test_macro_nesting_is_capped(self):
-        compile_expression("a.map(x, b.filter(y, y > x))")
-        compile_expression("a.map(x, x).filter(y, y > 1).all(z, z > 0)")
-        with pytest.raises(ExpressionError, match="nested at most"):
-            compile_expression("a.map(x, b.map(y, c.exists(z, z == y)))")
-
-    def test_an_escaped_string_index_is_a_wildcard(self):
-        assert referenced_paths("nodes['cl\\x61ssify'].severity") == {
-            "nodes.*.severity"
-        }
-
-    def test_paths_are_maximal_chains_including_function_arguments(self):
-        assert referenced_paths("size(items.filter(x, x.score > limit))") == {
-            "items",
-            "x.score",
-            "limit",
-        }
-        assert referenced_paths("has(nodes.fetch.count)") == {"nodes.fetch.count"}
 
 
 @pytest.mark.django_db

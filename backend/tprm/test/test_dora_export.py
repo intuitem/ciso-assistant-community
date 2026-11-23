@@ -292,6 +292,10 @@ class TestGetEntityIdentifier(TestCase):
         entity = Entity(legal_identifiers=None)
         self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
 
+    def test_legacy_string_legal_identifiers(self):
+        entity = Entity(legal_identifiers="LEI123")
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
+
     def test_empty_legal_identifiers(self):
         entity = Entity(legal_identifiers={})
         self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
@@ -1145,6 +1149,20 @@ class TestGenerateB0202(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         second_row = next(r for r in rows[1:] if r[0] == "CA-002")
         self.assertEqual(second_row[14], "eba_GA:qx2007")
+
+    def test_data_location_region_exports_qx2007(self):
+        self.solution_cloud.data_location_storage = "EU"
+        self.solution_cloud.data_location_processing = "EEA"
+        self.solution_cloud.save()
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[14], "eba_GA:qx2007")
+        self.assertEqual(main_row[15], "eba_GA:qx2007")
 
     def test_data_location_processing_present(self):
         buf = self._generate(

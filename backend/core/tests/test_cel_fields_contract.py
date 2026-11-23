@@ -21,6 +21,7 @@ QUICK_FORM = {
     "outcomes_definition": [
         {"ref_id": "n", "kind": "number", "expression": "1"},
         {"ref_id": "b", "expression": "true"},
+        {"ref_id": "m", "kind": "rating", "dimensions": ["s"]},
     ],
     "pages": [
         {
@@ -58,10 +59,13 @@ def test_quick_form_names_match_the_evaluator(fields):
     probe = _quick_form_probe(QUICK_FORM)
     expected = fields["quick_form"]
     assert set(expected["roots"]) == set(probe)
-    assert set(expected["visibility_roots"]) == set(probe) - {"values"}
+    assert set(expected["visibility_roots"]) == set(probe) - {"values", "ratings"}
     assert set(expected["response"]) == set(probe["response"])
     assert set(expected["pages"]) == set(probe["pages"]["p"])
     assert set(expected["answers"]) == set(probe["answers"]["p:question:q"])
+    (point,) = probe["ratings"]["m"]["points"]
+    assert set(expected["rating_points"]) == set(point)
+    assert set(expected["rating_dims"]) == set(point["dims"]["s"])
 
 
 def test_framework_names_match_the_evaluator(fields):

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import TaskOccurrencesPanel from '$lib/components/TaskOccurrences/TaskOccurrencesPanel.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import CommitmentPanel from '#lib/components/CommitmentPanel/CommitmentPanel.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import TaskOccurrencesPanel from '#lib/components/TaskOccurrences/TaskOccurrencesPanel.svelte';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 
@@ -55,6 +55,7 @@
 				past={data.pastOccurrences}
 				upcoming={data.upcomingOccurrences}
 				upcomingCount={data.upcomingCount}
+				failed={data.occurrencesFailed}
 			/>
 		</div>
 	{/snippet}
