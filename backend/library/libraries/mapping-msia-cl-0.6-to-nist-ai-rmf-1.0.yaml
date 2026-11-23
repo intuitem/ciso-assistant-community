@@ -5,24 +5,26 @@ locale: es
 ref_id: mapping-msia-cl-0.6-to-nist-ai-rmf-1.0
 name: MSIA-CL v0.6 -> NIST AI RMF 1.0
 description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-  \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento del\
-  \ est\xE1ndar destino."
+  \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean solo\
+  \ los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan, no prueban\
+  \ cumplimiento del est\xE1ndar destino."
 copyright: "\xA9 Athanor Tech \u2014 MSIA-CL v0.6 \u2014 CC BY 4.0 \u2014 https://doi.org/10.5281/zenodo.24348333"
-version: 1
+version: 2
 publication_date: 2026-11-16
 provider: Athanor Tech
 packager: Athanor Tech
 labels:
-- CHILE
 - GOBERNANZA-IA
-- MSIA-CL
 - IA
+- MSIA-CL
+- CHILE
 translations:
   en:
     name: MSIA-CL v0.6 -> NIST AI RMF 1.0
     description: 'Correspondences declared in the international standards column of
-      MSIA-CL v0.6. ''intersect'' relationship: they guide, they do not prove compliance
-      with the target standard.'
+      MSIA-CL v0.6. Where the framework cites a whole clause, only the requirements
+      the control actually covers are mapped. ''intersect'' relationship: they guide,
+      they do not prove compliance with the target standard.'
 dependencies:
 - urn:athanor:risk:library:msia-cl-0.6
 - urn:intuitem:risk:library:nist-ai-rmf-1.0
@@ -32,70 +34,59 @@ objects:
     ref_id: mapping-msia-cl-0.6-to-nist-ai-rmf-1.0
     name: MSIA-CL v0.6 -> NIST AI RMF 1.0
     description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-      \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento\
-      \ del est\xE1ndar destino."
+      \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean\
+      \ solo los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan,\
+      \ no prueban cumplimiento del est\xE1ndar destino."
     source_framework_urn: urn:athanor:risk:framework:msia-cl-0.6
     target_framework_urn: urn:intuitem:risk:framework:nist-ai-rmf-1.0
     requirement_mappings:
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Mandato con roles\
+        \ documentados (2.1) y responsabilidad de la alta direcci\xF3n (2.3). La capacitaci\xF3\
+        n (2.2) es GOB-05."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Mandato con roles\
+        \ documentados (2.1) y responsabilidad de la alta direcci\xF3n (2.3). La capacitaci\xF3\
+        n (2.2) es GOB-05."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.1
@@ -104,46 +95,22 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2.1)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de\
+        \ uso y herramientas aprobadas (1.4) y detecci\xF3n de la IA no autorizada\
+        \ para el inventario (1.6). No cubre el retiro (1.7, observaci\xF3n de CodeRabbit)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.6
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de\
+        \ uso y herramientas aprobadas (1.4) y detecci\xF3n de la IA no autorizada\
+        \ para el inventario (1.6). No cubre el retiro (1.7, observaci\xF3n de CodeRabbit)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.2
@@ -161,133 +128,49 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La clasificaci\xF3n documenta\
+        \ prop\xF3sito y contexto de uso (1.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El nivel de riesgo estima\
+        \ probabilidad y magnitud del impacto (5.1). La participaci\xF3n de actores\
+        \ externos (5.2) no es parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La evaluaci\xF3n de impacto\
+        \ examina los costos y da\xF1os posibles (3.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Probabilidad y magnitud\
+        \ de los impactos (5.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica y\
+        \ procedimiento para los riesgos de terceros (6.1). Los planes de contingencia\
+        \ (6.2) no son parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
       relationship: intersect
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3.2
@@ -296,52 +179,12 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 3.2)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: El punto de control\
+        \ permite desactivar o desconectar un sistema (2.4)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
@@ -361,30 +204,6 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3.5)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
       relationship: intersect
@@ -401,25 +220,17 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Riesgos de componentes\
+        \ de terceros (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Controles internos sobre\
+        \ los datos que usa cada componente (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
@@ -440,82 +251,60 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3.5)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Documentar y comunicar\
+        \ los impactos de las decisiones automatizadas (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Riesgos del proveedor\
+        \ sobre los datos (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Riesgos legales y de propiedad\
+        \ intelectual de los datos de terceros (4.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Evaluaci\xF3n\
+        \ de componentes y servicios de terceros (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
+        \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
+        \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La lista de componentes\
+        \ (AI-BOM) es la base para mapear sus riesgos (4.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
@@ -527,19 +316,19 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Planes posteriores\
+        \ al despliegue con gesti\xF3n de cambios (4.1) y mejora integrada en las\
+        \ actualizaciones (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Planes posteriores\
+        \ al despliegue con gesti\xF3n de cambios (4.1) y mejora integrada en las\
+        \ actualizaciones (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
@@ -584,22 +373,12 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4.1)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Indicadores medibles\
+        \ de mejora continua (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.4
@@ -632,91 +411,78 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2.4)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
+        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
+        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
       strength_of_relationship: 5
   - urn: urn:athanor:risk:req_mapping_set:mapping-msia-cl-0.6-to-nist-ai-rmf-1.0-revert
     ref_id: mapping-msia-cl-0.6-to-nist-ai-rmf-1.0-revert
     name: MSIA-CL v0.6 -> NIST AI RMF 1.0
     description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-      \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento\
-      \ del est\xE1ndar destino."
+      \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean\
+      \ solo los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan,\
+      \ no prueban cumplimiento del est\xE1ndar destino."
     target_framework_urn: urn:athanor:risk:framework:msia-cl-0.6
     source_framework_urn: urn:intuitem:risk:framework:nist-ai-rmf-1.0
     requirement_mappings:
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: La pol\xEDtica\
+        \ integra la IA confiable (1.2), fija el apetito de riesgo (1.3) y establece\
+        \ qui\xE9n aprueba qu\xE9 (1.4). Requisitos legales (1.1), monitoreo del proceso\
+        \ (1.5), inventario (1.6) y retiro (1.7) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Mandato con roles\
+        \ documentados (2.1) y responsabilidad de la alta direcci\xF3n (2.3). La capacitaci\xF3\
+        n (2.2) es GOB-05."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Mandato con roles\
+        \ documentados (2.1) y responsabilidad de la alta direcci\xF3n (2.3). La capacitaci\xF3\
+        n (2.2) es GOB-05."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-03
@@ -724,47 +490,23 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 2.1)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de\
+        \ uso y herramientas aprobadas (1.4) y detecci\xF3n de la IA no autorizada\
+        \ para el inventario (1.6). No cubre el retiro (1.7, observaci\xF3n de CodeRabbit)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.6
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de\
+        \ uso y herramientas aprobadas (1.4) y detecci\xF3n de la IA no autorizada\
+        \ para el inventario (1.6). No cubre el retiro (1.7, observaci\xF3n de CodeRabbit)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-05
@@ -782,103 +524,43 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 1); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La clasificaci\xF3n documenta\
+        \ prop\xF3sito y contexto de uso (1.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El nivel de riesgo estima\
+        \ probabilidad y magnitud del impacto (5.1). La participaci\xF3n de actores\
+        \ externos (5.2) no es parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La evaluaci\xF3n de impacto\
+        \ examina los costos y da\xF1os posibles (3.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Probabilidad y magnitud\
+        \ de los impactos (5.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica y\
+        \ procedimiento para los riesgos de terceros (6.1). Los planes de contingencia\
+        \ (6.2) no son parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
@@ -886,83 +568,19 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 1.7)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-04
       relationship: intersect
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 3.2)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 1)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: El punto de control\
+        \ permite desactivar o desconectar un sistema (2.4)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-02
@@ -982,30 +600,6 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3.5)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-05
       relationship: intersect
@@ -1022,25 +616,17 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Riesgos de componentes\
+        \ de terceros (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Controles internos sobre\
+        \ los datos que usa cada componente (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-02
@@ -1060,83 +646,61 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 3.5)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Documentar y comunicar\
+        \ los impactos de las decisiones automatizadas (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Riesgos del proveedor\
+        \ sobre los datos (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Riesgos legales y de propiedad\
+        \ intelectual de los datos de terceros (4.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF GOVERN 6);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Evaluaci\xF3n\
+        \ de componentes y servicios de terceros (6.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
+        \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
+        \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La lista de componentes\
+        \ (AI-BOM) es la base para mapear sus riesgos (4.1)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-03
@@ -1148,19 +712,19 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Planes posteriores\
+        \ al despliegue con gesti\xF3n de cambios (4.1) y mejora integrada en las\
+        \ actualizaciones (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Planes posteriores\
+        \ al despliegue con gesti\xF3n de cambios (4.1) y mejora integrada en las\
+        \ actualizaciones (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-05
@@ -1204,23 +768,13 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4.1)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Indicadores medibles\
+        \ de mejora continua (4.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
@@ -1252,21 +806,19 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 2.4)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
+        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
+        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
       strength_of_relationship: 5

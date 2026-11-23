@@ -74,6 +74,7 @@ class TestMsiaClLibrary(TestCase):
         framework = Framework.objects.get(urn=FRAMEWORK_URN)
         folder = Folder.get_root_folder()
         perimeter = Perimeter.objects.create(name="MSIA-CL", folder=folder)
+        selected = {}
         for group, expected in (("base", 17), ("estandar", 41), ("reforzado", 43)):
             audit = ComplianceAssessment.objects.create(
                 name=f"MSIA-CL {group}",
@@ -85,18 +86,33 @@ class TestMsiaClLibrary(TestCase):
             audit.create_requirement_assessments()
             assessed = audit.get_requirement_assessments(include_non_assessable=False)
             assert len(assessed) == expected, (group, len(assessed))
+            selected[group] = {ra.requirement.urn for ra in assessed}
+        # Cumulative: each profile strictly contains the previous one.
+        assert selected["base"] < selected["estandar"] < selected["reforzado"]
 
     def test_mappings(self):
         engine = MappingEngine()
+        # Where the framework cites a whole clause, only the requirements the control
+        # actually covers are mapped (the rationale is in each mapping's annotation).
         expected = {
-            "urn:intuitem:risk:framework:iso42001-2023": 107,
-            "urn:intuitem:risk:framework:nist-ai-rmf-1.0": 102,
+            "urn:intuitem:risk:framework:iso42001-2023": 51,
+            "urn:intuitem:risk:framework:nist-ai-rmf-1.0": 53,
         }
         for target, count in expected.items():
             assert (FRAMEWORK_URN, target) in engine.direct_mappings
             assert (target, FRAMEWORK_URN) in engine.direct_mappings
             rms = engine.get_rms((FRAMEWORK_URN, target))
             assert len(rms["requirement_mappings"]) == count
+        # Clause-level references must not imply unrelated requirements.
+        pairs = {
+            (m["source_requirement_urn"].rsplit(":", 1)[-1], m["target_requirement_urn"].rsplit(":", 1)[-1])
+            for target in expected
+            for m in engine.get_rms((FRAMEWORK_URN, target))["requirement_mappings"]
+        }
+        assert ("inv-05", "a.6.2.4") not in pairs  # retirement is not verification and validation
+        assert ("gob-04", "govern-1.7") not in pairs  # acceptable use is not safe decommissioning
+        assert ("inv-05", "govern-1.7") in pairs
+        assert ("cad-06", "a.6.2.4") in pairs
 
     def test_results_flow_to_iso42001(self):
         framework = Framework.objects.get(urn=FRAMEWORK_URN)
@@ -120,4 +136,8 @@ class TestMsiaClLibrary(TestCase):
             "urn:intuitem:risk:framework:iso42001-2023",
         )
         inferred = results.get("requirement_assessments", {})
-        assert len(inferred) > 0
+        # GOB-01 (compliant) -> ISO 42001 5.2 through an 'intersect' mapping:
+        # the result flows, but an overlap never becomes full compliance.
+        iso_5_2 = inferred.get("urn:intuitem:risk:req_node:iso42001-2023:5.2")
+        assert iso_5_2 is not None
+        assert iso_5_2.get("result") == "partially_compliant", iso_5_2

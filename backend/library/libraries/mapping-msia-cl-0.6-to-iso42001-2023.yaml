@@ -5,24 +5,26 @@ locale: es
 ref_id: mapping-msia-cl-0.6-to-iso42001-2023
 name: MSIA-CL v0.6 -> ISO/IEC 42001:2023
 description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-  \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento del\
-  \ est\xE1ndar destino."
+  \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean solo\
+  \ los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan, no prueban\
+  \ cumplimiento del est\xE1ndar destino."
 copyright: "\xA9 Athanor Tech \u2014 MSIA-CL v0.6 \u2014 CC BY 4.0 \u2014 https://doi.org/10.5281/zenodo.24348333"
-version: 1
+version: 2
 publication_date: 2026-11-16
 provider: Athanor Tech
 packager: Athanor Tech
 labels:
+- GOBERNANZA-IA
 - CHILE
 - MSIA-CL
-- GOBERNANZA-IA
 - IA
 translations:
   en:
     name: MSIA-CL v0.6 -> ISO/IEC 42001:2023
     description: 'Correspondences declared in the international standards column of
-      MSIA-CL v0.6. ''intersect'' relationship: they guide, they do not prove compliance
-      with the target standard.'
+      MSIA-CL v0.6. Where the framework cites a whole clause, only the requirements
+      the control actually covers are mapped. ''intersect'' relationship: they guide,
+      they do not prove compliance with the target standard.'
 dependencies:
 - urn:athanor:risk:library:msia-cl-0.6
 - urn:intuitem:risk:library:iso42001-2023
@@ -32,8 +34,9 @@ objects:
     ref_id: mapping-msia-cl-0.6-to-iso42001-2023
     name: MSIA-CL v0.6 -> ISO/IEC 42001:2023
     description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-      \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento\
-      \ del est\xE1ndar destino."
+      \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean\
+      \ solo los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan,\
+      \ no prueban cumplimiento del est\xE1ndar destino."
     source_framework_urn: urn:athanor:risk:framework:msia-cl-0.6
     target_framework_urn: urn:intuitem:risk:framework:iso42001-2023
     requirement_mappings:
@@ -47,19 +50,19 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de IA aprobada\
+        \ (A.2.2) y revisi\xF3n anual (A.2.4). La alineaci\xF3n con otras pol\xED\
+        ticas (A.2.3) no est\xE1 en el control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de IA aprobada\
+        \ (A.2.2) y revisi\xF3n anual (A.2.4). La alineaci\xF3n con otras pol\xED\
+        ticas (A.2.3) no est\xE1 en el control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
@@ -119,85 +122,10 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El inventario documenta\
+        \ los sistemas y sus recursos (A.4.2). Datos, herramientas, c\xF3mputo y personas\
+        \ (A.4.3 a A.4.6) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
@@ -229,25 +157,37 @@ objects:
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
@@ -261,206 +201,40 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10.3)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El punto de control aplica\
+        \ las reglas de uso responsable (A.9.2). Objetivos de uso (A.9.3) y uso previsto\
+        \ (A.9.4) no son parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La revisi\xF3n humana es\
+        \ parte de los procesos de uso responsable (A.9.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Herramientas,\
+        \ conectores y extensiones son componentes de terceros: gesti\xF3n de proveedores\
+        \ (A.10.3). Reparto de responsabilidades (A.10.2) y clientes (A.10.4) no aplican."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Excluir o enmascarar datos\
+        \ no necesarios antes de usarlos es preparaci\xF3n de datos (A.7.6). A.7.2\
+        \ a A.7.5 tratan datos de desarrollo y entrenamiento (DAT-06)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
@@ -469,82 +243,72 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.8.2)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Contratos y configuraci\xF3\
+        n con el proveedor: reparto de responsabilidades (A.10.2) y gesti\xF3n de\
+        \ proveedores (A.10.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Contratos y configuraci\xF3\
+        n con el proveedor: reparto de responsabilidades (A.10.2) y gesti\xF3n de\
+        \ proveedores (A.10.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
@@ -559,58 +323,31 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4.4)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-06
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
@@ -643,22 +380,14 @@ objects:
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.1)
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Los indicadores y el informe\
+        \ peri\xF3dico son entradas de la revisi\xF3n por la direcci\xF3n (9.3.2);\
+        \ la revisi\xF3n (9.3.1) y sus resultados (9.3.3) no son parte del control.\
+        \ Agregada el 22-nov-2026 al aplicar la propuesta."
       strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
       target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
@@ -694,8 +423,9 @@ objects:
     ref_id: mapping-msia-cl-0.6-to-iso42001-2023-revert
     name: MSIA-CL v0.6 -> ISO/IEC 42001:2023
     description: "Correspondencias declaradas en la columna de est\xE1ndares internacionales\
-      \ del MSIA-CL v0.6. Relaci\xF3n 'intersect': orientan, no prueban cumplimiento\
-      \ del est\xE1ndar destino."
+      \ del MSIA-CL v0.6. Cuando el marco cita una cl\xE1usula completa, se mapean\
+      \ solo los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan,\
+      \ no prueban cumplimiento del est\xE1ndar destino."
     target_framework_urn: urn:athanor:risk:framework:msia-cl-0.6
     source_framework_urn: urn:intuitem:risk:framework:iso42001-2023
     requirement_mappings:
@@ -709,19 +439,19 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de IA aprobada\
+        \ (A.2.2) y revisi\xF3n anual (A.2.4). La alineaci\xF3n con otras pol\xED\
+        ticas (A.2.3) no est\xE1 en el control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.2); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Pol\xEDtica de IA aprobada\
+        \ (A.2.2) y revisi\xF3n anual (A.2.4). La alineaci\xF3n con otras pol\xED\
+        ticas (A.2.3) no est\xE1 en el control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
@@ -781,85 +511,10 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El inventario documenta\
+        \ los sistemas y sus recursos (A.4.2). Datos, herramientas, c\xF3mputo y personas\
+        \ (A.4.3 a A.4.6) los cubren otros controles."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
@@ -891,25 +546,37 @@ objects:
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.5); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control pide la evaluaci\xF3\
+        n de impacto del sistema de IA de ISO/IEC 42001: proceso, documentaci\xF3\
+        n, impacto en personas y en la sociedad. Corresponde la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
@@ -923,206 +590,40 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10.3)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6) \u2014\
-        \ indirecta"
-      strength_of_relationship: 3
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El punto de control aplica\
+        \ las reglas de uso responsable (A.9.2). Objetivos de uso (A.9.3) y uso previsto\
+        \ (A.9.4) no son parte del control."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.9); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: La revisi\xF3n humana es\
+        \ parte de los procesos de uso responsable (A.9.2)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Herramientas,\
+        \ conectores y extensiones son componentes de terceros: gesti\xF3n de proveedores\
+        \ (A.10.3). Reparto de responsabilidades (A.10.2) y clientes (A.10.4) no aplican."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Excluir o enmascarar datos\
+        \ no necesarios antes de usarlos es preparaci\xF3n de datos (A.7.6). A.7.2\
+        \ a A.7.5 tratan datos de desarrollo y entrenamiento (DAT-06)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
@@ -1130,83 +631,73 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.8.2)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Contratos y configuraci\xF3\
+        n con el proveedor: reparto de responsabilidades (A.10.2) y gesti\xF3n de\
+        \ proveedores (A.10.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.10);\
+        \ precisada por Athanor Tech desde la cl\xE1usula completa: Contratos y configuraci\xF3\
+        n con el proveedor: reparto de responsabilidades (A.10.2) y gesti\xF3n de\
+        \ proveedores (A.10.3)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.7); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: El control cubre los datos\
+        \ de entrenamiento y ajuste: uso (A.7.2), licitud de la obtenci\xF3n (A.7.3),\
+        \ calidad (A.7.4), origen (A.7.5) y anonimizaci\xF3n (A.7.6). Corresponde\
+        \ la cl\xE1usula completa."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
@@ -1220,59 +711,32 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.4.4)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 A.6); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Versionar (A.6.2.3), evaluar\
+        \ antes de cambiar (A.6.2.4) y controlar el paso a producci\xF3n y la vuelta\
+        \ atr\xE1s (A.6.2.5)."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-06
@@ -1304,23 +768,15 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.1)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
       relationship: intersect
       rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      relationship: intersect
-      rationale: semantic
-      annotation: Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3)
+      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (ISO 42001 9.3); precisada\
+        \ por Athanor Tech desde la cl\xE1usula completa: Los indicadores y el informe\
+        \ peri\xF3dico son entradas de la revisi\xF3n por la direcci\xF3n (9.3.2);\
+        \ la revisi\xF3n (9.3.1) y sus resultados (9.3.3) no son parte del control.\
+        \ Agregada el 22-nov-2026 al aplicar la propuesta."
       strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
