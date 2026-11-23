@@ -1,0 +1,353 @@
+urn: urn:intuitem:risk:library:mapping-nist-800-171-rev2-and-cmmc-2.0
+locale: en
+ref_id: mapping-nist-800-171-rev2-and-cmmc-2.0
+name: nist-800-171-rev2 <-> cmmc-2.0
+description: Mapping between NIST SP 800-171 Rev. 2 and CMMC version 2.0 (Levels 1 and 2)
+copyright: Public domain (U.S. Department of Defense, NIST)
+version: 1
+publication_date: 2026-11-19
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:nist-800-171-rev2
+- urn:intuitem:risk:library:cmmc-2.0
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-nist-800-171-rev2-and-cmmc-2.0
+    ref_id: mapping-nist-800-171-rev2-and-cmmc-2.0
+    name: nist-800-171-rev2 <-> cmmc-2.0
+    description: Mapping between NIST SP 800-171 Rev. 2 and CMMC version 2.0 (Levels 1 and
+      2)
+    source_framework_urn: urn:intuitem:risk:framework:nist-800-171-rev2
+    target_framework_urn: urn:intuitem:risk:framework:cmmc-2.0
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.11
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.11
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.13
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.14
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.15
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.17
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.18
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.19
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.21
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.21
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.22
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.11
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.11
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.7
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.9
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.11
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.12
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.16
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.5
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      relationship: equal

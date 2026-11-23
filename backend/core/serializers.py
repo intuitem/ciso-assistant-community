@@ -8460,9 +8460,14 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
         return obj.subject_summary(user, self.context["_subject_labels"])
 
     def get_is_deletable(self, obj) -> bool:
-        # Answered per caller: a closed request is administrator-only.
-        request = self.context.get("request")
-        return obj.is_deletable(getattr(request, "user", None))
+        # Answered per caller: past a draft, only an administrator may delete. The
+        # answer turns on the status and the caller alone, so a listed page asks once
+        # per status, not once per row: the administrator check is a query.
+        answers = self.context.setdefault("_is_deletable_by_status", {})
+        if obj.status not in answers:
+            request = self.context.get("request")
+            answers[obj.status] = obj.is_deletable(getattr(request, "user", None))
+        return answers[obj.status]
 
     def get_progress(self, obj):
         """Cheap list-view progress: answered vs seeded questions, ignoring

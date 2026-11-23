@@ -419,6 +419,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "change_entity",
     "change_entityassessment",
     "change_evidence",
@@ -470,6 +472,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_auditpreparation",
     "view_entityscore",
     "add_entityscore",
     "change_entityscore",
@@ -882,6 +885,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "change_entity",
     "change_entityassessment",
     "change_evidence",
@@ -943,6 +948,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_auditpreparation",
     "view_entityscore",
     "add_entityscore",
     "change_entityscore",
@@ -1502,7 +1508,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_riskmatrix",
     "add_complianceassessment",
     "view_complianceassessment",
+    "view_auditpreparation",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
@@ -2545,6 +2554,13 @@ def startup(sender=None, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="glpi",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating GLPI IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")

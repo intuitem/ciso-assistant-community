@@ -127,6 +127,7 @@
     * [URN prefixes](configuration/libraries/library-objects/urn-prefixes.md)
     * [Risk matrices](configuration/libraries/library-objects/risk-matrices.md)
     * [Mappings](configuration/libraries/library-objects/mappings.md)
+    * [Audit guides](configuration/libraries/library-objects/audit-guides.md)
   * [Create a Library](configuration/libraries/create-library.md)
   * [Create a Mapping](configuration/libraries/create-mapping.md)
   * [Translate library content](configuration/libraries/translations.md)
@@ -151,6 +152,7 @@
 * [General tips](guides/general-tips.md)
 * Getting started
   * [Initial setup](guides/initial-setup.md)
+  * [Exploring with demo data](guides/demo-data.md)
   * [Creating your first perimeter](guides/first-perimeter.md)
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
@@ -220,6 +222,8 @@
 * [Scenario selection](features/scenario-selection.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
+* [Labels](features/labels.md)
+* [Relations graph](features/relations-graph.md)
 * [Workflow builder](features/workflows/README.md)
   * [Cheat sheet](features/workflows/cheat-sheet.md)
   * [Triggers](features/workflows/triggers.md)
@@ -255,6 +259,7 @@
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
+* [Paul, the EBIOS RM model](integrations/paul.md)
 * [MCP setup guide](integrations/mcp.md)
   * [MCP sign-in with OAuth](integrations/mcp-oauth.md)
 * [Power BI connector](integrations/powerbi.md)
@@ -262,6 +267,7 @@
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
+  * [GLPI](integrations/third-party/glpi.md)
 
 ## API documentation
 

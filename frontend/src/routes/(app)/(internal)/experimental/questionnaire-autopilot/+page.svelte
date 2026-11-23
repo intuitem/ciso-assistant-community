@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
 	import { enhance } from '$app/forms';
 	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
@@ -13,6 +14,8 @@
 	import * as m from '#paraglide/messages.js';
 	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import type { PageData } from './$types';
+
+	const modalStore = getModalStore();
 
 	interface Props {
 		data: PageData;
@@ -105,9 +108,10 @@
 	async function deleteRun(run: { id: string; title: string; filename: string }) {
 		const label = run.title || run.filename || 'this run';
 		if (
-			!confirm(
+			!(await confirmModal(
+				modalStore,
 				`Delete "${label}"? This removes the questionnaire, its extracted questions, and any agent runs / proposals attached to it.`
-			)
+			))
 		) {
 			return;
 		}

@@ -72,6 +72,10 @@ Narrow the inbox with:
 | **Updates** | A security exception or a validation flow changes status | Exception owners and approver; validation-flow requester or approver depending on the transition |
 | **Deadlines** | An applied control, evidence or security exception is expiring; an audit, task or validation flow is due | Owners, authors, assignees or approver — see [Email notifications](#email-notifications) for the details per object |
 | **Deadlines** | An applied control's ETA has passed, an evidence or security exception has expired, a task is overdue | Owners or assignees |
+| **Deadlines** | A [NIS2 notification stage](../concepts/incidents.md#nis2-notification) of a significant incident, or the GDPR notification of a data breach, is due or overdue (**Regulatory notification deadline**). Checked every hour: reminders go out 7 days, 24 hours, 6 hours and 1 hour before the deadline, and 1 hour after it | Incident owners; breach assignees |
+| **Deadlines** | A data subject request's response is due soon (**Data subject request due soon**) | Request owners |
+| **Deadlines** | A contract is about to expire (**Contract expiring soon**) | Contract owners |
+| **Deadlines** | A processing has gaps in its GDPR record: no purpose, a DPIA, retention or transfer mechanism (for transfers outside the EEA) missing (**GDPR record gaps**; the inbox is updated daily, the email digest goes out on Mondays) | Processing assignees |
 
 When an object is assigned to a **team**, every member, leader and deputy who has a user account gets their own notification.
 

@@ -1,14 +1,14 @@
 """
 LLM and embedding provider abstraction.
 Supports Ollama (default), OpenAI-compatible servers (LM Studio, vLLM, etc.),
-and sentence-transformers fallback for embeddings.
+and a local ONNX embedding model as fallback.
 """
 
 from typing import Protocol, Iterator
 import json
 import structlog
 
-from chat.embedding_models import DEFAULT_EMBEDDING_MODEL, INFERENCE_LOCK
+from chat.embedding_models import INFERENCE_LOCK, OnnxEmbedder
 from chat.memory import (
     SESSION_SUMMARY_NOTE,
     strip_framing_markers,
@@ -278,23 +278,20 @@ class LLM(Protocol):
         ...
 
 
-class SentenceTransformerEmbedder:
-    """Local embeddings using sentence-transformers. No external service needed."""
+class LocalEmbedder:
+    """Local CPU embeddings (ONNX). No external service needed."""
 
-    def __init__(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
-        from sentence_transformers import SentenceTransformer
-
-        with INFERENCE_LOCK:  # loading moves weights onto the shared device too
-            self.model = SentenceTransformer(model_name)
-        self._dimensions = self.model.get_sentence_embedding_dimension()
+    def __init__(self):
+        with INFERENCE_LOCK:
+            self.model = OnnxEmbedder()
 
     @property
     def dimensions(self) -> int:
-        return self._dimensions
+        return self.model.dimensions
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         with INFERENCE_LOCK:
-            embeddings = self.model.encode(texts, convert_to_numpy=True)
+            embeddings = self.model.encode(texts)
         return embeddings.tolist()
 
     def embed_query(self, text: str) -> list[float]:
@@ -923,10 +920,10 @@ def get_embedder() -> Embedder:
             return embedder
         except Exception as e:
             logger.warning(
-                "Ollama embedder failed (%s), falling back to sentence-transformers", e
+                "Ollama embedder failed (%s), falling back to the local embedder", e
             )
 
-    _cached_embedder = SentenceTransformerEmbedder()
+    _cached_embedder = LocalEmbedder()
     return _cached_embedder
 
 

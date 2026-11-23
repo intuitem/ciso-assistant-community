@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Beküldtek egy hozzárendelést a(z) „${assessment_name}” auditon"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő auditon beküldtek egy hozzárendelést felülvizsgálatra:
+
+  - Audit: ${assessment_name}
+  - Beküldte: ${actor_names}
+  - Értékelt követelmények száma: ${requirement_count}
+
+  A beküldött hozzárendelés felülvizsgálatához jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

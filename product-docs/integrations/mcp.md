@@ -29,7 +29,7 @@ Copilot Studio connections keep working as configured.
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **113 tools** covering:
+The CISO Assistant MCP server provides **139 tools** covering:
 
 - Risk management (assessments, scenarios, matrices)
 - Compliance audits (frameworks, requirements)
@@ -562,7 +562,7 @@ reserves or rewrites `Authorization`.
 
 #### Read-only by default
 
-The HTTP endpoint exposes **only read tools (55)**. Set
+The HTTP endpoint exposes **only read tools (57)**. Set
 `CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
 since an agent driven by a third-party orchestrator would then be able to modify
 your GRC data.
@@ -733,12 +733,34 @@ Once connected, try these example prompts:
 - "What personal data categories do we hold?"
 - "Show the open data subject right requests"
 
+**Incidents:**
+
+- "Log an incident for the phishing campaign reported this morning, severity major"
+- "Add a timeline entry: mitigation applied at 14:30"
+- "Link the post-mortem task to that incident"
+
+`create_incident` and `update_incident` take the incident's task definitions as `task_templates`, by ID or name; `create_timeline_entry` and `update_timeline_entry` add and edit its timeline.
+
+**Risk review:**
+
+- "Set the risk tolerance of the 2026 risk assessment to 2 and move it to in review"
+- "Make Alice the owner of every high-risk scenario in that assessment"
+
+`update_risk_assessment` and `update_perimeter` change an assessment's or perimeter's properties (status, tolerance, dates, a perimeter's default assignees). Where a tool takes actors, such as the owners of `update_risk_scenario` and `update_applied_control`, they can be given by email or name, not only by ID.
+
+**Evidence from a local file** (stdio only):
+
+- "Create an evidence from ~/Downloads/pentest-2026.pdf and link it to the firewall control"
+
+`create_evidence` uploads one local file per call. It is only offered over the local stdio transport: over HTTP the path would point at the server's disk. The server checks the file type and size. When the upload fails, the new evidence is deleted; when the outcome is unknown (a network error after the file was sent), the evidence is kept and the tool gives its ID: check whether it holds the file before trying again, to avoid a duplicate. Screenshots pasted into the chat work only when the client saved them on disk and shows their path, as Claude Code does.
+
 **EBIOS RM:**
 
 - "List our EBIOS RM studies"
 - "What feared events are in the SuperNova study?"
 - "Show the operational scenarios for that study"
 - "Generate the risk assessment for workshop 5"
+- "Why is operating mode MO.02 rated likely?" (`get_operating_mode_quotation` explains the likelihood computed from the kill chain under the standard or advanced [quotation method](../guides/ebios-rm.md#quotation-methods))
 
 ### The EBIOS RM workflow
 

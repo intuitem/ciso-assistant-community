@@ -1,5 +1,5 @@
 ---
-description: Cross-audit aggregate for one framework — compliance %, average implementation score, in-scope audits, status breakdown
+description: Cross-audit aggregate for one framework — compliance %, average scores, in-scope audits, status breakdown
 ---
 
 # Framework report
@@ -26,8 +26,8 @@ It's the framework-level layer of the platform's advanced analytics — sandwich
 | Surface | What it answers |
 |---|---|
 | **Scoring scale + IGs subtitle** | The framework's score range (e.g. 0–100) and how many implementation groups it defines |
-| **Compliance %** | Aggregate compliance percentage. Formula: _compliant + ½·partial, excluding N/A and not-assessed_ |
-| **Average implementation score** | Mean implementation score over scored requirements only (so partially-scored audits don't drag the mean down with null values) |
+| **Compliance %** | Aggregate compliance percentage. Formula: _compliant + ½·partial, excluding N/A and not-assessed_. Hidden, with the result distribution, when none of the audits shows its compliance (score-only audits such as CyFun) |
+| **Scores** | Each audit is scored as on its own page — its own calculation method, N/A anchoring and scale — then averaged across audits (_As computed on each audit, averaged across audits_). When the audits use documentation scores, the implementation, documentation and maturity scores show side by side; otherwise a single **Score**. Audits on a different scale are left out of the roll-up, and scores follow each audit's field visibility |
 | **In-scope audits** | The count of audits the report rolled up |
 | **Detected audits drawer** | Per-audit list with status, folder path, and `counted vs excluded` marker — so you can see what the status filter left out |
 | **Per-section breakdown** | Requirement rows grouped by their immediate parent section |

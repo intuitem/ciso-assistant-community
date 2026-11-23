@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${days_remaining} nap múlva lejáró kontroll"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${control_count} kontrollja jár le ${days_remaining} nap múlva:
+
+  ${control_list}
+
+  A kontrollok áttekintéséhez és befejezéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

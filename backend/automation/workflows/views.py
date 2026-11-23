@@ -186,7 +186,11 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     },
                     # A built model is assembled, not matched.
                     "upsert": not entry.get("constructor"),
-                    "match_on": list(_match_fields(entry)),
+                    # The builder shows what an upsert matches on: its parents too.
+                    "match_on": [
+                        *_match_fields(entry),
+                        *(entry.get("match_scope") or ()),
+                    ],
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]
@@ -206,7 +210,7 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def updatable_models(self, request):
         """The update_object registry. `allowed_values` travels with it so the
         builder offers the same fenced values the backend enforces."""
-        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS, _writable_values
 
         return Response(
             [
@@ -214,8 +218,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     "key": key,
                     "fields": entry.fields,
                     "allowed_values": {
-                        field: sorted(values)
-                        for field, values in entry.allowed_values.items()
+                        field: values
+                        for field in entry.fields
+                        if (values := sorted(_writable_values(entry, field) or []))
                     },
                     "m2m_fields": {
                         name: endpoint

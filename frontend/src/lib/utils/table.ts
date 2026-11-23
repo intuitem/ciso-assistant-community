@@ -1095,6 +1095,25 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Children of a draft (no status) or deprecated assessment, left out of the analytics summary.
+export const INACTIVE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'inactiveAssessment',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const NIS2_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'briefingNis2Overdue',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_OVERDUE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2067,6 +2086,7 @@ export const listViewFields = {
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
 			top_level: TOP_RISK_LEVEL_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			qualifications: QUALIFICATION_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2078,8 +2098,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'risk_scenarios'],
 		// State is shown as a badge on the name column, so the column is opt-in.
 		optionalFields: {
-			head: ['state'],
-			body: ['state']
+			head: ['ref_id', 'state'],
+			body: ['ref_id', 'state']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2446,8 +2466,8 @@ export const listViewFields = {
 		}
 	},
 	'quick-form-responses': {
-		head: ['ref_id', 'name', 'quickForm', 'status', 'respondents', 'dueDate', 'domain'],
-		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
+		head: ['ref_id', 'name', 'quickForm', 'status', 'score', 'respondents', 'dueDate', 'domain'],
+		body: ['ref_id', 'name', 'quick_form', 'status', 'score', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2503,7 +2523,8 @@ export const listViewFields = {
 			compliance_assessment: COMPLIANCE_ASSESSMENT_FILTER,
 			requirement__assessable: IS_ASSESSABLE_FILTER,
 			result: REQUIREMENT_ASSESSMENT_RESULT_FILTER,
-			compliance_assessment__perimeter: PERIMETER_FILTER
+			compliance_assessment__perimeter: PERIMETER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER
 		}
 	},
 	evidences: {
@@ -2518,14 +2539,15 @@ export const listViewFields = {
 			'applied_controls'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['ref_id', 'createdAt'],
+			body: ['ref_id', 'created_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
 			status: EVIDENCE_STATUS_FILTER,
 			owner: EVIDENCE_OWNER_FILTER,
+			expiry_date: dateFilter('expiry_date'),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -2732,8 +2754,8 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter', 'expiryDate', 'filteringLabels'],
-			body: ['perimeter', 'expiry_date', 'filtering_labels']
+			head: ['ref_id', 'perimeter', 'expiryDate', 'filteringLabels'],
+			body: ['ref_id', 'perimeter', 'expiry_date', 'filtering_labels']
 		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
@@ -2852,8 +2874,8 @@ export const listViewFields = {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt', 'filteringLabels'],
-			body: ['created_at', 'updated_at', 'filtering_labels']
+			head: ['ref_id', 'createdAt', 'updatedAt', 'filteringLabels'],
+			body: ['ref_id', 'created_at', 'updated_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3509,6 +3531,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			findings_assessment: FINDINGS_BINDER_FILTER,
+			inactive_assessment: INACTIVE_ASSESSMENT_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
@@ -3558,6 +3581,7 @@ export const listViewFields = {
 			severity: INCIDENT_SEVERITY_FILTER,
 			filtering_labels: LABELS_FILTER,
 			reported_at: dateFilter('reported_at', { isDateTime: true }),
+			nis2_overdue: NIS2_OVERDUE_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -4199,9 +4223,11 @@ export interface BatchActionConfig {
 	// A change_field value fixed by config ("mark as read") rather than picked by the
 	// user. Mutually exclusive with optionsEndpoint: skips the picker.
 	value?: string;
+	// Hidden from non-admins; the backend refuses them on its own (UX only).
+	adminOnly?: boolean;
 	enableDoubleDash?: boolean;
 	multiSelect?: boolean;
-	inputType?: 'date';
+	inputType?: 'date' | 'text';
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
@@ -4270,6 +4296,27 @@ export const quickFilterPresets: Partial<
 };
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	// Only the MCP flag: UserWriteSerializer keeps it admin-only, and turning it
+	// off revokes the users' app connections (iam/models.py _revoke_lost_app_access).
+	users: [
+		{
+			type: 'change_field',
+			label: 'allowAppConnections',
+			icon: 'fa-solid fa-plug-circle-check',
+			field: 'can_connect_apps',
+			value: 'true',
+			adminOnly: true
+		},
+		{
+			type: 'change_field',
+			label: 'blockAppConnections',
+			icon: 'fa-solid fa-plug-circle-xmark',
+			field: 'can_connect_apps',
+			value: 'false',
+			adminOnly: true,
+			confirmMessage: 'blockAppConnectionsConfirm'
+		}
+	],
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
 	notifications: [
 		{
@@ -4865,6 +4912,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-shield-halved',
 			field: 'is_sensitive',
 			optionsEndpoint: 'personal-data/is_sensitive'
+		},
+		{
+			type: 'change_field',
+			label: 'changeRetention',
+			icon: 'fa-solid fa-hourglass-half',
+			field: 'retention',
+			inputType: 'text'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

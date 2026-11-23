@@ -25,6 +25,7 @@ from ebios_rm.models import EbiosRMStudy
 from resilience.models import BusinessImpactAnalysis
 from tprm.models import Entity, EntityAssessment
 from core.base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     NameDescriptionMixin,
 )
@@ -136,7 +137,7 @@ for _queryset in GenericCollection.ITEM_TYPES.values():
     post_delete.connect(_delete_collection_items, sender=_queryset.model)
 
 
-class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
+class Accreditation(AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("draft", "Draft"),
         ("in_progress", "In progress"),
@@ -152,6 +153,9 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("accreditation_restricted", "accreditationRestricted"),
         ("other", "Other"),
     )
+
+    auto_ref_id_prefix = "ACC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     category = models.ForeignKey(
@@ -225,7 +229,9 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
 
-class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin):
+class Project(
+    AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
+):
     class Kind(models.TextChoices):
         PORTFOLIO = "portfolio", _("Portfolio")
         PROGRAM = "program", _("Program")
@@ -271,6 +277,9 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
         choices=Kind.choices,
         default=Kind.PROJECT,
     )
+
+    auto_ref_id_prefix = "PRJ"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     ref_link = models.URLField(blank=True, max_length=2048)
