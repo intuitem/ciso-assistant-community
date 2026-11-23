@@ -1105,6 +1105,18 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return LibraryDraftWriteSerializer
         return LibraryDraftReadSerializer
 
+    def update(self, request, *args, **kwargs):
+        # Serialize a metadata edit (PATCH/PUT) with publish on the same draft
+        # row. Without the lock a PATCH that read the draft before a publish
+        # committed could save stale columns over the bumped version and the
+        # published snapshot — ATOMIC_REQUESTS is off, so there is no implicit
+        # per-request lock. publish takes the same lock, so the two write paths
+        # serialize on the row.
+        with transaction.atomic():
+            instance = self.get_object()
+            LibraryDraft.objects.select_for_update().get(pk=instance.pk)
+            return super().update(request, *args, **kwargs)
+
     @action(detail=False, methods=["get"], url_path="check-identity")
     def check_identity(self, request):
         """Advisory identity check for the creation form, before a draft exists.
@@ -2626,22 +2638,22 @@ class LibraryDraftViewSet(BaseModelViewSet):
             ):
                 return Response(status=HTTP_403_FORBIDDEN)
 
-        validation = builder.validate_draft_document(draft, user=request.user)
-        if validation["errors"]:
-            return Response(
-                {"error": "draftValidationFailed", "details": validation["errors"]},
-                status=HTTP_422_UNPROCESSABLE_ENTITY,
-            )
-
         with transaction.atomic():
-            # Serialize concurrent publishes (and metadata edits) of the SAME
-            # draft: version and last_published_version are read-modify-written
-            # across store/load, and ATOMIC_REQUESTS is off, so without a row
-            # lock two requests could interleave and leave version below
-            # last_published_version. On PostgreSQL this blocks the second
-            # request until the first commits; on SQLite (tests) select_for_update
-            # is a no-op, which is fine as requests there never run concurrently.
+            # Lock the draft row for the whole publish: validation AND the
+            # version read-modify-write below (see _publish_locked) must see a
+            # row that no concurrent publish or metadata edit can change under
+            # them. ATOMIC_REQUESTS is off, so this explicit lock, taken here and
+            # in the update path, is what serializes the two write paths on the
+            # same draft. On PostgreSQL the second caller blocks until the first
+            # commits; on SQLite (tests) select_for_update is a no-op, fine as
+            # requests there never run concurrently.
             locked = LibraryDraft.objects.select_for_update().get(pk=draft.pk)
+            validation = builder.validate_draft_document(locked, user=request.user)
+            if validation["errors"]:
+                return Response(
+                    {"error": "draftValidationFailed", "details": validation["errors"]},
+                    status=HTTP_422_UNPROCESSABLE_ENTITY,
+                )
             return self._publish_locked(request, locked)
 
     def _publish_locked(self, request, draft):
