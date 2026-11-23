@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${request_count} érintetti kérelem ${days_remaining} nap múlva esedékes"
+body: |
+  Tisztelt Felhasználó!
+
+  A következő érintetti kérelmek ${days_remaining} nap múlva esedékesek:
+
+  ${request_list}
+
+  A GDPR 12. cikkének (3) bekezdése szerint a kérelem beérkezésétől számított egy hónapon belül választ kell adni. [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

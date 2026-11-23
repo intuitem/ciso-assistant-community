@@ -1538,6 +1538,7 @@ class LibraryUpdater:
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
+        self.audit_guides = new_library_content.get("audit_guides", [])
 
         self.new_quick_forms = new_library_content.get("quick_forms")
         if isinstance(self.new_quick_forms, dict):
@@ -1695,6 +1696,44 @@ class LibraryUpdater:
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
                     **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def audit_guides_error(self) -> str | None:
+        """Refuse, before anything changes, guides that would break the pre-read
+        or take over a guide another library owns."""
+        from library.utils import AuditGuideImporter
+
+        guides = self.audit_guides
+        if not isinstance(guides, list) or any(
+            AuditGuideImporter(g).is_valid() for g in guides
+        ):
+            return "invalidLibraryUpdate"
+        urns = [g["urn"].lower() for g in guides]
+        if (
+            len(set(urns)) != len(urns)
+            or AuditGuide.objects.filter(urn__in=urns)
+            .exclude(library=self.old_library)
+            .exists()
+        ):
+            return "invalidLibraryUpdate"
+        return None
+
+    def update_audit_guides(self):
+        # Guides the new version no longer ships go, so none lingers to compete.
+        AuditGuide.objects.filter(library=self.old_library).exclude(
+            urn__in=[g["urn"].lower() for g in self.audit_guides]
+        ).delete()
+        for guide in self.audit_guides:
+            fields = AuditGuide.fields_from(guide)
+            AuditGuide.objects.update_or_create(
+                urn=guide["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
                     "library": self.old_library,
                 },
             )
@@ -2749,6 +2788,8 @@ class LibraryUpdater:
             return error_msg
         if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
+        if (error_msg := self.audit_guides_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -2797,6 +2838,7 @@ class LibraryUpdater:
         self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_audit_guides()
         self.update_techniques()
         self.update_metric_definitions()
 
@@ -3580,56 +3622,80 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "nombre"}},
+            "translations": {
+                "fr": {"name": "nombre"},
+                "hu": {"name": "darabszám"},
+            },
         },
         {
             "name": "users",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "utilisateurs"}},
+            "translations": {
+                "fr": {"name": "utilisateurs"},
+                "hu": {"name": "felhasználó"},
+            },
         },
         {
             "name": "bytes",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "octets"}},
+            "translations": {
+                "fr": {"name": "octets"},
+                "hu": {"name": "bájt"},
+            },
         },
         {
             "name": "percentage",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "pourcentage"}},
+            "translations": {
+                "fr": {"name": "pourcentage"},
+                "hu": {"name": "százalék"},
+            },
         },
         {
             "name": "score",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "score"}},
+            "translations": {
+                "fr": {"name": "score"},
+                "hu": {"name": "pontszám"},
+            },
         },
         {
             "name": "days",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "jours"}},
+            "translations": {
+                "fr": {"name": "jours"},
+                "hu": {"name": "nap"},
+            },
         },
         {
             "name": "hours",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "heures"}},
+            "translations": {
+                "fr": {"name": "heures"},
+                "hu": {"name": "óra"},
+            },
         },
         {
             "name": "events per second",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "événements par seconde"}},
+            "translations": {
+                "fr": {"name": "événements par seconde"},
+                "hu": {"name": "esemény másodpercenként"},
+            },
         },
     ]
     field_path = models.CharField(
@@ -4217,7 +4283,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return scoring
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -4601,7 +4668,8 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
         )
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
@@ -13157,6 +13225,33 @@ class FindingsAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
         verbose_name=_("Reference link"),
     )
 
+    @classmethod
+    def binder_of(cls, audit):
+        """The findings binder of an audit, or None: where findings raised on its
+        requirements live. An audit can carry more than one findings assessment,
+        so get_or_create would raise MultipleObjectsReturned. Oldest wins, for a
+        stable choice."""
+        return (
+            cls.objects.filter(compliance_assessment=audit)
+            .order_by("created_at")
+            .first()
+        )
+
+    @classmethod
+    def create_binder(cls, audit):
+        """A new findings binder for `audit`. Callers authorize it and look for
+        an existing one first (binder_of)."""
+        return cls.objects.create(
+            compliance_assessment=audit,
+            # Distinguishable at a glance from the audit it belongs to.
+            name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
+            folder=audit.folder,
+            perimeter=audit.perimeter,
+            category=cls.Category.AUDIT,
+            description=str(_("Findings raised from %(audit)s"))
+            % {"audit": audit.name},
+        )
+
     def get_findings_metrics(self):
         findings = self.findings.all()
         total_count = findings.count()
@@ -14598,3 +14693,210 @@ auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
 auditlog.register(RiskMatrix, exclude_fields=common_exclude)
 auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
 auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)
+
+
+class EvidenceRequestLink(AbstractBaseModel):
+    """Experimental: an evidence marked by hand as answering one request of an
+    audit guide. Keyed by the guide and the domain of the audit where it was
+    made, not the audit: it holds at every audit of that domain."""
+
+    IAM_SCOPE_FIELD = "evidence"
+
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="guide_request_links"
+    )
+    # Framework URN the guide is written for, entry (requirement number) and
+    # request id inside it; ids are never reused, so the link stays stable.
+    guide = models.CharField(max_length=255)
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    # The audited domain, not the evidence's: it stays if the audit moves.
+    domain = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name="+")
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["evidence", "guide", "entry", "request", "domain"],
+                name="unique_evidence_request_link",
+            )
+        ]
+
+
+class AuditPreparation(AbstractBaseModel):
+    """Experimental: what an organisation decides while preparing one audit
+    with the auditor pre-read. Created on the first stored decision."""
+
+    # Scoped by its audit's domain, so it follows the audit if it moves.
+    IAM_SCOPE_FIELD = "compliance_assessment"
+
+    class Stage(models.TextChoices):
+        STAGE_1 = "stage_1", _("Stage 1")
+        STAGE_2 = "stage_2", _("Stage 2")
+        SURVEILLANCE = "surveillance", _("Surveillance")
+        RECERTIFICATION = "recertification", _("Recertification")
+
+    compliance_assessment = models.OneToOneField(
+        ComplianceAssessment, on_delete=models.CASCADE, related_name="preparation"
+    )
+    # Guide forced for a framework the numbering only partly matches; blank
+    # means the one resolved automatically.
+    guide = models.CharField(max_length=255, blank=True)
+    stage = models.CharField(max_length=20, choices=Stage.choices, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    certification_body = models.ForeignKey(
+        "tprm.Entity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    auditors = models.CharField(max_length=255, blank=True)
+    # Last person who changed the preparation: who to send a missing document to.
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    # Hook for later: the real audit's result, to set against the forecast.
+    findings_assessment = models.ForeignKey(
+        FindingsAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(
+                {"end_date": _("The audit cannot end before it starts")}
+            )
+
+
+class AuditPreparationSetAside(AbstractBaseModel):
+    """A request of the guide that does not apply to this audit, and why."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="set_asides"
+    )
+    # Request ids belong to a guide: another guide's "r1" is another document.
+    guide = models.CharField(max_length=255)
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    reason = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "guide", "entry", "request"],
+                name="unique_preparation_set_aside",
+            )
+        ]
+
+
+class AuditPreparationRole(AbstractBaseModel):
+    """Who answers for one interview role of the guide (ciso, hr, dpo...)."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="roles"
+    )
+    role = models.CharField(max_length=32)
+    actors = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "role"], name="unique_preparation_role"
+            )
+        ]
+
+
+class AuditPreparationSession(AbstractBaseModel):
+    """When and where one session of the guide takes place, and who attends."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="sessions"
+    )
+    session = models.CharField(max_length=32)
+    date = models.DateField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    attendees = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "session"], name="unique_preparation_session"
+            )
+        ]
+
+    def clean(self):
+        if self.start_time and self.end_time and self.start_time > self.end_time:
+            raise ValidationError(
+                {"end_time": _("The session cannot end before it starts")}
+            )
+
+
+class AuditGuide(ReferentialObjectMixin, I18nObjectMixin):
+    """Experimental: what a certification auditor will ask per requirement of a
+    framework (questions, records, sampling, pitfalls) and the sessions they run.
+    Ships in libraries, so anyone can load their own wording and content.
+
+    `entries` is keyed by the requirement number the guide is written for (the
+    URN suffix, e.g. "a.5.18"); every item has an id, stable across versions,
+    that translations, pairings and set-asides key on. `translations` holds, per
+    locale, `name`/`description` and the item texts keyed the same way.
+    """
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="audit_guides",
+    )
+    framework_urn = models.CharField(max_length=255)
+    entries = models.JSONField(default=dict)
+    sessions = models.JSONField(default=list)
+
+    @staticmethod
+    def fields_from(data: dict) -> dict:
+        """Model fields from a guide as written in a library, its requirement
+        numbers normalized the way requirements are matched ("A.05.18" -> "a.5.18")."""
+        from core.auditor_preread import normalize_key
+
+        def keyed(entries):
+            return {normalize_key(k): v for k, v in (entries or {}).items()}
+
+        translations = {
+            locale: {**t, "entries": keyed(t.get("entries"))} if "entries" in t else t
+            for locale, t in (data.get("translations") or {}).items()
+        }
+        return {
+            "ref_id": data["ref_id"],
+            "name": data.get("name"),
+            "description": data.get("description"),
+            "framework_urn": data["framework"].lower(),
+            "entries": keyed(data.get("entries")),
+            "sessions": [
+                {**s, "members": [normalize_key(m) for m in s.get("members") or []]}
+                for s in data.get("sessions") or []
+            ],
+            "translations": translations,
+        }
+
+    class Meta:
+        verbose_name = _("Audit guide")
+        verbose_name_plural = _("Audit guides")

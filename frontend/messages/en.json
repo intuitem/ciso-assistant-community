@@ -286,6 +286,8 @@
 	"evidenceFourEyes": "Four-eyes review of evidences",
 	"reviewEvidences": "Review evidences",
 	"evidenceFourEyesHelpText": "When enabled, whoever uploaded a file cannot approve or reject it",
+	"autoLockOverdueAssessments": "Auto-lock overdue assessments",
+	"autoLockOverdueAssessmentsHelpText": "When enabled, audits from a campaign or a third-party assessment are locked and moved to \"In review\" the night after their due date",
 	"autoRefId": "Automatic reference IDs",
 	"autoRefIdHelpText": "When enabled, objects created without a reference ID get one numbered within their parent (e.g. AC.01 in its domain, R.01 in its risk assessment). Existing reference IDs are never changed",
 	"autoRefIdPrefixes": "Prefixes",
@@ -8224,8 +8226,397 @@
 	"reviewToastRejected": "Rejected: {name}",
 	"reviewUndoError": "The decision could not be undone.",
 	"evidenceExportTooLarge": "The selection holds {size} MB of files, above the {max} MB limit. Narrow the selection and export again.",
+	"prereadTitle": "Auditor pre-read",
+	"prereadDescription": "For an ISO/IEC 27001:2022 audit: what the certification auditor will ask, request, sample and who they will interview, per requirement, set against the evidence already linked. Evidence request list and interview plan included.",
+	"prereadIntro": "Get ahead of the certification auditor. For each requirement: what they will ask, which records they will request, how they will sample and who they will interview, set against the evidence already in the audit.",
+	"prereadReadinessPerRequirement": "Readiness per requirement",
+	"prereadRequestList": "Evidence request list",
+	"prereadInterviewPlan": "Interview plan",
+	"prereadNoAudit": "No ISO/IEC 27001:2022 audit you can view yet. Audits on a copy of the standard with the same requirement numbers show up here too.",
+	"prereadGoToAudits": "Go to audits",
+	"prereadSearchAudits": "Search audits",
+	"prereadSearchAuditsPlaceholder": "Search audits, domains, perimeters",
+	"prereadAuditCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit",
+				"countPlural=other": "{count} audits"
+			}
+		}
+	],
+	"prereadByNumberHint": "The guide is applied by requirement number",
+	"prereadByNumber": "· matched by number",
+	"prereadPartial": "· partial",
+	"prereadPartialHint": "The guide covers part of this framework; open the audit to apply it",
+	"prereadNoPerimeter": "No perimeter",
+	"prereadOpen": "Open pre-read",
+	"prereadNoAuditMatches": "No audit matches “{query}”.",
+	"prereadPageTitle": "Auditor pre-read: {name}",
+	"prereadRoleTop": "Top management",
+	"prereadRoleCiso": "ISMS manager / CISO",
+	"prereadRoleRisk": "Risk owner",
+	"prereadRoleAuditor": "Internal auditor",
+	"prereadRoleHr": "HR",
+	"prereadRoleLegal": "Legal / compliance",
+	"prereadRoleDpo": "Data protection officer",
+	"prereadRoleProc": "Procurement",
+	"prereadRoleFacilities": "Facilities",
+	"prereadRoleItLead": "Head of IT",
+	"prereadRoleIam": "Identity & access admin",
+	"prereadRoleInfra": "Infrastructure & hosting",
+	"prereadRoleNetwork": "Network admin",
+	"prereadRoleEndpoint": "Workplace & endpoints",
+	"prereadRoleServiceDesk": "Service desk / ITSM",
+	"prereadRoleSecOps": "Security operations",
+	"prereadRoleDev": "Engineering lead",
+	"prereadRoleStaff": "Staff (random)",
+	"prereadGap": "Gap",
+	"prereadWeak": "Weak",
+	"prereadToConfirm": "To confirm",
+	"prereadReady": "Ready",
+	"prereadExcluded": "Excluded",
+	"prereadNoGuidance": "No guidance",
+	"prereadReasonOpenFinding": "Open finding from an earlier audit, potential nonconformity",
+	"prereadReasonOpenMinorFinding": "Open point to watch from an earlier audit",
+	"prereadReasonNothingLinked": "No evidence linked",
+	"prereadReasonNonCompliant": "Assessed as non-compliant",
+	"prereadReasonQualityError": "Audit quality check raises an error",
+	"prereadReasonNotAssessed": "Not assessed yet",
+	"prereadReasonStaleEvidence": "A requested record is older than its freshness window",
+	"prereadReasonRequestNotOnFile": "Requested evidence is not on file",
+	"prereadReasonEvidenceToConfirm": "Evidence on file, not yet confirmed as answering the requests",
+	"prereadReasonMissingFile": "An evidence has no file or link yet, so it does not count",
+	"prereadReasonQualityWarning": "Audit quality check raises a warning",
+	"prereadSectionClauses": "Clauses 4-10",
+	"prereadSectionA5": "A.5 Organizational",
+	"prereadSectionA6": "A.6 People",
+	"prereadSectionA7": "A.7 Physical",
+	"prereadSectionA8": "A.8 Technological",
+	"prereadSectionOther": "Other requirements",
+	"prereadKindDocument": "Document",
+	"prereadKindRecord": "Record",
+	"prereadKindTechnical": "Technical export",
+	"prereadKindObservation": "Observed on site",
+	"prereadStage1Long": "Stage 1: documentation review",
+	"prereadStage2Long": "Stage 2: implementation, tested on samples",
+	"prereadColReadiness": "Readiness",
+	"prereadColRef": "Ref",
+	"prereadColRequirement": "Requirement",
+	"prereadColRequest": "Request",
+	"prereadColKind": "Kind",
+	"prereadColMaxAgeDays": "Max age (days)",
+	"prereadColMaxAge": "Max age",
+	"prereadColOwner": "Owner",
+	"prereadColOnFile": "On file",
+	"prereadTsvToConfirm": "to confirm",
+	"prereadTsvMissing": "missing",
+	"prereadVerdictGap": "Not ready. As things stand, the auditor would likely record a problem here (a “nonconformity”).",
+	"prereadVerdictWeak": "Almost ready. A detail is missing: the auditor would likely make a remark, rarely more.",
+	"prereadVerdictToConfirm": "Probably ready, to check. Evidence is on file: say which request each one answers.",
+	"prereadVerdictReady": "On the day, have the evidence below at hand.",
+	"prereadVerdictExcluded": "Out of scope: the auditor will still ask why, so have the reason ready.",
+	"prereadVerdictNoGuidance": "No auditor guidance for this requirement yet.",
+	"prereadCannotEdit": "You cannot edit this audit.",
+	"prereadPairNotSaved": "The pairing was not saved.",
+	"prereadNoRevision": "no revision",
+	"prereadSummary": "Readiness summary",
+	"prereadOpenAudit": "Open the audit",
+	"prereadShowAll": "Show all requirements",
+	"prereadShowOnly": "Show only “{state}”",
+	"prereadSummaryHint": "{count} requirements. Click a count to show only those. Readiness is an estimate from the evidence linked to the audit and its quality checks.",
+	"prereadUnsupported": "There is no auditor guidance for this framework yet. Only ISO/IEC 27001:2022 is covered, including copies of it with the same requirement numbers.",
+	"prereadSuggestion": "Its numbering partly matches “{guide}”: {pct}% of the guide lands on {matched} of its {total} requirements.",
+	"prereadApplyAnyway": "Apply the guide anyway",
+	"prereadProjected": "ISO/IEC 27001:2022 guidance applied by requirement number: {matched} of {total} requirements matched.",
+	"prereadLettered": "Lettered items share their parent's guidance.",
+	"prereadSearchRequirements": "Search requirements",
+	"prereadSearchRequirementsPlaceholder": "Search by ref or title",
+	"prereadAuditStage": "Audit stage",
+	"prereadBothStages": "Both stages",
+	"prereadStage1": "Stage 1",
+	"prereadStage2": "Stage 2",
+	"prereadBothStagesHint": "Questions from both stages",
+	"prereadClearFilters": "Clear filters",
+	"prereadSection": "Section",
+	"prereadAllSections": "All sections",
+	"prereadByRequirement": "By requirement",
+	"prereadSessions": "Audit sessions",
+	"prereadRequirements": "Requirements",
+	"prereadOpenFindingHint": "Open finding from an earlier audit",
+	"prereadNothingMatches": "Nothing matches these filters.",
+	"prereadResultHint": "Result recorded in the audit",
+	"prereadOpenInAuditHint": "Edit this requirement in the audit. Cancel brings you back here.",
+	"prereadOpenInAudit": "Edit in the audit",
+	"prereadQualityFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit quality finding",
+				"countPlural=other": "{count} audit quality findings"
+			}
+		}
+	],
+	"prereadEarlierAudit": "Raised at an earlier audit",
+	"prereadEarlierAuditHint": "Followed up first: bring the action taken and its evidence",
+	"prereadWillAsk": "What the auditor will ask",
+	"prereadHowChecked": "How they will check it",
+	"prereadSample": "Sample",
+	"prereadSampleFrom": "From {population}",
+	"prereadNoSampling": "Document review only, no sampling expected.",
+	"prereadInterviews": "Interviews",
+	"prereadRequestedVsOnFile": "Evidence requested",
+	"prereadRequestedAside": "requested: {toFile} · provided: {matched} · to match: {other}",
+	"prereadWillAskFor": "The auditor will ask for",
+	"prereadFreshHint": "The most recent one should be younger than this",
+	"prereadDays": "{days} d",
+	"prereadEvidenceHidden": "Evidence you cannot view",
+	"prereadFiledElsewhereHint": "Linked under another requirement that asks for the same evidence",
+	"prereadFiledElsewhere": "· filed elsewhere in the audit",
+	"prereadPairedByHand": "· paired by hand",
+	"prereadUnpairHint": "Unpair: this evidence does not answer this request, here and wherever the same evidence is asked",
+	"prereadUnpair": "Unpair {name}",
+	"prereadToConfirmPick": "To confirm: pick the evidence that answers it",
+	"prereadNotOnFile": "Not on file",
+	"prereadAlsoOnFile": "Also on file, not matched",
+	"prereadOnFile": "You have on file",
+	"prereadViaTask": "via task {name}",
+	"prereadTaskHiddenLower": "a task you cannot view",
+	"prereadControlHiddenLower": "a control you cannot view",
+	"prereadOlderThanWindow": "Older than the freshness window requested",
+	"prereadAttachedToRequirement": "attached to the requirement",
+	"prereadVia": "via {name}",
+	"prereadNoFile": "no file or link",
+	"prereadAllAnswer": "Every linked evidence answers one of the requests.",
+	"prereadNothingLinkedYet": "Nothing linked yet.",
+	"prereadAttachHint": "Attach evidence to the applied controls of this requirement, or to the requirement itself.",
+	"prereadAppliedControls": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} applied control",
+				"countPlural=other": "{count} applied controls"
+			}
+		}
+	],
+	"prereadControlHidden": "Control you cannot view",
+	"prereadPitfalls": "Where auditors usually find something",
+	"prereadPrevious": "Previous",
+	"prereadNext": "Next",
+	"prereadKeysHint": "· use ↑ ↓ in the list",
+	"prereadSessionsIntro": "Stage 2 runs by topic, not in standard order: each session walks related clauses and controls with the same people. Prepare one folder and one owner per session.",
+	"prereadSessionCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requirement · {asks} records to file",
+				"countPlural=other": "{count} requirements · {asks} records to file"
+			}
+		}
+	],
+	"prereadSessionItems": "{count} items to have ready",
+	"prereadRequestsIntro": "Every record the auditor is likely to ask for, once, worst readiness first. Evidence asked by several requirements shows on one row. Excluded requirements are left out. Copy it into a spreadsheet to share with owners ahead of the audit.",
+	"prereadCopied": "Copied",
+	"prereadCopyRows": "Copy {count} rows",
+	"prereadToConfirmHint": "Evidence is linked to the requirement: confirm which one answers this request",
+	"prereadSeenOnSite": "Seen on site",
+	"prereadMissing": "Missing",
+	"prereadWalkThrough": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requirement to walk through",
+				"countPlural=other": "{count} requirements to walk through"
+			}
+		}
+	],
+	"prereadStartTitle": "Where to start",
+	"prereadStartConfirm": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Pair the evidence already on file: {count} requirement to confirm",
+				"countPlural=other": "Pair the evidence already on file: {count} requirements to confirm"
+			}
+		}
+	],
+	"prereadStartFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Follow up the findings still open from earlier audits: {count} requirement",
+				"countPlural=other": "Follow up the findings still open from earlier audits: {count} requirements"
+			}
+		}
+	],
+	"prereadStartDocuments": "Gather the most requested evidence first: one evidence often answers several requirements",
+	"prereadAnswers": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "answers {count} requirement",
+				"countPlural=other": "answers {count} requirements"
+			}
+		}
+	],
+	"prereadSeeAllRequests": "Full list of requested evidence",
+	"prereadStartStage1": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Then go through Stage 1, the document review: {count} requirement",
+				"countPlural=other": "Then go through Stage 1, the document review: {count} requirements"
+			}
+		}
+	],
+	"prereadPrepareInterview": "Prepare the interview",
+	"prereadPrepareInterviewAside": "questions, sampling, people to meet, common pitfalls",
+	"prereadOpenFindingsFilter": "Open findings",
+	"prereadTodoTitle": "What to do",
+	"prereadTodoFinding": "An earlier audit found a problem here. Show what was done to fix it, with proof (see below).",
+	"prereadTodoGather": "For each request marked “Not on file” below: upload the evidence, or choose it if it is already in the tool. Nothing written yet? Write a short note: what the auditor wants is the trace.",
+	"prereadTodoPair": "Some evidence is already on this requirement. Under each request, “Choose an existing evidence” lists it first: pick the one that answers it.",
+	"prereadTodoRefresh": "An evidence is older than the auditor expects. Add a recent version.",
+	"prereadTodoFix": "The audit says this requirement is not met. Plan a fix before the auditor comes, and keep a record of it.",
+	"prereadTodoAssess": "Record in the audit whether this requirement is met.",
+	"prereadTodoQuality": "Fix the points raised by the audit's quality checks (below).",
+	"prereadTodoJustify": "Write down why this requirement does not apply to you.",
+	"prereadTodoRehearse": "Read the questions the auditor will ask, so nobody is caught off guard.",
+	"prereadActionEvidence": "Add evidence",
+	"prereadActionAssess": "Assess",
+	"prereadActionJustify": "Justify",
+	"prereadActionPrep": "Show the questions",
+	"prereadResultIn": "In the audit: {result}",
+	"prereadUpload": "Upload the evidence",
+	"prereadUploadHint": "Adds it as evidence of this requirement, already matched with this request",
+	"prereadPickExisting": "Choose an existing evidence",
+	"prereadPickHint": "Attaches it to this requirement, matched with this request",
+	"prereadPickSearch": "Search evidence by name",
+	"prereadPickOnRequirement": "already on this requirement",
+	"prereadTodoNoGuide": "This requirement is your own: there is no auditor guide for it. Assess it in the audit as usual.",
+	"prereadHiddenUnusable": "Does not count (rejected, expired or missing)",
+	"prereadHiddenToValidate": "Not validated yet",
+	"prereadHiddenExpires": "Expires before the audit",
+	"prereadReasonUnusableEvidence": "An evidence is rejected, expired or marked missing, so it does not count",
+	"prereadReasonEvidenceToValidate": "An evidence is still a draft or in review",
+	"prereadReasonExpiresBeforeAudit": "An evidence expires before the audit date",
+	"prereadTodoUnusable": "An evidence below is rejected, expired or marked missing: it does not count. Replace it or renew it.",
+	"prereadTodoValidate": "An evidence below is still a draft or in review: have it approved before the audit, the auditor will ask.",
+	"prereadTodoExpiresBeforeAudit": "An evidence below expires before the audit date: renew it by then.",
+	"prereadReach": "Also counts for {what}",
+	"prereadReachAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} other audit in this domain where this evidence is on file",
+				"countPlural=other": "{count} other audits in this domain, wherever this evidence is on file"
+			}
+		}
+	],
+	"prereadReadOnly": "Read only: you can follow the preparation, but changes are made by those who can edit this audit.",
+	"prereadExpiredOn": "expired {date}",
+	"prereadExpires": "expires {date}",
+	"prereadPrepare": "Prepare the audit",
+	"prereadPrepNone": "Stage, dates and certification body not set yet",
+	"prereadStageField": "Stage being prepared",
+	"prereadStageNone": "Not set",
+	"prereadStage_stage_1": "Stage 1 (document review)",
+	"prereadStage_stage_2": "Stage 2 (on site)",
+	"prereadStage_surveillance": "Surveillance audit",
+	"prereadStage_recertification": "Recertification audit",
+	"prereadFirstDay": "First audit day",
+	"prereadLastDay": "Last audit day",
+	"prereadLastDayHint": "Evidence must still be valid on this day.",
+	"prereadCertificationBody": "Certification body",
+	"prereadAuditors": "Auditor(s)",
+	"prereadNotSaved": "Not saved.",
+	"prereadSetAside": "Doesn't apply",
+	"prereadSetAsideHint": "This request doesn't apply to this audit: it stops counting as missing.",
+	"prereadSetAsideReason": "Why? The auditor will ask.",
+	"prereadSetAsideShown": "Set aside: {reason}",
+	"prereadRestore": "Restore",
+	"prereadCarryOver": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} request was set aside at the previous audit of this domain.",
+				"countPlural=other": "{count} requests were set aside at the previous audit of this domain."
+			}
+		}
+	],
+	"prereadCarryOverAction": "Take them over",
+	"prereadStartSessions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Schedule the sessions with the certification body: {count} session has no date",
+				"countPlural=other": "Schedule the sessions with the certification body: {count} sessions have no date"
+			}
+		}
+	],
+	"prereadSchedule": "Schedule",
+	"prereadStartTime": "Start",
+	"prereadEndTime": "End",
+	"prereadLocation": "Place or link",
+	"prereadAttendees": "Attendees",
+	"prereadAssign": "Name someone",
+	"prereadNobodyYet": "Nobody named yet",
+	"prereadWho": "Who answers",
+	"prereadHiddenFinding": "A finding from an earlier audit (not visible to you)",
+	"prereadNoDate": "No date yet",
+	"prereadWalk": "Prepare this session",
+	"prereadWalkSession": "Preparing the session: {label}",
+	"prereadWalkCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} requirement left to work on",
+				"countPlural=other": "{count} requirements left to work on"
+			}
+		}
+	],
+	"prereadWalkExit": "Back to the full view",
+	"prereadWalkDone": "Everything in this session is handled.",
+	"prereadStartWalk": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Then prepare session by session, starting with “{label}”: {count} requirement left",
+				"countPlural=other": "Then prepare session by session, starting with “{label}”: {count} requirements left"
+			}
+		}
+	],
+	"prereadTodoAddFile": "An evidence below has no file or link yet: it does not count until you add it with “Add the file”.",
+	"prereadAddFile": "Add the file",
 	"europeanUnion": "European Union",
 	"europeanEconomicArea": "European Economic Area",
 	"otherCountries": "Other Countries",
-	"notShownOnMap": "Not shown on map"
+	"notShownOnMap": "Not shown on map",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "GLPI Integration Configuration",
+	"glpiInstanceUrlHelpText": "The URL of your GLPI instance (e.g., https://glpi.example.com/). GLPI 11 or later is required.",
+	"glpiClientIdHelpText": "The ID of an OAuth client created in GLPI with the password grant and the api scope.",
+	"glpiUsernameHelpText": "The GLPI user the integration acts as. Its profile decides which items can be read and written.",
+	"glpiSecretsAlreadySetHelpText": "The client secret and the password are already set.",
+	"glpiResetSecrets": "Reset secrets",
+	"glpiWebhookSecretHelpText": "The secret shown in the Security tab of your GLPI webhook.",
+	"glpiIntegrationMappingsHelpText": "Map your local controls to GLPI items.",
+	"glpiTableHelpText": "Select the GLPI item type to sync with (ticket, change or problem).",
+	"glpiField": "GLPI Field",
+	"glpiAssetMappingsHelpText": "Map your assets to GLPI items. Assets are synced once an item type is selected.",
+	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...)."
 }

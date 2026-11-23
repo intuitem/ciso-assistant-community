@@ -48,3 +48,6 @@ def test_soa_rows_flattens_assessable_nodes_in_order_and_localizes():
     de = soa_rows(tree, "de")[0]
     assert de["Konformitätsergebnis"] == "Teilweise konform"
     assert de["Umgesetzte Maßnahmen (Status)"] == "POL-1 ISP (Aktiv)"
+    hu = soa_rows(tree, "hu")[0]
+    assert hu["Megfelelőségi eredmény"] == "Részben megfelel"
+    assert hu["Alkalmazott kontrollok (állapot)"] == "POL-1 ISP (Aktív)"

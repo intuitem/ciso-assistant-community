@@ -1,0 +1,23 @@
+subject: "Üdvözöljük a CISO Assistantban!"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  ## Üdvözöljük a CISO Assistantban!
+
+  **Az Ön átfogó GRC-platformja**
+
+  Hozzáférést kapott a CISO Assistanthoz. Első lépésként állítsa be a jelszavát az alábbi hivatkozásra kattintva:
+
+  [Jelszó beállítása](${set_password_url})
+
+  Ha a hivatkozás nem működik, másolja be az alábbi címet a böngészőjébe:
+  ${set_password_url}
+
+  Ez a hivatkozás csak egyszer használható. Ha lejárt, nyissa meg [a saját példányát](${ciso_assistant_url}), és kérjen jelszó-visszaállítást.
+
+  Ha a hozzáférést nem Ön és nem is a szervezete kérte, ezt az e-mailt nyugodtan figyelmen kívül hagyhatja.
+
+  A CISO Assistantról [itt](https://intuitem.com/) tudhat meg többet.
+
+  Üdvözlettel:
+  a CISO Assistant csapata

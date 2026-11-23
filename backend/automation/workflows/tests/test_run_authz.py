@@ -15,7 +15,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from core.models import AppliedControl
+from core.models import AppliedControl, Finding, FindingsAssessment
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from automation.workflows.engine import run_identity, start_instance
 from automation.workflows.graph import save_graph
@@ -1223,3 +1223,73 @@ class TestNonRecursiveReadScope:
         output = instance.node_outputs["fetch_rows"]
         assert output["count"] == 1
         assert [row["name"] for row in output["results"]] == ["parent row"]
+
+
+@pytest.mark.django_db
+class TestReferenceVisibility:
+    """create_object authorizes the add where the row lands. What it links to
+    must also be visible to the run identity, or a known UUID would attach a
+    row the identity cannot see."""
+
+    def _setup(self):
+        parent = make_domain(f"RefParent-{uuid.uuid4()}")
+        enclave = Folder.objects.create(
+            name="RefEnclave",
+            parent_folder=parent,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        # Same name on purpose: an invisible row must not make a name ambiguous.
+        hidden = FindingsAssessment.objects.create(name="Binder", folder=enclave)
+        visible = FindingsAssessment.objects.create(name="Binder", folder=parent)
+        runner = User.objects.create_user(email=f"ref-{uuid.uuid4()}@authz.test")
+        grant(runner, parent, ["add_finding"])
+        # Non-recursive: the enclave's binders are out of the identity's sight,
+        # though inside the workflow's folder scope.
+        grant(runner, parent, ["view_findingsassessment"], recursive=False)
+        return parent, hidden, visible, runner
+
+    def _raise_finding(self, folder, identity, binder):
+        workflow = Workflow.objects.create(name=f"ref-{uuid.uuid4()}", folder=folder)
+        version = WorkflowVersion.objects.create(workflow=workflow)
+        trigger = node("trigger", trigger_config={"type": "manual"})
+        act = node(
+            "action",
+            action_config={
+                "type": "create_object",
+                "model": "finding",
+                "fields": {"name": "Raised", "findings_assessment": binder},
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, act, end],
+                "edges": [edge(trigger, act), edge(act, end)],
+                "variables": [],
+            },
+        )
+        publish_as(version, identity)
+        return start_instance(version)
+
+    def test_unviewable_reference_by_id_reads_as_missing(self):
+        parent, hidden, _visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, str(hidden.id))
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not Finding.objects.filter(findings_assessment=hidden).exists()
+        # Same answer as an unknown id: the error never confirms the row exists.
+        assert any(
+            "does not exist" in (log.message or "") for log in instance.logs.all()
+        )
+
+    def test_viewable_reference_by_id_links(self):
+        parent, _hidden, visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, str(visible.id))
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert Finding.objects.filter(findings_assessment=visible).count() == 1
+
+    def test_unviewable_row_does_not_make_a_name_ambiguous(self):
+        parent, _hidden, visible, runner = self._setup()
+        instance = self._raise_finding(parent, runner, "Binder")
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert Finding.objects.filter(findings_assessment=visible).count() == 1

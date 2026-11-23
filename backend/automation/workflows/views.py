@@ -186,7 +186,11 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
                     },
                     # A built model is assembled, not matched.
                     "upsert": not entry.get("constructor"),
-                    "match_on": list(_match_fields(entry)),
+                    # The builder shows what an upsert matches on: its parents too.
+                    "match_on": [
+                        *_match_fields(entry),
+                        *(entry.get("match_scope") or ()),
+                    ],
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]
