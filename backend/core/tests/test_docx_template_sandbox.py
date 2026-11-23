@@ -283,7 +283,7 @@ def _render_xml(template_path: Path, context: dict, jinja_env) -> bytes:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu"])
 def test_shipped_templates_render_as_with_the_stock_sandbox(
     report_context: dict, lang: str
 ) -> None:
