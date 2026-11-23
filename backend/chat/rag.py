@@ -12,7 +12,11 @@ from typing import Optional, Any
 from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
-from chat.embedding_models import INFERENCE_LOCK, RERANKER_MODEL as _RERANKER_MODEL
+from chat.embedding_models import (
+    INFERENCE_LOCK,
+    RERANKER_MODEL as _RERANKER_MODEL,
+    OnnxCrossEncoder,
+)
 from qdrant_client.models import (
     Document,
     FieldCondition,
@@ -43,9 +47,7 @@ def _get_reranker():
             if _reranker is not None:
                 return _reranker
             try:
-                from sentence_transformers import CrossEncoder
-
-                _reranker = CrossEncoder(_RERANKER_MODEL)
+                _reranker = OnnxCrossEncoder()
                 logger.info("reranker_loaded", model=_RERANKER_MODEL)
             except Exception as e:
                 logger.warning("reranker_load_failed", error=e)
