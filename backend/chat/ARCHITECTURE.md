@@ -254,7 +254,7 @@ sequenceDiagram
 | File | Purpose |
 |------|---------|
 | `views.py` | REST endpoints, message orchestration, SSE streaming, pre-routing |
-| `providers.py` | LLM/embedding abstraction (Ollama, OpenAI-compat, sentence-transformers) |
+| `providers.py` | LLM/embedding abstraction (Ollama, OpenAI-compat, local ONNX embedder) |
 | `tools.py` | Tool schemas, dispatch, MODEL_MAP, sanitization |
 | `orm_query.py` | Permission-filtered ORM queries, pagination, formatting |
 | `rag.py` | Qdrant vector search (dual-partition), graph expansion, context formatting |
