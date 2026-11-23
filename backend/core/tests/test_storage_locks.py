@@ -110,3 +110,24 @@ def test_name_reusers_take_the_stored_name_lock(settings, tmp_path, monkeypatch)
         "text/plain",
     )
     assert seen == []
+
+
+@pytest.mark.django_db
+def test_queue_skips_a_name_cleanup_already_removed(
+    settings, tmp_path, django_capture_on_commit_callbacks
+):
+    settings.MEDIA_ROOT = str(tmp_path)
+    from chat.models import IndexedDocument
+    from chat.signals import _queue
+
+    from core.tests.test_stored_file_cleanup import _evidence_revision
+
+    revision, _evidence, stored = _evidence_revision()
+    storage, name = stored[0]
+    stale = type(revision)._base_manager.get(pk=revision.pk)
+    with django_capture_on_commit_callbacks(execute=True):
+        revision.delete()
+    assert not storage.exists(name)
+
+    _queue(stale, "evidence", name, "policy.pdf", "application/pdf")
+    assert not IndexedDocument.objects.filter(file=name).exists()
