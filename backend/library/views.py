@@ -2633,6 +2633,24 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
+        with transaction.atomic():
+            # Serialize concurrent publishes (and metadata edits) of the SAME
+            # draft: version and last_published_version are read-modify-written
+            # across store/load, and ATOMIC_REQUESTS is off, so without a row
+            # lock two requests could interleave and leave version below
+            # last_published_version. On PostgreSQL this blocks the second
+            # request until the first commits; on SQLite (tests) select_for_update
+            # is a no-op, which is fine as requests there never run concurrently.
+            locked = LibraryDraft.objects.select_for_update().get(pk=draft.pk)
+            return self._publish_locked(request, locked)
+
+    def _publish_locked(self, request, draft):
+        """The publish critical section, run under a row lock on *draft*.
+
+        See `publish`. The lock serializes same-draft publishes end to end, so
+        the version read-modify-write below cannot interleave with another
+        publish or a metadata edit.
+        """
         # A publish that bumps the version and then fails to load (e.g. the
         # worker dies re-evaluating existing audits) must not leave the version
         # climbing: every failed attempt would offer a fresh bump, so the
@@ -2640,20 +2658,21 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # bump is committed early so the documented score-change retry can
         # re-publish at the SAME version; on any OTHER failure it is undone.
         original_version = draft.version
+        bumped_to = original_version
         bumped = False
 
         def _revert_version_bump() -> None:
             if not bumped:
                 return
-            # Never lower the version below a snapshot a concurrent publish may
-            # have committed: requests interleave (ATOMIC_REQUESTS is off), so a
-            # second publish could read this bumped version and record it as
-            # last_published_version. Dropping under it would defeat the
-            # version-identity guard — the same invariant the draft PATCH
-            # enforces. The conditional UPDATE makes the check and the write
-            # atomic; if it does not apply, the version stays as it is.
+            # Undo only our own bump, and only when it is safe to: the row must
+            # still hold the version we wrote (so a later edit is preserved), and
+            # last_published_version must not have advanced past the original (so
+            # a concurrent publish that committed a snapshot at the bumped version
+            # is not undercut). The row lock already serializes this; the
+            # conditional UPDATE keeps the check and the write atomic as a
+            # backstop.
             reverted = (
-                LibraryDraft.objects.filter(pk=draft.pk)
+                LibraryDraft.objects.filter(pk=draft.pk, version=bumped_to)
                 .filter(
                     Q(last_published_version__isnull=True)
                     | Q(last_published_version__lte=original_version)
@@ -2675,6 +2694,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 draft.version += 1
                 draft.save(update_fields=["version", "updated_at"])
                 bumped = True
+                bumped_to = draft.version
             else:
                 return Response(
                     {
@@ -2758,6 +2778,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 draft.version = max_existing + 1
                 draft.save(update_fields=["version", "updated_at"])
                 bumped = True
+                bumped_to = draft.version
             else:
                 return Response(
                     {"error": "libraryVersionOutdated", "max_version": max_existing},
