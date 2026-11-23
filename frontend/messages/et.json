@@ -3607,6 +3607,7 @@
 	"deleteSyncMapping": "Kustuta sünkroonivastendus",
 	"integrationProvider": "Integratsiooni teenusepakkuja",
 	"integrationProviderHelpText": "Vali integratsiooni teenusepakkuja objekti taseme sünkrooni seadistamiseks",
+	"integrationProviderCreateHelpText": "Vali integratsiooni teenusepakkuja. Selle kirje salvestamisel luuakse teenusepakkuja juures päriselt vastav objekt (nt Jira pilet).",
 	"remoteObject": "Kaugobjekt",
 	"remoteObjectHelpText": "Vali kaugobjekt, millega sünkroonida",
 	"webhookEndpointUrl": "Webhooki lõpp-punkti URL",

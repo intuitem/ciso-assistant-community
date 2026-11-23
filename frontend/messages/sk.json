@@ -3556,6 +3556,7 @@
 	"deleteSyncMapping": "Odstrániť mapovanie synchronizácie",
 	"integrationProvider": "Poskytovateľ integrácie",
 	"integrationProviderHelpText": "Zvoliť poskytovateľa integrácie na konfiguráciu synchronizácie na úrovni objektu",
+	"integrationProviderCreateHelpText": "Zvoľte poskytovateľa integrácie. Pri uložení tejto položky sa u poskytovateľa skutočne vytvorí zodpovedajúci objekt (napr. úloha v Jira).",
 	"remoteObject": "Vzdialený objekt",
 	"remoteObjectHelpText": "Zvoliť vzdialený objekt, s ktorým chcete synchronizovať",
 	"webhookEndpointUrl": "Webová adresa koncového bodu webhooku",

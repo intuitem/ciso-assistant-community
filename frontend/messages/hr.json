@@ -3036,6 +3036,7 @@
 	"instanceUrl": "URL instance",
 	"integrationProvider": "Pružatelj integracije",
 	"integrationProviderHelpText": "Odaberite pružatelja integracije kako bi konfigurirali sinkronizaciju na razini objekata",
+	"integrationProviderCreateHelpText": "Odaberite pružatelja integracije. Prilikom spremanja ove stavke kod pružatelja će se stvarno kreirati odgovarajući objekt (npr. Jira zadatak).",
 	"integrations": "Integracije",
 	"isBusinessFunction": "Poslovna funkcija",
 	"isCritical": "Kritično",

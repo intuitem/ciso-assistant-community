@@ -2014,6 +2014,7 @@
 	"insights": "Inzichten",
 	"integrationProvider": "Integratie-aanbieder",
 	"integrationProviderHelpText": "Selecteer de integratie-aanbieder om synchronisatie op objectniveau te configureren",
+	"integrationProviderCreateHelpText": "Selecteer de integratie-aanbieder. Bij het opslaan van dit item wordt daadwerkelijk een bijbehorend object (bijv. een Jira-issue) bij de aanbieder aangemaakt.",
 	"integrations": "Integraties",
 	"internal": "Intern",
 	"internalProcesses": "Interne processen",

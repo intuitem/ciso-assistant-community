@@ -4732,6 +4732,7 @@
 	"deleteSyncMapping": "حذف ربط المزامنة",
 	"integrationProvider": "مزوّد التكامل",
 	"integrationProviderHelpText": "اختر مزوّد التكامل لضبط المزامنة على مستوى الكائنات",
+	"integrationProviderCreateHelpText": "اختر مزوّد التكامل. سيُنشأ فعليًا كائن مقابل (مثل تذكرة Jira) لدى المزوّد عند حفظ هذا العنصر.",
 	"remoteObject": "الكائن البعيد",
 	"remoteObjectHelpText": "اختر الكائن البعيد المراد المزامنة معه",
 	"webhookEndpointUrl": "عنوان نقطة نهاية الـ webhook",

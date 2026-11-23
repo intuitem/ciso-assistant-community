@@ -4490,6 +4490,7 @@
 	"deleteSyncMapping": "Usuń mapowanie synchronizacji",
 	"integrationProvider": "Dostawca integracji",
 	"integrationProviderHelpText": "Wybierz dostawcę integracji, aby skonfigurować synchronizację na poziomie obiektu",
+	"integrationProviderCreateHelpText": "Wybierz dostawcę integracji. Po zapisaniu tego elementu u dostawcy zostanie faktycznie utworzony odpowiadający mu obiekt (np. zgłoszenie w Jira).",
 	"remoteObject": "Obiekt zdalny",
 	"remoteObjectHelpText": "Wybierz obiekt zdalny do synchronizacji",
 	"webhookEndpointUrl": "URL punktu końcowego webhooka",

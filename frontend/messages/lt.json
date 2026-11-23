@@ -3448,6 +3448,7 @@
 	"deleteSyncMapping": "Ištrinti sinchronizavimo susiejimą",
 	"integrationProvider": "Integracijos tiekėjas",
 	"integrationProviderHelpText": "Pasirinkite integracijos tiekėją, kad sukonfigūruotumėte objekto lygio sinchronizavimą",
+	"integrationProviderCreateHelpText": "Pasirinkite integracijos tiekėją. Išsaugojus šį elementą, tiekėjo sistemoje bus iš tikrųjų sukurtas atitinkamas objektas (pvz., Jira užduotis).",
 	"remoteObject": "Nuotolinis objektas",
 	"remoteObjectHelpText": "Pasirinkite nuotolinį objektą sinchronizavimui",
 	"webhookEndpointUrl": "Webhook galinio taško URL",

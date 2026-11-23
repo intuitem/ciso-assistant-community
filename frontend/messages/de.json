@@ -2018,6 +2018,7 @@
 	"insights": "Erkenntnisse",
 	"integrationProvider": "Integrationsanbieter",
 	"integrationProviderHelpText": "Wählen Sie den Integrationsanbieter aus, um die Synchronisierung auf Objektebene zu konfigurieren",
+	"integrationProviderCreateHelpText": "Wählen Sie den Integrationsanbieter aus. Beim Speichern dieses Elements wird beim Anbieter tatsächlich ein entsprechendes Objekt (z. B. ein Jira-Ticket) erstellt.",
 	"integrations": "Integrationen",
 	"internal": "Intern",
 	"internalProcesses": "Interne Prozesse",

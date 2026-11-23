@@ -3934,6 +3934,7 @@
 	"deleteSyncMapping": "Izbriši kartiranje sinhronizacije",
 	"integrationProvider": "Ponudnik integracije",
 	"integrationProviderHelpText": "Izberite ponudnika integracije za konfiguracijo sinhronizacije na ravni objektov",
+	"integrationProviderCreateHelpText": "Izberite ponudnika integracije. Ob shranjevanju tega elementa bo pri ponudniku dejansko ustvarjen ustrezen objekt (npr. zahtevek v Jiri).",
 	"remoteObject": "Oddaljeni objekt",
 	"remoteObjectHelpText": "Izberite oddaljeni objekt za sinhronizacijo",
 	"webhookEndpointUrl": "Končna točka za Webhook URL",

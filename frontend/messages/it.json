@@ -3092,6 +3092,7 @@
 	"instanceUrl": "URL dell'istanza",
 	"integrationProvider": "Provider di integrazione",
 	"integrationProviderHelpText": "Seleziona il provider di integrazione per configurare la sincronizzazione a livello di oggetto",
+	"integrationProviderCreateHelpText": "Seleziona il provider di integrazione. Al salvataggio di questo elemento verrà effettivamente creato un oggetto corrispondente (ad es. un ticket Jira) presso il provider.",
 	"isSelectedHelpText": "Decidi se deve essere passato allo studio",
 	"isSimulationFresh": "Simulazione aggiornata",
 	"isVisibleHelpText": "Se non visibile, questo elemento non apparirà nelle liste né sarà selezionabile, ma farà ancora parte delle terminologie",

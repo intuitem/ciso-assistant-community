@@ -2563,6 +2563,7 @@
 	"deleteSyncMapping": "删除同步映射",
 	"integrationProvider": "集成提供商",
 	"integrationProviderHelpText": "选择集成提供商以配置对象级同步",
+	"integrationProviderCreateHelpText": "选择集成提供商。保存此项目时，将在提供商中实际创建相应的对象（例如 Jira 问题）。",
 	"remoteObject": "远程对象",
 	"remoteObjectHelpText": "选择要同步的远程对象",
 	"webhookEndpointUrl": "Webhook端点URL",

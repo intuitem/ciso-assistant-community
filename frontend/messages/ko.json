@@ -3256,6 +3256,7 @@
 	"deleteSyncMapping": "동기화 매핑 삭제",
 	"integrationProvider": "통합 제공자",
 	"integrationProviderHelpText": "객체 수준 동기화를 구성할 통합 제공자를 선택합니다.",
+	"integrationProviderCreateHelpText": "통합 제공자를 선택합니다. 이 항목을 저장하면 제공자에 해당 객체(예: Jira 이슈)가 실제로 생성됩니다.",
 	"remoteObject": "원격 객체",
 	"remoteObjectHelpText": "동기화할 원격 객체를 선택합니다.",
 	"webhookEndpointUrl": "웹훅 엔드포인트 URL",
