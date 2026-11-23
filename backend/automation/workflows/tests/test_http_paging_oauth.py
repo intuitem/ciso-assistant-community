@@ -39,7 +39,7 @@ def tool(monkeypatch):
         calls["tokens"].append({"url": url, "data": kwargs.get("data")})
         return pages.get("token", FakeResponse({"access_token": "tok-123"}))
 
-    monkeypatch.setattr("requests.request", request)
+    monkeypatch.setattr("core.net_safety.public_request", request)
     monkeypatch.setattr("requests.post", post)
     calls["pages"] = pages
     return calls

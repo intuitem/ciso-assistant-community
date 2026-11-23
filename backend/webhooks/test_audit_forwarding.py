@@ -225,7 +225,7 @@ def test_send_audit_request_uses_static_headers_no_hmac(root_folder):
     ep = _make_audit_sink(root_folder)
     mock_response = MagicMock()
     mock_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=mock_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=mock_response) as post:
         result = tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
     assert result.startswith("Success")
     sent_headers = post.call_args.kwargs["headers"]
@@ -444,7 +444,7 @@ def test_send_audit_request_sends_oauth_bearer(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch", return_value=_minted("tok")):
-        with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+        with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
             result = tasks.send_audit_request.call_local(
                 str(ep.id), {"class_uid": 6003}
             )
@@ -460,7 +460,7 @@ def test_oauth_token_is_cached_across_sends(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch", return_value=_minted("tok")) as fetch:
-        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+        with patch("webhooks.tasks.public_post", return_value=sink_response):
             tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
             tasks.send_audit_request.call_local(str(ep.id), {"a": 2})
 
@@ -479,7 +479,7 @@ def test_oauth_refreshes_once_on_401(root_folder):
         "webhooks.oauth._fetch", side_effect=[_minted("stale"), _minted("fresh")]
     ) as fetch:
         with patch(
-            "webhooks.tasks.requests.post", side_effect=[unauthorized, ok]
+            "webhooks.tasks.public_post", side_effect=[unauthorized, ok]
         ) as post:
             result = tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
 
@@ -496,7 +496,7 @@ def test_oauth_failure_propagates_for_retry(root_folder):
 
     ep = _oauth_sink(root_folder)
     with patch("webhooks.oauth._fetch", side_effect=OAuthError("denied")):
-        with patch("webhooks.tasks.requests.post") as post:
+        with patch("webhooks.tasks.public_post") as post:
             with pytest.raises(OAuthError):
                 tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
     # The event is never sent unauthenticated.
@@ -510,7 +510,7 @@ def test_static_auth_does_not_fetch_a_token(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch") as fetch:
-        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+        with patch("webhooks.tasks.public_post", return_value=sink_response):
             tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
     fetch.assert_not_called()
 
@@ -568,7 +568,7 @@ def test_body_wrapper_array_wraps_the_event(root_folder):
     ep = _make_audit_sink(root_folder, body_wrapper=WebhookEndpoint.BodyWrapper.ARRAY)
     sink_response = MagicMock()
     sink_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
         tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
 
     assert json.loads(post.call_args.kwargs["data"]) == [{"class_uid": 6003}]
@@ -580,7 +580,7 @@ def test_body_wrapper_none_sends_bare_object(root_folder):
     ep = _make_audit_sink(root_folder)
     sink_response = MagicMock()
     sink_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
         tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
 
     assert json.loads(post.call_args.kwargs["data"]) == {"class_uid": 6003}
@@ -682,7 +682,7 @@ def test_send_refuses_bearer_over_http(root_folder):
     # Bypass clean() to simulate a row saved before the HTTPS rule.
     WebhookEndpoint.objects.filter(pk=ep.pk).update(url="http://siem.example/c")
     with patch("webhooks.oauth._fetch") as fetch:
-        with patch("webhooks.tasks.requests.post") as post:
+        with patch("webhooks.tasks.public_post") as post:
             result = tasks.send_audit_request.call_local(str(ep.id), {})
     assert result.startswith("Blocked")
     fetch.assert_not_called()
@@ -841,7 +841,7 @@ def test_blocked_token_url_drops_event_without_retry(root_folder):
         side_effect=BlockedRequestError("private"),
     ):
         with patch("webhooks.tasks.assert_public_url_unless_dev"):
-            with patch("webhooks.tasks.requests.post") as post:
+            with patch("webhooks.tasks.public_post") as post:
                 result = tasks.send_audit_request.call_local(str(ep.id), {})
     assert result.startswith("Blocked")
     post.assert_not_called()
