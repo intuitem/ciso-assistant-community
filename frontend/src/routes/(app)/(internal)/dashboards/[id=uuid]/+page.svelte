@@ -44,8 +44,7 @@
 
 			// If there's not enough space in the current widget line we jump to the next line.
 			if (endX > X_LIMIT) {
-				console.log('LIMIT REACHED:', endX);
-				const currentLineWidgets = filteredWidgets.filter(
+				const currentLineWidgets = finalWidgets.filter(
 					({ position_y }) => position_y === currentY
 				);
 				const currentLineHeights = currentLineWidgets.map(({ height }) => height);
@@ -71,7 +70,7 @@
 		const widgetTitleList = widgets
 			.filter(
 				// Adding the "text"-widgets in the filter options would be useless and confusing.
-				({ chart_type }) => chart_type !== 'text'
+				({ chart_type, title }) => chart_type !== 'text' && Boolean(title)
 			)
 			.map(({ title }) => title);
 		const uniqueWidgetTitleList = [...new Set(widgetTitleList)];
@@ -100,6 +99,7 @@
 					bind:selected={selectedTitles}
 					options={widgetTitles}
 					placeholder={m.widgets()}
+					aria-label={m.widgets()}
 					closeDropdownOnSelect={false}
 					outerDivClass="!input !bg-surface-100-900 !px-2 !flex min-w-64 max-w-1/2!"
 				/>
