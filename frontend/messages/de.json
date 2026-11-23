@@ -839,6 +839,8 @@
 	"blocker": "Blocker",
 	"createUser": "Benutzer erstellen",
 	"createUserHelpText": "Erstellen oder verknüpfen Sie einen Drittbenutzer mit dem Vertreter basierend auf der E-Mail",
+	"preferredRepresentative": "Bevorzugter Vertreter",
+	"preferredRepresentativeHelpText": "Wird als Zuständiger für Aufgaben vorausgewählt, die im Arbeitsbereich dieser Drittpartei erstellt werden. Ist keiner ihrer Antwortenden bevorzugt, werden alle vorausgewählt.",
 	"nameDuplicate": "Name existiert bereits",
 	"noAnswer": "Keine Antwort",
 	"clearAnswer": "Antwort löschen",

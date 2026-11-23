@@ -1425,6 +1425,8 @@
 	"blocker": "Blokator (Blocker)",
 	"createUser": "Ustvari uporabnika",
 	"createUserHelpText": "Ustvarite ali povežite uporabnika tretje osebe z zastopnikom na podlagi e-pošte",
+	"preferredRepresentative": "Prednostni zastopnik",
+	"preferredRepresentativeHelpText": "Vnaprej izbran kot izvajalec nalog, ustvarjenih v delovnem prostoru te tretje osebe. Če nobeden od njenih anketirancev ni prednosten, so vnaprej izbrani vsi.",
 	"userLinkedToRepresentative": "Uporabnik je že povezan s tem zastopnikom.",
 	"nameDuplicate": "Ime že obstaja",
 	"noAnswer": "Ni odgovora",

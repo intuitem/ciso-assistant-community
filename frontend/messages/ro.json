@@ -874,6 +874,8 @@
 	"blocker": "Blocant",
 	"createUser": "Creați utilizator",
 	"createUserHelpText": "Creați sau legați un utilizator terță parte la reprezentant pe baza emailului",
+	"preferredRepresentative": "Reprezentant preferat",
+	"preferredRepresentativeHelpText": "Preselectat ca responsabil pentru sarcinile create în spațiul de lucru al acestui terț. Dacă niciunul dintre respondenții săi nu este preferat, sunt preselectați toți.",
 	"nameDuplicate": "Numele există deja",
 	"noAnswer": "Nici un răspuns",
 	"clearAnswer": "Ștergeți răspunsul",

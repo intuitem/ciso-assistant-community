@@ -1237,6 +1237,8 @@
 	"blocker": "차단 요소",
 	"createUser": "사용자 생성",
 	"createUserHelpText": "이메일을 기준으로 대표자에게 제3자 사용자를 생성하거나 연결합니다",
+	"preferredRepresentative": "우선 대표자",
+	"preferredRepresentativeHelpText": "이 제3자의 작업 공간에서 생성된 작업의 담당자로 미리 선택됩니다. 우선으로 지정된 응답자가 없으면 모든 응답자가 미리 선택됩니다.",
 	"userLinkedToRepresentative": "이 대표자에는 이미 사용자가 연결되어 있습니다.",
 	"nameDuplicate": "이름이 이미 존재합니다",
 	"noAnswer": "답변 없음",

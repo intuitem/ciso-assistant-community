@@ -921,6 +921,8 @@
 	"blocker": "Engelleyici",
 	"createUser": "Kullanıcı oluştur",
 	"createUserHelpText": "E-postaya dayalı temsilci için bir üçüncü taraf kullanıcı oluşturun veya bağlayın",
+	"preferredRepresentative": "Tercih edilen temsilci",
+	"preferredRepresentativeHelpText": "Bu üçüncü tarafın çalışma alanında oluşturulan görevlere atanan kişi olarak önceden seçilir. Yanıtlayanlarından hiçbiri tercih edilmemişse hepsi önceden seçilir.",
 	"nameDuplicate": "Ad zaten var",
 	"noAnswer": "Cevap yok",
 	"clearAnswer": "Cevabı temizle",

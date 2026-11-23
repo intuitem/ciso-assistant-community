@@ -1085,6 +1085,8 @@
 	"blocker": "阻塞项",
 	"createUser": "创建用户",
 	"createUserHelpText": "根据邮箱创建或关联第三方用户到代表",
+	"preferredRepresentative": "首选代表",
+	"preferredRepresentativeHelpText": "在此第三方工作区中创建的任务将预先选择其为负责人。如果没有任何受访者被设为首选，则预先选择所有受访者。",
 	"userLinkedToRepresentative": "此代表已关联用户。",
 	"nameDuplicate": "名称已存在",
 	"noAnswer": "无答案",

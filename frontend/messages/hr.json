@@ -921,6 +921,8 @@
 	"blocker": "Blokiranje",
 	"createUser": "Kreiraj korisnika",
 	"createUserHelpText": "Kreiraj ili poveži korisnika treće strane s predstavnikom na temelju e-mail adrese",
+	"preferredRepresentative": "Preferirani predstavnik",
+	"preferredRepresentativeHelpText": "Unaprijed odabran kao izvršitelj zadataka stvorenih u radnom prostoru ove treće strane. Ako nijedan od njezinih ispitanika nije preferiran, unaprijed su odabrani svi.",
 	"nameDuplicate": "Ime već postoji",
 	"noAnswer": "Nema odgovora",
 	"clearAnswer": "Obriši odgovor",

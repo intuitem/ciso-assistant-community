@@ -879,6 +879,8 @@
 	"blocker": "Penghalang",
 	"createUser": "Buat pengguna",
 	"createUserHelpText": "Buat atau tautkan pengguna pihak ketiga ke perwakilan berdasarkan email",
+	"preferredRepresentative": "Perwakilan utama",
+	"preferredRepresentativeHelpText": "Dipilih sebelumnya sebagai penerima tugas yang dibuat di ruang kerja pihak ketiga ini. Jika tidak ada responden yang diutamakan, semuanya dipilih sebelumnya.",
 	"nameDuplicate": "Nama sudah ada",
 	"noAnswer": "Tidak ada jawaban",
 	"clearAnswer": "Hapus jawaban",

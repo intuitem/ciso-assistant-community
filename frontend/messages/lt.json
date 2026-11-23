@@ -1292,6 +1292,8 @@
 	"blocker": "Blokavimas",
 	"createUser": "Sukurti vartotoją",
 	"createUserHelpText": "Sukurti arba susieti trečiosios šalies vartotoją su atstovu pagal el. paštą",
+	"preferredRepresentative": "Pageidaujamas atstovas",
+	"preferredRepresentativeHelpText": "Iš anksto parenkamas kaip užduočių, sukurtų šios trečiosios šalies darbo erdvėje, vykdytojas. Jei nė vienas jos respondentas nėra pageidaujamas, parenkami visi.",
 	"userLinkedToRepresentative": "Prie šio atstovo jau susietas vartotojas.",
 	"nameDuplicate": "Pavadinimas jau egzistuoja",
 	"noAnswer": "Nėra atsakymo",

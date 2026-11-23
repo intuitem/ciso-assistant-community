@@ -1662,6 +1662,8 @@
 	"blocker": "Bloker",
 	"createUser": "Utwórz użytkownika",
 	"createUserHelpText": "Utwórz lub połącz użytkownika zewnętrznego z przedstawicielem na podstawie adresu e-mail",
+	"preferredRepresentative": "Preferowany przedstawiciel",
+	"preferredRepresentativeHelpText": "Wstępnie wybrany jako wykonawca zadań utworzonych w przestrzeni roboczej tego podmiotu zewnętrznego. Jeśli żaden z jego respondentów nie jest preferowany, wybierani są wszyscy.",
 	"userLinkedToRepresentative": "Z tym przedstawicielem jest już powiązany użytkownik.",
 	"auditAlreadyLinkedToEntityAssessment": "Ten audyt jest już powiązany z inną oceną podmiotu.",
 	"nameDuplicate": "Nazwa już istnieje",

@@ -876,6 +876,8 @@
 	"blocker": "Blockerare",
 	"createUser": "Skapa användare",
 	"createUserHelpText": "Skapa eller koppla en tredje parts användare till representanten baserat på e-posten",
+	"preferredRepresentative": "Föredragen representant",
+	"preferredRepresentativeHelpText": "Förvald som ansvarig för uppgifter som skapas i den här tredje partens arbetsyta. Om ingen av dess respondenter är föredragen förväljs alla.",
 	"nameDuplicate": "Namnet finns redan",
 	"noAnswer": "Inget svar",
 	"clearAnswer": "Rensa svar",
