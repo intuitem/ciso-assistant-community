@@ -910,10 +910,21 @@ class TestCelErrorContainment:
     publish was enough to OOM the worker. The error must be contained: bounded
     in the log and never crashing the evaluation (fail-open)."""
 
-    def test_cel_error_is_bounded(self):
+    def test_cel_error_is_bounded_and_drops_the_traceback(self):
         from core.cel_service import _MAX_CEL_ERROR_CHARS, _cel_error
 
-        assert len(_cel_error(Exception("x" * 100_000))) <= _MAX_CEL_ERROR_CHARS
+        text, keep_traceback = _cel_error(Exception("x" * 100_000))
+        assert len(text) <= _MAX_CEL_ERROR_CHARS
+        # A huge message is the exponential `||` blow-up: no traceback is logged.
+        assert keep_traceback is False
+
+    def test_cel_error_keeps_the_traceback_for_an_ordinary_error(self):
+        from core.cel_service import _cel_error
+
+        # A small, unexpected error keeps its traceback for debuggability.
+        text, keep_traceback = _cel_error(ValueError("boom"))
+        assert text == "boom"
+        assert keep_traceback is True
 
     def test_cel_error_survives_a_broken_str(self):
         from core.cel_service import _cel_error
@@ -923,7 +934,7 @@ class TestCelErrorContainment:
                 raise RuntimeError("no str for you")
 
         # A pathological __str__ must not mask the original failure.
-        assert _cel_error(Boom()) == "Boom"
+        assert _cel_error(Boom()) == ("Boom", False)
 
     def test_missing_key_chained_or_fails_open(self):
         """A rule whose terms all error (reading a missing answer key) and are

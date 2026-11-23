@@ -2643,11 +2643,25 @@ class LibraryDraftViewSet(BaseModelViewSet):
         bumped = False
 
         def _revert_version_bump() -> None:
-            if bumped:
-                draft.version = original_version
-                LibraryDraft.objects.filter(pk=draft.pk).update(
-                    version=original_version, updated_at=now()
+            if not bumped:
+                return
+            # Never lower the version below a snapshot a concurrent publish may
+            # have committed: requests interleave (ATOMIC_REQUESTS is off), so a
+            # second publish could read this bumped version and record it as
+            # last_published_version. Dropping under it would defeat the
+            # version-identity guard — the same invariant the draft PATCH
+            # enforces. The conditional UPDATE makes the check and the write
+            # atomic; if it does not apply, the version stays as it is.
+            reverted = (
+                LibraryDraft.objects.filter(pk=draft.pk)
+                .filter(
+                    Q(last_published_version__isnull=True)
+                    | Q(last_published_version__lte=original_version)
                 )
+                .update(version=original_version, updated_at=now())
+            )
+            if reverted:
+                draft.version = original_version
 
         # A published artifact is identified by URN + version: re-publishing
         # different content under the version already snapshotted would put
@@ -2706,6 +2720,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # load already went through.
         conflicting = LibraryDraft.objects.filter(urn=urn).exclude(id=draft.id).first()
         if conflicting is not None:
+            _revert_version_bump()
             return Response(
                 {"error": "draftAlreadyExists", "draft": str(conflicting.id)},
                 status=HTTP_409_CONFLICT,

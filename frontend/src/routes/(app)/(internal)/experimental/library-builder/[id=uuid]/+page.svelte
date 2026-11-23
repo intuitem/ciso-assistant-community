@@ -76,12 +76,24 @@
 
 	const base = () => `/experimental/library-builder/${draft.id}`;
 
-	async function reload() {
-		const res = await fetch(`${base()}?action=read`);
-		if (res.ok) {
-			draft = await res.json();
-			resetForms();
+	let reloadSeq = 0;
+	// Returns whether the draft now reflects the server. A stale read that
+	// resolves after a newer reload (e.g. a concurrent metadata save that
+	// reloaded too) is dropped so it cannot overwrite fresher state.
+	async function reload(): Promise<boolean> {
+		const seq = ++reloadSeq;
+		let res: Response;
+		try {
+			res = await fetch(`${base()}?action=read`);
+		} catch {
+			return false;
 		}
+		if (!res.ok) return false;
+		const data = await res.json();
+		if (seq !== reloadSeq) return true; // superseded by a newer reload
+		draft = data;
+		resetForms();
+		return true;
 	}
 
 	// --- Metadata form ------------------------------------------------------
@@ -388,7 +400,11 @@
 			// not only on success: a publish can bump the draft's version on the
 			// backend and then fail to load, so a stale local copy would keep
 			// offering a fresh bump on each retry. Re-reading re-syncs the version.
-			await reload();
+			// A failed refresh must surface (and never escape this finally), so
+			// the user knows the shown state may be stale and can reload.
+			if (!(await reload())) {
+				setStatus(m.lbDraftReloadFailed(), 'error');
+			}
 		}
 	}
 

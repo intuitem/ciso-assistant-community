@@ -36,27 +36,30 @@ from core.quick_form_scoring import (
 logger = structlog.get_logger(__name__)
 
 _MAX_CEL_ERROR_CHARS = 200
+# Above this, the message is the exponential `||` blow-up (celtypes.logical_or
+# embeds both operands' repr); its traceback is dropped so logging cannot OOM.
+_MAX_TRACEBACK_CHARS = 2000
 
 
-def _cel_error(exc: Exception) -> str:
-    """A bounded, one-line summary of a celpy evaluation error, for logging.
+def _cel_error(exc: Exception) -> tuple[str, bool]:
+    """A bounded summary of a celpy evaluation error, and whether logging its
+    traceback is safe.
 
     celpy builds the error of `a || b` from the repr of BOTH operands
     (celtypes.logical_or raises ``TypeError(f"... {x!r} or {y!r}")``), so a
     chain of failing ``||`` terms yields a message whose size doubles with each
     term — megabytes for a handful of terms. Logging such an error with
-    ``exc_info=True`` reformats that whole message into the traceback and feeds
-    it to the handlers, and doing so once per audit while re-evaluating a
-    framework's audits on publish was enough to OOM the worker. So these errors
-    are never logged with ``exc_info``; only a bounded prefix of the message is
-    kept. The giant string celpy already built is dropped as soon as the
-    ``except`` block returns.
+    ``exc_info`` reformats that whole message into the traceback and feeds it to
+    the handlers, and doing so once per audit while re-evaluating a framework's
+    audits on publish was enough to OOM the worker. So the message is truncated,
+    and the traceback is kept only when the message is small: an ordinary,
+    unexpected error still logs its stack, while the pathological one does not.
     """
     try:
         text = str(exc)
     except Exception:  # a pathological __str__ must not mask the real error
-        text = type(exc).__name__
-    return text[:_MAX_CEL_ERROR_CHARS]
+        return type(exc).__name__, False
+    return text[:_MAX_CEL_ERROR_CHARS], len(text) <= _MAX_TRACEBACK_CHARS
 
 
 def _python_to_cel(value):
@@ -333,12 +336,14 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 if not result:
                     hidden_urns.add(node["urn"])
             except Exception as exc:
+                error, keep_traceback = _cel_error(exc)
                 logger.warning(
                     "cel_visibility_error",
                     expression=vis_expr,
                     requirement_urn=node["urn"],
                     compliance_assessment_id=str(ca.pk),
-                    error=_cel_error(exc),
+                    error=error,
+                    exc_info=keep_traceback,
                 )
                 # Fail-open: keep requirement visible on error
 
@@ -902,11 +907,13 @@ def _evaluate_rules(
         try:
             result = run(rule)
         except Exception as exc:
+            error, keep_traceback = _cel_error(exc)
             logger.warning(
                 "cel_value_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                error=_cel_error(exc),
+                error=error,
+                exc_info=keep_traceback,
                 **log_fields,
             )
             if errors is not None:
@@ -932,11 +939,13 @@ def _evaluate_rules(
                     k: v for k, v in rule.items() if k not in _NOT_PASSED_ON
                 }
         except Exception as exc:
+            error, keep_traceback = _cel_error(exc)
             logger.warning(
                 "cel_evaluation_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                error=_cel_error(exc),
+                error=error,
+                exc_info=keep_traceback,
                 **log_fields,
             )
             if errors is not None:
@@ -1734,12 +1743,14 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
                     hidden_page_ids.add(page["id"])
                     hidden_page_urns.add(page["urn"])
             except Exception as exc:
+                error, keep_traceback = _cel_error(exc)
                 logger.warning(
                     "cel_visibility_error",
                     expression=expression,
                     page_urn=page["urn"],
                     quick_form_response_id=str(response.pk),
-                    error=_cel_error(exc),
+                    error=error,
+                    exc_info=keep_traceback,
                 )
 
     context = (
