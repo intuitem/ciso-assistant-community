@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0208_evidence_ref_id_riskacceptance_ref_id"),
+        ("core", "0209_auditor_preread"),
     ]
 
     operations = [
