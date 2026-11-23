@@ -32,6 +32,8 @@
 		 * Accepts the object itself or a plain UUID string.
 		 */
 		optionsSelf?: any;
+		/** Further folders to exclude with their subtree, as `optionsSelf` is. */
+		excludedIds?: string[];
 		/**
 		 * Defaults to ['DO', 'GL']
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
@@ -75,6 +77,7 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
+		excludedIds = [],
 		contentTypes = ['DO', 'GL'],
 		writePermission = undefined,
 		allowedIds = null,
@@ -130,31 +133,38 @@
 		orgTree && allowedIds ? restrict(orgTree, new Set(allowedIds.map(String))) : orgTree
 	);
 
+	//  optionsSelf / excludedIds exclusion
+	const excludedSelf = $derived(
+		optionsSelf
+			? [
+					String(
+						typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
+					)
+				]
+			: []
+	);
+	const excluded: ReadonlySet<string> = $derived(
+		new Set([...excludedSelf, ...excludedIds.map(String)])
+	);
+
 	// Search walks the root on its own, then its children: results show the
-	// path below Global, which every folder shares.
+	// path below Global, which every folder shares. The children are listed
+	// beside the root, so excluding the root must drop them too.
 	const topNodes = $derived(
-		shownTree ? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])] : []
+		shownTree && !excluded.has(String(shownTree.uuid))
+			? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])]
+			: []
 	);
 	const hasNodes = $derived(topNodes.length > 0);
 	// A node of a type that is not accepted hides its whole subtree, so Global
 	// can only be drawn as the root when it is accepted.
 	const showRoot = $derived(!!shownTree && contentTypes.includes(shownTree.content_type));
 
-	//  optionsSelf exclusion
-	const excludedId = $derived(
-		optionsSelf
-			? String(
-					typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
-				)
-			: null
-	);
-
-	/** Recursively prune the excluded node (and its subtree) from a node list. */
+	/** Recursively prune the excluded nodes (and their subtrees) from a node list. */
 	function pruneExcluded(nodes: TreeNode[]): TreeNode[] {
-		const eid = excludedId;
-		if (!eid) return nodes;
+		if (excluded.size === 0) return nodes;
 		return nodes
-			.filter((n) => n.uuid !== eid)
+			.filter((n) => !excluded.has(String(n.uuid)))
 			.map((n) => ({
 				...n,
 				children: n.children ? pruneExcluded(n.children) : undefined
@@ -162,9 +172,10 @@
 	}
 
 	// What the tree draws: Global as the root with the domains under it, or the
-	// domains alone when Global is not accepted or is the excluded node.
+	// domains alone when Global is not accepted. An excluded Global leaves
+	// topNodes empty, so nothing is drawn.
 	const rootNode = $derived(
-		shownTree && showRoot && shownTree.uuid !== excludedId
+		shownTree && showRoot && !excluded.has(String(shownTree.uuid))
 			? { ...shownTree, children: pruneExcluded(shownTree.children ?? []) }
 			: null
 	);
@@ -184,9 +195,11 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
+			// An excluded node's descendants are excluded too, as in the tree view.
+			if (excluded.has(String(n.uuid))) return;
 			const selectable =
 				(!n.content_type || contentTypes.includes(n.content_type)) && n.writable !== false;
-			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
+			if (selectable && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
 			(n.children ?? []).forEach((c) => visit(c, [...ancestors, n.name]));
