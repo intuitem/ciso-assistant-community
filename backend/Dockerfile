@@ -62,20 +62,17 @@ RUN printf 'Package: gcc-14-base libgcc-s1 libstdc++6 libatomic1\nPin: version /
 
 COPY pyproject.toml uv.lock ./
 
-# torch is pinned to the PyTorch CPU index in pyproject.toml/uv.lock, so the CUDA
-# wheels are never resolved or downloaded — a plain locked sync is enough.
 RUN --mount=type=cache,target=/root/.cache/uv \
   uv sync --locked --no-dev
 
-# Pre-bake the embedding and reranker models into the image so the AI works with no
-# internet at runtime (otherwise sentence-transformers downloads them from HuggingFace
-# on first use, which breaks fully offline / air-gapped instances).
+# Pre-bake the embedding and reranker ONNX models into the image so the AI works with no
+# internet at runtime (otherwise they are downloaded from HuggingFace on first use, which
+# breaks fully offline / air-gapped instances).
 # Model IDs come from chat/embedding_models.py (single source of truth). It is copied
 # first so this layer re-bakes whenever the IDs change. Network is needed at BUILD time only.
 COPY chat/embedding_models.py ./chat/embedding_models.py
-ENV HF_HOME=/opt/hf-cache \
-  SENTENCE_TRANSFORMERS_HOME=/opt/hf-cache
-RUN uv run python -c "import chat.embedding_models as m; from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer(m.DEFAULT_EMBEDDING_MODEL); CrossEncoder(m.RERANKER_MODEL)" \
+ENV HF_HOME=/opt/hf-cache
+RUN uv run python -c "import chat.embedding_models as m; m.OnnxEmbedder(); m.OnnxCrossEncoder()" \
   && chown -R 1001:1001 /opt/hf-cache
 
 # Force offline at runtime: the model is cached above and nothing else in the chat

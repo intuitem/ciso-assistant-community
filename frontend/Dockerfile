@@ -17,7 +17,7 @@ COPY . .
 RUN npm install -g "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 RUN pnpm install --frozen-lockfile
 RUN pnpm run build
-RUN pnpm prune
+RUN pnpm prune --prod --ignore-scripts
 
 # Distroless runtime: no shell, no package manager, no npm. The copies are chowned
 # rather than a user being created, since groupadd/useradd need a shell.
