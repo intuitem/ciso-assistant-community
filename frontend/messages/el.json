@@ -2843,5 +2843,6 @@
 	"sumpageExpiredEvidences": "Ληγμένα αποδεικτικά",
 	"viewAll": "Προβολή όλων",
 	"briefingOfAssessedRequirements": "από {total} αξιολογημένες απαιτήσεις",
-	"briefingPartialCount": "{count} μερικώς"
+	"briefingPartialCount": "{count} μερικώς",
+	"onlyTheReviewerCanDoThis": "Μόνο ο αξιολογητής μπορεί να εκτελέσει αυτό το βήμα"
 }

@@ -6408,5 +6408,6 @@
 	"commandKeywordAsk": "vraag",
 	"commandKeywordSearch": "zoek",
 	"briefingOfAssessedRequirements": "van {total} beoordeelde eisen",
-	"briefingPartialCount": "{count} gedeeltelijk"
+	"briefingPartialCount": "{count} gedeeltelijk",
+	"onlyTheReviewerCanDoThis": "Alleen de beoordelaar kan deze stap uitvoeren"
 }

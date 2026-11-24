@@ -12,6 +12,7 @@ from rest_framework import serializers
 
 from core.models import Actor, Commitment
 from global_settings.utils import ff_is_enabled
+from iam.models import Folder
 
 State = Commitment.State
 
@@ -32,10 +33,11 @@ COMMITMENT_FIELDS = (
 ANY = "any"  # anyone with change permission on the object
 OWNER = "owner"  # an accountable actor for the object
 COUNTERPARTY = "counterparty"  # someone who is *not* an accountable actor
+REVIEWER = "reviewer"  # anyone but a respondent of the third party's workspace
 
 # (from, to) -> who may move it, and what the move demands.
 TRANSITIONS = {
-    (State.UNDEFINED, State.IN_NEGOTIATION): {"side": ANY},
+    (State.UNDEFINED, State.IN_NEGOTIATION): {"side": REVIEWER},
     # The date is the promise: made in one step, frozen on the way in.
     (State.IN_NEGOTIATION, State.COMMITTED): {"side": OWNER, "requires_date": True},
     (State.IN_NEGOTIATION, State.DECLINED): {"side": OWNER, "requires_note": True},
@@ -43,7 +45,14 @@ TRANSITIONS = {
     # Segregation of duties: an owner who can both make and close their own promise is a
     # self-certification loop.
     (State.COMMITTED, State.FULFILLED): {"side": COUNTERPARTY},
-    (State.DECLINED, State.IN_NEGOTIATION): {"side": ANY},
+    (State.DECLINED, State.IN_NEGOTIATION): {"side": REVIEWER},
+    (State.FULFILLED, State.IN_NEGOTIATION): {"side": REVIEWER, "requires_note": True},
+}
+
+SIDE_REFUSALS = {
+    OWNER: "onlyTheAccountableActorCanDoThis",
+    COUNTERPARTY: "theAccountableActorCannotCloseTheirOwnCommitment",
+    REVIEWER: "onlyTheReviewerCanDoThis",
 }
 
 
@@ -94,10 +103,32 @@ def user_is_respondent_for(instance, user) -> bool:
     return folder_id in get_respondent_scoped_folder_ids(user)
 
 
+def user_answers_for_vendor(folder, user) -> bool:
+    """Is *user* a respondent in this third party's workspace (an enclave)?
+
+    Only there does the reviewer alone drive the commitment: an internal auditee still
+    opens negotiations on the controls they own.
+    """
+    from core.utils import get_respondent_scoped_folder_ids
+
+    return (
+        folder is not None
+        and folder.content_type == Folder.ContentType.ENCLAVE
+        and folder.id in get_respondent_scoped_folder_ids(user)
+    )
+
+
 def user_may_take(instance, user, side: str, incoming: dict | None = None) -> bool:
-    """Whether *user* is on the right side of the table for a *side* step."""
+    """Whether *user* is on the right side of the table for a *side* step.
+
+    *instance* is None on create, where the opening step is the only legal one, so its
+    folder is the incoming one.
+    """
     if side == ANY:
         return True
+    if side == REVIEWER:
+        folder = instance.folder if instance else (incoming or {}).get("folder")
+        return not user_answers_for_vendor(folder, user)
     if side == COUNTERPARTY and user_is_respondent_for(instance, user):
         return False
     return side_allows(side, user_is_accountable(instance, user, incoming))
@@ -257,17 +288,11 @@ class CommitmentSerializerMixin:
             )
 
         request = self.context.get("request")
-        if (
-            self.instance is not None
-            and request is not None
-            and not user_may_take(self.instance, request.user, config["side"], attrs)
+        if request is not None and not user_may_take(
+            self.instance, request.user, config["side"], attrs
         ):
             raise serializers.ValidationError(
-                {
-                    "commitment_state": "onlyTheAccountableActorCanDoThis"
-                    if config["side"] == OWNER
-                    else "theAccountableActorCannotCloseTheirOwnCommitment"
-                }
+                {"commitment_state": SIDE_REFUSALS[config["side"]]}
             )
 
         if (

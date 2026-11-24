@@ -5977,5 +5977,6 @@
 	"commandKeywordAsk": "opýtaj",
 	"commandKeywordSearch": "hľadaj",
 	"briefingOfAssessedRequirements": "z {total} posúdených požiadaviek",
-	"briefingPartialCount": "{count} čiastočne"
+	"briefingPartialCount": "{count} čiastočne",
+	"onlyTheReviewerCanDoThis": "Tento krok môže vykonať iba posudzovateľ"
 }

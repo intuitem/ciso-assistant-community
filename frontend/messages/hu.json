@@ -2785,6 +2785,7 @@
 	"commitmentActionDecline": "Elutasítás",
 	"commitmentActionFulfil": "Megjelölés teljesítettként",
 	"onlyTheAccountableActorCanDoThis": "Ezt a lépést csak a kijelölt felelős teheti meg",
+	"onlyTheReviewerCanDoThis": "Ezt a lépést csak a felülvizsgáló teheti meg",
 	"commitmentManagement": "Kötelezettségvállalás-kezelés",
 	"commitmentManagementDescription": "A felelős által vállalt javítási határidő és újraegyeztetésének nyomon követése",
 	"dora": "DORA",

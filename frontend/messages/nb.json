@@ -5608,5 +5608,6 @@
 	"searchPagesAndObjects": "Søk i sider og objekter...",
 	"viewAll": "Vis alle",
 	"briefingOfAssessedRequirements": "av {total} vurderte krav",
-	"briefingPartialCount": "{count} delvis"
+	"briefingPartialCount": "{count} delvis",
+	"onlyTheReviewerCanDoThis": "Bare den som gjennomgår kan utføre dette trinnet"
 }

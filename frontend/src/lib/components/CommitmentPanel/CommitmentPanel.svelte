@@ -2,11 +2,14 @@
 	import { refreshAll } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getErrorReason } from '#lib/utils/errors.js';
+
+	type Side = 'any' | 'owner' | 'counterparty' | 'reviewer';
 
 	interface Transition {
 		value: string;
 		label: string;
-		side: 'any' | 'owner' | 'counterparty';
+		side: Side;
 		requires_note: boolean;
 		requires_date: boolean;
 		allowed: boolean;
@@ -43,12 +46,9 @@
 	interface Props {
 		urlModel: string;
 		object: any;
-		/** Show the promise without offering to change it — used where the viewer has
-		 * read-only visibility on the host field. The backend still guards the steps. */
-		readOnly?: boolean;
 	}
 
-	let { urlModel, object, readOnly = false }: Props = $props();
+	let { urlModel, object }: Props = $props();
 
 	let payload: Payload = $state({ state: '--', transitions: [] });
 	let unreadable = $state(false);
@@ -84,10 +84,16 @@
 		fulfilled: m.commitmentActionFulfil
 	};
 
+	const SIDE_REFUSALS: Partial<Record<Side, () => string>> = {
+		owner: m.onlyTheAccountableActorCanDoThis,
+		counterparty: m.theAccountableActorCannotCloseTheirOwnCommitment,
+		reviewer: m.onlyTheReviewerCanDoThis
+	};
+
 	// Reopening reads differently once a promise exists: it is not "start talking", it is
 	// "that promise no longer holds".
 	function targetLabel(transition: Transition) {
-		if (transition.value === 'in_negotiation' && state === 'committed')
+		if (transition.value === 'in_negotiation' && (state === 'committed' || state === 'fulfilled'))
 			return m.commitmentActionReopen();
 		return ACTION_LABELS[transition.value]?.() ?? safeTranslate(transition.value);
 	}
@@ -120,17 +126,10 @@
 
 	// The backend answers with either {field: "<i18n key>"} or SvelteKit's {message}.
 	async function readError(res: Response): Promise<string> {
-		let body: any;
-		try {
-			body = await res.json();
-		} catch {
-			return `${m.anErrorOccurred()} (${res.status})`;
-		}
-		const raw = body?.message ?? body;
-		const first = typeof raw === 'string' ? raw : Object.values(raw ?? {}).flat()[0];
-		if (typeof first !== 'string' || !first) return `${m.anErrorOccurred()} (${res.status})`;
-		const translated = safeTranslate(first);
-		return translated && translated !== first ? translated : first;
+		const reason = getErrorReason(await res.json().catch(() => null));
+		if (!reason) return `${m.anErrorOccurred()} (${res.status})`;
+		const translated = safeTranslate(reason);
+		return translated && translated !== reason ? translated : reason;
 	}
 
 	function pick(transition: Transition) {
@@ -272,8 +271,6 @@
 				</button>
 			</div>
 		</div>
-	{:else if readOnly}
-		<!-- nothing: the state above is the whole story for a read-only viewer -->
 	{:else if payload.transitions.length}
 		<div class="flex flex-wrap gap-2 border-t border-surface-200-800 pt-3">
 			{#each payload.transitions as transition}
@@ -281,11 +278,7 @@
 					type="button"
 					class="btn {transition.allowed ? 'preset-tonal-primary' : 'preset-tonal-surface'}"
 					disabled={!transition.allowed}
-					title={transition.allowed
-						? undefined
-						: transition.side === 'owner'
-							? m.onlyTheAccountableActorCanDoThis()
-							: m.theAccountableActorCannotCloseTheirOwnCommitment()}
+					title={transition.allowed ? undefined : SIDE_REFUSALS[transition.side]?.()}
 					onclick={() => pick(transition)}
 				>
 					{targetLabel(transition)}

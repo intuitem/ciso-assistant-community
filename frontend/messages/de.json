@@ -4236,6 +4236,7 @@
 	"commitmentActionDecline": "Ablehnen",
 	"commitmentActionFulfil": "Als erfüllt markieren",
 	"onlyTheAccountableActorCanDoThis": "Nur der zugewiesene Eigentümer kann diesen Schritt ausführen",
+	"onlyTheReviewerCanDoThis": "Nur der Prüfer kann diesen Schritt ausführen",
 	"commitmentManagement": "Zusagenverwaltung",
 	"commitmentManagementDescription": "Verfolgen Sie den Behebungstermin, den ein Eigentümer zusagt, sowie dessen Neuverhandlung",
 	"dora": "DORA",

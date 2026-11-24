@@ -5881,5 +5881,6 @@
 	"commandKeywordAsk": "vprašaj",
 	"commandKeywordSearch": "išči",
 	"briefingOfAssessedRequirements": "od {total} ocenjenih zahtev",
-	"briefingPartialCount": "{count} delno"
+	"briefingPartialCount": "{count} delno",
+	"onlyTheReviewerCanDoThis": "Ta korak lahko izvede samo pregledovalec"
 }

@@ -2289,5 +2289,6 @@
 	"sumpageP1": "P1 în așteptare",
 	"viewAll": "Vezi tot",
 	"briefingOfAssessedRequirements": "din {total} cerințe evaluate",
-	"briefingPartialCount": "{count} parțial"
+	"briefingPartialCount": "{count} parțial",
+	"onlyTheReviewerCanDoThis": "Doar evaluatorul poate efectua acest pas"
 }

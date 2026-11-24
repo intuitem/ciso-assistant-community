@@ -2797,6 +2797,7 @@
 	"commitmentActionDecline": "Decline",
 	"commitmentActionFulfil": "Mark as fulfilled",
 	"onlyTheAccountableActorCanDoThis": "Only the assigned owner can take this step",
+	"onlyTheReviewerCanDoThis": "Only the reviewer can take this step",
 	"commitmentManagement": "Commitment management",
 	"commitmentManagementDescription": "Track the remediation date an owner commits to, and its renegotiation",
 	"dora": "DORA",

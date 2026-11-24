@@ -2257,5 +2257,6 @@
 	"sumpageP1": "लंबित P1",
 	"viewAll": "सभी देखें",
 	"briefingOfAssessedRequirements": "{total} मूल्यांकित आवश्यकताओं में से",
-	"briefingPartialCount": "{count} आंशिक"
+	"briefingPartialCount": "{count} आंशिक",
+	"onlyTheReviewerCanDoThis": "केवल समीक्षक ही यह चरण पूरा कर सकता है"
 }

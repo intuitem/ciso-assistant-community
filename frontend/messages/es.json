@@ -4018,5 +4018,6 @@
 	"searchPagesAndObjects": "Buscar páginas y objetos...",
 	"viewAll": "Ver todo",
 	"briefingOfAssessedRequirements": "de {total} requisitos evaluados",
-	"briefingPartialCount": "{count} parciales"
+	"briefingPartialCount": "{count} parciales",
+	"onlyTheReviewerCanDoThis": "Solo el revisor puede realizar este paso"
 }

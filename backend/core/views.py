@@ -6511,6 +6511,11 @@ class CommitmentActionsMixin:
         if getattr(obj, "is_recurrent", False):
             return {"state": obj.commitment_state, "transitions": []}
 
+        may_transition = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="transition_commitment"),
+            folder=Folder.get_folder(obj),
+        )
         transitions = []
         for target, config in commitment.allowed_targets(obj.commitment_state).items():
             transitions.append(
@@ -6522,9 +6527,8 @@ class CommitmentActionsMixin:
                     "requires_date": bool(config.get("requires_date")),
                     # Through `user_may_take`, not `side_allows`: the UI must not offer
                     # a step the write serializer will refuse.
-                    "allowed": commitment.user_may_take(
-                        obj, request.user, config["side"]
-                    ),
+                    "allowed": may_transition
+                    and commitment.user_may_take(obj, request.user, config["side"]),
                 }
             )
         current = obj.commitment

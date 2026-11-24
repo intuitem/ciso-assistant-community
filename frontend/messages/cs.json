@@ -5940,6 +5940,7 @@
 	"commitmentActionDecline": "Odmítnout",
 	"commitmentActionFulfil": "Označit jako splněné",
 	"onlyTheAccountableActorCanDoThis": "Tento krok může provést pouze odpovědný vlastník",
+	"onlyTheReviewerCanDoThis": "Tento krok může provést pouze posuzovatel",
 	"commitmentManagement": "Správa závazků",
 	"commitmentManagementDescription": "Sledujte datum nápravy, ke kterému se vlastník zaváže, a případná opětovná vyjednávání",
 	"dora": "DORA",

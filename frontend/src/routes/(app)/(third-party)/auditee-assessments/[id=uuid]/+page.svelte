@@ -1978,11 +1978,7 @@
 																	{#if showCommitment && expandedTask === task.id}
 																		<tr>
 																			<td colspan="5" class="pb-3">
-																				<CommitmentPanel
-																					urlModel="task-templates"
-																					object={task}
-																					readOnly={!canEditTaskTemplates}
-																				/>
+																				<CommitmentPanel urlModel="task-templates" object={task} />
 																			</td>
 																		</tr>
 																	{/if}

@@ -2267,5 +2267,6 @@
 	"sumpageP1": "زیر التوا P1",
 	"viewAll": "سب دیکھیں",
 	"briefingOfAssessedRequirements": "{total} جانچی گئی ضروریات میں سے",
-	"briefingPartialCount": "{count} جزوی"
+	"briefingPartialCount": "{count} جزوی",
+	"onlyTheReviewerCanDoThis": "صرف جائزہ لینے والا یہ قدم اٹھا سکتا ہے"
 }

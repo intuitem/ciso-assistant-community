@@ -2809,6 +2809,7 @@
 	"commitmentActionDecline": "Refuser",
 	"commitmentActionFulfil": "Marquer comme tenu",
 	"onlyTheAccountableActorCanDoThis": "Seul le responsable désigné peut effectuer cette étape",
+	"onlyTheReviewerCanDoThis": "Seul le relecteur peut effectuer cette étape",
 	"commitmentManagement": "Gestion des engagements",
 	"commitmentManagementDescription": "Suivre la date de remédiation sur laquelle un responsable s'engage, et sa renégociation",
 	"dora": "DORA",

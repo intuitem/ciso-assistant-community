@@ -2284,5 +2284,6 @@
 	"sumpageP1": "Väntande P1",
 	"viewAll": "Visa alla",
 	"briefingOfAssessedRequirements": "av {total} bedömda krav",
-	"briefingPartialCount": "{count} delvis"
+	"briefingPartialCount": "{count} delvis",
+	"onlyTheReviewerCanDoThis": "Endast granskaren kan utföra detta steg"
 }

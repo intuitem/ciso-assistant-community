@@ -4899,5 +4899,6 @@
 	"commandKeywordSearch": "ieškok",
 	"viewAll": "Rodyti viską",
 	"briefingOfAssessedRequirements": "iš {total} įvertintų reikalavimų",
-	"briefingPartialCount": "{count} iš dalies"
+	"briefingPartialCount": "{count} iš dalies",
+	"onlyTheReviewerCanDoThis": "Šį veiksmą gali atlikti tik peržiūrėtojas"
 }
