@@ -86,7 +86,7 @@
 				<i class="fa-solid fa-arrow-left"></i>
 				{m.back()}
 			</a>
-			<h1 class="text-2xl font-bold w-min">{dashboard.name}</h1>
+			<h1 class="text-2xl font-bold">{dashboard.name}</h1>
 			{#if dashboard.description}
 				<span class="text-surface-500">- {dashboard.description}</span>
 			{/if}
