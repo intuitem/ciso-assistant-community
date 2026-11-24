@@ -28,11 +28,13 @@ objects:
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.01
-      relationship: superset
+      relationship: intersect
       rationale: semantic
-      annotation: Policy content unchanged; v1.2 opening obligation to describe responsibilities
-        and interrelationships moved to 5.02.01 in v1.3.
-      strength_of_relationship: 9
+      annotation: Policy content kept, but v1.3 requires adoption by the entity's
+        board (bestuur, as defined by the Cybersecurity Act) instead of approval by
+        the organisation's management; the v1.2 opening obligation on responsibilities
+        and interrelationships moved to 5.02.01.
+      strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
       relationship: intersect
@@ -243,7 +245,7 @@ objects:
       strength_of_relationship: 10
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.01
       target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
-      relationship: intersect
+      relationship: subset
       rationale: semantic
       annotation: Cancelled in v1.3; per the official revision history it is covered
         by 5.21.03 (security requirements apply equally to the chain of subcontractors).
@@ -834,11 +836,13 @@ objects:
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.01
       target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
-      relationship: subset
+      relationship: intersect
       rationale: semantic
-      annotation: Policy content unchanged; v1.2 opening obligation to describe responsibilities
-        and interrelationships moved to 5.02.01 in v1.3.
-      strength_of_relationship: 9
+      annotation: Policy content kept, but v1.3 requires adoption by the entity's
+        board (bestuur, as defined by the Cybersecurity Act) instead of approval by
+        the organisation's management; the v1.2 opening obligation on responsibilities
+        and interrelationships moved to 5.02.01.
+      strength_of_relationship: 8
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
       target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
       relationship: intersect
@@ -1049,7 +1053,7 @@ objects:
       strength_of_relationship: 10
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
       target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.01
-      relationship: intersect
+      relationship: superset
       rationale: semantic
       annotation: Cancelled in v1.3; per the official revision history it is covered
         by 5.21.03 (security requirements apply equally to the chain of subcontractors).

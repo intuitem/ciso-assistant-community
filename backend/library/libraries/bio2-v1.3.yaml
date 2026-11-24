@@ -281,6 +281,8 @@ objects:
 
         All components shall be configured to ensure optimal security without compromising
         the functionality of the service provided.'
+      annotation: The binding Dutch text refers to the Cybersecurity Decree (Cyberbeveiligingsbesluit),
+        while the official English translation mentions the Cybersecurity Act (Cbw).
       translations:
         nl:
           description: 'Internetfacing-informatiesystemen en e-mail-berichtenverkeer
@@ -292,6 +294,8 @@ objects:
             Daarbij dienen alle onderdelen te worden ingesteld zodat een optimale
             beveiliging wordt bereikt zonder afbreuk te doen aan de functionaliteit
             van de geboden dienst.'
+          annotation: "De bindende Nederlandse tekst verwijst naar het Cyberbeveiligingsbesluit;\
+            \ de offici\xEBle Engelse vertaling spreekt van de Cybersecurity Act (Cbw)."
     - urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.02
       assessable: true
       depth: 1
