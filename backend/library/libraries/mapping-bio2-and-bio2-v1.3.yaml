@@ -1,0 +1,1631 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-bio2-and-bio2-v1.3
+locale: en
+ref_id: mapping-bio2-and-bio2-v1.3
+name: BIO2 v1.2 <-> BIO2 v1.3
+description: Mapping between Baseline Information Security for Government 2 (BIO2)
+  version 1.2 (24 September 2025) and version 1.3 (9 January 2026), following the
+  v1.3 revision history
+copyright: intuitem
+version: 1
+publication_date: 2026-11-24
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:bio2
+- urn:intuitem:risk:library:bio2-v1.3
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-bio2-and-bio2-v1.3
+    ref_id: mapping-bio2-and-bio2-v1.3
+    name: BIO2 v1.2 <-> BIO2 v1.3
+    description: Mapping between Baseline Information Security for Government 2 (BIO2)
+      version 1.2 (24 September 2025) and version 1.3 (9 January 2026), following
+      the v1.3 revision history
+    source_framework_urn: urn:intuitem:risk:framework:bio2
+    target_framework_urn: urn:intuitem:risk:framework:bio2-v1.3
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.01
+      relationship: superset
+      rationale: semantic
+      annotation: Policy content unchanged; v1.2 opening obligation to describe responsibilities
+        and interrelationships moved to 5.02.01 in v1.3.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
+      relationship: intersect
+      rationale: semantic
+      annotation: v1.2 obligation to describe and establish responsibilities and interrelationships
+        (IS, OT, BCM) is now part of 5.02.01.
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
+      relationship: subset
+      rationale: semantic
+      annotation: v1.3 keeps the roles and responsibilities and additionally requires
+        the board to establish the interrelationships for IS, OT and BCM.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.02.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.04.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.10.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical text, renumbered from 5.04.02 to 5.10.02.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.10.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical text, renumbered from 5.04.03 to 5.10.03.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.05.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.05.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.08.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.09.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.09.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.12.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.12.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.01
+      relationship: subset
+      rationale: semantic
+      annotation: v1.3 extends mandatory standards compliance to the Cybersecurity
+        Decree (Cyberbeveiligingsbesluit).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.15.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.15.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.16.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.16.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.16.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.16.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.18.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.18.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.18.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.18.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.19.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.19.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.06
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
+      relationship: intersect
+      rationale: semantic
+      annotation: Cancelled in v1.3; per the official revision history it is covered
+        by 5.21.03 (security requirements apply equally to the chain of subcontractors).
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.22.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.22.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.22.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.22.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.23.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.23.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.05
+      relationship: equal
+      rationale: syntactic
+      annotation: Same text (organisation -> entity), renumbered from 5.24.06 to 5.21.05.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.07
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.07
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.25.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.26.02
+      relationship: equal
+      rationale: semantic
+      annotation: 'Same obligation reworded: incidents handled via incident management
+        and reported to supervisory authorities where relevant; v1.2 listed example
+        laws.'
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.27.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.27.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.27.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.27.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.28.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.28.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.30.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.30.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.30.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.30.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.33.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.33.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.35.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.35.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:5.36.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.36.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.01.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:6.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.08.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.01.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.07.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.07.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.02
+      relationship: superset
+      rationale: semantic
+      annotation: Same check and reporting; the first paragraph (irretrievable deletion)
+        moved to 7.10.01 per the official revision history.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
+      relationship: intersect
+      rationale: semantic
+      annotation: Per the official revision history, the first paragraph of v1.2 7.10.02
+        is now described under 7.10.01.
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.01.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.01.02
+      relationship: superset
+      rationale: semantic
+      annotation: Same mobile device measures; the awareness bullet moved to 6.03.04
+        in v1.3.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.04
+      relationship: superset
+      rationale: semantic
+      annotation: Awareness on safe mobile working was a bullet of v1.2 8.01.02 and
+        is now its own measure 6.03.04.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.03.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.03.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.03.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.03.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.05.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.05.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.08
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical CVD text, renumbered from 8.08.06 to 5.24.08.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.06
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.18.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.18.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.18.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.18.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.19.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.19.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.20.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.20.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.20.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.20.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.22.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.22.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.01
+      relationship: intersect
+      rationale: semantic
+      annotation: Cancelled in v1.3; per the official revision history it is indirectly
+        described under 8.24.01 (how Netherlands Standardisation Forum standards are
+        applied).
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.27.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.27.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.29.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.29.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.30.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.30.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.31.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.31.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.31.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.31.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.32.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.32.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:8.32.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.32.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-bio2-and-bio2-v1.3-revert
+    ref_id: mapping-bio2-and-bio2-v1.3-revert
+    name: BIO2 v1.2 <-> BIO2 v1.3
+    description: Mapping between Baseline Information Security for Government 2 (BIO2)
+      version 1.2 (24 September 2025) and version 1.3 (9 January 2026), following
+      the v1.3 revision history
+    target_framework_urn: urn:intuitem:risk:framework:bio2
+    source_framework_urn: urn:intuitem:risk:framework:bio2-v1.3
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
+      relationship: subset
+      rationale: semantic
+      annotation: Policy content unchanged; v1.2 opening obligation to describe responsibilities
+        and interrelationships moved to 5.02.01 in v1.3.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.01
+      relationship: intersect
+      rationale: semantic
+      annotation: v1.2 obligation to describe and establish responsibilities and interrelationships
+        (IS, OT, BCM) is now part of 5.02.01.
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.01.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.02.01
+      relationship: superset
+      rationale: semantic
+      annotation: v1.3 keeps the roles and responsibilities and additionally requires
+        the board to establish the interrelationships for IS, OT and BCM.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.02.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.02.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.04.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.10.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical text, renumbered from 5.04.02 to 5.10.02.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.10.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.04.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical text, renumbered from 5.04.03 to 5.10.03.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.05.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.05.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.08.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.09.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.09.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.12.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.12.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.01
+      relationship: superset
+      rationale: semantic
+      annotation: v1.3 extends mandatory standards compliance to the Cybersecurity
+        Decree (Cyberbeveiligingsbesluit).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.14.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.14.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.15.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.15.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.16.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.16.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.16.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.16.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.17.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.17.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.18.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.18.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.18.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.18.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.19.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.19.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.20.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.20.06
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.01
+      relationship: intersect
+      rationale: semantic
+      annotation: Cancelled in v1.3; per the official revision history it is covered
+        by 5.21.03 (security requirements apply equally to the chain of subcontractors).
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.21.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.22.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.22.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.22.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.22.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.23.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.23.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.21.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.06
+      relationship: equal
+      rationale: syntactic
+      annotation: Same text (organisation -> entity), renumbered from 5.24.06 to 5.21.05.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.07
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.24.07
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.26.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.25.01
+      relationship: equal
+      rationale: semantic
+      annotation: 'Same obligation reworded: incidents handled via incident management
+        and reported to supervisory authorities where relevant; v1.2 listed example
+        laws.'
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.27.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.27.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.27.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.27.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.28.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.28.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.30.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.30.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.30.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.30.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.33.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.33.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.35.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.35.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.36.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:5.36.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.01.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.03.03
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:6.08.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.01.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.07.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.07.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
+      relationship: subset
+      rationale: semantic
+      annotation: Same check and reporting; the first paragraph (irretrievable deletion)
+        moved to 7.10.01 per the official revision history.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
+      relationship: intersect
+      rationale: semantic
+      annotation: Per the official revision history, the first paragraph of v1.2 7.10.02
+        is now described under 7.10.01.
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.01.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.01.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.02
+      relationship: subset
+      rationale: semantic
+      annotation: Same mobile device measures; the awareness bullet moved to 6.03.04
+        in v1.3.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:6.03.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.01.02
+      relationship: subset
+      rationale: semantic
+      annotation: Awareness on safe mobile working was a bullet of v1.2 8.01.02 and
+        is now its own measure 6.03.04.
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.02.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.02.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.03.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.03.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.03.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.03.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.05.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.05.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.07.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.07.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:5.24.08
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.08.06
+      relationship: equal
+      rationale: syntactic
+      annotation: Identical CVD text, renumbered from 8.08.06 to 5.24.08.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.13.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.13.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.15.06
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.15.06
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.16.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.16.04
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.18.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.18.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.18.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.18.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.19.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.19.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.20.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.20.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.20.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.20.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.03
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.03
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.21.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.21.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.22.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.22.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.02
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.03
+      relationship: intersect
+      rationale: semantic
+      annotation: Cancelled in v1.3; per the official revision history it is indirectly
+        described under 8.24.01 (how Netherlands Standardisation Forum standards are
+        applied).
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.04
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.04
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.24.05
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.24.05
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.27.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.27.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.29.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.29.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.30.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.30.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.31.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.31.01
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.31.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.31.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.32.01
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.32.01
+      relationship: equal
+      rationale: semantic
+      annotation: Same requirement, editorial rewording only (e.g. organisation ->
+        entity, wording clarifications).
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:8.32.02
+      target_requirement_urn: urn:intuitem:risk:req_node:bio2:8.32.02
+      relationship: equal
+      rationale: syntactic
+      annotation: Same requirement.
+      strength_of_relationship: 10
