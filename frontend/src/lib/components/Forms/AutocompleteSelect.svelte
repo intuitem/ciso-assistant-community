@@ -336,6 +336,17 @@
 						updateMissingConstraint(field, isMissing);
 					}
 				}
+				// The browsable list can omit a current value the user may still see
+				// (a deactivated owner): resolve it by id so it shows by name, like
+				// lazy mode does, instead of being dropped or counted as hidden
+				// below. Only id-valued fields can be resolved this way.
+				if (!effectiveLazy && !resetForm && optionsValueField === 'id' && !allowUserOptions) {
+					try {
+						await fetchSelectedItems();
+					} catch (error) {
+						console.warn(`Could not resolve the selection from ${optionsEndpoint}:`, error);
+					}
+				}
 				// Before optionsLoaded: the value sync must see them from its first run.
 				hiddenIds = await detectHiddenIds();
 				optionsLoaded = true;
@@ -395,23 +406,31 @@
 		// selection and drop what the user just picked.
 		const current = $value ?? initialValue;
 		if (current === undefined || current === null || current === '') return;
-		const ids = Array.isArray(current) ? current : [current];
+		// Eager mode already holds the browsable options: only resolve the rest.
+		const known = new Set(effectiveLazy ? [] : options.map((o) => String(o.value)));
+		const ids = (Array.isArray(current) ? current : [current])
+			.map(String)
+			.filter((id) => !known.has(id));
 		if (ids.length === 0) return;
 
 		const lazyBase = effectiveLazy ? autocompleteBase() : undefined;
 		// Chunked and paged: the id list can exceed both the URL length budget
 		// and the server page size, and a truncated hydration would sync a
 		// truncated selection back into the form value (silent data loss).
+		// include_inactive: the value may be hidden from browsing (a deactivated
+		// user's actor); endpoints without that switch ignore it.
 		const data = await fetchAllByIds(
 			cachedFetch,
-			buildEndpoint(undefined, lazyBase),
-			ids.map(String)
+			buildEndpoint({ include_inactive: 'true' }, lazyBase),
+			ids
 		);
 		if (data.length > 0) {
 			const hydrated = processOptions(data);
 			const hydratedValues = new Set(hydrated.map((o) => String(o.value)));
-			// Keep already-selected options the hydration did not return.
-			options = [...selected.filter((o) => !hydratedValues.has(String(o.value))), ...hydrated];
+			// Keep what is already known: the selection in lazy mode, the full
+			// list in eager mode.
+			const kept = effectiveLazy ? selected : options;
+			options = [...kept.filter((o) => !hydratedValues.has(String(o.value))), ...hydrated];
 		}
 	}
 

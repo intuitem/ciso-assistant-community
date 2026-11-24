@@ -1,6 +1,11 @@
 import { configDefaults, defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { svelteTesting } from '@testing-library/svelte/vite';
 import path from 'path';
+
+// Only tests that render a component need Svelte's browser build; the rest
+// keep the default resolution they have always run with.
+const COMPONENT_TESTS = 'src/**/*.svelte.test.ts';
 
 export default defineConfig({
 	plugins: [svelte({ hot: !process.env.VITEST })],
@@ -8,7 +13,21 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: ['./vitest-setup.ts'],
-		exclude: [...configDefaults.exclude, '**/tests/**']
+		exclude: [...configDefaults.exclude, '**/tests/**'],
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: 'unit',
+					exclude: [...configDefaults.exclude, '**/tests/**', COMPONENT_TESTS]
+				}
+			},
+			{
+				extends: true,
+				plugins: [svelteTesting()],
+				test: { name: 'component', include: [COMPONENT_TESTS] }
+			}
+		]
 	},
 	resolve: {
 		alias: {

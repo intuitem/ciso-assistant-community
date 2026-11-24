@@ -252,12 +252,16 @@ export const COMMITMENT_STATE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Pickers hide deactivated users; filters must not, since filtering on a
+// departed owner is how their leftover items get found and reassigned.
+const ACTOR_FILTER_ENDPOINT = 'actors?include_inactive=true';
+
 export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		lazy: true,
 		label: 'committedBy',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		multiple: true
@@ -1130,7 +1134,7 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 		label: 'assigned_to',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		multiple: true
 	}
 };
@@ -1142,7 +1146,7 @@ export const AUTHOR_FILTER: ListViewFilterConfig = {
 		label: 'authors',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		multiple: true
 	}
 };
@@ -1595,7 +1599,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		multiple: true
 	}
 };
@@ -1607,7 +1611,7 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		multiple: true
 	}
 };
@@ -1765,7 +1769,7 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'actors',
+		optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 		multiple: true,
 		enableDoubleDash: true
 	}
@@ -4011,7 +4015,7 @@ export const listViewFields = {
 				component: AutocompleteSelect,
 				props: {
 					lazy: true,
-					optionsEndpoint: 'actors',
+					optionsEndpoint: ACTOR_FILTER_ENDPOINT,
 					optionsLabelField: 'str',
 					label: 'owner',
 					multiple: true

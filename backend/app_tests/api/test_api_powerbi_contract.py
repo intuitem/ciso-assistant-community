@@ -275,8 +275,9 @@ def bi_dataset(db):
         mission="BI provider",
         reference_link="https://example.com/entity",
     )
-    # User-backed: /api/actors/ hides entity actors by default.
-    approver = User.objects.create(email="bi-approver@tests.com")
+    # User-backed: /api/actors/ hides entity actors by default. Deactivated, so
+    # the contract proves the connector's query still reaches departed owners.
+    approver = User.objects.create(email="bi-approver@tests.com", is_active=False)
     actor = approver.actor
     solution = Solution.objects.create(
         name="BI Solution",
@@ -409,7 +410,9 @@ def bi_dataset(db):
 
 
 # Mirrors GetEntityTable's baseQuery in CisoAssistant.pq.
-ENDPOINT_QUERY = {"actors": {"include_third_parties": "true"}}
+ENDPOINT_QUERY = {
+    "actors": {"include_third_parties": "true", "include_inactive": "true"}
+}
 
 
 def _get_row(client, endpoint, obj_id):
