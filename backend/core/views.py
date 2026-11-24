@@ -6202,17 +6202,21 @@ def request_viewable_folders(request):
     )
 
 
-def request_viewable_risk_scenarios(request):
+def request_viewable_choices(model):
     """
-    The risk scenarios a filter may offer as choices: those the requester can
-    view. A hidden scenario is rejected like an unknown one, so filtering by it
-    never reveals which controls it is linked to.
+    Filter choices limited to the objects of `model` the requester can view.
+    A hidden object is rejected like an unknown one, so filtering by it never
+    reveals what it is linked to. Without a request nothing is a valid choice.
     """
-    if request is None:
-        return RiskScenario.objects.none()
-    return RiskScenario.objects.filter(
-        id__in=RoleAssignment.get_viewable_object_ids(request.user, RiskScenario)
-    )
+
+    def queryset(request):
+        if request is None:
+            return model.objects.none()
+        return model.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, model)
+        )
+
+    return queryset
 
 
 class AppliedControlFilterSet(GenericFilterSet):
@@ -6229,16 +6233,23 @@ class AppliedControlFilterSet(GenericFilterSet):
     )
     risk_assessments = df.ModelMultipleChoiceFilter(
         method="filter_risk_assessments",
-        queryset=RiskAssessment.objects.all(),
+        queryset=request_viewable_choices(RiskAssessment),
     )
     findings_assessments = df.ModelMultipleChoiceFilter(
         method="filter_findings_assessments",
         queryset=FindingsAssessment.objects.all(),
     )
+    # Scenario filters only take scenarios the requester can view.
+    risk_scenarios = df.ModelMultipleChoiceFilter(
+        queryset=request_viewable_choices(RiskScenario)
+    )
+    risk_scenarios_e = df.ModelMultipleChoiceFilter(
+        queryset=request_viewable_choices(RiskScenario)
+    )
     # A control linked to a scenario as an existing or an additional measure.
     linked_risk_scenarios = df.ModelMultipleChoiceFilter(
         method="filter_linked_risk_scenarios",
-        queryset=request_viewable_risk_scenarios,
+        queryset=request_viewable_choices(RiskScenario),
         label="Linked risk scenarios",
     )
     status = df.MultipleChoiceFilter(
@@ -6445,8 +6456,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "control_impact": ["exact"],
             # category, csf_function, priority, effort, control_impact use NullableChoiceFilter (defined above)
             "filtering_labels": ["exact"],
-            "risk_scenarios": ["exact"],
-            "risk_scenarios_e": ["exact"],
             "requirement_assessments": ["exact"],
             "evidences": ["exact"],
             "objectives": ["exact"],

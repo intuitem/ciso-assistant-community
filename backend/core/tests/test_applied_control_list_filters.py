@@ -136,7 +136,11 @@ def test_impact_effort_honors_exclude_status(client, domain):
     assert cell("?exclude_status=active") == {"to do"}
 
 
-def test_linked_risk_scenarios_rejects_scenarios_the_user_cannot_view(domain):
+@pytest.fixture
+def hidden_link(domain):
+    """A reader of one domain, and a control there linked both ways to a
+    scenario they can view and to one in a domain they cannot."""
+
     def iam_domain(name):
         folder = Folder.objects.create(
             parent_folder=Folder.get_root_folder(),
@@ -156,22 +160,34 @@ def test_linked_risk_scenarios_rejects_scenarios_the_user_cannot_view(domain):
         risk_assessment=_risk_assessment(hidden_domain, "unseen ra"), name="unseen"
     )
     control = _control(visible_domain, "shared control")
-    seen.applied_controls.add(control)
-    unseen.existing_applied_controls.add(control)
+    for scenario in (seen, unseen):
+        scenario.applied_controls.add(control)
+        scenario.existing_applied_controls.add(control)
 
     reader = User.objects.create_user("reader@control-filters-tests.com")
     UserGroup.objects.get(name="BI-UG-AUD", folder=visible_domain).user_set.add(reader)
-    reader_client = _token_client(reader)
+    return _token_client(reader), seen, unseen
 
-    assert _names(reader_client, f"linked_risk_scenarios={seen.id}") == {
+
+@pytest.mark.parametrize(
+    "param, attribute",
+    [
+        ("linked_risk_scenarios", "id"),
+        ("risk_scenarios", "id"),
+        ("risk_scenarios_e", "id"),
+        ("risk_assessments", "risk_assessment_id"),
+    ],
+)
+def test_filters_reject_objects_the_user_cannot_view(hidden_link, param, attribute):
+    reader_client, seen, unseen = hidden_link
+
+    assert _names(reader_client, f"{param}={getattr(seen, attribute)}") == {
         "shared control"
     }
-    # A hidden scenario is refused exactly like one that does not exist.
+    # A hidden object is refused exactly like one that does not exist.
     hidden = reader_client.get(
-        f"/api/applied-controls/?linked_risk_scenarios={unseen.id}"
+        f"/api/applied-controls/?{param}={getattr(unseen, attribute)}"
     )
-    unknown = reader_client.get(
-        f"/api/applied-controls/?linked_risk_scenarios={uuid4()}"
-    )
+    unknown = reader_client.get(f"/api/applied-controls/?{param}={uuid4()}")
     assert hidden.status_code == unknown.status_code == 400
-    assert set(hidden.json()) == set(unknown.json()) == {"linked_risk_scenarios"}
+    assert set(hidden.json()) == set(unknown.json()) == {param}
