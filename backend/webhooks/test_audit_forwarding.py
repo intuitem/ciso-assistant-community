@@ -10,6 +10,7 @@ from django.test import override_settings
 
 from auditlog.models import LogEntry
 from core.models import Perimeter
+from core.net_safety import BlockedRequestError
 from iam.models import Folder
 from webhooks import tasks
 from webhooks.models import WebhookEndpoint
@@ -225,7 +226,7 @@ def test_send_audit_request_uses_static_headers_no_hmac(root_folder):
     ep = _make_audit_sink(root_folder)
     mock_response = MagicMock()
     mock_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=mock_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=mock_response) as post:
         result = tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
     assert result.startswith("Success")
     sent_headers = post.call_args.kwargs["headers"]
@@ -432,9 +433,8 @@ def _minted(token):
     return (token, time.monotonic() + 3600)
 
 
-# webhooks.tasks.requests and webhooks.oauth.requests are the same module object,
-# so patching both paths in one test collides. Delivery tests stub oauth._fetch;
-# the token request itself is covered by the oauth-module tests below.
+# Delivery tests stub oauth._fetch; the token request itself is covered by the
+# oauth-module tests below.
 
 
 @pytest.mark.django_db
@@ -444,7 +444,7 @@ def test_send_audit_request_sends_oauth_bearer(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch", return_value=_minted("tok")):
-        with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+        with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
             result = tasks.send_audit_request.call_local(
                 str(ep.id), {"class_uid": 6003}
             )
@@ -460,7 +460,7 @@ def test_oauth_token_is_cached_across_sends(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch", return_value=_minted("tok")) as fetch:
-        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+        with patch("webhooks.tasks.public_post", return_value=sink_response):
             tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
             tasks.send_audit_request.call_local(str(ep.id), {"a": 2})
 
@@ -479,7 +479,7 @@ def test_oauth_refreshes_once_on_401(root_folder):
         "webhooks.oauth._fetch", side_effect=[_minted("stale"), _minted("fresh")]
     ) as fetch:
         with patch(
-            "webhooks.tasks.requests.post", side_effect=[unauthorized, ok]
+            "webhooks.tasks.public_post", side_effect=[unauthorized, ok]
         ) as post:
             result = tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
 
@@ -491,12 +491,29 @@ def test_oauth_refreshes_once_on_401(root_folder):
 
 @pytest.mark.django_db
 @override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_oauth_refresh_blocked_reports_token_url(root_folder):
+    ep = _oauth_sink(root_folder)
+    unauthorized = MagicMock()
+    unauthorized.status_code = 401
+    with patch(
+        "webhooks.oauth._fetch",
+        side_effect=[_minted("stale"), BlockedRequestError("rebound")],
+    ):
+        with patch("webhooks.tasks.public_post", return_value=unauthorized) as post:
+            result = tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
+
+    assert result.startswith("Blocked") and "token URL" in result
+    assert post.call_count == 1
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
 def test_oauth_failure_propagates_for_retry(root_folder):
     from webhooks.oauth import OAuthError
 
     ep = _oauth_sink(root_folder)
     with patch("webhooks.oauth._fetch", side_effect=OAuthError("denied")):
-        with patch("webhooks.tasks.requests.post") as post:
+        with patch("webhooks.tasks.public_post") as post:
             with pytest.raises(OAuthError):
                 tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
     # The event is never sent unauthenticated.
@@ -510,7 +527,7 @@ def test_static_auth_does_not_fetch_a_token(root_folder):
     sink_response = MagicMock()
     sink_response.status_code = 200
     with patch("webhooks.oauth._fetch") as fetch:
-        with patch("webhooks.tasks.requests.post", return_value=sink_response):
+        with patch("webhooks.tasks.public_post", return_value=sink_response):
             tasks.send_audit_request.call_local(str(ep.id), {"a": 1})
     fetch.assert_not_called()
 
@@ -521,7 +538,7 @@ def test_oauth_token_request_is_an_rfc6749_form_post(root_folder):
     from webhooks import oauth
 
     ep = _oauth_sink(root_folder)
-    with patch("webhooks.oauth.requests.post", return_value=_token_response()) as post:
+    with patch("webhooks.oauth.public_post", return_value=_token_response()) as post:
         assert oauth.get_token(ep) == "tok"
 
     assert post.call_args.args[0] == ep.oauth_config["token_url"]
@@ -540,7 +557,7 @@ def test_oauth_rejects_token_endpoint_error(root_folder):
     ep = _oauth_sink(root_folder)
     denied = MagicMock()
     denied.status_code = 401
-    with patch("webhooks.oauth.requests.post", return_value=denied):
+    with patch("webhooks.oauth.public_post", return_value=denied):
         with pytest.raises(oauth.OAuthError):
             oauth.get_token(ep)
 
@@ -553,7 +570,7 @@ def test_oauth_renews_within_the_expiry_skew(root_folder):
     # A lifetime shorter than the skew must never be served from cache.
     ep = _oauth_sink(root_folder)
     with patch(
-        "webhooks.oauth.requests.post", return_value=_token_response(expires_in=30)
+        "webhooks.oauth.public_post", return_value=_token_response(expires_in=30)
     ) as post:
         oauth.get_token(ep)
         oauth.get_token(ep)
@@ -568,7 +585,7 @@ def test_body_wrapper_array_wraps_the_event(root_folder):
     ep = _make_audit_sink(root_folder, body_wrapper=WebhookEndpoint.BodyWrapper.ARRAY)
     sink_response = MagicMock()
     sink_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
         tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
 
     assert json.loads(post.call_args.kwargs["data"]) == [{"class_uid": 6003}]
@@ -580,7 +597,7 @@ def test_body_wrapper_none_sends_bare_object(root_folder):
     ep = _make_audit_sink(root_folder)
     sink_response = MagicMock()
     sink_response.status_code = 200
-    with patch("webhooks.tasks.requests.post", return_value=sink_response) as post:
+    with patch("webhooks.tasks.public_post", return_value=sink_response) as post:
         tasks.send_audit_request.call_local(str(ep.id), {"class_uid": 6003})
 
     assert json.loads(post.call_args.kwargs["data"]) == {"class_uid": 6003}
@@ -649,7 +666,7 @@ def test_oauth_rejects_malformed_token_body(root_folder, body):
     ep = _oauth_sink(root_folder)
     response = MagicMock(status_code=200)
     response.json.return_value = body
-    with patch("webhooks.oauth.requests.post", return_value=response):
+    with patch("webhooks.oauth.public_post", return_value=response):
         with pytest.raises(oauth.OAuthError):
             oauth.get_token(ep)
 
@@ -682,7 +699,7 @@ def test_send_refuses_bearer_over_http(root_folder):
     # Bypass clean() to simulate a row saved before the HTTPS rule.
     WebhookEndpoint.objects.filter(pk=ep.pk).update(url="http://siem.example/c")
     with patch("webhooks.oauth._fetch") as fetch:
-        with patch("webhooks.tasks.requests.post") as post:
+        with patch("webhooks.tasks.public_post") as post:
             result = tasks.send_audit_request.call_local(str(ep.id), {})
     assert result.startswith("Blocked")
     fetch.assert_not_called()
@@ -791,7 +808,7 @@ def test_extra_params_cannot_override_credentials(root_folder):
         "grant_type": "password",
         "audience": "api://x",
     }
-    with patch("webhooks.oauth.requests.post", return_value=_token_response()) as post:
+    with patch("webhooks.oauth.public_post", return_value=_token_response()) as post:
         oauth.get_token(ep)
     sent = post.call_args.kwargs["data"]
     assert sent["client_id"] == "cid"
@@ -807,7 +824,7 @@ def test_zero_expires_in_is_not_cached(root_folder):
 
     ep = _oauth_sink(root_folder)
     with patch(
-        "webhooks.oauth.requests.post", return_value=_token_response(expires_in=0)
+        "webhooks.oauth.public_post", return_value=_token_response(expires_in=0)
     ) as post:
         oauth.get_token(ep)
         oauth.get_token(ep)
@@ -822,7 +839,7 @@ def test_unreachable_token_endpoint_raises_oauth_error(root_folder):
 
     ep = _oauth_sink(root_folder)
     with patch(
-        "webhooks.oauth.requests.post",
+        "webhooks.oauth.public_post",
         side_effect=requests.exceptions.ConnectionError("down"),
     ):
         with pytest.raises(oauth.OAuthError):
@@ -841,7 +858,7 @@ def test_blocked_token_url_drops_event_without_retry(root_folder):
         side_effect=BlockedRequestError("private"),
     ):
         with patch("webhooks.tasks.assert_public_url_unless_dev"):
-            with patch("webhooks.tasks.requests.post") as post:
+            with patch("webhooks.tasks.public_post") as post:
                 result = tasks.send_audit_request.call_local(str(ep.id), {})
     assert result.startswith("Blocked")
     post.assert_not_called()
