@@ -49,6 +49,8 @@
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
+	const MAX_ENTRIES = 200;
+
 	let entries: AuditEntry[] = $state([]);
 	let loading = $state(true);
 	let errorMessage: string | null = $state(null);
@@ -192,6 +194,11 @@
 			{:else if events.length === 0}
 				<p class="text-surface-500">{m.noHistoryForThisObject()}</p>
 			{:else}
+				{#if entries.length >= MAX_ENTRIES}
+					<p class="text-surface-500 text-sm mb-4" data-testid="audit-trail-truncated">
+						{m.auditTrailTruncated({ count: MAX_ENTRIES })}
+					</p>
+				{/if}
 				<ul class="space-y-6">
 					{#each events as event (event.key)}
 						<li class="border-l-2 border-surface-300-700 pl-4 py-1">
