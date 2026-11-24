@@ -39,18 +39,19 @@ The steps between them, and who may take each one:
 
 | Step | Who | Requires |
 |---|---|---|
-| Not started → **Open a negotiation** | anyone who can change the object | — |
+| Not started → **Open a negotiation** | anyone, except a third-party respondent | — |
 | In negotiation → **Commit to a date** | the owner | a date |
 | In negotiation → **Decline** | the owner | a note |
 | Committed → **Reopen the commitment** | anyone | a note |
 | Committed → **Mark as fulfilled** | the counterparty — *not* the owner | — |
-| Declined → **Reopen the commitment** | anyone | — |
+| Declined → **Reopen the commitment** | anyone, except a third-party respondent | — |
+| Fulfilled → **Reopen the commitment** | anyone, except a third-party respondent | a note |
 
 Two rules carry the intent of the model:
 
 **The owner cannot close their own commitment.** Someone who both makes and confirms delivery of a promise is self-certifying. Fulfilment is a counterparty step, deliberately.
 
-**A third-party respondent is always the promising side.** They can commit and decline; they can't sign off their own delivery.
+**A third-party respondent is always the promising side.** They can commit, decline and ask for a delay, even after submitting their questionnaire; opening, relaunching and reopening a negotiation is left to the reviewer, and they can't sign off their own delivery.
 
 When nothing is accountable for the object — no owner set — there are no sides, and anyone who can change the object can run the whole lifecycle. That's a deliberate escape hatch so an unassigned control doesn't deadlock.
 
