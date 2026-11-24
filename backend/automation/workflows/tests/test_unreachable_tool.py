@@ -76,7 +76,7 @@ def unreachable(monkeypatch):
     def refuse(*args, **kwargs):
         raise requests.ConnectionError("connection refused")
 
-    monkeypatch.setattr("requests.request", refuse)
+    monkeypatch.setattr("core.net_safety.public_request", refuse)
 
 
 @pytest.mark.django_db
@@ -123,7 +123,7 @@ class TestUnreachableTool:
             def json(self):
                 return {"ok": True}
 
-        monkeypatch.setattr("requests.request", lambda *a, **k: Answer())
+        monkeypatch.setattr("core.net_safety.public_request", lambda *a, **k: Answer())
         answered = start_instance(
             fetch_flow(make_domain("Answered"), allow_connection_error=True)
         )
@@ -131,7 +131,7 @@ class TestUnreachableTool:
         def refuse(*args, **kwargs):
             raise requests.ConnectionError("connection refused")
 
-        monkeypatch.setattr("requests.request", refuse)
+        monkeypatch.setattr("core.net_safety.public_request", refuse)
         silent = start_instance(
             fetch_flow(make_domain("Silent"), allow_connection_error=True)
         )
@@ -153,7 +153,7 @@ class TestUnreachableTool:
             def json(self):
                 raise ValueError
 
-        monkeypatch.setattr("requests.request", lambda *a, **k: Answer())
+        monkeypatch.setattr("core.net_safety.public_request", lambda *a, **k: Answer())
         instance = start_instance(
             fetch_flow(make_domain("Stringly"), allow_error_status="false")
         )
@@ -335,7 +335,7 @@ class TestUnreachableAttachSource:
             def iter_content(self, _):
                 return iter([])
 
-        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+        monkeypatch.setattr("core.net_safety.public_get", lambda *a, **k: Answer())
 
         failed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
         assert failed.status == WorkflowInstance.Status.FAILED
@@ -361,13 +361,13 @@ class TestUnreachableAttachSource:
             def iter_content(self, _):
                 return iter([b"host,agent\nlaptop-01,ok\n"])
 
-        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+        monkeypatch.setattr("core.net_safety.public_get", lambda *a, **k: Answer())
         filed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
 
         def refuse(*args, **kwargs):
             raise requests.ConnectionError("connection refused")
 
-        monkeypatch.setattr("requests.get", refuse)
+        monkeypatch.setattr("core.net_safety.public_get", refuse)
         missed = start_instance(attach_flow(folder, obj, allow_connection_error=True))
 
         assert set(filed.node_outputs["attach"]) == set(missed.node_outputs["attach"])
@@ -385,7 +385,7 @@ class TestUnreachableAttachSource:
             def iter_content(self, _):
                 return iter([b"host,agent\nlaptop-01,ok\n"])
 
-        monkeypatch.setattr("requests.get", lambda *a, **k: Answer())
+        monkeypatch.setattr("core.net_safety.public_get", lambda *a, **k: Answer())
 
         instance = start_instance(attach_flow(folder, obj, allow_connection_error=True))
         assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
