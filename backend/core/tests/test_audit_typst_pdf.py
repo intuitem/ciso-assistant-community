@@ -309,7 +309,7 @@ def test_scoping_helper_matches_the_interactive_endpoint(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_every_locale_template_renders(audit, lang):
     pdf, _ = _render(audit, "auditor", profile="attestation", lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -344,6 +344,8 @@ def test_unknown_locale_falls_back_whole():
         assert localized_template(stem, "de") == f"{stem}_en.typ"
         assert localized_template(stem, "fr") == f"{stem}_fr.typ"
         assert localized_template(stem, "fr-CA") == f"{stem}_fr.typ"
+        assert localized_template(stem, "hu") == f"{stem}_hu.typ"
+        assert localized_template(stem, "hu-HU") == f"{stem}_hu.typ"
         assert localized_template(stem, "tr") == f"{stem}_tr.typ"
         assert localized_template(stem, "tr-TR") == f"{stem}_tr.typ"
         assert localized_template(stem, None) == f"{stem}_en.typ"
@@ -393,6 +395,52 @@ def test_turkish_commitment_states_cover_every_state():
     from core.generators import _STATE_LABELS
 
     assert set(_STATE_LABELS["tr"]) == set(_STATE_LABELS["en"])
+
+
+@pytest.mark.django_db
+def test_hungarian_template_does_not_drift_from_english(audit):
+    """Same page count as the English twin, and none of its English chrome."""
+    en_pdf, _ = _render(audit, "auditor", profile="attestation", lang="en")
+    hu_pdf, _ = _render(audit, "auditor", profile="attestation", lang="hu")
+
+    en_doc = PdfReader(BytesIO(en_pdf)).pages
+    hu_doc = PdfReader(BytesIO(hu_pdf)).pages
+    assert len(en_doc) == len(hu_doc)
+
+    hu_text = "".join(page.extract_text() for page in hu_doc)
+    for english_only in ("Detailed results", "Assessed entity", "Signatures"):
+        assert english_only not in hu_text, (
+            "the Hungarian template still has English chrome"
+        )
+
+
+@pytest.mark.django_db
+def test_hungarian_requirement_status_values_are_localised(audit):
+    """Progress comes from `i18n_dict`, not from the template: without a `hu`
+    block it would fall back to English inside a Hungarian document. The context is
+    built with `hu` here, as the views do from the user's language preference."""
+    for ra in RequirementAssessment.objects.filter(compliance_assessment=audit):
+        ra.status = "in_progress"
+        ra.result = "compliant"
+        ra.save()
+
+    context = gen_audit_context(audit.id, _tree(audit), "hu")
+    payload, images = audit_context_for_typst(context, audit, "auditor", "hu", "full")
+    statuses = {
+        ra["status"] for ra in payload["requirement_assessments"] if "status" in ra
+    }
+    assert statuses == {"Folyamatban"}
+
+    pdf = render_pdf(localized_template("audit_report", "hu"), payload, images=images)
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
+    assert "Folyamatban" in text
+    assert "In progress" not in text, "status fell back to English"
+
+
+def test_hungarian_commitment_states_cover_every_state():
+    from core.generators import _STATE_LABELS
+
+    assert set(_STATE_LABELS["hu"]) == set(_STATE_LABELS["en"])
 
 
 @pytest.mark.django_db
