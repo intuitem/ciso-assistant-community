@@ -61,6 +61,7 @@ from core.models import (
     RiskAssessment,
     SecurityException,
     RequirementAssessment,
+    Answer,
 )
 from global_settings.models import GlobalSettings
 from resilience.models import BusinessImpactAnalysis
@@ -1371,6 +1372,15 @@ class ObjectAuditTrailView(APIView):
             entry_filter |= Q(
                 content_type=ContentType.objects.get_for_model(RequirementAssessment),
                 object_pk__in=list(ra_labels),
+            )
+            entry_filter |= Q(
+                content_type=ContentType.objects.get_for_model(Answer),
+                object_pk__in=[
+                    str(pk)
+                    for pk in Answer.objects.filter(
+                        requirement_assessment__compliance_assessment_id=object_id
+                    ).values_list("id", flat=True)
+                ],
             )
 
         entries = LogEntry.objects.filter(entry_filter)

@@ -14412,7 +14412,12 @@ auditlog.register(
 )
 auditlog.register(
     RequirementAssessment,
-    m2m_fields={"applied_controls"},
+    m2m_fields={"applied_controls", "evidences"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Answer,
+    m2m_fields={"selected_choices"},
     exclude_fields=common_exclude,
 )
 auditlog.register(

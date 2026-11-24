@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { m } from '#paraglide/messages.js';
-	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { safeTranslate, translateModelName } from '#lib/utils/i18n.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { localNameForDjangoName } from '#lib/utils/crud.js';
@@ -143,7 +143,7 @@
 
 	const modelLabel = (name: string): string => {
 		const localName = localNameForDjangoName(name);
-		return localName ? safeTranslate(localName) : name;
+		return localName ? safeTranslate(localName) : translateModelName(name);
 	};
 
 	const fmt = (value: unknown): string => {
