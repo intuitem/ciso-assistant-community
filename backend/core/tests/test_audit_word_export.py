@@ -22,6 +22,8 @@ from pathlib import Path
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from docx import Document
 from docxtpl import DocxTemplate
@@ -42,6 +44,7 @@ from core.models import (
     Framework,
     Perimeter,
     RequirementAssessment,
+    RequirementNode,
     StoredLibrary,
 )
 from iam.models import Folder, User, UserGroup
@@ -382,3 +385,57 @@ class TestAuditWordExport:
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
         )
+
+
+@pytest.mark.django_db
+class TestAuditReportQueryCount:
+    """The requirement tree is built without per-node queries."""
+
+    @pytest.fixture
+    def tree_queries(self, monkeypatch):
+        """Query counts of each get_sorted_requirement_nodes call."""
+        import core.views
+
+        counts = []
+        original = core.views.get_sorted_requirement_nodes
+
+        def counting(*args, **kwargs):
+            with CaptureQueriesContext(connection) as ctx:
+                result = original(*args, **kwargs)
+            counts.append(len(ctx.captured_queries))
+            return result
+
+        monkeypatch.setattr(core.views, "get_sorted_requirement_nodes", counting)
+        return counts
+
+    @staticmethod
+    def _get(client, url_name, audit_obj):
+        response = client.get(reverse(url_name, kwargs={"pk": str(audit_obj.pk)}))
+        assert response.status_code == status.HTTP_200_OK
+
+    @pytest.mark.parametrize(
+        "url_name",
+        ["compliance-assessments-word-report", "compliance-assessments-posture-pdf"],
+    )
+    def test_tree_queries_do_not_grow_with_requirements(
+        self, tree_queries, admin_client, audit, url_name
+    ):
+        self._get(admin_client, url_name, audit)
+        framework = audit.framework
+        for i in range(10):
+            RequirementNode.objects.create(
+                framework=framework,
+                folder=framework.folder,
+                urn=f"urn:intuitem:test:req_node:audit-word-reg:extra-{i}",
+                parent_urn="urn:intuitem:test:req_node:audit-word-reg:cat-1",
+                name=f"Extra {i}",
+                assessable=True,
+                order_id=100 + i,
+            )
+        bigger = _make_audit(framework, name="bigger audit")
+        bigger.create_requirement_assessments()
+
+        self._get(admin_client, url_name, bigger)
+
+        small, big = tree_queries
+        assert big == small
