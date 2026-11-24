@@ -15099,13 +15099,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
             list(
-                RequirementNode.objects.filter(framework=_framework)
-                .select_related("framework")
-                .prefetch_related("questions__choices")
+                RequirementNode.objects.filter(framework=_framework).prefetch_related(
+                    "questions__choices"
+                )
             ),
             list(
                 audit_obj.get_requirement_assessments(
-                    include_non_assessable=True, skip_ig_filter=True
+                    include_non_assessable=True, lightweight=True, skip_ig_filter=True
                 )
             ),
             audit_obj.max_score

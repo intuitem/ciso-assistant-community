@@ -59,6 +59,25 @@ INITIAL_META = {
 }
 
 
+def assets_with_descendants(assets):
+    """The given assets and all their descendants, as a queryset."""
+    # one query per hierarchy level for all seeds; per-asset get_descendants() rescanned the whole link table per row
+    ids = set(assets.values_list("id", flat=True))
+    links = Asset.parent_assets.through.objects
+    frontier = ids
+    while frontier:
+        frontier = (
+            set(
+                links.filter(to_asset_id__in=frontier).values_list(
+                    "from_asset_id", flat=True
+                )
+            )
+            - ids
+        )
+        ids |= frontier
+    return Asset.objects.filter(id__in=ids)
+
+
 def get_initial_meta():
     return INITIAL_META
 
@@ -1370,25 +1389,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         return self.attack_path.ro_to_couple
 
     def get_assets(self):
-        # one query per hierarchy level for all seeds; per-asset get_descendants() rescanned the whole link table per row
-        ids = set(
+        return assets_with_descendants(
             Asset.objects.filter(
                 feared_events__in=self.ro_to.feared_events.filter(is_selected=True)
-            ).values_list("id", flat=True)
-        )
-        links = Asset.parent_assets.through.objects
-        frontier = ids
-        while frontier:
-            frontier = (
-                set(
-                    links.filter(to_asset_id__in=frontier).values_list(
-                        "from_asset_id", flat=True
-                    )
-                )
-                - ids
             )
-            ids |= frontier
-        return Asset.objects.filter(id__in=ids)
+        )
 
     def get_applied_controls(self):
         return AppliedControl.objects.filter(stakeholders__in=self.stakeholders.all())
