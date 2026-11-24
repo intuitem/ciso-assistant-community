@@ -13,15 +13,15 @@ description: "Marco de Seguridad y Gobierno de la IA para Chile (MSIA-CL), de At
   \ https://www.athanortech.net/msia-cl. No constituye asesor\xEDa ni validaci\xF3\
   n jur\xEDdica."
 copyright: "\xA9 Athanor Tech \u2014 MSIA-CL v0.6 \u2014 CC BY 4.0 \u2014 https://doi.org/10.5281/zenodo.24348333"
-version: 2
+version: 3
 publication_date: 2026-11-16
 provider: Athanor Tech
 packager: Athanor Tech
 labels:
-- GOBERNANZA-IA
-- IA
-- MSIA-CL
 - CHILE
+- GOBERNANZA-IA
+- MSIA-CL
+- IA
 translations:
   en:
     name: "MSIA-CL v0.6 \u2014 AI Security and Governance Framework for Chile"

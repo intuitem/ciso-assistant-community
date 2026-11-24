@@ -92,27 +92,53 @@ class TestMsiaClLibrary(TestCase):
 
     def test_mappings(self):
         engine = MappingEngine()
+        iso = "urn:intuitem:risk:framework:iso42001-2023"
+        nist = "urn:intuitem:risk:framework:nist-ai-rmf-1.0"
         # Where the framework cites a whole clause, only the requirements the control
         # actually covers are mapped (the rationale is in each mapping's annotation).
-        expected = {
-            "urn:intuitem:risk:framework:iso42001-2023": 51,
-            "urn:intuitem:risk:framework:nist-ai-rmf-1.0": 53,
-        }
+        expected = {iso: 51, nist: 50}
+
+        def pairs(key):
+            return {
+                (m["source_requirement_urn"], m["target_requirement_urn"])
+                for m in engine.get_rms(key)["requirement_mappings"]
+            }
+
+        forward, reverse = set(), set()
         for target, count in expected.items():
             assert (FRAMEWORK_URN, target) in engine.direct_mappings
             assert (target, FRAMEWORK_URN) in engine.direct_mappings
-            rms = engine.get_rms((FRAMEWORK_URN, target))
-            assert len(rms["requirement_mappings"]) == count
+            fwd, rev = pairs((FRAMEWORK_URN, target)), pairs((target, FRAMEWORK_URN))
+            assert len(fwd) == count
+            # The reverse set mirrors the forward one exactly.
+            assert len(rev) == count
+            assert rev == {(t, s) for s, t in fwd}
+            forward |= fwd
+            reverse |= rev
+
+        msia = "urn:athanor:risk:req_node:msia-cl-0.6:"
+        iso_node = "urn:intuitem:risk:req_node:iso42001-2023:"
+        nist_node = "urn:intuitem:risk:req_node:nist-ai-rmf-1.0:"
+        kept = [
+            (msia + "inv-05", nist_node + "govern-1.7"),
+            (msia + "cad-06", iso_node + "a.6.2.4"),
+            (msia + "cad-01", nist_node + "map-4.1"),
+            (msia + "res-04", nist_node + "manage-4.2"),
+        ]
         # Clause-level references must not imply unrelated requirements.
-        pairs = {
-            (m["source_requirement_urn"].rsplit(":", 1)[-1], m["target_requirement_urn"].rsplit(":", 1)[-1])
-            for target in expected
-            for m in engine.get_rms((FRAMEWORK_URN, target))["requirement_mappings"]
-        }
-        assert ("inv-05", "a.6.2.4") not in pairs  # retirement is not verification and validation
-        assert ("gob-04", "govern-1.7") not in pairs  # acceptable use is not safe decommissioning
-        assert ("inv-05", "govern-1.7") in pairs
-        assert ("cad-06", "a.6.2.4") in pairs
+        removed = [
+            (msia + "inv-05", iso_node + "a.6.2.4"),  # retirement is not verification and validation
+            (msia + "gob-04", nist_node + "govern-1.7"),  # acceptable use is not safe decommissioning
+            (msia + "cad-02", nist_node + "map-4.1"),  # an inventory is not a risk mapping
+            (msia + "trz-04", nist_node + "manage-4.2"),  # reporting is not improving the system
+            (msia + "res-04", nist_node + "manage-4.3"),  # an exercise is not incident communication
+        ]
+        for source, target in kept:
+            assert (source, target) in forward, (source, target)
+            assert (target, source) in reverse, (target, source)
+        for source, target in removed:
+            assert (source, target) not in forward, (source, target)
+            assert (target, source) not in reverse, (target, source)
 
     def test_results_flow_to_iso42001(self):
         framework = Framework.objects.get(urn=FRAMEWORK_URN)

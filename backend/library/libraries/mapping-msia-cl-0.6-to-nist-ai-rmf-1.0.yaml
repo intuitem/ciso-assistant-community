@@ -9,14 +9,14 @@ description: "Correspondencias declaradas en la columna de est\xE1ndares interna
   \ los requisitos que el control cubre. Relaci\xF3n 'intersect': orientan, no prueban\
   \ cumplimiento del est\xE1ndar destino."
 copyright: "\xA9 Athanor Tech \u2014 MSIA-CL v0.6 \u2014 CC BY 4.0 \u2014 https://doi.org/10.5281/zenodo.24348333"
-version: 2
+version: 3
 publication_date: 2026-11-16
 provider: Athanor Tech
 packager: Athanor Tech
 labels:
-- GOBERNANZA-IA
-- IA
 - MSIA-CL
+- IA
+- GOBERNANZA-IA
 - CHILE
 translations:
   en:
@@ -298,14 +298,6 @@ objects:
         \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
         \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
-        \ por Athanor Tech desde la cl\xE1usula completa: La lista de componentes\
-        \ (AI-BOM) es la base para mapear sus riesgos (4.1)."
-      strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-03
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       relationship: intersect
@@ -372,14 +364,6 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4.1)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
-        \ precisada por Athanor Tech desde la cl\xE1usula completa: Indicadores medibles\
-        \ de mejora continua (4.2)."
-      strength_of_relationship: 5
     - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
       target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.4
       relationship: intersect
@@ -416,15 +400,9 @@ objects:
       rationale: semantic
       annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
         \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
-        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
-      target_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
-        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
-        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
+        \ y actualizaci\xF3n de controles (4.2). Un ejercicio no es comunicar ni documentar\
+        \ la respuesta a un incidente real (4.3), que se quit\xF3 tras la revisi\xF3\
+        n de CodeRabbit del 23-11-2026."
       strength_of_relationship: 5
   - urn: urn:athanor:risk:req_mapping_set:mapping-msia-cl-0.6-to-nist-ai-rmf-1.0-revert
     ref_id: mapping-msia-cl-0.6-to-nist-ai-rmf-1.0-revert
@@ -694,14 +672,6 @@ objects:
         \ por Athanor Tech desde la cl\xE1usula completa: Mapear los riesgos de los\
         \ componentes (4.1) e identificar sus controles (4.2)."
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MAP 4); precisada\
-        \ por Athanor Tech desde la cl\xE1usula completa: La lista de componentes\
-        \ (AI-BOM) es la base para mapear sus riesgos (4.1)."
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-03
       relationship: intersect
@@ -768,14 +738,6 @@ objects:
       rationale: semantic
       annotation: Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4.1)
       strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
-        \ precisada por Athanor Tech desde la cl\xE1usula completa: Indicadores medibles\
-        \ de mejora continua (4.2)."
-      strength_of_relationship: 5
     - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.4
       target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
       relationship: intersect
@@ -812,13 +774,7 @@ objects:
       rationale: semantic
       annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
         \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
-        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
-      strength_of_relationship: 5
-    - source_requirement_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
-      target_requirement_urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
-      relationship: intersect
-      rationale: semantic
-      annotation: "Correspondencia declarada en el MSIA-CL v0.6 (AI RMF MANAGE 4);\
-        \ precisada por Athanor Tech desde la cl\xE1usula completa: Lecciones aprendidas\
-        \ (4.2) y comunicaci\xF3n y seguimiento de incidentes (4.3)."
+        \ y actualizaci\xF3n de controles (4.2). Un ejercicio no es comunicar ni documentar\
+        \ la respuesta a un incidente real (4.3), que se quit\xF3 tras la revisi\xF3\
+        n de CodeRabbit del 23-11-2026."
       strength_of_relationship: 5
