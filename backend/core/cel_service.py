@@ -124,6 +124,44 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
     return result
 
 
+def _zero_filled_answers(framework, exclude_requirement_urns=()) -> dict[str, dict]:
+    """A zero-filled answer entry for every question of the framework, in the
+    same shape `_build_answer_data` produces and `_framework_probe` validates
+    against. Questions on `exclude_requirement_urns` are left out — that is how
+    a hidden requirement's answers stay out of the context.
+
+    `_build_answer_data` only loads answers of in-scope requirements that have an
+    Answer row, so a rule reading `answers["Q"]` of an unanswered question — or
+    of a question whose requirement is outside the audit's implementation-group
+    scope — would hit `no such key` and raise at evaluation. celpy builds the
+    error of a chain of failing `||` from both operands' repr, so the message
+    (and memory) grows exponentially; a handful of terms is enough to OOM the
+    worker. Seeding every key removes the error at its source, so the runtime
+    context matches what the builder already validates.
+    """
+    from core.models import Question
+    from core.utils import extract_node_id
+
+    questions = Question.objects.filter(requirement_node__framework=framework)
+    if exclude_requirement_urns:
+        questions = questions.exclude(
+            requirement_node__urn__in=exclude_requirement_urns
+        )
+    defaults: dict[str, dict] = {}
+    for urn, q_type, weight in questions.values_list("urn", "type", "weight"):
+        node_id = extract_node_id(urn)
+        if node_id:
+            defaults[node_id] = {
+                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
+                "score": 0,
+                "selected_choices": [],
+                # A negative weight has no defined meaning; treat it as 0.
+                "weight": max(weight or 0, 0),
+                "type": q_type,
+            }
+    return defaults
+
+
 def _requirement_layers(ca, node, ra) -> dict:
     """A requirement's documentation and maturity scores on its own scale,
     counted as the audit's aggregates count it: -1 when it does not count (or
@@ -304,8 +342,13 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         )
     }
 
-    # Query 3: answer-level data for in-scope requirements
-    answer_data = _build_answer_data(ca, in_scope_node_ids)
+    # Query 3: answer-level data for in-scope requirements. Seed every question
+    # of the framework first so a rule can read any answer key without raising,
+    # whatever the audit's scope; real answers overwrite the zero-filled ones.
+    answer_data = {
+        **_zero_filled_answers(framework),
+        **_build_answer_data(ca, in_scope_node_ids),
+    }
 
     max_score = ca.max_score or 100
     computed_outcomes = ca.computed_outcome if ca.computed_outcome else {}
@@ -356,7 +399,12 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     if hidden_assessable:
         visible_scope = [n for n in in_scope if n["urn"] not in hidden_assessable]
         visible_urns = {n["urn"] for n in visible_scope}
-        visible_answer_data = _build_answer_data(ca, [n["id"] for n in visible_scope])
+        visible_answer_data = {
+            # A hidden requirement's questions stay out of the context, just as
+            # its real answers do.
+            **_zero_filled_answers(framework, exclude_requirement_urns=hidden_urns),
+            **_build_answer_data(ca, [n["id"] for n in visible_scope]),
+        }
         visible_ra_rows = {k: v for k, v in ra_rows.items() if k in visible_urns}
         final_context = _build_context_dict(
             visible_scope,
@@ -371,6 +419,13 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         ]
     else:
         final_context = initial_context
+        if hidden_urns:
+            # No assessable requirement is hidden, so scores stand; only drop a
+            # hidden (non-assessable) node's seeded questions from the answers.
+            final_context["answers"] = {
+                **_zero_filled_answers(framework, exclude_requirement_urns=hidden_urns),
+                **_build_answer_data(ca, in_scope_node_ids),
+            }
         final_context["hidden_requirements"] = [
             extract_node_id(u) for u in hidden_urns if extract_node_id(u)
         ]

@@ -2644,9 +2644,11 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # row that no concurrent publish or metadata edit can change under
             # them. ATOMIC_REQUESTS is off, so this explicit lock, taken here and
             # in the update path, is what serializes the two write paths on the
-            # same draft. On PostgreSQL the second caller blocks until the first
-            # commits; on SQLite (tests) select_for_update is a no-op, fine as
-            # requests there never run concurrently.
+            # same draft. On PostgreSQL the second caller blocks on the row until
+            # the first commits; on SQLite (also a supported production backend)
+            # select_for_update is a no-op, but SQLite already serializes writers
+            # with a single database-wide write lock, so the two still cannot
+            # interleave.
             locked = LibraryDraft.objects.select_for_update().get(pk=draft.pk)
             validation = builder.validate_draft_document(locked, user=request.user)
             if validation["errors"]:
@@ -2663,36 +2665,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
         the version read-modify-write below cannot interleave with another
         publish or a metadata edit.
         """
-        # A publish that bumps the version and then fails to load (e.g. the
-        # worker dies re-evaluating existing audits) must not leave the version
-        # climbing: every failed attempt would offer a fresh bump, so the
-        # customer's version crept up without a single successful publish. The
-        # bump is committed early so the documented score-change retry can
-        # re-publish at the SAME version; on any OTHER failure it is undone.
-        original_version = draft.version
-        bumped_to = original_version
-        bumped = False
-
-        def _revert_version_bump() -> None:
-            if not bumped:
-                return
-            # Undo only our own bump, and only when it is safe to: the row must
-            # still hold the version we wrote (so a later edit is preserved), and
-            # last_published_version must not have advanced past the original (so
-            # a concurrent publish that committed a snapshot at the bumped version
-            # is not undercut). The row lock already serializes this; the
-            # conditional UPDATE keeps the check and the write atomic as a
-            # backstop.
-            reverted = (
-                LibraryDraft.objects.filter(pk=draft.pk, version=bumped_to)
-                .filter(
-                    Q(last_published_version__isnull=True)
-                    | Q(last_published_version__lte=original_version)
-                )
-                .update(version=original_version, updated_at=now())
-            )
-            if reverted:
-                draft.version = original_version
+        # The whole publish runs in one transaction under the draft's row lock
+        # (see `publish`), so the version bump can stay in memory and be
+        # persisted only when the publish actually goes through — on success and
+        # on the score-change conflict, whose documented retry re-publishes at
+        # the SAME version. A failed attempt commits no bump, so the version
+        # never climbs across retries and nothing has to be rolled back.
 
         # A published artifact is identified by URN + version: re-publishing
         # different content under the version already snapshotted would put
@@ -2704,9 +2682,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
         ):
             if request.data.get("bump_version"):
                 draft.version += 1
-                draft.save(update_fields=["version", "updated_at"])
-                bumped = True
-                bumped_to = draft.version
             else:
                 return Response(
                     {
@@ -2729,6 +2704,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             draft.mark_published()
             draft.save(
                 update_fields=[
+                    "version",
                     "first_published_at",
                     "last_published_at",
                     "last_published_version",
@@ -2752,7 +2728,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # load already went through.
         conflicting = LibraryDraft.objects.filter(urn=urn).exclude(id=draft.id).first()
         if conflicting is not None:
-            _revert_version_bump()
             return Response(
                 {"error": "draftAlreadyExists", "draft": str(conflicting.id)},
                 status=HTTP_409_CONFLICT,
@@ -2788,9 +2763,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if max_existing is not None and max_existing >= draft.version:
             if request.data.get("bump_version"):
                 draft.version = max_existing + 1
-                draft.save(update_fields=["version", "updated_at"])
-                bumped = True
-                bumped_to = draft.version
             else:
                 return Response(
                     {"error": "libraryVersionOutdated", "max_version": max_existing},
@@ -2808,7 +2780,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
             logger.exception(
                 "Failed to store published draft", urn=urn, locale=draft.locale
             )
-            _revert_version_bump()
             return Response(
                 {"error": "libraryPublishFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -2817,7 +2788,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # Publish is stateless (failed attempts leave no stored row
             # behind), so a store refusal genuinely means the content or
             # version already exists — nothing new to publish.
-            _revert_version_bump()
             return Response({"error": error}, status=HTTP_409_CONFLICT)
 
         # Publish is all-or-nothing: if loading does not complete, remove the
@@ -2833,6 +2803,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 error_msg = stored.load()
         except LibraryUpdater.ScoreChangeDetected as e:
             stored.delete()
+            # Persist the bump so the documented retry (same version, with a
+            # chosen strategy) re-publishes at this version.
+            draft.save(update_fields=["version", "updated_at"])
             return Response(
                 {
                     "error": "score_change_detected",
@@ -2849,14 +2822,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
             # here can carry internal state (DB, filesystem, paths).
             logger.exception("Failed to load published draft", urn=urn)
             stored.delete()
-            _revert_version_bump()
             return Response(
                 {"error": "libraryLoadFailed"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is not None:
             stored.delete()
-            _revert_version_bump()
             if error_msg == "libraryHasNoUpdate":
                 return Response(
                     {"error": "noChangesToPublish"}, status=HTTP_409_CONFLICT
@@ -2874,6 +2845,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         draft.save(
             update_fields=[
                 "urn",
+                "version",
                 "first_published_at",
                 "last_published_at",
                 "last_published_version",

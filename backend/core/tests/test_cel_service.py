@@ -964,12 +964,16 @@ class TestCelErrorContainment:
             defer_outcome_evaluation(cel_setup["ca"].pk)
         evaluator.assert_called_once()
 
-    def test_missing_key_chained_or_fails_open(self):
+    def test_missing_key_chained_or_fails_open_and_is_logged_bounded(self):
         """A rule whose terms all error (reading a missing answer key) and are
-        chained with `||` must be skipped, not crash the whole evaluation."""
+        chained with `||` must be skipped, not crash the whole evaluation — and
+        the error it logs must be bounded and carry no traceback, so a run of
+        such rules cannot OOM the worker. (On main this logs the full celpy
+        message with exc_info, so the log assertions below fail there.)"""
         import celpy
+        from structlog.testing import capture_logs
 
-        from core.cel_service import _evaluate_rules
+        from core.cel_service import _MAX_CEL_ERROR_CHARS, _evaluate_rules
 
         term = 'answers["Q"].value == true'
         rules = [
@@ -981,10 +985,86 @@ class TestCelErrorContainment:
             {"ref_id": "ok", "expression": "true", "result": "fine", "label": "OK"},
         ]
         errors: list[str] = []
-        fired, _values = _evaluate_rules(
-            celpy.Environment(), rules, {"answers": {}}, errors=errors
-        )
+        with capture_logs() as logs:
+            fired, _values = _evaluate_rules(
+                celpy.Environment(), rules, {"answers": {}}, errors=errors
+            )
         # Fail-open: the broken rule is dropped, the sound rule still fires.
         assert "crash" not in fired
         assert fired["ok"] == {"result": "fine", "label": "OK"}
         assert errors == ["crash"]
+        # The failure is logged, bounded, and without a traceback (no exc_info).
+        logged = [
+            e
+            for e in logs
+            if e.get("event") == "cel_evaluation_error" and e.get("rule") == "crash"
+        ]
+        assert len(logged) == 1, logs
+        assert len(logged[0]["error"]) <= _MAX_CEL_ERROR_CHARS
+        assert logged[0].get("exc_info") in (False, None)
+
+    def test_out_of_scope_question_does_not_error(self, db):
+        """The real CA-1945 reproducer: an outcome rule reads the answer of a
+        question whose requirement is OUTSIDE the audit's implementation-group
+        scope. `_build_answer_data` only loads in-scope answers, so without the
+        zero-fill the key is missing and evaluation raises `no such key`. With
+        every framework question seeded, the rule evaluates with no error."""
+        from core.cel_service import evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="IG scope FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=[
+                {
+                    "ref_id": "r",
+                    "expression": 'answers["qb"].value == true',
+                    "result": "x",
+                    "label": "X",
+                }
+            ],
+        )
+        rn_a = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:igs:a",
+            ref_id="A",
+            assessable=True,
+            implementation_groups=["group_a"],
+            folder=folder,
+        )
+        rn_b = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:igs:b",
+            ref_id="B",
+            assessable=True,
+            implementation_groups=["group_b"],
+            folder=folder,
+        )
+        # qb lives on the out-of-scope requirement; the rule reads it.
+        Question.objects.create(
+            requirement_node=rn_b,
+            urn="urn:test:risk:question:igs:qb",
+            text="B?",
+            type="boolean",
+            folder=folder,
+        )
+        perimeter = Perimeter.objects.create(name="IGS Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="IGS CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+            selected_implementation_groups=["group_a"],
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_a, folder=folder
+        )
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        # No `no such key`: the out-of-scope question's answer key was seeded.
+        assert not ca.outcome_errors
