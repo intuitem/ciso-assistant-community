@@ -4,7 +4,6 @@ import mimetypes
 import re
 from uuid import UUID
 
-import requests
 import structlog
 from django.contrib.auth.models import Permission
 from django.db import models, transaction
@@ -29,7 +28,7 @@ from weasyprint.urls import URLFetcher, URLFetcherResponse
 
 import django_filters as df
 
-from core.net_safety import BlockedRequestError, assert_public_url
+from core.net_safety import BlockedRequestError, assert_public_url, public_get
 from core.typst_render import render_mermaid_svg
 from core.utils import get_report_timezone
 from core.validators import validate_file_name, validate_file_size
@@ -180,7 +179,7 @@ class _SafeURLFetcher(URLFetcher):
         if url.startswith("data:"):
             return _DATA_URL_FETCHER.fetch(url)
         assert_public_url(url, allowed_schemes=("https",))
-        r = requests.get(url, timeout=self._timeout, allow_redirects=False, stream=True)
+        r = public_get(url, timeout=self._timeout, allow_redirects=False, stream=True)
         try:
             status_code = r.status_code
             final_url = r.url

@@ -39,7 +39,7 @@ def _render(assessment, controls, lang="en", linked=None):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_renders_in_each_locale(audit, lang):
     pdf, _ = _render(audit, _controls(audit, ["to_do", "active"]), lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -102,6 +102,7 @@ def test_cover_carries_traceability(audit):
 def test_locale_fallback_is_whole_document():
     assert localized_template("action_plan", "de") == "action_plan_en.typ"
     assert localized_template("action_plan", "fr") == "action_plan_fr.typ"
+    assert localized_template("action_plan", "hu") == "action_plan_hu.typ"
     assert localized_template("action_plan", "tr") == "action_plan_tr.typ"
 
 
@@ -109,7 +110,12 @@ def test_locale_fallback_is_whole_document():
 def test_columns_are_fixed_fractions_not_auto(audit):
     """`auto` sizing overflows the page and overlaps neighbouring cells once the
     content is wider than the paper; fractions always sum to the available width."""
-    for template in ("action_plan_en.typ", "action_plan_fr.typ", "action_plan_tr.typ"):
+    for template in (
+        "action_plan_en.typ",
+        "action_plan_fr.typ",
+        "action_plan_hu.typ",
+        "action_plan_tr.typ",
+    ):
         src = (TEMPLATE_DIR / template).read_text()
         spec = src[
             src.index("#let columns-spec = (") : src.index(
@@ -146,6 +152,7 @@ def test_owner_replaces_the_dropped_columns(audit):
     [
         ("en", "To do", "Technical"),
         ("fr", "À faire", "Technique"),
+        ("hu", "Teendő", "Technikai"),
         ("tr", "Yapılacak", "Teknik"),
     ],
 )
@@ -187,7 +194,12 @@ def test_every_status_has_a_fill_and_a_label_in_each_locale():
         f"no fill for {statuses - set(_ACTION_PLAN_STATUS_FILLS)}"
     )
 
-    for name in ("action_plan_en.typ", "action_plan_fr.typ", "action_plan_tr.typ"):
+    for name in (
+        "action_plan_en.typ",
+        "action_plan_fr.typ",
+        "action_plan_hu.typ",
+        "action_plan_tr.typ",
+    ):
         src = (TEMPLATE_DIR / name).read_text()
         block = src[src.index("#let status-label = (") :]
         block = block[: block.index(")")]
