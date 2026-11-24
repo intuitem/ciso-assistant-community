@@ -943,17 +943,26 @@ class TestCelErrorContainment:
         commit hook: it runs after the transaction (a publish snapshot, say) has
         committed, so propagating would fail the request with nothing to roll
         back. It is logged and swallowed; the next audit change recomputes it."""
+        from django.db import connection
+
         from core.models import defer_outcome_evaluation
 
+        # cel_setup's audit creation already queued a deferred evaluation for this
+        # pk; clear it so _defer_once does not deduplicate (and thus skip) our own
+        # call — otherwise the test would pass without ever running the evaluator.
+        getattr(connection, "_pending_cel_evaluations", {}).clear()
+
         # execute=True runs the captured callbacks on block exit; the raise would
-        # surface here if it were not contained.
+        # surface here if it were not contained. assert_called_once proves the
+        # evaluator actually ran (so the failure path really was exercised).
         with (
             patch(
                 "core.cel_service.evaluate_outcomes", side_effect=RuntimeError("boom")
-            ),
+            ) as evaluator,
             django_capture_on_commit_callbacks(execute=True),
         ):
             defer_outcome_evaluation(cel_setup["ca"].pk)
+        evaluator.assert_called_once()
 
     def test_missing_key_chained_or_fails_open(self):
         """A rule whose terms all error (reading a missing answer key) and are
