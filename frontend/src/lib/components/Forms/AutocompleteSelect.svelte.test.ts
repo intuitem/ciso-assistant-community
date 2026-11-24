@@ -18,6 +18,24 @@ vi.hoisted(() => {
 	})) as typeof window.matchMedia;
 });
 
+// The generated translations are tens of MB: loading them here for a few
+// labels makes the coverage run exhaust the heap. Every message echoes its key.
+vi.mock('#paraglide/messages.js', () => {
+	const messages: object = new Proxy(
+		{},
+		{
+			has: (_, key) => typeof key === 'string' && key !== 'then',
+			get: (_, key) => {
+				if (typeof key !== 'string' || key === 'then') return undefined;
+				if (key === 'm') return messages;
+				return (params?: Record<string, unknown>) =>
+					params ? `${key} ${Object.values(params).join(' ')}` : key;
+			}
+		}
+	);
+	return messages;
+});
+
 const field = vi.hoisted(() => ({
 	initial: undefined as unknown,
 	value: undefined as unknown as Writable<unknown>
