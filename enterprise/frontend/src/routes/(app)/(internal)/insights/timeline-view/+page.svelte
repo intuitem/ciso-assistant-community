@@ -352,12 +352,14 @@
 			{@const result = buildItems(ganttData)}
 			{@const ganttItems = result.items}
 			{@const noDateCount = result.noDateCount}
-			{@const availableFolders = Array.from(result.allFolderIds)
+			{@const availableFolders = Array.from(new Set([...result.allFolderIds, ...selectedFolders]))
 				.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
 				.sort((a, b) => a.name.localeCompare(b.name))}
 
-			<!-- Folder filter (only after data loads, only if multiple domains) -->
-			{#if availableFolders.length > 1}
+			<!-- Folder filter (only after data loads, only if multiple domains or a selection).
+			     Selected domains stay listed even when the other filters leave them empty,
+			     so they can always be cleared. -->
+			{#if availableFolders.length > 1 || selectedFolders.size > 0}
 				<div class="flex items-center gap-2">
 					<span class="text-xs font-semibold text-surface-500">{m.domains()}</span>
 					<div class="flex flex-wrap gap-1">

@@ -19,13 +19,21 @@
 
 	// Active controls are already in place: leaving them out keeps the matrix
 	// on what is left to prioritize. Kept in the URL so the page loads the
-	// matrix with it, and passed to the table as an extra query.
-	const excludeActive = $derived(page.url.searchParams.getAll('exclude_status').includes('active'));
+	// matrix with it, and passed to the table as an extra query. The table gets
+	// every excluded status in the URL, like the matrix does.
+	const excludedStatuses = $derived(page.url.searchParams.getAll('exclude_status'));
+	const excludeActive = $derived(excludedStatuses.includes('active'));
+	const tableExtraParams = $derived(
+		new URLSearchParams(excludedStatuses.map((status) => ['exclude_status', status])).toString()
+	);
 
 	function setExcludeActive(exclude: boolean) {
 		const url = new URL(page.url.href);
+		const others = url.searchParams.getAll('exclude_status').filter((s) => s !== 'active');
 		url.searchParams.delete('exclude_status');
-		if (exclude) url.searchParams.set('exclude_status', 'active');
+		for (const status of exclude ? [...others, 'active'] : others) {
+			url.searchParams.append('exclude_status', status);
+		}
 		goto(url, { replace: true, reset: false });
 	}
 
@@ -190,7 +198,7 @@
 				body: []
 			}}
 			{overrideFilters}
-			extraParams={excludeActive ? 'exclude_status=active' : ''}
+			extraParams={tableExtraParams}
 			hideFilters={true}
 			URLModel="applied-controls"
 		/>
