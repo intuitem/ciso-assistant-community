@@ -122,8 +122,8 @@ class _Handler(BaseHTTPRequestHandler):
 
 @pytest.fixture
 def loopback_server(monkeypatch):
-    for var in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "http_proxy", "https_proxy"):
-        monkeypatch.delenv(var, raising=False)
+    # Env and OS-level (macOS/Windows) proxies would bypass the checked connection.
+    monkeypatch.setattr("requests.sessions.get_environ_proxies", lambda *a, **k: {})
     _Handler.hits = 0
     server = HTTPServer(("127.0.0.1", 0), _Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -169,6 +169,11 @@ class TestPublicSession:
             (("169.254.169.254", 80), True),
             (("::ffff:127.0.0.1", 80, 0, 0), True),
             (("fe80::1%eth0", 80, 0, 2), True),
+            # IPv6 transition forms embedding a private IPv4 (6to4, Teredo, NAT64)
+            (("2002:a9fe:a9fe::1", 80, 0, 0), True),
+            (("2002:7f00:1::1", 80, 0, 0), True),
+            (("2001:0:4136:e378:8000:63bf:567f:fefe", 80, 0, 0), True),
+            (("64:ff9b::a9fe:a9fe", 80, 0, 0), True),
         ],
     )
     def test_peer_check(self, peer, blocked):

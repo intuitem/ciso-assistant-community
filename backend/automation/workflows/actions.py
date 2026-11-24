@@ -2783,11 +2783,11 @@ class HttpRequestAction(BaseAction):
 
     @staticmethod
     def _fetch_token(oauth, timeout):
-        import requests
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,
             assert_public_url_unless_dev,
+            public_post,
         )
 
         token_url = str(oauth.get("token_url") or "")
@@ -2807,7 +2807,7 @@ class HttpRequestAction(BaseAction):
         }
         if oauth.get("scope"):
             data["scope"] = oauth["scope"]
-        response = requests.post(
+        response = public_post(
             token_url, data=data, timeout=timeout, allow_redirects=False
         )
         answer = json_loads_or_none(response.text)
@@ -2826,7 +2826,6 @@ class HttpRequestAction(BaseAction):
     def _paginate(self, config, paginate, method, url, kwargs, host):
         import json
 
-        import requests
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,

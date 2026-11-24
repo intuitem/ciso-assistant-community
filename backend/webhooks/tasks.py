@@ -244,10 +244,18 @@ def send_audit_request(endpoint_id, body):
             # Credentials rotated, or the provider expired the token early: mint
             # a fresh one once before falling through to Huey's backoff.
             invalidate_token(endpoint)
-            retry_headers = {
-                **headers,
-                "Authorization": _bearer(endpoint, force_refresh=True),
-            }
+            try:
+                bearer = _bearer(endpoint, force_refresh=True)
+            except BlockedRequestError:
+                logger.error(
+                    "Audit sink token URL blocked by SSRF guard",
+                    endpoint_id=endpoint_id,
+                    exc_info=True,
+                )
+                return (
+                    f"Blocked: {endpoint_id} token URL points to a non-public address"
+                )
+            retry_headers = {**headers, "Authorization": bearer}
             response = _post_audit(endpoint, json_payload, retry_headers)
         if 200 <= response.status_code < 300:
             return f"Success: Sent audit event to {endpoint.url}"
