@@ -1448,11 +1448,16 @@ class LibraryDraftViewSet(BaseModelViewSet):
         # (same identity gate as check_identity / adopt). objects.create below
         # skips field validators, so check here.
         packager = str(packager).lower()
-        if len(packager) > LibraryDraft.PACKAGER_MAX_LENGTH or not re.match(
-            LibraryDraft.IDENTITY_REGEX, packager
-        ):
+        if len(packager) > LibraryDraft.PACKAGER_MAX_LENGTH:
             return Response(
                 {"error": "packagerTooLong"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        # fullmatch, not match: `$` would still accept a trailing newline,
+        # which objects.create would then store inside the URN namespace.
+        if not re.fullmatch(LibraryDraft.IDENTITY_REGEX, packager):
+            return Response(
+                {"error": "packagerNotUrnSafe"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 

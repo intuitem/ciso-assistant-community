@@ -619,7 +619,7 @@ def test_import_yaml_rejects_non_urn_safe_packager(admin_client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
         response.content
     )
-    assert response.data["error"] == "packagerTooLong"
+    assert response.data["error"] == "packagerNotUrnSafe"
 
 
 @pytest.mark.django_db
