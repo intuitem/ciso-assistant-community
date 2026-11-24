@@ -183,8 +183,12 @@ def vendors(monkeypatch):
         holder.__dict__.update(fresh.__dict__)
         return holder
 
-    monkeypatch.setattr("requests.request", lambda *a, **k: holder.request(*a, **k))
-    monkeypatch.setattr("requests.post", lambda *a, **k: holder.post(*a, **k))
+    monkeypatch.setattr(
+        "core.net_safety.public_request", lambda *a, **k: holder.request(*a, **k)
+    )
+    monkeypatch.setattr(
+        "core.net_safety.public_post", lambda *a, **k: holder.post(*a, **k)
+    )
     return install
 
 

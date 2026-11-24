@@ -145,7 +145,7 @@ class TestNodeOutputReferences:
                 return {"identity": {"email": "ada@acme.com"}}
 
         monkeypatch.setattr(
-            "requests.request", lambda method, url, **kw: FakeResponse()
+            "core.net_safety.public_request", lambda method, url, **kw: FakeResponse()
         )
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
@@ -203,7 +203,7 @@ class TestNodeOutputReferences:
                 }
 
         monkeypatch.setattr(
-            "requests.request", lambda method, url, **kw: FakeResponse()
+            "core.net_safety.public_request", lambda method, url, **kw: FakeResponse()
         )
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
