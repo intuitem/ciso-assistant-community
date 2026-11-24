@@ -10170,6 +10170,151 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
+    # Counts stop past this many rows, so a large subtree is never scanned in full:
+    # a count over it is returned as the cap and flagged as capped.
+    MOVE_PREVIEW_COUNT_CAP = 1000
+    # The folder types and models the move preview counts on a line of their own,
+    # mapped to the i18n key of that line. Every other type is summed under
+    # "otherObjects": most are internal records a user would not recognise.
+    MOVE_PREVIEW_FOLDER_LABELS = {
+        Folder.ContentType.DOMAIN: "domains",
+        Folder.ContentType.ENCLAVE: "enclaves",
+    }
+    MOVE_PREVIEW_MODEL_LABELS = {
+        "core.Perimeter": "perimeters",
+        "core.ComplianceAssessment": "complianceAssessments",
+        "core.RiskAssessment": "riskAssessments",
+        "ebios_rm.EbiosRMStudy": "ebiosRMStudies",
+        "resilience.BusinessImpactAnalysis": "businessImpactAnalysis",
+        "core.Asset": "assets",
+        "core.AppliedControl": "appliedControls",
+        "core.Evidence": "evidences",
+        "core.Incident": "incidents",
+        "core.Vulnerability": "vulnerabilities",
+        "core.SecurityException": "securityExceptions",
+        "core.RiskAcceptance": "riskAcceptances",
+        "core.Threat": "threats",
+        "core.ReferenceControl": "referenceControls",
+        "core.FindingsAssessment": "findingsAssessments",
+        "core.Finding": "findings",
+        "tprm.Entity": "entities",
+        "privacy.Processing": "processings",
+        "core.TaskTemplate": "taskTemplates",
+    }
+
+    @action(detail=False, methods=["post"], url_path="move-preview")
+    def move_preview(self, request: Request) -> Response:
+        """What moving the listed domains together carries along.
+
+        Covers the listed domains the caller may change; other folders are left out.
+        `subjects` says for each one whether it sits below another listed domain:
+        moved to a common target, it leaves that subtree. `carried` counts the
+        folders and everything filed under the moved subtrees, whatever the caller
+        may view, and names none of them: one group per type of
+        `MOVE_PREVIEW_FOLDER_LABELS` and `MOVE_PREVIEW_MODEL_LABELS`, labelled by its
+        i18n key, then an "otherObjects" group for the rest. Counts stop at
+        `MOVE_PREVIEW_COUNT_CAP`, with `capped` (per group and overall) set when
+        there are more. 400 if `ids` is empty or longer than `BATCH_SIZE_LIMIT`,
+        403 if none is changeable.
+        """
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids:
+            return Response(
+                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        subjects = sorted(
+            self.get_queryset()
+            .filter(
+                id__in=ids,
+                builtin=False,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            .filter(
+                id__in=RoleAssignment.get_changeable_object_ids(request.user, Folder)
+            ),
+            key=lambda folder: folder.name.lower(),
+        )
+        if not subjects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        subject_ids = {folder.id for folder in subjects}
+        closure = Folder.descendants.through.objects
+        below_selected = set(
+            closure.filter(
+                from_folder_id__in=subject_ids, to_folder_id__in=subject_ids
+            ).values_list("to_folder_id", flat=True)
+        )
+        # The moved subtrees stay a subquery: spelled out, they could put thousands
+        # of ids in every query below.
+        descendant_ids = closure.filter(from_folder_id__in=subject_ids).values(
+            "to_folder_id"
+        )
+
+        cap = self.MOVE_PREVIEW_COUNT_CAP
+        groups: list[dict] = []
+
+        def capped_count(queryset: models.QuerySet) -> int:
+            return queryset.order_by()[: cap + 1].count()
+
+        def add_group(label: str, count: int) -> None:
+            if count:
+                groups.append(
+                    {"label": label, "count": min(count, cap), "capped": count > cap}
+                )
+
+        # Every folder below a moved domain moves with it, enclaves included.
+        carried_folders = Folder.objects.filter(id__in=descendant_ids).exclude(
+            id__in=subject_ids
+        )
+        for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
+            add_group(
+                label, capped_count(carried_folders.filter(content_type=content_type))
+            )
+        other_count = capped_count(
+            carried_folders.exclude(
+                content_type__in=list(self.MOVE_PREVIEW_FOLDER_LABELS)
+            )
+        )
+
+        in_subtree = Q(folder_id__in=subject_ids) | Q(folder_id__in=descendant_ids)
+        content_models = {
+            model._meta.label: model
+            for model in self._folder_content_models(exempt=frozenset())
+        }
+        for model_label, label in self.MOVE_PREVIEW_MODEL_LABELS.items():
+            if model := content_models.pop(model_label, None):
+                add_group(label, capped_count(model._base_manager.filter(in_subtree)))
+        for model in content_models.values():
+            # Once over the cap, the other types cannot change what is shown.
+            if other_count > cap:
+                break
+            other_count += capped_count(model._base_manager.filter(in_subtree))
+        add_group("otherObjects", other_count)
+
+        return Response(
+            {
+                "subjects": [
+                    {
+                        "id": str(folder.id),
+                        "name": folder.name,
+                        "below_selected": folder.id in below_selected,
+                    }
+                    for folder in subjects
+                ],
+                "carried": {
+                    "count": sum(g["count"] for g in groups),
+                    "capped": any(g["capped"] for g in groups),
+                    "groups": groups,
+                },
+            }
+        )
+
     def cascade_preclear(self, instance):
         # Rows of the domain tree that PROTECT other rows of the same tree.
         # References from outside the tree are not cleared and still block.
@@ -10356,24 +10501,27 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         )
 
     @staticmethod
-    def _folder_content_models() -> list:
-        """Every model that could hold a folder's content.
+    def _folder_content_models(
+        exempt: frozenset[str] = frozenset({"iam.UserGroup", "iam.RoleAssignment"}),
+    ) -> list:
+        """Every model that could hold a folder's content, except the `exempt` labels.
 
-        Exhaustive rather than curated: deletion cascades through every FK. The IAM
-        objects every domain auto-provisions are exempt, or nothing would be deletable.
-        Models whose table this edition never created are dropped up front: probing one
-        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
-        cannot simply be caught and skipped.
+        Exhaustive rather than curated: deletion cascades through every FK. By default
+        the IAM objects every domain auto-provisions are exempt, or nothing would be
+        deletable. Proxies are left out: their concrete model already covers their
+        rows. Models whose table this edition never created are dropped up front:
+        probing one raises, and on PostgreSQL that aborts the surrounding transaction,
+        so the error cannot simply be caught and skipped.
         """
         from django.apps import apps
         from django.db import connection
 
         tables = set(connection.introspection.table_names())
-        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
         return [
             model
             for model in apps.get_models()
             if model is not Folder
+            and not model._meta.proxy
             and model._meta.label not in exempt
             and model._meta.db_table in tables
             and any(
@@ -14950,8 +15098,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         audit_obj = self.get_object()
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
-            RequirementNode.objects.filter(framework=_framework).all(),
-            RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
+            list(
+                RequirementNode.objects.filter(framework=_framework).prefetch_related(
+                    "questions__choices"
+                )
+            ),
+            list(
+                audit_obj.get_requirement_assessments(
+                    include_non_assessable=True, lightweight=True, skip_ig_filter=True
+                )
+            ),
             audit_obj.max_score
             if audit_obj.max_score is not None
             else _framework.max_score,
@@ -15048,7 +15204,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Object-level permission is not enough: a respondent sees only their
         # assigned requirements, and CEL-hidden ones do not apply at all.
         assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
-        nodes = RequirementNode.objects.filter(framework=framework)
+        nodes = RequirementNode.objects.filter(framework=framework).prefetch_related(
+            "questions__choices"
+        )
         if hidden_urns:
             nodes = nodes.exclude(urn__in=hidden_urns)
         tree = get_sorted_requirement_nodes(
