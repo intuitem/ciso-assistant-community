@@ -29,9 +29,11 @@ from jinja2.runtime import (
 )
 from jinja2.sandbox import ImmutableSandboxedEnvironment
 from jinja2.utils import Cycler, Joiner, Namespace
+from global_settings.models import GlobalSettings
 from library.helpers import get_referential_translation
 from markupsafe import Markup
 
+from .framework_report import visible_layers
 from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
@@ -41,6 +43,7 @@ from .models import (
     RequirementAssessment,
     RequirementNode,
     TaskTemplate,
+    round_score,
 )
 
 matplotlib.use("Agg")
@@ -990,6 +993,27 @@ def _risk_level(level):
     }
 
 
+def documentation_score_first():
+    """The general setting that shows documentation before implementation in
+    score pairs, as the CCB CyFun tools do."""
+    general = GlobalSettings.objects.filter(name="general").first()
+    return bool(general and general.value.get("documentation_score_first"))
+
+
+def report_score_layers(audit, visible):
+    """The score layers a report shows, in display order: the implementation
+    score alone, or with the documentation and maturity scores when the audit
+    has a documentation score and `visible` (the reader's layers) includes it.
+    The pair follows `documentation_score_first`, as in the app; the maturity
+    score, their average, comes last."""
+    if not (audit.show_documentation_score and "documentation_score" in visible):
+        return ["implementation_score"]
+    pair = ["implementation_score", "documentation_score"]
+    if documentation_score_first():
+        pair.reverse()
+    return [*pair, "maturity_score"]
+
+
 def gen_audit_context(
     id,
     tree,
@@ -998,7 +1022,17 @@ def gen_audit_context(
     charts=True,
     tz: tzinfo = timezone.utc,
     readable=_all_readable,
+    *,
+    score_layers=None,
 ):
+    """Report context of an audit.
+
+    `score_layers` are the score layers the reader may see
+    (`framework_report.visible_layers`); the auditor's when omitted. They
+    decide the headline score of the category view and its radar: the maturity
+    score when the documentation score is shown, the implementation score
+    otherwise.
+    """
     seen = lambda objs: [o for o in objs if readable(o)]  # noqa: E731
 
     def count_category_results(data):
@@ -1033,77 +1067,120 @@ def gen_audit_context(
 
         return category_result_counts
 
-    def aggregate_category_scores(data):
+    def aggregate_category_scores(data, audit, shown_layers):
         """
-        Aggregate scores per category from the tree structure, using existing score values.
-        Each scoreable item has a standard max_score of 100.
+        Aggregate scores per top-level category with audit.get_scores_for, so
+        each category is scored like the audit's global score, and once more
+        over every category for the audit as a whole.
 
-        Args:
-            data (dict): Tree structure containing assessment data with score values
+        Each entry carries the `shown_layers` (implementation, documentation,
+        maturity score); `average_score` is its headline, the maturity score
+        when shown and the implementation score otherwise.
 
         Returns:
-            dict: Dictionary with category URNs as keys and score information as values
+            tuple: the entries keyed by category URN, and the audit-wide entry
         """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        ig = set(audit.selected_implementation_groups or [])
+        ca_min = audit.min_score if audit.min_score is not None else 0
+        ca_max = audit.max_score if audit.max_score is not None else 100
+        is_sum = (
+            audit.score_calculation_method == ComplianceAssessment.CalculationMethod.SUM
+        )
+        headline = (
+            "maturity_score"
+            if "maturity_score" in shown_layers
+            else "implementation_score"
+        )
+        ras_by_urn = {
+            ra.requirement.urn: ra
+            for ra in RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+            if not ig or ig & set(ra.requirement.implementation_groups or [])
+        }
 
-        def recursive_score_calculation(node_data):
-            # Initialize score tracking for this node
-            scores = {
-                "total_score": 0,  # Sum of all scores
-                "item_count": 0,  # Number of scoreable items
-                "scored_count": 0,  # Number of items that have been scored
-                "assessable_count": 0,
-                "not_applicable_count": 0,
+        def collect(node_data, group):
+            ra = ras_by_urn.get(node_data.get("urn"))
+            if ra is not None:
+                group.append(ra)
+            for child_data in (node_data.get("children") or {}).values():
+                collect(child_data, group)
+            return group
+
+        def on_audit_scale(score, counted):
+            """SUM yields a weighted total: project it onto the audit's scale
+            from the span its requirements can reach (Σ min × weight to
+            Σ max × weight), as the averages project their ratios."""
+            if score is None or not is_sum:
+                return score
+            low = high = 0
+            for ra in counted:
+                requirement = ra.requirement
+                weight = requirement.weight or 1
+                low += (
+                    requirement.min_score
+                    if requirement.min_score is not None
+                    else ca_min
+                ) * weight
+                high += (
+                    requirement.max_score
+                    if requirement.max_score is not None
+                    else ca_max
+                ) * weight
+            if high <= low:
+                return None
+            return ca_min + (score - low) / (high - low) * (ca_max - ca_min)
+
+        def scores_of(group):
+            counted = []
+            for ra in group:
+                layers = audit.requirement_layer_scores(
+                    result=ra.result,
+                    is_scored=ra.is_scored,
+                    score=ra.score,
+                    documentation_score=ra.documentation_score,
+                    min_score=ra.requirement.min_score,
+                    max_score=ra.requirement.max_score,
+                )
+                if layers["implementation_score"] is not None:
+                    counted.append((ra, layers["implementation_score"]))
+
+            computed = audit.get_scores_for(group)
+            values = {
+                layer: on_audit_scale(computed[layer], [ra for ra, _ in counted])
+                for layer in shown_layers
+            }
+            values = {
+                layer: None if value is None else round_score(value)
+                for layer, value in values.items()
+            }
+            return {
+                "total_score": sum(value for _, value in counted),
+                "item_count": sum(
+                    1
+                    for ra in group
+                    if (ra.is_scored and ra.result != na)
+                    or (audit.anchor_na_to_target and ra.result == na)
+                ),
+                "scored_count": len(counted),
+                **values,
+                "average_score": values[headline] or 0,
+                "nothing_applicable": all(ra.result == na for ra in group),
             }
 
-            if node_data.get("assessable", False) and node_data.get("ra_id"):
-                scores["assessable_count"] = 1
-                if node_data.get("result") == "not_applicable":
-                    scores["not_applicable_count"] = 1
-
-            # Check if the current node is scoreable
-            if node_data.get("is_scored", False):
-                scores["item_count"] = 1
-
-                if node_data.get("score") is not None:
-                    scores["total_score"] = node_data["score"]
-                    scores["scored_count"] = 1
-
-            # Recursively process children
-            for child_id, child_data in node_data.get("children", {}).items():
-                child_scores = recursive_score_calculation(child_data)
-
-                # Aggregate child scores
-                scores["total_score"] += child_scores["total_score"]
-                scores["item_count"] += child_scores["item_count"]
-                scores["scored_count"] += child_scores["scored_count"]
-                scores["assessable_count"] += child_scores["assessable_count"]
-                scores["not_applicable_count"] += child_scores["not_applicable_count"]
-
-            return scores
-
-        # Dictionary to store category scores
         category_scores = {}
-        for node_id, node_data in data.items():
-            # this acts only at the top level nodes since it's not crawling the children.
-            # TODO: we need a new param to control on which depth we want to report now that we have the depth map
-            scores = recursive_score_calculation(node_data)
-
-            # Calculate average score for the category
-            average_score = 0
-            if scores["scored_count"] > 0:
-                average_score = scores["total_score"] / scores["scored_count"]
-
+        everything = []
+        for node_data in data.values():
+            # Top-level nodes only.
+            group = collect(node_data, [])
+            everything += group
             category_scores[node_data["urn"]] = {
                 "name": node_data["node_content"].split(":")[0],
-                "total_score": scores["total_score"],
-                "item_count": scores["item_count"],
-                "scored_count": scores["scored_count"],
-                "average_score": round(average_score, 1),
-                "nothing_applicable": scores["not_applicable_count"]
-                == scores["assessable_count"],
+                **scores_of(group),
             }
 
-        return category_scores
+        return category_scores, scores_of(everything)
 
     def _build_safe_audit_context(audit):
         return {
@@ -1151,8 +1228,13 @@ def gen_audit_context(
 
     agg_drifts = list()
 
-    # Calculate category scores
-    category_scores = aggregate_category_scores(tree)
+    shown_layers = report_score_layers(
+        audit,
+        visible_layers(audit, "auditor") if score_layers is None else score_layers,
+    )
+    category_scores, overall_scores = aggregate_category_scores(
+        tree, audit, shown_layers
+    )
 
     max_score = next(
         (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
@@ -1238,6 +1320,31 @@ def gen_audit_context(
             "observation_sensitive_point": "Observation / point sensible",
             "opportunity_for_improvement": "Opportunité d'amélioration",
             "good_practice": "Bonne pratique",
+        },
+        "hu": {
+            "compliant": "Megfelel",
+            "partially_compliant": "Részben megfelel",
+            "non_compliant": "Nem felel meg",
+            "not_applicable": "Nem alkalmazható",
+            "not_assessed": "Nem értékelt",
+            "to_do": "Teendő",
+            "on_hold": "Felfüggesztve",
+            "in_progress": "Folyamatban",
+            "deprecated": "Elavult",
+            "active": "Aktív",
+            "degraded": "Leromlott",
+            "policy": "Szabályzat",
+            "process": "Folyamat",
+            "technical": "Technikai",
+            "physical": "Fizikai",
+            "procedure": "Eljárás",
+            "in_review": "Felülvizsgálat alatt",
+            "done": "Kész",
+            "major_nonconformity": "Súlyos nemmegfelelőség",
+            "minor_nonconformity": "Kisebb nemmegfelelőség",
+            "observation_sensitive_point": "Észrevétel / érzékeny pont",
+            "opportunity_for_improvement": "Fejlesztési lehetőség",
+            "good_practice": "Jó gyakorlat",
         },
         "nl": {
             "compliant": "Compliant",
@@ -1342,6 +1449,47 @@ def gen_audit_context(
         else assessments
     )
 
+    def row_layers(ra):
+        """The requirement's score layers when the report shows more than the
+        implementation score: the documentation score as recorded, like the
+        CSV, the others as its audit counts them. A not applicable requirement
+        has none: exports leave its scores empty."""
+        if len(shown_layers) == 1:
+            return {}
+        if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return dict.fromkeys(shown_layers)
+        layers = {
+            **audit.requirement_layer_scores(
+                result=ra.result,
+                is_scored=ra.is_scored,
+                score=ra.score,
+                documentation_score=ra.documentation_score,
+                min_score=ra.requirement.min_score,
+                max_score=ra.requirement.max_score,
+            ),
+            "documentation_score": ra.documentation_score,
+        }
+        return {
+            layer: None if layers[layer] is None else round_score(layers[layer])
+            for layer in shown_layers
+        }
+
+    def row_max_score(ra):
+        """The top of the scale the requirement's scores are on: its own
+        maximum, else the audit's, else the framework's."""
+        return next(
+            (
+                bound
+                for bound in (
+                    ra.requirement.max_score,
+                    audit.max_score,
+                    audit.framework.max_score,
+                )
+                if bound is not None
+            ),
+            None,
+        )
+
     # Build flat list of requirement assessments for Word template
     requirement_assessments_list = []
     for ra in [
@@ -1361,8 +1509,11 @@ def gen_audit_context(
                 # The label is localised; the colour must key off the raw value.
                 "result_key": ra.result or "",
                 "extended_result": safe_translate(lang, ra.extended_result),
-                "score": ra.score,
-                "max_score": audit.framework.max_score if ra.is_scored else None,
+                "score": None if ra.result == "not_applicable" else ra.score,
+                "max_score": row_max_score(ra)
+                if ra.is_scored and ra.result != "not_applicable"
+                else None,
+                **row_layers(ra),
                 "observation": ra.observation or "-",
                 "answers": _answer_rows(ra),
                 "evidences": [e.name for e in seen(ra.evidences.all())],
@@ -1452,6 +1603,8 @@ def gen_audit_context(
         "ac_count": ac_total,
         "igs": IGs,
         "category_scores": category_scores,
+        "overall_scores": overall_scores,
+        "score_layers": shown_layers,
         "category_radar": category_radar_buffer,
         "requirement_assessments": requirement_assessments_list,
         "ra_count": len(requirement_assessments_list),
@@ -1629,9 +1782,18 @@ _REDACTABLE_RA_FIELDS = (
     "result",
     "extended_result",
     "score",
+    "documentation_score",
     "observation",
     "applied_controls",
 )
+
+# Row keys computed from a governed field, dropped with it. The maturity score
+# averages both scores, so it goes with either.
+_RA_DERIVED_KEYS = {
+    "score": ("max_score", "implementation_score", "maturity_score"),
+    "documentation_score": ("maturity_score",),
+    "result": ("result_key",),
+}
 
 # Data derived from a governed field. Redacting the field does not redact an
 # aggregate or an image computed from it, so they have to be dropped together —
@@ -1641,7 +1803,7 @@ _FIELD_DERIVED_CHARTS = {
     "result": ("compliance_donut", "compliance_radar", "completion_bar"),
 }
 _FIELD_DERIVED_KEYS = {
-    "score": ("category_scores",),
+    "score": ("category_scores", "overall_scores"),
     "result": ("req", "drifts_per_domain"),
     "applied_controls": ("p1_controls", "full_controls", "ac_count"),
 }
@@ -1719,6 +1881,13 @@ _STATE_LABELS = {
         Commitment.State.COMMITTED: "Engagé",
         Commitment.State.DECLINED: "Refusé",
         Commitment.State.FULFILLED: "Réalisé",
+    },
+    "hu": {
+        Commitment.State.UNDEFINED: "Nincs meghatározva",
+        Commitment.State.IN_NEGOTIATION: "Egyeztetés alatt",
+        Commitment.State.COMMITTED: "Vállalva",
+        Commitment.State.DECLINED: "Elutasítva",
+        Commitment.State.FULFILLED: "Teljesítve",
     },
     "tr": {
         Commitment.State.UNDEFINED: "Tanımsız",
@@ -1826,6 +1995,27 @@ def counterparty_context(audit, readable=_all_readable):
     }
 
 
+def report_reader_role(role, profile):
+    """The role a report is written for. Least privilege of the reader's own and
+    the profile's: an auditor exporting the external document gets the
+    respondent's field set, and a respondent never escalates by asking for the
+    internal one."""
+    spec = REPORT_PROFILES.get(profile, REPORT_PROFILES["full"])
+    return "respondent" if "respondent" in (role, spec["role"]) else "auditor"
+
+
+def _implementation_only(entry):
+    """A score entry without the documentation and maturity scores, headlined
+    by the implementation score."""
+    kept = {
+        key: value
+        for key, value in entry.items()
+        if key not in ("documentation_score", "maturity_score")
+    }
+    kept["average_score"] = entry.get("implementation_score") or 0
+    return kept
+
+
 def audit_context_for_typst(
     context,
     audit,
@@ -1846,10 +2036,7 @@ def audit_context_for_typst(
     }
 
     spec = REPORT_PROFILES.get(profile, REPORT_PROFILES["full"])
-    # Least privilege of the two: an auditor exporting the external document gets
-    # the respondent's field set, and a respondent never escalates by asking for
-    # the internal one.
-    effective_role = "respondent" if "respondent" in (role, spec["role"]) else "auditor"
+    effective_role = report_reader_role(role, profile)
     hidden = {
         field
         for field in _REDACTABLE_RA_FIELDS
@@ -1865,17 +2052,31 @@ def audit_context_for_typst(
         if is_field_visible_to(audit, field, "auditor")
     }
     if hidden:
+        dropped = hidden | {
+            key for field in hidden for key in _RA_DERIVED_KEYS.get(field, ())
+        }
         payload["requirement_assessments"] = [
-            {
-                key: value
-                for key, value in ra.items()
-                if key not in hidden
-                and not (key == "max_score" and "score" in hidden)
-                and not (key == "result_key" and "result" in hidden)
-            }
+            {key: value for key, value in ra.items() if key not in dropped}
             for ra in payload.get("requirement_assessments", [])
         ]
     payload["hidden_fields"] = sorted(hidden)
+
+    # The context's headline is the maturity score when it was built for a
+    # reader who sees the documentation score (gen_audit_context's
+    # `score_layers`). For this reader, that maturity — in a figure or in the
+    # radar drawn from it — would give the documentation score away.
+    maturity_withheld = "documentation_score" in hidden and "maturity_score" in (
+        payload.get("score_layers") or ()
+    )
+    if maturity_withheld:
+        payload["score_layers"] = ["implementation_score"]
+        if "category_scores" in payload:
+            payload["category_scores"] = {
+                urn: _implementation_only(entry)
+                for urn, entry in payload["category_scores"].items()
+            }
+        if payload.get("overall_scores") is not None:
+            payload["overall_scores"] = _implementation_only(payload["overall_scores"])
 
     images = {}
     for key in AUDIT_CHART_KEYS:
@@ -1886,12 +2087,16 @@ def audit_context_for_typst(
         images[f"{key}.png"] = buffer.read()
     if "categories" not in spec["sections"]:
         payload.pop("category_scores", None)
+        payload.pop("overall_scores", None)
 
     for field in hidden:
         for key in _FIELD_DERIVED_KEYS.get(field, ()):
             payload.pop(key, None)
         for name in _FIELD_DERIVED_CHARTS.get(field, ()):
             images.pop(f"{name}.png", None)
+    if maturity_withheld:
+        # Drawn from the maturity score; cannot be redrawn from here.
+        images.pop("category_radar.png", None)
 
     if {"commitments", "tasks"} & set(spec["sections"]):
         commitments, tasks = audit_undertakings(

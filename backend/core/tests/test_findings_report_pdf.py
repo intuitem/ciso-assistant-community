@@ -67,7 +67,7 @@ def _render(assessment_obj, lang="en"):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_renders_in_each_locale(assessment, lang):
     _findings(assessment, [4, 2])
     pdf, _ = _render(assessment, lang)
@@ -139,6 +139,7 @@ def test_endpoint_returns_a_pdf(admin_client, assessment):  # noqa: F811
 def test_locale_fallback_is_whole_document():
     assert localized_template("findings_report", "de") == "findings_report_en.typ"
     assert localized_template("findings_report", "fr") == "findings_report_fr.typ"
+    assert localized_template("findings_report", "hu") == "findings_report_hu.typ"
     assert localized_template("findings_report", "tr") == "findings_report_tr.typ"
 
 
@@ -151,11 +152,21 @@ def test_turkish_status_label_names_the_undefined_marker():
     assert '"--":' in block
 
 
+def test_hungarian_status_label_names_the_undefined_marker():
+    """`Finding.Status.UNDEFINED` is stored as "--", so the status badge needs
+    that key, not only `undefined`."""
+    src = (TEMPLATE_DIR / "findings_report_hu.typ").read_text()
+    block = src[src.index("#let status-label = (") :]
+    block = block[: block.index("\n)")]
+    assert '"--":' in block
+
+
 def test_templates_avoid_auto_column_sizing():
     """`auto` overflows and overlaps once content is wider than the page."""
     for name in (
         "findings_report_en.typ",
         "findings_report_fr.typ",
+        "findings_report_hu.typ",
         "findings_report_tr.typ",
     ):
         src = (TEMPLATE_DIR / name).read_text()
@@ -163,7 +174,7 @@ def test_templates_avoid_auto_column_sizing():
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_every_optional_block_compiles(assessment, lang):
     """Optional blocks are only compiled when their data is present: a fixture
     with empty labels never reaches the label branch, which is how a broken
@@ -232,6 +243,7 @@ def test_actors_are_named_and_observations_are_whole(assessment):
     [
         ("en", "Pentest", "In progress"),
         ("fr", "Test d'intrusion", "En cours"),
+        ("hu", "Behatolásteszt", "Folyamatban"),
         ("tr", "Sızma testi", "Devam ediyor"),
     ],
 )
@@ -253,7 +265,7 @@ def test_assessment_category_and_status_are_localised(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr", "tr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_recommendation_and_priority_reach_the_report(assessment, lang):
     """Issue #4944: the report dropped the recommendation and the priority."""
     _findings(assessment, [3], rich=True)

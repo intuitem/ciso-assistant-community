@@ -9,6 +9,10 @@ from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregatio
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
+    AuditGuide,
+    AuditPreparationRole,
+    AuditPreparationSession,
+    AuditPreparationSetAside,
     Framework,
     QuickForm,
     QuickFormPage,
@@ -853,6 +857,140 @@ class ReferenceControlImporter:
         )
 
 
+class AuditGuideImporter:
+    """An auditor's guide to a framework; format in the product docs, "Audit guides"."""
+
+    REQUIRED_FIELDS = {"ref_id", "urn", "framework", "entries"}
+    KINDS = {"document", "record", "technical", "observation"}
+    # The preparation stores these ids as they are written in the guide: one
+    # that does not fit its column loads, then can never be paired or assigned.
+    MAX_ENTRY = AuditPreparationSetAside._meta.get_field("entry").max_length
+    MAX_ITEM_ID = AuditPreparationSetAside._meta.get_field("request").max_length
+    MAX_ROLE = AuditPreparationRole._meta.get_field("role").max_length
+    MAX_SESSION_ID = AuditPreparationSession._meta.get_field("session").max_length
+
+    def __init__(self, guide_data: dict):
+        self.guide_data = guide_data
+
+    @staticmethod
+    def _is_text(value, max_length: int) -> bool:
+        return isinstance(value, str) and 0 < len(value) <= max_length
+
+    def is_valid(self) -> Union[str, None]:
+        from core.auditor_preread import normalize_key
+
+        data = self.guide_data
+        if not isinstance(data, dict):
+            return "an audit guide must be a mapping"
+        if missing_fields := self.REQUIRED_FIELDS - set(data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        if not all(isinstance(data[f], str) and data[f] for f in ("urn", "framework")):
+            return "urn and framework must be URNs"
+        entries = data["entries"]
+        if not isinstance(entries, dict):
+            return "entries must be a mapping keyed by requirement number"
+        keys = [normalize_key(k) for k in entries]
+        if len(set(keys)) != len(keys):
+            return "two entries are keyed by the same requirement number"
+        if not all(self._is_text(k, self.MAX_ENTRY) for k in keys):
+            return "an entry is keyed by a requirement number, of at most {} characters".format(
+                self.MAX_ENTRY
+            )
+        for key, entry in entries.items():
+            if not isinstance(entry, dict):
+                return "entry {} must be a mapping".format(key)
+            interviewees = entry.get("interviewees") or []
+            if not isinstance(interviewees, list) or not all(
+                self._is_text(who, self.MAX_ROLE) for who in interviewees
+            ):
+                return "entry {}: interviewees must be a list of role names, of at most {} characters each".format(
+                    key, self.MAX_ROLE
+                )
+            people = set(interviewees)
+            ids = []
+            for part in ("questions", "requests", "pitfalls", "sampling"):
+                items = entry.get(part) or []
+                if not isinstance(items, list) or not all(
+                    isinstance(item, dict) for item in items
+                ):
+                    return "entry {}: {} must be a list of mappings".format(key, part)
+                ids += [item.get("id") for item in items]
+            # Translations key every item of an entry in one flat mapping, and
+            # stored keys are text: a number would never be found again.
+            if not all(self._is_text(i, self.MAX_ITEM_ID) for i in ids) or len(
+                set(ids)
+            ) != len(ids):
+                return "entry {}: every item needs an id (text, at most {} characters), unique across the entry".format(
+                    key, self.MAX_ITEM_ID
+                )
+            for q in entry.get("questions") or []:
+                if q.get("stage") not in (1, 2) or not q.get("text"):
+                    return "entry {}: question {} needs a stage (1 or 2) and a text".format(
+                        key, q["id"]
+                    )
+                if not set(q.get("who") or []) <= people:
+                    return "entry {}: question {} names someone who is not an interviewee".format(
+                        key, q["id"]
+                    )
+            for r in entry.get("requests") or []:
+                if r.get("kind") not in self.KINDS or not r.get("label"):
+                    return (
+                        "entry {}: request {} needs a label and a kind among {}".format(
+                            key, r["id"], ", ".join(sorted(self.KINDS))
+                        )
+                    )
+                fresh = r.get("fresh_days")
+                if fresh is not None and (
+                    not isinstance(fresh, int) or isinstance(fresh, bool) or fresh <= 0
+                ):
+                    return "entry {}: request {}: fresh_days must be a positive number of days".format(
+                        key, r["id"]
+                    )
+                if not isinstance(r.get("reference_control", ""), str):
+                    return (
+                        "entry {}: request {}: reference_control must be a URN".format(
+                            key, r["id"]
+                        )
+                    )
+        sessions = data.get("sessions") or []
+        if not isinstance(sessions, list) or any(
+            not isinstance(x, dict)
+            or not self._is_text(x.get("id"), self.MAX_SESSION_ID)
+            or not isinstance(x.get("members"), list)
+            for x in sessions
+        ):
+            return "every session needs an id (text, at most {} characters) and a members list".format(
+                self.MAX_SESSION_ID
+            )
+        translations = data.get("translations") or {}
+        if not isinstance(translations, dict) or any(
+            not isinstance(t, dict)
+            or not isinstance(t.get("entries") or {}, dict)
+            or not isinstance(t.get("sessions") or {}, dict)
+            or not all(
+                isinstance(v, dict)
+                and all(isinstance(x, (str, dict)) for x in v.values())
+                for v in (t.get("entries") or {}).values()
+            )
+            or not all(isinstance(v, dict) for v in (t.get("sessions") or {}).values())
+            for t in translations.values()
+        ):
+            return (
+                "translations must map each locale to texts keyed by entry and item id"
+            )
+        return None
+
+    def import_audit_guide(self, library_object: LoadedLibrary):
+        AuditGuide.objects.create(
+            library=library_object,
+            urn=self.guide_data["urn"].lower(),
+            provider=library_object.provider,
+            locale=library_object.locale,
+            default_locale=library_object.default_locale,
+            **AuditGuide.fields_from(self.guide_data),
+        )
+
+
 class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
@@ -1023,6 +1161,7 @@ class LibraryImporter:
         "requirement_mapping_sets",
         "preset",
         "workflows",
+        "audit_guides",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -1043,6 +1182,7 @@ class LibraryImporter:
         self._risk_matrices = []
         self._requirement_mapping_sets = []
         self._workflows = []
+        self._audit_guides = []
 
     def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
         """Structural validation of workflow objects; actual
@@ -1407,6 +1547,24 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
+        if "audit_guides" in library_objects:
+            if not isinstance(library_objects["audit_guides"], list):
+                return "[AUDIT_GUIDE_ERROR] audit_guides must be a list"
+            importers = [AuditGuideImporter(g) for g in library_objects["audit_guides"]]
+            self._audit_guides = importers
+            urns = [
+                str(g.get("urn")).lower()
+                for g in library_objects["audit_guides"]
+                if isinstance(g, dict)
+            ]
+            if len(set(urns)) != len(urns):
+                return "[AUDIT_GUIDE_ERROR] two audit guides share a URN"
+            for index, importer in enumerate(importers):
+                if (error := importer.is_valid()) is not None:
+                    return "[AUDIT_GUIDE_ERROR] audit guide {}: {}".format(
+                        index + 1, error
+                    )
+
         if "metric_definitions" in library_objects:
             metric_definition_data = library_objects["metric_definitions"]
             if (
@@ -1508,6 +1666,9 @@ class LibraryImporter:
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        for audit_guide in self._audit_guides:
+            audit_guide.import_audit_guide(library_object)
 
         # after reference controls: techniques link to them and to parents
         for technique in self._techniques:

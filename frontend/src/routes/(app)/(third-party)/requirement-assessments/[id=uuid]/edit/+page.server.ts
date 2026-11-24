@@ -6,6 +6,7 @@ import { getSecureRedirect } from '#lib/utils/helpers.js';
 import { formatSelectFieldData } from '#lib/utils/load.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import { headData } from '#lib/utils/table.js';
+import { fetchVendorAssignees } from '#lib/utils/vendorTasks.js';
 import { m } from '#paraglide/messages.js';
 import { type TableSource } from '#lib/components/ModelTable/types.js';
 import type { Actions } from '@sveltejs/kit';
@@ -16,7 +17,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, locals }) => {
 	const URLModel = 'requirement-assessments';
 	const baseUrl = BASE_API_URL;
 	const endpoint = `${baseUrl}/${URLModel}/${params.id}/`;
@@ -171,7 +172,16 @@ export const load = (async ({ fetch, params }) => {
 	const taskTemplateModel = getModelInfo('task-templates');
 	const taskTemplateCreateSchema = modelSchema('task-templates');
 	const taskTemplateCreateForm = await superValidate(
-		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		{
+			requirement_assessments: [params.id],
+			folder: requirementAssessment.folder.id,
+			// getUser(), not locals.user: the layout load that sets it runs alongside this one.
+			assigned_to: await fetchVendorAssignees(
+				fetch,
+				requirementAssessment.folder,
+				!!(await locals.getUser())?.is_third_party
+			)
+		},
 		zod(taskTemplateCreateSchema),
 		{ errors: false }
 	);
@@ -325,7 +335,7 @@ export const actions: Actions = {
 			const nextParam = getSecureRedirect(event.url.searchParams.get('next'));
 			redirect(
 				302,
-				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${nextParam}` : ''}`
+				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`
 			);
 		}
 

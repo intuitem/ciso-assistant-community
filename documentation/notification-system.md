@@ -104,6 +104,7 @@ Worker command: `uv run python manage.py run_huey -w 2 -k process`
 | `backend/core/templates/emails/fr/` | French YAML email templates |
 | `backend/core/templates/emails/de/` | German YAML email templates |
 | `backend/core/templates/emails/nl/` | Dutch YAML email templates |
+| `backend/core/templates/emails/hu/` | Hungarian YAML email templates |
 | `backend/core/templates/registration/` | HTML templates for password reset / welcome emails |
 
 ---
@@ -149,7 +150,7 @@ The `ciso_assistant_url` variable is always injected via `get_default_context()`
 ### How to Add a New Template
 
 1. Create `backend/core/templates/emails/en/{template_name}.yaml` with `subject` and `body` keys
-2. Create the `fr`, `de` and `nl` translations next to it (`backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`); a missing locale falls back to English
+2. Create the `fr`, `de`, `nl` and `hu` translations next to it (`backend/core/templates/emails/{fr,de,nl,hu}/{template_name}.yaml`); a missing locale falls back to English
 3. Use `${variable_name}` for dynamic content
 4. `${ciso_assistant_url}` is automatically available
 
@@ -270,7 +271,7 @@ These tasks perform automated actions without sending emails:
 
 | Task | Schedule | Action |
 |------|----------|--------|
-| `lock_overdue_compliance_assessments` | 02:30 | Lock overdue assessments (with campaign/entity), set status to `in_review` |
+| `lock_overdue_compliance_assessments` | 02:30 | Lock overdue assessments (with campaign/entity), set status to `in_review`. Only when the `auto_lock_overdue_assessments` general setting is on |
 | `deactivate_expired_users` | 03:00 | Deactivate users past `expiry_date` (except superusers) |
 | `mark_expired_evidences` | 03:35 | Set evidence status to `expired` |
 | `check_expired_organisation_issues` | 06:50 | Set expired OrganisationIssue status to `inactive` |
@@ -339,7 +340,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Create email templates**:
    - `backend/core/templates/emails/en/{template_name}.yaml`
-   - `backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`
+   - `backend/core/templates/emails/{fr,de,nl,hu}/{template_name}.yaml`
 
 2. **Add a Huey task** in `backend/core/tasks.py`:
    ```python

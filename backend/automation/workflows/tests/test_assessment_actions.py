@@ -6,7 +6,13 @@ import uuid
 
 import pytest
 
-from core.models import ComplianceAssessment, Framework, RequirementNode
+from core.models import (
+    ComplianceAssessment,
+    Finding,
+    FindingsAssessment,
+    Framework,
+    RequirementNode,
+)
 from iam.models import Folder
 from tprm.models import Entity, EntityAssessment
 from automation.workflows.actions import (
@@ -377,3 +383,59 @@ class TestReferenceResolution:
             )
         }
         assert "action_create_bad_reference" in codes
+
+
+@pytest.mark.django_db
+class TestFindingOnRequirement:
+    """A finding raised on a requirement goes to its audit's binder, named after
+    the requirement, and an upsert of it stays within that binder."""
+
+    def make_audit(self, domain, framework, name):
+        audit = ComplianceAssessment.objects.create(
+            name=name, framework=framework, folder=domain
+        )
+        audit.create_requirement_assessments()
+        return audit
+
+    def raise_on(self, domain, requirement_assessment):
+        version = action_flow(
+            domain,
+            {
+                "type": "create_object",
+                "model": "finding",
+                "upsert": True,
+                "fields": {"requirement_assessment": str(requirement_assessment.id)},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        return instance.node_outputs["build_it"]
+
+    def test_an_upsert_never_moves_a_finding_to_another_audit(self):
+        # Yearly audits of one framework in one folder: the same requirement
+        # derives the same finding name in both.
+        domain = make_domain(f"Yearly {uuid.uuid4()}")
+        framework = make_framework(groups=False)
+        last_year = self.make_audit(domain, framework, "2025 audit")
+        this_year = self.make_audit(domain, framework, "2026 audit")
+        urn = f"{framework.urn}:req0"
+        old_ra = last_year.requirement_assessments.get(requirement__urn=urn)
+        new_ra = this_year.requirement_assessments.get(requirement__urn=urn)
+
+        first = self.raise_on(domain, old_ra)
+        second = self.raise_on(domain, new_ra)
+
+        assert second["created"]
+        assert second["created_object_id"] != first["created_object_id"]
+        old = Finding.objects.get(id=first["created_object_id"])
+        new = Finding.objects.get(id=second["created_object_id"])
+        assert old.name == new.name == "Req 0"
+        # Last year's finding stays on last year's audit.
+        assert old.requirement_assessment == old_ra
+        assert old.findings_assessment == FindingsAssessment.binder_of(last_year)
+        assert new.findings_assessment == FindingsAssessment.binder_of(this_year)
+
+        # A rerun still finds its own finding rather than adding another.
+        again = self.raise_on(domain, new_ra)
+        assert not again["created"]
+        assert again["created_object_id"] == second["created_object_id"]

@@ -20,7 +20,8 @@ capability domains apply across all phases (ASD reports them as "All"), so they
 are in every group.
 
 Also writes the transition mapping from essential-eight-2023, whose ref_ids are
-ISM controls: ASD maps each action to the Essential Eight ISM controls.
+ISM controls: ASD maps each action to the Essential Eight ISM controls. And the
+mapping with nist-csf-2.0 (both directions), from the same collection.
 
 Usage:
     python tools/build_asd_essentials.py [--source DIR] [--output-dir DIR]
@@ -48,6 +49,8 @@ SLUG = "asd-essentials-enterprise-it"
 NAME = "ASD Essentials for enterprise IT"
 E8 = "essential-eight-2023"
 E8_TITLE = "ASD’s Essential Eight"
+CSF = "nist-csf-2.0"
+CSF_TITLE = "NIST Cybersecurity Framework 2.0"
 
 # ASD's summary table order: capability domains, then by priority phase.
 DOMAINS = [
@@ -124,6 +127,13 @@ def fetch(source: Path | None, name: str) -> bytes:
     url = f"https://raw.githubusercontent.com/{REPO}/{COMMIT}/{name}"
     with urllib.request.urlopen(url, timeout=60) as response:  # nosec B310
         return response.read()
+
+
+def rationale(mappings: dict, entry: dict) -> str | None:
+    """A map's own matching-rationale wins over the collection's (OSCAL); None if neither sets it."""
+    return entry.get("matching-rationale") or mappings.get("provenance", {}).get(
+        "matching-rationale"
+    )
 
 
 def props(obj: dict) -> dict:
@@ -278,7 +288,9 @@ def build_framework(catalog, profiles):
     return framework, instances
 
 
-def library(urn_slug, name, description, objects, dependencies=None, copyright=None):
+def library(
+    urn_slug, name, description, objects, dependencies=None, copyright=None, version=1
+):
     lib = {
         "urn": f"urn:intuitem:risk:library:{urn_slug}",
         "locale": "en",
@@ -286,7 +298,7 @@ def library(urn_slug, name, description, objects, dependencies=None, copyright=N
         "name": name,
         "description": description,
         "copyright": copyright or COPYRIGHT,
-        "version": 1,
+        "version": version,
         "publication_date": date.today().isoformat(),
         "provider": "Australian Signals Directorate (ASD)",
         "packager": "intuitem",
@@ -320,12 +332,12 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
                 missing.add(ism)
             for source in by_ism.get(ism, []):
                 for urn in instances[action]:
-                    pairs.append((source, urn))
+                    pairs.append((source, urn, rationale(mappings, entry)))
     if missing:
         print(f"E8 ISM ids not in {E8}: {sorted(missing)}", file=sys.stderr)
     seen = set()
     rows = []
-    for source, target in pairs:
+    for source, target, matching in pairs:
         if (source, target) not in seen:
             seen.add((source, target))
             rows.append(
@@ -333,7 +345,7 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
                     "source_requirement_urn": source,
                     "target_requirement_urn": target,
                     "relationship": "intersect",
-                    "rationale": "semantic",
+                    "rationale": matching,
                     "strength_of_relationship": None,
                 }
             )
@@ -363,7 +375,80 @@ def build_e8_mapping(mappings, instances, e8_path: Path):
             f"urn:intuitem:risk:library:{E8}",
             f"urn:intuitem:risk:library:{SLUG}",
         ],
+        version=2,  # v2: rationale read from ASD's provenance (functional, was semantic)
     ), len(missing)
+
+
+def build_csf_mapping(mappings, instances, csf_path: Path):
+    csf = yaml.safe_load(csf_path.read_text(encoding="utf-8"))
+    known = {n["urn"] for n in csf["objects"]["framework"]["requirement_nodes"]}
+    titles = {r["uuid"]: r["title"] for r in mappings["back-matter"]["resources"]}
+    (csf_map,) = [
+        m
+        for m in mappings["mappings"]
+        if titles[m["target-resource"]["href"].lstrip("#")].startswith(CSF_TITLE)
+    ]
+    rows = []
+    for entry in csf_map["maps"]:
+        assert entry["relationship"] == "intersects-with", entry["relationship"]
+        assert len(entry["sources"]) == 1, entry["sources"]
+        action = entry["sources"][0]["id-ref"]
+        for target in entry["targets"]:
+            urn = f"urn:intuitem:risk:req_node:{CSF}:{target['id-ref'].lower()}"
+            assert urn in known, f"CSF id not in {CSF}: {target['id-ref']}"
+            for source in instances[action]:
+                rows.append(
+                    {
+                        "source_requirement_urn": source,
+                        "target_requirement_urn": urn,
+                        "relationship": "intersect",
+                        "rationale": rationale(mappings, entry),
+                        "strength_of_relationship": None,
+                    }
+                )
+    slug = f"mapping-{SLUG}-and-{CSF}"
+    description = (
+        f"Mapping between the {NAME} and the NIST Cybersecurity Framework 2.0, from ASD's OSCAL "
+        f"mapping collection ({VERSION}): each action intersects the CSF subcategories ASD maps "
+        "it to, in every domain it applies to."
+    )
+    name = f"{NAME} <-> NIST CSF 2.0"
+
+    def mapping_set(ref_id, source, target, mapping_rows):
+        return {
+            "urn": f"urn:intuitem:risk:req_mapping_set:{ref_id}",
+            "ref_id": ref_id,
+            "name": name,
+            "description": description,
+            "source_framework_urn": f"urn:intuitem:risk:framework:{source}",
+            "target_framework_urn": f"urn:intuitem:risk:framework:{target}",
+            "requirement_mappings": mapping_rows,
+        }
+
+    # intersect is symmetric; the reverse set lets CSF (and ISO 27001 through it) reach the Essentials
+    reverse = [
+        {
+            **r,
+            "source_requirement_urn": r["target_requirement_urn"],
+            "target_requirement_urn": r["source_requirement_urn"],
+        }
+        for r in rows
+    ]
+    return library(
+        slug,
+        name,
+        description,
+        {
+            "requirement_mapping_sets": [
+                mapping_set(slug, SLUG, CSF, rows),
+                mapping_set(f"{slug}-revert", CSF, SLUG, reverse),
+            ]
+        },
+        dependencies=[
+            f"urn:intuitem:risk:library:{SLUG}",
+            f"urn:intuitem:risk:library:{CSF}",
+        ],
+    )
 
 
 def _str_representer(dumper, data):
@@ -412,6 +497,12 @@ def main():
         mappings, instances, root / f"backend/library/libraries/{E8}.yaml"
     )
     write(args.output_dir / f"mapping-{E8}-and-{SLUG}.yaml", mapping)
+    write(
+        args.output_dir / f"mapping-{SLUG}-and-{CSF}.yaml",
+        build_csf_mapping(
+            mappings, instances, root / f"backend/library/libraries/{CSF}.yaml"
+        ),
+    )
 
 
 if __name__ == "__main__":

@@ -81,6 +81,7 @@ from .generators import (
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
+    report_reader_role,
     render_docx_report,
     render_docx_report_bounded,
     DocxRenderCrash,
@@ -88,6 +89,7 @@ from .generators import (
     DocxRenderTimeout,
     DocxTemplateError,
 )
+from .framework_report import visible_layers
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
 
@@ -227,6 +229,7 @@ from core.utils import (
     visible_questions,
     _generate_occurrences,
     _create_task_dict,
+    UserGroupCodename,
 )
 from dateutil import relativedelta as rd
 
@@ -539,6 +542,41 @@ def escape_csv_row(row):
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
+    ]
+
+
+def audit_reader_role(user, audit):
+    """The viewer role a user reads the audit with."""
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders and audit.folder_id in respondent_folders:
+        return "respondent"
+    return "auditor"
+
+
+def export_shows_documentation_score(user, audit):
+    """Whether an audit export may carry the documentation and maturity scores."""
+    return audit.show_documentation_score and "documentation_score" in (
+        visible_layers(audit, audit_reader_role(user, audit))
+    )
+
+
+def export_documentation_and_maturity(audit, ra):
+    """The documentation score as recorded and the maturity score as the audit
+    counts it (Framework Insights' requirement figures), for an audit export.
+    Empty for a not applicable requirement, like its implementation score."""
+    if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
+        return [None, None]
+    maturity = audit.requirement_layer_scores(
+        result=ra.result,
+        is_scored=ra.is_scored,
+        score=ra.score,
+        documentation_score=ra.documentation_score,
+        min_score=ra.requirement.min_score,
+        max_score=ra.requirement.max_score,
+    )["maturity_score"]
+    return [
+        ra.documentation_score,
+        None if maturity is None else round_score(maturity),
     ]
 
 
@@ -9439,11 +9477,29 @@ class ActorViewSet(BaseModelViewSet):
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
 
+        try:
+            workspace = UUID(self.request.query_params.get("respondents_of", ""))
+        except ValueError:
+            workspace = None
+        # Only the respondents of that workspace: other vendors' stay hidden.
+        respondents = (
+            User.objects.filter(
+                user_groups__folder_id=workspace,
+                user_groups__name=UserGroupCodename.THIRD_PARTY_RESPONDENT.value,
+            )
+            if workspace
+            else User.objects.none()
+        )
+        if self.request.query_params.get("respondents_only", "").lower() == "true":
+            queryset = queryset.filter(user__in=respondents)
+
         include_third_parties = self.request.query_params.get(
             "include_third_parties", "false"
         )
         if include_third_parties.lower() != "true":
-            third_parties = Actor.objects.filter(user__is_third_party=True)
+            third_parties = Actor.objects.filter(user__is_third_party=True).exclude(
+                user__in=respondents
+            )
             queryset = queryset.exclude(id__in=third_parties)
 
         # Service account users are managed via /api/iam/service-accounts/
@@ -10131,6 +10187,151 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
+    # Counts stop past this many rows, so a large subtree is never scanned in full:
+    # a count over it is returned as the cap and flagged as capped.
+    MOVE_PREVIEW_COUNT_CAP = 1000
+    # The folder types and models the move preview counts on a line of their own,
+    # mapped to the i18n key of that line. Every other type is summed under
+    # "otherObjects": most are internal records a user would not recognise.
+    MOVE_PREVIEW_FOLDER_LABELS = {
+        Folder.ContentType.DOMAIN: "domains",
+        Folder.ContentType.ENCLAVE: "enclaves",
+    }
+    MOVE_PREVIEW_MODEL_LABELS = {
+        "core.Perimeter": "perimeters",
+        "core.ComplianceAssessment": "complianceAssessments",
+        "core.RiskAssessment": "riskAssessments",
+        "ebios_rm.EbiosRMStudy": "ebiosRMStudies",
+        "resilience.BusinessImpactAnalysis": "businessImpactAnalysis",
+        "core.Asset": "assets",
+        "core.AppliedControl": "appliedControls",
+        "core.Evidence": "evidences",
+        "core.Incident": "incidents",
+        "core.Vulnerability": "vulnerabilities",
+        "core.SecurityException": "securityExceptions",
+        "core.RiskAcceptance": "riskAcceptances",
+        "core.Threat": "threats",
+        "core.ReferenceControl": "referenceControls",
+        "core.FindingsAssessment": "findingsAssessments",
+        "core.Finding": "findings",
+        "tprm.Entity": "entities",
+        "privacy.Processing": "processings",
+        "core.TaskTemplate": "taskTemplates",
+    }
+
+    @action(detail=False, methods=["post"], url_path="move-preview")
+    def move_preview(self, request: Request) -> Response:
+        """What moving the listed domains together carries along.
+
+        Covers the listed domains the caller may change; other folders are left out.
+        `subjects` says for each one whether it sits below another listed domain:
+        moved to a common target, it leaves that subtree. `carried` counts the
+        folders and everything filed under the moved subtrees, whatever the caller
+        may view, and names none of them: one group per type of
+        `MOVE_PREVIEW_FOLDER_LABELS` and `MOVE_PREVIEW_MODEL_LABELS`, labelled by its
+        i18n key, then an "otherObjects" group for the rest. Counts stop at
+        `MOVE_PREVIEW_COUNT_CAP`, with `capped` (per group and overall) set when
+        there are more. 400 if `ids` is empty or longer than `BATCH_SIZE_LIMIT`,
+        403 if none is changeable.
+        """
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids:
+            return Response(
+                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        subjects = sorted(
+            self.get_queryset()
+            .filter(
+                id__in=ids,
+                builtin=False,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            .filter(
+                id__in=RoleAssignment.get_changeable_object_ids(request.user, Folder)
+            ),
+            key=lambda folder: folder.name.lower(),
+        )
+        if not subjects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        subject_ids = {folder.id for folder in subjects}
+        closure = Folder.descendants.through.objects
+        below_selected = set(
+            closure.filter(
+                from_folder_id__in=subject_ids, to_folder_id__in=subject_ids
+            ).values_list("to_folder_id", flat=True)
+        )
+        # The moved subtrees stay a subquery: spelled out, they could put thousands
+        # of ids in every query below.
+        descendant_ids = closure.filter(from_folder_id__in=subject_ids).values(
+            "to_folder_id"
+        )
+
+        cap = self.MOVE_PREVIEW_COUNT_CAP
+        groups: list[dict] = []
+
+        def capped_count(queryset: models.QuerySet) -> int:
+            return queryset.order_by()[: cap + 1].count()
+
+        def add_group(label: str, count: int) -> None:
+            if count:
+                groups.append(
+                    {"label": label, "count": min(count, cap), "capped": count > cap}
+                )
+
+        # Every folder below a moved domain moves with it, enclaves included.
+        carried_folders = Folder.objects.filter(id__in=descendant_ids).exclude(
+            id__in=subject_ids
+        )
+        for content_type, label in self.MOVE_PREVIEW_FOLDER_LABELS.items():
+            add_group(
+                label, capped_count(carried_folders.filter(content_type=content_type))
+            )
+        other_count = capped_count(
+            carried_folders.exclude(
+                content_type__in=list(self.MOVE_PREVIEW_FOLDER_LABELS)
+            )
+        )
+
+        in_subtree = Q(folder_id__in=subject_ids) | Q(folder_id__in=descendant_ids)
+        content_models = {
+            model._meta.label: model
+            for model in self._folder_content_models(exempt=frozenset())
+        }
+        for model_label, label in self.MOVE_PREVIEW_MODEL_LABELS.items():
+            if model := content_models.pop(model_label, None):
+                add_group(label, capped_count(model._base_manager.filter(in_subtree)))
+        for model in content_models.values():
+            # Once over the cap, the other types cannot change what is shown.
+            if other_count > cap:
+                break
+            other_count += capped_count(model._base_manager.filter(in_subtree))
+        add_group("otherObjects", other_count)
+
+        return Response(
+            {
+                "subjects": [
+                    {
+                        "id": str(folder.id),
+                        "name": folder.name,
+                        "below_selected": folder.id in below_selected,
+                    }
+                    for folder in subjects
+                ],
+                "carried": {
+                    "count": sum(g["count"] for g in groups),
+                    "capped": any(g["capped"] for g in groups),
+                    "groups": groups,
+                },
+            }
+        )
+
     def cascade_preclear(self, instance):
         # Rows of the domain tree that PROTECT other rows of the same tree.
         # References from outside the tree are not cleared and still block.
@@ -10317,24 +10518,27 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         )
 
     @staticmethod
-    def _folder_content_models() -> list:
-        """Every model that could hold a folder's content.
+    def _folder_content_models(
+        exempt: frozenset[str] = frozenset({"iam.UserGroup", "iam.RoleAssignment"}),
+    ) -> list:
+        """Every model that could hold a folder's content, except the `exempt` labels.
 
-        Exhaustive rather than curated: deletion cascades through every FK. The IAM
-        objects every domain auto-provisions are exempt, or nothing would be deletable.
-        Models whose table this edition never created are dropped up front: probing one
-        raises, and on PostgreSQL that aborts the surrounding transaction, so the error
-        cannot simply be caught and skipped.
+        Exhaustive rather than curated: deletion cascades through every FK. By default
+        the IAM objects every domain auto-provisions are exempt, or nothing would be
+        deletable. Proxies are left out: their concrete model already covers their
+        rows. Models whose table this edition never created are dropped up front:
+        probing one raises, and on PostgreSQL that aborts the surrounding transaction,
+        so the error cannot simply be caught and skipped.
         """
         from django.apps import apps
         from django.db import connection
 
         tables = set(connection.introspection.table_names())
-        exempt = {"iam.UserGroup", "iam.RoleAssignment"}
         return [
             model
             for model in apps.get_models()
             if model is not Folder
+            and not model._meta.proxy
             and model._meta.label not in exempt
             and model._meta.db_table in tables
             and any(
@@ -14271,6 +14475,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
     search_fields = ["name", "description", "ref_id", "framework__name"]
     ordering_remap = {"authors": "authors_label"}
     ordering_nulls_last = ("authors_label",)
+    # Preparing an audit is its own right: without this, a POST on an audit
+    # would also ask for add_complianceassessment.
+    permission_overrides = {
+        "auditor_preread_pair": "change_auditpreparation",
+        "auditor_preread_preparation": "change_auditpreparation",
+    }
 
     def get_serializer_class(self, **kwargs):
         action = kwargs.get("action", self.action)
@@ -14665,9 +14875,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 "applied_controls",
                 "answers",
             ]
+            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+            # Appended, so the existing columns keep their place; `score` stays
+            # the implementation score.
+            show_documentation_score = export_shows_documentation_score(
+                request.user, compliance_assessment
+            )
+            if show_documentation_score:
+                columns += ["documentation_score", "maturity_score"]
             writer.writerow(columns)
 
-            compliance_assessment = ComplianceAssessment.objects.get(id=pk)
             reqs = list(
                 compliance_assessment.get_requirement_assessments(
                     include_non_assessable=True
@@ -14690,7 +14907,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         req.result,
                         req.extended_result,
                         req.status,
-                        req.score,
+                        None
+                        if req.result == RequirementAssessment.Result.NOT_APPLICABLE
+                        else req.score,
                         req.observation,
                         ",".join(c.name for c in viewable(req.applied_controls.all())),
                     ]
@@ -14702,6 +14921,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         build_answers_dict(req.answers.all()),
                     )
                 )
+                if show_documentation_score:
+                    row += export_documentation_and_maturity(compliance_assessment, req)
                 writer.writerow(escape_csv_row(row))
 
             return response
@@ -14721,7 +14942,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         audit = ComplianceAssessment.objects.get(id=pk)
         entries = []
-        show_documentation_score = audit.show_documentation_score
+        show_documentation_score = export_shows_documentation_score(request.user, audit)
         requirement_assessments = audit.get_requirement_assessments(
             include_non_assessable=True
         )
@@ -14769,11 +14990,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     for c in viewable(req.applied_controls.all())
                 ),
             }
+            is_na = req.result == RequirementAssessment.Result.NOT_APPLICABLE
+            score = None if is_na else req.score
             if show_documentation_score:
-                entry["implementation_score"] = req.score
-                entry["documentation_score"] = req.documentation_score
+                entry["implementation_score"] = score
+                entry["documentation_score"] = (
+                    None if is_na else req.documentation_score
+                )
             else:
-                entry["score"] = req.score
+                entry["score"] = score
 
             if has_questions:
                 # Round-tripped so re-import keeps the override state.
@@ -14785,6 +15010,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     questions_by_node.get(req_node.id),
                     answers_by_req.get(req.id, {}),
                 )
+
+            if show_documentation_score:
+                # Last, and read by no import: it is computed from the two
+                # scores, which are the ones to edit.
+                entry["maturity_score"] = export_documentation_and_maturity(audit, req)[
+                    1
+                ]
 
             entries.append(entry)
 
@@ -14898,13 +15130,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
+        reader_role = audit_reader_role(request.user, audit_obj)
         context = gen_audit_context(
             pk,
             tree,
             user_lang,
             tz=get_report_timezone(),
             readable=ViewableFilter(request.user).allows,
+            score_layers=visible_layers(audit_obj, reader_role),
         )
+        if not is_field_visible_to(audit_obj, "score", reader_role):
+            # No score table where the reader has no scores, as in the PDF; an
+            # audit that does not use scores would otherwise print zeros.
+            context["category_scores"] = {}
+            context["overall_scores"] = None
 
         # Custom overrides support any language; auto-generated strings only en/fr.
         custom_template = None
@@ -14968,12 +15207,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         audit = self.get_object()
-        respondent_folders = get_respondent_scoped_folder_ids(request.user)
-        role = (
-            "respondent"
-            if respondent_folders and audit.folder_id in respondent_folders
-            else "auditor"
-        )
+        role = audit_reader_role(request.user, audit)
 
         framework = audit.framework
         # Object-level permission is not enough: a respondent sees only their
@@ -15011,6 +15245,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             charts=wants_charts,
             tz=get_report_timezone(),
             readable=viewable.allows,
+            # Scores this reader may see, so the radar is drawn for them.
+            score_layers=visible_layers(audit, report_reader_role(role, profile)),
         )
         payload, images = audit_context_for_typst(
             context,
@@ -15868,6 +16104,142 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
+
+    @action(detail=True, methods=["get"], url_path="auditor_preread")
+    def auditor_preread(self, request, pk):
+        """Experimental: what a certification auditor will ask per requirement."""
+        from core.auditor_preread import auditor_preread
+
+        audit = self.get_object()
+        # Preparation work: respondents who only answer the audit do not see it.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_auditpreparation"),
+            folder=audit.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return Response(
+            auditor_preread(audit, request.user, request.query_params.get("guide"))
+        )
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/pair")
+    def auditor_preread_pair(self, request, pk):
+        """Experimental: mark an evidence as answering one auditor request."""
+        from core.auditor_preread import pair_request
+
+        audit = self.get_object()
+        # Pairing is preparation work; attaching the evidence to the
+        # requirement on the way also edits the requirement.
+        needed = ["change_auditpreparation"]
+        if request.data.get("attach") and not request.data.get("remove"):
+            if audit.is_locked:
+                return Response(
+                    {"error": "auditLocked"}, status=status.HTTP_403_FORBIDDEN
+                )
+            needed.append("change_requirementassessment")
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            error = pair_request(
+                audit, request.user, request.data, request.data.get("guide")
+            )
+        except DjangoValidationError, ValueError:  # an id that is not a UUID
+            error = "invalidField"
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], url_path="auditor_preread/preparation")
+    def auditor_preread_preparation(self, request, pk):
+        """Experimental: store one decision of this audit's preparation."""
+        from core.auditor_preread import update_preparation
+
+        audit = self.get_object()
+        exists = hasattr(audit, "preparation")
+        needed = ["change_auditpreparation"] + (
+            [] if exists else ["add_auditpreparation"]
+        )
+        if not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=audit.folder,
+            )
+            for codename in needed
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        error = update_preparation(audit, request.user, request.data)
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="auditor_preread_audits")
+    def auditor_preread_audits(self, request):
+        """Experimental: audits an audit guide applies to, or is offered for, by framework."""
+        from core.auditor_preread import SUGGEST_COVERAGE, resolve_guide
+
+        # Only audits whose pre-read the user may open (analyst and up).
+        perm = Permission.objects.get(codename="view_auditpreparation")
+        allowed = {}
+        audits = [
+            a
+            for a in self.get_queryset().select_related(
+                "framework", "folder", "perimeter"
+            )
+            if allowed.setdefault(
+                a.folder_id,
+                RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=a.folder
+                ),
+            )
+        ]
+        # A guide saved on the preparation ("apply anyway") wins over the
+        # framework's own match; each pair is resolved once.
+        saved = dict(
+            AuditPreparation.objects.filter(
+                compliance_assessment__in=[a.id for a in audits]
+            )
+            .exclude(guide="")
+            .values_list("compliance_assessment_id", "guide")
+        )
+        fits = {}
+        for a in audits:
+            if a.framework and (key := (a.framework_id, saved.get(a.id))) not in fits:
+                fits[key] = resolve_guide(a.framework, key[1])
+        rows = [
+            {
+                "id": a.id,
+                "name": a.name,
+                "status": a.status,
+                "framework": a.framework.name,
+                "folder": {"str": str(a.folder)} if a.folder else None,
+                "perimeter": {"id": str(a.perimeter_id), "str": str(a.perimeter)}
+                if a.perimeter
+                else None,
+                "exact": fit["exact"],
+                "coverage": round(fit["coverage"], 3),
+                "applies": fit["applies"],
+            }
+            for a in audits
+            if (fit := fits.get((a.framework_id, saved.get(a.id))))
+            and (fit["applies"] or fit["coverage"] >= SUGGEST_COVERAGE)
+        ]
+        # Masked like the audit list: no label for a perimeter the user cannot view.
+        fields = {"perimeter": Perimeter}
+        return Response(
+            self._filter_related_fields(
+                rows, fields, self._get_accessible_ids_map(set(fields.values()))
+            )
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -18009,25 +18381,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 {"folder": "You do not have permission to add a findings binder here"}
             )
 
-        # An audit can carry more than one binder, so get_or_create would raise
-        # MultipleObjectsReturned. Oldest wins, for a stable choice.
-        binder = (
-            FindingsAssessment.objects.filter(compliance_assessment=audit)
-            .order_by("created_at")
-            .first()
-        )
+        binder = FindingsAssessment.binder_of(audit)
         created = binder is None
         if created:
-            binder = FindingsAssessment.objects.create(
-                compliance_assessment=audit,
-                # Distinguishable at a glance from the audit it belongs to.
-                name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
-                folder=audit.folder,
-                perimeter=audit.perimeter,
-                category=FindingsAssessment.Category.AUDIT,
-                description=str(_("Findings raised from %(audit)s"))
-                % {"audit": audit.name},
-            )
+            binder = FindingsAssessment.create_binder(audit)
         return Response(
             {"id": str(binder.id), "name": binder.name, "created": created},
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
