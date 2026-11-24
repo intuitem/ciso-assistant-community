@@ -2947,14 +2947,16 @@ class IntegrationLinkViewSetMixin:
 
     def perform_create(self, serializer):
         integration_config = serializer.validated_data.pop("integration_config", None)
-        serializer.validated_data.pop("remote_object_id", None)
+        remote_object_id = serializer.validated_data.pop("remote_object_id", None)
 
         super().perform_create(serializer)
 
-        # Skip configs already pushed to by the model's save(), which would
+        # Skip when the caller targets an existing remote object, and for
+        # configs already pushed to by the model's save(), which would
         # otherwise create a duplicate remote object.
         if (
             integration_config
+            and not remote_object_id
             and integration_config.id not in self.model.auto_sync_config_ids()
         ):
             from django.contrib.contenttypes.models import ContentType
@@ -6864,16 +6866,18 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
 
     def perform_create(self, serializer):
         integration_config = serializer.validated_data.pop("integration_config", None)
-        serializer.validated_data.pop("remote_object_id", None)  # Remove if present
+        remote_object_id = serializer.validated_data.pop("remote_object_id", None)
 
         # Create the local object first
         super().perform_create(serializer)
         instance = serializer.instance
 
         # Selecting an integration provider on creation implies creating the
-        # remote object, unless the model's save() already pushed to this config.
+        # remote object, unless the caller targets an existing remote object or
+        # the model's save() already pushed to this config.
         if (
             integration_config
+            and not remote_object_id
             and integration_config.id not in self.model.auto_sync_config_ids()
         ):
             try:

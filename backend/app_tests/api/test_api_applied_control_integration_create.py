@@ -29,7 +29,7 @@ def _jira_config(settings):
     )
 
 
-def _create(client, config, captured):
+def _create(client, config, captured, **extra):
     task = MagicMock()
     with (
         patch("core.views.sync_object_to_integrations", task),
@@ -42,6 +42,7 @@ def _create(client, config, captured):
                 "name": "Control",
                 "folder": str(Folder.get_root_folder().id),
                 "integration_config": str(config.id),
+                **extra,
             },
             format="json",
         )
@@ -71,3 +72,19 @@ def test_explicit_creation_when_save_does_not_sync(
 
     task.schedule.assert_called_once()
     assert task.schedule.call_args.kwargs["args"][2] == [config.id]
+
+
+@pytest.mark.django_db
+def test_no_creation_when_remote_object_id_is_given(
+    authenticated_client, django_capture_on_commit_callbacks
+):
+    config = _jira_config({})
+
+    task = _create(
+        authenticated_client,
+        config,
+        django_capture_on_commit_callbacks,
+        remote_object_id="CA-1",
+    )
+
+    task.schedule.assert_not_called()
