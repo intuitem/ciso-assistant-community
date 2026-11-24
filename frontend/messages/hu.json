@@ -343,6 +343,8 @@
 	"evidenceFourEyes": "Bizonyítékok felülvizsgálata a négy szem elve szerint",
 	"reviewEvidences": "Bizonyítékok felülvizsgálata",
 	"evidenceFourEyesHelpText": "Ha engedélyezett, a fájl feltöltője nem hagyhatja jóvá és nem utasíthatja el a fájlt",
+	"autoLockOverdueAssessments": "Lejárt határidejű értékelések automatikus zárolása",
+	"autoLockOverdueAssessmentsHelpText": "Ha engedélyezett, a kampányból vagy szervezetértékelésből származó auditokat a rendszer a határidejüket követő éjszakán zárolja, és „Felülvizsgálat alatt” állapotba helyezi",
 	"autoRefId": "Automatikus hivatkozási azonosítók",
 	"autoRefIdHelpText": "Ha engedélyezett, a hivatkozási azonosító nélkül létrehozott objektumok a szülőobjektumukon belül sorszámozott azonosítót kapnak (pl. AC.01 a tartományában, R.01 a kockázatértékelésében). A meglévő hivatkozási azonosítók soha nem változnak",
 	"autoRefIdPrefixes": "Előtagok",
@@ -8224,8 +8226,397 @@
 	"reviewToastRejected": "Elutasítva: {name}",
 	"reviewUndoError": "A döntést nem sikerült visszavonni.",
 	"evidenceExportTooLarge": "A kijelölés {size} MB-nyi fájlt tartalmaz, ez több a megengedett {max} MB-nál. Szűkítse a kijelölést, és exportálja újra.",
+	"prereadTitle": "Auditfelkészítő",
+	"prereadDescription": "ISO/IEC 27001:2022 szerinti audithoz: követelményenként megmutatja, mit kérdez, mit kér be, miből vesz mintát, és kivel készít interjút a tanúsító auditor, a már kapcsolt bizonyítékokkal összevetve. Tartalmazza a kért bizonyítékok listáját és az interjútervet.",
+	"prereadIntro": "Legyen egy lépéssel a tanúsító auditor előtt. Követelményenként: mit kérdez, milyen feljegyzéseket kér be, hogyan vesz mintát, és kivel készít interjút, az auditban már meglévő bizonyítékokkal összevetve.",
+	"prereadReadinessPerRequirement": "Felkészültség követelményenként",
+	"prereadRequestList": "Kért bizonyítékok listája",
+	"prereadInterviewPlan": "Interjúterv",
+	"prereadNoAudit": "Még nincs olyan ISO/IEC 27001:2022 szerinti audit, amelyet megtekinthet. A szabvány azonos követelményszámozású másolatára épülő auditok is itt jelennek meg.",
+	"prereadGoToAudits": "Ugrás az auditokhoz",
+	"prereadSearchAudits": "Auditok keresése",
+	"prereadSearchAuditsPlaceholder": "Auditok, tartományok, hatókörök keresése",
+	"prereadAuditCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} audit",
+				"countPlural=other": "{count} audit"
+			}
+		}
+	],
+	"prereadByNumberHint": "Az útmutatót a rendszer a követelményszám alapján alkalmazza",
+	"prereadByNumber": "· szám alapján megfeleltetve",
+	"prereadPartial": "· részleges",
+	"prereadPartialHint": "Az útmutató a keretrendszernek csak egy részét fedi le; az alkalmazásához nyissa meg az auditot",
+	"prereadNoPerimeter": "Nincs hatókör",
+	"prereadOpen": "Felkészítő megnyitása",
+	"prereadNoAuditMatches": "Nincs a(z) „{query}” keresésnek megfelelő audit.",
+	"prereadPageTitle": "Auditfelkészítő: {name}",
+	"prereadRoleTop": "Felső vezetés",
+	"prereadRoleCiso": "IBIR-felelős / CISO",
+	"prereadRoleRisk": "Kockázatgazda",
+	"prereadRoleAuditor": "Belső auditor",
+	"prereadRoleHr": "HR",
+	"prereadRoleLegal": "Jogi terület / megfelelőség",
+	"prereadRoleDpo": "Adatvédelmi tisztviselő",
+	"prereadRoleProc": "Beszerzés",
+	"prereadRoleFacilities": "Létesítménygazdálkodás",
+	"prereadRoleItLead": "Informatikai vezető",
+	"prereadRoleIam": "Identitás- és hozzáférés-kezelési adminisztrátor",
+	"prereadRoleInfra": "Infrastruktúra és tárhelyszolgáltatás",
+	"prereadRoleNetwork": "Hálózati rendszergazda",
+	"prereadRoleEndpoint": "Munkaállomások és végponti eszközök",
+	"prereadRoleServiceDesk": "Informatikai ügyfélszolgálat / ITSM",
+	"prereadRoleSecOps": "Biztonsági üzemeltetés",
+	"prereadRoleDev": "Fejlesztési vezető",
+	"prereadRoleStaff": "Munkatársak (véletlenszerűen)",
+	"prereadGap": "Hiányosság",
+	"prereadWeak": "Gyenge",
+	"prereadToConfirm": "Megerősítendő",
+	"prereadReady": "Kész",
+	"prereadExcluded": "Kizárva",
+	"prereadNoGuidance": "Nincs útmutató",
+	"prereadReasonOpenFinding": "Nyitott megállapítás egy korábbi auditból, lehetséges nemmegfelelőség",
+	"prereadReasonOpenMinorFinding": "Nyitott, figyelmet igénylő pont egy korábbi auditból",
+	"prereadReasonNothingLinked": "Nincs kapcsolt bizonyíték",
+	"prereadReasonNonCompliant": "Az értékelés szerint nem felel meg",
+	"prereadReasonQualityError": "Az audit minőség-ellenőrzése hibát jelez",
+	"prereadReasonNotAssessed": "Még nincs értékelve",
+	"prereadReasonStaleEvidence": "Egy kért feljegyzés régebbi az elvárt frissességnél",
+	"prereadReasonRequestNotOnFile": "Egy kért bizonyíték nincs meg",
+	"prereadReasonEvidenceToConfirm": "Van bizonyíték, de még nincs megerősítve, hogy választ ad a kérésekre",
+	"prereadReasonMissingFile": "Egy bizonyítékhoz még nincs fájl vagy hivatkozás, ezért nem számít",
+	"prereadReasonQualityWarning": "Az audit minőség-ellenőrzése figyelmeztetést jelez",
+	"prereadSectionClauses": "4–10. fejezet",
+	"prereadSectionA5": "A.5 Szervezeti",
+	"prereadSectionA6": "A.6 Személyi",
+	"prereadSectionA7": "A.7 Fizikai",
+	"prereadSectionA8": "A.8 Technológiai",
+	"prereadSectionOther": "Egyéb követelmények",
+	"prereadKindDocument": "Dokumentum",
+	"prereadKindRecord": "Feljegyzés",
+	"prereadKindTechnical": "Technikai export",
+	"prereadKindObservation": "Helyszíni megfigyelés",
+	"prereadStage1Long": "1. szakasz: a dokumentáció átvizsgálása",
+	"prereadStage2Long": "2. szakasz: megvalósítás, mintákon ellenőrizve",
+	"prereadColReadiness": "Felkészültség",
+	"prereadColRef": "Hiv.",
+	"prereadColRequirement": "Követelmény",
+	"prereadColRequest": "Kérés",
+	"prereadColKind": "Fajta",
+	"prereadColMaxAgeDays": "Max. kor (nap)",
+	"prereadColMaxAge": "Max. kor",
+	"prereadColOwner": "Felelős",
+	"prereadColOnFile": "Megvan",
+	"prereadTsvToConfirm": "megerősítendő",
+	"prereadTsvMissing": "hiányzik",
+	"prereadVerdictGap": "Nincs kész. A jelenlegi állapot szerint az auditor itt valószínűleg problémát rögzítene (ez a „nemmegfelelőség”).",
+	"prereadVerdictWeak": "Majdnem kész. Egy részlet hiányzik: az auditor valószínűleg megjegyzést tenne, ritkán többet.",
+	"prereadVerdictToConfirm": "Valószínűleg kész, ellenőrizendő. Van bizonyíték: adja meg mindegyikről, melyik kérésre ad választ.",
+	"prereadVerdictReady": "Az audit napján legyenek kéznél az alábbi bizonyítékok.",
+	"prereadVerdictExcluded": "Terjedelmen kívül esik: az auditor ettől még rákérdez az okára, ezért készítse elő az indoklást.",
+	"prereadVerdictNoGuidance": "Ehhez a követelményhez még nincs auditori útmutató.",
+	"prereadCannotEdit": "Ezt az auditot nem szerkesztheti.",
+	"prereadPairNotSaved": "A párosítás mentése nem sikerült.",
+	"prereadNoRevision": "nincs revízió",
+	"prereadSummary": "Felkészültségi összefoglaló",
+	"prereadOpenAudit": "Audit megnyitása",
+	"prereadShowAll": "Összes követelmény megjelenítése",
+	"prereadShowOnly": "Csak a(z) „{state}” állapotúak megjelenítése",
+	"prereadSummaryHint": "{count} követelmény. Kattintson egy darabszámra, hogy csak az ahhoz tartozó követelmények jelenjenek meg. A felkészültség becslés, amely az audithoz kapcsolt bizonyítékokon és az audit minőség-ellenőrzésein alapul.",
+	"prereadUnsupported": "Ehhez a keretrendszerhez még nincs auditori útmutató. Az útmutató csak az ISO/IEC 27001:2022 szabványt fedi le, beleértve az azonos követelményszámozású másolatait is.",
+	"prereadSuggestion": "A számozása részben megegyezik a(z) „{guide}” számozásával: az útmutató {pct}%-a megfeleltethető a keretrendszer {total} követelménye közül {matched} követelménynek.",
+	"prereadApplyAnyway": "Az útmutató alkalmazása ennek ellenére",
+	"prereadProjected": "Az ISO/IEC 27001:2022 szabványhoz tartozó útmutató a követelményszám alapján alkalmazva: {total} követelményből {matched} megfeleltetve.",
+	"prereadLettered": "A betűvel jelölt pontokra a szülőjük útmutatója vonatkozik.",
+	"prereadSearchRequirements": "Követelmények keresése",
+	"prereadSearchRequirementsPlaceholder": "Keresés hiv. azonosító vagy cím szerint",
+	"prereadAuditStage": "Auditszakasz",
+	"prereadBothStages": "Mindkét szakasz",
+	"prereadStage1": "1. szakasz",
+	"prereadStage2": "2. szakasz",
+	"prereadBothStagesHint": "Mindkét szakasz kérdései",
+	"prereadClearFilters": "Szűrők törlése",
+	"prereadSection": "Rész",
+	"prereadAllSections": "Minden rész",
+	"prereadByRequirement": "Követelményenként",
+	"prereadSessions": "Auditülések",
+	"prereadRequirements": "Követelmények",
+	"prereadOpenFindingHint": "Nyitott megállapítás egy korábbi auditból",
+	"prereadNothingMatches": "Semmi sem felel meg ezeknek a szűrőknek.",
+	"prereadResultHint": "Az auditban rögzített eredmény",
+	"prereadOpenInAuditHint": "A követelmény szerkesztése az auditban. A Mégse gomb ide hozza vissza.",
+	"prereadOpenInAudit": "Szerkesztés az auditban",
+	"prereadQualityFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} minőség-ellenőrzési megállapítás",
+				"countPlural=other": "{count} minőség-ellenőrzési megállapítás"
+			}
+		}
+	],
+	"prereadEarlierAudit": "Korábbi auditon megállapítva",
+	"prereadEarlierAuditHint": "Az auditor elsőként ezt követi nyomon: legyen kéznél a megtett intézkedés és annak bizonyítéka",
+	"prereadWillAsk": "Mit kérdez majd az auditor",
+	"prereadHowChecked": "Hogyan fogja ellenőrizni",
+	"prereadSample": "Minta",
+	"prereadSampleFrom": "A következők közül: {population}",
+	"prereadNoSampling": "Csak a dokumentáció átvizsgálása, mintavétel nem várható.",
+	"prereadInterviews": "Interjúk",
+	"prereadRequestedVsOnFile": "Kért bizonyítékok",
+	"prereadRequestedAside": "kért: {toFile} · megvan: {matched} · párosítandó: {other}",
+	"prereadWillAskFor": "Az auditor ezeket fogja kérni",
+	"prereadFreshHint": "A legfrissebb nem lehet ennél régebbi",
+	"prereadDays": "{days} nap",
+	"prereadEvidenceHidden": "Az Ön számára nem látható bizonyíték",
+	"prereadFiledElsewhereHint": "Egy másik, ugyanezt a bizonyítékot kérő követelményhez van kapcsolva",
+	"prereadFiledElsewhere": "· az auditban máshol van meg",
+	"prereadPairedByHand": "· kézzel párosítva",
+	"prereadUnpairHint": "Párosítás megszüntetése: ez a bizonyíték nem ad választ erre a kérésre, sem itt, sem máshol, ahol ugyanezt a bizonyítékot kérik",
+	"prereadUnpair": "Párosítás megszüntetése: {name}",
+	"prereadToConfirmPick": "Megerősítendő: válassza ki azt a bizonyítékot, amelyik választ ad rá",
+	"prereadNotOnFile": "Nincs meg",
+	"prereadAlsoOnFile": "Szintén megvan, nincs párosítva",
+	"prereadOnFile": "Ami megvan",
+	"prereadViaTask": "feladaton keresztül: {name}",
+	"prereadTaskHiddenLower": "az Ön számára nem látható feladat",
+	"prereadControlHiddenLower": "az Ön számára nem látható kontroll",
+	"prereadOlderThanWindow": "Régebbi az elvárt frissességnél",
+	"prereadAttachedToRequirement": "a követelményhez csatolva",
+	"prereadVia": "kontrollon keresztül: {name}",
+	"prereadNoFile": "nincs fájl vagy hivatkozás",
+	"prereadAllAnswer": "Minden kapcsolt bizonyíték választ ad valamelyik kérésre.",
+	"prereadNothingLinkedYet": "Még semmi sincs kapcsolva.",
+	"prereadAttachHint": "Csatoljon bizonyítékot a követelmény alkalmazott kontrolljaihoz vagy magához a követelményhez.",
+	"prereadAppliedControls": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} alkalmazott kontroll",
+				"countPlural=other": "{count} alkalmazott kontroll"
+			}
+		}
+	],
+	"prereadControlHidden": "Az Ön számára nem látható kontroll",
+	"prereadPitfalls": "Ahol az auditorok általában találnak valamit",
+	"prereadPrevious": "Előző",
+	"prereadNext": "Következő",
+	"prereadKeysHint": "· a listában a ↑ ↓ billentyűkkel léphet",
+	"prereadSessionsIntro": "A 2. szakasz témák szerint halad, nem a szabvány sorrendjében: minden ülés összetartozó fejezeteket és kontrollokat jár végig ugyanazokkal a személyekkel. Ülésenként készítsen elő egy mappát, és jelöljön ki egy felelőst.",
+	"prereadSessionCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény · {asks} előkészítendő feljegyzés",
+				"countPlural=other": "{count} követelmény · {asks} előkészítendő feljegyzés"
+			}
+		}
+	],
+	"prereadSessionItems": "{count} előkészítendő elem",
+	"prereadRequestsIntro": "Minden feljegyzés, amelyet az auditor valószínűleg kérni fog, egyszer felsorolva, a legrosszabb felkészültségűekkel kezdve. A több követelmény által kért bizonyíték egy sorban jelenik meg. A kizárt követelmények kimaradnak. Másolja táblázatkezelőbe, hogy az audit előtt megoszthassa a felelősökkel.",
+	"prereadCopied": "Másolva",
+	"prereadCopyRows": "{count} sor másolása",
+	"prereadToConfirmHint": "A követelményhez van kapcsolt bizonyíték: erősítse meg, melyik ad választ erre a kérésre",
+	"prereadSeenOnSite": "A helyszínen figyelik meg",
+	"prereadMissing": "Hiányzik",
+	"prereadWalkThrough": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} végigjárandó követelmény",
+				"countPlural=other": "{count} végigjárandó követelmény"
+			}
+		}
+	],
+	"prereadStartTitle": "Hol érdemes kezdeni",
+	"prereadStartConfirm": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Párosítsa a már meglévő bizonyítékokat: {count} megerősítendő követelmény",
+				"countPlural=other": "Párosítsa a már meglévő bizonyítékokat: {count} megerősítendő követelmény"
+			}
+		}
+	],
+	"prereadStartFindings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Kövesse nyomon a korábbi auditok még nyitott megállapításait: {count} követelmény",
+				"countPlural=other": "Kövesse nyomon a korábbi auditok még nyitott megállapításait: {count} követelmény"
+			}
+		}
+	],
+	"prereadStartDocuments": "Először a legtöbbször kért bizonyítékokat gyűjtse össze: egy bizonyíték gyakran több követelményre is választ ad",
+	"prereadAnswers": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelményre ad választ",
+				"countPlural=other": "{count} követelményre ad választ"
+			}
+		}
+	],
+	"prereadSeeAllRequests": "A kért bizonyítékok teljes listája",
+	"prereadStartStage1": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ezután menjen végig az 1. szakaszon, a dokumentáció átvizsgálásán: {count} követelmény",
+				"countPlural=other": "Ezután menjen végig az 1. szakaszon, a dokumentáció átvizsgálásán: {count} követelmény"
+			}
+		}
+	],
+	"prereadPrepareInterview": "Felkészülés az interjúra",
+	"prereadPrepareInterviewAside": "kérdések, mintavétel, interjúalanyok, gyakori buktatók",
+	"prereadOpenFindingsFilter": "Nyitott megállapítások",
+	"prereadTodoTitle": "Teendők",
+	"prereadTodoFinding": "Egy korábbi audit itt problémát talált. Mutassa be bizonyítékkal alátámasztva, mit tettek a kijavítására (lásd lent).",
+	"prereadTodoGather": "Minden lenti, „Nincs meg” jelzésű kérésnél: töltse fel a bizonyítékot, vagy válassza ki, ha már szerepel a rendszerben. Még semmi nincs leírva? Írjon rövid feljegyzést: az auditornak az írásos nyom számít.",
+	"prereadTodoPair": "Ehhez a követelményhez már tartozik bizonyíték. Az egyes kérések alatt a „Meglévő bizonyíték kiválasztása” ezeket sorolja fel elsőként: válassza ki azt, amelyik választ ad a kérésre.",
+	"prereadTodoRefresh": "Egy bizonyíték régebbi, mint amit az auditor elvár. Adjon hozzá friss változatot.",
+	"prereadTodoFix": "Az audit szerint ez a követelmény nem teljesül. Tervezzen javítást az auditor érkezése előtt, és készítsen róla feljegyzést.",
+	"prereadTodoAssess": "Rögzítse az auditban, hogy teljesül-e ez a követelmény.",
+	"prereadTodoQuality": "Javítsa ki az audit minőség-ellenőrzései által jelzett pontokat (lent).",
+	"prereadTodoJustify": "Írja le, miért nem vonatkozik a szervezetére ez a követelmény.",
+	"prereadTodoRehearse": "Olvassa át az auditor várható kérdéseit, hogy senkit ne érjen meglepetés.",
+	"prereadActionEvidence": "Bizonyíték hozzáadása",
+	"prereadActionAssess": "Értékelés",
+	"prereadActionJustify": "Indoklás",
+	"prereadActionPrep": "Kérdések megjelenítése",
+	"prereadResultIn": "Az auditban: {result}",
+	"prereadUpload": "Bizonyíték feltöltése",
+	"prereadUploadHint": "A követelmény bizonyítékaként adja hozzá, már ehhez a kéréshez párosítva",
+	"prereadPickExisting": "Meglévő bizonyíték kiválasztása",
+	"prereadPickHint": "A követelményhez csatolja, ehhez a kéréshez párosítva",
+	"prereadPickSearch": "Bizonyíték keresése név szerint",
+	"prereadPickOnRequirement": "már ehhez a követelményhez tartozik",
+	"prereadTodoNoGuide": "Ez saját követelmény: nincs hozzá auditori útmutató. Értékelje az auditban a szokásos módon.",
+	"prereadHiddenUnusable": "Nem számít (elutasítva, lejárt vagy hiányzik)",
+	"prereadHiddenToValidate": "Még nincs validálva",
+	"prereadHiddenExpires": "Az audit előtt lejár",
+	"prereadReasonUnusableEvidence": "Egy bizonyíték elutasított, lejárt, vagy hiányzóként van megjelölve, ezért nem számít",
+	"prereadReasonEvidenceToValidate": "Egy bizonyíték még piszkozat, vagy felülvizsgálat alatt áll",
+	"prereadReasonExpiresBeforeAudit": "Egy bizonyíték az audit dátuma előtt lejár",
+	"prereadTodoUnusable": "Egy lenti bizonyíték elutasított, lejárt, vagy hiányzóként van megjelölve: nem számít. Cserélje le vagy újítsa meg.",
+	"prereadTodoValidate": "Egy lenti bizonyíték még piszkozat, vagy felülvizsgálat alatt áll: hagyassa jóvá az audit előtt, az auditor rá fog kérdezni.",
+	"prereadTodoExpiresBeforeAudit": "Egy lenti bizonyíték az audit dátuma előtt lejár: addig újítsa meg.",
+	"prereadReach": "Ezekre is érvényes: {what}",
+	"prereadReachAudits": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "a tartomány {count} másik auditja, ha ott is megvan ez a bizonyíték",
+				"countPlural=other": "a tartomány {count} másik auditja, ha ott is megvan ez a bizonyíték"
+			}
+		}
+	],
+	"prereadReadOnly": "Csak olvasható: a felkészülést követheti, de módosítani csak azok tudnak, akik szerkeszthetik ezt az auditot.",
+	"prereadExpiredOn": "lejárt: {date}",
+	"prereadExpires": "lejár: {date}",
+	"prereadPrepare": "Felkészülés az auditra",
+	"prereadPrepNone": "A szakasz, a dátumok és a tanúsító szervezet még nincs megadva",
+	"prereadStageField": "Melyik szakaszra készül",
+	"prereadStageNone": "Nincs megadva",
+	"prereadStage_stage_1": "1. szakasz (a dokumentáció átvizsgálása)",
+	"prereadStage_stage_2": "2. szakasz (helyszíni)",
+	"prereadStage_surveillance": "Felügyeleti audit",
+	"prereadStage_recertification": "Megújító audit",
+	"prereadFirstDay": "Az audit első napja",
+	"prereadLastDay": "Az audit utolsó napja",
+	"prereadLastDayHint": "A bizonyítékoknak ezen a napon még érvényesnek kell lenniük.",
+	"prereadCertificationBody": "Tanúsító szervezet",
+	"prereadAuditors": "Auditor(ok)",
+	"prereadNotSaved": "A mentés nem sikerült.",
+	"prereadSetAside": "Nem vonatkozik rá",
+	"prereadSetAsideHint": "Ez a kérés nem vonatkozik erre az auditra: a továbbiakban nem számít hiányzónak.",
+	"prereadSetAsideReason": "Miért? Az auditor rá fog kérdezni.",
+	"prereadSetAsideShown": "Félretéve: {reason}",
+	"prereadRestore": "Visszaállítás",
+	"prereadCarryOver": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "A tartomány előző auditján {count} kérést tettek félre.",
+				"countPlural=other": "A tartomány előző auditján {count} kérést tettek félre."
+			}
+		}
+	],
+	"prereadCarryOverAction": "Átvétel",
+	"prereadStartSessions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ütemezze az üléseket a tanúsító szervezettel: {count} ülésnek nincs időpontja",
+				"countPlural=other": "Ütemezze az üléseket a tanúsító szervezettel: {count} ülésnek nincs időpontja"
+			}
+		}
+	],
+	"prereadSchedule": "Ütemezés",
+	"prereadStartTime": "Kezdés",
+	"prereadEndTime": "Befejezés",
+	"prereadLocation": "Helyszín vagy hivatkozás",
+	"prereadAttendees": "Résztvevők",
+	"prereadAssign": "Személy kijelölése",
+	"prereadNobodyYet": "Még nincs kijelölve senki",
+	"prereadWho": "Ki válaszol",
+	"prereadHiddenFinding": "Egy korábbi audit megállapítása (az Ön számára nem látható)",
+	"prereadNoDate": "Még nincs időpont",
+	"prereadWalk": "Felkészülés erre az ülésre",
+	"prereadWalkSession": "Felkészülés az ülésre: {label}",
+	"prereadWalkCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} követelmény van még hátra",
+				"countPlural=other": "{count} követelmény van még hátra"
+			}
+		}
+	],
+	"prereadWalkExit": "Vissza a teljes nézethez",
+	"prereadWalkDone": "Ennél az ülésnél már nincs teendő.",
+	"prereadStartWalk": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ezután készüljön fel ülésenként, a(z) „{label}” üléssel kezdve: {count} követelmény van hátra",
+				"countPlural=other": "Ezután készüljön fel ülésenként, a(z) „{label}” üléssel kezdve: {count} követelmény van hátra"
+			}
+		}
+	],
+	"prereadTodoAddFile": "Egy lenti bizonyítékhoz még nincs fájl vagy hivatkozás: addig nem számít, amíg a „Fájl hozzáadása” gombbal hozzá nem adja.",
+	"prereadAddFile": "Fájl hozzáadása",
 	"europeanUnion": "Európai Unió",
 	"europeanEconomicArea": "Európai Gazdasági Térség",
 	"otherCountries": "Egyéb országok",
-	"notShownOnMap": "A térképen nem jelenik meg"
+	"notShownOnMap": "A térképen nem jelenik meg",
+	"glpi": "GLPI",
+	"glpiIntegrationConfig": "GLPI-integráció beállításai",
+	"glpiInstanceUrlHelpText": "A GLPI-példány URL-je (pl. https://glpi.example.com/). GLPI 11 vagy újabb verzió szükséges.",
+	"glpiClientIdHelpText": "A GLPI-ben „password” engedélytípussal (grant) és „api” hatókörrel (scope) létrehozott OAuth-kliens azonosítója.",
+	"glpiUsernameHelpText": "Az a GLPI-felhasználó, akinek a nevében az integráció működik. A profilja határozza meg, mely elemek olvashatók és írhatók.",
+	"glpiSecretsAlreadySetHelpText": "A klienstitok és a jelszó már be van állítva.",
+	"glpiResetSecrets": "Titkok lecserélése",
+	"glpiWebhookSecretHelpText": "A GLPI-webhook „Security” (Biztonság) lapján megjelenő titok.",
+	"glpiIntegrationMappingsHelpText": "Rendelje hozzá a helyi kontrollokat GLPI-elemekhez.",
+	"glpiTableHelpText": "Válassza ki a szinkronizálandó GLPI-elemtípust (bejelentés, változás vagy probléma).",
+	"glpiField": "GLPI-mező",
+	"glpiAssetMappingsHelpText": "Rendelje hozzá az eszközöket GLPI-elemekhez. Az eszközök szinkronizálása az elemtípus kiválasztása után indul.",
+	"glpiAssetTableHelpText": "Válassza ki a szinkronizálandó GLPI-eszköztípust (számítógép, szoftver, készülék…)."
 }
