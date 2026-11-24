@@ -439,8 +439,10 @@ class TestPicksMustBeReadable:
     def test_the_instance_form_refuses_an_unreadable_pick(self, acme):
         group, _fr, _de, i = acme
         clicks = i["clicks_fr"].metric_definition
-        reader = make_definition(
-            "Reader",
+        # in the member's domain: linking a definition needs view on it
+        reader = MetricDefinition.objects.create(
+            name="Reader",
+            folder=group,
             inputs=[{"key": "a", "definition": str(clicks.id), "combine": "one"}],
             expression="a",
         )

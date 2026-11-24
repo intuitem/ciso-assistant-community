@@ -550,12 +550,15 @@ def compute_sample(instance, *, write=True, only_if_due=False, full=False):
             raise
         if write:
             with transaction.atomic():
-                CustomMetricSample.objects.create(
+                # Computed again within the same instant (a retried job, a
+                # frozen clock): that instant's one sample, replaced, not a
+                # twin the readers would pick from in database order.
+                CustomMetricSample.objects.update_or_create(
                     metric_instance=instance,
-                    folder=instance.folder,
                     timestamp=now,
-                    value=envelope,
                     source=CustomMetricSample.Source.DERIVED,
+                    period_start=None,
+                    defaults={"folder": instance.folder, "value": envelope},
                 )
                 instance.last_computed_at = now
                 instance.last_computation_error = ""

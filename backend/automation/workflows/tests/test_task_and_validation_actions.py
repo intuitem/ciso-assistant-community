@@ -28,6 +28,7 @@ from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
 from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from automation.workflows.tests.helpers import publisher_user
+from automation.workflows.tests.test_run_authz import grant
 
 
 def node(type_, **kwargs):
@@ -218,6 +219,139 @@ class TestCreatingAValidationFlow:
                     "model": "validation_flow",
                     "fields": {
                         "approver": f"{one.id},{two.id}",
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ValidationFlow.objects.filter(folder=domain).exists()
+
+    def test_it_can_ask_on_behalf_of_someone_else(self, domain, audit):
+        """Without this, the run's identity owns the request: the person it was
+        raised for is never notified, and a `change_requested` comes back to
+        someone who did not submit it."""
+        approver = User.objects.create(email=f"boss-{uuid.uuid4()}@test.example")
+        submitter = User.objects.create(email=f"sub-{uuid.uuid4()}@test.example")
+        grant(submitter, domain, ["view_validationflow", "change_validationflow"])
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "approver": str(approver.id),
+                        "requester": str(submitter.id),
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+
+        flow = ValidationFlow.objects.get(folder=domain)
+        assert flow.requester == submitter
+        # The opening event is attributed to the requester, as it is for a
+        # request raised by hand: the timeline must not credit the run.
+        assert flow.events.get().event_actor == submitter
+
+    def test_it_still_asks_as_the_run_when_no_requester_is_named(self, domain, audit):
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {"compliance_assessments": str(audit.id)},
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert ValidationFlow.objects.get(folder=domain).requester == publisher_user()
+
+    def test_a_template_names_the_submitter_the_run_was_raised_for(self, domain, audit):
+        """The id is not known when the graph is written: a real workflow binds
+        it from the event that started the run, which is the whole point of the
+        parameter."""
+        submitter = User.objects.create(email=f"qf-{uuid.uuid4()}@test.example")
+        grant(submitter, domain, ["view_validationflow", "change_validationflow"])
+        version = action_flow(
+            domain,
+            {
+                "type": "create_object",
+                "model": "validation_flow",
+                "fields": {
+                    "requester": "{{payload.submitted_by}}",
+                    "compliance_assessments": str(audit.id),
+                },
+            },
+        )
+        instance = start_instance(version, payload={"submitted_by": str(submitter.id)})
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        assert ValidationFlow.objects.get(folder=domain).requester == submitter
+
+    def test_a_requester_who_cannot_act_on_the_flow_is_refused(self, domain, audit):
+        """Only the requester can answer a `change_requested`: naming someone
+        who cannot change validation flows in the domain strands the request,
+        which is the very thing naming a requester is meant to prevent."""
+        reader = User.objects.create(email=f"r-{uuid.uuid4()}@test.example")
+        grant(reader, domain, ["view_validationflow"])
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "requester": str(reader.id),
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ValidationFlow.objects.filter(folder=domain).exists()
+
+    def test_a_requester_who_cannot_see_the_flow_is_refused(
+        self, domain, audit
+    ) -> None:
+        """The API only serves flows the user can view, updates included, so a
+        requester with change but not view could not open the flow to answer."""
+        blind = User.objects.create(email=f"b-{uuid.uuid4()}@test.example")
+        grant(blind, domain, ["change_validationflow"])
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "requester": str(blind.id),
+                        "compliance_assessments": str(audit.id),
+                    },
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not ValidationFlow.objects.filter(folder=domain).exists()
+
+    def test_two_requesters_are_refused_rather_than_silently_halved(
+        self, domain, audit
+    ):
+        """`requester` is one FK column, and naming it grants the right to act
+        on the flow. Dropping one silently would hand that right to whichever
+        id happened to come first."""
+        one = User.objects.create(email=f"c-{uuid.uuid4()}@test.example")
+        two = User.objects.create(email=f"d-{uuid.uuid4()}@test.example")
+        instance = start_instance(
+            action_flow(
+                domain,
+                {
+                    "type": "create_object",
+                    "model": "validation_flow",
+                    "fields": {
+                        "requester": f"{one.id},{two.id}",
                         "compliance_assessments": str(audit.id),
                     },
                 },

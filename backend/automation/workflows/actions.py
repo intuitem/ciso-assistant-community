@@ -24,6 +24,7 @@ from django.db.models import (
     Model,
     Q,
 )
+from django.utils.text import Truncator
 
 from iam.models import User
 from core.models import (
@@ -375,328 +376,6 @@ class ComputeAction(BaseAction):
         return results
 
 
-# Explicit registry of models workflows may create: each entry
-# lists the writable simple fields and the FK fields (target model + the
-# frontend endpoint serving its options). Anything else in the config is
-# ignored. FK values are UUIDs — templatable, so a previous node's
-# created_object_id can feed the next node's FK.
-#
-# With `upsert: true` in the config, the action matches an existing row by
-# the entry's `match_on` field (within the instance's folder) and updates it
-# instead of creating a duplicate, which the primitive sync flows need.
-# Entries without an explicit `match_on` match on name.
-CREATABLE_MODELS = {
-    "applied_control": {
-        "model": AppliedControl,
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {},
-    },
-    "evidence": {
-        "model": Evidence,
-        "fields": ["name", "description"],
-        "fk_fields": {},
-    },
-    "incident": {
-        "model": Incident,
-        "fields": ["name", "description", "ref_id", "status", "severity", "link"],
-        "fk_fields": {},
-    },
-    "asset": {
-        "model": Asset,
-        "fields": ["name", "description", "ref_id", "type", "reference_link"],
-        "fk_fields": {},
-    },
-    "vulnerability": {
-        "model": Vulnerability,
-        "fields": ["name", "description", "ref_id", "status", "severity"],
-        "fk_fields": {},
-    },
-    "security_exception": {
-        "model": SecurityException,
-        "fields": [
-            "name",
-            "description",
-            "ref_id",
-            "severity",
-            "expiration_date",
-            "status",
-            "observation",
-        ],
-        "fk_fields": {"approver": (User, "users")},
-    },
-    "entity": {
-        "model": Entity,
-        "fields": ["name", "description", "ref_id", "mission", "reference_link"],
-        "fk_fields": {},
-    },
-    "findings_assessment": {
-        "model": FindingsAssessment,
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {},
-    },
-    "finding": {
-        "model": Finding,
-        "fields": ["name", "description", "ref_id", "severity", "status"],
-        "fk_fields": {
-            "findings_assessment": (FindingsAssessment, "findings-assessments")
-        },
-    },
-    "compliance_assessment": {
-        "model": ComplianceAssessment,
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {"perimeter": (Perimeter, "perimeters")},
-        # Construction parameters: not columns, handed to the constructor.
-        "params": {
-            "framework": (Framework, "frameworks"),
-            "implementation_groups": None,
-        },
-        "required_params": ["framework"],
-        "constructor": "_construct_audit",
-        "constructor_permissions": {"framework": ["add_complianceassessment"]},
-    },
-    "validation_flow": {
-        "model": ValidationFlow,
-        # No name or description on the model; `ref_id` is generated on save.
-        "fields": ["request_notes"],
-        "fk_fields": {},
-        "params": {
-            "approver": None,
-            "validation_deadline": None,
-            "compliance_assessments": None,
-            "evidences": None,
-            "policies": None,
-            "findings_assessments": None,
-            "security_exceptions": None,
-        },
-        "constructor": "_construct_validation_flow",
-    },
-    "risk_scenario": {
-        "model": RiskScenario,
-        # Never the ratings or the treatment: those are the analyst's.
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {"risk_assessment": (RiskAssessment, "risk-assessments")},
-        "folder_from": "risk_assessment",
-    },
-    "risk_assessment": {
-        "model": RiskAssessment,
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {
-            "risk_matrix": (RiskMatrix, "risk-matrices"),
-            "perimeter": (Perimeter, "perimeters"),
-        },
-    },
-    "business_impact_analysis": {
-        "model": BusinessImpactAnalysis,
-        # No status: a BIA a workflow opens starts where a new one starts.
-        "fields": ["name", "description", "eta", "due_date"],
-        "fk_fields": {
-            "perimeter": (Perimeter, "perimeters"),
-            "risk_matrix": (RiskMatrix, "risk-matrices"),
-        },
-    },
-    "asset_assessment": {
-        "model": AssetAssessment,
-        # The recovery verdicts stay human; attaching the asset is the job.
-        "fields": ["observation"],
-        "fk_fields": {
-            "asset": (Asset, "assets"),
-            "bia": (BusinessImpactAnalysis, "business-impact-analysis"),
-        },
-    },
-    "processing": {
-        "model": Processing,
-        # No status: privacy_approved is an approval, and a record a workflow
-        # writes starts as a draft.
-        "fields": [
-            "name",
-            "description",
-            "ref_id",
-            "information_channel",
-            "usage_channel",
-            "dpia_reference",
-        ],
-    },
-    "purpose": {
-        "model": Purpose,
-        "fields": ["name", "description", "legal_basis", "article_9_condition"],
-        "fk_fields": {"processing": (Processing, "processings")},
-        "folder_from": "processing",
-    },
-    "personal_data": {
-        "model": PersonalData,
-        "fields": [
-            "name",
-            "description",
-            "retention",
-            "deletion_policy",
-            "is_sensitive",
-        ],
-        "fk_fields": {
-            "processing": (Processing, "processings"),
-            # Resolves among this field's own categories, by name or id.
-            "category": (Terminology, "terminologies"),
-        },
-        "folder_from": "processing",
-    },
-    "data_subject": {
-        "model": DataSubject,
-        "fields": ["name", "description", "category"],
-        "fk_fields": {"processing": (Processing, "processings")},
-        "required_fields": ["category"],
-        "folder_from": "processing",
-    },
-    "data_recipient": {
-        "model": DataRecipient,
-        "fields": ["name", "description", "category"],
-        "fk_fields": {"processing": (Processing, "processings")},
-        "required_fields": ["category"],
-        "folder_from": "processing",
-    },
-    "data_contractor": {
-        "model": DataContractor,
-        "fields": [
-            "name",
-            "description",
-            "relationship_type",
-            "country",
-            "documentation_link",
-        ],
-        "fk_fields": {
-            "processing": (Processing, "processings"),
-            "entity": (Entity, "entities"),
-        },
-        "required_fields": ["relationship_type", "country"],
-        "folder_from": "processing",
-    },
-    "data_transfer": {
-        "model": DataTransfer,
-        "fields": [
-            "name",
-            "description",
-            "country",
-            "transfer_mechanism",
-            "guarantees",
-            "documentation_link",
-        ],
-        "fk_fields": {
-            "processing": (Processing, "processings"),
-            "entity": (Entity, "entities"),
-        },
-        "required_fields": ["country"],
-        "folder_from": "processing",
-    },
-    "entity_score": {
-        "model": EntityScore,
-        # A reading a provider published, dated so readings accumulate.
-        "fields": ["score", "scale_max", "grade", "as_of", "url", "observation"],
-        "fk_fields": {
-            "entity": (Entity, "entities"),
-            "provider": (Terminology, "terminologies"),
-        },
-        "required_fields": ["score", "as_of"],
-        # save() takes the folder from the entity; match there.
-        "folder_from": "entity",
-        "match_on": ["entity", "provider", "as_of"],
-    },
-    "timeline_entry": {
-        "model": TimelineEntry,
-        "fields": ["entry", "entry_type", "timestamp", "observation"],
-        "fk_fields": {"incident": (Incident, "incidents")},
-        "required_fields": ["entry"],
-        "folder_from": "incident",
-        # EntryType.get_manual_entry_types: a run reports what it observed,
-        # it does not narrate a lifecycle move someone else made.
-        "allowed_values": {
-            "entry_type": frozenset({"detection", "mitigation", "observation"})
-        },
-    },
-    "task_template": {
-        "model": TaskTemplate,
-        # No `schedule`: objects.create() skips field validators and that
-        # column's shape is enforced by one.
-        "fields": ["name", "description", "ref_id"],
-        "fk_fields": {},
-        "params": {
-            "assigned_to": None,
-            "task_date": None,
-            "applied_controls": None,
-            "compliance_assessments": None,
-            "evidences": None,
-            "documents": None,
-        },
-        "constructor": "_construct_task_template",
-        # An updater is what makes upsert possible on a built model. Never a
-        # recurring one: re-dating its occurrences rewrites past ones.
-        "updater": "_update_task_template",
-        "match_filter": Q(is_recurrent=False),
-    },
-    "right_request": {
-        "model": RightRequest,
-        # No status: a run opens the request, the DPO closes it.
-        "fields": [
-            "name",
-            "description",
-            "ref_id",
-            "requested_on",
-            "due_date",
-            "request_type",
-            "observation",
-        ],
-        "fk_fields": {},
-        "required_fields": ["requested_on"],
-    },
-    "document_container": {
-        "model": DocumentContainer,
-        # The language-independent identity. Its locale variants are separate
-        # rows, so a container is created once and documents hang off it.
-        "fields": ["name", "description", "ref_id", "document_type"],
-        "fk_fields": {},
-    },
-    "managed_document": {
-        "model": ManagedDocument,
-        # `name` titles this locale variant; the container carries the
-        # language-independent one.
-        "fields": ["name", "description", "locale", "template_used"],
-        "fk_fields": {"container": (DocumentContainer, "document-containers")},
-        # The column is nullable — a container-less document is a legacy shape —
-        # but a run has no business creating one: the container is where the
-        # folder, the type and the catalog entry come from.
-        "required_fks": ["container"],
-        # Not a column on this model: the first revision's markdown.
-        "params": {"content": None},
-        "folder_from": "container",
-        "constructor": "_construct_managed_document",
-        # The constructor writes the first revision too.
-        "extra_permissions": ["add_documentrevision"],
-    },
-    "document_revision": {
-        "model": DocumentRevision,
-        # Authored markdown only: an uploaded or linked revision is a file, and
-        # no action can produce one.
-        "fields": ["content", "change_summary"],
-        "fk_fields": {"document": (ManagedDocument, "managed-documents")},
-        "folder_from": "document",
-        "constructor": "_construct_document_revision",
-    },
-    "entity_assessment": {
-        "model": EntityAssessment,
-        "fields": ["name", "description"],
-        "fk_fields": {
-            "entity": (Entity, "entities"),
-            "perimeter": (Perimeter, "perimeters"),
-        },
-        # With a framework the constructor also builds the questionnaire;
-        # without one it is a plain create.
-        "params": {
-            "framework": (Framework, "frameworks"),
-            "implementation_groups": None,
-        },
-        "constructor": "_construct_entity_assessment",
-        "constructor_permissions": {"framework": ["add_complianceassessment"]},
-    },
-}
-
-
 def _name_scope_folder_ids(folder):
     """Where a NAME may resolve: the instance folder, its subtree, and the
     root folder (global referentials such as terminologies live there).
@@ -764,6 +443,42 @@ def _document_template_content(ref_id, locale, instance):
             f"create_object: no document template '{ref_id}' in {locale} or en"
         )
     return template.content
+
+
+def _prepare_finding(kwargs, instance):
+    """The API's rules for a new finding (FindingWriteSerializer.validate), and
+    the Findings tab's binding: raised on a requirement without a findings
+    assessment, it goes to that audit's binder, created on first use as the
+    findings-binder endpoint does."""
+    requirement_assessment = kwargs.get("requirement_assessment")
+    if requirement_assessment is not None:
+        if requirement_assessment.is_locked:
+            raise FatalActionError(
+                "create_object: cannot raise a finding on a requirement of a "
+                "locked audit"
+            )
+        if kwargs.get("findings_assessment") is None:
+            audit = requirement_assessment.compliance_assessment
+            # The endpoint asks for it whether or not the binder exists yet.
+            _authorize_creation_folder(FindingsAssessment, audit.folder, instance)
+            kwargs["findings_assessment"] = FindingsAssessment.binder_of(
+                audit
+            ) or FindingsAssessment.create_binder(audit)
+        if not kwargs.get("name"):
+            # Named after the requirement: "ref - name", or its text when it has
+            # neither (whole frameworks do), cut to fit.
+            requirement = requirement_assessment.requirement
+            label = requirement.display_short or (
+                requirement.get_description_translated or ""
+            )
+            kwargs["name"] = Truncator(label).chars(
+                Finding._meta.get_field("name").max_length
+            )
+    findings_assessment = kwargs.get("findings_assessment")
+    if findings_assessment is not None and findings_assessment.is_locked:
+        raise FatalActionError(
+            "create_object: cannot attach a finding to a locked findings assessment"
+        )
 
 
 def _identifier_q(model, value):
@@ -954,13 +669,30 @@ def _send_quietly(what, send, **context):
 
 
 def _construct_validation_flow(kwargs, params, instance):
-    """A request for sign-off, from the run's identity. `approver` is a single
-    FK, so a second id would be dropped without a word."""
+    """A request for sign-off, from `requester` or else the run's identity.
+
+    Naming a requester also hands them the right to act on the flow: a
+    `change_requested` can only be answered by the requester, so leaving it on
+    the run's identity strands the request, and so would naming someone who
+    cannot change validation flows in the domain. Both it and `approver` are
+    single FKs, so a second id would be dropped without a word.
+    """
+    from . import authz
     from .engine import run_identity
 
     approvers = _rows_for(User, params.get("approver"), instance, "approver")
     if len(approvers) > 1:
         raise FatalActionError("create_object: 'approver' names one user, not several")
+    requesters = _rows_for(User, params.get("requester"), instance, "requester")
+    if len(requesters) > 1:
+        raise FatalActionError("create_object: 'requester' names one user, not several")
+    if requesters and not all(
+        authz.can(requesters[0], codename, kwargs["folder"])
+        for codename in ["view_validationflow", "change_validationflow"]
+    ):
+        raise FatalActionError(
+            "create_object: 'requester' cannot act on validation flows in this domain"
+        )
 
     relations = {
         "compliance_assessments": ComplianceAssessment,
@@ -974,7 +706,7 @@ def _construct_validation_flow(kwargs, params, instance):
         if params.get("validation_deadline")
         else None
     )
-    requester = run_identity(instance)
+    requester = requesters[0] if requesters else run_identity(instance)
     with transaction.atomic():
         flow = ValidationFlow.objects.create(
             approver=approvers[0] if approvers else None,
@@ -1113,6 +845,338 @@ def _implementation_groups(value, framework):
     return groups
 
 
+# Explicit registry of models workflows may create: each entry
+# lists the writable simple fields and the FK fields (target model + the
+# frontend endpoint serving its options). Anything else in the config is
+# ignored. FK values are UUIDs — templatable, so a previous node's
+# created_object_id can feed the next node's FK.
+#
+# With `upsert: true` in the config, the action matches an existing row by
+# the entry's `match_on` field (within the instance's folder) and updates it
+# instead of creating a duplicate, which the primitive sync flows need.
+# Entries without an explicit `match_on` match on name. `match_scope` adds the
+# parents a row belongs to, compared as given, so an upsert never moves a row
+# from one parent to another.
+CREATABLE_MODELS = {
+    "applied_control": {
+        "model": AppliedControl,
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {},
+    },
+    "evidence": {
+        "model": Evidence,
+        "fields": ["name", "description"],
+        "fk_fields": {},
+    },
+    "incident": {
+        "model": Incident,
+        "fields": ["name", "description", "ref_id", "status", "severity", "link"],
+        "fk_fields": {},
+    },
+    "asset": {
+        "model": Asset,
+        "fields": ["name", "description", "ref_id", "type", "reference_link"],
+        "fk_fields": {},
+    },
+    "vulnerability": {
+        "model": Vulnerability,
+        "fields": ["name", "description", "ref_id", "status", "severity"],
+        "fk_fields": {},
+    },
+    "security_exception": {
+        "model": SecurityException,
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "severity",
+            "expiration_date",
+            "status",
+            "observation",
+        ],
+        "fk_fields": {"approver": (User, "users")},
+    },
+    "entity": {
+        "model": Entity,
+        "fields": ["name", "description", "ref_id", "mission", "reference_link"],
+        "fk_fields": {},
+    },
+    "findings_assessment": {
+        "model": FindingsAssessment,
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {},
+    },
+    "finding": {
+        "model": Finding,
+        "fields": ["name", "description", "ref_id", "severity", "status"],
+        "fk_fields": {
+            "findings_assessment": (FindingsAssessment, "findings-assessments"),
+            # The audited requirement the finding is raised on. Without an explicit
+            # findings_assessment it goes to that audit's binder, as the
+            # requirement's Findings tab does (_prepare_finding).
+            "requirement_assessment": (
+                RequirementAssessment,
+                "requirement-assessments",
+            ),
+        },
+        "prepare": _prepare_finding,
+        # A name is not unique enough: audits of one framework in one folder
+        # derive the same names from their requirements, and a name-only match
+        # would move last year's finding into this year's binder.
+        "match_scope": ["findings_assessment", "requirement_assessment"],
+        # A bound finding lives in its assessment's folder, as through the API.
+        "folder_from": "findings_assessment",
+        # Raising on a requirement may create the audit's binder; the Findings
+        # tab's endpoint asks for this permission too.
+        "constructor_permissions": {
+            "requirement_assessment": ["add_findingsassessment"]
+        },
+    },
+    "compliance_assessment": {
+        "model": ComplianceAssessment,
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {"perimeter": (Perimeter, "perimeters")},
+        # Construction parameters: not columns, handed to the constructor.
+        "params": {
+            "framework": (Framework, "frameworks"),
+            "implementation_groups": None,
+        },
+        "required_params": ["framework"],
+        "constructor": _construct_audit,
+        "constructor_permissions": {"framework": ["add_complianceassessment"]},
+    },
+    "validation_flow": {
+        "model": ValidationFlow,
+        # No name or description on the model; `ref_id` is generated on save.
+        "fields": ["request_notes"],
+        "fk_fields": {},
+        "params": {
+            "approver": None,
+            "requester": None,
+            "validation_deadline": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "policies": None,
+            "findings_assessments": None,
+            "security_exceptions": None,
+        },
+        "constructor": _construct_validation_flow,
+    },
+    "risk_scenario": {
+        "model": RiskScenario,
+        # Never the ratings or the treatment: those are the analyst's.
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {"risk_assessment": (RiskAssessment, "risk-assessments")},
+    },
+    "risk_assessment": {
+        "model": RiskAssessment,
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {
+            "risk_matrix": (RiskMatrix, "risk-matrices"),
+            "perimeter": (Perimeter, "perimeters"),
+        },
+    },
+    "business_impact_analysis": {
+        "model": BusinessImpactAnalysis,
+        # No status: a BIA a workflow opens starts where a new one starts.
+        "fields": ["name", "description", "eta", "due_date"],
+        "fk_fields": {
+            "perimeter": (Perimeter, "perimeters"),
+            "risk_matrix": (RiskMatrix, "risk-matrices"),
+        },
+    },
+    "asset_assessment": {
+        "model": AssetAssessment,
+        # The recovery verdicts stay human; attaching the asset is the job.
+        "fields": ["observation"],
+        "fk_fields": {
+            "asset": (Asset, "assets"),
+            "bia": (BusinessImpactAnalysis, "business-impact-analysis"),
+        },
+    },
+    "processing": {
+        "model": Processing,
+        # No status: privacy_approved is an approval, and a record a workflow
+        # writes starts as a draft.
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "information_channel",
+            "usage_channel",
+            "dpia_reference",
+        ],
+    },
+    "purpose": {
+        "model": Purpose,
+        "fields": ["name", "description", "legal_basis", "article_9_condition"],
+        "fk_fields": {"processing": (Processing, "processings")},
+    },
+    "personal_data": {
+        "model": PersonalData,
+        "fields": [
+            "name",
+            "description",
+            "retention",
+            "deletion_policy",
+            "is_sensitive",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            # Resolves among this field's own categories, by name or id.
+            "category": (Terminology, "terminologies"),
+        },
+    },
+    "data_subject": {
+        "model": DataSubject,
+        "fields": ["name", "description", "category"],
+        "fk_fields": {"processing": (Processing, "processings")},
+        "required_fields": ["category"],
+    },
+    "data_recipient": {
+        "model": DataRecipient,
+        "fields": ["name", "description", "category"],
+        "fk_fields": {"processing": (Processing, "processings")},
+        "required_fields": ["category"],
+    },
+    "data_contractor": {
+        "model": DataContractor,
+        "fields": [
+            "name",
+            "description",
+            "relationship_type",
+            "country",
+            "documentation_link",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            "entity": (Entity, "entities"),
+        },
+        "required_fields": ["relationship_type", "country"],
+    },
+    "data_transfer": {
+        "model": DataTransfer,
+        "fields": [
+            "name",
+            "description",
+            "country",
+            "transfer_mechanism",
+            "guarantees",
+            "documentation_link",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            "entity": (Entity, "entities"),
+        },
+        "required_fields": ["country"],
+    },
+    "entity_score": {
+        "model": EntityScore,
+        # A reading a provider published, dated so readings accumulate.
+        "fields": ["score", "scale_max", "grade", "as_of", "url", "observation"],
+        "fk_fields": {
+            "entity": (Entity, "entities"),
+            "provider": (Terminology, "terminologies"),
+        },
+        "required_fields": ["score", "as_of"],
+        "match_on": ["entity", "provider", "as_of"],
+    },
+    "timeline_entry": {
+        "model": TimelineEntry,
+        "fields": ["entry", "entry_type", "timestamp", "observation"],
+        "fk_fields": {"incident": (Incident, "incidents")},
+        "required_fields": ["entry"],
+        # EntryType.get_manual_entry_types: a run reports what it observed,
+        # it does not narrate a lifecycle move someone else made.
+        "allowed_values": {
+            "entry_type": frozenset({"detection", "mitigation", "observation"})
+        },
+    },
+    "task_template": {
+        "model": TaskTemplate,
+        # No `schedule`: objects.create() skips field validators and that
+        # column's shape is enforced by one.
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {},
+        "params": {
+            "assigned_to": None,
+            "task_date": None,
+            "applied_controls": None,
+            "compliance_assessments": None,
+            "evidences": None,
+            "documents": None,
+        },
+        "constructor": _construct_task_template,
+        # An updater is what makes upsert possible on a built model. Never a
+        # recurring one: re-dating its occurrences rewrites past ones.
+        "updater": _update_task_template,
+        "match_filter": Q(is_recurrent=False),
+    },
+    "right_request": {
+        "model": RightRequest,
+        # No status: a run opens the request, the DPO closes it.
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "requested_on",
+            "due_date",
+            "request_type",
+            "observation",
+        ],
+        "fk_fields": {},
+        "required_fields": ["requested_on"],
+    },
+    "document_container": {
+        "model": DocumentContainer,
+        # The language-independent identity. Its locale variants are separate
+        # rows, so a container is created once and documents hang off it.
+        "fields": ["name", "description", "ref_id", "document_type"],
+        "fk_fields": {},
+    },
+    "managed_document": {
+        "model": ManagedDocument,
+        # `name` titles this locale variant; the container carries the
+        # language-independent one.
+        "fields": ["name", "description", "locale", "template_used"],
+        "fk_fields": {"container": (DocumentContainer, "document-containers")},
+        # The column is nullable — a container-less document is a legacy shape —
+        # but a run has no business creating one: the container is where the
+        # folder, the type and the catalog entry come from.
+        "required_fks": ["container"],
+        # Not a column on this model: the first revision's markdown.
+        "params": {"content": None},
+        "constructor": _construct_managed_document,
+        # The constructor writes the first revision too.
+        "extra_permissions": ["add_documentrevision"],
+    },
+    "document_revision": {
+        "model": DocumentRevision,
+        # Authored markdown only: an uploaded or linked revision is a file, and
+        # no action can produce one.
+        "fields": ["content", "change_summary"],
+        "fk_fields": {"document": (ManagedDocument, "managed-documents")},
+        "constructor": _construct_document_revision,
+    },
+    "entity_assessment": {
+        "model": EntityAssessment,
+        "fields": ["name", "description"],
+        "fk_fields": {
+            "entity": (Entity, "entities"),
+            "perimeter": (Perimeter, "perimeters"),
+        },
+        # With a framework the constructor also builds the questionnaire;
+        # without one it is a plain create.
+        "params": {
+            "framework": (Framework, "frameworks"),
+            "implementation_groups": None,
+        },
+        "constructor": _construct_entity_assessment,
+        "constructor_permissions": {"framework": ["add_complianceassessment"]},
+    },
+}
+
+
 def _construction_params(entry, fields, instance):
     """Resolve an entry's construction parameters: references by urn or id,
     everything else rendered as-is."""
@@ -1154,12 +1218,6 @@ class CreateObjectAction(BaseAction):
                     f"create_object: '{value}' is not an accepted "
                     f"{config.get('model')}.{key}"
                 )
-        name_field = get_model_field(entry["model"], "name")
-        # The model decides: a managed document's name is optional because its
-        # container carries the one that matters, a control's is not.
-        named = name_field is not None and not name_field.blank
-        if named and not kwargs.get("name") and not config.get("upsert"):
-            raise ActionError("create_object: 'name' is required")
         for key in entry.get("required_fields") or []:
             if not kwargs.get(key):
                 raise ActionError(f"create_object: '{key}' is required")
@@ -1177,11 +1235,22 @@ class CreateObjectAction(BaseAction):
                 ._meta.get_field(fk_name)
                 .get_limit_choices_to(),
             )
+        if entry.get("prepare"):
+            entry["prepare"](kwargs, instance)
+        name_field = get_model_field(entry["model"], "name")
+        # The model decides: a managed document's name is optional because its
+        # container carries the one that matters, a control's is not. Checked
+        # after `prepare`, which may supply a default.
+        named = name_field is not None and not name_field.blank
+        if named and not kwargs.get("name") and not config.get("upsert"):
+            raise ActionError("create_object: 'name' is required")
 
         # save() may take the folder from a parent; an upsert matching on the
         # instance folder would then miss and hit a unique constraint.
         folder = _creation_folder(instance)
-        folder_from = entry.get("folder_from")
+        folder_from = entry.get("folder_from") or getattr(
+            entry["model"], "folder_from", None
+        )
         if folder_from and kwargs.get(folder_from) is not None:
             folder = kwargs[folder_from].folder
         # authorize_action cleared the workflow's own folder; the row lands
@@ -1209,12 +1278,10 @@ class CreateObjectAction(BaseAction):
             params = _construction_params(entry, fields, instance)
             try:
                 if obj is None:
-                    obj = globals()[constructor](
-                        {"folder": folder, **kwargs}, params, instance
-                    )
+                    obj = constructor({"folder": folder, **kwargs}, params, instance)
                 else:
                     created = False
-                    globals()[entry["updater"]](obj, kwargs, params, instance)
+                    entry["updater"](obj, kwargs, params, instance)
             except ValidationError as e:
                 raise ActionError(f"create_object: {'; '.join(e.messages)}")
             if created:
@@ -1342,6 +1409,9 @@ def _upsert_match(entry, kwargs, folder):
         raise ActionError(
             f"create_object: upsert requires {', '.join(repr(m) for m in missing)}"
         )
+    # The parents, unlike the match fields, may be absent: an unbound row
+    # matches only unbound rows, and a bound one only rows of the same parent.
+    match.update({key: kwargs.get(key) for key in entry.get("match_scope") or ()})
     rows = entry["model"].objects.filter(folder=folder, **match)
     if entry.get("match_filter") is not None:
         rows = rows.filter(entry["match_filter"])
@@ -1506,12 +1576,14 @@ class ReadObjectsAction(BaseAction):
 
 @dataclass(frozen=True)
 class UpdateEntry:
-    """One UPDATABLE_MODELS entry, drawn on one line: automation may record
-    that time passed and may attach work, but may not render the judgment.
+    """One UPDATABLE_MODELS entry. Assessment verdicts (results, scores,
+    treatments) stay off the registry; lifecycle statuses are the customer's
+    process, so any of the column's choices may be written, except the
+    decisions a review records (evidence approved or rejected).
 
-    ``fields`` is what a run may write; ``allowed_values`` narrows a field to
-    the values that are facts rather than decisions. Plain columns only —
-    anything whose transition lives outside save() stays off the registry.
+    ``fields`` is what a run may write; ``allowed_values`` narrows a field when
+    a value would bypass logic outside save(). Plain columns only — anything
+    whose transition lives outside save() stays off the registry.
     """
 
     model: type[Model]
@@ -1566,6 +1638,25 @@ def _record_document_edit(revision, updated, before, instance):
     record_document_edit(revision, run_identity(instance), before.get("content"))
 
 
+# Approving or rejecting is a review: EvidenceRevision.record_review stamps the
+# reviewer, enforces four-eyes and notifies the owners, all outside save().
+_EVIDENCE_STATUSES = frozenset({"draft", "missing", "in_review", "expired"})
+
+
+def _reopen_evidence_review(evidence, updated, before, instance):
+    """What EvidenceWriteSerializer.update does on any other status change:
+    leaving approved or rejected undoes the decision, so the file is queued
+    for review again."""
+    if "status" not in updated or before.get("status") == evidence.status:
+        return
+    revision = evidence.last_revision
+    if (
+        revision is not None
+        and revision.review_status != EvidenceRevision.ReviewStatus.PENDING
+    ):
+        revision.clear_review()
+
+
 UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     # Triage, not judgment. A run may widen the reviewer pool, tighten the date and
     # leave a note; `status` and `resolution` are absent on purpose — the request
@@ -1602,9 +1693,9 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     "evidence": UpdateEntry(
         model=Evidence,
         fields=["status", "expiry_date", "description"],
-        # A lapsed date and a missing file are facts; approving is not.
-        allowed_values={"status": frozenset({"expired", "missing"})},
+        allowed_values={"status": _EVIDENCE_STATUSES},
         m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
+        after_save=_reopen_evidence_review,
     ),
     "incident": UpdateEntry(
         model=Incident,
@@ -1646,8 +1737,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "expiration_date",
             "observation",
         ],
-        # Granting or refusing an exception stays human; expiring it is a date.
-        allowed_values={"status": frozenset({"expired", "deprecated"})},
         m2m_fields={"owners": _ACTOR, "evidences": _EVIDENCES},
     ),
     "entity": UpdateEntry(
@@ -1673,22 +1762,6 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
             "ref_id",
             "observation",
         ],
-        # All but `dismissed`: that one is a person judging it harmless.
-        allowed_values={
-            "status": frozenset(
-                {
-                    "--",
-                    "identified",
-                    "confirmed",
-                    "assigned",
-                    "in_progress",
-                    "mitigated",
-                    "resolved",
-                    "closed",
-                    "deprecated",
-                }
-            )
-        },
         m2m_fields={
             "owner": _ACTOR,
             "applied_controls": _CONTROLS,
@@ -1960,11 +2033,21 @@ def _resolve_reference(model, value, instance, label, constraints=None):
 
     `constraints` narrows the search to what the field itself accepts, so a
     category resolves among categories and not among every terminology.
+
+    Only rows the run identity may view are candidates, as in _rows_for: the
+    action's own check is the add permission where the row lands, which says
+    nothing about what it links to. A row the identity cannot view reads as
+    one that does not exist, and never makes a name ambiguous.
     """
+    from . import authz
+    from .engine import run_identity
+
     value = str(value or "").strip()
     if not value:
         raise FatalActionError(f"{label} is required")
-    queryset = model.objects.filter(**(constraints or {}))
+    queryset = model.objects.filter(**(constraints or {})).filter(
+        id__in=authz.viewable_ids(run_identity(instance), model)
+    )
     if UUID_RE.match(value):
         matches = list(queryset.filter(id=value)[:2])
     elif value.lower().startswith("urn:") and get_model_field(model, "urn"):

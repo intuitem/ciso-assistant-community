@@ -13,6 +13,7 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
+from core.utils import get_report_timezone, get_report_timezone_names
 from core.net_safety import (
     BlockedRequestError,
     DnsLookupError,
@@ -87,6 +88,10 @@ GENERAL_SETTINGS_KEYS = [
     "daily_rate",
     "mapping_max_depth",
     "allow_self_validation",
+    "evidence_four_eyes",
+    "auto_lock_overdue_assessments",
+    "auto_ref_id",
+    "auto_ref_id_prefixes",
     "show_warning_external_links",
     "show_get_started",
     "builtin_metrics_retention_days",
@@ -94,6 +99,7 @@ GENERAL_SETTINGS_KEYS = [
     "enforce_mfa",
     "default_language",
     "default_date_format",
+    "report_timezone",
     "llm_provider",
     "ollama_base_url",
     "ollama_model",
@@ -121,6 +127,32 @@ LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
 }
+
+
+def _validate_auto_ref_id_prefixes(value) -> dict:
+    """Keep the non-empty overrides of known models; blank means the default."""
+    from core.base_models import AUTO_REF_ID_PREFIX_RE, auto_ref_id_models
+
+    if not isinstance(value, dict):
+        raise serializers.ValidationError({"auto_ref_id_prefixes": "Invalid value."})
+    known = auto_ref_id_models()
+    cleaned = {}
+    for model_name, prefix in value.items():
+        prefix = (prefix or "").strip() if isinstance(prefix, str) else prefix
+        if not prefix:
+            continue
+        if model_name not in known:
+            raise serializers.ValidationError(
+                {"auto_ref_id_prefixes": f"Unknown object type: {model_name}"}
+            )
+        if not isinstance(prefix, str) or not AUTO_REF_ID_PREFIX_RE.match(prefix):
+            raise serializers.ValidationError(
+                {
+                    "auto_ref_id_prefixes": "A prefix has 1 to 8 letters, digits, '-' or '_'."
+                }
+            )
+        cleaned[model_name] = prefix
+    return cleaned
 
 
 # Proposed on the audit form for frameworks without a scale of their own.
@@ -231,6 +263,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = _normalize_organisation_score_scale(
                     value
                 )
+            if key == "auto_ref_id" and not isinstance(value, bool):
+                raise serializers.ValidationError({"auto_ref_id": "Must be a boolean."})
+            if key == "auto_ref_id_prefixes":
+                validated_data["value"][key] = _validate_auto_ref_id_prefixes(value)
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(
@@ -255,6 +291,19 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_date_format": f"Invalid date format. Must be one of: {sorted(User.DATE_FORMATS)}"
                         }
                     )
+            if key == "report_timezone":
+                # A stored name that still loads (a renamed region) stays accepted:
+                # the form sends every key, so rejecting it would block saving any
+                # other general setting.
+                if not isinstance(value, str) or (
+                    value not in get_report_timezone_names()
+                    and value != get_report_timezone().key
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "report_timezone": "Invalid time zone. Must be an IANA region such as Europe/Paris."
+                        }
+                    )
             if key == "default_packager":
                 # Identity alphabet of library packagers / ref_ids
                 # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
@@ -272,11 +321,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {"disabled_email_templates": "Must be a list of template keys."}
                     )
-            if key == "chat_temperature_enabled":
+            if key in ("chat_temperature_enabled", "auto_lock_overdue_assessments"):
                 if not isinstance(value, bool):
-                    raise serializers.ValidationError(
-                        {"chat_temperature_enabled": "Must be a boolean."}
-                    )
+                    raise serializers.ValidationError({key: "Must be a boolean."})
             if key == "chat_temperature":
                 try:
                     temp = float(value)
@@ -561,6 +608,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.findings_from_requirements", required=False, default=False
     )
     dora = serializers.BooleanField(source="value.dora", required=False, default=True)
+    nis2 = serializers.BooleanField(source="value.nis2", required=False, default=False)
     external_ratings = serializers.BooleanField(
         source="value.external_ratings", required=False, default=False
     )
@@ -569,6 +617,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     relations_graph = serializers.BooleanField(
         source="value.relations_graph", required=False, default=False
+    )
+    mcp = serializers.BooleanField(source="value.mcp", required=False, default=False)
+    mcp_write = serializers.BooleanField(
+        source="value.mcp_write", required=False, default=False
     )
 
     # Flags a user may switch off for themselves. Opt-in, like batch actions: a
@@ -633,6 +685,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "dpias": frozenset({"quick_forms"}),
             # The SLA computes vulnerability due dates.
             "vulnerability_sla": frozenset({"vulnerabilities"}),
+            # Write profiles for AI apps only exist with MCP itself.
+            "mcp_write": frozenset({"mcp"}),
         }
     )
 
@@ -647,6 +701,21 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "folder",
         ]
         read_only_fields = ["name"]
+
+    def validate(self, attrs):
+        from iam.mcp_access import has_shared_cache
+
+        value = attrs.get("value") or {}
+        # sign-in keeps each authorization code in the cache until the app
+        # redeems it, possibly on another worker
+        if (value.get("mcp") or value.get("mcp_write")) and not has_shared_cache():
+            raise serializers.ValidationError(
+                {
+                    "mcp": "AI app connections need a shared cache (memcached): "
+                    "configure it first."
+                }
+            )
+        return attrs
 
     def get_fields(self):
         fields = super().get_fields()

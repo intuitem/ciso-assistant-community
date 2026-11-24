@@ -15,6 +15,17 @@
   not_applicable: "Not applicable",
   not_assessed: "Not assessed",
 )
+// Score layers in display order; more than one when the audit has a
+// documentation score.
+#let layers = d.at("score_layers", default: ("implementation_score",))
+#let layered = layers.len() > 1
+#let layer-label = (
+  implementation_score: "Implementation",
+  documentation_score: "Documentation",
+  maturity_score: "Maturity",
+)
+#let score-text(value) = if value == none { "–" } else { str(value) }
+#let out-of(ra) = if field(ra, "max_score", fallback: none) != none [\/#ra.max_score]
 // Keyed on the raw value: labels are localised.
 #let result-color(key) = (
   compliant: rgb("#dcfce7"),
@@ -39,7 +50,7 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone], align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -117,6 +128,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Generated at], [#d.generated_at],
+          [Time zone], [#d.timezone - each time shows its UTC offset],
           [Document ID], [#raw(d.audit.id)],
         )
       ]
@@ -179,10 +191,10 @@
         + if "extended_result" in ra and ra.extended_result != "-" {
           ([*Result detail:* #ra.extended_result],)
         } else { () }
-        + if "score" in ra and ra.score != none {
-          ([*Score:* #ra.score#if field(ra, "max_score", fallback: none) != none [
-              \/#ra.max_score
-            ]],)
+        + if layered and ra.at("maturity_score", default: none) != none {
+          layers.map(l => [*#layer-label.at(l):* #score-text(ra.at(l, default: none))#if ra.at(l, default: none) != none { out-of(ra) }])
+        } else if "score" in ra and ra.score != none {
+          ([*Score:* #ra.score#out-of(ra)],)
         } else { () }
     )
     #if meta.len() > 0 [#meta.join(h(10pt))]

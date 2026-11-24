@@ -39,6 +39,38 @@
   cancelled: "Annulé",
 )
 
+// Set when the report covers a scenario selection rather than the whole assessment.
+#let selection = d.at("selection", default: none)
+#let selection-filter-label = (
+  within_tolerance: "Tolérable",
+  treatment: "Traitement",
+  current_level: "Niveau courant",
+  residual_level: "Niveau résiduel",
+  owner: "Propriétaire",
+  threats: "Menaces",
+  assets: "Actifs",
+  qualifications: "Qualifications",
+  filtering_labels: "Étiquettes",
+)
+#let tolerance-label = ("YES": "Oui", "NO": "Non", "--": "Non défini")
+#let selection-value(key, value) = if key == "within_tolerance" {
+  tolerance-label.at(value, default: value)
+} else if key == "treatment" {
+  treatment-label.at(value, default: value)
+} else { value }
+#let selection-box = if selection != none {
+  block(width: 100%, fill: rgb("#eef2ff"), stroke: 0.6pt + accent, radius: 3pt, inset: 8pt)[
+    #set par(justify: false)
+    #set align(left)
+    #text(weight: "bold", fill: accent)[Sélection de scénarios] · #selection.count sur #selection.total scénarios
+    #v(2pt)
+    #for f in selection.filters [
+      #selection-filter-label.at(f.key, default: f.key) : #f.values.map(v => selection-value(f.key, v)).join(", ") \
+    ]
+    #text(fill: muted)[Les scénarios hors sélection ne figurent pas dans ce rapport.]
+  ]
+}
+
 #let level-badge(level) = box(
   fill: rgb(level.hexcolor),
   inset: (x: 5pt, y: 2pt),
@@ -59,7 +91,8 @@
     set text(8pt, fill: muted)
     grid(
       columns: (1fr, auto),
-      d.date, align(right)[#counter(page).display("1 / 1", both: true)],
+      [#d.date · #d.timezone#if selection != none [ · Sélection #selection.count/#selection.total]],
+      align(right)[#counter(page).display("1 / 1", both: true)],
     )
   },
 )
@@ -97,6 +130,10 @@
         [*Relecteurs*], [#ra.reviewers],
         [*Échéance / Limite*], [#ra.eta — #ra.due_date],
       )
+      #if selection != none [
+        #v(1em)
+        #selection-box
+      ]
       #v(1em)
       #block(width: 100%)[
         #set text(7.5pt, fill: muted)
@@ -105,6 +142,7 @@
           row-gutter: 3pt,
           column-gutter: 12pt,
           [Généré le], [#d.generated_at],
+          [Fuseau horaire], [#d.timezone - chaque heure indique son décalage UTC],
           [Identifiant du document], [#raw(d.id)],
         )
       ]
@@ -209,6 +247,7 @@
       ..(
         if scenario.description != "" { row("Description", [#scenario.description]) } else { () }
           + if scenario.qualifications.len() > 0 { row(qualification-label, [#scenario.qualifications.join(", ")]) } else { () }
+          + if scenario.owners.len() > 0 { row("Assigné à", [#scenario.owners.join(", ")]) } else { () }
           + if scenario.assets.len() > 0 { row("Actifs", [#scenario.assets.join(", ")]) } else { () }
           + if scenario.threats.len() > 0 { row("Menaces", [#scenario.threats.join(", ")]) } else { () }
           + if "inherent" in scenario { row("Niveau inhérent", level-badge(scenario.inherent)) } else { () }

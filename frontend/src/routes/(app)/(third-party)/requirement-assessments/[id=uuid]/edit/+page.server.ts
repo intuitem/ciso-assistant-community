@@ -6,17 +6,18 @@ import { getSecureRedirect } from '#lib/utils/helpers.js';
 import { formatSelectFieldData } from '#lib/utils/load.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import { headData } from '#lib/utils/table.js';
+import { fetchVendorAssignees } from '#lib/utils/vendorTasks.js';
 import { m } from '#paraglide/messages.js';
 import { type TableSource } from '#lib/components/ModelTable/types.js';
 import type { Actions } from '@sveltejs/kit';
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, locals }) => {
 	const URLModel = 'requirement-assessments';
 	const baseUrl = BASE_API_URL;
 	const endpoint = `${baseUrl}/${URLModel}/${params.id}/`;
@@ -60,14 +61,35 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences?.map((evidence) => evidence.id) ?? [];
-	object.applied_controls =
-		object.applied_controls?.map((applied_control) => applied_control.id) ?? [];
-	object.security_exceptions =
-		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
-	object.task_templates = object.task_templates?.map((task_template) => task_template.id) ?? [];
-	object.findings = object.findings?.map((finding) => finding.id) ?? [];
+	// Linked ids from the raw object: the read data masks the objects the user cannot
+	// see, and the form must send those links back untouched. Only for fields the read
+	// data shows: it leaves out those hidden from respondents. Without the raw object
+	// the page does not load: a form built from the read data would unlink the hidden
+	// objects on its next save.
+	const rawResponse = await fetch(`${endpoint}object/`);
+	if (!rawResponse.ok) {
+		error(rawResponse.status, rawResponse.statusText || 'Failed to load the linked objects');
+	}
+	const rawObject = await rawResponse.json();
+	const linkedIds = (field: string): string[] =>
+		field in requirementAssessment && Array.isArray(rawObject[field])
+			? rawObject[field].map(String)
+			: (object[field] ?? []).map((item: any) => item?.id).filter(Boolean);
+	for (const field of [
+		'evidences',
+		'applied_controls',
+		'security_exceptions',
+		'task_templates',
+		'findings'
+	]) {
+		object[field] = linkedIds(field);
+	}
 	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
+	// Compliance hidden but applicability readable (score-only audits): start the
+	// form from it, so the applicability toggle only writes when it is switched.
+	if (!('result' in object) && 'not_applicable' in object) {
+		object.result = object.not_applicable ? 'not_applicable' : 'not_assessed';
+	}
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
@@ -150,7 +172,16 @@ export const load = (async ({ fetch, params }) => {
 	const taskTemplateModel = getModelInfo('task-templates');
 	const taskTemplateCreateSchema = modelSchema('task-templates');
 	const taskTemplateCreateForm = await superValidate(
-		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		{
+			requirement_assessments: [params.id],
+			folder: requirementAssessment.folder.id,
+			// getUser(), not locals.user: the layout load that sets it runs alongside this one.
+			assigned_to: await fetchVendorAssignees(
+				fetch,
+				requirementAssessment.folder,
+				!!(await locals.getUser())?.is_third_party
+			)
+		},
 		zod(taskTemplateCreateSchema),
 		{ errors: false }
 	);
@@ -263,8 +294,14 @@ export const actions: Actions = {
 			'security_exceptions',
 			'findings'
 		];
+		// The applicability toggle of score-only audits writes the hidden result,
+		// only when switched: N/A or back to not assessed (the backend accepts nothing else).
+		const applicabilitySwitched =
+			!('result' in currentRa) &&
+			'not_applicable' in currentRa &&
+			(formData.result === 'not_applicable') !== currentRa.not_applicable;
 		for (const key of visibilityControlled) {
-			if (!(key in currentRa)) {
+			if (!(key in currentRa) && !(key === 'result' && applicabilitySwitched)) {
 				delete formData[key];
 			}
 		}
@@ -298,7 +335,7 @@ export const actions: Actions = {
 			const nextParam = getSecureRedirect(event.url.searchParams.get('next'));
 			redirect(
 				302,
-				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${nextParam}` : ''}`
+				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`
 			);
 		}
 

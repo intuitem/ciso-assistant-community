@@ -1,6 +1,8 @@
 """The risk assessment report, rendered by Typst."""
 
-import pymupdf
+from io import BytesIO
+
+from pypdf import PdfReader
 import pytest
 
 from core.generators import risk_assessment_context
@@ -80,7 +82,17 @@ class FakeM2M:
 
     def all(self):
         return [
-            type("C", (), {"name": n, "get_name_translated": n})() for n in self._names
+            type(
+                "C",
+                (),
+                {
+                    "name": n,
+                    "get_name_translated": n,
+                    "get_status_display": lambda self: "Active",
+                    "__str__": lambda self: self.name,
+                },
+            )()
+            for n in self._names
         ]
 
 
@@ -98,6 +110,7 @@ class FakeScenario:
         self.qualifications = FakeM2M(["Availability"])
         self.existing_applied_controls = FakeM2M(existing)
         self.applied_controls = FakeM2M(extra)
+        self.owner = FakeM2M(["Risk owner"])
 
     def get_inherent_risk(self):
         return {"name": "High", "hexcolor": "#ef4444"}
@@ -129,7 +142,7 @@ def _render(
     return pdf, payload
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_renders_in_each_locale(lang):
     pdf, _ = _render(_clusters(current={(1, 2): ["R.01"]}), lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -191,13 +204,15 @@ def test_inherent_view_appears_only_when_the_flag_supplied_it():
 def test_cover_carries_traceability():
     pdf, payload = _render(_clusters())
     assert payload["generated_at"]
-    cover = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert FakeAssessment.id in cover
 
 
 def test_locale_fallback_is_whole_document():
     assert localized_template("risk_report", "de") == "risk_report_en.typ"
     assert localized_template("risk_report", "fr") == "risk_report_fr.typ"
+    assert localized_template("risk_report", "hu") == "risk_report_hu.typ"
+    assert localized_template("risk_report", "tr") == "risk_report_tr.typ"
 
 
 def test_the_four_matrix_html_variants_are_gone():
@@ -211,7 +226,7 @@ def test_the_four_matrix_html_variants_are_gone():
         assert not (snippets / name).exists(), f"{name} survived the migration"
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_existing_and_extra_controls_are_both_listed(lang):
     """`existing_applied_controls` and `applied_controls` are distinct relations;
     the deprecated free-text `existing_controls` field is not rendered."""
@@ -219,12 +234,14 @@ def test_existing_and_extra_controls_are_both_listed(lang):
     pdf, payload = _render(_clusters(), lang=lang, scenarios=[scenario])
 
     row = payload["scenarios"][0]
-    assert row["existing_controls"] == ["Backup power"]
-    assert row["controls"] == ["Second supplier"]
+    assert row["existing_controls"] == ["Backup power (Active)"]
+    assert row["controls"] == ["Second supplier (Active)"]
+    assert row["owners"] == ["Risk owner"]
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
-    assert "Backup power" in text
-    assert "Second supplier" in text
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
+    assert "Backup power (Active)" in text
+    assert "Second supplier (Active)" in text
+    assert "Risk owner" in text
 
 
 def test_control_rows_are_omitted_when_empty():
@@ -233,7 +250,7 @@ def test_control_rows_are_omitted_when_empty():
     assert row["existing_controls"] == [] and row["controls"] == []
 
 
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_inherent_is_omitted_when_the_flag_is_off(lang):
     """The flag reaches the builder as the presence of the inherent cluster; it must
     gate the per-scenario level as well as the matrix view."""
@@ -254,7 +271,7 @@ def test_scenario_rows_follow_the_risk_story_order():
     """inherent -> existing controls -> current -> extra controls -> residual."""
     scenario = FakeScenario(existing=["Backup power"], extra=["Second supplier"])
     pdf, _ = _render(_clusters(inherent={}), scenarios=[scenario])
-    full = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    full = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     # Several of these labels also head a summary-table column, so look only at
     # the detail section.
     text = full[full.index("Risk scenarios") :]
@@ -279,13 +296,13 @@ def test_scenario_rows_follow_the_risk_story_order():
 def test_empty_rows_are_omitted():
     _, payload = _render(_clusters(), scenarios=[FakeScenario()])
     pdf, _ = _render(_clusters(), scenarios=[FakeScenario()])
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "Existing controls" not in text
     assert "Extra controls" not in text
 
 
 def _text(pdf):
-    return "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    return "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
 
 
 def test_label_standard_switches_the_axis_titles():
@@ -341,33 +358,43 @@ def test_summary_rows_link_to_their_scenario_block():
     scenarios = [FakeScenario(), FakeScenario()]
     pdf, _ = _render(_clusters(), scenarios=scenarios)
 
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
+    reader = PdfReader(BytesIO(pdf))
+    doc = reader.pages
     internal = [
-        link
+        {"page": reader.get_page_number(dest[0].get_object())}
         for page in doc
-        for link in page.get_links()
-        if link["kind"] == pymupdf.LINK_GOTO
+        for annot in page.get("/Annots") or []
+        if (dest := annot.get_object().get("/Dest"))
     ]
     assert len(internal) == len(scenarios), "one link per summary row"
     detail_page = next(
-        i for i, page in enumerate(doc) if "Strength of knowledge" in page.get_text()
+        i
+        for i, page in enumerate(doc)
+        if "Strength of knowledge" in page.extract_text()
     )
     assert all(link["page"] == detail_page for link in internal)
 
 
 def test_summary_table_carries_the_treatment():
     pdf, _ = _render(_clusters(), scenarios=[FakeScenario()])
-    header = pymupdf.open(stream=pdf, filetype="pdf")[
-        next(
-            i
-            for i, page in enumerate(pymupdf.open(stream=pdf, filetype="pdf"))
-            if "Scenario summary" in page.get_text()
-        )
-    ].get_text()
+    header = (
+        PdfReader(BytesIO(pdf))
+        .pages[
+            next(
+                i
+                for i, page in enumerate(PdfReader(BytesIO(pdf)).pages)
+                if "Scenario summary" in page.extract_text()
+            )
+        ]
+        .extract_text()
+    )
     assert "Treatment" in header
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "Cancelled"), ("fr", "Annulé")])
+@pytest.mark.parametrize(
+    "lang,expected",
+    [("en", "Cancelled"), ("fr", "Annulé"), ("hu", "Lemondva"), ("tr", "İptal edildi")],
+)
 def test_treatment_is_localised_by_the_template(lang, expected):
     """`get_treatment_display()` reads Django's gettext catalog, which is fr-only
     and incomplete — "cancelled" came through untranslated. The raw key travels
@@ -380,7 +407,15 @@ def test_treatment_is_localised_by_the_template(lang, expected):
     assert expected in _text(pdf)
 
 
-@pytest.mark.parametrize("lang,expected", [("en", "In progress"), ("fr", "En cours")])
+@pytest.mark.parametrize(
+    "lang,expected",
+    [
+        ("en", "In progress"),
+        ("fr", "En cours"),
+        ("hu", "Folyamatban"),
+        ("tr", "Devam ediyor"),
+    ],
+)
 def test_assessment_status_is_localised_by_the_template(lang, expected):
     pdf, payload = _render(_clusters(), lang=lang)
     assert payload["assessment"]["status_key"] == "in_progress"
@@ -393,7 +428,7 @@ def test_each_template_declares_its_own_language():
     English rules. The suffix is the source of truth."""
     import re
 
-    for template in sorted(TEMPLATE_DIR.glob("*.typ")):
+    for template in sorted(TEMPLATE_DIR.glob("*_??.typ")):
         expected = template.stem.rsplit("_", 1)[1]
         match = re.search(r'#set text\([^)]*lang: "(\w+)"\)', template.read_text())
         assert match, f"{template.name} sets no language"

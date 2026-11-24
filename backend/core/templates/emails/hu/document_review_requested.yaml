@@ -1,0 +1,14 @@
+subject: "CISO Assistant: A(z) „${document_name}” dokumentum az Ön felülvizsgálatára vár"
+body: |
+  Tisztelt Felhasználó!
+
+  ${actor_name} felülvizsgálatra beküldte Önnek a következő dokumentum egy revízióját:
+
+  - Dokumentum: ${document_name}
+  - Verzió: ${version_number}
+  - Változások összefoglalása: ${change_summary}
+  - Tartomány: ${folder_name}
+
+  A jóváhagyásához vagy változtatások kéréséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

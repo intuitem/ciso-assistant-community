@@ -191,6 +191,22 @@ class TestQuickFormImport:
         ) == [large]
         assert Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
 
+    def test_admin_can_delete_submitted_response(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="Test answer",
+            quick_form=form,
+            folder=Folder.get_root_folder(),
+            status=QuickFormResponse.Status.SUBMITTED,
+        )
+        other = User.objects.create_user(email="qf-other@test.local", is_published=True)
+        assert not response.is_deletable(other)
+        assert not response.is_deletable()
+        _, client = _admin_client()
+        res = client.delete(f"/api/quick-form-responses/{response.id}/")
+        assert res.status_code == 204
+        assert not QuickFormResponse.objects.filter(id=response.id).exists()
+
     def test_update_drops_choices_nobody_picked(self, app_config):
         form = _load(LIBRARY_V1)
         response = QuickFormResponse.objects.create(
@@ -692,6 +708,41 @@ def _role_client(email, role_code, folder):
 
 
 @pytest.mark.django_db
+def test_listed_is_deletable_follows_status_and_caller(app_config):
+    """The list answers `is_deletable` per caller and per status, on a page mixing
+    statuses: drafts for anyone, everything past a draft for an administrator."""
+    form = _load(LIBRARY_V1)
+    folder = Folder.objects.create(
+        name="qf-deletable", parent_folder=Folder.get_root_folder()
+    )
+    for index, status in enumerate(
+        [
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.CLOSED,
+        ]
+    ):
+        QuickFormResponse.objects.create(
+            name=f"deletable-{index}", quick_form=form, folder=folder, status=status
+        )
+
+    def listed(client):
+        res = client.get(f"/api/quick-form-responses/?folder={folder.id}")
+        assert res.status_code == 200, res.json()
+        return {(row["status"], row["is_deletable"]) for row in res.json()["results"]}
+
+    _, analyst = _role_client("qf-deleter@test.local", "BI-RL-ANA", folder)
+    assert listed(analyst) == {
+        ("draft", True),
+        ("submitted", False),
+        ("closed", False),
+    }
+    _, admin = _admin_client()
+    assert listed(admin) == {("draft", True), ("submitted", True), ("closed", True)}
+
+
+@pytest.mark.django_db
 def test_requester_cannot_decide_on_their_own_request(app_config):
     """Separation of duties: whoever submitted a request may not close it, whatever
     folder rights they hold — unless an admin turns on self-validation."""
@@ -1070,6 +1121,15 @@ def test_answer_endpoint_honours_the_requester_rule(app_config):
     requester, requester_client = _role_client(
         "qf-door@test.local", "BI-RL-ANA", folder
     )
+    # Linking the library question needs view on it: members get Global's
+    # baseline reader through its default role, a custom group does not.
+    from iam.models import Role, RoleAssignment
+
+    RoleAssignment.objects.create(
+        user=requester,
+        role=Role.objects.get(name="BI-RL-BSL"),
+        folder=Folder.get_root_folder(),
+    ).perimeter_folders.add(Folder.get_root_folder())
     response = QuickFormResponse.objects.create(
         name="theirs",
         quick_form=form,
@@ -1760,3 +1820,25 @@ def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
     ]
     (rating,) = body["ratings"]
     assert [p["level"] for p in rating["points"]] == ["unacceptable"]
+
+
+@pytest.mark.django_db
+def test_question_help_text_is_translated(app_config):
+    from django.utils import translation
+
+    from core.models import _translate_questions
+
+    _load(LIBRARY_V1)
+    Question.objects.filter(urn=Q_SENSITIVE).update(
+        annotation="Health, biometrics, beliefs",
+        translations={"de": {"text": "Sensible Daten?", "annotation": "Gesundheit"}},
+    )
+    page = QuickFormPage.objects.get(urn=PAGE1)
+    with translation.override("de"):
+        de = _translate_questions(page)
+    assert de[Q_SENSITIVE]["annotation"] == "Gesundheit"
+    with translation.override("en"):
+        en = _translate_questions(page)
+    assert en[Q_SENSITIVE]["annotation"] == "Health, biometrics, beliefs"
+    # sync copies the text into an empty annotation; it must not come back as help
+    assert "annotation" not in en[Q_HEADCOUNT]

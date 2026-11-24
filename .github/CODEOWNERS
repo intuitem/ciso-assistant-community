@@ -1,0 +1,4 @@
+# CI runs with repository secrets: changes here need a core maintainer's review
+/.github/workflows/ @intuitem/core
+/.github/actions/ @intuitem/core
+/.github/CODEOWNERS @intuitem/core

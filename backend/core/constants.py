@@ -252,6 +252,62 @@ COUNTRY_CHOICES = [
     ("x28", "Other Countries"),
 ]
 
+EU_COUNTRIES_SET = {
+    "AT",
+    "BE",
+    "BG",
+    "HR",
+    "CY",
+    "CZ",
+    "DK",
+    "EE",
+    "FI",
+    "FR",
+    "DE",
+    "GR",
+    "HU",
+    "IE",
+    "IT",
+    "LV",
+    "LT",
+    "LU",
+    "MT",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "SK",
+    "SI",
+    "ES",
+    "SE",
+}
+
+# GDPR applies directly across the EEA, not just the EU: transfers to Iceland,
+# Liechtenstein and Norway are not third-country transfers.
+EEA_COUNTRIES_SET = EU_COUNTRIES_SET | {"IS", "LI", "NO"}
+
+# Supranational fallbacks for privacy records, where a provider commits to a region
+# rather than a country. Kept out of COUNTRY_CHOICES on purpose: the DORA register
+# serialises those values as eba_GA:<code>, and the EBA taxonomy has no region codes.
+REGION_CHOICES = [
+    ("EU", "European Union"),
+    ("EEA", "European Economic Area"),
+]
+
+PRIVACY_COUNTRY_CHOICES = REGION_CHOICES + COUNTRY_CHOICES
+
+# Same list for solution data locations ("data stays in the EU"); the DORA export
+# writes these region codes as eba_GA:qx2007 since the EBA taxonomy has none.
+DATA_LOCATION_CHOICES = PRIVACY_COUNTRY_CHOICES
+REGION_CODES = {code for code, _ in REGION_CHOICES}
+
+# Transfer destinations inside the GDPR area: no chapter V mechanism needed.
+GDPR_INTERNAL_LOCATIONS = EEA_COUNTRIES_SET | REGION_CODES
+
+# Codes with no matching feature in the world map topology, so they are reported
+# alongside the map instead of being silently dropped from it.
+NON_MAPPABLE_COUNTRY_CODES = REGION_CODES | {"x28"}
+
 CURRENCY_CHOICES = [
     ("AED", "UAE Dirham"),
     ("AFN", "Afghani"),

@@ -103,6 +103,9 @@ NON_ADMIN_EXPECTED_RESPONSES: Final[list[ExpectedResponse]] = [
         "GET", "/api/settings/general/default_language/", 200, Reason.NON_SENSITIVE_DATA
     ),
     ExpectedResponse(
+        "GET", "/api/settings/general/report_timezone/", 200, Reason.NON_SENSITIVE_DATA
+    ),
+    ExpectedResponse(
         "POST",
         "/api/settings/general/set-default-dashboard/",
         403,

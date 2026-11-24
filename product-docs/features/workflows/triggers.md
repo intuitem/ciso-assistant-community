@@ -103,7 +103,15 @@ Starts when an object is created, updated or deleted inside CISO Assistant.
 
 ### When this happens
 
-A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+A select grouped by object kind, offering `created`, `updated` and `deleted` for each. Anything audited by the platform is available: applied controls, findings, vulnerabilities, audits, requirement assessments, requirement assignments, risk acceptances, validation flows, entities, users, personal access tokens and more.
+
+Links set after creation (a requirement assignment's actors, an audit's authors) arrive as an `updated` event of their own. The link field's new value is `add` or `delete`: to react when actors are added to an assignment, including at its creation, listen to `requirementassignment.updated` with `actor`, **Only when changed**, `eq` `add`. Without that filter, every status change starts a run too.
+
+### Run immediately
+
+Off, the run is queued for the background worker and starts a moment after the change. On, it runs before the server answers the request that saved the object, once that request has finished writing, so the user sees the result as soon as the page reloads. Use it to complete or correct the object just saved, for example to give new evidence a status other than Draft. The API response still shows the object as the request saved it, and the audit log records the run's changes like a queued run's, not as the user's.
+
+Because the request waits for the run, an immediate workflow may only contain conditions, variable steps, logs, date offsets, and reading, creating or updating objects. Publishing refuses any other step (HTTP request, email, AI, sub-workflow, loop, task or wait). If the run fails, the save still goes through and the failure is recorded on the run. Only immediate workflows run with the request: other workflows listening to the same event stay queued.
 
 ### Filters
 
@@ -140,7 +148,7 @@ The run's payload describes the event. The [expressions page](expressions.md#pay
 - Event triggers arrive **disabled** at publish. Enable them in the Triggers panel.
 - One user action on one object starts at most one run per trigger, even if it wrote several audit entries. The panel then shows **Coalesced (same user action already handled)**. A bulk edit of several objects still starts one run per object.
 - Changes made by a run can start other runs, up to five levels deep. Past that the trigger shows **Skipped (too many chained triggers)**. This stops two workflows from feeding each other forever.
-- Events are processed by the background worker. A run typically starts within a second of the change.
+- Events are processed by the background worker, unless **Run immediately** is on. A queued run typically starts within a second of the change.
 
 ## The Triggers panel
 

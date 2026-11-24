@@ -178,6 +178,7 @@
 						{form}
 						field={path}
 						options={choiceOptions(def)}
+						translateOptions={false}
 						label={def.label_localized}
 						helpText={def.help_text_localized}
 					/>
@@ -187,6 +188,7 @@
 						multiple
 						field={path}
 						options={choiceOptions(def)}
+						translateOptions={false}
 						label={def.label_localized}
 						helpText={def.help_text_localized}
 					/>

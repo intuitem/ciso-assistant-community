@@ -150,6 +150,8 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
         verbose_name = _("Managed document")
         verbose_name_plural = _("Managed documents")
 
+    folder_from = "container"
+
     def save(self, *args, **kwargs):
         if self.container_id:
             self.folder = self.container.folder
@@ -258,6 +260,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             instance._loaded_content = instance.content
         return instance
 
+    folder_from = "document"
+
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
 
@@ -352,6 +356,8 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
         verbose_name = _("Document attachment")
         verbose_name_plural = _("Document attachments")
 
+    folder_from = "document"
+
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         super().save(*args, **kwargs)
@@ -389,6 +395,8 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
         ordering = ["-created_at"]
         verbose_name = _("Document edit")
         verbose_name_plural = _("Document edits")
+
+    folder_from = "revision"
 
     def save(self, *args, **kwargs):
         self.folder = self.revision.folder

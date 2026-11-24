@@ -1,0 +1,172 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:lyss:risk:library:mapping-lyss-and-iso27001-2022
+locale: en
+ref_id: mapping-lyss-and-iso27001-2022
+name: LYSS (draft 0.7.0) -> ISO/IEC 27001:2022
+description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.7.0-draft
+  and ISO/IEC 27001:2022 Annex A, from the informative references of the specification.
+  Each LYSS control is a specific, testable part (subset) of the ISO control it maps
+  to. Compliant LYSS requirements give at most partial coverage of the ISO control.
+  Non-compliant ones make it non-compliant when no other mapped LYSS requirement is
+  compliant; if some are compliant and some are not, the ISO control is partially
+  compliant. One direction only: an ISO control judged compliant proves nothing about
+  a given switch. DRAFT: controls and mappings may still change before LYSS 1.0, but
+  control identifiers are stable: never renamed, renumbered or reused. Generated from
+  spec/lyss-spec.yaml by tools/build_ciso_library.py in the LYSS repository (https://github.com/lyss-project/lyss).'
+copyright: "LYSS specification \xA9 2026 Mouad Lyaazale, CC BY 4.0"
+version: 1
+publication_date: 2026-11-09
+provider: Mouad Lyaazale
+packager: LYSS project
+dependencies:
+- urn:lyss:risk:library:lyss
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:lyss:risk:req_mapping_set:mapping-lyss-and-iso27001-2022
+    ref_id: mapping-lyss-and-iso27001-2022
+    name: LYSS (draft 0.7.0) -> ISO/IEC 27001:2022
+    description: 'Mapping between LYSS (Lyaazale Switch Security) specification 0.7.0-draft
+      and ISO/IEC 27001:2022 Annex A, from the informative references of the specification.
+      Each LYSS control is a specific, testable part (subset) of the ISO control it
+      maps to. Compliant LYSS requirements give at most partial coverage of the ISO
+      control. Non-compliant ones make it non-compliant when no other mapped LYSS
+      requirement is compliant; if some are compliant and some are not, the ISO control
+      is partially compliant. One direction only: an ISO control judged compliant
+      proves nothing about a given switch. DRAFT: controls and mappings may still
+      change before LYSS 1.0, but control identifiers are stable: never renamed, renumbered
+      or reused. Generated from spec/lyss-spec.yaml by tools/build_ciso_library.py
+      in the LYSS repository (https://github.com/lyss-project/lyss).'
+    source_framework_urn: urn:lyss:risk:framework:lyss
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-002
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-002
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-003
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-003
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-004
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-002
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-002
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-003
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-003
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-004
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-004
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-vuln-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-bkp-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-bkp-001
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-011
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-auth-011
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-011
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-012
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-013
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-mgmt-013
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-log-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-log-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-log-011
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-010
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-011
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-020
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-020
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-021
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-021
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-022
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-022
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-023
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-023
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      relationship: subset
+    - source_requirement_urn: urn:lyss:risk:req_node:lyss:lyss-acc-024
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset

@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${expired_since} napja lejárt bizonyíték"
+body: |
+  Tisztelt Felhasználó!
+
+  Önnek ${evidence_count} bizonyítéka járt le ${expired_since} napja:
+
+  ${evidence_list}
+
+  A bizonyítékok áttekintéséhez és frissítéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

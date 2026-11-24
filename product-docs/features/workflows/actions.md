@@ -141,6 +141,7 @@ Each row carries `id`, `name`, `created_at`, `updated_at` plus the fields below.
 | `managed_document` | description, locale, default_locale, container, plus `document_type` and `current_revision` (id, version number, status). A locale variant with no title of its own reads under the document's name |
 | `document_revision` | version_number, status, source, change_summary, content, published_at, document. `content` is the markdown itself, so a long one is truncated in `{{nodes.…}}`; map it to a variable to pass a whole document to an AI step |
 | `requirement_assessment` | status, result, extended_result, score, is_scored, documentation_score, eta, due_date, observation, compliance_assessment, `applied_controls_count`, `evidences_count`, plus `requirement` (id, ref_id, name, description), `applied_controls` (each with its own `evidences`) and `evidences` attached to the requirement itself, all narrowed to what the run may see. Every evidence says whether anything is `attached`. Only assessable requirements |
+| `requirement_assignment` | status, compliance_assessment, folder, plus `framework` (id, urn, ref_id, name) and `audit_folder` (the audit's domain), both empty when the run cannot see the audit, `actors` (ids), and under **Extra data to include** `users` (id, email, is_third_party): the assigned user, a team's leader, deputies and members, an entity's representatives with an account. Narrowed to what the run may see, with nothing reported for what it drops: a team or entity outside the workflow's reach, a user it cannot view, and representatives unless the run identity has `view_representative` on the entity's domain |
 | `risk_scenario` | description, ref_id, treatment, inherent_level, current_level, residual_level, risk_assessment, `applied_controls_count`. Level filters ignore unrated scenarios |
 | `risk_acceptance` | description, state, expiry_date, justification |
 | `validation_flow` | ref_id, status, validation_deadline |
@@ -254,7 +255,7 @@ Some objects live in their parent's domain rather than the workflow's: a purpose
 | `entity_score` | **score**, **as_of**, scale_max, grade, url, observation | entity, provider |
 | `timeline_entry` | **entry**, entry_type, timestamp, observation | incident |
 | `task_template` | name, description, ref_id | `assigned_to` (actors), `task_date`, and links to `applied_controls`, `compliance_assessments`, `evidences`, `documents`. Creates the occurrence with it, so the task shows on the board. **Update when it already exists** re-dates that occurrence rather than adding a second one |
-| `validation_flow` | request_notes | `approver` (actor), `validation_deadline`, and what is being validated — links to `compliance_assessments`, `evidences`, `policies`, `findings_assessments`, `security_exceptions`. Opens with its submission event. Upsert not available |
+| `validation_flow` | request_notes | `approver` (actor), `requester`, `validation_deadline`, and what is being validated — links to `compliance_assessments`, `evidences`, `policies`, `findings_assessments`, `security_exceptions`. Opens with its submission event. Upsert not available |
 | `right_request` | name, **requested_on**, description, ref_id, due_date, request_type, observation | |
 
 **Bold** marks a field the object cannot be stored without: publishing refuses a step that leaves one empty, rather than letting the run write a blank. An object whose name the model requires needs one too, unless **Update when it already exists** is on — where the name is optional on the object itself (a managed document, a privacy record), the step may leave it empty.
@@ -266,7 +267,7 @@ Four of these are where a run files what an external system reported, and each i
 * **External rating** (`entity_score`) is one reading per provider per day, dated. Turn on **Update when it already exists** and a re-run on the same day corrects that day's reading instead of failing on the duplicate.
 * **Timeline Entry** (`timeline_entry`) adds an observation to an incident without touching its status or severity.
 * **Task** (`task_template`) attaches work. A run creates a dated, assigned task and the occurrence that puts it on the board; recurrence stays something you set up by hand.
-* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity.
+* **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity unless you name a `requester`. That user must be able to view and change validation flows in the domain, since only the requester can answer a request for changes.
 * **Right Request** (`right_request`) opens a request in **New**. Closing it stays with whoever handles it.
 
 ### Create or update in bulk
@@ -304,11 +305,11 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | Model | Writable fields | Relations |
 |---|---|---|
 | `applied_control` | status, priority, effort, start_date, eta, expiry_date, description, ref_id, link, observation | owner, evidences, assets, filtering_labels |
-| `evidence` | status (`expired`, `missing` only), expiry_date, description | owner, filtering_labels |
+| `evidence` | status (not `approved` or `rejected`), expiry_date, description | owner, filtering_labels |
 | `incident` | description, ref_id, link | owners, assets, applied_controls, filtering_labels |
 | `asset` | description, ref_id, reference_link, observation | owner, security_exceptions, filtering_labels |
 | `vulnerability` | status, severity, description, ref_id, eta, due_date | applied_controls, assets, security_exceptions, filtering_labels |
-| `security_exception` | status (`expired`, `deprecated` only), severity, description, ref_id, expiration_date, observation | owners, evidences |
+| `security_exception` | status, severity, description, ref_id, expiration_date, observation | owners, evidences |
 | `entity` | description, ref_id, mission, reference_link | filtering_labels |
 | `findings_assessment` | status (planning states), eta, due_date, description, ref_id, observation | evidences, filtering_labels |
 | `finding` | status, severity, priority, eta, due_date, description, ref_id, observation | owner, applied_controls, evidences, filtering_labels |
@@ -321,7 +322,7 @@ The object must be inside the workflow's subtree and changeable by the run ident
 | `managed_document` | description | |
 | `document_revision` | content, change_summary — while the revision is still being drafted | |
 
-Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable.
+Planning states are `planned`, `in_progress`, `in_review`, `done`, `deprecated`. Names are never writable. Results, scores, levels and decisions are never writable. Moving evidence off `approved` or `rejected` puts its latest file back in the review queue, as changing the status by hand does.
 
 A document revision's status is not writable either, and a submitted, validated or published revision's markdown cannot be touched at all — the same rule the document editor applies. Publishing deprecates the revision it replaces and repoints the document at the new one, which a field write would not do. A workflow writes the draft; someone publishes it, and the rewrite is recorded in the document's edit history under the identity the workflow runs as.
 
@@ -507,7 +508,7 @@ Adds a user to a group or removes them.
 
 | Setting | |
 |---|---|
-| User *expr* | An email, or a variable holding one |
+| User *expr* | An email or a user id, or a variable holding one. In a loop over a requirement assignment's `users`, `{{item.id}}` |
 | Domain | The domain whose group to use |
 | Group | Reader, Approver, Analyst, Domain manager or Respondent |
 | Operation | **Add** or **Remove** |

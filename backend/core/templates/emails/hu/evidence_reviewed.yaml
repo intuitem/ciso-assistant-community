@@ -1,0 +1,14 @@
+subject: "CISO Assistant: A(z) „${evidence_name}” bizonyíték: ${decision}"
+body: |
+  Tisztelt Felhasználó!
+
+  Felülvizsgálták az Ön felelősségébe tartozó egyik bizonyítékot:
+
+  - Név: ${evidence_name}
+  - Állapot: ${decision}
+  - Felülvizsgálta: ${actor_name}
+  - Tartomány: ${folder_name}
+
+  A megtekintéséhez jelentkezzen be a CISO Assistantba: [A CISO Assistant megnyitása](${ciso_assistant_url})
+
+  Köszönjük.

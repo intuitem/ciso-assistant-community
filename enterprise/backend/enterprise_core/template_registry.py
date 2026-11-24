@@ -13,12 +13,17 @@ TYPST_AUDIT_VARIABLES = [
     {
         "name": "date",
         "type": "string",
-        "description": "Export date formatted as DD/MM/YYYY",
+        "description": "Export date in the report time zone, formatted as DD/MM/YYYY",
     },
     {
         "name": "generated_at",
         "type": "string",
-        "description": "Full generation timestamp",
+        "description": "Generation timestamp in the report time zone, with its UTC offset (2026-10-23 09:58:11 (UTC+02:00))",
+    },
+    {
+        "name": "timezone",
+        "type": "string",
+        "description": "Report time zone, an IANA name such as Europe/Paris",
     },
     {
         "name": "contributors",
@@ -101,7 +106,17 @@ WORD_TEMPLATE_REGISTRY = {
             {
                 "name": "date",
                 "type": "string",
-                "description": "Current date formatted as DD/MM/YYYY",
+                "description": "Current date in the report time zone, formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "generated_at",
+                "type": "string",
+                "description": "Generation timestamp in the report time zone, with its UTC offset (2026-10-23 09:58:11 (UTC+02:00))",
+            },
+            {
+                "name": "timezone",
+                "type": "string",
+                "description": "Report time zone, an IANA name such as Europe/Paris",
             },
             {
                 "name": "contributors",
@@ -309,6 +324,36 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "regulatory_deadline": {
+        "description": "Sent when a NIS2 notification stage or a GDPR breach notification is due or overdue",
+        "category": "notification",
+        "variables": ["deadline_count", "deadline_list", "ciso_assistant_url"],
+    },
+    "right_request_due_soon": {
+        "description": "Sent when data subject requests are due soon",
+        "category": "notification",
+        "variables": [
+            "request_count",
+            "request_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "contract_expiring_soon": {
+        "description": "Sent when contracts are about to expire",
+        "category": "notification",
+        "variables": [
+            "contract_count",
+            "contract_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "processing_obligation_gap": {
+        "description": "Weekly digest of gaps in the record of processing activities",
+        "category": "notification",
+        "variables": ["processing_count", "gap_list", "ciso_assistant_url"],
+    },
     "compliance_assessment_due_soon": {
         "description": "Sent when compliance assessments are due soon",
         "category": "notification",
@@ -403,6 +448,7 @@ EMAIL_TEMPLATE_REGISTRY = {
             "object_type",
             "object_name",
             "folder_name",
+            "object_url",
             "ciso_assistant_url",
         ],
     },
@@ -413,6 +459,7 @@ EMAIL_TEMPLATE_REGISTRY = {
             "object_type",
             "object_name",
             "folder_name",
+            "object_url",
             "ciso_assistant_url",
         ],
     },
@@ -485,6 +532,8 @@ EMAIL_TEMPLATE_REGISTRY = {
             "exception_status",
             "expiration_date",
             "folder_name",
+            "exception_url",
+            "exception_observation",
             "ciso_assistant_url",
         ],
     },
@@ -511,6 +560,8 @@ EMAIL_TEMPLATE_REGISTRY = {
             "new_status",
             "actor_name",
             "folder_name",
+            "exception_url",
+            "exception_observation",
             "ciso_assistant_url",
         ],
     },

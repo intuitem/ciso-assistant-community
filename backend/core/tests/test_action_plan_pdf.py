@@ -1,8 +1,9 @@
 """The action plan, rendered by Typst — one document serving two parents."""
 
+from io import BytesIO
 from uuid import uuid4
 
-import pymupdf
+from pypdf import PdfReader
 import pytest
 
 from core.generators import action_plan_context
@@ -38,7 +39,7 @@ def _render(assessment, controls, lang="en", linked=None):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("lang", ["en", "fr"])
+@pytest.mark.parametrize("lang", ["en", "fr", "hu", "tr"])
 def test_renders_in_each_locale(audit, lang):
     pdf, _ = _render(audit, _controls(audit, ["to_do", "active"]), lang=lang)
     assert pdf[:5] == b"%PDF-"
@@ -77,7 +78,7 @@ def test_subject_omits_framework_when_the_parent_has_none(audit):
     assert payload["subject"]["framework"] == ""
 
     pdf, _ = _render(ParentWithoutFramework(), _controls(audit, ["active"]))
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert "Framework" not in text
 
 
@@ -86,7 +87,7 @@ def test_linked_items_reach_the_last_column(audit):
     controls = _controls(audit, ["to_do"])
     linked = {controls[0].id: ["REQ-1.1 - First requirement"]}
     pdf, _ = _render(audit, controls, linked=linked)
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert "REQ-1.1" in text
 
 
@@ -94,20 +95,27 @@ def test_linked_items_reach_the_last_column(audit):
 def test_cover_carries_traceability(audit):
     pdf, payload = _render(audit, _controls(audit, ["to_do"]))
     assert payload["generated_at"]
-    text = pymupdf.open(stream=pdf, filetype="pdf")[0].get_text()
+    text = PdfReader(BytesIO(pdf)).pages[0].extract_text()
     assert str(audit.id) in text
 
 
 def test_locale_fallback_is_whole_document():
     assert localized_template("action_plan", "de") == "action_plan_en.typ"
     assert localized_template("action_plan", "fr") == "action_plan_fr.typ"
+    assert localized_template("action_plan", "hu") == "action_plan_hu.typ"
+    assert localized_template("action_plan", "tr") == "action_plan_tr.typ"
 
 
 @pytest.mark.django_db
 def test_columns_are_fixed_fractions_not_auto(audit):
     """`auto` sizing overflows the page and overlaps neighbouring cells once the
     content is wider than the paper; fractions always sum to the available width."""
-    for template in ("action_plan_en.typ", "action_plan_fr.typ"):
+    for template in (
+        "action_plan_en.typ",
+        "action_plan_fr.typ",
+        "action_plan_hu.typ",
+        "action_plan_tr.typ",
+    ):
         src = (TEMPLATE_DIR / template).read_text()
         spec = src[
             src.index("#let columns-spec = (") : src.index(
@@ -123,9 +131,9 @@ def test_column_titles_repeat_on_continuation_pages(audit):
     """A long group spans pages; every page must carry the column titles."""
     controls = _controls(audit, ["to_do"] * 60)
     pdf, _ = _render(audit, controls)
-    doc = pymupdf.open(stream=pdf, filetype="pdf")
-    assert doc.page_count > 1, "not enough rows to spill onto a second page"
-    assert "Description" in doc[1].get_text()
+    doc = PdfReader(BytesIO(pdf)).pages
+    assert len(doc) > 1, "not enough rows to spill onto a second page"
+    assert "Description" in doc[1].extract_text()
 
 
 @pytest.mark.django_db
@@ -141,7 +149,12 @@ def test_owner_replaces_the_dropped_columns(audit):
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "lang,status,category",
-    [("en", "To do", "Technical"), ("fr", "À faire", "Technique")],
+    [
+        ("en", "To do", "Technical"),
+        ("fr", "À faire", "Technique"),
+        ("hu", "Teendő", "Technikai"),
+        ("tr", "Yapılacak", "Teknik"),
+    ],
 )
 def test_status_and_category_are_localised_by_the_template(
     audit, lang, status, category
@@ -157,7 +170,7 @@ def test_status_and_category_are_localised_by_the_template(
     assert row["category_key"] == "technical"
     assert "category" not in row
 
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert status in text
     assert category in text
 
@@ -165,7 +178,7 @@ def test_status_and_category_are_localised_by_the_template(
 @pytest.mark.django_db
 def test_unset_status_group_is_named_by_the_template(audit):
     pdf, _ = _render(audit, _controls(audit, ["--"]))
-    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
     assert "No status" in text
 
 
@@ -181,7 +194,12 @@ def test_every_status_has_a_fill_and_a_label_in_each_locale():
         f"no fill for {statuses - set(_ACTION_PLAN_STATUS_FILLS)}"
     )
 
-    for name in ("action_plan_en.typ", "action_plan_fr.typ"):
+    for name in (
+        "action_plan_en.typ",
+        "action_plan_fr.typ",
+        "action_plan_hu.typ",
+        "action_plan_tr.typ",
+    ):
         src = (TEMPLATE_DIR / name).read_text()
         block = src[src.index("#let status-label = (") :]
         block = block[: block.index(")")]

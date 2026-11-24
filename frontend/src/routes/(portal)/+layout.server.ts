@@ -8,6 +8,9 @@ export const load = loadFlash(async ({ locals, url, fetch }) => {
 	if (!user) {
 		redirect(302, `/login?next=${encodeURIComponent(url.pathname + url.search)}`);
 	}
+	if (user.is_third_party) {
+		redirect(302, '/auditee-dashboard');
+	}
 	const [settings, featureflags] = await Promise.all([
 		locals.getSettings(),
 		locals.getFeatureFlags()

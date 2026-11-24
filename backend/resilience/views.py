@@ -171,6 +171,7 @@ def asset_dependency_graph(user, assessments):
 
 
 class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
+    search_fields = ["name", "description", "ref_id"]
     model = BusinessImpactAnalysis
     filterset_fields = [
         "folder",
@@ -189,6 +190,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
                 "label": "internal_id",
                 "format": lambda v: str(v),
             },
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "description": {
                 "source": "description",
@@ -549,6 +551,11 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     filterset_fields = ["bia", "asset"]
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
+
+    def _get_fieldsrelated_map(self, serializer):
+        """`children_assets` names every asset below the assessed one, including ones
+        the user cannot see: it is masked like the direct links."""
+        return {**super()._get_fieldsrelated_map(serializer), "children_assets": Asset}
 
     def get_queryset(self):
         return (

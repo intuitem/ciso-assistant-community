@@ -325,7 +325,7 @@
 		partially_compliant: '#fbbf24',
 		non_compliant: '#f87171',
 		compliant: '#4ade80',
-		not_applicable: '#1e293b'
+		not_applicable: '#475569'
 	};
 	let accentColor = $derived(
 		currentSplashNode

@@ -3,8 +3,8 @@ from iam.models import FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
-from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.constants import COUNTRY_CHOICES
+from core.base_models import AutoRefIdMixin, NameDescriptionMixin, AbstractBaseModel
+from core.constants import PRIVACY_COUNTRY_CHOICES
 from django.db.models import Count
 
 from auditlog.registry import auditlog
@@ -12,6 +12,7 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+from datetime import timedelta
 
 
 class DpiaRequirementSource(models.TextChoices):
@@ -77,7 +78,7 @@ def create_default_privacy_terminologies():
     Terminology._seed_defaults(DEFAULT_PERSONAL_DATA_CATEGORIES)
 
 
-class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
+class Processing(AutoRefIdMixin, NameDescriptionFolderMixin, FilteringLabelMixin):
     STATUS_CHOICES = (
         ("privacy_draft", "Draft"),
         ("privacy_in_review", "In Review"),
@@ -91,6 +92,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     # A DPIA is the controller's (Art. 35): a processor only assists (Art. 28(3)(f)).
     DPIA_ROLES = ("privacy_controller", "privacy_joint_controller")
+
+    auto_ref_id_prefix = "PRC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
@@ -151,7 +155,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     dpia_required_set_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("DPIA requirement set at")
     )
-    has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
@@ -178,13 +181,10 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     def dpia_applies(self) -> bool:
         return self.role in self.DPIA_ROLES
 
-    def update_sensitive_data_flag(self):
-        """Update the has_sensitive_personal_data flag based on associated personal data"""
-        has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
-
-        if has_sensitive != self.has_sensitive_personal_data:
-            self.has_sensitive_personal_data = has_sensitive
-            self.save(update_fields=["has_sensitive_personal_data"])
+    @property
+    def has_sensitive_personal_data(self) -> bool:
+        # Reads the personal_data prefetch when the queryset has one
+        return any(pd.is_sensitive for pd in self.personal_data.all())
 
     def metrics(self):
         return {}
@@ -230,6 +230,8 @@ class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.legal_basis
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -288,16 +290,13 @@ class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else str(self.category)
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
-
-        # Update the processing's sensitive data flag if needed
-        if self.is_sensitive and not self.processing.has_sensitive_personal_data:
-            self.processing.has_sensitive_personal_data = True
-            self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
     def get_categories_count(cls, filters: dict = {}):
@@ -351,6 +350,8 @@ class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.category
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -411,6 +412,8 @@ class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.category
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
@@ -441,7 +444,7 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     relationship_type = models.CharField(
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
@@ -450,6 +453,8 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     def __str__(self):
         return self.name if self.name else self.relationship_type
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -470,7 +475,7 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         null=True,
         blank=True,
     )
-    country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
+    country = models.CharField(max_length=3, choices=PRIVACY_COUNTRY_CHOICES)
     transfer_mechanism = models.CharField(
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
@@ -484,12 +489,14 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
     def __str__(self):
         return self.name if self.name else self.country
 
+    folder_from = "processing"
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
 
 
-class RightRequest(NameDescriptionFolderMixin):
+class RightRequest(AutoRefIdMixin, NameDescriptionFolderMixin):
     REQUEST_TYPE_CHOICES = (
         ("deletion", "Deletion / Erasure"),
         ("rectification", "Rectification"),
@@ -506,6 +513,9 @@ class RightRequest(NameDescriptionFolderMixin):
         ("on_hold", "On hold"),
         ("done", "Done"),
     )
+
+    auto_ref_id_prefix = "RR"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     owner = models.ManyToManyField(
@@ -532,7 +542,7 @@ class RightRequest(NameDescriptionFolderMixin):
         verbose_name_plural = "Right Requests"
 
 
-class DataBreach(NameDescriptionFolderMixin):
+class DataBreach(AutoRefIdMixin, NameDescriptionFolderMixin):
     BREACH_TYPE_CHOICES = (
         ("privacy_destruction", "Destruction"),
         ("privacy_loss", "Loss"),
@@ -555,6 +565,9 @@ class DataBreach(NameDescriptionFolderMixin):
         ("privacy_subjects_notified", "Data Subjects Notified"),
         ("privacy_closed", "Closed"),
     )
+
+    auto_ref_id_prefix = "DB"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     assigned_to = models.ManyToManyField(
@@ -634,6 +647,30 @@ class DataBreach(NameDescriptionFolderMixin):
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
 
+    # Past the authority notification, whether or not its date was entered
+    NOTIFIED_OR_CLOSED_STATUSES = (
+        "privacy_authority_notified",
+        "privacy_subjects_notified",
+        "privacy_closed",
+    )
+
+    @property
+    def authority_notification_due(self):
+        # GDPR art. 33(1): 72h from awareness, unless unlikely to result in a risk
+        if self.risk_level == "privacy_no_risk" or not self.discovered_on:
+            return None
+        return self.discovered_on + timedelta(hours=72)
+
+    @property
+    def authority_notification_overdue(self) -> bool:
+        due = self.authority_notification_due
+        return bool(
+            due
+            and not self.authority_notified_on
+            and self.status not in self.NOTIFIED_OR_CLOSED_STATUSES
+            and timezone.now() > due
+        )
+
 
 class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
     """One change of a processing's `dpia_required`, whatever the path (form,
@@ -677,6 +714,8 @@ class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
         verbose_name = _("DPIA requirement change")
         verbose_name_plural = _("DPIA requirement changes")
         ordering = ["-created_at"]
+
+    folder_from = "processing"
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

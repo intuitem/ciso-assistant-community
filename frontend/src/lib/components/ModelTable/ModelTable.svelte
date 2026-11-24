@@ -37,7 +37,7 @@
 	}
 	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
 	import { toCamelCase } from '#lib/utils/locales.js';
-	import { onMount, tick, untrack } from 'svelte';
+	import { onDestroy, onMount, tick, untrack, type Component } from 'svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { applyUnreadCount } from '#lib/utils/stores.js';
 
@@ -136,6 +136,12 @@
 		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
+		/** Query appended to every request without becoming part of `baseEndpoint`,
+		 *  so the table's own filter state and sort stay keyed to the same table
+		 *  while the extra params change. A change refetches. */
+		extraParams?: string;
+		/** Cell components for this table only, over the model's defaults. */
+		fieldComponents?: Record<string, Component<any>>;
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
@@ -202,6 +208,8 @@
 		deleteForm = undefined,
 		URLModel = undefined,
 		baseEndpoint = `/${URLModel}`,
+		extraParams = '',
+		fieldComponents = {},
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
@@ -235,6 +243,15 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+	// Null, blank, empty lists, the "--" (Undefined) choice and the not-rated risk level
+	// ({name: "--", hexcolor}) all render the same muted placeholder.
+	const isEmptyCell = (v: any) =>
+		v == null ||
+		v === '' ||
+		v === '-' ||
+		v === '--' ||
+		(Array.isArray(v) && v.length === 0) ||
+		(typeof v === 'object' && v.hexcolor && (v.name ?? v.str) === '--');
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
@@ -408,7 +425,12 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
-	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const nonNavigableRelatedFields = new Set([
+		'qualifications',
+		'relationship',
+		'nature',
+		'lifecycle_stage'
+	]);
 	const getRelatedFieldHref = (
 		fieldName: string,
 		id: string,
@@ -461,6 +483,13 @@
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
 	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+	onDestroy(() => {
+		// A newer table may already own this endpoint.
+		tableHandlers.update((h) => {
+			if (h[baseEndpoint] === handler) delete h[baseEndpoint];
+			return h;
+		});
+	});
 
 	const toastStore = getToastStore();
 
@@ -471,8 +500,14 @@
 	// refetch keeps the previous rows on screen.
 	let inFlight = $state(0);
 	let hasLoadedOnce = $state(false);
-	const isFetching = $derived(inFlight > 0 && !hasLoadedOnce);
+	let loadFailed = $state(false);
+	// A remote table is "fetching" until its first page lands (not only while a request is
+	// in flight): otherwise it flashes empty headers before the first request starts. A failed
+	// first request only ends the skeleton once no retry is still pending.
+	const isFetching = $derived(hasRemoteSource && !hasLoadedOnce && (!loadFailed || inFlight > 0));
 	let currentLoad: Promise<any[]> = Promise.resolve([]);
+	// Requests can land out of order: only the latest one may fill the table.
+	let latestLoad = 0;
 
 	if (hasRemoteSource) {
 		// The trigger handler calls our reload synchronously before its first
@@ -487,12 +522,18 @@
 			query.delete('limit');
 			onQueryChange(query.toString());
 			inFlight += 1;
+			const request = ++latestLoad;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
 			currentLoad = loadTableData({
-				state,
+				state: {
+					...state,
+					setTotalRows: (value) => {
+						if (request === latestLoad) state.setTotalRows(value);
+					}
+				},
 				URLModel,
-				endpoint: baseEndpoint,
+				endpoint: withExtraParams(baseEndpoint, extraParams),
 				fields:
 					showColumnSelector && allColumnKeys.length > 0
 						? { head: allColumnKeys, body: allColumnKeys }
@@ -516,11 +557,32 @@
 				}
 			}).finally(() => {
 				inFlight -= 1;
+				if (request !== latestLoad) return;
 				if (!failed) hasLoadedOnce = true;
+				// The latest request decides: a failed search must not read as an empty result.
+				loadFailed = failed;
 			});
-			return currentLoad;
+			// The handler keeps its rows when it is handed nothing.
+			return currentLoad.then((rows) => (request === latestLoad ? rows : undefined));
 		});
 	}
+
+	function withExtraParams(endpoint: string, params: string) {
+		if (!params) return endpoint;
+		return `${endpoint}${endpoint.includes('?') ? '&' : '?'}${params}`;
+	}
+
+	let previousExtraParams = extraParams;
+	$effect(() => {
+		if (extraParams === previousExtraParams) return;
+		previousExtraParams = extraParams;
+		// New params mean a new row set: start from its first page.
+		if (hasRemoteSource)
+			untrack(() => {
+				handler.setPage(1);
+				handler.invalidate();
+			});
+	});
 
 	function applySavedSort() {
 		const saved = $tableSortStates[filterStoreKey];
@@ -750,7 +812,7 @@
 		}
 	});
 
-	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
+	let fieldComponentMap = $derived({ ...getFieldComponentMap(URLModel), ...fieldComponents });
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -911,6 +973,20 @@
 		degraded: 'preset-tonal-error',
 		deprecated: 'preset-tonal-surface'
 	};
+	// Status column badges: the applied-control tones plus the shared assessment statuses.
+	const STATUS_PRESETS: Record<string, string> = {
+		...APPLIED_CONTROL_STATUS_PRESETS,
+		planned: 'preset-tonal-primary',
+		in_review: 'preset-tonal-secondary',
+		done: 'preset-tonal-success'
+	};
+	// Same flag tones as the detail view.
+	const PRIORITY_FLAGS: Record<string, string> = {
+		'1': 'text-red-500',
+		'2': 'text-orange-500',
+		'3': 'text-blue-500',
+		'4': 'text-surface-600-400'
+	};
 
 	const tail_render = $derived(tail);
 
@@ -988,10 +1064,12 @@
 
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
-			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
-					a.type === 'delete'
-						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
-						: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`)
+			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter(
+					(a) =>
+						(!a.adminOnly || user?.is_admin) &&
+						(a.type === 'delete'
+							? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+							: !noBatchFieldEdit && hasPermissionAnywhere(user, `change_${model.name}`))
 				)
 			: []
 	);
@@ -1007,10 +1085,19 @@
 		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
 	);
 
-	let selectAllChecked = $derived.by(() => {
-		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
-		return pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
-	});
+	// The batch endpoint refuses every builtin object, so offering one for selection
+	// can only end in a per-row failure the caller could do nothing about.
+	function isRowSelectable(row: { meta?: { id?: string; builtin?: boolean } }): boolean {
+		return Boolean(row?.meta?.id) && !row.meta?.builtin;
+	}
+
+	const selectableRowIds = $derived(
+		$rows.filter(isRowSelectable).map((r: any) => r.meta.id as string)
+	);
+
+	let selectAllChecked = $derived(
+		selectableRowIds.length > 0 && selectableRowIds.every((id) => selectedIds.has(id))
+	);
 
 	function toggleRowSelection(id: string) {
 		const next = new Set(selectedIds);
@@ -1023,12 +1110,7 @@
 	}
 
 	function toggleSelectAll() {
-		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
-		if (selectAllChecked) {
-			selectedIds = new Set();
-		} else {
-			selectedIds = new Set(pageIds);
-		}
+		selectedIds = selectAllChecked ? new Set() : new Set(selectableRowIds);
 	}
 
 	function clearSelection() {
@@ -1046,6 +1128,13 @@
 	});
 
 	let tableWrapEl: HTMLElement | undefined = $state();
+
+	const refPrefix = (key: string, val: { ref_id?: string; str?: string }) => {
+		const name = val.str ?? '';
+		const named =
+			!!val.ref_id && name.startsWith(val.ref_id) && !/[\w-]/.test(name.charAt(val.ref_id.length));
+		return key === 'applied_controls' && val.ref_id && !named ? `${val.ref_id} - ` : '';
+	};
 </script>
 
 <div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
@@ -1228,21 +1317,27 @@
 								)}"
 							>
 								{#if hasBatchActions}
+									{@const selectable = isRowSelectable(row)}
 									<td
-										class="group/check w-10 text-center cursor-pointer"
+										class="group/check w-10 text-center {selectable
+											? 'cursor-pointer'
+											: 'cursor-not-allowed'}"
 										onclick={(e) => {
 											e.stopPropagation();
-											if (meta?.id) toggleRowSelection(meta.id);
+											if (selectable) toggleRowSelection(meta.id);
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors {selectable
+												? 'group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10'
+												: ''}"
 										>
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
 												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
+												disabled={!selectable}
 												tabindex={-1}
 											/>
 										</span>
@@ -1267,7 +1362,10 @@
 													data-testid="model-table-td-array-elem"
 													class="font-typo-base whitespace-pre-line break-words"
 												>
-													{#if Array.isArray(value)}
+													<!-- last_assessment_status: null means "never assessed", rendered by its own branch. -->
+													{#if key !== 'last_assessment_status' && isEmptyCell(value)}
+														<span class="text-surface-400-600">--</span>
+													{:else if Array.isArray(value)}
 														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
 														{@const visibleValues = isRelatedField(key)
 															? value.filter((item) => !isMaskedPlaceholder(item))
@@ -1299,10 +1397,10 @@
 																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{safeTranslate(val.str)}</Anchor
+																					>{refPrefix(key, val)}{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else}
-																				{safeTranslate(val.str)}
+																				{refPrefix(key, val)}{safeTranslate(val.str)}
 																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
@@ -1355,11 +1453,15 @@
 																	)[1]}</Anchor
 																>
 															{:else}
-																<Anchor
-																	breadcrumbAction="push"
-																	href={itemHref}
-																	class="anchor"
-																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																<!-- Clamp a wrapper, not the link: a block-level link would fill the
+																     cell and steal clicks meant for the row. -->
+																<span class="line-clamp-2" title={safeTranslate(value.str)}
+																	><Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
+																	></span
 																>
 															{/if}
 														{:else}
@@ -1379,12 +1481,33 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
-														<span class="ml-9"
-															>{value != null
-																? safeTranslate('percentageDisplay', { number: value })
-																: '--'}</span
+													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
+														<span
+															class="badge text-xs {STATUS_PRESETS[value] ??
+																'preset-tonal-surface'}">{safeTranslate(value)}</span
 														>
+													{:else if key === 'priority' && PRIORITY_FLAGS[String(value).replace('P', '')]}
+														<span class="whitespace-nowrap"
+															><i
+																class="fa-solid fa-flag mr-1 {PRIORITY_FLAGS[
+																	String(value).replace('P', '')
+																]}"
+															></i>{safeTranslate(value)}</span
+														>
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
+														<div class="flex items-center gap-2 min-w-24">
+															<div
+																class="h-1.5 flex-1 rounded-full bg-surface-200-800 overflow-hidden"
+															>
+																<div
+																	class="h-full rounded-full bg-primary-500"
+																	style="width: {Math.min(100, Math.max(0, Number(value)))}%"
+																></div>
+															</div>
+															<span class="text-xs tabular-nums whitespace-nowrap w-10 text-end"
+																>{safeTranslate('percentageDisplay', { number: value })}</span
+															>
+														</div>
 													{:else if key === 'last_assessment_status'}
 														<!-- The status is nullable: only a missing round is "never assessed". -->
 														{#if !meta?.last_assessment_date}
@@ -1451,15 +1574,13 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = [
-															'name',
-															'description',
-															'observation',
-															'ref_id',
-															'key'
-														].includes(key)
-															? (value ?? '-')
-															: safeTranslate(value ?? '-')}
+														{@const displayValue =
+															['name', 'description', 'observation', 'ref_id', 'key'].includes(
+																key
+															) ||
+															(key.startsWith('cf__') && typeof value === 'string')
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
 
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...
@@ -1617,6 +1738,12 @@
 			</tfoot>
 		{/if}
 	</table>
+	<!-- Outside the table: an empty tbody stays empty (tests count rows) and no context menu targets it. -->
+	{#if !loading && !isFetching && inFlight === 0 && $rows.length === 0}
+		<p data-testid="table-empty" class="py-8 text-center text-sm text-surface-500">
+			{loadFailed ? m.errorLoadingData() : m.noEntriesFound()}
+		</p>
+	{/if}
 
 	<footer class="flex justify-between items-center space-x-8 p-2">
 		{#if rowCount && pagination}

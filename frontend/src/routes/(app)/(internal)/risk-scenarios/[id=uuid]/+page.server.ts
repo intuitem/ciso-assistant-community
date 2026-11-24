@@ -10,8 +10,10 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '#paraglide/messages.js';
 import { error, redirect } from '@sveltejs/kit';
+import { loadValidationFlowFormData } from '#lib/utils/load.js';
 
-export const load = (async ({ fetch, params, cookies, locals }) => {
+export const load = (async (event) => {
+	const { fetch, params, cookies, locals } = event;
 	const URLModel = 'risk-scenarios';
 	const baseEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
@@ -76,6 +78,13 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		.then((res) => res.json())
 		.then((res) => JSON.parse(res.json_definition));
 
+	const { validationFlowForm, validationFlowModel } = await loadValidationFlowFormData({
+		event,
+		folderId: scenario.folder?.id,
+		targetField: 'risk_scenarios',
+		targetIds: [params.id]
+	});
+
 	return {
 		scenario,
 		tables,
@@ -84,7 +93,13 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		riskAcceptances: await riskAcceptancesPromise,
 		relatedRequirements: await relatedRequirementsPromise,
 		suggestedControls: await suggestedControlsPromise,
-		suggestedLikelihood: await suggestedLikelihoodPromise
+		suggestedLikelihood: await suggestedLikelihoodPromise,
+		validationFlowForm,
+		validationFlowModel,
+		validationFlows: await fetchAllPages(
+			fetch,
+			`${BASE_API_URL}/validation-flows/?risk_scenarios=${params.id}`
+		).catch(() => [])
 	};
 }) satisfies PageServerLoad;
 

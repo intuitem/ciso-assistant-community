@@ -204,6 +204,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
     queryset = StoredLibrary.objects.all()
 
     search_fields = ["name", "description", "urn", "ref_id"]
+    # Re-storing a newer version creates a new row: sorting by creation would
+    # move a library to the end of the store on every version bump.
+    ordering = ["urn"]
 
     def get_queryset(self) -> models.query.QuerySet:
         qs = super().get_queryset().prefetch_related("filtering_labels")

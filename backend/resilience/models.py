@@ -16,6 +16,7 @@ from django.db.models.functions import Greatest, Least
 from django.utils.functional import cached_property
 from auditlog.registry import auditlog
 
+from core.base_models import AutoRefIdMixin
 from iam.models import FolderMixin
 from core.models import (
     FilteringLabelMixin,
@@ -29,7 +30,13 @@ from core.models import (
 )
 
 
-class BusinessImpactAnalysis(Assessment, FilteringLabelMixin):
+class BusinessImpactAnalysis(AutoRefIdMixin, Assessment, FilteringLabelMixin):
+    auto_ref_id_prefix = "BIA"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -410,6 +417,8 @@ class DoraIncidentReport(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"DORA IR ({self.get_incident_submission_display()}) — {self.incident}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.incident_id:

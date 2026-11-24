@@ -1,4 +1,6 @@
 openpyxl
 PyYAML
+pypdfium2
 lxml
 BeautifulSoup4
+defusedxml

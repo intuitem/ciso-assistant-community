@@ -1,0 +1,11 @@
+subject: "CISO Assistant: ${contract_count} Vertrag/Verträge laufen in ${days_remaining} Tag(en) ab"
+body: |
+  Hallo,
+
+  Die folgenden Verträge laufen in ${days_remaining} Tag(en) ab:
+
+  ${contract_list}
+
+  Bitte prüfen Sie die Verlängerung und die Konformität des Lieferanten: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

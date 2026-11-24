@@ -7,7 +7,8 @@ import re
 import uuid
 import hashlib
 import operator
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from functools import reduce
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -56,6 +57,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import duration_day_unit
 from core.utils import format_currency as _fmt_currency
 from core.utils import get_global_currency
 from core.quick_form_scoring import (
@@ -63,10 +65,12 @@ from core.quick_form_scoring import (
     normalize_page_aggregation,
     score_bounds,
 )
+from core.staircase import expand_scope
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
@@ -686,8 +690,9 @@ def _translate_questions(owner) -> dict | None:
             choice_data["select_implementation_groups"] = (
                 choice.select_implementation_groups
             )
-        if choice.annotation:
-            choice_data["annotation"] = choice.annotation
+        annotation = tr.get("annotation", choice.annotation)
+        if annotation:
+            choice_data["annotation"] = annotation
         return choice_data
 
     result = {}
@@ -700,8 +705,12 @@ def _translate_questions(owner) -> dict | None:
         }
         if not question.required:
             q_data["required"] = False
-        if question.annotation:
-            q_data["annotation"] = question.annotation
+        annotation = q_tr.get("annotation")
+        # sync copies the text into an empty annotation; that copy is no help text
+        if not annotation and question.annotation != question.text:
+            annotation = question.annotation
+        if annotation:
+            q_data["annotation"] = annotation
         if question.config is not None:
             q_data["config"] = question.config
         choices = [_translate_choice(c) for c in question.choices.all()]
@@ -1529,6 +1538,7 @@ class LibraryUpdater:
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
+        self.audit_guides = new_library_content.get("audit_guides", [])
 
         self.new_quick_forms = new_library_content.get("quick_forms")
         if isinstance(self.new_quick_forms, dict):
@@ -1686,6 +1696,44 @@ class LibraryUpdater:
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
                     **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def audit_guides_error(self) -> str | None:
+        """Refuse, before anything changes, guides that would break the pre-read
+        or take over a guide another library owns."""
+        from library.utils import AuditGuideImporter
+
+        guides = self.audit_guides
+        if not isinstance(guides, list) or any(
+            AuditGuideImporter(g).is_valid() for g in guides
+        ):
+            return "invalidLibraryUpdate"
+        urns = [g["urn"].lower() for g in guides]
+        if (
+            len(set(urns)) != len(urns)
+            or AuditGuide.objects.filter(urn__in=urns)
+            .exclude(library=self.old_library)
+            .exists()
+        ):
+            return "invalidLibraryUpdate"
+        return None
+
+    def update_audit_guides(self):
+        # Guides the new version no longer ships go, so none lingers to compete.
+        AuditGuide.objects.filter(library=self.old_library).exclude(
+            urn__in=[g["urn"].lower() for g in self.audit_guides]
+        ).delete()
+        for guide in self.audit_guides:
+            fields = AuditGuide.fields_from(guide)
+            AuditGuide.objects.update_or_create(
+                urn=guide["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
                     "library": self.old_library,
                 },
             )
@@ -2740,6 +2788,8 @@ class LibraryUpdater:
             return error_msg
         if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
+        if (error_msg := self.audit_guides_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -2788,6 +2838,7 @@ class LibraryUpdater:
         self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_audit_guides()
         self.update_techniques()
         self.update_metric_definitions()
 
@@ -3056,6 +3107,8 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         verbose_name = _("Classification level")
         verbose_name_plural = _("Classification levels")
 
+    folder_from = "object_classification"
+
     def save(self, *args, **kwargs):
         if self.object_classification_id:
             self.folder = self.object_classification.folder
@@ -3091,6 +3144,7 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
         ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
+        ASSET_LIFECYCLE_STAGE = "asset.lifecycle_stage", "assetLifecycleStage"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -3496,6 +3550,45 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         },
     ]
 
+    DEFAULT_ASSET_LIFECYCLE_STAGES = [
+        {
+            "name": "planned",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "implementing",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "active",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "phasing_out",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "retired",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+        {
+            "name": "archived",
+            "builtin": True,
+            "field_path": FieldPath.ASSET_LIFECYCLE_STAGE,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_ENTITY_SCORE_PROVIDERS = [
         {
             "name": "SecurityScorecard",
@@ -3529,56 +3622,80 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "nombre"}},
+            "translations": {
+                "fr": {"name": "nombre"},
+                "hu": {"name": "darabszám"},
+            },
         },
         {
             "name": "users",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "utilisateurs"}},
+            "translations": {
+                "fr": {"name": "utilisateurs"},
+                "hu": {"name": "felhasználó"},
+            },
         },
         {
             "name": "bytes",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "octets"}},
+            "translations": {
+                "fr": {"name": "octets"},
+                "hu": {"name": "bájt"},
+            },
         },
         {
             "name": "percentage",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "pourcentage"}},
+            "translations": {
+                "fr": {"name": "pourcentage"},
+                "hu": {"name": "százalék"},
+            },
         },
         {
             "name": "score",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "score"}},
+            "translations": {
+                "fr": {"name": "score"},
+                "hu": {"name": "pontszám"},
+            },
         },
         {
             "name": "days",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "jours"}},
+            "translations": {
+                "fr": {"name": "jours"},
+                "hu": {"name": "nap"},
+            },
         },
         {
             "name": "hours",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "heures"}},
+            "translations": {
+                "fr": {"name": "heures"},
+                "hu": {"name": "óra"},
+            },
         },
         {
             "name": "events per second",
             "builtin": True,
             "field_path": FieldPath.METRIC_UNIT,
             "is_visible": True,
-            "translations": {"fr": {"name": "événements par seconde"}},
+            "translations": {
+                "fr": {"name": "événements par seconde"},
+                "hu": {"name": "esemény másodpercenként"},
+            },
         },
     ]
     field_path = models.CharField(
@@ -3652,6 +3769,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
     @classmethod
     def create_default_entity_score_providers(cls):
         cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
+    def create_default_asset_lifecycle_stages(cls):
+        cls._seed_defaults(cls.DEFAULT_ASSET_LIFECYCLE_STAGES)
 
     @classmethod
     def create_default_metric_units(cls):
@@ -4162,7 +4283,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return scoring
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -4546,7 +4668,8 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
         )
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.get_name_translated}"
+        name = self.get_name_translated
+        return f"{self.provider} - {name}" if self.provider else name
 
 
 class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
@@ -4924,7 +5047,7 @@ class RequirementMapping(models.Model):
 ########################### Domain objects #########################
 
 
-class Perimeter(NameDescriptionMixin, FolderMixin):
+class Perimeter(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("Undefined")),
         ("in_design", _("Design")),
@@ -4933,6 +5056,9 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
+
+    auto_ref_id_prefix = "PER"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -4976,7 +5102,9 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
+class SecurityException(
+    AutoRefIdMixin, NameDescriptionMixin, FolderMixin, CustomFieldsMixin
+):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -4985,6 +5113,9 @@ class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
+
+    auto_ref_id_prefix = "EXC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
@@ -5071,6 +5202,7 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
+    AutoRefIdMixin,
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
@@ -5229,6 +5361,9 @@ class Asset(
     overridden_children_capabilities = models.ManyToManyField(
         AssetCapability, blank=True, verbose_name=_("Overridden children capabilities")
     )
+    auto_ref_id_prefix = "AST"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -5250,6 +5385,15 @@ class Asset(
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
+    )
+    lifecycle_stage = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="assets_lifecycle_stage",
+        limit_choices_to={"field_path": Terminology.FieldPath.ASSET_LIFECYCLE_STAGE},
+        verbose_name=_("Lifecycle stage"),
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
@@ -5788,18 +5932,21 @@ class Asset(
 
     def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
         def format_seconds(seconds: int) -> str:
-            hours, remainder = divmod(seconds, 3600)
+            days, remainder = divmod(seconds, 86400)
+            hours, remainder = divmod(remainder, 3600)
             minutes, secs = divmod(remainder, 60)
 
             parts = []
+            if days > 0:
+                parts.append(f"{days}{duration_day_unit()}")
             if hours > 0:
                 parts.append(f"{hours}h")
             if minutes > 0:
-                parts.append(f"{minutes:02d}m")
+                parts.append(f"{minutes:02d}m" if parts else f"{minutes}m")
             if secs > 0 or (
                 not parts
             ):  # Always show seconds if no other parts, or if > 0
-                parts.append(f"{secs:02d}s")
+                parts.append(f"{secs:02d}s" if parts else f"{secs}s")
 
             return "".join(parts)
 
@@ -5841,18 +5988,21 @@ class Asset(
 
     def get_recovery_capabilities_display(self) -> list[dict[str, str]]:
         def format_seconds(seconds: int) -> str:
-            hours, remainder = divmod(seconds, 3600)
+            days, remainder = divmod(seconds, 86400)
+            hours, remainder = divmod(remainder, 3600)
             minutes, secs = divmod(remainder, 60)
 
             parts = []
+            if days > 0:
+                parts.append(f"{days}{duration_day_unit()}")
             if hours > 0:
                 parts.append(f"{hours}h")
             if minutes > 0:
-                parts.append(f"{minutes:02d}m")
+                parts.append(f"{minutes:02d}m" if parts else f"{minutes}m")
             if secs > 0 or (
                 not parts
             ):  # Always show seconds if no other parts, or if > 0
-                parts.append(f"{secs:02d}s")
+                parts.append(f"{secs:02d}s" if parts else f"{secs}s")
 
             return "".join(parts)
 
@@ -6502,7 +6652,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin):
         ]
 
 
-class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Evidence(AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
@@ -6511,6 +6661,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
 
+    auto_ref_id_prefix = "EVD"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     owner = models.ManyToManyField(
         "core.Actor",
         verbose_name="Owner",
@@ -6611,6 +6767,39 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
+    class ReviewStatus(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="uploaded_evidence_revisions",
+        verbose_name=_("Uploaded by"),
+    )
+    review_status = models.CharField(
+        max_length=20,
+        choices=ReviewStatus.choices,
+        default=ReviewStatus.PENDING,
+        db_index=True,
+        verbose_name=_("Review status"),
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_evidence_revisions",
+        verbose_name=_("Reviewed by"),
+    )
+    reviewed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Reviewed at")
+    )
+    review_comment = models.TextField(blank=True, verbose_name=_("Review comment"))
+
     fields_to_check = ["evidence", "version"]
 
     # A revision without a file or a link carries no evidence.
@@ -6635,10 +6824,104 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
 
+    folder_from = "evidence"
+
+    def record_review(self, user, decision: str, comment: str = "") -> None:
+        """Record a reviewer's decision on this revision and mirror it on the evidence."""
+        if decision not in (self.ReviewStatus.APPROVED, self.ReviewStatus.REJECTED):
+            raise ValidationError({"decision": "invalid_decision"})
+        if (
+            self.uploaded_by_id
+            and self.uploaded_by_id == user.id
+            and GlobalSettings.objects.filter(
+                name="general", value__evidence_four_eyes=True
+            ).exists()
+        ):
+            raise ValidationError({"decision": "four_eyes_uploader_cannot_review"})
+        self.review_status = decision
+        self.reviewed_by = user
+        self.reviewed_at = now()
+        self.review_comment = comment.strip()
+        self.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "review_comment",
+                "updated_at",
+            ]
+        )
+        if self.evidence.last_revision == self:
+            self.evidence.status = decision
+            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def undo_review(self, user) -> None:
+        """Put a decision back in the queue; only the reviewer who made it can."""
+        if (
+            self.review_status == self.ReviewStatus.PENDING
+            or self.reviewed_by_id != user.id
+        ):
+            raise ValidationError({"decision": "cannot_undo"})
+        self.clear_review()
+        if self.evidence.last_revision == self:
+            self.evidence.status = Evidence.Status.IN_REVIEW
+            self.evidence.save(update_fields=["status", "updated_at"])
+
+    def clear_review(self) -> None:
+        """Back to pending, without touching the evidence status."""
+        self.review_status = self.ReviewStatus.PENDING
+        self.reviewed_by = None
+        self.reviewed_at = None
+        self.review_comment = ""
+        self.save(
+            update_fields=[
+                "review_status",
+                "reviewed_by",
+                "reviewed_at",
+                "review_comment",
+                "updated_at",
+            ]
+        )
+
+    def reopen_evidence_review(self) -> None:
+        """New, unreviewed content on the latest revision sends a decided evidence back to review.
+        Called from upload paths only: imports and seeds create revisions without new content."""
+        evidence = self.evidence
+        if (
+            evidence.status in (Evidence.Status.APPROVED, Evidence.Status.REJECTED)
+            and evidence.last_revision == self
+        ):
+            evidence.status = Evidence.Status.IN_REVIEW
+            evidence.save(update_fields=["status", "updated_at"])
+
     def save(self, *args, **kwargs):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
+
+        # A review covers the content it saw: new content on a reviewed revision voids it.
+        content_changed = False
+        if not self._state.adding:
+            old = (
+                EvidenceRevision.objects.filter(pk=self.pk)
+                .values("attachment", "link")
+                .first()
+            )
+            new_file = bool(self.attachment) and not self.attachment._committed
+            content_changed = bool(old) and (
+                new_file
+                or (old["attachment"] or None) != (self.attachment.name or None)
+                or (old["link"] or None) != (self.link or None)
+            )
+        review_voided = (
+            content_changed and self.review_status != self.ReviewStatus.PENDING
+        )
+        if review_voided:
+            self.review_status = self.ReviewStatus.PENDING
+            self.reviewed_by = None
+            self.reviewed_at = None
+            self.review_comment = ""
+            kwargs.pop("update_fields", None)
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -6696,6 +6979,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
+        if review_voided:
+            self.reopen_evidence_review()
+
     def filename(self) -> str | None:
         if not self.attachment:
             return None
@@ -6729,7 +7015,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024 / 1024:.1f} MB"
 
 
-class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class Incident(AutoRefIdMixin, NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"
@@ -6748,6 +7034,14 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Detection(models.TextChoices):
         INTERNAL = "internally_detected", "Internal"
         EXTERNAL = "externally_detected", "External"
+
+    class Answer(models.TextChoices):
+        YES = "yes", "Yes"
+        NO = "no", "No"
+        UNCERTAIN = "uncertain", "Uncertain"
+
+    auto_ref_id_prefix = "INC"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -6844,12 +7138,84 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Task templates"),
         related_name="incidents",
     )
+    root_cause = models.TextField(null=True, blank=True, verbose_name=_("Root cause"))
+    # NIS2 art. 23: significant incidents go to the CSIRT/competent authority
+    nis2_significant = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Significant incident (NIS2)")
+    )
+    nis2_early_warning_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 early warning sent at")
+    )
+    nis2_notification_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 incident notification sent at")
+    )
+    nis2_final_report_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("NIS2 final report sent at")
+    )
+    nis2_reference = models.CharField(
+        max_length=255, blank=True, verbose_name=_("NIS2 notification reference")
+    )
+    # asked from the 24h early warning on (CCB form: Malicious_Intent, Cross_Border_Impact)
+    nis2_malicious_intent = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Suspected malicious intent"),
+    )
+    nis2_cross_border_impact = models.CharField(
+        max_length=20,
+        choices=Answer.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Cross-border impact"),
+    )
 
     fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
+
+    def nis2_deadlines(self) -> list[dict]:
+        """NIS2 art. 23(4) stages, clocked from awareness (reported_at)."""
+        aware = self.reported_at or self.created_at
+        if not self.nis2_significant or not aware:
+            return []
+        notification_due = aware + timedelta(hours=72)
+        stages = [
+            ("early_warning", aware + timedelta(hours=24), self.nis2_early_warning_at),
+            ("incident_notification", notification_due, self.nis2_notification_at),
+            (
+                "final_report",
+                (self.nis2_notification_at or notification_due)
+                + relativedelta(months=1),
+                self.nis2_final_report_at,
+            ),
+        ]
+        current = now()
+        return [
+            {
+                "stage": stage,
+                "due": due,
+                "done_at": done,
+                "overdue": done is None and current > due,
+            }
+            for stage, due, done in stages
+        ]
+
+    def nis2_next_stage(self) -> dict | None:
+        """The stage to act on: an overdue 72h notification first (a missed early
+        warning must not hide it, nor the upcoming final report), else the next
+        stage ahead, else the last one still open."""
+        pending = [s for s in self.nis2_deadlines() if s["done_at"] is None]
+        for s in pending:
+            if s["stage"] == "incident_notification" and s["overdue"]:
+                return s
+        upcoming = [s for s in pending if not s["overdue"]]
+        if upcoming:
+            return upcoming[0]
+        return pending[-1] if pending else None
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -6912,6 +7278,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.entry}"
+
+    folder_from = "incident"
 
     def save(self, *args, **kwargs):
         if self.timestamp > now():
@@ -7232,6 +7600,7 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
+    AutoRefIdMixin,
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
@@ -7296,6 +7665,9 @@ class AppliedControl(
         blank=True,
         verbose_name=_("Reference Control"),
     )
+    auto_ref_id_prefix = "AC"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -7642,6 +8014,7 @@ class AppliedControl(
 
 
 class OrganisationIssue(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     FolderMixin,
 ):
@@ -7671,6 +8044,9 @@ class OrganisationIssue(
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
         INACTIVE = "inactive", _("Inactive")
+
+    auto_ref_id_prefix = "ISS"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -7720,6 +8096,7 @@ class OrganisationIssue(
 
 
 class OrganisationObjective(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     FolderMixin,
 ):
@@ -7762,6 +8139,9 @@ class OrganisationObjective(
         related_name="assigned_organisation_objectives",
         blank=True,
     )
+    auto_ref_id_prefix = "OBJ"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -7821,6 +8201,7 @@ class Policy(AppliedControl):
 
 
 class Vulnerability(
+    AutoRefIdMixin,
     NameDescriptionMixin,
     ETADueDateMixin,
     FolderMixin,
@@ -7840,6 +8221,9 @@ class Vulnerability(
     RESOLVED_STATUSES = frozenset(
         {Status.MITIGATED, Status.FIXED, Status.NOTEXPLOITABLE, Status.UNAFFECTED}
     )
+
+    auto_ref_id_prefix = "VUL"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -8168,15 +8552,19 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs) -> None:
+    def resolve_auto_ref_id_parent(self) -> None:
+        """An assessment left on the root folder lands in its perimeter's domain."""
         if self.perimeter and (
             not self.folder or self.folder == Folder.get_root_folder()
         ):
             self.folder = self.perimeter.folder
+
+    def save(self, *args, **kwargs) -> None:
+        self.resolve_auto_ref_id_parent()
         return super().save(*args, **kwargs)
 
 
-class RiskAssessment(Assessment, FilteringLabelMixin):
+class RiskAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -8186,6 +8574,9 @@ class RiskAssessment(Assessment, FilteringLabelMixin):
     risk_tolerance = models.SmallIntegerField(
         default=-1, verbose_name=_("Risk tolerance")
     )
+    auto_ref_id_prefix = "RA"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -8657,7 +9048,9 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
+class RiskScenario(
+    AutoRefIdMixin, NameDescriptionMixin, FilteringLabelMixin, FolderMixin
+):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -8839,6 +9232,12 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         verbose_name=_("Treatment status"),
     )
 
+    auto_ref_id_prefix = "R"
+    auto_ref_id_parent = "risk_assessment"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.risk_assessment, prefix)
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -8887,16 +9286,23 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         return self.risk_assessment.is_locked
 
     @classmethod
-    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+    def get_default_ref_id(
+        cls, risk_assessment: RiskAssessment, prefix: str | None = None
+    ):
         """return associated risk assessment id"""
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         scenarios_ref_ids = list(
             cls.objects.filter(risk_assessment=risk_assessment).values_list(
                 "ref_id", flat=True
             )
         )
         nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_scenarios + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in scenarios_ref_ids if r}
+        )
 
     def parent_perimeter(self):
         return self.risk_assessment.perimeter
@@ -9049,6 +9455,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    folder_from = "risk_assessment"
 
     def save(self, *args, **kwargs):
         self.folder = self.risk_assessment.folder
@@ -9224,7 +9632,7 @@ def rescale_score(value, old_range, new_range, integer=True):
     return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-class ComplianceAssessment(Assessment, FilteringLabelMixin):
+class ComplianceAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
         SUM = "sum", "Sum"
@@ -9236,6 +9644,9 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
     )
+    auto_ref_id_prefix = "AUD"
+    auto_ref_id_parent = "folder"
+
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
@@ -9255,6 +9666,10 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
     computed_outcome = models.JSONField(null=True, blank=True)
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # ref_ids of outcome rules whose last evaluation failed.
+    outcome_errors = models.JSONField(
+        blank=True, null=True, verbose_name=_("Outcome errors")
     )
 
     assets = models.ManyToManyField(
@@ -9527,6 +9942,12 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
         creating = self._state.adding
+        if creating and self.selected_implementation_groups:
+            # A target level brings the levels below it, whatever creates the
+            # audit (campaigns, third parties, automation, imports).
+            self.selected_implementation_groups = expand_scope(
+                self.framework.outcomes_definition, self.selected_implementation_groups
+            )
         loaded = getattr(self, "_loaded_cel_values", {})
         update_fields = kwargs.get("update_fields")
         saved = self._CEL_RELEVANT_FIELDS & set(
@@ -10177,6 +10598,48 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
+    def requirement_layer_scores(
+        self, *, result, is_scored, score, documentation_score, min_score, max_score
+    ) -> dict:
+        """One requirement's implementation, documentation and maturity scores
+        on its own scale, counted as get_scores_for counts it: N/A at the target
+        when the audit anchors N/A, a missing documentation score at the bottom
+        of the scale, maturity the average of the two (the implementation score
+        when the audit has no documentation score). Layers that do not count
+        are None. min_score / max_score are the requirement's own bounds; None
+        falls back to the audit's."""
+        low = self.min_score if min_score is None else min_score
+        high = self.max_score if max_score is None else max_score
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            if not self.anchor_na_to_target or low is None or high is None:
+                implementation = None
+            else:
+                implementation = documentation = self.na_anchor_score(low, high)
+        elif is_scored and score is not None:
+            implementation = score
+            documentation = (
+                documentation_score if documentation_score is not None else low or 0
+            )
+        else:
+            implementation = None
+        if implementation is None:
+            return {
+                "implementation_score": None,
+                "documentation_score": None,
+                "maturity_score": None,
+            }
+        if not self.show_documentation_score:
+            return {
+                "implementation_score": implementation,
+                "documentation_score": None,
+                "maturity_score": implementation,
+            }
+        return {
+            "implementation_score": implementation,
+            "documentation_score": documentation,
+            "maturity_score": (implementation + documentation) / 2,
+        }
+
     def get_total_max_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
     ):
@@ -10506,7 +10969,7 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#475569",
             RequirementAssessment.Status.TODO: "#9ca3af",
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
@@ -11196,7 +11659,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     ),
                     "status": "create",
                 }
@@ -11249,7 +11712,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         name=reference_control.get_name_translated
                         or reference_control.ref_id,
                         ref_id=reference_control.ref_id,
-                        description=reference_control.description,
+                        description=reference_control.get_description_translated,
                     )
                     if not dry_run:
                         applied_control.save()
@@ -11361,7 +11824,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     #      needs a persisted completion flag (rejected) or write-time answer
     #      cleanup (out of scope).
     #   2. result visible on the audit: result set
-    #   3. score-only audit: score strictly above the resolved minimum
+    #   3. score-only audit: not applicable (the applicability toggle sets it
+    #      and no score follows), or score strictly above the resolved minimum
     #      (requirement override, then audit, then framework). The scoring
     #      toggle pre-fills scores at that minimum, so a score left at min is
     #      indistinguishable from an untouched one and must not count.
@@ -11408,7 +11872,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 Value(0),
             )
         )
-        content = result_assessed if result_visible else score_progressed
+        content = (
+            result_assessed
+            if result_visible
+            else Q(result=cls.Result.NOT_APPLICABLE) | score_progressed
+        )
         if has_questions_annotation:
             # A question counts whether or not it computes anything: fully
             # answered seeded rows complete the carriers for informational
@@ -11462,6 +11930,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             return result_assessed or score_assessed or questionnaire_fully_answered
         if result_visible:
             return result_assessed
+        if result == RequirementAssessment.Result.NOT_APPLICABLE:
+            return True
         resolved_min = (
             requirement_min_score
             if requirement_min_score is not None
@@ -12141,16 +12611,14 @@ class QuickFormResponse(
         """A draft can be deleted by whoever holds it. A submitted or in-review
         request cannot: it is abandoned by dropping it, which leaves a record.
 
-        A closed request is a record and is administrator-only — the decision has
-        been made and neither the requester nor the reviewer may erase it. Without a
-        user this returns the conservative answer, which is what the UI shows when it
+        An administrator may delete any request, e.g. to clean up test answers;
+        nobody else may erase a submitted, in-review or closed one. Without a user
+        this returns the conservative answer, which is what the UI shows when it
         does not know who is asking.
         """
         if self.status == self.Status.DRAFT:
             return True
-        if self.status == self.Status.CLOSED and user is not None:
-            return user.is_admin()
-        return False
+        return user is not None and user.is_admin()
 
     class Meta:
         verbose_name = _("Quick form response")
@@ -12512,6 +12980,8 @@ class QuickFormApplication(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Quick form applications")
         ordering = ["-created_at"]
 
+    folder_from = "response"
+
     def save(self, *args, **kwargs):
         # As visible as the response that made it.
         if self.response_id:
@@ -12676,7 +13146,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         self._defer_cel_evaluation()
 
 
-class FindingsAssessment(Assessment, FilteringLabelMixin):
+class FindingsAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
     class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
         pass
 
@@ -12704,6 +13174,9 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
         related_name="findings_assessments",
         verbose_name=_("Evidences"),
     )
+
+    auto_ref_id_prefix = "FA"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -12751,6 +13224,33 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
         help_text=_("External url for follow-up (eg. report, Jira ticket)"),
         verbose_name=_("Reference link"),
     )
+
+    @classmethod
+    def binder_of(cls, audit):
+        """The findings binder of an audit, or None: where findings raised on its
+        requirements live. An audit can carry more than one findings assessment,
+        so get_or_create would raise MultipleObjectsReturned. Oldest wins, for a
+        stable choice."""
+        return (
+            cls.objects.filter(compliance_assessment=audit)
+            .order_by("created_at")
+            .first()
+        )
+
+    @classmethod
+    def create_binder(cls, audit):
+        """A new findings binder for `audit`. Callers authorize it and look for
+        an existing one first (binder_of)."""
+        return cls.objects.create(
+            compliance_assessment=audit,
+            # Distinguishable at a glance from the audit it belongs to.
+            name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
+            folder=audit.folder,
+            perimeter=audit.perimeter,
+            category=cls.Category.AUDIT,
+            description=str(_("Findings raised from %(audit)s"))
+            % {"audit": audit.name},
+        )
 
     def get_findings_metrics(self):
         findings = self.findings.all()
@@ -12818,7 +13318,13 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
         self.upsert_daily_metrics()
 
 
-class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
+class Finding(
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    FilteringLabelMixin,
+    ETADueDateMixin,
+):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         IDENTIFIED = "identified", _("Identified")
@@ -12876,6 +13382,9 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         verbose_name=_("Owner"),
         related_name="findings",
     )
+
+    auto_ref_id_prefix = "F"
+    auto_ref_id_parent = "findings_assessment"
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -12959,7 +13468,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin):
+class RiskAcceptance(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", "Created"),
         ("submitted", "Submitted"),
@@ -12968,6 +13477,12 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         ("revoked", "Revoked"),
     ]
 
+    auto_ref_id_prefix = "RAC"
+    auto_ref_id_parent = "folder"
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
     risk_scenarios = models.ManyToManyField(
         RiskScenario,
         verbose_name=_("Risk scenarios"),
@@ -13074,7 +13589,11 @@ class TaskTemplateManager(models.Manager):
 
 
 class TaskTemplate(
-    NameDescriptionMixin, FolderMixin, FilteringLabelMixin, CommitmentMixin
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    FilteringLabelMixin,
+    CommitmentMixin,
 ):
     # A recurrent template is a definition, not a single promise: commitment lives
     # on one-time tasks only (hidden entirely otherwise).
@@ -13144,6 +13663,9 @@ class TaskTemplate(
     task_date = models.DateField(null=True, blank=True, verbose_name="Date")
 
     is_recurrent = models.BooleanField(default=False)
+
+    auto_ref_id_prefix = "TSK"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name="reference id"
@@ -13470,6 +13992,15 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         "tprm.Contract",
         blank=True,
     )
+    # per-requirement and per-risk sign-off, not only per assessment
+    requirement_assessments = models.ManyToManyField(
+        "core.RequirementAssessment",
+        blank=True,
+    )
+    risk_scenarios = models.ManyToManyField(
+        "core.RiskScenario",
+        blank=True,
+    )
     request_notes = models.TextField(null=True, blank=True)
     requester = models.ForeignKey(
         User,
@@ -13557,6 +14088,8 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "processings",
             "accreditations",
             "contracts",
+            "requirement_assessments",
+            "risk_scenarios",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
@@ -14150,6 +14683,8 @@ auditlog.register(
         "security_exceptions",
         "policies",
         "processings",
+        "requirement_assessments",
+        "risk_scenarios",
     },
     exclude_fields=common_exclude,
 )
@@ -14158,3 +14693,210 @@ auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
 auditlog.register(RiskMatrix, exclude_fields=common_exclude)
 auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
 auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)
+
+
+class EvidenceRequestLink(AbstractBaseModel):
+    """Experimental: an evidence marked by hand as answering one request of an
+    audit guide. Keyed by the guide and the domain of the audit where it was
+    made, not the audit: it holds at every audit of that domain."""
+
+    IAM_SCOPE_FIELD = "evidence"
+
+    evidence = models.ForeignKey(
+        Evidence, on_delete=models.CASCADE, related_name="guide_request_links"
+    )
+    # Framework URN the guide is written for, entry (requirement number) and
+    # request id inside it; ids are never reused, so the link stays stable.
+    guide = models.CharField(max_length=255)
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    # The audited domain, not the evidence's: it stays if the audit moves.
+    domain = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name="+")
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["evidence", "guide", "entry", "request", "domain"],
+                name="unique_evidence_request_link",
+            )
+        ]
+
+
+class AuditPreparation(AbstractBaseModel):
+    """Experimental: what an organisation decides while preparing one audit
+    with the auditor pre-read. Created on the first stored decision."""
+
+    # Scoped by its audit's domain, so it follows the audit if it moves.
+    IAM_SCOPE_FIELD = "compliance_assessment"
+
+    class Stage(models.TextChoices):
+        STAGE_1 = "stage_1", _("Stage 1")
+        STAGE_2 = "stage_2", _("Stage 2")
+        SURVEILLANCE = "surveillance", _("Surveillance")
+        RECERTIFICATION = "recertification", _("Recertification")
+
+    compliance_assessment = models.OneToOneField(
+        ComplianceAssessment, on_delete=models.CASCADE, related_name="preparation"
+    )
+    # Guide forced for a framework the numbering only partly matches; blank
+    # means the one resolved automatically.
+    guide = models.CharField(max_length=255, blank=True)
+    stage = models.CharField(max_length=20, choices=Stage.choices, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    certification_body = models.ForeignKey(
+        "tprm.Entity",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    auditors = models.CharField(max_length=255, blank=True)
+    # Last person who changed the preparation: who to send a missing document to.
+    updated_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    # Hook for later: the real audit's result, to set against the forecast.
+    findings_assessment = models.ForeignKey(
+        FindingsAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError(
+                {"end_date": _("The audit cannot end before it starts")}
+            )
+
+
+class AuditPreparationSetAside(AbstractBaseModel):
+    """A request of the guide that does not apply to this audit, and why."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="set_asides"
+    )
+    # Request ids belong to a guide: another guide's "r1" is another document.
+    guide = models.CharField(max_length=255)
+    entry = models.CharField(max_length=64)
+    request = models.CharField(max_length=16)
+    reason = models.TextField()
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "guide", "entry", "request"],
+                name="unique_preparation_set_aside",
+            )
+        ]
+
+
+class AuditPreparationRole(AbstractBaseModel):
+    """Who answers for one interview role of the guide (ciso, hr, dpo...)."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="roles"
+    )
+    role = models.CharField(max_length=32)
+    actors = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "role"], name="unique_preparation_role"
+            )
+        ]
+
+
+class AuditPreparationSession(AbstractBaseModel):
+    """When and where one session of the guide takes place, and who attends."""
+
+    IAM_SCOPE_FIELD = "preparation"
+
+    preparation = models.ForeignKey(
+        AuditPreparation, on_delete=models.CASCADE, related_name="sessions"
+    )
+    session = models.CharField(max_length=32)
+    date = models.DateField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    attendees = models.ManyToManyField(Actor, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["preparation", "session"], name="unique_preparation_session"
+            )
+        ]
+
+    def clean(self):
+        if self.start_time and self.end_time and self.start_time > self.end_time:
+            raise ValidationError(
+                {"end_time": _("The session cannot end before it starts")}
+            )
+
+
+class AuditGuide(ReferentialObjectMixin, I18nObjectMixin):
+    """Experimental: what a certification auditor will ask per requirement of a
+    framework (questions, records, sampling, pitfalls) and the sessions they run.
+    Ships in libraries, so anyone can load their own wording and content.
+
+    `entries` is keyed by the requirement number the guide is written for (the
+    URN suffix, e.g. "a.5.18"); every item has an id, stable across versions,
+    that translations, pairings and set-asides key on. `translations` holds, per
+    locale, `name`/`description` and the item texts keyed the same way.
+    """
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="audit_guides",
+    )
+    framework_urn = models.CharField(max_length=255)
+    entries = models.JSONField(default=dict)
+    sessions = models.JSONField(default=list)
+
+    @staticmethod
+    def fields_from(data: dict) -> dict:
+        """Model fields from a guide as written in a library, its requirement
+        numbers normalized the way requirements are matched ("A.05.18" -> "a.5.18")."""
+        from core.auditor_preread import normalize_key
+
+        def keyed(entries):
+            return {normalize_key(k): v for k, v in (entries or {}).items()}
+
+        translations = {
+            locale: {**t, "entries": keyed(t.get("entries"))} if "entries" in t else t
+            for locale, t in (data.get("translations") or {}).items()
+        }
+        return {
+            "ref_id": data["ref_id"],
+            "name": data.get("name"),
+            "description": data.get("description"),
+            "framework_urn": data["framework"].lower(),
+            "entries": keyed(data.get("entries")),
+            "sessions": [
+                {**s, "members": [normalize_key(m) for m in s.get("members") or []]}
+                for s in data.get("sessions") or []
+            ],
+            "translations": translations,
+        }
+
+    class Meta:
+        verbose_name = _("Audit guide")
+        verbose_name_plural = _("Audit guides")

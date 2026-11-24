@@ -4,16 +4,18 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
+from allauth.socialaccount.models import SocialApp
 from django.contrib.auth import get_user_model, login, logout
 from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
+from django.db.models.deletion import ProtectedError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
 from knox import crypto
-from knox.auth import TokenAuthentication, get_token_model, knox_settings
+from knox.auth import get_token_model, knox_settings
 from knox.models import AuthToken
 from knox.views import DateTimeField
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -32,6 +34,7 @@ from global_settings.models import GlobalSettings
 from core import mailer
 from core.models import Actor
 from core.utils import RoleCodename
+from .authentication import KnoxTokenAuthentication
 from .models import (
     Folder,
     PersonalAccessToken,
@@ -45,9 +48,11 @@ from iam.sso.slo import copy_slo_state_from_session_key
 from .service_accounts import (
     UNSET as UNSET_FIELD,
     get_selectable_permissions,
+    provision_federated_service_account,
     provision_service_account,
     update_service_account,
 )
+from .oidc_federation import register_social_app, update_social_app
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
@@ -55,6 +60,8 @@ from .serializers import (
     ResetPasswordConfirmSerializer,
     ServiceAccountReadSerializer,
     SetPasswordSerializer,
+    SocialAppReadSerializer,
+    SocialAppWriteSerializer,
 )
 
 logger = structlog.get_logger(__name__)
@@ -268,6 +275,7 @@ class CurrentUserView(views.APIView):
             "is_admin": request.user.is_admin(),
             "is_local": request.user.is_local,
             "is_sso": request.user.is_sso,
+            "can_connect_apps": request.user.can_connect_apps,
             "accessible_domains": [str(f) for f in accessible_domains],
             "permission_sets": permission_sets,
             "domain_permissions": domain_permissions,
@@ -292,7 +300,7 @@ class SessionTokenView(views.APIView):
                 {"error": "No access token provided"}, status=HTTP_401_UNAUTHORIZED
             )
         # Get user from token
-        auth = TokenAuthentication()
+        auth = KnoxTokenAuthentication()
         user, _ = auth.authenticate_credentials(access_token.encode())
         if not user:
             return Response(
@@ -418,13 +426,27 @@ class ResetPasswordConfirmView(views.APIView):
             user is not None and user.is_local
         ):  # Only local user can reset their password.
             if self.token_generator.check_token(user, token):
-                user.set_password(new_password)
-                user.save()
+                with transaction.atomic():
+                    user.set_password(new_password)
+                    user.save()
+                    _revoke_login_tokens(user)
                 return Response(status=status.HTTP_200_OK)
         return Response(
             data={"error": "The link is invalid or has expired."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+def _revoke_login_tokens(user, keep_digest=None):
+    return (
+        AuthToken.objects.filter(user=user)
+        .exclude(
+            Q(digest=keep_digest)
+            | Q(Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))))
+            | Q(Exists(SCIMToken.objects.filter(auth_token=OuterRef("pk"))))
+        )
+        .delete()[0]
+    )
 
 
 class ChangePasswordView(views.APIView):
@@ -446,8 +468,12 @@ class ChangePasswordView(views.APIView):
             raise serializers.ValidationError(
                 "Your old password was entered incorrectly. Please enter it again."
             )
-        user.set_password(new_password)
-        user.save()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(
+                user, keep_digest=getattr(request.auth, "digest", None)
+            )
         return Response(status=status.HTTP_200_OK)
 
 
@@ -465,8 +491,10 @@ class SetPasswordView(views.APIView):
         serializer.is_valid(raise_exception=True)
         new_password = serializer.validated_data.get("new_password")
         user = serializer.validated_data.get("user")
-        user.set_password(new_password)
-        user.save()
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save()
+            _revoke_login_tokens(user)
         try:
             email_address = EmailAddress.objects.get(user=user, primary=True)
             email_address.verified = True
@@ -533,20 +561,7 @@ class RevokeOtherSessionsView(views.APIView):
             )
         access_token = auth_header.split(" ")[1]
         digest = crypto.hash_token(access_token)
-        user_id = str(request.user.id)
-
-        deleted_count, _ = (
-            AuthToken.objects.filter(user_id=user_id)
-            .exclude(
-                Q(digest=digest)
-                | Q(
-                    Exists(
-                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
-                    )
-                )
-            )
-            .delete()
-        )
+        deleted_count = _revoke_login_tokens(request.user, keep_digest=digest)
 
         return Response(
             {"revoked_sessions": deleted_count},
@@ -654,7 +669,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
     feature_flag = "service_accounts"
     serializer_class = ServiceAccountReadSerializer
     queryset = ServiceAccount.objects.select_related(
-        "client", "user", "role", "created_by"
+        "client", "user", "role", "created_by", "social_app"
     ).order_by("-created_at")
 
     def get_write_serializer_class(self):
@@ -673,51 +688,103 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
         serializer = self.get_write_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        is_federated = (
+            data.get("identity_source", ServiceAccount.IdentitySource.LOCAL)
+            == ServiceAccount.IdentitySource.FEDERATED
+        )
         try:
-            service_account, plain_secret = provision_service_account(
-                name=data["name"],
-                description=data.get("description"),
-                permission_ids=data.get("permissions"),
-                role_id=data["role"].id if data.get("role") else None,
-                folder_ids=data["folders"],
-                is_recursive=data["is_recursive"],
-                created_by=request.user,
-                expiry_date=data.get("expiry_date"),
-            )
+            if is_federated:
+                service_account = provision_federated_service_account(
+                    name=data["name"],
+                    description=data.get("description"),
+                    permission_ids=data.get("permissions"),
+                    role_id=data["role"].id if data.get("role") else None,
+                    folder_ids=data["folders"],
+                    is_recursive=data["is_recursive"],
+                    created_by=request.user,
+                    social_app=data["social_app"],
+                    federated_subject=data["federated_subject"],
+                    expiry_date=data.get("expiry_date"),
+                )
+                payload = ServiceAccountReadSerializer(service_account).data
+            else:
+                service_account, plain_secret = provision_service_account(
+                    name=data["name"],
+                    description=data.get("description"),
+                    permission_ids=data.get("permissions"),
+                    role_id=data["role"].id if data.get("role") else None,
+                    folder_ids=data["folders"],
+                    is_recursive=data["is_recursive"],
+                    created_by=request.user,
+                    expiry_date=data.get("expiry_date"),
+                )
+                payload = ServiceAccountReadSerializer(service_account).data
+                payload["client_secret"] = plain_secret
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
-        payload = ServiceAccountReadSerializer(service_account).data
-        payload["client_secret"] = plain_secret
         return Response(payload, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
         service_account = self.get_object()
+
+        def _changed(field, current):
+            if field not in request.data:
+                return False
+            normalize = lambda v: None if v in (None, "") else str(v)
+            return normalize(request.data[field]) != normalize(current)
+
+        # identity_source is structural (a local account has an OAuth2 client/secret a
+        # federated one doesn't, and update_service_account has no code path to create
+        # or tear one down), so switching it isn't supported. social_app and
+        # federated_subject are just the federated account's identity and may be
+        # re-pointed, subject to the same checks creation applies (see below).
+        if _changed("identity_source", service_account.identity_source):
+            return Response(
+                {"error": ["identity_source cannot be changed after creation."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        federation_fields_changed = _changed(
+            "social_app", service_account.social_app_id
+        ) or _changed("federated_subject", service_account.federated_subject)
+        if (
+            federation_fields_changed
+            and service_account.identity_source
+            != ServiceAccount.IdentitySource.FEDERATED
+        ):
+            return Response(
+                {
+                    "error": [
+                        "social_app and federated_subject are only valid for "
+                        "federated service accounts."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer = self.get_write_serializer_class()(
             data=request.data, partial=True, context={"instance": service_account}
         )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
-            with transaction.atomic():
-                update_service_account(
-                    service_account,
-                    name=data.get("name"),
-                    description=data["description"]
-                    if "description" in data
-                    else UNSET_FIELD,
-                    permission_ids=data.get("permissions"),
-                    role_id=data["role"].id if data.get("role") else None,
-                    folder_ids=data.get("folders"),
-                    is_recursive=data.get("is_recursive"),
-                    expiry_date=data["expiry_date"]
-                    if "expiry_date" in data
-                    else UNSET_FIELD,
-                )
-                if "is_active" in data:
-                    if data["is_active"] and not service_account.is_active:
-                        service_account.activate()
-                    elif not data["is_active"] and service_account.is_active:
-                        service_account.deactivate()
+            update_service_account(
+                service_account,
+                name=data.get("name"),
+                description=data["description"]
+                if "description" in data
+                else UNSET_FIELD,
+                permission_ids=data.get("permissions"),
+                role_id=data["role"].id if data.get("role") else None,
+                folder_ids=data.get("folders"),
+                is_recursive=data.get("is_recursive"),
+                expiry_date=data["expiry_date"]
+                if "expiry_date" in data
+                else UNSET_FIELD,
+                social_app=data["social_app"] if "social_app" in data else UNSET_FIELD,
+                federated_subject=data["federated_subject"]
+                if "federated_subject" in data
+                else UNSET_FIELD,
+                is_active=data.get("is_active"),
+            )
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
         service_account.refresh_from_db()
@@ -731,6 +798,17 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def rotate_secret(self, request, pk=None):
         service_account = self.get_object()
+        if service_account.identity_source == ServiceAccount.IdentitySource.FEDERATED:
+            return Response(
+                {
+                    "error": [
+                        "Federated service accounts have no local secret to "
+                        "rotate; key rotation is the identity provider's "
+                        "responsibility."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         grace_period_days = request.data.get("grace_period_days") or 0
         try:
             grace_period_days = int(grace_period_days)
@@ -790,3 +868,53 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 for role in roles
             ]
         )
+
+
+class SocialAppViewSet(viewsets.ModelViewSet):
+    """Admin-only registry of external OIDC providers for federated service accounts."""
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsGlobalAdmin,
+        FeatureFlagRequired,
+    ]
+    feature_flag = "service_accounts"
+    serializer_class = SocialAppReadSerializer
+    queryset = SocialApp.objects.order_by("name")
+
+    def create(self, request, *args, **kwargs):
+        serializer = SocialAppWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            social_app = register_social_app(**serializer.validated_data)
+        except DjangoValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            SocialAppReadSerializer(social_app).data, status=status.HTTP_201_CREATED
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        social_app = self.get_object()
+        serializer = SocialAppWriteSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        try:
+            social_app = update_social_app(social_app, **serializer.validated_data)
+        except DjangoValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SocialAppReadSerializer(social_app).data)
+
+    def destroy(self, request, *args, **kwargs):
+        social_app = self.get_object()
+        try:
+            social_app.delete()
+        except ProtectedError:
+            return Response(
+                {
+                    "error": [
+                        "This identity provider is still used by one or more "
+                        "federated service accounts."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)

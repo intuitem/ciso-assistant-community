@@ -634,7 +634,7 @@ def cyfun(db):
     if stored is None:
         stored, error = StoredLibrary.store_library_content(CYFUN.read_bytes())
         assert error is None
-    assert stored.version == 10
+    assert stored.version == 11
     assert stored.load() is None
     framework = Framework.objects.get(urn="urn:intuitem:risk:framework:ccb-cyfun2025")
 

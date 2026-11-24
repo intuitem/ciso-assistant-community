@@ -24,7 +24,12 @@ import metrology.serializers  # noqa: F401
 import privacy.serializers  # noqa: F401
 import resilience.serializers  # noqa: F401
 import tprm.serializers  # noqa: F401
-from core.email_utils import _MODEL_LABELS, _STATE_LABELS, paraglide_model_key
+from core.email_utils import (
+    _MODEL_LABELS,
+    MODEL_NAME_TO_FRONTEND_ROUTE,
+    _STATE_LABELS,
+    paraglide_model_key,
+)
 from core.models import FindingsAssessment
 from core.serializers import (
     AssetWriteSerializer,
@@ -53,12 +58,13 @@ def test_every_wired_model_has_a_label_and_m2m_fields():
     for cls in wired:
         model = cls.Meta.model
         assert paraglide_model_key(model) in _MODEL_LABELS["en"], model
+        assert model._meta.model_name in MODEL_NAME_TO_FRONTEND_ROUTE, model
         for field, notification_type in cls.assignment_notifications.items():
             assert model._meta.get_field(field).many_to_many, (model, field)
             assert notification_type in NOTIFICATION_REGISTRY, notification_type
 
 
-@pytest.mark.parametrize("locale", ["en", "fr", "de", "nl"])
+@pytest.mark.parametrize("locale", ["en", "fr", "de", "nl", "hu"])
 def test_email_labels_match_the_paraglide_catalog(locale):
     path = Path(settings.BASE_DIR).parent / "frontend" / "messages" / f"{locale}.json"
     if not path.exists():
@@ -201,7 +207,11 @@ def test_reviewers_get_the_review_type(
 
 @pytest.mark.parametrize(
     "locale,expected",
-    [("fr", "Actif 'Payroll DB'"), ("nl", "Aan u toegewezen: Middel 'Payroll DB'")],
+    [
+        ("fr", "Actif 'Payroll DB'"),
+        ("hu", "Önhöz rendelve: Eszköz „Payroll DB”"),
+        ("nl", "Aan u toegewezen: Middel 'Payroll DB'"),
+    ],
 )
 def test_email_names_the_model_in_the_recipient_language(
     folder, alice, locale, expected, django_capture_on_commit_callbacks
@@ -213,3 +223,11 @@ def test_email_names_the_model_in_the_recipient_language(
         _asset(folder, [alice])
 
     assert expected in send_email.call_args.args[0]
+
+
+def test_email_links_to_the_object(folder, alice, django_capture_on_commit_callbacks):
+    with _producer(django_capture_on_commit_callbacks) as (_notify, send_email):
+        asset = _asset(folder, [alice])
+
+    expected = f"{settings.CISO_ASSISTANT_URL}/assets/{asset.pk}"
+    assert expected in send_email.call_args.args[1]

@@ -73,17 +73,13 @@
 					};
 				}}
 			>
-				<button
-					type="submit"
-					class="btn bg-pink-500 dark:bg-pink-600 text-white h-fit"
-					disabled={simulationIsLoading}
-				>
+				<button type="submit" class="btn btn-quiet h-fit" disabled={simulationIsLoading}>
 					<span class="mr-2">
 						{#if simulationIsLoading}
 							<Progress value={null}>
 								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
 									<Progress.CircleTrack />
-									<Progress.CircleRange class="stroke-white" />
+									<Progress.CircleRange class="stroke-current" />
 								</Progress.Circle>
 							</Progress>
 						{:else}

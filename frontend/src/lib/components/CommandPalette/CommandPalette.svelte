@@ -10,6 +10,7 @@
 		setInputText
 	} from '../ChatWidget/chatStore.svelte';
 	import { m } from '#paraglide/messages.js';
+	import Kbd from '#lib/components/utils/Kbd.svelte';
 	import { createIntentHref } from '#lib/utils/create-intent.js';
 	import {
 		awaitingArgument,
@@ -291,37 +292,21 @@
 			>
 				<div class="flex items-center gap-3">
 					<span class="flex items-center gap-1">
-						<kbd
-							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
-							>↑</kbd
-						>
-						<kbd
-							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
-							>↓</kbd
-						>
+						<Kbd keys={['↑', '↓']} />
 						<span class="ml-0.5">{m.commandPaletteNavigate()}</span>
 					</span>
 					<span class="flex items-center gap-1">
-						<kbd
-							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
-							>↵</kbd
-						>
+						<Kbd keys={['↵']} />
 						<span class="ml-0.5">{m.commandPaletteOpen()}</span>
 					</span>
 				</div>
 				<div class="flex items-center gap-3">
 					<span class="flex items-center gap-1">
-						<kbd
-							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
-							>+</kbd
-						>
+						<Kbd keys={['+']} />
 						<span class="ml-0.5">{m.commandPaletteCreateHint()}</span>
 					</span>
 					<span class="flex items-center gap-1">
-						<kbd
-							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
-							>/</kbd
-						>
+						<Kbd keys={['/']} />
 						<span class="ml-0.5">{m.commandPaletteCommandHint()}</span>
 					</span>
 				</div>

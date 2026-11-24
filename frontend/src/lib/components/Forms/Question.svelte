@@ -203,6 +203,9 @@
 							>{safeTranslate(question.type)}</span
 						>
 					</p>
+					{#if question.annotation && !shallow}
+						<p class="text-xs text-surface-600-400 whitespace-pre-line">{question.annotation}</p>
+					{/if}
 
 					{#if shallow}
 						{#if Array.isArray(internalAnswers[urn]) && internalAnswers[urn].length > 0}
@@ -403,7 +406,7 @@
 						{#if form}
 							<textarea
 								placeholder=""
-								class="input w-full {_class}"
+								class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 								{disabled}
 								autocomplete="off"
 								bind:value={internalAnswers[urn]}
@@ -412,7 +415,7 @@
 							<div>
 								<textarea
 									placeholder=""
-									class="input w-full {_class}"
+									class="input w-full min-h-20 max-h-96 resize-y [field-sizing:content] {_class}"
 									{disabled}
 									autocomplete="off"
 									bind:value={questionBuffers[urn]}

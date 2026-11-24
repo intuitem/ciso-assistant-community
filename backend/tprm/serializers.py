@@ -574,6 +574,11 @@ class EntityAssessmentWriteSerializer(
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
 
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
     def validate(self, attrs):
         # Before super(): custom fields are scoped against attrs["folder"].
         instance = self.instance
@@ -779,6 +784,7 @@ class EntityAssessmentWriteSerializer(
     class Meta:
         model = EntityAssessment
         exclude = []
+        read_only_fields = ["compliance_assessment"]
 
 
 class EntityScoreReadSerializer(BaseModelSerializer):
@@ -989,6 +995,14 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
     def validate_entity(self, value):
         self._ensure_immutable("entity", value)
+        return value
+
+    def validate_create_user(self, value):
+        from iam.delegation import is_delegated
+
+        # creates a user account and emails an invitation: control plane
+        if value and is_delegated():
+            raise serializers.ValidationError("AI apps cannot create user accounts.")
         return value
 
     def to_representation(self, instance):
@@ -1220,6 +1234,18 @@ class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
             only then do we have the bound Solution).
         """
         subs = [entry["subcontractor"] for entry in value]
+        current = (
+            set(
+                self.instance.subcontracting_chain.values_list(
+                    "subcontractor_id", flat=True
+                )
+            )
+            if self.instance is not None
+            else set()
+        )
+        self._check_m2m_visibility(
+            {"subcontracting_chain": [s for s in subs if s.id not in current]}
+        )
         sub_ids = {s.id for s in subs}
         if len(subs) != len(sub_ids):
             raise serializers.ValidationError(

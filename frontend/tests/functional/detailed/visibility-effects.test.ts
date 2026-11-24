@@ -8,7 +8,7 @@
  * The editor itself is exercised by visibility-editor.test.ts.
  *
  * Companion tests:
- *   - visibility-editor.test.ts verifies the editor UI (pill state, cascade,
+ *   - visibility-editor.test.ts verifies the editor UI (per-role state, cascade,
  *     persistence) for one save cycle.
  *   - test_field_visibility.py (backend) covers the resolver helpers.
  */
@@ -16,8 +16,9 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
+import { BACKEND_API_URL, getAuthToken } from '../../utils/api.js';
 import { m } from '#paraglide/messages.js';
-import type { Page, BrowserContext } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
@@ -26,17 +27,6 @@ const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 type Pair = { auditor: 'edit' | 'hidden'; respondent: 'edit' | 'hidden' };
 const EVERYONE: Pair = { auditor: 'edit', respondent: 'edit' };
 const HIDDEN: Pair = { auditor: 'hidden', respondent: 'hidden' };
-
-/** Resolve the backend base URL the SvelteKit app was built with. */
-const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
-
-/** Extract the auth token the frontend stored after login. */
-async function getAuthToken(context: BrowserContext): Promise<string> {
-	const cookies = await context.cookies();
-	const token = cookies.find((c) => c.name === 'token')?.value;
-	if (!token) throw new Error('No `token` cookie found — is the user logged in?');
-	return token;
-}
 
 test('field visibility effects: each flag toggles the corresponding donut', async ({
 	logedPage,

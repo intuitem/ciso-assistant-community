@@ -78,6 +78,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * reference\_link - URL reference; also accepted as `link`
 * observation&#x20;
 * filtering\_labels - pipe- or comma-separated label names (created if missing)
+* lifecycle\_stage - the asset's lifecycle stage, by the name of any visible stage, built-in or custom, in either spelling (for example `phasing_out` or `Phasing out`, `active`, `retired`); a hidden or unknown stage is reported as an error. Also accepted as `lifecycle`
 * parent\_assets -comma- or pipe-separated list of parent asset `ref_id` values; parent links are resolved after all assets in the file are created, so forward references are supported
 * security\_objectives
   * confidentiality: 3,integrity: 2,availability: 1,...
@@ -213,6 +214,9 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `done`
 * score
   * integer within the requirement's effective scale — the audit's `min_score`/`max_score`, or the requirement's own bounds when it overrides them. Out-of-range values are rejected.
+* implementation\_score, documentation\_score
+  * the export's names for the two scores of an audit with a documentation score, on the same scale as `score`. Each is read on its own, so a row can carry only one of them; `score` is read when `implementation_score` is blank.
+  * importing a documentation score turns the documentation score on for the audit. On its own it does not mark the requirement as scored.
 * is\_score\_overridden
   * text: `true`, `yes`, `y`, `1`, `oui`, `vrai`, `x` for true — `false`, `no`, `n`, `0`, `non`, `faux` for false. Any other text is rejected and the row fails, so a typo can't silently clear an existing override.
   * numbers: only `0` (false) and `1` (true) are accepted; any other number is rejected.

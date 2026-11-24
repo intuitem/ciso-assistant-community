@@ -186,9 +186,7 @@ class TestRiskAssessmentAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
-        perimeter2 = Perimeter.objects.create(
-            name="test2", folder=Folder.objects.create(name="test2")
-        )
+        perimeter2 = Perimeter.objects.create(name="test2", folder=test.folder)
         risk_matrix_library = StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
         )

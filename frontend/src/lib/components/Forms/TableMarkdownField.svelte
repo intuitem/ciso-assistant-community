@@ -13,7 +13,7 @@
 	let {
 		value = $bindable(),
 		onSave,
-		placeholder = 'Double-click to add content...',
+		placeholder = m.markdownCTA(),
 		disabled = false
 	}: Props = $props();
 
@@ -56,27 +56,27 @@
 		<textarea
 			class="input w-full"
 			rows="5"
-			placeholder="You can use markdown formatting here..."
+			placeholder={m.markdownPlaceholder()}
 			bind:value={editValue}
 		></textarea>
 		<div class="flex justify-end items-center">
 			<div class="flex space-x-2">
 				<button type="button" class="btn btn-sm preset-tonal-primary" onclick={preview}>
 					<i class="fas fa-eye mr-1"></i>
-					Preview
+					{m.preview()}
 				</button>
 				<button class="btn btn-sm preset-filled-primary-500" onclick={saveChanges} type="button">
 					<i class="fa-solid fa-check mr-1"></i>
-					Save
+					{m.save()}
 				</button>
 				<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
 					<i class="fa-solid fa-xmark mr-1"></i>
-					Cancel
+					{m.cancel()}
 				</button>
 			</div>
 		</div>
 		<p class="text-xs text-surface-400-600">
-			Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+			{m.markdownHelpText()}
 		</p>
 	{:else}
 		<!-- Preview Mode -->
@@ -108,7 +108,7 @@
 				<div class="flex space-x-2">
 					<button type="button" class="btn btn-sm preset-tonal" onclick={startEdit}>
 						<i class="fas fa-edit mr-1"></i>
-						Edit
+						{m.edit()}
 					</button>
 					{#if isDirty}
 						<button
@@ -117,11 +117,11 @@
 							type="button"
 						>
 							<i class="fa-solid fa-check mr-1"></i>
-							Save
+							{m.save()}
 						</button>
 						<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
 							<i class="fa-solid fa-xmark mr-1"></i>
-							Cancel
+							{m.cancel()}
 						</button>
 					{/if}
 				</div>

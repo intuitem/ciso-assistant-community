@@ -69,6 +69,7 @@ READER_PERMISSIONS_LIST = [
     "view_cwe",
     "view_vulnerability",
     "view_user",
+    "view_user_full",
     "view_actor",
     "view_team",
     "view_usergroup",
@@ -418,6 +419,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "change_entity",
     "change_entityassessment",
     "change_evidence",
@@ -469,6 +472,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_auditpreparation",
     "view_entityscore",
     "add_entityscore",
     "change_entityscore",
@@ -881,6 +885,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "change_entity",
     "change_entityassessment",
     "change_evidence",
@@ -942,6 +948,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_auditpreparation",
     "view_entityscore",
     "add_entityscore",
     "change_entityscore",
@@ -1413,6 +1420,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_object_audittrail",
     "add_user",
     "view_user",
+    "view_user_full",
     "view_actor",
     "add_team",
     "view_team",
@@ -1500,7 +1508,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_riskmatrix",
     "add_complianceassessment",
     "view_complianceassessment",
+    "view_auditpreparation",
     "change_complianceassessment",
+    "add_auditpreparation",
+    "change_auditpreparation",
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
@@ -2360,7 +2371,7 @@ def startup(sender=None, **kwargs):
         ObjectClassification,
         Terminology,
     )
-    from iam.models import Folder, Role, User
+    from iam.models import ConnectionProfile, Folder, Role, User
     from tprm.models import Entity
     from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
@@ -2394,6 +2405,8 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+
+    ConnectionProfile.sync_builtin()
 
     # When nothing installed makes the default role configurable, it is
     # hard-coded: the root folder carries the baseline reader role and nothing
@@ -2499,6 +2512,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Metric Units", exc_info=True)
 
     try:
+        Terminology.create_default_asset_lifecycle_stages()
+    except Exception as e:
+        logger.error("Error creating default Asset Lifecycle Stages", exc_info=True)
+
+    try:
         Terminology.create_default_project_statuses()
     except Exception as e:
         logger.error("Error creating default Project Statuses", exc_info=True)
@@ -2536,6 +2554,13 @@ def startup(sender=None, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="glpi",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating GLPI IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")

@@ -61,7 +61,8 @@ the visual's values to force the join.
 
 ## Installation (Power BI Desktop)
 
-Both variants of the connector are attached to each release; pick the
+Both variants of the connector are attached to each release (see the
+[connector releases](https://github.com/intuitem/ciso-assistant-community/releases?q=powerbi&expanded=true)); pick the
 installation path that fits your environment:
 
 | | Path A — signed `.pqx` (recommended) | Path B — `.mez` |
@@ -133,7 +134,8 @@ Opening the starter template instead asks for the same URL up front, as a
 `BaseUrl` parameter. Change it later under **Transform data → Manage
 parameters** to repoint the whole report at another instance.
 
-`CisoAssistant-starter.pbit` is attached to every connector release so both
+`CisoAssistant-starter.pbit` is attached to every
+[connector release](https://github.com/intuitem/ciso-assistant-community/releases?q=powerbi&expanded=true) so both
 files come from one place (the source of truth is `samples/starter.pbit`). Its
 queries select navigator entries by name, so it works with any connector
 version that exposes the tables it names — newer templates may use tables an

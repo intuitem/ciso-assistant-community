@@ -21,7 +21,7 @@ graph LR
   ST -.->|change requested| CR[Change requested]
 ```
 
-A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The original objects remain unchanged — what's recorded is the validation flow itself, with the link back to whatever was up for approval.
+A **requester** submits a validation flow for one or more objects in their domain. The flow carries optional **request notes**, a **validation deadline**, and is routed to a designated **approver**. The approver moves the flow through a status machine ending in one of: _Accepted_, _Rejected_, _Change requested_, _Revoked_, _Expired_, or _Dropped_. The decision is recorded on the validation flow itself, with the link back to whatever was up for approval. Two things also change on the linked objects: accepting a flow locks its audits, risk assessments, business impact analyses and findings binders, and security exceptions follow the decision (see below).
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -55,7 +55,22 @@ The flow moves through a small state machine:
 | **Expired** | Validation deadline passed without a decision |
 | **Dropped** | Requester withdrew the flow before a decision was reached |
 
+The decision also carries onto linked **security exceptions**: _Accepted_ moves those in _Draft_ or _In review_ to _Approved_, _Rejected_ moves them to _Rejected_, and _Revoked_ sends _Approved_ ones back to _In review_. This only applies to exceptions the requester is allowed to edit, and an exception stays _Approved_ while another accepted flow still covers it. Exceptions in any other status are left alone, and their owners are notified of the change.
+
 The status is the audit-trail field that gets cited in evidence reports — "policy v3 was _Accepted_ by Jane Doe on 2026-03-12" is what makes the decision provable later.
+
+## The Validations page
+
+**Validations** in the sidebar is a personal inbox: _Approve what is waiting on you, follow up on what you sent._ It has four tabs, each with its count:
+
+- **Received** — flows **Submitted** to you, waiting for your decision.
+- **Sent** — flows you requested that are still open (submitted or with changes requested).
+- **History** — closed flows you took part in, as requester or approver: accepted, rejected, revoked, expired or dropped.
+- **All** — every flow you can see, as a regular table with filters.
+
+The page opens on the first tab with something in it. Each card shows the flow, its linked objects and its status, with the actions open to you: the approver can approve, reject or request changes, and later revoke an approval; the requester can resubmit after changes or drop the flow. Cards show the 100 most recent flows; the **All** tab holds the rest.
+
+To start a flow, open an audit, a policy or another object and use **Request validation**.
 
 ## Approver — user, not actor
 

@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
-	const endpoint = `${BASE_API_URL}/data-wizard/templates/${params.model}/`;
+	const endpoint = `${BASE_API_URL}/data-wizard/templates/${encodeURIComponent(params.model)}/`;
 
 	const templateResponse = await fetch(endpoint);
 

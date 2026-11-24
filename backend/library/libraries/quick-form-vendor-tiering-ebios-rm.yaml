@@ -6,7 +6,7 @@ description: 'A starter form to tier a vendor with the four EBIOS Risk Manager s
   it from a vendor with "Assess tier"; an accepted response writes the tier onto the vendor. It is an
   alternative to the "Vendor tiering" form: use one tiering method per organisation.'
 copyright: © intuitem. Criteria and rating scales after the EBIOS Risk Manager method, ANSSI.
-version: 2
+version: 3
 publication_date: '2026-10-08'
 provider: intuitem
 packager: intuitem
@@ -55,6 +55,8 @@ objects:
           label: Dépendance
         it:
           label: Dipendenza
+        de:
+          label: Abhängigkeit
     - ref_id: penetration
       label: Penetration
       kind: number
@@ -67,6 +69,8 @@ objects:
           label: Pénétration
         it:
           label: Penetrazione
+        de:
+          label: Durchdringung
     - ref_id: maturity
       label: Cyber maturity
       kind: number
@@ -79,6 +83,8 @@ objects:
           label: Maturité cyber
         it:
           label: Maturità cyber
+        de:
+          label: Cyberreife
     - ref_id: trust
       label: Trust
       kind: number
@@ -91,6 +97,8 @@ objects:
           label: Confiance
         it:
           label: Fiducia
+        de:
+          label: Vertrauen
     - ref_id: threat_level
       label: Threat level
       kind: number
@@ -100,6 +108,8 @@ objects:
           label: Niveau de menace
         it:
           label: Livello di minaccia
+        de:
+          label: Bedrohungsniveau
     pages:
     - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context
       ref_id: context
@@ -115,6 +125,8 @@ objects:
               text: Fournisseur
             it:
               text: Fornitore
+            de:
+              text: Anbieter
         urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context:question:service:
           type: text
           text: What service does the vendor provide?
@@ -123,11 +135,15 @@ objects:
               text: Quel service le fournisseur assure-t-il ?
             it:
               text: Quale servizio fornisce il fornitore?
+            de:
+              text: Welche Leistung erbringt der Anbieter?
       translations:
         fr:
           name: Contexte
         it:
           name: Contesto
+        de:
+          name: Kontext
     - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure
       ref_id: exposure
       name: Exposure
@@ -148,6 +164,9 @@ objects:
                 value: 1 – Non necessario
                 description: L’attività dell’organizzazione può essere svolta senza alcun collegamento con
                   i sistemi di questo fornitore.
+              de:
+                value: 1 – Nicht benötigt
+                description: Sie können Ihre Aufgaben ohne Anbindung an die Systeme dieses Anbieters erfüllen.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l2
             value: 2 – Useful
             description: The link helps carry out your mission, which could do without it.
@@ -159,6 +178,10 @@ objects:
                 value: 2 – Utile
                 description: Il collegamento agevola lo svolgimento dell’attività, che potrebbe comunque
                   proseguire senza di esso.
+              de:
+                value: 2 – Nützlich
+                description: Die Anbindung unterstützt Ihre Aufgabenerfüllung, ist dafür aber nicht zwingend
+                  erforderlich.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l3
             value: 3 – Essential, replaceable
             description: The link is essential, but another provider could take over.
@@ -170,6 +193,9 @@ objects:
               it:
                 value: 3 – Essenziale, fungibile
                 description: Il collegamento è essenziale, ma un altro fornitore potrebbe subentrare.
+              de:
+                value: 3 – Unverzichtbar, ersetzbar
+                description: Die Anbindung ist unverzichtbar, aber ein anderer Anbieter könnte sie übernehmen.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l4
             value: 4 – Essential, irreplaceable
             description: The link is essential and no other provider could take over.
@@ -181,12 +207,17 @@ objects:
               it:
                 value: 4 – Essenziale, non fungibile
                 description: Il collegamento è essenziale e nessun altro fornitore potrebbe subentrare.
+              de:
+                value: 4 – Unverzichtbar, nicht ersetzbar
+                description: Die Anbindung ist unverzichtbar und kein anderer Anbieter könnte sie übernehmen.
           translations:
             fr:
               text: La relation avec ce fournisseur est-elle vitale pour votre activité ?
             it:
               text: Quanto è essenziale il rapporto con questo fornitore per l’attività
                 dell’organizzazione?
+            de:
+              text: Wie entscheidend ist die Beziehung zu diesem Anbieter für Ihre Tätigkeit?
         urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:
           type: unique_choice
           text: How far does this vendor reach into your internal resources?
@@ -204,6 +235,10 @@ objects:
                 value: 1 – Nessun accesso o accesso come utente
                 description: Nessun accesso oppure privilegi di utente standard sui dispositivi degli
                   utenti finali, come postazioni di lavoro o telefoni.
+              de:
+                value: 1 – Kein Zugriff oder Benutzerzugriff
+                description: Kein Zugriff oder normale Benutzerrechte auf Endgeräten wie Arbeitsplätzen
+                  oder Telefonen.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l2
             value: 2 – Administrator of end-user devices
             description: Administrator rights on end-user devices or fleets, or physical access to your
@@ -217,6 +252,10 @@ objects:
                 value: 2 – Amministratore dei dispositivi degli utenti finali
                 description: Privilegi di amministratore sui dispositivi degli utenti finali o sui
                   relativi parchi dispositivi, oppure accesso fisico agli uffici.
+              de:
+                value: 2 – Administrator von Endgeräten
+                description: Administratorrechte auf Endgeräten oder Geräteflotten oder physischer Zugang
+                  zu Ihren Büroräumen.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l3
             value: 3 – Administrator of business servers
             description: 'Administrator rights on business servers: files, databases, web or application
@@ -230,6 +269,9 @@ objects:
                 value: 3 – Amministratore dei server applicativi
                 description: 'Privilegi di amministratore sui server applicativi: file server, database,
                   server web o applicativi.'
+              de:
+                value: 3 – Administrator von Geschäftsservern
+                description: 'Administratorrechte auf Geschäftsservern: Datei-, Datenbank-, Web- oder Anwendungsserver.'
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l4
             value: 4 – Administrator of the infrastructure
             description: Administrator rights on core infrastructure (directory, DNS, network, firewalls,
@@ -243,12 +285,18 @@ objects:
                 value: 4 – Amministratore dell’infrastruttura
                 description: Privilegi di amministratore sull’infrastruttura centrale (directory, DNS,
                   rete, firewall, hypervisor, storage) oppure accesso fisico alle sale server.
+              de:
+                value: 4 – Administrator der Infrastruktur
+                description: Administratorrechte auf zentraler Infrastruktur (Verzeichnisdienst, DNS, Netzwerk,
+                  Firewalls, Hypervisoren, Speicher) oder physischer Zugang zu Serverräumen.
           translations:
             fr:
               text: Jusqu'où ce fournisseur accède-t-il à vos ressources internes ?
             it:
               text: Fino a che punto questo fornitore può accedere alle risorse interne
                 dell’organizzazione?
+            de:
+              text: Wie weit reicht der Zugriff dieses Anbieters auf Ihre internen Ressourcen?
       translations:
         fr:
           name: Exposition
@@ -257,6 +305,10 @@ objects:
           name: Esposizione
           description: La rilevanza del fornitore per l’organizzazione e l’ampiezza del suo accesso ai
             sistemi interni.
+        de:
+          name: Exposition
+          description: Wie wichtig der Anbieter für Sie ist und wie weit sein Zugriff auf Ihre Systeme
+            reicht.
     - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability
       ref_id: reliability
       name: Cyber reliability
@@ -280,6 +332,10 @@ objects:
                 value: 1 – Non strutturato
                 description: Le misure di sicurezza di base sono applicate saltuariamente, nulla è
                   formalizzato e la risposta agli incidenti è incerta.
+              de:
+                value: 1 – Ad hoc
+                description: Grundlegende Cyberhygiene wird gelegentlich angewendet, nichts ist formell
+                  geregelt und die Reaktion auf Vorfälle ist ungewiss.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l2
             value: 2 – Reactive
             description: Hygiene rules and regulations are followed but not part of an overall policy;
@@ -294,6 +350,11 @@ objects:
                 description: Le regole di sicurezza di base e gli obblighi normativi sono rispettati, ma
                   non rientrano in una politica complessiva; la sicurezza è gestita quando emergono
                   problemi.
+              de:
+                value: 2 – Reaktiv
+                description: Regeln zur Cyberhygiene und Vorschriften werden eingehalten, sind aber nicht
+                  Teil einer übergreifenden Richtlinie; Sicherheitsprobleme werden erst bei ihrem Auftreten
+                  behandelt.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l3
             value: 3 – Policy-driven
             description: An overall security policy is applied, still mostly reactive, with some risks
@@ -307,6 +368,10 @@ objects:
                 value: 3 – Basata su politiche
                 description: È applicata una politica di sicurezza complessiva, ancora prevalentemente
                   reattiva, con alcuni rischi gestiti centralmente e anticipati.
+              de:
+                value: 3 – Richtlinienbasiert
+                description: Eine übergreifende Sicherheitsrichtlinie wird angewendet, weiterhin überwiegend
+                  reaktiv; einige Risiken werden zentral erfasst und vorausschauend berücksichtigt.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l4
             value: 4 – Managed and proactive
             description: The vendor manages its risks through an integrated, proactive security policy.
@@ -319,11 +384,17 @@ objects:
                 value: 4 – Gestita e proattiva
                 description: Il fornitore gestisce i propri rischi mediante una politica di sicurezza
                   integrata e proattiva.
+              de:
+                value: 4 – Gesteuert und proaktiv
+                description: Der Anbieter steuert seine Risiken mithilfe einer integrierten, proaktiven
+                  Sicherheitsrichtlinie.
           translations:
             fr:
               text: Quelles sont les capacités de ce fournisseur en matière de sécurité ?
             it:
               text: Quali sono le capacità di sicurezza di questo fornitore?
+            de:
+              text: Über welche Sicherheitsfähigkeiten verfügt dieser Anbieter?
         urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:
           type: unique_choice
           text: Could this vendor's intentions or interests run against yours?
@@ -338,6 +409,9 @@ objects:
               it:
                 value: 1 – Non definibili
                 description: Non si conoscono le intenzioni del fornitore.
+              de:
+                value: 1 – Unbekannt
+                description: Sie kennen die Absichten des Anbieters nicht.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l2
             value: 2 – Neutral
             description: The vendor's intentions are considered neutral.
@@ -348,6 +422,9 @@ objects:
               it:
                 value: 2 – Neutrali
                 description: Le intenzioni del fornitore sono considerate neutrali.
+              de:
+                value: 2 – Neutral
+                description: Die Absichten des Anbieters werden als neutral eingeschätzt.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l3
             value: 3 – Probably favourable
             description: The vendor's intentions are known and likely favourable to you.
@@ -359,6 +436,9 @@ objects:
                 value: 3 – Probabilmente favorevoli
                 description: Le intenzioni del fornitore sono note e probabilmente favorevoli
                   all’organizzazione.
+              de:
+                value: 3 – Vermutlich wohlwollend
+                description: Die Absichten des Anbieters sind bekannt und voraussichtlich für Sie günstig.
           - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l4
             value: 4 – Fully aligned
             description: The vendor's intentions are well known and fully compatible with yours.
@@ -371,6 +451,9 @@ objects:
                 value: 4 – Pienamente allineate
                 description: Le intenzioni del fornitore sono ben note e pienamente compatibili con quelle
                   dell’organizzazione.
+              de:
+                value: 4 – Vollständig übereinstimmend
+                description: Die Absichten des Anbieters sind gut bekannt und vollständig mit Ihren vereinbar.
           translations:
             fr:
               text: Les intentions ou les intérêts de ce fournisseur peuvent-ils être contraires aux vôtres
@@ -378,6 +461,8 @@ objects:
             it:
               text: Le intenzioni o gli interessi di questo fornitore potrebbero essere contrari a quelli
                 dell’organizzazione?
+            de:
+              text: Könnten die Absichten oder Interessen dieses Anbieters Ihren entgegenstehen?
       translations:
         fr:
           name: Fiabilité cyber
@@ -387,6 +472,10 @@ objects:
           name: Affidabilità cyber
           description: La capacità del fornitore di proteggersi e la convergenza dei suoi interessi con
             quelli dell’organizzazione. Livelli più elevati riducono la minaccia.
+        de:
+          name: Cyber-Zuverlässigkeit
+          description: Wie gut sich der Anbieter selbst schützt und ob seine Interessen mit Ihren
+            übereinstimmen. Höhere Werte verringern das Bedrohungsniveau.
     translations:
       fr:
         name: Criticité des fournisseurs (EBIOS RM)
@@ -419,6 +508,19 @@ objects:
           ciascuna organizzazione: modificarle nelle impostazioni del modulo secondo le proprie esigenze.
           I livelli sono identificati dalle rispettive chiavi, quindi la procedura continua a funzionare
           anche se la scala viene rinominata o riordinata.'
+      de:
+        name: Anbietereinstufung (EBIOS RM)
+        description: |-
+          Stuft einen Anbieter anhand der Stakeholder-Kriterien der EBIOS-Risk-Manager-Methode ein (ANSSI, Workshop 3): Exposition (Abhängigkeit, Durchdringung) und Cyber-Zuverlässigkeit (Cyberreife, Vertrauen), jeweils von 1 bis 4 bewertet.
+
+          Das Bedrohungsniveau berechnet sich als Abhängigkeit × Durchdringung ÷ (Reife × Vertrauen) und reicht von 0,06 bis 16. Anhand dieses Werts werden Stakeholder in der EBIOS-RM-Ökosystemkarte eingeordnet.
+        annotation: 'Eine angenommene Antwort setzt die Stufe des Anbieters auf der Standardskala
+          anhand des Bedrohungsniveaus und der Standardzonen der EBIOS-RM-Ökosystemkarte: Kritisch
+          ab 2,5 (Gefahrenzone), Wichtig ab 0,9 (Kontrollzone), Standard ab 0,2 (Beobachtungszone),
+          darunter Geringe Auswirkungen. EBIOS RM überlässt diese Schwellenwerte der jeweiligen
+          Organisation: Passen Sie sie in den Formulareinstellungen an Ihre eigenen Vorgaben an.
+          Die Stufen werden über ihre Schlüssel referenziert, sodass umbenannte oder neu geordnete
+          Skalen weiterhin funktionieren.'
 translations:
   fr:
     name: Criticité des fournisseurs (EBIOS RM)
@@ -432,3 +534,9 @@ translations:
       Manager di valutazione delle parti interessate. Avviarlo dalla scheda del fornitore con «Valuta
       livello»; una risposta accettata assegna il livello al fornitore. È un’alternativa al modulo
       «Classificazione dei fornitori»: utilizzare un solo metodo di classificazione per organizzazione.'
+  de:
+    name: Anbietereinstufung (EBIOS RM)
+    description: |-
+      Ein Einstiegsformular zur Einstufung eines Anbieters anhand der vier Kriterien für Stakeholder aus EBIOS Risk Manager. Starten Sie es bei einem Anbieter über „Stufe bewerten“; eine angenommene Antwort überträgt die Stufe auf den Anbieter. Es ist eine Alternative zum Formular „Anbietereinstufung“: Verwenden Sie pro Organisation eine Einstufungsmethode.
+
+      Hinweis zur Übersetzung: KI-gestützte Übersetzung der englischen Fassung, ohne unabhängige menschliche Prüfung. Im Zweifel gilt die englische Fassung.

@@ -15,7 +15,7 @@ description: "Indicateurs de s\xE9curit\xE9 des syst\xE8mes d'information d'impo
   \ de son \xE9valuation ; toute \xE9volution significative par rapport \xE0 l'\xE9\
   valuation pr\xE9c\xE9dente doit \xEAtre justifi\xE9e."
 copyright: "Loi fran\xE7aise"
-version: 1
+version: 2
 publication_date: 2026-07-28
 provider: "Gouvernement fran\xE7ais"
 packager: intuitem
@@ -37,6 +37,17 @@ translations:
 
       The English wording is an unofficial translation; the French text of the order
       prevails.'
+  de:
+    name: OIV-Regeln – Sicherheitskennzahlen
+    description: |-
+      Sicherheitskennzahlen für Informationssysteme von lebenswichtiger Bedeutung (SIIV), festgelegt in den französischen sektoralen Verordnungen zu den Sicherheitsregeln für Betreiber von lebenswichtiger Bedeutung (OIV) auf Grundlage der Artikel R. 1332-41-1 ff. des französischen Verteidigungsgesetzbuchs.
+
+      Jede Kennzahl ist ein für jedes SIIV zu ermittelnder und aktuell zu haltender Prozentsatz, der einmal jährlich an die ANSSI gemeldet wird. Ein niedrigerer Wert bedeutet eine bessere Beherrschung. Der Betreiber gibt für jede Kennzahl die verwendete Bewertungsmethode und gegebenenfalls die Unsicherheitsspanne seiner Bewertung an. Jede wesentliche Änderung gegenüber der vorherigen Bewertung ist zu begründen.
+
+      Die deutsche Fassung ist eine nicht amtliche Übersetzung; maßgeblich bleibt der französische Verordnungstext.
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten. Keine offizielle Übersetzung von intuitem oder der genannten Behörden; keine unabhängige menschliche Prüfung.
+    copyright: Französisches Recht
 objects:
   metric_definitions:
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-01
@@ -58,6 +69,12 @@ objects:
 
 
           Indicator relating to maintaining resources in secure conditions.'
+      de:
+        name: Arbeitsplätze mit nicht unterstützten Versionen
+        description: |-
+          Anteil der Benutzerarbeitsplätze in Prozent, deren Systemressourcen nicht in einer vom Anbieter oder Hersteller unterstützten Version installiert sind.
+
+          Kennzahl zur Aufrechterhaltung des sicheren Betriebs der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-02
     ref_id: IND-02
     name: "Serveurs en version non support\xE9e"
@@ -76,6 +93,12 @@ objects:
 
 
           Indicator relating to maintaining resources in secure conditions.'
+      de:
+        name: Server mit nicht unterstützten Versionen
+        description: |-
+          Anteil der Server in Prozent, deren Systemressourcen nicht in einer vom Anbieter oder Hersteller unterstützten Version installiert sind.
+
+          Kennzahl zur Aufrechterhaltung des sicheren Betriebs der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-03
     ref_id: IND-03
     name: "Postes utilisateurs non \xE0 jour depuis 15 jours"
@@ -97,6 +120,12 @@ objects:
 
 
           Indicator relating to maintaining resources in secure conditions.'
+      de:
+        name: Arbeitsplätze mit mindestens 15 Tagen Patchrückstand
+        description: |-
+          Anteil der Benutzerarbeitsplätze in Prozent, deren Systemressourcen seit mindestens 15 Tagen nach Bereitstellung aktualisierter Versionen nicht sicherheitsseitig aktualisiert oder gepatcht wurden.
+
+          Kennzahl zur Aufrechterhaltung des sicheren Betriebs der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-04
     ref_id: IND-04
     name: "Serveurs non \xE0 jour depuis 15 jours"
@@ -118,6 +147,12 @@ objects:
 
 
           Indicator relating to maintaining resources in secure conditions.'
+      de:
+        name: Server mit mindestens 15 Tagen Patchrückstand
+        description: |-
+          Anteil der Server in Prozent, deren Systemressourcen seit mindestens 15 Tagen nach Bereitstellung aktualisierter Versionen nicht sicherheitsseitig aktualisiert oder gepatcht wurden.
+
+          Kennzahl zur Aufrechterhaltung des sicheren Betriebs der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-05
     ref_id: IND-05
     name: "Utilisateurs sur comptes partag\xE9s"
@@ -136,6 +171,12 @@ objects:
 
           Indicator relating to user access rights and authentication of access to
           resources.'
+      de:
+        name: Benutzer mit gemeinsam genutzten Konten
+        description: |-
+          Anteil der Benutzer in Prozent, die mit gemeinsam genutzten Konten auf das SIIV zugreifen.
+
+          Kennzahl zu Benutzerzugriffsrechten und zur Authentifizierung beim Zugriff auf Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-06
     ref_id: IND-06
     name: "Utilisateurs sur comptes privil\xE9gi\xE9s"
@@ -154,6 +195,12 @@ objects:
 
           Indicator relating to user access rights and authentication of access to
           resources.'
+      de:
+        name: Benutzer mit privilegierten Konten
+        description: |-
+          Anteil der Benutzer in Prozent, die mit privilegierten Konten auf das SIIV zugreifen.
+
+          Kennzahl zu Benutzerzugriffsrechten und zur Authentifizierung beim Zugriff auf Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-07
     ref_id: IND-07
     name: Ressources aux secrets non modifiables
@@ -174,6 +221,12 @@ objects:
 
           Indicator relating to user access rights and authentication of access to
           resources.'
+      de:
+        name: Ressourcen mit unveränderbaren Authentifizierungsgeheimnissen
+        description: |-
+          Anteil der Ressourcen in Prozent, deren geheime Authentifizierungsinformationen vom Betreiber nicht geändert werden können.
+
+          Kennzahl zu Benutzerzugriffsrechten und zur Authentifizierung beim Zugriff auf Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-08
     ref_id: IND-08
     name: "Administration sans compte d\xE9di\xE9"
@@ -192,6 +245,12 @@ objects:
 
 
           Indicator relating to the administration of resources.'
+      de:
+        name: Administration ohne separates Konto
+        description: |-
+          Anteil der administrierten Ressourcen in Prozent, deren Administration über ein nicht ausschließlich für Administrationszwecke bestimmtes Konto erfolgt.
+
+          Kennzahl zur Administration der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-09
     ref_id: IND-09
     name: "Administration sans liaison physique d\xE9di\xE9e"
@@ -212,6 +271,12 @@ objects:
 
 
           Indicator relating to the administration of resources.'
+      de:
+        name: Administration ohne separate physische Verbindung
+        description: |-
+          Anteil der administrierten Ressourcen in Prozent, deren Administration nicht über eine physische Netzwerkverbindung oder eine physische Administrationsschnittstelle erfolgen kann.
+
+          Kennzahl zur Administration der Ressourcen.
   - urn: urn:intuitem:risk:metric:lpm-oiv:ind-10
     ref_id: IND-10
     name: "Flux d'administration non prot\xE9g\xE9s"
@@ -233,3 +298,9 @@ objects:
 
 
           Indicator relating to the administration of resources.'
+      de:
+        name: Ungeschützter Administrationsverkehr
+        description: |-
+          Anteil der administrierten Ressourcen in Prozent, deren Administrationsdatenverkehr nicht durch Verschlüsselungs- und Authentifizierungsmechanismen geschützt werden kann, wenn er außerhalb des Informationssystems für die Administration übertragen wird.
+
+          Kennzahl zur Administration der Ressourcen.

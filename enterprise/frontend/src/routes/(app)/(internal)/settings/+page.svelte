@@ -289,6 +289,21 @@
 									</div>
 								</a>
 							</div>
+							<div class="card p-4 bg-inherit flex flex-col space-y-3">
+								<a class="unstyled" href="/settings/integrations/glpi">
+									<div class="flex flex-col space-y-2 hover:bg-primary-50-950 card p-4">
+										<span class="flex flex-row justify-between text-xl">
+											<i class="text-indigo-700 dark:text-indigo-300 fa-solid fa-ticket"></i>
+											{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'glpi' && integration.configurations?.length)}
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											{/if}
+										</span>
+										<span class="flex flex-row space-x-2">
+											<h6 class="h6 text-typo-base-light">{m.glpi()}</h6>
+										</span>
+									</div>
+								</a>
+							</div>
 
 							<hr />
 						</dd>

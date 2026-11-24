@@ -43,12 +43,47 @@ test('user can add a custom metric sample to a metric instance', async ({
 	await test.step('create metric instance', async () => {
 		await metricInstancesPage.goto();
 		await metricInstancesPage.hasUrl();
-		await metricInstancesPage.createItem({
+		// The form defines a metric in one step by default: this one uses the
+		// definition created above.
+		await metricInstancesPage.addButton.first().click();
+		await metricInstancesPage.form.hasTitle();
+		await page.getByRole('radio', { name: 'Use an existing definition' }).click();
+		await metricInstancesPage.form.fill({
 			name: vars.metricInstanceName,
 			description: vars.description,
 			folder: vars.folderName,
 			metric_definition: vars.metricDefinitionName
 		});
+		await metricInstancesPage.form.saveButton.click();
+		await metricInstancesPage.isToastVisible(
+			'The metric instance object has been successfully created'
+		);
+	});
+
+	await test.step('create a metric in one step', async () => {
+		// The default mode: the definition is created with the metric.
+		await metricInstancesPage.goto();
+		await metricInstancesPage.hasUrl();
+		await metricInstancesPage.addButton.first().click();
+		await metricInstancesPage.form.hasTitle();
+		await metricInstancesPage.form.fill({
+			name: vars.metricInstanceName + ' one step',
+			folder: vars.folderName
+		});
+		await metricInstancesPage.form.saveButton.click();
+		await metricInstancesPage.isToastVisible(
+			'The metric instance object has been successfully created'
+		);
+		// The definition was created with it, under the metric's name.
+		await page.waitForURL(/\/metric-instances\/[0-9a-f-]{36}$/);
+		await expect(
+			page.locator('a[href^="/metric-definitions/"]', {
+				hasText: vars.metricInstanceName + ' one step'
+			})
+		).toBeVisible();
+		// Back to the list: the next step opens a metric from there.
+		await metricInstancesPage.goto();
+		await metricInstancesPage.hasUrl();
 	});
 
 	await test.step('add a custom metric sample', async () => {

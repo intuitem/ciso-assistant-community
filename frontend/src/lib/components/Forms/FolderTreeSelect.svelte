@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import type { CacheLock } from '#lib/utils/types.js';
 	import FolderTreeNode, { type TreeNode } from '../FocusMode/FolderTreeNode.svelte';
+	import { keepOnlyEnclaveOf } from './folder-tree';
 
 	const PERSONAL_SENTINEL = '__personal__';
 
@@ -31,9 +32,13 @@
 		 * Accepts the object itself or a plain UUID string.
 		 */
 		optionsSelf?: any;
+		/** Further folders to exclude with their subtree, as `optionsSelf` is. */
+		excludedIds?: string[];
 		/**
 		 * Defaults to ['DO', 'GL']
 		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
+		 * With 'GL', Global is the root of the tree; without it, Global is left
+		 * out and the domains sit at the top level.
 		 */
 		contentTypes?: string[];
 		/**
@@ -48,6 +53,11 @@
 		 * without write access do.
 		 */
 		allowedIds?: string[] | null;
+		/**
+		 * With 'EN' in contentTypes, list only the enclave holding the value the form
+		 * opened with (an object already filed there), not every third-party workspace.
+		 */
+		onlyCurrentEnclave?: boolean;
 	}
 
 	let {
@@ -67,9 +77,11 @@
 		onChange = () => {},
 		mount: mountCallback = () => null,
 		optionsSelf = null,
+		excludedIds = [],
 		contentTypes = ['DO', 'GL'],
 		writePermission = undefined,
-		allowedIds = null
+		allowedIds = null,
+		onlyCurrentEnclave = false
 	}: Props = $props();
 
 	// Write permission is inferred from ModelForm context: add_<model.name>.
@@ -121,37 +133,57 @@
 		orgTree && allowedIds ? restrict(orgTree, new Set(allowedIds.map(String))) : orgTree
 	);
 
-	// Include the GL root as a flat first entry
+	//  optionsSelf / excludedIds exclusion
+	const excludedSelf = $derived(
+		optionsSelf
+			? [
+					String(
+						typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
+					)
+				]
+			: []
+	);
+	const excluded: ReadonlySet<string> = $derived(
+		new Set([...excludedSelf, ...excludedIds.map(String)])
+	);
+
+	// Search walks the root on its own, then its children: results show the
+	// path below Global, which every folder shares. The children are listed
+	// beside the root, so excluding the root must drop them too.
 	const topNodes = $derived(
-		shownTree ? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])] : []
+		shownTree && !excluded.has(String(shownTree.uuid))
+			? [{ ...shownTree, children: undefined }, ...(shownTree.children ?? [])]
+			: []
 	);
 	const hasNodes = $derived(topNodes.length > 0);
+	// A node of a type that is not accepted hides its whole subtree, so Global
+	// can only be drawn as the root when it is accepted.
+	const showRoot = $derived(!!shownTree && contentTypes.includes(shownTree.content_type));
 
-	//  optionsSelf exclusion
-	const excludedId = $derived(
-		optionsSelf
-			? String(
-					typeof optionsSelf === 'object' ? (optionsSelf?.id ?? optionsSelf?.uuid) : optionsSelf
-				)
-			: null
-	);
-
-	/** Recursively prune the excluded node (and its subtree) from a node list. */
+	/** Recursively prune the excluded nodes (and their subtrees) from a node list. */
 	function pruneExcluded(nodes: TreeNode[]): TreeNode[] {
-		const eid = excludedId;
-		if (!eid) return nodes;
+		if (excluded.size === 0) return nodes;
 		return nodes
-			.filter((n) => n.uuid !== eid)
+			.filter((n) => !excluded.has(String(n.uuid)))
 			.map((n) => ({
 				...n,
 				children: n.children ? pruneExcluded(n.children) : undefined
 			}));
 	}
 
+	// What the tree draws: Global as the root with the domains under it, or the
+	// domains alone when Global is not accepted. An excluded Global leaves
+	// topNodes empty, so nothing is drawn.
+	const rootNode = $derived(
+		shownTree && showRoot && !excluded.has(String(shownTree.uuid))
+			? { ...shownTree, children: pruneExcluded(shownTree.children ?? []) }
+			: null
+	);
 	const sortedTopNodes = $derived.by(() => {
+		const domains = shownTree?.children ?? [];
 		const sorted = sortAsc
-			? [...topNodes].sort((a, b) => a.name.localeCompare(b.name))
-			: [...topNodes].sort((a, b) => b.name.localeCompare(a.name));
+			? [...domains].sort((a, b) => a.name.localeCompare(b.name))
+			: [...domains].sort((a, b) => b.name.localeCompare(a.name));
 		return pruneExcluded(sorted);
 	});
 
@@ -163,9 +195,11 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
+			// An excluded node's descendants are excluded too, as in the tree view.
+			if (excluded.has(String(n.uuid))) return;
 			const selectable =
 				(!n.content_type || contentTypes.includes(n.content_type)) && n.writable !== false;
-			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
+			if (selectable && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
 			(n.children ?? []).forEach((c) => visit(c, [...ancestors, n.name]));
@@ -324,7 +358,8 @@
 				if (res.ok) return res.json();
 			})
 			.then((data) => {
-				if (data) orgTree = data;
+				if (!data) return;
+				orgTree = onlyCurrentEnclave ? (keepOnlyEnclaveOf(data, $value) ?? undefined) : data;
 			})
 			.catch((e) => console.error('FolderTreeSelect: failed to fetch org_tree', e))
 			.finally(() => (isLoading = false));
@@ -542,16 +577,29 @@
 								</button>
 							</li>
 						{/if}
-						{#each sortedTopNodes as node (node.uuid ?? node.name)}
+						{#if rootNode}
+							<!-- The displayed path starts below Global, as it does in search results -->
 							<FolderTreeNode
-								{node}
+								node={rootNode}
 								{sortAsc}
 								{contentTypes}
 								focusId={$value ? String($value) : null}
-								onSelect={handleSelect}
+								onSelect={(id, name, path) => handleSelect(id, name, path.slice(1))}
 								depth={0}
+								expanded={true}
 							/>
-						{/each}
+						{:else}
+							{#each sortedTopNodes as node (node.uuid ?? node.name)}
+								<FolderTreeNode
+									{node}
+									{sortAsc}
+									{contentTypes}
+									focusId={$value ? String($value) : null}
+									onSelect={handleSelect}
+									depth={0}
+								/>
+							{/each}
+						{/if}
 					{/if}
 				</ul>
 			</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -68,17 +69,21 @@
 							value: number;
 							percent: number;
 						}) =>
-							`${params.seriesName} <br/>${translateName(params.name)} : ${params.value} (${params.percent}%)`
+							`${escapeHtml(params.seriesName)} <br/>${escapeHtml(translateName(params.name))} : ${params.value} (${params.percent}%)`
 					},
 					series: [
 						{
 							name: m.csfFunction(),
 							type: 'pie',
-							radius: [20, 100],
+							// Relative radius leaves room for side labels in narrow cards; long labels wrap.
+							radius: ['8%', '55%'],
 							roseType: 'area',
 							label: {
-								formatter: (params: { name: string }) => translateName(params.name)
+								formatter: (params: { name: string }) => translateName(params.name),
+								overflow: 'break',
+								width: 80
 							},
+							labelLine: { length: 8, length2: 6 },
 							data: dataWithColors
 						}
 					]

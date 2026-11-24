@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import (
+    AutoRefIdMixin,
     AbstractBaseModel,
     ETADueDateMixin,
     NameDescriptionMixin,
@@ -63,7 +64,11 @@ def get_initial_meta():
 
 
 class EbiosRMStudy(
-    NameDescriptionMixin, ETADueDateMixin, FolderMixin, FilteringLabelMixin
+    AutoRefIdMixin,
+    NameDescriptionMixin,
+    ETADueDateMixin,
+    FolderMixin,
+    FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
@@ -160,6 +165,9 @@ class EbiosRMStudy(
         help_text=_("Entity that is the focus of the study"),
         default=Entity.get_main_entity,
     )
+
+    auto_ref_id_prefix = "EBS"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True)
     version = models.CharField(
@@ -451,7 +459,7 @@ class EbiosRMStudy(
         return self.save()
 
 
-class FearedEvent(NameDescriptionMixin, FolderMixin):
+class FearedEvent(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -476,6 +484,9 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
 
+    auto_ref_id_prefix = "FE"
+    auto_ref_id_parent = "ebios_rm_study"
+
     ref_id = models.CharField(max_length=100, blank=True)
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
@@ -487,6 +498,8 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         verbose_name = _("Feared event")
         verbose_name_plural = _("Feared events")
         ordering = ["created_at"]
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         # Ensure the folder is set to the study's folder
@@ -634,6 +647,8 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("RO/TO couples")
         ordering = ["created_at"]
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         self.pertinence = rating_kit.pertinence(
@@ -775,6 +790,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.entity.name} ({self.category.get_name_translated if self.category else 'N/A'})"
 
+    folder_from = "ebios_rm_study"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -831,7 +848,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
 
 
-class StrategicScenario(NameDescriptionMixin, FolderMixin):
+class StrategicScenario(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -844,6 +861,9 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         on_delete=models.CASCADE,
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
+    auto_ref_id_prefix = "SS"
+    auto_ref_id_parent = "ebios_rm_study"
+
     ref_id = models.CharField(max_length=100, blank=True)
     focused_feared_event = models.ForeignKey(
         FearedEvent,
@@ -870,6 +890,8 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
 
     def get_scope(self):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
@@ -910,7 +932,7 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         )
 
 
-class AttackPath(NameDescriptionMixin, FolderMixin):
+class AttackPath(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -931,6 +953,12 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
 
+    auto_ref_id_prefix = "AP"
+    auto_ref_id_parent = "strategic_scenario"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.strategic_scenario, prefix)
+
     ref_id = models.CharField(max_length=100, blank=True)
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
@@ -944,6 +972,8 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
 
     def get_scope(self):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
@@ -962,13 +992,18 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         return result
 
     @classmethod
-    def get_default_ref_id(cls, strategic_scenario):
+    def get_default_ref_id(cls, strategic_scenario, prefix: str | None = None):
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         attack_paths_ref_ids = list(
             strategic_scenario.attack_paths.values_list("ref_id", flat=True)
         )
         nb_attack_paths = len(attack_paths_ref_ids) + 1
-        candidates = [f"AP.{i:02d}" for i in range(1, nb_attack_paths + 1)]
-        return next(x for x in candidates if x not in attack_paths_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_attack_paths + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in attack_paths_ref_ids if r}
+        )
 
     @property
     def form_display_name(self):
@@ -987,7 +1022,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         return self.strategic_scenario.gravity
 
 
-class ElementaryAction(NameDescriptionMixin, FolderMixin):
+class ElementaryAction(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
     ICON_MAP = {
         "server": {"hex": "f233", "fa": "fas fa-server"},
         "computer": {"hex": "f108", "fa": "fas fa-desktop"},
@@ -1034,6 +1069,9 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         ENTER = 1, "ebiosInitialAccess"
         DISCOVER = 2, "ebiosDiscovery"
         EXPLOIT = 3, "ebiosExploitation"
+
+    auto_ref_id_prefix = "EA"
+    auto_ref_id_parent = "folder"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
     technique = models.ForeignKey(
@@ -1088,7 +1126,13 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         ordering = ["name"]
 
 
-class OperatingMode(NameDescriptionMixin, FolderMixin):
+class OperatingMode(AutoRefIdMixin, NameDescriptionMixin, FolderMixin):
+    auto_ref_id_prefix = "MO"
+    auto_ref_id_parent = "operational_scenario"
+
+    def next_ref_id(self, prefix: str) -> str:
+        return self.get_default_ref_id(self.operational_scenario, prefix)
+
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name="Reference ID"
     )
@@ -1117,6 +1161,8 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         verbose_name = "Operating Mode"
         verbose_name_plural = "Operating Modes"
         ordering = ["created_at"]
+
+    folder_from = "operational_scenario"
 
     def save(self, *args, **kwargs):
         self.folder = self.operational_scenario.folder
@@ -1172,14 +1218,19 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
             self.save(update_fields=["computed_likelihood"])
 
     @classmethod
-    def get_default_ref_id(cls, operational_scenario):
+    def get_default_ref_id(cls, operational_scenario, prefix: str | None = None):
         """return associated risk assessment id"""
+        prefix = prefix or cls.current_auto_ref_id_prefix()
         operating_modes_ref_ids = [
             x.ref_id for x in operational_scenario.operating_modes.all()
         ]
         nb_operating_modes = len(operating_modes_ref_ids) + 1
-        candidates = [f"MO.{i:02d}" for i in range(1, nb_operating_modes + 1)]
-        return next(x for x in candidates if x not in operating_modes_ref_ids)
+        candidates = [f"{prefix}.{i:02d}" for i in range(1, nb_operating_modes + 1)]
+        return next(
+            x
+            for x in candidates
+            if x.lower() not in {r.lower() for r in operating_modes_ref_ids if r}
+        )
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
@@ -1234,6 +1285,8 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         verbose_name = _("Operational scenario")
         verbose_name_plural = _("Operational scenarios")
         ordering = ["created_at"]
+
+    folder_from = "ebios_rm_study"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
@@ -1501,6 +1554,8 @@ class KillChain(AbstractBaseModel, FolderMixin):
         verbose_name = "Kill Chain"
         verbose_name_plural = "Kill Chains"
         ordering = ["created_at"]
+
+    folder_from = "operating_mode"
 
     def save(self, *args, **kwargs):
         self.folder = self.operating_mode.folder

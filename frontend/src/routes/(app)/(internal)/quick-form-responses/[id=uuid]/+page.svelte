@@ -321,11 +321,6 @@
 					total: content.progress?.total_count ?? 0
 				})}
 			</span>
-			{#if content.score !== null && content.score !== undefined}
-				<span
-					><i class="fa-solid fa-star mr-1 text-surface-500"></i>{m.score()}: {content.score}</span
-				>
-			{/if}
 			{#if content.hidden_pages?.length}
 				<span class="text-surface-500"
 					><i class="fa-solid fa-eye-slash mr-1"></i>{m.quickFormHiddenPagesHint()}</span
@@ -821,13 +816,12 @@
 					<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
 				</button>
 				<span class="text-sm text-surface-500">{pageIndex + 1} / {stepCount}</span>
-				<!-- Last page and nothing missing: submit from here, not back at the top. -->
-				{#if pageIndex >= stepCount - 1 && canSubmit}
+				{#if pageIndex >= stepCount - 1 && response.status === 'draft' && (viewerIsRequester || content.can_edit_answers)}
 					<button
 						type="button"
 						class="btn preset-filled-success-500"
-						disabled={busy}
-						title={content.on_submit === 'apply' ? m.onSubmitApplies() : undefined}
+						disabled={busy || !content.progress?.complete}
+						title={content.progress?.complete ? m.quickFormComplete() : m.quickFormIncomplete()}
 						onclick={submit}
 						data-testid="submit-bottom"
 					>

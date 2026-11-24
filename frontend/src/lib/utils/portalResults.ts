@@ -5,7 +5,7 @@ export const RESULT_META = [
 	{ key: 'compliant', label: 'compliant', color: '#86efac' },
 	{ key: 'partially_compliant', label: 'partiallyCompliant', color: '#fde047' },
 	{ key: 'non_compliant', label: 'nonCompliant', color: '#f87171' },
-	{ key: 'not_applicable', label: 'notApplicable', color: '#000000' },
+	{ key: 'not_applicable', label: 'notApplicable', color: '#475569' },
 	{ key: 'not_assessed', label: 'notAssessed', color: '#d1d5db' }
 ] as const;
 

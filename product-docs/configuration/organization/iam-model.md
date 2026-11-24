@@ -54,6 +54,8 @@ CISO Assistant implements a robust **Role-Based Access Control (RBAC)** model th
 
 Each object type has granular **CRUD permissions** (create, read, update, delete). This model applies across all business entities: users, backups, risks, policies, incidents, data processing, and more. There are more than 200 permissions in CISO Assistant.
 
+Where some details of an object are only for some viewers, **View** gives the base view and a separate permission adds the rest. Compliance assessments have one: **View** gives the respondent view, and **See all requirements (auditor view)** adds the auditor view. Users have one too: **View** lists users with what pickers and owner fields need (name, email, visible groups), and **View full user record** adds their sign-in and administration details (superuser flag, MFA status, expiry date, local login, provisioning, observation). **Administrator** and **Reader** hold the full record; the other roles that see users hold **View** only. Users live in the Global domain, so only assignments on Global make the difference: a Global reader sees the full record, a reader on a domain doesn't. **Change** on users, assigned on Global, also shows the full record. Everyone sees their own full record. A user's audit trail follows the same rule. The **Users** page is listed for holders of the full record on Global, and for those who can change or create users there. Third-party users are listed only to those who can see one of their representatives or the full user record, and to themselves.
+
 #### Predefined Roles <a href="#ember940" id="ember940"></a>
 
 Permissions are grouped into a small set of **standard roles** — Administrator, Domain manager, Analyst, Reader, Approver, Respondent, Third-party respondent and Technical tester, plus User creator in the PRO edition.
@@ -139,7 +141,7 @@ Who is *not* a member follows from the definition — no exception list to remem
 
 Only roles containing view permissions can be used as a default role, and enclave domains cannot carry one.
 
-Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. In the community edition, the default role exists only on the root domain, fixed to **Baseline reader**, and cannot be changed.
+Configuring default roles is an **enterprise** capability: the domain form exposes the control there, and it can be tuned per domain — set to a narrower view-only role, or **cleared entirely** for domains that should share nothing ambiently. Clearing the root domain's default role gives the instance an **explicit-grant policy**: no ambient visibility at all, every access traceable to an assigned role. If the root domain carries a custom default role, leave **View full user record** out of it, or every member sees every user's full record. In the community edition, the default role exists only on the root domain, fixed to **Baseline reader**, and cannot be changed.
 
 #### Can I make an object visible to all users without attaching it to global?
 

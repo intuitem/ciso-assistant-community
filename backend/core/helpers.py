@@ -9,7 +9,7 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.db.models import Count
+from django.db.models import Case, Count, F, Q, When
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.views import api_settings
@@ -22,7 +22,12 @@ from statistics import mean
 import math
 
 from .models import *
-from .utils import build_answers_dict, camel_case
+from .utils import (
+    build_answers_dict,
+    camel_case,
+    escape_excel_formula,
+    restrict_to_respondent_assignments,
+)
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -59,19 +64,6 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "transfer": "#91cc75",
     "cancelled": "#9ca3af",
 }
-
-
-def color_css_class(status):
-    return {
-        "not_assessed": "gray-300",
-        "compliant": "green-500",
-        "to_do": "gray-400",
-        "in_progress": "blue-500",
-        "done": "green-500",
-        "non_compliant": "red-500",
-        "partially_compliant": "yellow-400",
-        "not_applicable": "black",
-    }.get(status)
 
 
 def applied_control_priority(user: User):
@@ -122,7 +114,7 @@ def compile_perimeter_for_composer(user: User, perimeters_list: list):
         "non_compliant": "#f87171",
         "to_do": "#d1d5db",
         "partially_compliant": "#fde047",
-        "not_applicable": "#000000",
+        "not_applicable": "#475569",
         "compliant": "#86efac",
     }
     for st in RequirementAssessment.Status:
@@ -669,6 +661,170 @@ def annotate_tree_with_coverage(tree: dict[str, dict], compliance_assessment) ->
     return tree
 
 
+_SOA_LABELS = {
+    "en": {
+        "ref_id": "Ref",
+        "name": "Control",
+        "applicable": "Applicable",
+        "justification": "Justification",
+        "result": "Compliance result",
+        "controls": "Applied controls (status)",
+        "risks": "Linked risk scenarios",
+        True: "Yes",
+        False: "No",
+        "compliant": "Compliant",
+        "partially_compliant": "Partially compliant",
+        "non_compliant": "Non-compliant",
+        "not_applicable": "Not applicable",
+        "not_assessed": "Not assessed",
+        # applied control statuses
+        "to_do": "To do",
+        "in_progress": "In progress",
+        "on_hold": "On hold",
+        "active": "Active",
+        "degraded": "Degraded",
+        "deprecated": "Deprecated",
+        "--": "Undefined",
+    },
+    "fr": {
+        "ref_id": "Réf.",
+        "name": "Mesure",
+        "applicable": "Applicable",
+        "justification": "Justification",
+        "result": "Résultat de conformité",
+        "controls": "Mesures appliquées (statut)",
+        "risks": "Scénarios de risque liés",
+        True: "Oui",
+        False: "Non",
+        "compliant": "Conforme",
+        "partially_compliant": "Partiellement conforme",
+        "non_compliant": "Non conforme",
+        "not_applicable": "Non applicable",
+        "not_assessed": "Non évalué",
+        # applied control statuses
+        "to_do": "À faire",
+        "in_progress": "En cours",
+        "on_hold": "En attente",
+        "active": "Actif",
+        "degraded": "Dégradé",
+        "deprecated": "Obsolète",
+        "--": "Non défini",
+    },
+    "nl": {
+        "ref_id": "Ref.",
+        "name": "Maatregel",
+        "applicable": "Toepasselijk",
+        "justification": "Rechtvaardiging",
+        "result": "Conformiteitsresultaat",
+        "controls": "Toegepaste maatregelen (status)",
+        "risks": "Gekoppelde risicoscenario's",
+        True: "Ja",
+        False: "Nee",
+        "compliant": "Conform",
+        "partially_compliant": "Gedeeltelijk conform",
+        "non_compliant": "Niet conform",
+        "not_applicable": "Niet van toepassing",
+        "not_assessed": "Niet beoordeeld",
+        # applied control statuses
+        "to_do": "Te doen",
+        "in_progress": "In uitvoering",
+        "on_hold": "In de wacht",
+        "active": "Actief",
+        "degraded": "Verminderd",
+        "deprecated": "Verouderd",
+        "--": "Niet bepaald",
+    },
+    "de": {
+        "ref_id": "Ref.",
+        "name": "Maßnahme",
+        "applicable": "Anwendbar",
+        "justification": "Begründung",
+        "result": "Konformitätsergebnis",
+        "controls": "Umgesetzte Maßnahmen (Status)",
+        "risks": "Verknüpfte Risikoszenarien",
+        True: "Ja",
+        False: "Nein",
+        "compliant": "Konform",
+        "partially_compliant": "Teilweise konform",
+        "non_compliant": "Nicht konform",
+        "not_applicable": "Nicht anwendbar",
+        "not_assessed": "Nicht bewertet",
+        # applied control statuses
+        "to_do": "Zu erledigen",
+        "in_progress": "In Bearbeitung",
+        "on_hold": "Pausiert",
+        "active": "Aktiv",
+        "degraded": "Beeinträchtigt",
+        "deprecated": "Veraltet",
+        "--": "Nicht definiert",
+    },
+    "hu": {
+        "ref_id": "Hiv.",
+        "name": "Kontroll",
+        "applicable": "Alkalmazható",
+        "justification": "Indoklás",
+        "result": "Megfelelőségi eredmény",
+        "controls": "Alkalmazott kontrollok (állapot)",
+        "risks": "Kapcsolt kockázati forgatókönyvek",
+        True: "Igen",
+        False: "Nem",
+        "compliant": "Megfelel",
+        "partially_compliant": "Részben megfelel",
+        "non_compliant": "Nem felel meg",
+        "not_applicable": "Nem alkalmazható",
+        "not_assessed": "Nem értékelt",
+        # applied control statuses
+        "to_do": "Teendő",
+        "in_progress": "Folyamatban",
+        "on_hold": "Felfüggesztve",
+        "active": "Aktív",
+        "degraded": "Leromlott",
+        "deprecated": "Elavult",
+        "--": "Nincs meghatározva",
+    },
+}
+
+
+def soa_rows(tree: dict, lang: str = "en") -> list[dict]:
+    """Flatten an `enrich_tree_for_soa` tree into one row per assessable requirement,
+    in tree order, with headers in `lang` (falls back to English)."""
+    labels = _SOA_LABELS.get((lang or "en").split("-")[0], _SOA_LABELS["en"])
+    rows = []
+
+    def walk(node):
+        if node.get("assessable") and node.get("ra_id"):
+            row = {
+                labels["ref_id"]: node.get("ref_id") or "",
+                labels["name"]: node.get("name") or node.get("description") or "",
+                # Same rule as the SoA page (SoaTreeSection.svelte)
+                labels["applicable"]: labels.get(
+                    False
+                    if node.get("result") == "not_applicable"
+                    else node.get("selected"),
+                    "",
+                ),
+                labels["justification"]: node.get("observation") or "",
+                labels["result"]: labels.get(
+                    node.get("result"), node.get("result") or ""
+                ),
+                labels["controls"]: "\n".join(
+                    f"{c['ref_id'] + ' ' if c['ref_id'] else ''}{c['name']} ({labels.get(c['status'], c['status'])})"
+                    for c in node.get("applied_controls") or []
+                ),
+                labels["risks"]: "\n".join(
+                    rs["name"] for rs in node.get("risk_scenarios") or []
+                ),
+            }
+            # user-editable text: a leading = + - @ must not become a formula
+            rows.append({k: escape_excel_formula(v) for k, v in row.items()})
+        for child in node.get("children", {}).values():
+            walk(child)
+
+    for node in tree.values():
+        walk(node)
+    return rows
+
+
 def enrich_tree_for_soa(
     tree: dict,
     ra_lookup: dict,
@@ -1111,6 +1267,10 @@ def combined_assessments_per_status(
             user, model, scoped_folder
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
+        if model is ComplianceAssessment:
+            viewable_assessments = restrict_to_respondent_assignments(
+                user, viewable_assessments, "requirement_assignments__actor__in"
+            )
 
         # Count by status in a single query
         status_counts = dict(
@@ -1423,14 +1583,24 @@ def build_audits_tree_metrics(user):
     return tree
 
 
+def _respondent_scoped_audit_ids(user, scoped_folder):
+    return restrict_to_respondent_assignments(
+        user,
+        ComplianceAssessment.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                user, ComplianceAssessment, scoped_folder
+            )
+        ),
+        "requirement_assignments__actor__in",
+    ).values_list("id", flat=True)
+
+
 def build_audits_stats(user, folder_id=None, object_ids=None):
     if object_ids is None:
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        object_ids = RoleAssignment.get_viewable_object_ids(
-            user, ComplianceAssessment, scoped_folder
-        )
+        object_ids = _respondent_scoped_audit_ids(user, scoped_folder)
     top_audits = list(
         ComplianceAssessment.objects.filter(id__in=object_ids)
         .order_by("-updated_at")
@@ -1509,19 +1679,39 @@ def get_metrics(user: User, folder_id):
         return model.objects.filter(id__in=object_ids)
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
-    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
-    viewable_compliance_assessments = viewable_items(ComplianceAssessment, folder_id)
-    viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
+    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id).exclude(
+        INACTIVE_ASSESSMENT
+    )
+    viewable_compliance_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
+    )
+    viewable_risk_scenarios = exclude_inactive_parent(
+        viewable_items(RiskScenario, folder_id), "risk_assessment"
+    )
     viewable_threats = viewable_items(Threat, folder_id)
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
-    viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
+    viewable_requirement_assessments = restrict_to_respondent_assignments(
+        user,
+        exclude_inactive_parent(
+            viewable_items(RequirementAssessment, folder_id), "compliance_assessment"
+        ),
+        "assignments__actor__in",
+    )
+    from core.utils import get_respondent_scoped_folder_ids
+    from privacy.models import RightRequest
+    from tprm.models import Contract, EntityAssessment
+
+    today = date.today()
+    soon = today + timedelta(days=30)
     controls_count = viewable_controls.count()
     missed_eta_count = (
         viewable_controls.filter(
             eta__lt=date.today(),
         )
-        .exclude(status="active")
+        .exclude(status__in=CONTROLS_NOT_PENDING)
         .count()
     )
 
@@ -1534,16 +1724,40 @@ def get_metrics(user: User, folder_id):
             "active": viewable_controls.filter(status="active").count(),
             "degraded": viewable_controls.filter(status="degraded").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
-            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
+            "p1": viewable_controls.filter(priority=1)
+            .exclude(status__in=CONTROLS_NOT_PENDING)
+            .count(),
             "eta_missed": missed_eta_count,
+            "no_status": viewable_controls.filter(
+                Q(status=AppliedControl.Status.UNDEFINED) | Q(status__isnull=True)
+            ).count(),
         },
         "risk": {
             "assessments": viewable_risk_assessments.count(),
             "scenarios": viewable_risk_scenarios.count(),
+            "high_inherent": count_top_risk_levels(
+                viewable_risk_scenarios, "inherent_level"
+            ),
+            "high_current": count_top_risk_levels(
+                viewable_risk_scenarios, "current_level"
+            ),
+            "high_residual": count_top_risk_levels(
+                viewable_risk_scenarios, "residual_level"
+            ),
             "threats": viewable_threats.filter(risk_scenarios__isnull=False)
             .distinct()
             .count(),
             "acceptances": viewable_risk_acceptances.count(),
+            "expired_acceptances": viewable_risk_acceptances.filter(
+                state="accepted", expiry_date__lt=today
+            ).count(),
+            "overdue_assessments": viewable_risk_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
+            # Still approved past their end date: the risk is back on the clock.
+            "expired_exceptions": viewable_items(SecurityException, folder_id)
+            .filter(status=SecurityException.Status.APPROVED, expiration_date__lt=today)
+            .count(),
         },
         "compliance": {
             "used_frameworks": viewable_compliance_assessments.values("framework_id")
@@ -1555,13 +1769,276 @@ def get_metrics(user: User, folder_id):
             ).count(),
             "evidences": viewable_evidences.count(),
             "expired_evidences": viewable_evidences.filter(status="expired").count(),
+            "expiring_evidences": viewable_evidences.filter(
+                expiry_date__gte=today, expiry_date__lte=soon
+            )
+            .exclude(status="expired")
+            .count(),
+            # Only those this user can review: change access, outside respondent scope.
+            "evidences_to_review": viewable_evidences.filter(
+                id__in=RoleAssignment.get_changeable_object_ids(user, Evidence),
+                revisions__in=EvidenceRevision.current_with_content().filter(
+                    review_status=EvidenceRevision.ReviewStatus.PENDING
+                ),
+            )
+            .exclude(folder_id__in=get_respondent_scoped_folder_ids(user))
+            .distinct()
+            .count(),
+            "overdue_audits": viewable_compliance_assessments.filter(
+                due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES
+            ).count(),
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
+            "partially_compliant_items": viewable_requirement_assessments.filter(
+                result="partially_compliant"
+            ).count(),
+            # Requirements with a verdict: the base of the non-compliant share.
+            "assessed_items": viewable_requirement_assessments.filter(
+                result__in=["compliant", "partially_compliant", "non_compliant"]
+            ).count(),
+        },
+        "operations": {
+            "open_incidents": viewable_items(Incident, folder_id)
+            .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+            .count(),
+            "open_findings": exclude_inactive_parent(
+                viewable_items(Finding, folder_id), "findings_assessment"
+            )
+            .exclude(status__in=FINDING_CLOSED_STATUSES)
+            .count(),
+            "overdue_tasks": overdue_task_templates(
+                viewable_items(TaskTemplate, folder_id)
+            ).count(),
+            "nis2_overdue_incidents": nis2_overdue_incidents(
+                viewable_items(Incident, folder_id)
+            ).count(),
+            "overdue_vulnerabilities": viewable_items(Vulnerability, folder_id)
+            .annotate(**Vulnerability.sla_state_annotations(today))
+            .filter(sla_state="overdue")
+            .count(),
+        },
+        "third_party": {
+            "overdue_assessments": viewable_items(EntityAssessment, folder_id)
+            .filter(due_date__lt=today, status__in=OPEN_ASSESSMENT_STATUSES)
+            .count(),
+            "ending_contracts": viewable_items(Contract, folder_id)
+            .filter(
+                status=Contract.Status.ACTIVE,
+                end_date__gte=today,
+                end_date__lte=soon,
+            )
+            .count(),
+        },
+        "privacy": {
+            # GDPR gives a month: flag them a week ahead, and once late.
+            "right_requests_due": viewable_items(RightRequest, folder_id)
+            .filter(due_date__lte=today + timedelta(days=7))
+            .exclude(status="done")
+            .count(),
         },
         "csf_functions": csf_functions(user, folder_id),
+        # Root snapshots cover the whole organisation, not a single domain.
+        "trends": None if folder_id else get_summary_trends(user),
     }
     return data
+
+
+SUMMARY_TREND_DAYS = 30
+# Snapshot keys trended on the analytics summary; computed in
+# metrology.models.BuiltinMetricSample._compute_folder_metrics with the same definitions.
+SUMMARY_TREND_KEYS = [
+    "audits_avg_assessed",
+    "non_compliant_items",
+    "partially_compliant_items",
+    "total_risk_scenarios",
+    "risk_scenarios_high_current",
+    "risk_scenarios_high_residual",
+    "incidents_open",
+    "controls_eta_missed",
+    "controls_p1_pending",
+    "task_templates_overdue",
+    "findings_open",
+    "evidence_expired",
+    "controls_no_status",
+]
+# Models the root snapshot counts: a trend is only shown to users who can see all of them.
+SUMMARY_TREND_MODELS = (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RiskScenario,
+    Incident,
+    Finding,
+    Evidence,
+    TaskNode,
+)
+
+
+def get_summary_trends(user: User):
+    """Daily series of the summary figures from the root folder snapshots.
+
+    The root snapshot is organisation-wide, so it is only returned to users with a
+    recursive view grant on the root folder for every counted model; others get None.
+    """
+    from django.contrib.contenttypes.models import ContentType
+    from metrology.models import BuiltinMetricSample
+
+    from core.utils import get_respondent_scoped_folder_ids
+
+    if get_respondent_scoped_folder_ids(user):
+        return None
+    root = Folder.get_root_folder()
+    for model in SUMMARY_TREND_MODELS:
+        grants = RoleAssignment._get_grant_folder_set(user, ("view", model))
+        if root.id not in grants.recursive_grant_folder_ids:
+            return None
+
+    samples = (
+        BuiltinMetricSample.objects.filter(
+            content_type=ContentType.objects.get_for_model(Folder),
+            object_id=root.id,
+            date__gte=date.today() - timedelta(days=SUMMARY_TREND_DAYS),
+            date__lt=date.today(),
+        )
+        .order_by("date")
+        .values_list("date", "metrics")
+    )
+    # Domain saves don't refresh the root snapshot, so today's point is computed live.
+    live = {
+        **BuiltinMetricSample._compute_summary_metrics(root),
+        "controls_status_breakdown": {
+            "active": AppliedControl.objects.filter(status="active").count()
+        },
+    }
+    samples = [*samples, (date.today(), live)]
+    series = {key: [] for key in ["active_controls", *SUMMARY_TREND_KEYS]}
+    for day, metrics in samples:
+        values = {
+            "active_controls": (metrics.get("controls_status_breakdown") or {}).get(
+                "active"
+            ),
+            **{key: metrics.get(key) for key in SUMMARY_TREND_KEYS},
+        }
+        for key, value in values.items():
+            # Snapshots taken before a metric existed simply lack it.
+            if value is not None:
+                series[key].append([day.isoformat(), value])
+    return series
+
+
+def overdue_task_templates(templates):
+    """Enabled tasks with a past occurrence still open: the task list's "overdue" filter."""
+    return templates.filter(
+        enabled=True,
+        id__in=TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        ).values("task_template_id"),
+    )
+
+
+# Controls nothing is waiting on: in place, or retired.
+CONTROLS_NOT_PENDING = [AppliedControl.Status.ACTIVE, AppliedControl.Status.DEPRECATED]
+
+
+# Assessments with no status are drafts; with deprecated ones, the summary leaves them out.
+INACTIVE_ASSESSMENT = Q(status__isnull=True) | Q(status=Assessment.Status.DEPRECATED)
+# Started or not, still expected to finish.
+OPEN_ASSESSMENT_STATUSES = [
+    Assessment.Status.PLANNED,
+    Assessment.Status.IN_PROGRESS,
+    Assessment.Status.IN_REVIEW,
+]
+
+
+def inactive_parent(parent: str) -> Q:
+    """Children of a draft or deprecated assessment; those without a parent are not."""
+    return Q(**{f"{parent}__isnull": False}) & (
+        Q(**{f"{parent}__status__isnull": True})
+        | Q(**{f"{parent}__status": Assessment.Status.DEPRECATED})
+    )
+
+
+def exclude_inactive_parent(qs, parent: str):
+    return qs.exclude(inactive_parent(parent))
+
+
+def nis2_overdue_incidents(incidents):
+    """Open significant incidents with a NIS2 stage past due that no later stage has
+    superseded (a missed early warning stops counting once the notification is sent):
+    the incident list's "nis2_overdue" filter."""
+    # A fresh, narrow queryset: the deadlines need a few columns, not the list's prefetches.
+    candidates = (
+        Incident.objects.filter(
+            pk__in=incidents.values("pk"),
+            nis2_significant=True,
+            nis2_final_report_at__isnull=True,
+        )
+        .exclude(status__in=[Incident.Status.CLOSED, Incident.Status.DISMISSED])
+        .only(
+            "reported_at",
+            "created_at",
+            "nis2_significant",
+            "nis2_early_warning_at",
+            "nis2_notification_at",
+            "nis2_final_report_at",
+        )
+    )
+    late = []
+    for incident in candidates:
+        stages = incident.nis2_deadlines()
+        if any(
+            stage["overdue"] and not any(later["done_at"] for later in stages[i + 1 :])
+            for i, stage in enumerate(stages)
+        ):
+            late.append(incident.pk)
+    return incidents.filter(pk__in=late)
+
+
+FINDING_CLOSED_STATUSES = [
+    Finding.Status.DISMISSED,
+    Finding.Status.MITIGATED,
+    Finding.Status.RESOLVED,
+    Finding.Status.CLOSED,
+    Finding.Status.DEPRECATED,
+]
+
+
+def filter_top_risk_levels(scenarios, level_field: str):
+    """Scenarios in the top levels of their own matrix (top 2, or top 1 on matrices of 3 levels or fewer).
+
+    Levels are matrix-relative, so they are compared per matrix rather than merged by name.
+    An unassessed inherent or residual level counts at the current level: nothing shows
+    the risk was lower before controls, or that it was treated.
+    """
+    if level_field in ("inherent_level", "residual_level"):
+        scenarios = scenarios.annotate(
+            effective_level=Case(
+                When(**{f"{level_field}__lt": 0}, then=F("current_level")),
+                default=F(level_field),
+            )
+        )
+        level_field = "effective_level"
+    matrix_ids = scenarios.values_list(
+        "risk_assessment__risk_matrix_id", flat=True
+    ).distinct()
+    q = Q(pk__in=[])
+    for matrix_id, json_def in RiskMatrix.objects.filter(id__in=matrix_ids).values_list(
+        "id", "json_definition"
+    ):
+        n = len((json_def or {}).get("risk", []))
+        if n == 0:
+            continue
+        threshold = n - min(2, max(n // 2, 1))
+        q |= Q(
+            risk_assessment__risk_matrix_id=matrix_id,
+            **{f"{level_field}__gte": threshold},
+        )
+    return scenarios.filter(q)
+
+
+def count_top_risk_levels(scenarios, level_field: str) -> int:
+    return filter_top_risk_levels(scenarios, level_field).count()
 
 
 def _compute_progress_by_assessment(assessment_ids: QuerySet[UUID]) -> dict[UUID, int]:
@@ -1610,13 +2087,18 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids = RoleAssignment.get_viewable_object_ids(
-        user, ComplianceAssessment, scoped_folder
+    object_ids = (
+        ComplianceAssessment.objects.filter(
+            id__in=_respondent_scoped_audit_ids(user, scoped_folder)
+        )
+        .exclude(INACTIVE_ASSESSMENT)
+        .values_list("id", flat=True)
     )
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
     return {
         "progress_avg": progress_avg,
+        "audits_count": len(progresses),
         "audits_stats": build_audits_stats(user, folder_id, object_ids=object_ids),
     }
 
@@ -1659,8 +2141,10 @@ def get_compliance_analytics(user: User, folder_id=None):
         object_ids = RoleAssignment.get_viewable_object_ids(user, model, scoped_folder)
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = viewable_items(
-        ComplianceAssessment, folder_id
+    viewable_assessments = restrict_to_respondent_assignments(
+        user,
+        viewable_items(ComplianceAssessment, folder_id),
+        "requirement_assignments__actor__in",
     ).select_related("framework", "folder", "perimeter")
 
     progress_by_id = _compute_progress_by_assessment(
@@ -1800,14 +2284,7 @@ def risk_status(user: User, risk_assessment_list):
         "transfer": list(),
         "cancelled": list(),
     }
-    mtg_status_out = {
-        "--": list(),
-        "to_do": list(),
-        "in_progress": list(),
-        "on_hold": list(),
-        "active": list(),
-        "deprecated": list(),
-    }
+    mtg_status_out = {status: list() for status in AppliedControl.Status.values}
 
     max_tmp = list()
     abbreviations = [x[0] for x in get_rating_options_abbr(user)]
@@ -1877,7 +2354,10 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
+def build_scenario_clusters(
+    risk_assessment: RiskAssessment, include_inherent=False, scenarios=None
+):
+    """Scenario ref_ids per matrix cell; `scenarios` narrows it to a selection."""
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
@@ -1890,9 +2370,9 @@ def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=Fa
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
-    for ri in RiskScenario.objects.filter(risk_assessment=risk_assessment).order_by(
-        "created_at"
-    ):
+    if scenarios is None:
+        scenarios = RiskScenario.objects.filter(risk_assessment=risk_assessment)
+    for ri in scenarios.order_by("created_at"):
         if ri.current_level >= 0:
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
@@ -2223,6 +2703,75 @@ def handle(exc, context):
     return drf_exception_handler(exc, context)
 
 
+def is_visible_from_folder(
+    obj: models.Model,
+    target_folder: Folder,
+    target_parent_folders: list[Folder],
+    sub_folders: list[Folder],
+    model_class: type[models.Model] | None = None,
+) -> bool:
+    """
+    Whether the users of `target_folder` can see `obj`: it lives in that folder or
+    one of its sub-folders, or in a parent folder whose `default_role` grants the
+    view permission on its model.
+    """
+    model_class = model_class or type(obj)
+    folder = obj.folder
+    if folder == target_folder or folder in sub_folders:
+        return True
+    return (
+        folder in target_parent_folders
+        and folder.default_role is not None
+        and folder.default_role.permissions.filter(
+            codename=f"view_{model_class._meta.model_name}"
+        ).exists()
+    )
+
+
+def resolve_related_object(
+    obj: models.Model,
+    target_folder: Folder,
+    target_parent_folders: list[Folder],
+    sub_folders: list[Folder],
+    model_class: type[models.Model] | None = None,
+    before_copy=None,
+) -> tuple[models.Model, bool]:
+    """
+    What a copy placed in `target_folder` should point at instead of `obj`.
+
+    An object with the same name already in the target folder is reused, `obj`
+    itself is kept when the target folder can see it or is built-in (code-managed,
+    never duplicated), and otherwise `obj` is copied into the target folder
+    (`before_copy(model)` runs first, e.g. to check the add permission).
+    Returns `(object, created)`.
+    """
+    model_class = model_class or type(obj)
+    if getattr(obj, "builtin", False):
+        return obj, False
+
+    existing_obj = model_class.objects.filter(
+        name=obj.name, folder=target_folder
+    ).first()
+    if existing_obj:
+        return existing_obj, False
+
+    if is_visible_from_folder(
+        obj, target_folder, target_parent_folders, sub_folders, model_class
+    ):
+        return obj, False
+
+    if before_copy is not None:
+        before_copy(type(obj))
+    # Copy every concrete field except the primary key, into the target folder
+    field_values = {
+        field.name: getattr(obj, field.name)
+        for field in obj._meta.fields
+        if not field.primary_key and not field.auto_created
+    }
+    field_values["folder"] = target_folder
+    return type(obj).objects.create(**field_values), True
+
+
 def duplicate_related_objects(
     source_object: models.Model,
     duplicate_object: models.Model,
@@ -2238,97 +2787,17 @@ def duplicate_related_objects(
     - target_folder (Folder): The folder where duplicated objects will be stored.
     - field_name (str): The field name representing the related objects in the source
     """
-
-    def process_related_object(
-        obj,
-        duplicate_object,
-        target_folder,
-        target_parent_folders,
-        sub_folders,
-        field_name,
-        model_class,
-    ):
-        """
-        Process a single related object: add, link, or duplicate it based on folder and existence checks.
-        """
-
-        # Check if the object already exists in the target folder
-        existing_obj = get_existing_object(obj, target_folder, model_class)
-
-        if existing_obj:
-            # If the object exists in the target folder, link it to the duplicate object
-            link_existing_object(duplicate_object, existing_obj, field_name)
-
-        elif (
-            obj.folder in target_parent_folders
-            and obj.folder.default_role is not None
-            and obj.folder.default_role.permissions.filter(
-                codename=f"view_{model_class._meta.model_name}"
-            ).exists()
-        ):
-            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
-            link_existing_object(duplicate_object, obj, field_name)
-
-        elif obj.folder in sub_folders:
-            # If the object's folder is a subfolder of the target folder, link it
-            link_existing_object(duplicate_object, obj, field_name)
-
-        else:
-            # Otherwise, duplicate the object and link it
-            duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
-
-    def get_existing_object(obj, target_folder, model_class):
-        """
-        Check if an object with the same name already exists in the target folder.
-        """
-        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
-
-    def link_existing_object(duplicate_object, existing_obj, field_name):
-        """
-        Link an existing object to the duplicate object by adding it to the related field.
-        """
-        getattr(duplicate_object, field_name).add(existing_obj)
-
-    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
-        """
-        Duplicate an object and link it to the duplicate object.
-        """
-        # Get the model of the object
-        model_class = new_obj.__class__
-
-        # Extract all fields except the primary key
-        field_values = {}
-        for field in new_obj._meta.fields:
-            if not field.primary_key and not field.auto_created:
-                field_values[field.name] = getattr(new_obj, field.name)
-
-        # Apply changes
-        field_values["folder"] = target_folder
-
-        # Create the new object
-        new_obj = model_class.objects.create(**field_values)
-        link_existing_object(duplicate_object, new_obj, field_name)
-
     model_class = getattr(type(source_object), field_name).field.related_model
 
     # Get parent and sub-folders of the target folder
     target_parent_folders = list(target_folder.get_parent_folders())
     sub_folders = list(target_folder.get_sub_folders())
 
-    # Get all related objects for the specified field
-    related_objects = getattr(source_object, field_name).all()
-
-    # Process each related object
-    for obj in related_objects:
-        process_related_object(
-            obj,
-            duplicate_object,
-            target_folder,
-            target_parent_folders,
-            sub_folders,
-            field_name,
-            model_class,
+    for obj in getattr(source_object, field_name).all():
+        target_obj, _ = resolve_related_object(
+            obj, target_folder, target_parent_folders, sub_folders, model_class
         )
+        getattr(duplicate_object, field_name).add(target_obj)
 
 
 def scoped_requirement_assessments(

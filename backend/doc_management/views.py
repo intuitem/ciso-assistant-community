@@ -31,6 +31,7 @@ import django_filters as df
 
 from core.net_safety import BlockedRequestError, assert_public_url
 from core.typst_render import render_mermaid_svg
+from core.utils import get_report_timezone
 from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
@@ -1477,6 +1478,8 @@ class DocumentRevisionViewSet(PublishedReadMixin, BaseModelViewSet):
             if cls
             else None
         )
+        # Both dates are local days in the report time zone, like the other reports.
+        tz = get_report_timezone()
         context = {
             "policy_name": doc.display_name,
             "classification": classification,
@@ -1486,11 +1489,11 @@ class DocumentRevisionViewSet(PublishedReadMixin, BaseModelViewSet):
             "author_name": author_name,
             "reviewer_name": reviewer_name,
             "published_at": (
-                revision.published_at.strftime("%Y-%m-%d")
+                revision.published_at.astimezone(tz).strftime("%Y-%m-%d")
                 if revision.published_at
                 else ""
             ),
-            "date": timezone.now().strftime("%Y-%m-%d"),
+            "date": timezone.now().astimezone(tz).strftime("%Y-%m-%d"),
             "content_html": content_html,
             # Aliases exposed to custom override templates (DOC_HTML_TEMPLATE_REGISTRY).
             "title": doc.display_name,

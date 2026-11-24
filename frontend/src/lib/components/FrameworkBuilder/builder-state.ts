@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '#paraglide/messages.js';
 import { safeTranslate } from '#lib/utils/i18n.js';
-import { resolveComputeResult } from '#lib/utils/helpers.js';
+import { resolveComputeResult, type VisibilityMap } from '#lib/utils/helpers.js';
 
 // --- Types ---
 
@@ -120,18 +120,42 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
-	/** 'number' rules compute a value instead of firing; 'rating' classifies the
-	 *  answers to its scales into named levels (see core.quick_form_ratings). */
-	kind?: 'number' | 'rating';
+	/** Absent: a yes/no rule, firing when `expression` is true. 'number' computes a value
+	 *  instead; 'rating' classifies the answers to its scales into named levels (see
+	 *  core.quick_form_ratings); 'staircase' gives the level reached over implementation
+	 *  groups (see core.staircase); 'weakest_link' rates nodes by their weakest requirement and
+	 *  scores each section (see core.weakest_link).
+	 *  A kind reuses another kind's key only with the same meaning and shape; otherwise the
+	 *  key is prefixed with the kind (`staircase_levels`, not `levels`). */
+	kind?: 'number' | 'rating' | 'staircase' | 'weakest_link';
+	label?: string;
 	/** Ratings: the scales measured, their named levels, and either a grid (two
 	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
 	 *  plus, optionally, the page ids that feed it. */
 	dimensions?: string[];
-	label?: string;
 	levels?: { ref_id: string; label: string; color?: string; translations?: Translations }[];
 	grid?: string[][];
 	rules?: { level: string; when: string }[];
 	pages?: string[];
+	/** Staircases: the implementation groups that are its levels, lowest first; a level per
+	 *  top-level section (`per`) or one for the whole audit; whether requirements tagged with
+	 *  a lower level count at higher levels too (`cumulative`); the names of level 0 and of
+	 *  the sections. */
+	staircase_levels?: string[];
+	per?: 'depth_1';
+	cumulative?: boolean;
+	floor_label?: string;
+	section_label?: string;
+	/** Weakest links: the depth of the nodes rated (1 = top level), and what the results are
+	 *  called and weigh. */
+	rated_depth?: number;
+	result_labels?: Partial<
+		Record<
+			'compliant' | 'partially_compliant' | 'non_compliant' | 'not_assessed' | 'not_applicable',
+			string
+		>
+	>;
+	result_weights?: Partial<Record<'compliant' | 'partially_compliant' | 'non_compliant', number>>;
 	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
 	implementation_groups?: string[];
 	translations?: Translations | null;
@@ -162,9 +186,13 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
+	field_visibility: VisibilityMap;
+	/** Audit defaults proposed for new audits of the framework. */
+	score_calculation_method?: string;
+	anchor_na_to_target?: boolean;
+	target_score?: number | null;
 	/** Quick forms: ordered levels questions share (`config.scale`). */
 	scales_definition?: Scale[];
-	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
 	available_languages?: string[];
@@ -856,6 +884,9 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			on_accept: fw.on_accept ?? [],
 			scales_definition: (fw.scales_definition ?? []) as unknown as Record<string, unknown>[],
 			field_visibility: fw.field_visibility,
+			score_calculation_method: fw.score_calculation_method,
+			anchor_na_to_target: fw.anchor_na_to_target,
+			target_score: fw.target_score,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
 		},
@@ -894,6 +925,9 @@ export function hydrateDraft(
 		on_accept: (meta.on_accept ?? []) as Record<string, unknown>[],
 		scales_definition: (meta.scales_definition ?? []) as unknown as Scale[],
 		field_visibility: meta.field_visibility ?? {},
+		score_calculation_method: meta.score_calculation_method,
+		anchor_na_to_target: meta.anchor_na_to_target,
+		target_score: meta.target_score,
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null
 	};
@@ -1926,13 +1960,14 @@ export function createBuilderState(
 			['name', 'description']
 		);
 		// Swap nested translations in outcomes_definition entries, and in a rating's levels
+		// (a staircase's levels are implementation group ids, with nothing to translate)
 		const swappedOutcomes = swapJsonArrayTranslations(
 			fw.outcomes_definition as Record<string, unknown>[] | null,
 			oldLocale,
 			newLocale,
-			['annotation', 'label']
+			['annotation', 'label', 'section_label', 'floor_label']
 		)?.map((rule) =>
-			Array.isArray(rule.levels)
+			rule.kind === 'rating' && Array.isArray(rule.levels)
 				? {
 						...rule,
 						levels: swapJsonArrayTranslations(rule.levels, oldLocale, newLocale, ['label'])
@@ -2264,6 +2299,22 @@ export function createBuilderState(
 	};
 }
 
+/** Same rule as Framework.scoring_defaults_problem: the i18n key of what audits
+ *  would refuse, if any. */
+export function scoringDefaultsProblem(fw: Framework): string | null {
+	const target = fw.target_score ?? null;
+	const groupTargets = (fw.implementation_groups_definition ?? [])
+		.map((group) => (group as Record<string, unknown>).target_score as number | null | undefined)
+		.filter((value): value is number => value != null);
+	if (target === null && (fw.anchor_na_to_target || groupTargets.length)) {
+		return 'targetScoreRequired';
+	}
+	const targets = target === null ? groupTargets : [target, ...groupTargets];
+	return targets.some((value) => value < fw.min_score || value > fw.max_score)
+		? 'targetScoreOutOfRange'
+		: null;
+}
+
 export function setBuilderContext(store: BuilderStore) {
 	setContext(CONTEXT_KEY, store);
 }
@@ -2350,4 +2401,57 @@ export function rulesToGrid(rule: OutcomeRule, scales: Scale[]): string[][] | nu
 		}
 	}
 	return fitGrid({ ...rule, grid }, scales);
+}
+
+/** What a staircase rule covers, as core/staircase.py counts it: the sections that get
+ *  a level, and per level the requirements that must pass. */
+export function staircaseCoverage(
+	rule: OutcomeRule,
+	roots: BuilderNode[]
+): { sections: number; counts: number[] } {
+	const levels = (rule.staircase_levels ?? []).map(String);
+	const tagsBySection: string[][][] = [];
+	const collect = (bn: BuilderNode, into: string[][]) => {
+		if (bn.node.assessable) into.push((bn.node.implementation_groups ?? []).map(String));
+		bn.children.forEach((c) => collect(c, into));
+	};
+	if (rule.per === 'depth_1') {
+		for (const root of roots) {
+			const tags: string[][] = [];
+			collect(root, tags);
+			tagsBySection.push(tags);
+		}
+	} else {
+		const tags: string[][] = [];
+		roots.forEach((r) => collect(r, tags));
+		tagsBySection.push(tags);
+	}
+	const memberOf = (tags: string[], index: number) =>
+		(rule.cumulative ? levels.slice(0, index + 1) : [levels[index]]).some((l) => tags.includes(l));
+	const counts = levels.map((_, i) =>
+		tagsBySection.reduce((sum, section) => sum + section.filter((t) => memberOf(t, i)).length, 0)
+	);
+	const sections = tagsBySection.filter((section) =>
+		section.some((t) => levels.some((_, i) => memberOf(t, i)))
+	).length;
+	return { sections, counts };
+}
+
+export function levelsInGroupOrder(
+	rules: OutcomeRule[],
+	before: string[],
+	after: string[]
+): OutcomeRule[] {
+	const removed = before.filter((id) => !after.includes(id));
+	const added = after.filter((id) => !before.includes(id));
+	const renamed =
+		before.length === after.length && removed.length === 1 && added.length === 1
+			? { [removed[0]]: added[0] }
+			: {};
+	return rules.map((rule) => {
+		if (rule.kind !== 'staircase') return rule;
+		const levels = (rule.staircase_levels ?? []).map((id) => renamed[String(id)] ?? String(id));
+		const sorted = [...new Set(after.filter((id) => levels.includes(id)))];
+		return { ...rule, staircase_levels: sorted };
+	});
 }
