@@ -607,7 +607,11 @@ def _pdf_text(content):
 @pytest.mark.parametrize("path", ["risk_assessment_pdf", "action_plan_pdf"])
 @pytest.mark.parametrize(
     "lang, statement",
-    [("en", "Tolerable: No"), ("fr", "Tolérable : Non")],
+    [
+        ("en", "Tolerable: No"),
+        ("fr", "Tolérable : Non"),
+        ("hu", "Tűréshatáron belül: Nem"),
+    ],
 )
 def test_pdf_exports_state_their_selection(admin_client, setup, path, lang, statement):
     ra = setup["ra"]
