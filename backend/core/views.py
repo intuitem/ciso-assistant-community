@@ -6202,6 +6202,19 @@ def request_viewable_folders(request):
     )
 
 
+def request_viewable_risk_scenarios(request):
+    """
+    The risk scenarios a filter may offer as choices: those the requester can
+    view. A hidden scenario is rejected like an unknown one, so filtering by it
+    never reveals which controls it is linked to.
+    """
+    if request is None:
+        return RiskScenario.objects.none()
+    return RiskScenario.objects.filter(
+        id__in=RoleAssignment.get_viewable_object_ids(request.user, RiskScenario)
+    )
+
+
 class AppliedControlFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
@@ -6225,7 +6238,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     # A control linked to a scenario as an existing or an additional measure.
     linked_risk_scenarios = df.ModelMultipleChoiceFilter(
         method="filter_linked_risk_scenarios",
-        queryset=RiskScenario.objects.all(),
+        queryset=request_viewable_risk_scenarios,
         label="Linked risk scenarios",
     )
     status = df.MultipleChoiceFilter(

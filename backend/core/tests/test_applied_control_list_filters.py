@@ -1,5 +1,7 @@
 """Applied control list filters: linked risk scenarios and excluded statuses."""
 
+from uuid import uuid4
+
 import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -22,27 +24,33 @@ def domain():
     )
 
 
-@pytest.fixture
-def client(domain):
-    admin = User.objects.create_superuser("admin@control-filters-tests.com")
-    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+def _token_client(user):
     client = APIClient()
     client.credentials(
-        HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=admin)[1]}"
+        HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
     )
     return client
 
 
 @pytest.fixture
-def scenarios(domain):
+def client(domain):
+    admin = User.objects.create_superuser("admin@control-filters-tests.com")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    return _token_client(admin)
+
+
+def _risk_assessment(folder, name):
     matrix = RiskMatrix.objects.create(
-        name="filters matrix",
+        name=f"{name} matrix",
         folder=Folder.get_root_folder(),
         json_definition=RISK_MATRIX_JSON_DEFINITION,
     )
-    ra = RiskAssessment.objects.create(
-        name="filters ra", folder=domain, risk_matrix=matrix
-    )
+    return RiskAssessment.objects.create(name=name, folder=folder, risk_matrix=matrix)
+
+
+@pytest.fixture
+def scenarios(domain):
+    ra = _risk_assessment(domain, "filters ra")
     return (
         RiskScenario.objects.create(risk_assessment=ra, name="S1"),
         RiskScenario.objects.create(risk_assessment=ra, name="S2"),
@@ -126,3 +134,44 @@ def test_impact_effort_honors_exclude_status(client, domain):
 
     assert cell() == {"active", "to do"}
     assert cell("?exclude_status=active") == {"to do"}
+
+
+def test_linked_risk_scenarios_rejects_scenarios_the_user_cannot_view(domain):
+    def iam_domain(name):
+        folder = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name=name,
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(folder)
+        return folder
+
+    visible_domain = iam_domain("visible domain")
+    hidden_domain = iam_domain("hidden domain")
+    seen = RiskScenario.objects.create(
+        risk_assessment=_risk_assessment(visible_domain, "seen ra"), name="seen"
+    )
+    unseen = RiskScenario.objects.create(
+        risk_assessment=_risk_assessment(hidden_domain, "unseen ra"), name="unseen"
+    )
+    control = _control(visible_domain, "shared control")
+    seen.applied_controls.add(control)
+    unseen.existing_applied_controls.add(control)
+
+    reader = User.objects.create_user("reader@control-filters-tests.com")
+    UserGroup.objects.get(name="BI-UG-AUD", folder=visible_domain).user_set.add(reader)
+    reader_client = _token_client(reader)
+
+    assert _names(reader_client, f"linked_risk_scenarios={seen.id}") == {
+        "shared control"
+    }
+    # A hidden scenario is refused exactly like one that does not exist.
+    hidden = reader_client.get(
+        f"/api/applied-controls/?linked_risk_scenarios={unseen.id}"
+    )
+    unknown = reader_client.get(
+        f"/api/applied-controls/?linked_risk_scenarios={uuid4()}"
+    )
+    assert hidden.status_code == unknown.status_code == 400
+    assert set(hidden.json()) == set(unknown.json()) == {"linked_risk_scenarios"}
