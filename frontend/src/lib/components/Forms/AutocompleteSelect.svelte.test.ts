@@ -58,10 +58,10 @@ const ALICE = { id: 'a1', str: 'alice.active@example.com' };
 // Deactivated: the actors endpoint only returns it with include_inactive=true.
 const BOB = { id: 'b2', str: 'bob.departed@example.com' };
 
-function stubActorsEndpoint() {
+function stubActorsEndpoint(active = [ALICE]) {
 	const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
 		const url = new URL(String(input), 'http://localhost');
-		const rows = url.searchParams.get('include_inactive') === 'true' ? [ALICE, BOB] : [ALICE];
+		const rows = url.searchParams.get('include_inactive') === 'true' ? [...active, BOB] : active;
 		const ids = url.searchParams.get('id')?.split(',');
 		const results = ids ? rows.filter((r) => ids.includes(r.id)) : rows;
 		return {
@@ -125,6 +125,30 @@ describe('AutocompleteSelect selected-value hydration', () => {
 		});
 		expect(hidden.textContent).toContain('1');
 		expect(get(field.value)).toEqual([ALICE.id, BOB.id, invisible]);
+	});
+
+	it('clears the missing-options flag once the only value is resolved', async () => {
+		stubActorsEndpoint([]);
+		field.initial = [BOB.id];
+		const updateMissingConstraint = vi.fn();
+
+		const { container } = render(AutocompleteSelect, {
+			props: {
+				form,
+				field: 'owner',
+				multiple: true,
+				mandatory: true,
+				optionsEndpoint: 'actors',
+				optionsLabelField: 'str'
+			},
+			context: new Map([['updateMissingConstraint', updateMissingConstraint]])
+		});
+
+		await waitFor(() => expect(container.textContent).toContain(BOB.str));
+		expect(updateMissingConstraint.mock.calls).toEqual([
+			['owner', true],
+			['owner', false]
+		]);
 	});
 
 	it('does not resolve by id when every value is already listed', async () => {

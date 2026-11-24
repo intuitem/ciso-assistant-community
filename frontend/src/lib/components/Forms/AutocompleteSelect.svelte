@@ -346,6 +346,11 @@
 					} catch (error) {
 						console.warn(`Could not resolve the selection from ${optionsEndpoint}:`, error);
 					}
+					// An empty list was flagged above as missing options: the
+					// resolved value means the field has one after all.
+					if (updateMissingConstraint && options.length > 0) {
+						updateMissingConstraint(field, false);
+					}
 				}
 				// Before optionsLoaded: the value sync must see them from its first run.
 				hiddenIds = await detectHiddenIds();
