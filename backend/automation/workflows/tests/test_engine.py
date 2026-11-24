@@ -1114,7 +1114,7 @@ class TestTokenAdmin:
             calls["n"] += 1
             return Resp(500 if calls["n"] == 1 else 200)
 
-        monkeypatch.setattr("requests.request", flaky)
+        monkeypatch.setattr("core.net_safety.public_request", flaky)
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda u, **k: None
         )

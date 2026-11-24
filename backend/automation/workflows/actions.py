@@ -2303,6 +2303,7 @@ class AttachEvidenceAction(BaseAction):
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,
+            public_get,
             assert_public_url_unless_dev,
         )
 
@@ -2326,13 +2327,15 @@ class AttachEvidenceAction(BaseAction):
             # Redirects off for the same reason as http_request: only the first
             # URL passed the SSRF check. Streamed and capped, because the file
             # never travels through the run context.
-            response = requests.get(
+            response = public_get(
                 url,
                 headers=headers,
                 timeout=min(max(int(config.get("timeout") or 15), 1), 30),
                 allow_redirects=False,
                 stream=True,
             )
+        except BlockedRequestError as e:
+            raise ActionError(f"attach_evidence: {type(e).__name__} for host '{host}'")
         except requests.RequestException as e:
             if not _as_bool(config.get("allow_connection_error")):
                 raise ActionError(f"attach_evidence: {type(e).__name__}")
@@ -2703,6 +2706,7 @@ class HttpRequestAction(BaseAction):
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,
+            public_request,
             assert_public_url_unless_dev,
         )
 
@@ -2759,9 +2763,11 @@ class HttpRequestAction(BaseAction):
                 )
             paginate = render(config.get("paginate"), context)
             if not paginate:
-                response = requests.request(method, url, **kwargs)
+                response = public_request(method, url, **kwargs)
                 return self._finish(config, response, host)
             return self._paginate(config, paginate, method, url, kwargs, host)
+        except BlockedRequestError as e:
+            raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
         except requests.RequestException as e:
             # Network failures stay on the retry path.
             if not _as_bool(config.get("allow_connection_error")):
@@ -2777,11 +2783,11 @@ class HttpRequestAction(BaseAction):
 
     @staticmethod
     def _fetch_token(oauth, timeout):
-        import requests
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,
             assert_public_url_unless_dev,
+            public_post,
         )
 
         token_url = str(oauth.get("token_url") or "")
@@ -2801,7 +2807,7 @@ class HttpRequestAction(BaseAction):
         }
         if oauth.get("scope"):
             data["scope"] = oauth["scope"]
-        response = requests.post(
+        response = public_post(
             token_url, data=data, timeout=timeout, allow_redirects=False
         )
         answer = json_loads_or_none(response.text)
@@ -2820,10 +2826,10 @@ class HttpRequestAction(BaseAction):
     def _paginate(self, config, paginate, method, url, kwargs, host):
         import json
 
-        import requests
         from core.net_safety import (
             BlockedRequestError,
             DnsLookupError,
+            public_request,
             assert_public_url_unless_dev,
         )
 
@@ -2852,7 +2858,7 @@ class HttpRequestAction(BaseAction):
         items, count, pages, truncated, chars, largest = [], 0, 0, False, 0, 0
         requested = {url}
         while True:
-            response = requests.request(method, url, **kwargs)
+            response = public_request(method, url, **kwargs)
             pages += 1
             output = self._finish(config, response, host)
             if output["status"] >= 400:
