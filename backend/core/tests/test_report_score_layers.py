@@ -353,6 +353,7 @@ class TestPdf:
         [
             ("en", ("Implementation", "Documentation", "Maturity", "Overall")),
             ("fr", ("Implémentation", "Documentation", "Maturité", "Global")),
+            ("hu", ("Megvalósítás", "Dokumentáció", "Érettség", "Összesen")),
             ("tr", ("Uygulama", "Dokümantasyon", "Olgunluk", "Genel")),
         ],
     )
@@ -369,7 +370,13 @@ class TestPdf:
             assert label in text, label
 
     @pytest.mark.parametrize(
-        "lang,maturity", [("en", "Maturity"), ("fr", "Maturité"), ("tr", "Olgunluk")]
+        "lang,maturity",
+        [
+            ("en", "Maturity"),
+            ("fr", "Maturité"),
+            ("hu", "Érettség"),
+            ("tr", "Olgunluk"),
+        ],
     )
     def test_attestation_rows_show_the_three_scores(
         self, layered_audit, lang, maturity
@@ -574,7 +581,9 @@ class TestWordReport:
             [[cell.text for cell in row.cells] for row in table.rows]
             for table in doc.tables
         ]
-        return next(t for t in tables if t[0][0] in ("Category", "Catégorie"))
+        return next(
+            t for t in tables if t[0][0] in ("Category", "Catégorie", "Kategória")
+        )
 
     def test_shows_the_three_scores(
         self,
@@ -684,3 +693,24 @@ class TestWordReport:
             "Éléments",
         ]
         assert table[-1][0] == "Global"
+
+    def test_hungarian_template(
+        self,
+        admin_client,  # noqa: F811
+        layered_audit,
+    ):
+        admin = User.objects.get(email="admin@audit-word-export-tests.com")
+        admin.preferences = {**(admin.preferences or {}), "lang": "hu"}
+        admin.save()
+
+        table = self._score_table(admin_client, layered_audit)
+
+        assert table[0] == [
+            "Kategória",
+            "Megvalósítás",
+            "Dokumentáció",
+            "Érettség",
+            "Pontozott",
+            "Tételek",
+        ]
+        assert table[-1][0] == "Összesen"
