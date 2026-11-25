@@ -16,6 +16,7 @@ from .models import (
     RoTo,
     Stakeholder,
     StrategicScenario,
+    assets_with_descendants,
     get_initial_meta,
 )
 from core.models import AppliedControl, Asset, RiskScenario
@@ -715,15 +716,6 @@ def _find_existing_risk_scenario(risk_assessment, name):
             return None
 
 
-def _get_assets_with_descendants(assets_qs):
-    """Expand an asset queryset to include all descendants."""
-    assets = set()
-    for asset in assets_qs:
-        assets.add(asset)
-        assets.update(asset.get_descendants())
-    return Asset.objects.filter(id__in=[a.id for a in assets])
-
-
 # --- Description building blocks ---
 
 
@@ -948,7 +940,7 @@ def _sync_attack_paths(risk_assessment, selected):
             description=description,
             impact=attack_path.gravity,
             likelihood=-1,
-            assets=_get_assets_with_descendants(
+            assets=assets_with_descendants(
                 Asset.objects.filter(feared_events__in=feared_events)
             ),
             existing_controls=AppliedControl.objects.filter(
@@ -989,7 +981,7 @@ def _sync_strategic_scenarios(risk_assessment, selected):
             description=description,
             impact=ss.gravity,
             likelihood=-1,
-            assets=_get_assets_with_descendants(
+            assets=assets_with_descendants(
                 Asset.objects.filter(feared_events__in=feared_events)
             ),
             risk_origin=ro_to.risk_origin,
@@ -1033,7 +1025,7 @@ def _sync_feared_events(risk_assessment, selected):
             description=description,
             impact=fe.gravity,
             likelihood=-1,
-            assets=_get_assets_with_descendants(fe.assets.all()),
+            assets=assets_with_descendants(fe.assets.all()),
         )
         if created:
             created_count += 1

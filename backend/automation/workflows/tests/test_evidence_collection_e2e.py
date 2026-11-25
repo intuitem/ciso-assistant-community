@@ -427,7 +427,7 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
     def refuse(*args, **kwargs):
         raise requests.ConnectionError("connection refused")
 
-    monkeypatch.setattr("requests.get", refuse)
+    monkeypatch.setattr("core.net_safety.public_get", refuse)
 
     # Delivery runs in the worker; without this the run parks on the email step.
     enqueued = []
