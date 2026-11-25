@@ -19644,7 +19644,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings_assessment = FindingsAssessment.objects.get(id=pk)
         findings = (
             Finding.objects.filter(findings_assessment=pk)
-            .select_related("folder")
+            .select_related("folder", "asset")
             .prefetch_related(
                 "applied_controls",
                 "evidences",
@@ -19666,6 +19666,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "description": finding.description,
                 "status": finding.status,
                 "threats": ",".join([threat.name for threat in finding.threats.all()]),
+                "asset": finding.asset.name
+                if finding.asset and viewable.allows(finding.asset)
+                else "",
                 "severity": finding.get_severity_display(),
                 "priority": str(finding.get_priority_display())
                 if finding.priority
@@ -19770,7 +19773,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
-            .select_related("folder")
+            .select_related("folder", "asset")
             .prefetch_related(
                 "applied_controls",
                 "evidences",
@@ -19860,6 +19863,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Status**: {finding.get_status_display()}\n"
             if finding.threats.all():
                 md_content += f"- **Threats**: {', '.join([threat.name for threat in finding.threats.all()])}\n"
+            if finding.asset:
+                md_content += f"- **Asset**: {finding.asset.name}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
