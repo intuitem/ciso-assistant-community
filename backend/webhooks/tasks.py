@@ -13,7 +13,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q, Count
 
 from auditlog.models import LogEntry
-from core.net_safety import BlockedRequestError, assert_public_url_unless_dev
+from core.net_safety import (
+    BlockedRequestError,
+    public_post,
+    assert_public_url_unless_dev,
+)
 from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
@@ -91,7 +95,7 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         return f"Blocked: {endpoint_id} URL points to a non-public address"
 
     try:
-        response = requests.post(
+        response = public_post(
             endpoint.url,
             data=json_payload.encode("utf-8"),
             headers=headers,
@@ -117,6 +121,12 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
                 f"Webhook failed for {endpoint_id} with status {response.status_code}."
             )
 
+    except BlockedRequestError:
+        # DNS flipped to a non-public address after the check above. Terminal.
+        logger.error(
+            "Webhook blocked by SSRF guard", endpoint_id=endpoint_id, exc_info=True
+        )
+        return f"Blocked: {endpoint_id} URL points to a non-public address"
     except requests.exceptions.RequestException as e:
         # Network error, timeout, etc.
         # Raise exception to trigger Huey retry
@@ -172,7 +182,7 @@ def _bearer(endpoint, *, force_refresh=False):
 
 
 def _post_audit(endpoint, json_payload, headers):
-    return requests.post(
+    return public_post(
         endpoint.url,
         data=json_payload.encode("utf-8"),
         headers=headers,
@@ -234,10 +244,18 @@ def send_audit_request(endpoint_id, body):
             # Credentials rotated, or the provider expired the token early: mint
             # a fresh one once before falling through to Huey's backoff.
             invalidate_token(endpoint)
-            retry_headers = {
-                **headers,
-                "Authorization": _bearer(endpoint, force_refresh=True),
-            }
+            try:
+                bearer = _bearer(endpoint, force_refresh=True)
+            except BlockedRequestError:
+                logger.error(
+                    "Audit sink token URL blocked by SSRF guard",
+                    endpoint_id=endpoint_id,
+                    exc_info=True,
+                )
+                return (
+                    f"Blocked: {endpoint_id} token URL points to a non-public address"
+                )
+            retry_headers = {**headers, "Authorization": bearer}
             response = _post_audit(endpoint, json_payload, retry_headers)
         if 200 <= response.status_code < 300:
             return f"Success: Sent audit event to {endpoint.url}"
@@ -252,6 +270,11 @@ def send_audit_request(endpoint_id, body):
             raise Exception(
                 f"Audit sink failed for {endpoint_id} with status {response.status_code}."
             )
+    except BlockedRequestError:
+        logger.error(
+            "Audit sink blocked by SSRF guard", endpoint_id=endpoint_id, exc_info=True
+        )
+        return f"Blocked: {endpoint_id} URL points to a non-public address"
     except requests.exceptions.RequestException as e:
         raise Exception(f"Audit sink network error for {endpoint_id}: {e}")
 

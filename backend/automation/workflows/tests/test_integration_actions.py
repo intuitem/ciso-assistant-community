@@ -115,7 +115,7 @@ class TestHttpRequest:
             captured.update(method=method, url=url, **kwargs)
             return FakeResponse()
 
-        monkeypatch.setattr("requests.request", fake_request)
+        monkeypatch.setattr("core.net_safety.public_request", fake_request)
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
@@ -154,7 +154,7 @@ class TestHttpRequest:
                 return {"rows": [{"note": "x" * 300} for _ in range(20)], "ok": True}
 
         monkeypatch.setattr(
-            "requests.request", lambda method, url, **kw: FakeResponse()
+            "core.net_safety.public_request", lambda method, url, **kw: FakeResponse()
         )
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
@@ -199,7 +199,7 @@ class TestHttpRequest:
             captured.update(kwargs)
             return FakeResponse()
 
-        monkeypatch.setattr("requests.request", fake_request)
+        monkeypatch.setattr("core.net_safety.public_request", fake_request)
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
@@ -226,7 +226,7 @@ class TestHttpRequest:
         def failing_request(method, url, **kwargs):
             raise requests.ConnectionError("connection refused")
 
-        monkeypatch.setattr("requests.request", failing_request)
+        monkeypatch.setattr("core.net_safety.public_request", failing_request)
         scheduled = {}
         monkeypatch.setattr(
             "automation.workflows.tasks.retry_token_task.schedule",
@@ -277,7 +277,7 @@ class TestHttpRequest:
             requested.append(url)
             return Redirect()
 
-        monkeypatch.setattr("requests.request", fake_request)
+        monkeypatch.setattr("core.net_safety.public_request", fake_request)
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
@@ -310,7 +310,9 @@ class TestHttpRequest:
             def json(self):
                 return {"error": "boom"}
 
-        monkeypatch.setattr("requests.request", lambda *a, **k: ErrorResponse())
+        monkeypatch.setattr(
+            "core.net_safety.public_request", lambda *a, **k: ErrorResponse()
+        )
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
