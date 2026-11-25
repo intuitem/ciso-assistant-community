@@ -15098,8 +15098,16 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         audit_obj = self.get_object()
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
-            RequirementNode.objects.filter(framework=_framework).all(),
-            RequirementAssessment.objects.filter(compliance_assessment=audit_obj).all(),
+            list(
+                RequirementNode.objects.filter(framework=_framework).prefetch_related(
+                    "questions__choices"
+                )
+            ),
+            list(
+                audit_obj.get_requirement_assessments(
+                    include_non_assessable=True, lightweight=True, skip_ig_filter=True
+                )
+            ),
             audit_obj.max_score
             if audit_obj.max_score is not None
             else _framework.max_score,
@@ -15196,7 +15204,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # Object-level permission is not enough: a respondent sees only their
         # assigned requirements, and CEL-hidden ones do not apply at all.
         assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
-        nodes = RequirementNode.objects.filter(framework=framework)
+        nodes = RequirementNode.objects.filter(framework=framework).prefetch_related(
+            "questions__choices"
+        )
         if hidden_urns:
             nodes = nodes.exclude(urn__in=hidden_urns)
         tree = get_sorted_requirement_nodes(
