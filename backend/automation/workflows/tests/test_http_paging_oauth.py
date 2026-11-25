@@ -39,8 +39,8 @@ def tool(monkeypatch):
         calls["tokens"].append({"url": url, "data": kwargs.get("data")})
         return pages.get("token", FakeResponse({"access_token": "tok-123"}))
 
-    monkeypatch.setattr("requests.request", request)
-    monkeypatch.setattr("requests.post", post)
+    monkeypatch.setattr("core.net_safety.public_request", request)
+    monkeypatch.setattr("core.net_safety.public_post", post)
     calls["pages"] = pages
     return calls
 
@@ -481,7 +481,7 @@ class TestOAuth:
                 (200, ["not", "an", "object"], ActionError),
             ]:
                 patch.setattr(
-                    "requests.post",
+                    "core.net_safety.public_post",
                     lambda *a, _p=payload, _s=status, **k: FakeResponse(_p, _s),
                 )
                 with pytest.raises(error) as caught:

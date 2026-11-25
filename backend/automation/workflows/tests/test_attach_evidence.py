@@ -166,7 +166,7 @@ class TestAttachEvidence:
             seen.update({"url": url, **kwargs})
             return FakeResponse(b"%PDF-1.7 fake")
 
-        monkeypatch.setattr("requests.get", fake_get)
+        monkeypatch.setattr("core.net_safety.public_get", fake_get)
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
         )
@@ -308,7 +308,9 @@ class TestCredentialsNeedHttps:
         monkeypatch.setattr(
             "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
         )
-        monkeypatch.setattr("requests.get", lambda url, **kw: FakeResponse(b"ok"))
+        monkeypatch.setattr(
+            "core.net_safety.public_get", lambda url, **kw: FakeResponse(b"ok")
+        )
         domain = make_domain("Encrypted")
         evidence = Evidence.objects.create(name="Report", folder=domain)
         version = attach_flow(
