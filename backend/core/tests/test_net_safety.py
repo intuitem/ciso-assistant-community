@@ -1,11 +1,19 @@
 """Tests for the SSRF guard helpers in `core.net_safety`."""
 
 import socket
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import patch
 
 import pytest
 
-from core.net_safety import BlockedRequestError, DnsLookupError, assert_public_url
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    _assert_public_peer,
+    assert_public_url,
+    public_get,
+)
 
 
 def _addrinfo(*addrs):
@@ -97,3 +105,91 @@ class TestAssertPublicUrl:
                 assert_public_url("http://example.com/")
             # Caller can opt in.
             assert_public_url("http://example.com/", allowed_schemes=("http", "https"))
+
+
+class _Handler(BaseHTTPRequestHandler):
+    hits = 0
+
+    def do_GET(self):
+        type(self).hits += 1
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"internal")
+
+    def log_message(self, *args):
+        pass
+
+
+@pytest.fixture
+def loopback_server(monkeypatch):
+    # Env and OS-level (macOS/Windows) proxies would bypass the checked connection.
+    monkeypatch.setattr("requests.sessions.get_environ_proxies", lambda *a, **k: {})
+    _Handler.hits = 0
+    server = HTTPServer(("127.0.0.1", 0), _Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    yield server.server_address[1]
+    server.shutdown()
+    server.server_close()
+
+
+def _rebinding_dns():
+    """First answer public (the check), every later one loopback (the fetch)."""
+    real = socket.getaddrinfo
+    calls = []
+
+    def resolve(host, port, *args, **kwargs):
+        calls.append(host)
+        ip = "93.184.216.34" if len(calls) == 1 else "127.0.0.1"
+        return real(ip, port, *args, **kwargs)
+
+    return resolve
+
+
+class TestPublicSession:
+    def test_dns_rebinding_is_blocked_before_any_byte_is_sent(
+        self, loopback_server, settings
+    ):
+        settings.ALLOW_PRIVATE_NETWORK_REQUESTS = False
+        url = f"http://rebind.test:{loopback_server}/latest/meta-data/"
+        with patch("socket.getaddrinfo", side_effect=_rebinding_dns()):
+            assert_public_url(url, allowed_schemes=("https", "http"))
+            with pytest.raises(BlockedRequestError):
+                public_get(url, timeout=5, allow_redirects=False)
+        assert _Handler.hits == 0
+
+    def test_private_network_flag_allows_loopback(self, loopback_server, settings):
+        settings.ALLOW_PRIVATE_NETWORK_REQUESTS = True
+        response = public_get(f"http://127.0.0.1:{loopback_server}/", timeout=5)
+        assert response.content == b"internal"
+
+    @pytest.mark.parametrize(
+        "peer, blocked",
+        [
+            (("93.184.216.34", 80), False),
+            (("169.254.169.254", 80), True),
+            (("::ffff:127.0.0.1", 80, 0, 0), True),
+            (("fe80::1%eth0", 80, 0, 2), True),
+            # IPv6 transition forms embedding a private IPv4 (6to4, Teredo, NAT64)
+            (("2002:a9fe:a9fe::1", 80, 0, 0), True),
+            (("2002:7f00:1::1", 80, 0, 0), True),
+            (("2001:0:4136:e378:8000:63bf:567f:fefe", 80, 0, 0), True),
+            (("64:ff9b::a9fe:a9fe", 80, 0, 0), True),
+        ],
+    )
+    def test_peer_check(self, peer, blocked):
+        class Sock:
+            closed = False
+
+            def getpeername(self):
+                return peer
+
+            def close(self):
+                self.closed = True
+
+        sock = Sock()
+        if blocked:
+            with pytest.raises(BlockedRequestError):
+                _assert_public_peer(sock, "example.com")
+            assert sock.closed
+        else:
+            _assert_public_peer(sock, "example.com")
