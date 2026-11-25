@@ -56,7 +56,7 @@ def test_redirect_returns_terminally(public_endpoint):
     mock_response.status_code = 302
     mock_response.headers = {"Location": "https://elsewhere.example/"}
 
-    with patch("webhooks.tasks.requests.post", return_value=mock_response):
+    with patch("webhooks.tasks.public_post", return_value=mock_response):
         result = send_webhook_request.call_local(
             public_endpoint.id, "test.event", {"foo": "bar"}
         )
@@ -86,7 +86,7 @@ def test_5xx_raises_for_retry(public_endpoint):
     mock_response = MagicMock()
     mock_response.status_code = 503
 
-    with patch("webhooks.tasks.requests.post", return_value=mock_response):
+    with patch("webhooks.tasks.public_post", return_value=mock_response):
         with pytest.raises(Exception, match="status 503"):
             send_webhook_request.call_local(
                 public_endpoint.id, "test.event", {"foo": "bar"}
@@ -100,7 +100,7 @@ def test_allow_private_ips_bypasses_guard(private_endpoint):
     mock_response = MagicMock()
     mock_response.status_code = 200
 
-    with patch("webhooks.tasks.requests.post", return_value=mock_response):
+    with patch("webhooks.tasks.public_post", return_value=mock_response):
         result = send_webhook_request.call_local(
             private_endpoint.id, "test.event", {"foo": "bar"}
         )
