@@ -8,7 +8,7 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 20
+version: 21
 publication_date: 2026-11-19
 provider: ISO/IEC
 packager: intuitem
@@ -54,6 +54,12 @@ translations:
     copyright: "\u8FD9\u662FISO27001-2022\u6807\u51C6\u7684\u8F6E\u5ED3\u3002\u4F60\
       \u53EF\u4EE5\u4ECE https://www.iso.org/standard/27001 \u8D2D\u4E70\u5168\u6807\
       \u51C6\u7248"
+  nl:
+    name: Internationale norm ISO/IEC 27001:2022
+    description: Informatiebeveiliging, cyberbeveiliging en privacybescherming - Managementsystemen
+      voor informatiebeveiliging - Eisen
+    copyright: Dit is een samenvatting van de opbouw van de norm ISO/IEC 27001:2022.
+      De volledige norm is te koop via https://www.iso.org/standard/27001
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -106,6 +112,12 @@ objects:
           \u7B56\u3002\u63AA\u65BD\u5305\u62EC\u754C\u5B9A\u8303\u56F4\u3001\u8BBE\
           \u5B9A\u76EE\u6807\uFF0C\u5E76\u786E\u4FDD\u7B26\u5408\u5408\u89C4\u8981\
           \u6C42\u3002"
+      nl: &id001
+        name: Beleid voor informatiebeveiliging
+        description: Deze beheersmaatregel zorgt voor beleid voor informatiebeveiliging
+          dat aansluit op de doelen van de organisatie en wordt bijgehouden. Maatregelen
+          zijn onder meer het vastleggen van de reikwijdte, het stellen van doelen
+          en het afstemmen op nalevingseisen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.2
     ref_id: A.5.2
     name: Information security roles and responsibilities
@@ -155,6 +167,12 @@ objects:
           \u4FDD\u95EE\u8D23\u5236\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u8D23\
           \u4EFB\u8BB0\u5F55\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\
           \u5236\u3002"
+      nl: &id002
+        name: Rollen en verantwoordelijkheden voor informatiebeveiliging
+        description: Deze beheersmaatregel legt rollen en verantwoordelijkheden voor
+          informatiebeveiliging vast en wijst ze toe, zodat duidelijk is wie aanspreekbaar
+          is. Maatregelen zijn onder meer heldere documentatie, periodieke herziening
+          en handhaving.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.3
     ref_id: A.5.3
     name: Segregation of duties
@@ -201,6 +219,11 @@ objects:
           \u6388\u6743\u8BBF\u95EE\u7684\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\
           \u89D2\u8272\u5206\u79BB\u3001\u8BBF\u95EE\u9650\u5236\u548C\u5B9A\u671F\
           \u5BA1\u8BA1\u3002"
+      nl: &id003
+        name: Functiescheiding
+        description: Deze beheersmaatregel zorgt voor scheiding van taken om het risico
+          op fouten, fraude en onbevoegde toegang te verkleinen. Maatregelen zijn
+          onder meer gescheiden rollen, toegangsbeperkingen en regelmatige controles.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.4
     ref_id: A.5.4
     name: Management responsibilities
@@ -247,6 +270,12 @@ objects:
           \u7684\u7BA1\u7406\u804C\u8D23\u88AB\u660E\u786E\u5B9A\u4E49\u5E76\u5F97\
           \u4EE5\u5B9E\u65BD\u3002\u63AA\u65BD\u5305\u62EC\u8BBE\u5B9A\u76EE\u6807\
           \u3001\u5206\u914D\u8D44\u6E90\u548C\u76D1\u7763\u5408\u89C4\u3002"
+      nl: &id004
+        name: Verantwoordelijkheden van het management
+        description: Deze beheersmaatregel zorgt dat de verantwoordelijkheden van
+          het management voor informatiebeveiliging duidelijk zijn vastgelegd en worden
+          ingevuld. Maatregelen zijn onder meer het stellen van doelen, het toewijzen
+          van middelen en toezicht op naleving.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.5
     ref_id: A.5.5
     name: Contact with authorities
@@ -295,6 +324,11 @@ objects:
           \u6C9F\u901A\u3002\u63AA\u65BD\u5305\u62EC\u5EFA\u7ACB\u8054\u7CFB\u534F\
           \u8BAE\u3001\u7EF4\u62A4\u8054\u7CFB\u4EBA\u540D\u5355\u66F4\u65B0\u4EE5\
           \u53CA\u5206\u914D\u804C\u8D23\u3002"
+      nl: &id005
+        name: Contact met overheidsinstanties
+        description: Deze beheersmaatregel zorgt voor tijdig contact met de betrokken
+          instanties bij informatiebeveiligingsincidenten. Maatregelen zijn onder
+          meer afspraken over contact, actuele contactlijsten en toegewezen verantwoordelijkheden.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.6
     ref_id: A.5.6
     name: Contact with special interest groups
@@ -339,6 +373,11 @@ objects:
           \u5B9E\u8DF5\u7684\u4E86\u89E3\u3002\u63AA\u65BD\u5305\u62EC\u53C2\u4E0E\
           \u8BBA\u575B\u3001\u4F1A\u5458\u8D44\u683C\u548C\u534F\u4F5C\u9879\u76EE\
           \u3002"
+      nl: &id006
+        name: Contact met speciale belangengroepen
+        description: Deze beheersmaatregel maakt contact met speciale belangengroepen
+          mogelijk om op de hoogte te blijven van ontwikkelingen in beveiliging. Maatregelen
+          zijn onder meer deelname aan fora, lidmaatschappen en samenwerkingsverbanden.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.7
     ref_id: A.5.7
     name: Threat intelligence
@@ -386,6 +425,12 @@ objects:
           \u89E3\u5B89\u5168\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\u76D1\u63A7\
           \u5A01\u80C1\u4FE1\u606F\u6D41\u3001\u5206\u6790\u8D8B\u52BF\u4EE5\u53CA\
           \u5206\u4EAB\u53EF\u4F5C\u7684\u89C1\u89E3\u3002"
+      nl: &id007
+        name: Informatie over dreigingen
+        description: Deze beheersmaatregel zorgt dat informatie over dreigingen wordt
+          verzameld en bijgehouden om beveiligingsrisico's te herkennen en te beperken.
+          Maatregelen zijn onder meer het volgen van dreigingsbronnen, het analyseren
+          van trends en het delen van bruikbare inzichten.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.8
     ref_id: A.5.8
     name: Information security in project management
@@ -431,6 +476,11 @@ objects:
           \u62EC\u98CE\u9669\u8BC4\u4F30\u3001\u5408\u89C4\u5BA1\u67E5\u4EE5\u53CA\
           \u9879\u76EE\u751F\u547D\u5468\u671F\u5185\u7684\u5B89\u5168\u68C0\u67E5\
           \u70B9\u3002"
+      nl: &id008
+        name: Informatiebeveiliging in projectmanagement
+        description: Deze beheersmaatregel neemt informatiebeveiliging op in de manier
+          van projectmanagement. Maatregelen zijn onder meer risicobeoordelingen,
+          nalevingscontroles en beveiligingsmomenten tijdens de looptijd van een project.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.9
     ref_id: A.5.9
     name: Inventory of information and other associated assets
@@ -474,6 +524,11 @@ objects:
           \u76F8\u5173\u8D44\u4EA7\u7684\u51C6\u786E\u76D8\u70B9\u3002\u63AA\u65BD\
           \u5305\u62EC\u8D44\u4EA7\u8DDF\u8E2A\u3001\u5B9A\u671F\u5BA1\u8BA1\u4EE5\
           \u53CA\u6309\u654F\u611F\u5EA6\u5206\u7C7B\u3002"
+      nl: &id009
+        name: Inventarisatie van informatie en andere gerelateerde bedrijfsmiddelen
+        description: Deze beheersmaatregel zorgt voor een juist overzicht van informatie
+          en gerelateerde bedrijfsmiddelen. Maatregelen zijn onder meer het bijhouden
+          van bedrijfsmiddelen, periodieke controles en indeling naar gevoeligheid.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.10
     ref_id: A.5.10
     name: Acceptable use of information and other associated assets
@@ -524,6 +579,11 @@ objects:
           \u786E\u4FDD\u6B63\u786E\u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u6709\
           \u6587\u6863\u5316\u7684\u653F\u7B56\u3001\u7528\u6237\u57F9\u8BAD\u548C\
           \u6267\u884C\u673A\u5236\u3002"
+      nl: &id010
+        name: Aanvaardbaar gebruik van informatie en andere gerelateerde bedrijfsmiddelen
+        description: Deze beheersmaatregel legt vast wat aanvaardbaar gebruik is van
+          informatie en gerelateerde bedrijfsmiddelen. Maatregelen zijn onder meer
+          vastgelegd beleid, training van gebruikers en handhaving.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.11
     ref_id: A.5.11
     name: Return of assets
@@ -569,6 +629,12 @@ objects:
           \uFF0C\u8D44\u4EA7\u80FD\u591F\u5B89\u5168\u56DE\u6536\u3002\u63AA\u65BD\
           \u5305\u62EC\u6E05\u5355\u3001\u8D44\u4EA7\u8DDF\u8E2A\u548C\u9000\u5F79\
           \u534F\u8BAE\u3002"
+      nl: &id011
+        name: Teruggave van bedrijfsmiddelen
+        description: Deze beheersmaatregel zorgt dat bedrijfsmiddelen veilig worden
+          ingeleverd als medewerkers of externen vertrekken of van rol wisselen. Maatregelen
+          zijn onder meer checklists, het bijhouden van bedrijfsmiddelen en afspraken
+          voor het buiten gebruik stellen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.12
     ref_id: A.5.12
     name: Classification of information
@@ -616,6 +682,12 @@ objects:
           \u4EE5\u786E\u4FDD\u9002\u5F53\u7684\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\
           \u62EC\u5206\u7C7B\u65B9\u6848\u3001\u8BBF\u95EE\u9650\u5236\u548C\u6807\
           \u7B7E\u6307\u5357\u3002"
+      nl: &id012
+        name: Classificatie van informatie
+        description: Deze beheersmaatregel zorgt dat informatie wordt ingedeeld naar
+          gevoeligheid en waarde, zodat ze passend wordt beschermd. Maatregelen zijn
+          onder meer een classificatieschema, toegangsbeperkingen en richtlijnen voor
+          labelen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.13
     ref_id: A.5.13
     name: Labelling of information
@@ -657,6 +729,11 @@ objects:
           \u7B7E\u4E00\u81F4\uFF0C\u53CD\u6620\u5176\u5206\u7C7B\u548C\u5904\u7406\
           \u8981\u6C42\u3002\u8861\u91CF\u6807\u51C6\u5305\u62EC\u6807\u51C6\u5316\
           \u6A21\u677F\u3001\u57F9\u8BAD\u548C\u5BA1\u8BA1\u3002"
+      nl: &id013
+        name: Labelen van informatie
+        description: Deze beheersmaatregel zorgt dat informatie consequent wordt gelabeld
+          volgens haar classificatie en de eisen voor omgang ermee. Maatregelen zijn
+          onder meer vaste sjablonen, training en controles.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.14
     ref_id: A.5.14
     name: Information transfer
@@ -700,6 +777,11 @@ objects:
           \u7EC4\u7EC7\u4E4B\u95F4\u4FE1\u606F\u4F20\u8F93\u7684\u5B89\u5168\u6D41\
           \u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u8BBF\u95EE\u63A7\
           \u5236\u548C\u5B89\u5168\u4F20\u8F93\u534F\u8BAE\u3002"
+      nl: &id014
+        name: Overdracht van informatie
+        description: Deze beheersmaatregel zorgt voor veilige processen voor het overdragen
+          van informatie tussen systemen of organisaties. Maatregelen zijn onder meer
+          versleuteling, toegangsbeheer en veilige overdrachtsprotocollen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.15
     ref_id: A.5.15
     name: Access control
@@ -747,6 +829,11 @@ objects:
           \u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\
           \u8BBF\u95EE\u3001\u591A\u56E0\u7D20\u8BA4\u8BC1\u548C\u5B9A\u671F\u5BA1\
           \u67E5\u3002"
+      nl: &id015
+        name: Toegangsbeveiliging
+        description: Deze beheersmaatregel zorgt voor toegangsbeveiliging die toegang
+          beperkt tot bevoegde personen. Maatregelen zijn onder meer toegang op basis
+          van rollen, meerfactorauthenticatie en periodieke herziening.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.16
     ref_id: A.5.16
     name: Identity management
@@ -794,6 +881,12 @@ objects:
           \u9760\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u8EAB\u4EFD\u9A8C\u8BC1\
           \u3001\u751F\u547D\u5468\u671F\u7BA1\u7406\u548C\u8BBF\u95EE\u914D\u7F6E\
           \u3002"
+      nl: &id016
+        name: Identiteitsbeheer
+        description: Deze beheersmaatregel zorgt dat identiteiten veilig worden beheerd,
+          zodat toegang tot systemen juist en betrouwbaar is. Maatregelen zijn onder
+          meer identiteitscontrole, beheer van de levenscyclus en het toekennen van
+          toegang.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.17
     ref_id: A.5.17
     name: Authentication information
@@ -837,6 +930,11 @@ objects:
           \u606F\uFF0C\u5982\u5BC6\u7801\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\
           \u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\
           \u5B89\u5168\u5B58\u50A8\u548C\u5B9A\u671F\u66F4\u65B0\u5BC6\u7801\u3002"
+      nl: &id017
+        name: Authenticatie-informatie
+        description: Deze beheersmaatregel beschermt authenticatie-informatie, zoals
+          wachtwoorden, tegen onbevoegd gebruik. Maatregelen zijn onder meer versleuteling,
+          veilige opslag en het periodiek vernieuwen van wachtwoorden.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.18
     ref_id: A.5.18
     name: Access rights
@@ -883,6 +981,12 @@ objects:
           \u89D2\u8272\u548C\u804C\u8D23\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\
           \u5BA1\u8BA1\u3001\u8BBF\u95EE\u64A4\u9500\u548C\u81EA\u52A8\u5316\u8BBF\
           \u95EE\u7BA1\u7406\u3002"
+      nl: &id018
+        name: Toegangsrechten
+        description: Deze beheersmaatregel zorgt dat toegangsrechten regelmatig worden
+          herzien en passen bij rollen en verantwoordelijkheden. Maatregelen zijn
+          onder meer periodieke controles, het intrekken van toegang en geautomatiseerd
+          toegangsbeheer.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.19
     ref_id: A.5.19
     name: Information security in supplier relationships
@@ -926,6 +1030,12 @@ objects:
           \u5D4C\u5165\u4F9B\u5E94\u5546\u5173\u7CFB\u548C\u6D41\u7A0B\u4E2D\u3002\
           \u63AA\u65BD\u5305\u62EC\u5C3D\u804C\u8C03\u67E5\u3001\u5B89\u5168\u5BA1\
           \u67E5\u548C\u6301\u7EED\u76D1\u63A7\u3002"
+      nl: &id019
+        name: Informatiebeveiliging in relaties met leveranciers
+        description: Deze beheersmaatregel zorgt dat informatiebeveiliging een vast
+          onderdeel is van de relaties en processen met leveranciers. Maatregelen
+          zijn onder meer onderzoek vooraf, beveiligingsbeoordelingen en doorlopende
+          controle.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.20
     ref_id: A.5.20
     name: Addressing information security within supplier agreements
@@ -972,6 +1082,11 @@ objects:
           \u4E2D\u7684\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\
           \u62EC\u660E\u786E\u7684\u5408\u540C\u6761\u6B3E\u3001\u5408\u89C4\u5BA1\
           \u8BA1\u4EE5\u53CA\u5BF9\u8FDD\u89C4\u7684\u660E\u786E\u5904\u7F5A\u3002"
+      nl: &id020
+        name: Informatiebeveiliging in overeenkomsten met leveranciers
+        description: Deze beheersmaatregel neemt eisen voor informatiebeveiliging
+          op in overeenkomsten met leveranciers. Maatregelen zijn onder meer expliciete
+          contractbepalingen, nalevingsaudits en afgesproken sancties bij overtreding.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.21
     ref_id: A.5.21
     name: Managing information security in the ICT supply chain
@@ -1023,6 +1138,12 @@ objects:
           \u7EC4\u4EF6\u7684\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\u98CE\u9669\
           \u8BC4\u4F30\u3001\u4F9B\u5E94\u5546\u8BC4\u4F30\u548C\u4E8B\u6545\u54CD\
           \u5E94\u534F\u8BAE\u3002"
+      nl: &id021
+        name: Beheer van informatiebeveiliging in de ICT-toeleveringsketen
+        description: Deze beheersmaatregel beheerst de risico's voor informatiebeveiliging
+          in de ICT-toeleveringsketen, zodat diensten en componenten veilig zijn.
+          Maatregelen zijn onder meer risicobeoordelingen, beoordeling van leveranciers
+          en afspraken voor incidentrespons.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
     name: Monitoring, review and change management of supplier services
@@ -1072,6 +1193,12 @@ objects:
           \u4EE5\u7EF4\u62A4\u4FE1\u606F\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\
           \u670D\u52A1\u6C34\u5E73\u534F\u8BAE\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\
           \u5408\u540C\u66F4\u65B0\u3002"
+      nl: &id022
+        name: Monitoring, beoordeling en wijzigingsbeheer van diensten van leveranciers
+        description: Deze beheersmaatregel zorgt dat diensten van leveranciers worden
+          gevolgd, beoordeeld en bijgestuurd om de informatiebeveiliging op peil te
+          houden. Maatregelen zijn onder meer dienstverleningsovereenkomsten, periodieke
+          beoordelingen en het bijwerken van contracten.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.23
     ref_id: A.5.23
     name: Information security for use of cloud services
@@ -1117,6 +1244,12 @@ objects:
           \u98CE\u9669\uFF0C\u786E\u4FDD\u4E91\u670D\u52A1\u7684\u5B89\u5168\u4F7F\
           \u7528\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u52A0\u5BC6\u3001\u8BBF\
           \u95EE\u63A7\u5236\u548C\u63D0\u4F9B\u8005\u5408\u89C4\u5BA1\u67E5\u3002"
+      nl: &id023
+        name: Informatiebeveiliging bij het gebruik van clouddiensten
+        description: Deze beheersmaatregel zorgt voor veilig gebruik van clouddiensten
+          door de bijbehorende risico's aan te pakken. Maatregelen zijn onder meer
+          versleuteling van gegevens, toegangsbeheer en controle op naleving door
+          de aanbieder.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.24
     ref_id: A.5.24
     name: Information security incident management planning and preparation
@@ -1166,6 +1299,11 @@ objects:
           \u5168\u4E8B\u4EF6\u7684\u5408\u7406\u89C4\u5212\u548C\u51C6\u5907\u3002\
           \u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u54CD\u5E94\u8BA1\u5212\u3001\u57F9\
           \u8BAD\u6F14\u4E60\u548C\u901A\u4FE1\u534F\u8BAE\u3002"
+      nl: &id024
+        name: Planning en voorbereiding van het beheer van informatiebeveiligingsincidenten
+        description: Deze beheersmaatregel zorgt voor goede planning en voorbereiding
+          op het afhandelen van informatiebeveiligingsincidenten. Maatregelen zijn
+          onder meer incidentresponsplannen, oefeningen en afspraken over communicatie.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.25
     ref_id: A.5.25
     name: Assessment and decision on information security events
@@ -1216,6 +1354,11 @@ objects:
           \u52A8\u7684\u6D41\u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u6839\u672C\u539F\
           \u56E0\u5206\u6790\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u7F13\u89E3\u8BA1\
           \u5212\u3002"
+      nl: &id025
+        name: Beoordeling van en besluitvorming over informatiebeveiligingsgebeurtenissen
+        description: Deze beheersmaatregel zorgt voor processen om informatiebeveiligingsgebeurtenissen
+          te beoordelen en te besluiten wat er moet gebeuren. Maatregelen zijn onder
+          meer oorzaakanalyse, risicobeoordeling en plannen om risico's te beperken.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.26
     ref_id: A.5.26
     name: Response to information security incidents
@@ -1263,6 +1406,12 @@ objects:
           \u9650\u5EA6\u5730\u51CF\u5C11\u5F71\u54CD\u5E76\u8FC5\u901F\u6062\u590D\
           \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u3001\u5347\u7EA7\
           \u534F\u8BAE\u548C\u904F\u5236\u7B56\u7565\u3002"
+      nl: &id026
+        name: Reactie op informatiebeveiligingsincidenten
+        description: Deze beheersmaatregel zorgt voor een doeltreffende reactie op
+          informatiebeveiligingsincidenten om de schade te beperken en snel te herstellen.
+          Maatregelen zijn onder meer het melden van incidenten, afspraken over opschaling
+          en het indammen van de schade.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.27
     ref_id: A.5.27
     name: Learning from information security incidents
@@ -1312,6 +1461,12 @@ objects:
           \u5F55\u5E76\u52A0\u4EE5\u5B9E\u65BD\uFF0C\u4EE5\u6539\u8FDB\u6D41\u7A0B\
           \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u540E\u5BA1\u67E5\u3001\u884C\
           \u52A8\u8BA1\u5212\u548C\u653F\u7B56\u66F4\u65B0\u3002"
+      nl: &id027
+        name: Leren van informatiebeveiligingsincidenten
+        description: Deze beheersmaatregel zorgt dat lessen uit informatiebeveiligingsincidenten
+          worden vastgelegd en gebruikt om processen te verbeteren. Maatregelen zijn
+          onder meer evaluaties na een incident, actieplannen en het bijwerken van
+          beleid.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.28
     ref_id: A.5.28
     name: Collection of evidence
@@ -1360,6 +1515,11 @@ objects:
           \u4EE5\u652F\u6301\u8C03\u67E5\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7BA1\
           \u94FE\u7A0B\u5E8F\u3001\u5B89\u5168\u5B58\u50A8\u548C\u95E8\u7981\u63A7\
           \u5236\u3002"
+      nl: &id028
+        name: Verzamelen van bewijsmateriaal
+        description: Deze beheersmaatregel zorgt dat bewijs bij beveiligingsincidenten
+          wordt verzameld en bewaard ter ondersteuning van onderzoek. Maatregelen
+          zijn onder meer een sluitende bewijsketen, veilige opslag en toegangsbeheer.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.29
     ref_id: A.5.29
     name: Information security during disruption
@@ -1406,6 +1566,11 @@ objects:
           \u8FD0\u8425\u7684\u8FDE\u7EED\u6027\u3002\u63AA\u65BD\u5305\u62EC\u5E94\
           \u6025\u9884\u6848\u3001\u5907\u4EFD\u7CFB\u7EDF\u548C\u6545\u969C\u5207\
           \u6362\u673A\u5236\u3002"
+      nl: &id029
+        name: Informatiebeveiliging tijdens een verstoring
+        description: Deze beheersmaatregel zorgt dat informatiebeveiliging op peil
+          blijft tijdens verstoringen, zodat de bedrijfsvoering doorgaat. Maatregelen
+          zijn onder meer noodplannen, back-upsystemen en uitwijkvoorzieningen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.30
     ref_id: A.5.30
     name: ICT readiness for business continuity
@@ -1453,6 +1618,11 @@ objects:
           \u51CF\u5C11\u4E2D\u65AD\u671F\u95F4\u7684\u505C\u673A\u65F6\u95F4\u3002\
           \u63AA\u65BD\u5305\u62EC\u6D4B\u8BD5\u6062\u590D\u8BA1\u5212\u3001\u5197\
           \u4F59\u7CFB\u7EDF\u548C\u707E\u96BE\u6062\u590D\u7AD9\u70B9\u3002"
+      nl: &id030
+        name: "ICT-gereedheid voor bedrijfscontinu\xEFteit"
+        description: "Deze beheersmaatregel zorgt dat de ICT klaar is voor bedrijfscontinu\xEF\
+          teit, zodat uitval bij verstoringen beperkt blijft. Maatregelen zijn onder\
+          \ meer het testen van herstelplannen, redundante systemen en uitwijklocaties."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.31
     ref_id: A.5.31
     name: Legal, statutory, regulatory and contractual requirements
@@ -1499,6 +1669,11 @@ objects:
           \u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\u4FE1\u606F\u5B89\
           \u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\u62EC\u653F\u7B56\u5BA1\u67E5\
           \u3001\u5BA1\u8BA1\u548C\u8BC1\u636E\u8BB0\u5F55\u3002"
+      nl: &id031
+        name: Wettelijke, statutaire, regelgevende en contractuele eisen
+        description: Deze beheersmaatregel zorgt voor naleving van wettelijke, statutaire,
+          regelgevende en contractuele eisen voor informatiebeveiliging. Maatregelen
+          zijn onder meer beleidsherzieningen, audits en het vastleggen van bewijs.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.32
     ref_id: A.5.32
     name: Intellectual property rights
@@ -1543,6 +1718,11 @@ objects:
           \u901A\u8FC7\u9002\u5F53\u7684\u4FE1\u606F\u5B89\u5168\u63AA\u65BD\u5F97\
           \u5230\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\u62EC\u8BBF\u95EE\u9650\u5236\
           \u3001\u52A0\u5BC6\u548C\u6CD5\u5F8B\u534F\u8BAE\u3002"
+      nl: &id032
+        name: Intellectuele-eigendomsrechten
+        description: Deze beheersmaatregel beschermt intellectuele-eigendomsrechten
+          met passende beveiligingsmaatregelen. Maatregelen zijn onder meer toegangsbeperkingen,
+          versleuteling en juridische afspraken.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.33
     ref_id: A.5.33
     name: Protection of records
@@ -1591,6 +1771,11 @@ objects:
           \u7ECF\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7559\
           \u653F\u7B56\u3001\u5B89\u5168\u5B58\u50A8\u548C\u8BBF\u95EE\u63A7\u5236\
           \u3002"
+      nl: &id033
+        name: Beschermen van registraties
+        description: Deze beheersmaatregel zorgt dat registraties veilig worden opgeslagen
+          en beschermd tegen verlies en onbevoegde toegang. Maatregelen zijn onder
+          meer bewaartermijnen, veilige opslag en toegangsbeheer.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.34
     ref_id: A.5.34
     name: Privacy and protection of PII
@@ -1636,6 +1821,11 @@ objects:
           \u4FDD\u4E2A\u4EBA\u8EAB\u4EFD\u4FE1\u606F\uFF08PII\uFF09\u7684\u5B89\u5168\
           \u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u533F\u540D\u5316\u3001\u52A0\
           \u5BC6\u4EE5\u53CA\u9075\u5B88\u9690\u79C1\u6CD5\u5F8B\u3002"
+      nl: &id034
+        name: Privacy en bescherming van persoonsgegevens
+        description: Deze beheersmaatregel beschermt de privacy en zorgt voor een
+          veilige omgang met persoonsgegevens. Maatregelen zijn onder meer anonimiseren,
+          versleutelen en naleving van privacywetgeving.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.35
     ref_id: A.5.35
     name: Independent review of information security
@@ -1682,6 +1872,12 @@ objects:
           \u6709\u6548\u6027\u548C\u5408\u89C4\u6027\u3002\u63AA\u65BD\u5305\u62EC\
           \u5916\u90E8\u5BA1\u8BA1\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u540E\u7EED\
           \u884C\u52A8\u3002"
+      nl: &id035
+        name: Onafhankelijke beoordeling van informatiebeveiliging
+        description: Deze beheersmaatregel zorgt voor onafhankelijke beoordelingen
+          van informatiebeveiliging om de doeltreffendheid en naleving te toetsen.
+          Maatregelen zijn onder meer externe audits, risicobeoordelingen en opvolging
+          van bevindingen.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.36
     ref_id: A.5.36
     name: Compliance with policies, rules and standards for information security
@@ -1731,6 +1927,11 @@ objects:
           \u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\u5219\u548C\u6807\
           \u51C6\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\u653F\
           \u7B56\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\u5236\u3002"
+      nl: &id036
+        name: Naleving van beleid, regels en normen voor informatiebeveiliging
+        description: Deze beheersmaatregel zorgt voor naleving van alle beleid, regels
+          en normen voor informatiebeveiliging. Maatregelen zijn onder meer regelmatige
+          training, beleidsherzieningen en handhaving.
   - urn: urn:intuitem:risk:function:doc-pol:a.5.37
     ref_id: A.5.37
     name: Documented operating procedures
@@ -1774,6 +1975,11 @@ objects:
           \u6863\u7684\u4F5C\u7A0B\u5E8F\uFF0C\u4EE5\u786E\u4FDD\u5B89\u5168\u5B9E\
           \u8DF5\u7684\u4E00\u81F4\u6027\u3002\u63AA\u65BD\u5305\u62EC\u6D41\u7A0B\
           \u6587\u6863\u3001\u7248\u672C\u63A7\u5236\u548C\u65E0\u969C\u788D\u3002"
+      nl: &id037
+        name: Gedocumenteerde bedieningsprocedures
+        description: Deze beheersmaatregel zorgt voor vastgelegde werkprocedures die
+          worden bijgehouden, zodat beveiliging overal op dezelfde manier gebeurt.
+          Maatregelen zijn onder meer procesdocumentatie, versiebeheer en goede vindbaarheid.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.1
     ref_id: A.6.1
     name: Screening
@@ -1824,6 +2030,12 @@ objects:
           \u4EBA\u7684\u9002\u4EFB\u6027\u3002\u63AA\u65BD\u5305\u62EC\u80CC\u666F\
           \u8C03\u67E5\u3001\u8EAB\u4EFD\u9A8C\u8BC1\u548C\u8D44\u683C\u8BC4\u4F30\
           \uFF0C\u4EE5\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002"
+      nl: &id038
+        name: Screening
+        description: "Deze beheersmaatregel zorgt voor screening om v\xF3\xF3r indiensttreding\
+          \ na te gaan of kandidaten geschikt zijn. Maatregelen zijn onder meer achtergrondonderzoek,\
+          \ identiteitscontrole en het toetsen van kwalificaties om beveiligingsrisico's\
+          \ te verkleinen."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.2
     ref_id: A.6.2
     name: Terms and conditions of employment
@@ -1870,6 +2082,11 @@ objects:
           \u63AA\u65BD\u5305\u62EC\u660E\u786E\u89C4\u5B9A\u4FDD\u5BC6\u3001\u9075\
           \u5B88\u653F\u7B56\u4EE5\u53CA\u8FDD\u89C4\u540E\u679C\u7B49\u6761\u6B3E\
           \u3002"
+      nl: &id039
+        name: Arbeidsvoorwaarden
+        description: Deze beheersmaatregel zorgt dat de arbeidsvoorwaarden verantwoordelijkheden
+          voor informatiebeveiliging bevatten. Maatregelen zijn onder meer expliciete
+          bepalingen over geheimhouding, naleving van beleid en gevolgen bij overtreding.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.3
     ref_id: A.6.3
     name: Information security awareness, education and training
@@ -1919,6 +2136,11 @@ objects:
           \u57F9\u8BAD\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\
           \u7535\u5B50\u5B66\u4E60\u9879\u76EE\u548C\u6A21\u62DF\u9493\u9C7C\u6F14\
           \u4E60\u3002"
+      nl: &id040
+        name: Bewustzijn, opleiding en training op het gebied van informatiebeveiliging
+        description: Deze beheersmaatregel zorgt dat medewerkers regelmatig bewustwording,
+          opleiding en training in informatiebeveiliging krijgen. Maatregelen zijn
+          onder meer geplande trainingen, e-learning en gesimuleerde phishingoefeningen.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.4
     ref_id: A.6.4
     name: Disciplinary process
@@ -1966,6 +2188,11 @@ objects:
           \u89C4\u884C\u4E3A\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u7684\u6307\
           \u5BFC\u65B9\u9488\u3001\u5347\u7EA7\u7A0B\u5E8F\u548C\u6301\u7EED\u7684\
           \u6267\u6CD5\uFF0C\u4EE5\u4FDD\u6301\u95EE\u8D23\u5236\u3002"
+      nl: &id041
+        name: Disciplinaire procedure
+        description: Deze beheersmaatregel zorgt voor een disciplinaire procedure
+          bij overtreding van het informatiebeveiligingsbeleid. Maatregelen zijn onder
+          meer duidelijke richtlijnen, afspraken over opschaling en consequente handhaving.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.5
     ref_id: A.6.5
     name: Responsibilities after termination or change of employment
@@ -2020,6 +2247,12 @@ objects:
           \u66F4\u540E\u5F97\u5230\u5B9A\u4E49\u548C\u6267\u884C\u3002\u63AA\u65BD\
           \u5305\u62EC\u64A4\u9500\u8BBF\u95EE\u6743\u3001\u6536\u7F34\u7EC4\u7EC7\
           \u8D44\u4EA7\u4EE5\u53CA\u8FDB\u884C\u79BB\u804C\u9762\u8C08\u3002"
+      nl: &id042
+        name: "Verantwoordelijkheden na be\xEBindiging of wijziging van het dienstverband"
+        description: Deze beheersmaatregel zorgt dat verantwoordelijkheden voor informatiebeveiliging
+          zijn vastgelegd en blijven gelden na vertrek of een andere rol. Maatregelen
+          zijn onder meer het intrekken van toegangsrechten, het innemen van bedrijfsmiddelen
+          en exitgesprekken.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.6
     ref_id: A.6.6
     name: Confidentiality or non-disclosure agreements
@@ -2069,6 +2302,12 @@ objects:
           \u63AA\u65BD\u5305\u62EC\u5165\u804C\u65F6\u7B7E\u7F72\u534F\u8BAE\u3001\
           \u5B9A\u671F\u63D0\u9192\u4EE5\u53CA\u5728\u8FDD\u89C4\u65F6\u6267\u884C\
           \u6CD5\u5F8B\u884C\u52A8\u3002"
+      nl: &id043
+        name: Vertrouwelijkheids- of geheimhoudingsovereenkomsten
+        description: Deze beheersmaatregel zorgt voor vertrouwelijkheids- of geheimhoudingsovereenkomsten
+          om gevoelige informatie te beschermen. Maatregelen zijn onder meer ondertekende
+          overeenkomsten bij indiensttreding, periodieke herinneringen en juridische
+          stappen bij overtreding.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.7
     ref_id: A.6.7
     name: Remote working
@@ -2117,6 +2356,12 @@ objects:
           \u7684\u5B89\u5168\u8BBF\u95EE\u3001\u5F3A\u5236\u4F7F\u7528VPN\uFF0C\u4EE5\
           \u53CA\u5236\u5B9A\u8FDC\u7A0B\u5904\u7406\u654F\u611F\u6570\u636E\u7684\
           \u653F\u7B56\u3002"
+      nl: &id044
+        name: Werken op afstand
+        description: Deze beheersmaatregel zorgt dat de risico's voor informatiebeveiliging
+          bij werken op afstand worden beheerst. Maatregelen zijn onder meer veilige
+          toegang tot bedrijfssystemen, verplicht gebruik van een VPN en beleid voor
+          omgang met gevoelige gegevens op afstand.
   - urn: urn:intuitem:risk:function:doc-pol:a.6.8
     ref_id: A.6.8
     name: Information security event reporting
@@ -2167,6 +2412,11 @@ objects:
           \u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u6E20\u9053\u3001\u5BA3\u4F20\
           \u6D3B\u52A8\u4EE5\u53CA\u8C03\u67E5\u548C\u5904\u7406\u62A5\u544A\u4E8B\
           \u4EF6\u7684\u540E\u7EED\u7A0B\u5E8F\u3002"
+      nl: &id045
+        name: Melden van informatiebeveiligingsgebeurtenissen
+        description: Deze beheersmaatregel zorgt dat medewerkers informatiebeveiligingsgebeurtenissen
+          snel kunnen melden. Maatregelen zijn onder meer meldkanalen, bewustwordingscampagnes
+          en opvolging om meldingen te onderzoeken en af te handelen.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.1
     ref_id: A.7.1
     name: Physical security perimeters
@@ -2217,6 +2467,12 @@ objects:
           \u8BBE\u7F6E\u969C\u788D\u7269\u3001\u95E8\u7981\u63A7\u5236\u548C\u76D1\
           \u63A7\u7CFB\u7EDF\uFF0C\u786E\u4FDD\u53EA\u6709\u6388\u6743\u4EBA\u5458\
           \u624D\u80FD\u8FDB\u5165\u3002"
+      nl: &id046
+        name: Fysieke beveiligingszones
+        description: Deze beheersmaatregel zorgt voor fysieke beveiligingszones die
+          kritieke ruimten beschermen tegen onbevoegde toegang. Maatregelen zijn onder
+          meer afscheidingen, toegangscontrole en bewakingssystemen, zodat alleen
+          bevoegde personen binnenkomen.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.2
     ref_id: A.7.2
     name: Physical entry
@@ -2263,6 +2519,11 @@ objects:
           \u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u5FBD\
           \u7AE0\u7CFB\u7EDF\u3001\u5B89\u4FDD\u4EBA\u5458\u548C\u8BBF\u5BA2\u8BB0\
           \u5F55\u3002"
+      nl: &id047
+        name: Fysieke toegangsbeveiliging
+        description: Deze beheersmaatregel zorgt dat fysieke toegangspunten worden
+          beheerst en bewaakt om onbevoegde toegang te voorkomen. Maatregelen zijn
+          onder meer pasjessystemen, beveiligingspersoneel en bezoekersregistratie.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.3
     ref_id: A.7.3
     name: Securing offices, rooms and facilities
@@ -2308,6 +2569,11 @@ objects:
           \u623F\u95F4\u548C\u8BBE\u65BD\u7684\u5B89\u5168\uFF0C\u4EE5\u4FDD\u62A4\
           \u4FE1\u606F\u548C\u8D44\u6E90\u3002\u63AA\u65BD\u5305\u62EC\u4E0A\u9501\
           \u95E8\u3001\u9650\u5236\u533A\u57DF\u548C\u76D1\u63A7\u7CFB\u7EDF\u3002"
+      nl: &id048
+        name: Beveiligen van kantoren, ruimten en faciliteiten
+        description: Deze beheersmaatregel zorgt dat kantoren, ruimten en faciliteiten
+          zijn beveiligd om informatie en middelen te beschermen. Maatregelen zijn
+          onder meer afgesloten deuren, afgeschermde zones en camerabewaking.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.4
     ref_id: A.7.4
     name: Physical security monitoring
@@ -2351,6 +2617,11 @@ objects:
           \u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u5E76\u8FC5\u901F\u54CD\u5E94\u5A01\
           \u80C1\u3002\u63AA\u65BD\u5305\u62EC\u95ED\u8DEF\u7535\u89C6\u7CFB\u7EDF\
           \u3001\u8FD0\u52A8\u63A2\u6D4B\u5668\u548C\u5B9E\u65F6\u8B66\u62A5\u3002"
+      nl: &id049
+        name: Monitoren van de fysieke beveiliging
+        description: Deze beheersmaatregel zorgt voor bewaking van de fysieke beveiliging
+          om dreigingen snel te zien en erop te reageren. Maatregelen zijn onder meer
+          camerasystemen, bewegingsmelders en directe meldingen.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.5
     ref_id: A.7.5
     name: Protecting against physical and environmental threats
@@ -2396,6 +2667,11 @@ objects:
           \u6E90\u514D\u53D7\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1\u3002\u63AA\
           \u65BD\u5305\u62EC\u706D\u706B\u7CFB\u7EDF\u3001\u6E29\u5EA6\u63A7\u5236\
           \u548C\u9632\u6D2A\u5C4F\u969C\u3002"
+      nl: &id050
+        name: Beschermen tegen fysieke en omgevingsdreigingen
+        description: Deze beheersmaatregel beschermt systemen en middelen tegen fysieke
+          en omgevingsdreigingen. Maatregelen zijn onder meer brandblusinstallaties,
+          temperatuurregeling en voorzieningen tegen wateroverlast.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.6
     ref_id: A.7.6
     name: Working In secure areas
@@ -2440,6 +2716,11 @@ objects:
           \u53EA\u5141\u8BB8\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
           \u95E8\u7981\u7CFB\u7EDF\u3001\u8BBF\u5BA2\u62A4\u9001\u548C\u6D3B\u52A8\
           \u76D1\u6D4B\u3002"
+      nl: &id051
+        name: Werken in beveiligde ruimten
+        description: Deze beheersmaatregel zorgt dat beveiligde ruimten zo worden
+          beheerd dat alleen bevoegden er toegang hebben. Maatregelen zijn onder meer
+          toegangscontrolesystemen, begeleiding van bezoekers en bewaking van activiteiten.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.7
     ref_id: A.7.7
     name: Clear desk and clear screen
@@ -2488,6 +2769,12 @@ objects:
           \u654F\u611F\u4FE1\u606F\u4E0D\u4F1A\u88AB\u9057\u6F0F\u3002\u63AA\u65BD\
           \u5305\u62EC\u5C06\u654F\u611F\u6587\u4EF6\u9501\u597D\uFF0C\u5E76\u5728\
           \u672A\u4F7F\u7528\u65F6\u81EA\u52A8\u9501\u5B9A\u5C4F\u5E55\u3002"
+      nl: &id052
+        name: Clean desk en clear screen
+        description: Deze beheersmaatregel voorkomt met een clean-desk- en clear-screenbeleid
+          dat gevoelige informatie onbeheerd zichtbaar is. Maatregelen zijn onder
+          meer het opbergen van gevoelige documenten en het automatisch vergrendelen
+          van schermen.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.8
     ref_id: A.7.8
     name: Equipment siting and protection
@@ -2533,6 +2820,12 @@ objects:
           \u7684\u8BBF\u95EE\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u5B89\
           \u5168\u5B89\u88C5\u3001\u4E0A\u9501\u67DC\u5B50\u548C\u9650\u5236\u8FDB\
           \u5165\u533A\u57DF\u3002"
+      nl: &id053
+        name: Plaatsen en beschermen van apparatuur
+        description: Deze beheersmaatregel zorgt dat apparatuur zo is geplaatst en
+          beschermd dat onbevoegde toegang en schade worden voorkomen. Maatregelen
+          zijn onder meer stevige bevestiging, afgesloten kasten en ruimten met beperkte
+          toegang.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.9
     ref_id: A.7.9
     name: Security of assets off-premises
@@ -2579,6 +2872,12 @@ objects:
           \u4EE5\u7EF4\u62A4\u673A\u5BC6\u6027\u548C\u5B8C\u6574\u6027\u3002\u63AA\
           \u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u5B89\u5168\u4F20\u8F93\u548C\u8BBF\
           \u95EE\u8FFD\u8E2A\u3002"
+      nl: &id054
+        name: Beveiligen van bedrijfsmiddelen buiten het terrein
+        description: Deze beheersmaatregel zorgt dat bedrijfsmiddelen die buiten de
+          organisatie worden gebruikt of bewaard, beveiligd zijn. Maatregelen zijn
+          onder meer versleuteling, veilig transport en het bijhouden van wie toegang
+          heeft.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.10
     ref_id: A.7.10
     name: Storage media
@@ -2620,6 +2919,11 @@ objects:
           \uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u6216\u7BE1\
           \u6539\u3002\u63AA\u65BD\u5305\u62EC\u5B89\u5168\u5B58\u50A8\u3001\u52A0\
           \u5BC6\u548C\u8BBF\u95EE\u9650\u5236\u3002"
+      nl: &id055
+        name: Opslagmedia
+        description: Deze beheersmaatregel beschermt opslagmedia tegen onbevoegde
+          toegang en manipulatie. Maatregelen zijn onder meer veilige opslag, versleuteling
+          en toegangsbeperkingen.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.11
     ref_id: A.7.11
     name: Supporting utilities
@@ -2665,6 +2969,11 @@ objects:
           \u516C\u7528\u4E8B\u4E1A\uFF0C\u5982\u7535\u529B\u548C\u51B7\u5374\u7CFB\
           \u7EDF\uFF0C\u53EF\u9760\u4E14\u4E0D\u53D7\u5E72\u6270\u3002\u63AA\u65BD\
           \u5305\u62EC\u5197\u4F59\u7CFB\u7EDF\u548C\u7269\u7406\u5B89\u5168\u3002"
+      nl: &id056
+        name: Nutsvoorzieningen
+        description: Deze beheersmaatregel zorgt dat ondersteunende voorzieningen,
+          zoals stroom en koeling, betrouwbaar zijn en beschermd tegen uitval. Maatregelen
+          zijn onder meer redundante systemen en fysieke beveiliging.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.12
     ref_id: A.7.12
     name: Cabling security
@@ -2708,6 +3017,11 @@ objects:
           \u62E6\u622A\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u62A4\
           \u7BA1\u9053\u3001\u6B63\u786E\u6807\u8BC6\u548C\u5B89\u5168\u5E03\u7EBF\
           \u3002"
+      nl: &id057
+        name: Beveiligen van bekabeling
+        description: Deze beheersmaatregel zorgt dat kabels zijn beveiligd tegen afluisteren
+          en beschadiging. Maatregelen zijn onder meer beschermende kabelgoten, duidelijke
+          labels en veilige kabelroutes.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.13
     ref_id: A.7.13
     name: Equipment maintenance
@@ -2754,6 +3068,12 @@ objects:
           \u6545\u969C\u53D1\u751F\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u4FDD\
           \u517B\u3001\u5B89\u5168\u7EF4\u62A4\u5B9E\u8DF5\u4EE5\u53CA\u6388\u6743\
           \u4EBA\u5458\u901A\u884C\u3002"
+      nl: &id058
+        name: Onderhoud van apparatuur
+        description: Deze beheersmaatregel zorgt dat apparatuur wordt onderhouden,
+          zodat ze goed blijft werken en storingen worden voorkomen. Maatregelen zijn
+          onder meer regelmatig onderhoud, veilige onderhoudspraktijken en toegang
+          alleen voor bevoegd personeel.
   - urn: urn:intuitem:risk:function:doc-pol:a.7.14
     ref_id: A.7.14
     name: Secure disposal or re-use of equipment
@@ -2800,6 +3120,11 @@ objects:
           \u5904\u7F6E\u6216\u518D\u5229\u7528\uFF0C\u4EE5\u4FDD\u62A4\u654F\u611F\
           \u4FE1\u606F\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u51C0\u5316\u3001\
           \u7269\u7406\u9500\u6BC1\u548C\u8BA4\u8BC1\u5904\u7406\u6D41\u7A0B\u3002"
+      nl: &id059
+        name: Veilig verwijderen of hergebruiken van apparatuur
+        description: Deze beheersmaatregel zorgt voor veilige afvoer of hergebruik
+          van apparatuur om gevoelige informatie te beschermen. Maatregelen zijn onder
+          meer het wissen van gegevens, fysieke vernietiging en gecertificeerde afvoer.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.1
     ref_id: A.8.1
     name: User end point devices
@@ -2849,6 +3174,11 @@ objects:
           \u3001\u53F0\u5F0F\u673A\u548C\u79FB\u52A8\u8BBE\u5907\u7B49\u7EC8\u7AEF\
           \u8BBE\u5907\u7684\u4FDD\u62A4\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\
           \u964D\u4F4E\u98CE\u9669\u3002"
+      nl: &id060
+        name: Eindgebruikersapparatuur
+        description: Deze beheersmaatregel beschermt eindapparaten zoals laptops,
+          desktops en mobiele apparaten met maatregelen als detectie op het apparaat,
+          versleuteling en een veilige configuratie om risico's te beperken.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.2
     ref_id: A.8.2
     name: Privileged access rights
@@ -2901,6 +3231,12 @@ objects:
           \u6027\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\
           \u95EE\u63A7\u5236\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u4E25\u683C\u7684\
           \u8D26\u6237\u7BA1\u7406\u3002"
+      nl: &id061
+        name: Speciale toegangsrechten
+        description: Deze beheersmaatregel zorgt dat beheerdersrechten zorgvuldig
+          worden toegekend, beheerd en gecontroleerd om misbruik te voorkomen. Maatregelen
+          zijn onder meer toegang op basis van rollen, periodieke herziening en strikt
+          accountbeheer.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.3
     ref_id: A.8.3
     name: Information access restriction
@@ -2947,6 +3283,12 @@ objects:
           \u95EE\u3002\u63AA\u65BD\u5305\u62EC\u7528\u6237\u8BA4\u8BC1\u3001\u57FA\
           \u4E8E\u89D2\u8272\u7684\u6743\u9650\u4EE5\u53CA\u5B9A\u671F\u7684\u8BBF\
           \u95EE\u5BA1\u67E5\u3002"
+      nl: &id062
+        name: Beperking van toegang tot informatie
+        description: Deze beheersmaatregel beperkt de toegang tot gevoelige informatie
+          volgens het need-to-knowprincipe. Maatregelen zijn onder meer authenticatie
+          van gebruikers, rechten op basis van rollen en regelmatige herziening van
+          toegang.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.4
     ref_id: A.8.4
     name: Access to source code
@@ -2993,6 +3335,11 @@ objects:
           \u4FDD\u969C\u4E86\u5BF9\u6E90\u4EE3\u7801\u7684\u8BBF\u95EE\u3002\u63AA\
           \u65BD\u5305\u62EC\u7248\u672C\u63A7\u5236\u3001\u5B89\u5168\u4ED3\u5E93\
           \u548C\u9650\u5236\u5F00\u53D1\u8005\u8BBF\u95EE\u3002"
+      nl: &id063
+        name: Toegang tot broncode
+        description: Deze beheersmaatregel beveiligt de toegang tot broncode tegen
+          onbevoegd inzien, wijzigen of uitlekken. Maatregelen zijn onder meer versiebeheer,
+          beveiligde repositories en beperkte toegang voor ontwikkelaars.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.5
     ref_id: A.8.5
     name: Secure authentication
@@ -3034,6 +3381,11 @@ objects:
           \uFF0C\u5982\u591A\u56E0\u7D20\u8BA4\u8BC1\uFF0C\u4EE5\u9A8C\u8BC1\u7528\
           \u6237\u8EAB\u4EFD\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
           \u95EE\u3002"
+      nl: &id064
+        name: Veilige authenticatie
+        description: Deze beheersmaatregel zorgt voor sterke authenticatie, zoals
+          meerfactorauthenticatie, om de identiteit van gebruikers te controleren
+          en onbevoegde toegang te voorkomen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.6
     ref_id: A.8.6
     name: Capacity management
@@ -3080,6 +3432,12 @@ objects:
           \u80FD\u5E76\u9632\u6B62\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u76D1\
           \u63A7\u8D44\u6E90\u4F7F\u7528\u548C\u89C4\u5212\u672A\u6765\u9700\u6C42\
           \u3002"
+      nl: &id065
+        name: Capaciteitsbeheer
+        description: Deze beheersmaatregel zorgt dat de capaciteit van systemen wordt
+          beheerd, zodat de prestaties voldoende zijn en verstoringen worden voorkomen.
+          Maatregelen zijn onder meer het volgen van het gebruik van middelen en het
+          plannen van toekomstige behoeften.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.7
     ref_id: A.8.7
     name: Protection against malware
@@ -3121,6 +3479,11 @@ objects:
           \u3001\u5A01\u80C1\u68C0\u6D4B\u5DE5\u5177\u548C\u5B9A\u671F\u66F4\u65B0\
           \u7B49\u63AA\u65BD\uFF0C\u4EE5\u4FDD\u62A4\u7CFB\u7EDF\u514D\u53D7\u6076\
           \u610F\u8F6F\u4EF6\u548C\u6076\u610F\u653B\u51FB\u3002"
+      nl: &id066
+        name: Bescherming tegen malware
+        description: Deze beheersmaatregel beschermt systemen tegen malware en kwaadwillende
+          aanvallen met onder meer antivirussoftware, detectie van dreigingen en regelmatige
+          updates.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.8
     ref_id: A.8.8
     name: Management of technical vulnerabilities
@@ -3165,6 +3528,11 @@ objects:
           \u5927\u9650\u5EA6\u5730\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002\u63AA\
           \u65BD\u5305\u62EC\u6F0F\u6D1E\u626B\u63CF\u548C\u8865\u4E01\u7BA1\u7406\
           \u3002"
+      nl: &id067
+        name: Beheer van technische kwetsbaarheden
+        description: Deze beheersmaatregel zorgt dat technische kwetsbaarheden snel
+          worden gevonden, beoordeeld en verholpen om beveiligingsrisico's te beperken.
+          Maatregelen zijn onder meer kwetsbaarheidsscans en patchbeheer.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.9
     ref_id: A.8.9
     name: Configuration management
@@ -3203,6 +3571,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u914D\u7F6E\
           \u7684\u4E00\u81F4\u7BA1\u7406\uFF0C\u4EE5\u7EF4\u62A4\u5B89\u5168\u8BBE\
           \u7F6E\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u66F4\u6539\u3002"
+      nl: &id068
+        name: Configuratiebeheer
+        description: Deze beheersmaatregel zorgt voor consistent beheer van systeemconfiguraties,
+          zodat beveiligingsinstellingen behouden blijven en onbevoegde wijzigingen
+          worden voorkomen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.10
     ref_id: A.8.10
     name: Information deletion
@@ -3243,6 +3616,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u654F\u611F\u4FE1\u606F\
           \u5728\u4E0D\u518D\u9700\u8981\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
           \u6062\u590D\u6216\u66DD\u5149\u65F6\u88AB\u5B89\u5168\u5220\u9664\u3002"
+      nl: &id069
+        name: Verwijderen van informatie
+        description: Deze beheersmaatregel zorgt dat gevoelige informatie veilig wordt
+          verwijderd als ze niet meer nodig is, zodat ze niet kan worden teruggehaald
+          of uitlekken.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.11
     ref_id: A.8.11
     name: Data masking
@@ -3282,6 +3660,10 @@ objects:
         description: "\u8BE5\u63A7\u5236\u901A\u8FC7\u4F7F\u7528\u6570\u636E\u63A9\
           \u853D\u6280\u672F\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\uFF0C\u9632\u6B62\
           \u672A\u6388\u6743\u7528\u6237\u53D1\u73B0\u3002"
+      nl: &id070
+        name: Maskeren van gegevens
+        description: Deze beheersmaatregel beschermt gevoelige informatie tijdens
+          verwerking of weergave door gegevens te maskeren voor onbevoegde gebruikers.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.12
     ref_id: A.8.12
     name: Data leakage prevention
@@ -3322,6 +3704,11 @@ objects:
           \u654F\u611F\u6570\u636E\u901A\u8FC7\u7535\u5B50\u90AE\u4EF6\u3001\u53EF\
           \u79FB\u52A8\u5A92\u4F53\u6216\u5176\u4ED6\u6E20\u9053\u610F\u5916\u6CC4\
           \u9732\u7684\u673A\u5236\u3002"
+      nl: &id071
+        name: Voorkomen van datalekken
+        description: Deze beheersmaatregel zorgt voor middelen die voorkomen dat gevoelige
+          gegevens per ongeluk uitlekken via e-mail, verwisselbare media of andere
+          kanalen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.13
     ref_id: A.8.13
     name: Information backup
@@ -3361,6 +3748,11 @@ objects:
           \u80FD\u591F\u5B9A\u671F\u4E14\u5B89\u5168\u5730\u5907\u4EFD\uFF0C\u786E\
           \u4FDD\u5728\u4E8B\u6545\u6216\u707E\u96BE\u53D1\u751F\u65F6\u5176\u53EF\
           \u7528\u6027\u3002"
+      nl: &id072
+        name: Back-up van informatie
+        description: Deze beheersmaatregel zorgt dat belangrijke informatie regelmatig
+          en veilig wordt geback-upt, zodat ze beschikbaar blijft bij incidenten of
+          rampen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.14
     ref_id: A.8.14
     name: Redundancy of information processing facilities
@@ -3402,6 +3794,11 @@ objects:
           \u5185\u7F6E\u5197\u4F59\uFF0C\u4EE5\u5728\u7CFB\u7EDF\u6545\u969C\u6216\
           \u7D27\u6025\u60C5\u51B5\u4E0B\u4FDD\u6301\u53EF\u7528\u6027\u548C\u8FD0\
           \u884C\u3002"
+      nl: &id073
+        name: Redundantie van informatieverwerkende faciliteiten
+        description: Deze beheersmaatregel zorgt voor redundantie in verwerkingsfaciliteiten,
+          zodat de beschikbaarheid en de bedrijfsvoering doorgaan bij storingen of
+          noodsituaties.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.15
     ref_id: A.8.15
     name: Logging
@@ -3440,6 +3837,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u4F7F\u7CFB\u7EDF\u5185\u6D3B\u52A8\
           \u80FD\u591F\u8BB0\u5F55\uFF0C\u4EE5\u652F\u6301\u76D1\u63A7\u3001\u4E8B\
           \u4EF6\u68C0\u6D4B\u548C\u53D6\u8BC1\u8C03\u67E5\u3002"
+      nl: &id074
+        name: Logging
+        description: Deze beheersmaatregel zorgt dat activiteiten in systemen worden
+          gelogd ter ondersteuning van monitoring, het ontdekken van incidenten en
+          forensisch onderzoek.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities
@@ -3477,6 +3879,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u6D3B\u52A8\
           \u6301\u7EED\u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u3001\u54CD\u5E94\u5E76\
           \u7F13\u89E3\u5B89\u5168\u5A01\u80C1\u3002"
+      nl: &id075
+        name: Monitoren van activiteiten
+        description: Deze beheersmaatregel zorgt voor doorlopende monitoring van systeemactiviteiten
+          om beveiligingsdreigingen te ontdekken, erop te reageren en ze te beperken.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.17
     ref_id: A.8.17
     name: Clock synchronization
@@ -3514,6 +3920,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u65F6\u949F\
           \u540C\u6B65\uFF0C\u4EE5\u4FDD\u6301\u65E5\u5FD7\u53CA\u5176\u4ED6\u5173\
           \u952E\u8FDB\u7A0B\u7684\u65F6\u95F4\u6233\u51C6\u786E\u4E00\u81F4\u3002"
+      nl: &id076
+        name: Kloksynchronisatie
+        description: Deze beheersmaatregel zorgt dat de klokken van systemen gelijk
+          lopen, zodat tijdstempels in logs en andere belangrijke processen juist
+          en consistent zijn.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.18
     ref_id: A.8.18
     name: Use of privileged utility programs
@@ -3551,6 +3962,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u9650\u5236\u5E76\u76D1\u63A7\u7279\
           \u6743\u5DE5\u5177\u7A0B\u5E8F\u7684\u4F7F\u7528\uFF0C\u4EE5\u9632\u6B62\
           \u6EE5\u7528\u548C\u672A\u7ECF\u6388\u6743\u7684\u884C\u4E3A\u3002"
+      nl: &id077
+        name: Gebruik van speciale systeemhulpmiddelen
+        description: Deze beheersmaatregel beperkt en bewaakt het gebruik van krachtige
+          systeemhulpmiddelen om misbruik en onbevoegde handelingen te voorkomen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.19
     ref_id: A.8.19
     name: Installation of software on operational systems
@@ -3591,6 +4006,11 @@ objects:
           \u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5\u5F97\u5230\u5B89\u5168\u7BA1\
           \u7406\uFF0C\u4EE5\u9632\u6B62\u6F0F\u6D1E\u6216\u672A\u7ECF\u6388\u6743\
           \u7684\u66F4\u6539\u3002"
+      nl: &id078
+        name: Installeren van software op operationele systemen
+        description: "Deze beheersmaatregel zorgt dat software op operationele systemen\
+          \ veilig wordt ge\xEFnstalleerd, zodat kwetsbaarheden en onbevoegde wijzigingen\
+          \ worden voorkomen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.20
     ref_id: A.8.20
     name: Networks security
@@ -3632,6 +4052,11 @@ objects:
           \u5165\u4FB5\u68C0\u6D4B\u7CFB\u7EDF\u548C\u8BBF\u95EE\u63A7\u5236\u786E\
           \u4FDD\u7F51\u7EDC\u5B89\u5168\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\
           \u7684\u8BBF\u95EE\u548C\u653B\u51FB\u3002"
+      nl: &id079
+        name: Netwerkbeveiliging
+        description: Deze beheersmaatregel zorgt voor netwerkbeveiliging met onder
+          meer firewalls, inbraakdetectie en toegangsbeheer, ter bescherming tegen
+          onbevoegde toegang en aanvallen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.21
     ref_id: A.8.21
     name: Security of network services
@@ -3670,6 +4095,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7F51\u7EDC\u670D\u52A1\
           \u5728\u4F7F\u7528\u8FC7\u7A0B\u4E2D\u4FDD\u6301\u673A\u5BC6\u6027\u3001\
           \u5B8C\u6574\u6027\u548C\u53EF\u7528\u6027\u3002"
+      nl: &id080
+        name: Beveiliging van netwerkdiensten
+        description: Deze beheersmaatregel zorgt dat netwerkdiensten zijn beveiligd,
+          zodat vertrouwelijkheid, integriteit en beschikbaarheid tijdens gebruik
+          behouden blijven.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.22
     ref_id: A.8.22
     name: Segregation of networks
@@ -3707,6 +4137,10 @@ objects:
           \u79BB\uFF0C\u4EE5\u9650\u5236\u5A01\u80C1\u7684\u6269\u6563\uFF0C\u5E76\
           \u6700\u5927\u9650\u5EA6\u5730\u51CF\u5C11\u6F5C\u5728\u5165\u4FB5\u7684\
           \u5F71\u54CD\u3002"
+      nl: &id081
+        name: Scheiding van netwerken
+        description: Deze beheersmaatregel scheidt netwerken om de verspreiding van
+          dreigingen te beperken en de gevolgen van een inbraak klein te houden.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.23
     ref_id: A.8.23
     name: Web filtering
@@ -3743,6 +4177,10 @@ objects:
         description: "\u8BE5\u63A7\u5236\u5229\u7528\u7F51\u7EDC\u8FC7\u6EE4\u5DE5\
           \u5177\u963B\u6B62\u672A\u7ECF\u6388\u6743\u6216\u6709\u5BB3\u5185\u5BB9\
           \u901A\u8FC7\u4E92\u8054\u7F51\u8BBF\u95EE\u3002"
+      nl: &id082
+        name: Webfiltering
+        description: Deze beheersmaatregel gebruikt webfilters om onbevoegde of schadelijke
+          inhoud op internet te blokkeren.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.24
     ref_id: A.8.24
     name: Use of cryptography
@@ -3781,6 +4219,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u91C7\u7528\u5BC6\u7801\
           \u5B66\u6280\u672F\u6765\u4FDD\u62A4\u6570\u636E\u7684\u673A\u5BC6\u6027\
           \u3001\u5B8C\u6574\u6027\u548C\u771F\u5B9E\u6027\u3002"
+      nl: &id083
+        name: Gebruik van cryptografie
+        description: Deze beheersmaatregel zorgt dat cryptografie wordt ingezet om
+          de vertrouwelijkheid, integriteit en echtheid van gegevens te beschermen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.25
     ref_id: A.8.25
     name: Secure development life cycle
@@ -3820,6 +4262,10 @@ objects:
         description: "\u8BE5\u63A7\u5236\u5C06\u5B89\u5168\u6574\u5408\u5230\u5F00\
           \u53D1\u751F\u547D\u5468\u671F\u7684\u6240\u6709\u9636\u6BB5\uFF0C\u786E\
           \u4FDD\u7CFB\u7EDF\u548C\u5E94\u7528\u7684\u5B89\u5168\u6784\u5EFA\u3002"
+      nl: &id084
+        name: Beveiligen tijdens de ontwikkelcyclus
+        description: Deze beheersmaatregel neemt beveiliging op in alle fasen van
+          de ontwikkelcyclus, zodat systemen en applicaties veilig worden gebouwd.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.26
     ref_id: A.8.26
     name: Application security requirements
@@ -3854,6 +4300,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u6267\u884C\u5E94\
           \u7528\u7A0B\u5E8F\u7684\u5B89\u5168\u8981\u6C42\uFF0C\u4EE5\u9632\u8303\
           \u6F0F\u6D1E\u3002"
+      nl: &id085
+        name: Beveiligingseisen voor applicaties
+        description: Deze beheersmaatregel legt beveiligingseisen voor applicaties
+          vast en handhaaft ze ter bescherming tegen kwetsbaarheden.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.27
     ref_id: A.8.27
     name: Secure system architecture and engineering principles
@@ -3891,6 +4341,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u7CFB\u7EDF\u67B6\
           \u6784\u5F00\u53D1\u8FC7\u7A0B\u4E2D\u91C7\u7528\u5B89\u5168\u7684\u8BBE\
           \u8BA1\u539F\u5219\u3002"
+      nl: &id086
+        name: Principes voor veilige systeemarchitectuur en -engineering
+        description: Deze beheersmaatregel zorgt dat principes voor veilig ontwerp
+          worden toegepast bij het ontwikkelen van systeemarchitecturen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.28
     ref_id: A.8.28
     name: Secure coding
@@ -3925,6 +4379,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u5B89\u5168\u7684\
           \u7F16\u7801\u5B9E\u8DF5\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\u51CF\
           \u5C11\u5F00\u53D1\u8F6F\u4EF6\u4E2D\u7684\u6F0F\u6D1E\u3002"
+      nl: &id087
+        name: Veilig programmeren
+        description: Deze beheersmaatregel zorgt voor veilige programmeerpraktijken
+          om kwetsbaarheden in ontwikkelde software te beperken.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.29
     ref_id: A.8.29
     name: Security testing in development and acceptance
@@ -3962,6 +4420,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u548C\
           \u9A8C\u6536\u9636\u6BB5\u8FDB\u884C\u5B89\u5168\u6D4B\u8BD5\uFF0C\u4EE5\
           \u8BC6\u522B\u5F31\u70B9\u3002"
+      nl: &id088
+        name: Beveiligingstesten bij ontwikkeling en acceptatie
+        description: Deze beheersmaatregel zorgt dat tijdens ontwikkeling en acceptatie
+          beveiligingstests worden uitgevoerd om zwakke plekken te vinden.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.30
     ref_id: A.8.30
     name: Outsourced development
@@ -3998,6 +4460,10 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u5916\
           \u5305\u7ED9\u7B2C\u4E09\u65B9\u4F9B\u5E94\u5546\u65F6\u5B89\u5168\u98CE\
           \u9669\u5F97\u5230\u6709\u6548\u7BA1\u7406\u3002"
+      nl: &id089
+        name: Uitbestede ontwikkeling
+        description: Deze beheersmaatregel zorgt dat beveiligingsrisico's goed worden
+          beheerst als ontwikkeling is uitbesteed aan externe partijen.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.31
     ref_id: A.8.31
     name: Separation of development, test and production environments
@@ -4041,6 +4507,11 @@ objects:
           \u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u88AB\u9694\u79BB\uFF0C\u4EE5\u9632\
           \u6B62\u610F\u5916\u4EA4\u4E92\u548C\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
           \u95EE\u3002"
+      nl: &id090
+        name: Scheiding van ontwikkel-, test- en productieomgevingen
+        description: "Deze beheersmaatregel zorgt dat ontwikkel-, test- en productieomgevingen\
+          \ gescheiden zijn, zodat ongewenste be\xEFnvloeding en onbevoegde toegang\
+          \ worden voorkomen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.32
     ref_id: A.8.32
     name: Change management
@@ -4078,6 +4549,11 @@ objects:
         description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u53D8\u66F4\
           \u5F97\u5230\u5B89\u5168\u7BA1\u7406\uFF0C\u4EE5\u964D\u4F4E\u98CE\u9669\
           \u5E76\u4FDD\u6301\u8FD0\u8425\u7A33\u5B9A\u6027\u3002"
+      nl: &id091
+        name: Wijzigingsbeheer
+        description: Deze beheersmaatregel zorgt dat wijzigingen in systemen veilig
+          worden beheerd, zodat risico's beperkt blijven en de bedrijfsvoering stabiel
+          blijft.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.33
     ref_id: A.8.33
     name: Test information
@@ -4114,6 +4590,10 @@ objects:
         description: "\u8BE5\u63A7\u5236\u4FDD\u62A4\u6D4B\u8BD5\u6570\u636E\uFF0C\
           \u9632\u6B62\u654F\u611F\u6216\u673A\u5BC6\u4FE1\u606F\u5728\u6D4B\u8BD5\
           \u8FC7\u7A0B\u4E2D\u6CC4\u9732\u3002"
+      nl: &id092
+        name: Testgegevens
+        description: Deze beheersmaatregel beschermt testgegevens, zodat gevoelige
+          of vertrouwelijke informatie tijdens het testen niet uitlekt.
   - urn: urn:intuitem:risk:function:doc-pol:a.8.34
     ref_id: A.8.34
     name: Protection of information systems during audit testing
@@ -4172,6 +4652,12 @@ objects:
           \u975E\u751F\u4EA7\u73AF\u5883\u3001\u8BBF\u95EE\u9650\u5236\u548C\u4FDD\
           \u5BC6\u534F\u8BAE\uFF0C\u4EE5\u7EF4\u62A4\u7CFB\u7EDF\u5B89\u5168\u548C\
           \u5B8C\u6574\u6027\u3002"
+      nl: &id093
+        name: Bescherming van informatiesystemen tijdens audits
+        description: Deze beheersmaatregel zorgt dat systemen en gegevens tijdens
+          audits beschermd blijven tegen onbevoegde toegang, datalekken en verstoringen.
+          Maatregelen zijn onder meer het gebruik van niet-productieomgevingen, toegangsbeperkingen
+          en geheimhoudingsafspraken.
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -4207,6 +4693,10 @@ objects:
         description: "\u4FE1\u606F\u5B89\u5168\u3001\u7F51\u7EDC\u5B89\u5168\u548C\
           \u9690\u79C1\u4FDD\u62A4\u2014\u2014\u4FE1\u606F\u5B89\u5168\u7BA1\u7406\
           \u7CFB\u7EDF\u2014\u2014\u8981\u6C42"
+      nl:
+        name: Internationale norm ISO/IEC 27001:2022
+        description: Informatiebeveiliging, cyberbeveiliging en privacybescherming
+          - Managementsystemen voor informatiebeveiliging - Eisen
     implementation_groups_definition:
     - ref_id: Clauses
       name: Clauses
@@ -4224,6 +4714,8 @@ objects:
           name: Kapitel
         zh:
           name: "\u6761\u6B3E"
+        nl:
+          name: Hoofdstukken
     - ref_id: SoA
       name: Statement of Applicability
       description: null
@@ -4240,6 +4732,8 @@ objects:
           name: "Erkl\xE4rung zur Anwendbarkeit"
         zh:
           name: "\u9002\u7528\u6027\u8BF4\u660E"
+        nl:
+          name: Verklaring van toepasselijkheid
     - ref_id: Governance
       name: Governance
       description: null
@@ -4256,6 +4750,8 @@ objects:
           name: Governance
         zh:
           name: "\u6CBB\u7406"
+        nl:
+          name: Governance
     - ref_id: Asset_management
       name: Asset management
       description: null
@@ -4272,6 +4768,8 @@ objects:
           name: Verwaltung von Werten
         zh:
           name: "\u8D44\u4EA7\u7BA1\u7406"
+        nl:
+          name: Beheer van bedrijfsmiddelen
     - ref_id: Information_protection
       name: Information protection
       description: null
@@ -4288,6 +4786,8 @@ objects:
           name: Informationsschutz
         zh:
           name: "\u4FE1\u606F\u4FDD\u62A4"
+        nl:
+          name: Bescherming van informatie
     - ref_id: Human_resource_security
       name: Human resource security
       description: null
@@ -4304,6 +4804,8 @@ objects:
           name: Personalsicherheit
         zh:
           name: "\u4EBA\u529B\u8D44\u6E90\u5B89\u5168"
+        nl:
+          name: Personeelsbeveiliging
     - ref_id: Physical_security
       name: Physical security
       description: null
@@ -4320,6 +4822,8 @@ objects:
           name: Physische Sicherheit
         zh:
           name: "\u7269\u7406\u5B89\u5168"
+        nl:
+          name: Fysieke beveiliging
     - ref_id: System_and_network_security
       name: System and network security
       description: null
@@ -4336,6 +4840,8 @@ objects:
           name: System- und Netzwerksicherheit
         zh:
           name: "\u7CFB\u7EDF\u548C\u7F51\u7EDC\u5B89\u5168"
+        nl:
+          name: Systeem- en netwerkbeveiliging
     - ref_id: Application_security
       name: Application security
       description: null
@@ -4352,6 +4858,8 @@ objects:
           name: Anwendungssicherheit
         zh:
           name: "\u5E94\u7528\u5B89\u5168"
+        nl:
+          name: Applicatiebeveiliging
     - ref_id: Secure_configuration
       name: Secure configuration
       description: null
@@ -4368,6 +4876,8 @@ objects:
           name: Sichere Konfiguration
         zh:
           name: "\u5B89\u5168\u914D\u7F6E"
+        nl:
+          name: Veilige configuratie
     - ref_id: Identity_and_access_management
       name: Identity and access management
       description: null
@@ -4384,6 +4894,8 @@ objects:
           name: "Identit\xE4ts- und Zugangsmanagement"
         zh:
           name: "\u8EAB\u4EFD\u548C\u8BBF\u95EE\u7BA1\u7406"
+        nl:
+          name: Identiteits- en toegangsbeheer
     - ref_id: Threat_and_vulnerability_management
       name: Threat and vulnerability management
       description: null
@@ -4400,6 +4912,8 @@ objects:
           name: Bedrohungs- und Schwachstellenmanagement
         zh:
           name: "\u5A01\u80C1\u548C\u6F0F\u6D1E\u7BA1\u7406"
+        nl:
+          name: Beheer van dreigingen en kwetsbaarheden
     - ref_id: Continuity
       name: Continuity
       description: null
@@ -4416,6 +4930,8 @@ objects:
           name: "Kontinuit\xE4t"
         zh:
           name: "\u8FDE\u7EED\u6027"
+        nl:
+          name: "Continu\xEFteit"
     - ref_id: Supplier_relationships_security
       name: Supplier relationships security
       description: null
@@ -4432,6 +4948,8 @@ objects:
           name: Sicherheit in Lieferantenbeziehungen
         zh:
           name: "\u4F9B\u5E94\u5546\u5173\u7CFB\u5B89\u5168"
+        nl:
+          name: Beveiliging van leveranciersrelaties
     - ref_id: Legal_and_compliance
       name: Legal and compliance
       description: null
@@ -4448,6 +4966,8 @@ objects:
           name: Recht und Compliance
         zh:
           name: "\u6CD5\u5F8B\u548C\u5408\u89C4"
+        nl:
+          name: Juridisch en compliance
     - ref_id: Information_security_event_management
       name: Information security event management
       description: null
@@ -4464,6 +4984,8 @@ objects:
           name: Management von Informationssicherheitsereignissen
         zh:
           name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u6001\u7BA1\u7406"
+        nl:
+          name: Beheer van informatiebeveiligingsgebeurtenissen
     - ref_id: Information_security_assurance
       name: Information security assurance
       description: null
@@ -4480,6 +5002,8 @@ objects:
           name: "Gew\xE4hrleistung der Informationssicherheit"
         zh:
           name: "\u4FE1\u606F\u5B89\u5168\u4FDD\u969C"
+        nl:
+          name: Borging van informatiebeveiliging
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:core
       assessable: false
@@ -4501,6 +5025,8 @@ objects:
           name: Kapitel
         zh:
           name: "\u6761\u6B3E"
+        nl:
+          name: Hoofdstukken
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 2
@@ -4522,6 +5048,8 @@ objects:
           name: Kontext der Organisation
         zh:
           name: "\u7EC4\u7EC7\u80CC\u666F"
+        nl:
+          name: Context van de organisatie
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
       depth: 3
@@ -4571,6 +5099,11 @@ objects:
             \u5B89\u5168\u76EE\u6807\u80FD\u529B\u7684\u5185\u90E8\u548C\u5916\u90E8\
             \u56E0\u7D20\uFF0C\u786E\u4FDDISMS\u4E0E\u5176\u80CC\u666F\u4FDD\u6301\
             \u4E00\u81F4\u3002"
+        nl:
+          name: Inzicht in de organisatie en haar context
+          description: Bepaal de interne en externe factoren die invloed hebben op
+            het vermogen van de organisatie om haar doelen voor informatiebeveiliging
+            te halen, zodat het ISMS aansluit op die context.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
       depth: 3
@@ -4618,6 +5151,11 @@ objects:
           description: "\u5206\u6790\u76F8\u5173\u65B9\u7684\u9700\u6C42\u548C\u671F\
             \u671B\uFF0C\u5C06\u5176\u7EB3\u5165ISMS\uFF0C\u5E76\u6EE1\u8DB3\u76F8\
             \u5173\u7684\u4FE1\u606F\u5B89\u5168\u9700\u6C42\u3002"
+        nl:
+          name: Inzicht in de behoeften en verwachtingen van belanghebbenden
+          description: Breng de behoeften en verwachtingen van belanghebbenden in
+            kaart, neem ze op in het ISMS en pak de relevante eisen voor informatiebeveiliging
+            op.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
       depth: 3
@@ -4669,6 +5207,11 @@ objects:
             \u7D20\u3001\u5229\u76CA\u76F8\u5173\u8005\u9700\u6C42\u4EE5\u53CA\u8FD0\
             \u8425\u73AF\u5883\u4E2D\u7684\u4F9D\u8D56\u5173\u7CFB\uFF0C\u5B9A\u4E49\
             ISMS\u7684\u8303\u56F4\u3002"
+        nl:
+          name: Bepalen van de reikwijdte van het managementsysteem voor informatiebeveiliging
+          description: Leg de reikwijdte van het ISMS vast, rekening houdend met interne
+            en externe factoren, de behoeften van belanghebbenden en afhankelijkheden
+            in de operationele omgeving.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
       depth: 3
@@ -4712,6 +5255,11 @@ objects:
           description: "\u6784\u5EFA\u3001\u8FD0\u884C\u5E76\u6301\u7EED\u6539\u8FDB\
             ISM\uFF0C\u4EE5\u6709\u6548\u7BA1\u7406\u4FE1\u606F\u5B89\u5168\u98CE\u9669\
             \u5E76\u5B9E\u73B0\u7EC4\u7EC7\u76EE\u6807\u3002"
+        nl:
+          name: Managementsysteem voor informatiebeveiliging
+          description: Richt een ISMS in, houd het in stand en verbeter het voortdurend,
+            zodat risico's voor informatiebeveiliging goed beheerst worden en de doelen
+            van de organisatie gehaald worden.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -4733,6 +5281,8 @@ objects:
           name: "F\xFChrung"
         zh:
           name: "\u9886\u5BFC\u5C42"
+        nl:
+          name: Leiderschap
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
       depth: 3
@@ -4787,6 +5337,12 @@ objects:
             \u7EC7\u76EE\u6807\u5BF9\u9F50\u3001\u5206\u914D\u8D44\u6E90\u3001\u4FC3\
             \u8FDB\u5B89\u5168\u6587\u5316\u5E76\u63A8\u52A8\u6301\u7EED\u6539\u8FDB\
             \u6765\u5C55\u793A\u9886\u5BFC\u529B\u548C\u627F\u8BFA\u3002"
+        nl:
+          name: Leiderschap en betrokkenheid
+          description: Toon leiderschap en betrokkenheid door het ISMS te steunen,
+            het af te stemmen op de doelen van de organisatie, middelen beschikbaar
+            te stellen, een veiligheidscultuur te bevorderen en voortdurende verbetering
+            te stimuleren.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
       depth: 3
@@ -4837,6 +5393,11 @@ objects:
             \u65B9\u5411\u4E00\u81F4\u7684\u4FE1\u606F\u5B89\u5168\u653F\u7B56\uFF0C\
             \u660E\u786E\u5408\u89C4\u3001\u6301\u7EED\u6539\u8FDB\u548C\u4FE1\u606F\
             \u5B89\u5168\u4FC3\u8FDB\u7684\u627F\u8BFA\u3002"
+        nl:
+          name: Beleid
+          description: Stel een informatiebeveiligingsbeleid op dat past bij de doelen
+            en de strategische koers van de organisatie, met toezeggingen over naleving,
+            voortdurende verbetering en het bevorderen van informatiebeveiliging.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
       depth: 3
@@ -4883,6 +5444,11 @@ objects:
             \u3001\u8D23\u4EFB\u548C\u6743\u9650\uFF0C\u4EE5\u786E\u4FDDISMS\u7684\
             \u6709\u6548\u5B9E\u65BD\u548C\u8FD0\u8425\uFF0C\u5E76\u4E0E\u7EC4\u7EC7\
             \u76EE\u6807\u4FDD\u6301\u4E00\u81F4\u7684\u95EE\u8D23\u5236\u3002"
+        nl:
+          name: Rollen, verantwoordelijkheden en bevoegdheden binnen de organisatie
+          description: Bepaal rollen, verantwoordelijkheden en bevoegdheden, wijs
+            ze toe en communiceer ze, zodat het ISMS goed werkt en duidelijk is wie
+            waarvoor aanspreekbaar is.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
       depth: 2
@@ -4904,6 +5470,8 @@ objects:
           name: Planung
         zh:
           name: "\u89C4\u5212"
+        nl:
+          name: Planning
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: false
       depth: 3
@@ -4925,6 +5493,8 @@ objects:
           name: "Ma\xDFnahmen zum Umgang mit Risiken und Chancen"
         zh:
           name: "\u5E94\u5BF9\u98CE\u9669\u4E0E\u673A\u9047\u7684\u884C\u52A8"
+        nl:
+          name: Maatregelen om risico's en kansen aan te pakken
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
       depth: 4
@@ -4978,6 +5548,11 @@ objects:
             \u5916\u90E8\u56E0\u7D20\u3001\u5229\u76CA\u76F8\u5173\u8005\u9700\u6C42\
             \u53CA\u9002\u7528\u8981\u6C42\uFF0C\u786E\u4FDDISMS\u5B9E\u73B0\u5176\
             \u76EE\u6807\u3002"
+        nl:
+          name: Algemeen
+          description: Richt een proces in om risico's en kansen voor informatiebeveiliging
+            te bepalen, met oog voor interne en externe factoren, de behoeften van
+            belanghebbenden en geldende eisen, zodat het ISMS zijn doelen haalt.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
       depth: 4
@@ -5034,6 +5609,12 @@ objects:
             \u7528\u5B9A\u4E49\u6807\u51C6\u8BC4\u4F30\u673A\u5BC6\u6027\u3001\u5B8C\
             \u6574\u6027\u548C\u53EF\u7528\u6027\u7684\u5A01\u80C1\uFF0C\u786E\u4FDD\
             \u7ED3\u679C\u4E00\u81F4\u4E14\u53EF\u9760\u3002"
+        nl:
+          name: Risicobeoordeling voor informatiebeveiliging
+          description: Richt een proces in om op geplande momenten risico's voor informatiebeveiliging
+            te beoordelen, met vaste criteria voor bedreigingen van vertrouwelijkheid,
+            integriteit en beschikbaarheid, zodat de uitkomsten consistent en betrouwbaar
+            zijn.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
       depth: 4
@@ -5088,6 +5669,11 @@ objects:
             \u9669\u5904\u7406\u8BA1\u5212\u4E2D\u8BB0\u5F55\u8FD9\u4E9B\u98CE\u9669\
             \uFF0C\u6765\u5E94\u5BF9\u5DF2\u8BC6\u522B\u7684\u4FE1\u606F\u5B89\u5168\
             \u98CE\u9669\u3002"
+        nl:
+          name: Risicobehandeling voor informatiebeveiliging
+          description: Leg een proces vast om vastgestelde risico's te behandelen
+            door passende beheersmaatregelen te kiezen, in lijn met de criteria voor
+            risicoacceptatie, en leg dit vast in een risicobehandelplan.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
       depth: 3
@@ -5147,6 +5733,12 @@ objects:
             \u5E76\u89C4\u5212\u5177\u4F53\u7684\u8D23\u4EFB\u3001\u8D44\u6E90\u3001\
             \u65F6\u95F4\u8868\u53CA\u8BC4\u4F30\u65B9\u6CD5\u4EE5\u5B9E\u73B0\u8FD9\
             \u4E9B\u76EE\u6807\u3002"
+        nl:
+          name: Doelstellingen voor informatiebeveiliging en de planning om ze te
+            halen
+          description: Stel meetbare doelen voor informatiebeveiliging die passen
+            bij het ISMS en de strategische doelen, en plan de acties met verantwoordelijken,
+            middelen, termijnen en de manier van evalueren.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
       depth: 3
@@ -5194,6 +5786,11 @@ objects:
             \u786E\u4FDD\u4E0E\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u4FDD\u6301\u4E00\
             \u81F4\uFF0C\u65E0\u7F1D\u6574\u5408\u4E8E\u73B0\u6709\u6D41\u7A0B\uFF0C\
             \u5E76\u6709\u6548\u7BA1\u7406\u98CE\u9669\u3002"
+        nl:
+          name: Planning van wijzigingen
+          description: Plan wijzigingen in het ISMS stap voor stap, zodat ze aansluiten
+            op de eisen voor informatiebeveiliging, goed passen in bestaande processen
+            en de risico's beheerst blijven.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 2
@@ -5215,6 +5812,8 @@ objects:
           name: "Unterst\xFCtzung"
         zh:
           name: "\u652F\u6301"
+        nl:
+          name: Ondersteuning
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
       depth: 3
@@ -5263,6 +5862,11 @@ objects:
             \u8FD0\u884C\u5E76\u6301\u7EED\u6539\u8FDBISMS\uFF0C\u786E\u4FDD\u5176\
             \u6709\u6548\u8FD0\u884C\u5E76\u4E0E\u7EC4\u7EC7\u76EE\u6807\u4FDD\u6301\
             \u4E00\u81F4\u3002"
+        nl:
+          name: Middelen
+          description: Stel de middelen beschikbaar die nodig zijn om het ISMS in
+            te richten, te laten werken en voortdurend te verbeteren, zodat het goed
+            functioneert en aansluit op de doelen van de organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
       depth: 3
@@ -5313,6 +5917,11 @@ objects:
             \u9002\u5F53\u7684\u6559\u80B2\u3001\u57F9\u8BAD\u6216\u7ECF\u9A8C\u5177\
             \u5907\u5FC5\u8981\u7684\u80FD\u529B\uFF0C\u4EE5\u6709\u6548\u5C65\u884C\
             \u804C\u8D23\u3002"
+        nl:
+          name: Competentie
+          description: Zorg dat mensen die bij het ISMS betrokken zijn de nodige competenties
+            hebben, door opleiding, training of ervaring, zodat ze hun verantwoordelijkheden
+            goed kunnen invullen.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
       depth: 3
@@ -5362,6 +5971,11 @@ objects:
             \u5728\u4FE1\u606F\u5B89\u5168\u4E2D\u4F5C\u7528\u4EE5\u53CA\u9075\u5B88\
             \u5B89\u5168\u653F\u7B56\u548C\u8981\u6C42\u91CD\u8981\u6027\u7684\u8BA4\
             \u8BC6\u3002"
+        nl:
+          name: Bewustzijn
+          description: Vergroot bij de betrokken medewerkers het bewustzijn van het
+            ISMS, hun eigen rol in informatiebeveiliging en het belang van het naleven
+            van beleid en eisen.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
       depth: 3
@@ -5407,6 +6021,10 @@ objects:
             \u7A0B\uFF0C\u786E\u4FDD\u53CA\u65F6\u4E14\u9002\u5F53\u5730\u4EA4\u6362\
             \u4E0EISMS\uFF08\u56FD\u9645\u5B89\u5168\u7BA1\u7406\u7CFB\u7EDF\u53CA\
             \u5176\u76EE\u6807\uFF09\u76F8\u5173\u7684\u4FE1\u606F\u3002"
+        nl:
+          name: Communicatie
+          description: Richt interne en externe communicatie zo in dat informatie
+            over het ISMS en de doelen ervan tijdig en op de juiste manier wordt gedeeld.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: false
       depth: 3
@@ -5428,6 +6046,8 @@ objects:
           name: Dokumentierte Information
         zh:
           name: "\u6587\u732E\u4FE1\u606F"
+        nl:
+          name: Gedocumenteerde informatie
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
       depth: 4
@@ -5472,6 +6092,11 @@ objects:
             \u4EE5\u786E\u4FDD\u6709\u6548\u7684\u89C4\u5212\u3001\u8FD0\u8425\u3001\
             \u6D41\u7A0B\u63A7\u5236\u5E76\u4E0E\u7EC4\u7EC7\u9700\u6C42\u4FDD\u6301\
             \u4E00\u81F4\u3002"
+        nl:
+          name: Algemeen
+          description: Documenteer het ISMS voor zover nodig voor goede planning,
+            uitvoering en beheersing van processen, en om aan te sluiten op de eisen
+            van de organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
       depth: 4
@@ -5514,6 +6139,10 @@ objects:
           description: "\u786E\u4FDDISMS\u6587\u6863\u5F97\u5230\u9002\u5F53\u521B\
             \u5EFA\u3001\u66F4\u65B0\u548C\u63A7\u5236\uFF0C\u5305\u62EC\u9002\u5F53\
             \u7684\u5BA1\u6279\u548C\u7248\u672C\u7BA1\u7406\u3002"
+        nl:
+          name: Opstellen en bijwerken van gedocumenteerde informatie
+          description: Zorg dat documentatie van het ISMS op de juiste manier wordt
+            opgesteld, bijgewerkt en beheerd, met goedkeuring en versiebeheer.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
       depth: 4
@@ -5557,6 +6186,10 @@ objects:
           description: "\u8BA9ISMS\u6587\u6863\u5BF9\u6709\u9700\u8981\u7684\u4EBA\
             \u53EF\u8BBF\u95EE\u548C\u4F7F\u7528\uFF0C\u540C\u65F6\u4FDD\u62A4\u5176\
             \u514D\u53D7\u672A\u7ECF\u6388\u6743\u8BBF\u95EE\u6216\u4E22\u5931\u3002"
+        nl:
+          name: Beheersing van gedocumenteerde informatie
+          description: Maak documentatie van het ISMS beschikbaar en bruikbaar voor
+            wie die nodig heeft, en bescherm haar tegen onbevoegde toegang en verlies.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
       depth: 2
@@ -5578,6 +6211,8 @@ objects:
           name: Betrieb
         zh:
           name: "\u8FD0\u8425"
+        nl:
+          name: Uitvoering
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
       depth: 3
@@ -5621,6 +6256,11 @@ objects:
           description: "\u89C4\u5212\u548C\u63A7\u5236ISMS\u6D41\u7A0B\uFF0C\u786E\
             \u4FDD\u4E0E\u9700\u6C42\u4E00\u81F4\uFF0C\u5E76\u505A\u51FA\u5FC5\u8981\
             \u8C03\u6574\u4EE5\u5E94\u5BF9\u98CE\u9669\u548C\u673A\u9047\u3002"
+        nl:
+          name: Operationele planning en beheersing
+          description: Plan en beheers de processen van het ISMS, zorg dat ze aan
+            de eisen voldoen en stuur bij waar nodig om risico's en kansen aan te
+            pakken.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
       depth: 3
@@ -5666,6 +6306,10 @@ objects:
           description: "\u5B9E\u65BD\u98CE\u9669\u8BC4\u4F30\u6D41\u7A0B\uFF0C\u8BC6\
             \u522B\u3001\u8BC4\u4F30\u5E76\u4F18\u5148\u6392\u5E8FISMS\u6846\u67B6\
             \u4E2D\u5B9A\u4E49\u7684\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u3002"
+        nl:
+          name: Risicobeoordeling voor informatiebeveiliging
+          description: Voer de risicobeoordeling uit om risico's voor informatiebeveiliging
+            te bepalen, te beoordelen en te prioriteren, zoals vastgelegd in het ISMS.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
       depth: 3
@@ -5716,6 +6360,11 @@ objects:
             \u9669\uFF0C\u5E94\u7528\u98CE\u9669\u5904\u7406\u6D41\u7A0B\uFF0C\u786E\
             \u4FDD\u4E0E\u7EC4\u7EC7\u7684\u98CE\u9669\u63A5\u53D7\u6807\u51C6\u4FDD\
             \u6301\u4E00\u81F4\u3002"
+        nl:
+          name: Risicobehandeling voor informatiebeveiliging
+          description: Voer de risicobehandeling uit door passende beheersmaatregelen
+            te kiezen en in te voeren voor de vastgestelde risico's, in lijn met de
+            criteria voor risicoacceptatie van de organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
       depth: 2
@@ -5737,6 +6386,8 @@ objects:
           name: Bewertung der Leistung
         zh:
           name: "\u7EE9\u6548\u8BC4\u4F30"
+        nl:
+          name: Evaluatie van de prestaties
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
       depth: 3
@@ -5782,6 +6433,11 @@ objects:
           description: "\u4F7F\u7528\u7B26\u5408\u7EC4\u7EC7\u76EE\u6807\u7684\u9002\
             \u5F53\u65B9\u6CD5\uFF0C\u76D1\u63A7\u3001\u6D4B\u91CF\u3001\u5206\u6790\
             \u548C\u8BC4\u4F30ISMS\u7684\u7EE9\u6548\u548C\u6709\u6548\u6027\u3002"
+        nl:
+          name: Monitoren, meten, analyseren en evalueren
+          description: Monitor, meet, analyseer en evalueer de prestaties en de doeltreffendheid
+            van het ISMS met passende methoden die aansluiten op de doelen van de
+            organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: false
       depth: 3
@@ -5803,6 +6459,8 @@ objects:
           name: Internes Audit
         zh:
           name: "\u5185\u90E8\u5BA1\u8BA1"
+        nl:
+          name: Interne audit
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
       depth: 4
@@ -5848,6 +6506,11 @@ objects:
           description: "\u6309\u8BA1\u5212\u95F4\u9694\u8FDB\u884C\u5185\u90E8\u5BA1\
             \u8BA1\uFF0C\u786E\u4FDDISMS\u7B26\u5408ISO/IEC 27001\u8981\u6C42\u5E76\
             \u6709\u6548\u5B9E\u65BD\u548C\u7EF4\u62A4\u3002"
+        nl:
+          name: Algemeen
+          description: Voer op geplande momenten interne audits uit om na te gaan
+            of het ISMS aan de eisen van ISO/IEC 27001 voldoet en goed wordt ingevoerd
+            en onderhouden.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
       depth: 4
@@ -5893,6 +6556,11 @@ objects:
             \u5305\u62EC\u5B9A\u4E49\u6807\u51C6\u3001\u8303\u56F4\u3001\u65B9\u6CD5\
             \u548C\u804C\u8D23\uFF0C\u5E76\u5C06\u7ED3\u679C\u62A5\u544A\u7ED9\u76F8\
             \u5173\u7BA1\u7406\u5C42\u3002"
+        nl:
+          name: Programma voor interne audits
+          description: Plan en voer interne audits uit, met vastgelegde criteria,
+            reikwijdte, methoden en verantwoordelijkheden, en rapporteer de uitkomsten
+            aan het betrokken management.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: false
       depth: 3
@@ -5914,6 +6582,8 @@ objects:
           name: Managementbewertung
         zh:
           name: "\u7BA1\u7406\u6743\u5BA1\u67E5"
+        nl:
+          name: Directiebeoordeling
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
       depth: 4
@@ -5958,6 +6628,10 @@ objects:
           description: "\u5B9A\u671F\u5BA1\u67E5ISMS\u4EE5\u786E\u4FDD\u5176\u5728\
             \u5B9E\u73B0\u7EC4\u7EC7\u76EE\u6807\u65B9\u9762\u7684\u9002\u7528\u6027\
             \u3001\u5145\u5206\u6027\u548C\u6709\u6548\u6027\u3002"
+        nl:
+          name: Algemeen
+          description: Beoordeel het ISMS periodiek om na te gaan of het geschikt,
+            toereikend en doeltreffend is voor de doelen van de organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
       depth: 4
@@ -6003,6 +6677,11 @@ objects:
             \u3001\u98CE\u9669\u72B6\u6001\u3001\u6539\u8FDB\u673A\u4F1A\u4EE5\u53CA\
             \u7BA1\u7406\u5BA1\u67E5\u4E2D\u6240\u9700\u7684\u53D8\u66F4\u7B49\u8F93\
             \u5165\u3002"
+        nl:
+          name: Input voor de directiebeoordeling
+          description: Neem in de directiebeoordeling onder meer auditresultaten,
+            de prestaties van het ISMS, de stand van de risico's, kansen voor verbetering
+            en benodigde wijzigingen mee.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
       depth: 4
@@ -6045,6 +6724,10 @@ objects:
           description: "\u8BB0\u5F55\u7BA1\u7406\u5BA1\u67E5\u7684\u7ED3\u679C\uFF0C\
             \u5305\u62EC\u6539\u8FDB\u51B3\u7B56\u3001ISMS\u53D8\u66F4\u548C\u8D44\
             \u6E90\u9700\u6C42\u3002"
+        nl:
+          name: Resultaten van de directiebeoordeling
+          description: Leg de resultaten van de directiebeoordeling vast, met besluiten
+            over verbeteringen, wijzigingen in het ISMS en benodigde middelen.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
       depth: 2
@@ -6066,6 +6749,8 @@ objects:
           name: Verbesserung
         zh:
           name: "\u6539\u8FDB"
+        nl:
+          name: Verbetering
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
       depth: 3
@@ -6110,6 +6795,10 @@ objects:
           description: "\u8BC6\u522B\u5E76\u91C7\u53D6\u884C\u52A8\uFF0C\u4EE5\u6301\
             \u7EED\u6539\u8FDB\uFF0C\u4EE5\u63D0\u5347ISMS\u7684\u6548\u80FD\u548C\
             \u4E0E\u7EC4\u7EC7\u76EE\u6807\u7684\u4E00\u81F4\u6027\u3002"
+        nl:
+          name: Voortdurende verbetering
+          description: Zoek kansen voor voortdurende verbetering en benut ze, zodat
+            het ISMS doeltreffender wordt en beter aansluit op de doelen van de organisatie.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
       depth: 3
@@ -6161,6 +6850,10 @@ objects:
             \u522B\u6839\u672C\u539F\u56E0\u5E76\u5B9E\u65BD\u9632\u6B62\u590D\u53D1\
             \u63AA\u65BD\uFF0C\u540C\u65F6\u8BB0\u5F55\u6D41\u7A0B\uFF0C\u89E3\u51B3\
             \u4E0D\u5408\u89C4\u95EE\u9898\u3002"
+        nl:
+          name: Afwijkingen en corrigerende maatregelen
+          description: Pak afwijkingen aan met corrigerende maatregelen, zoek de grondoorzaak,
+            voorkom herhaling en leg het proces vast.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
@@ -6181,6 +6874,8 @@ objects:
           name: "Erkl\xE4rung zur Anwendbarkeit"
         zh:
           name: "\u9002\u7528\u6027\u8BF4\u660E"
+        nl:
+          name: Verklaring van toepasselijkheid
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 2
@@ -6202,6 +6897,8 @@ objects:
           name: "Organisatorische Ma\xDFnahmen"
         zh:
           name: "\u7EC4\u7EC7\u63A7\u5236"
+        nl:
+          name: Organisatorische beheersmaatregelen
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
       depth: 3
@@ -6261,6 +6958,7 @@ objects:
             \u7B56\u3002\u63AA\u65BD\u5305\u62EC\u754C\u5B9A\u8303\u56F4\u3001\u8BBE\
             \u5B9A\u76EE\u6807\uFF0C\u5E76\u786E\u4FDD\u7B26\u5408\u5408\u89C4\u8981\
             \u6C42\u3002"
+        nl: *id001
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
       depth: 3
@@ -6320,6 +7018,7 @@ objects:
             \u4FDD\u95EE\u8D23\u5236\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u8D23\
             \u4EFB\u8BB0\u5F55\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\
             \u5236\u3002"
+        nl: *id002
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
       depth: 3
@@ -6375,6 +7074,7 @@ objects:
             \u6388\u6743\u8BBF\u95EE\u7684\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\
             \u89D2\u8272\u5206\u79BB\u3001\u8BBF\u95EE\u9650\u5236\u548C\u5B9A\u671F\
             \u5BA1\u8BA1\u3002"
+        nl: *id003
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
       depth: 3
@@ -6430,6 +7130,7 @@ objects:
             \u7684\u7BA1\u7406\u804C\u8D23\u88AB\u660E\u786E\u5B9A\u4E49\u5E76\u5F97\
             \u4EE5\u5B9E\u65BD\u3002\u63AA\u65BD\u5305\u62EC\u8BBE\u5B9A\u76EE\u6807\
             \u3001\u5206\u914D\u8D44\u6E90\u548C\u76D1\u7763\u5408\u89C4\u3002"
+        nl: *id004
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
       depth: 3
@@ -6487,6 +7188,7 @@ objects:
             \u6C9F\u901A\u3002\u63AA\u65BD\u5305\u62EC\u5EFA\u7ACB\u8054\u7CFB\u534F\
             \u8BAE\u3001\u7EF4\u62A4\u8054\u7CFB\u4EBA\u540D\u5355\u66F4\u65B0\u4EE5\
             \u53CA\u5206\u914D\u804C\u8D23\u3002"
+        nl: *id005
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
       depth: 3
@@ -6538,6 +7240,7 @@ objects:
             \u5B9E\u8DF5\u7684\u4E86\u89E3\u3002\u63AA\u65BD\u5305\u62EC\u53C2\u4E0E\
             \u8BBA\u575B\u3001\u4F1A\u5458\u8D44\u683C\u548C\u534F\u4F5C\u9879\u76EE\
             \u3002"
+        nl: *id006
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
       depth: 3
@@ -6593,6 +7296,7 @@ objects:
             \u89E3\u5B89\u5168\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\u76D1\u63A7\
             \u5A01\u80C1\u4FE1\u606F\u6D41\u3001\u5206\u6790\u8D8B\u52BF\u4EE5\u53CA\
             \u5206\u4EAB\u53EF\u4F5C\u7684\u89C1\u89E3\u3002"
+        nl: *id007
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
       depth: 3
@@ -6648,6 +7352,7 @@ objects:
             \u62EC\u98CE\u9669\u8BC4\u4F30\u3001\u5408\u89C4\u5BA1\u67E5\u4EE5\u53CA\
             \u9879\u76EE\u751F\u547D\u5468\u671F\u5185\u7684\u5B89\u5168\u68C0\u67E5\
             \u70B9\u3002"
+        nl: *id008
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
       depth: 3
@@ -6701,6 +7406,7 @@ objects:
             \u76F8\u5173\u8D44\u4EA7\u7684\u51C6\u786E\u76D8\u70B9\u3002\u63AA\u65BD\
             \u5305\u62EC\u8D44\u4EA7\u8DDF\u8E2A\u3001\u5B9A\u671F\u5BA1\u8BA1\u4EE5\
             \u53CA\u6309\u654F\u611F\u5EA6\u5206\u7C7B\u3002"
+        nl: *id009
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
       depth: 3
@@ -6761,6 +7467,7 @@ objects:
             \u786E\u4FDD\u6B63\u786E\u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u6709\
             \u6587\u6863\u5316\u7684\u653F\u7B56\u3001\u7528\u6237\u57F9\u8BAD\u548C\
             \u6267\u884C\u673A\u5236\u3002"
+        nl: *id010
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
       depth: 3
@@ -6814,6 +7521,7 @@ objects:
             \uFF0C\u8D44\u4EA7\u80FD\u591F\u5B89\u5168\u56DE\u6536\u3002\u63AA\u65BD\
             \u5305\u62EC\u6E05\u5355\u3001\u8D44\u4EA7\u8DDF\u8E2A\u548C\u9000\u5F79\
             \u534F\u8BAE\u3002"
+        nl: *id011
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
       depth: 3
@@ -6869,6 +7577,7 @@ objects:
             \u4EE5\u786E\u4FDD\u9002\u5F53\u7684\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\
             \u62EC\u5206\u7C7B\u65B9\u6848\u3001\u8BBF\u95EE\u9650\u5236\u548C\u6807\
             \u7B7E\u6307\u5357\u3002"
+        nl: *id012
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
       depth: 3
@@ -6918,6 +7627,7 @@ objects:
             \u7B7E\u4E00\u81F4\uFF0C\u53CD\u6620\u5176\u5206\u7C7B\u548C\u5904\u7406\
             \u8981\u6C42\u3002\u8861\u91CF\u6807\u51C6\u5305\u62EC\u6807\u51C6\u5316\
             \u6A21\u677F\u3001\u57F9\u8BAD\u548C\u5BA1\u8BA1\u3002"
+        nl: *id013
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
       depth: 3
@@ -6970,6 +7680,7 @@ objects:
             \u7EC4\u7EC7\u4E4B\u95F4\u4FE1\u606F\u4F20\u8F93\u7684\u5B89\u5168\u6D41\
             \u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u8BBF\u95EE\u63A7\
             \u5236\u548C\u5B89\u5168\u4F20\u8F93\u534F\u8BAE\u3002"
+        nl: *id014
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
       depth: 3
@@ -7025,6 +7736,7 @@ objects:
             \u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\
             \u8BBF\u95EE\u3001\u591A\u56E0\u7D20\u8BA4\u8BC1\u548C\u5B9A\u671F\u5BA1\
             \u67E5\u3002"
+        nl: *id015
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
       depth: 3
@@ -7080,6 +7792,7 @@ objects:
             \u9760\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u8EAB\u4EFD\u9A8C\u8BC1\
             \u3001\u751F\u547D\u5468\u671F\u7BA1\u7406\u548C\u8BBF\u95EE\u914D\u7F6E\
             \u3002"
+        nl: *id016
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
       depth: 3
@@ -7132,6 +7845,7 @@ objects:
             \u606F\uFF0C\u5982\u5BC6\u7801\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\
             \u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\
             \u5B89\u5168\u5B58\u50A8\u548C\u5B9A\u671F\u66F4\u65B0\u5BC6\u7801\u3002"
+        nl: *id017
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
       depth: 3
@@ -7187,6 +7901,7 @@ objects:
             \u89D2\u8272\u548C\u804C\u8D23\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\
             \u5BA1\u8BA1\u3001\u8BBF\u95EE\u64A4\u9500\u548C\u81EA\u52A8\u5316\u8BBF\
             \u95EE\u7BA1\u7406\u3002"
+        nl: *id018
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
       depth: 3
@@ -7240,6 +7955,7 @@ objects:
             \u5D4C\u5165\u4F9B\u5E94\u5546\u5173\u7CFB\u548C\u6D41\u7A0B\u4E2D\u3002\
             \u63AA\u65BD\u5305\u62EC\u5C3D\u804C\u8C03\u67E5\u3001\u5B89\u5168\u5BA1\
             \u67E5\u548C\u6301\u7EED\u76D1\u63A7\u3002"
+        nl: *id019
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
       depth: 3
@@ -7294,6 +8010,7 @@ objects:
             \u4E2D\u7684\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\
             \u62EC\u660E\u786E\u7684\u5408\u540C\u6761\u6B3E\u3001\u5408\u89C4\u5BA1\
             \u8BA1\u4EE5\u53CA\u5BF9\u8FDD\u89C4\u7684\u660E\u786E\u5904\u7F5A\u3002"
+        nl: *id020
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
       depth: 3
@@ -7353,6 +8070,7 @@ objects:
             \u7EC4\u4EF6\u7684\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\u98CE\u9669\
             \u8BC4\u4F30\u3001\u4F9B\u5E94\u5546\u8BC4\u4F30\u548C\u4E8B\u6545\u54CD\
             \u5E94\u534F\u8BAE\u3002"
+        nl: *id021
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
       depth: 3
@@ -7415,6 +8133,7 @@ objects:
             \u4EE5\u7EF4\u62A4\u4FE1\u606F\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\
             \u670D\u52A1\u6C34\u5E73\u534F\u8BAE\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\
             \u5408\u540C\u66F4\u65B0\u3002"
+        nl: *id022
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
       depth: 3
@@ -7470,6 +8189,7 @@ objects:
             \u98CE\u9669\uFF0C\u786E\u4FDD\u4E91\u670D\u52A1\u7684\u5B89\u5168\u4F7F\
             \u7528\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u52A0\u5BC6\u3001\u8BBF\
             \u95EE\u63A7\u5236\u548C\u63D0\u4F9B\u8005\u5408\u89C4\u5BA1\u67E5\u3002"
+        nl: *id023
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
       depth: 3
@@ -7529,6 +8249,7 @@ objects:
             \u5168\u4E8B\u4EF6\u7684\u5408\u7406\u89C4\u5212\u548C\u51C6\u5907\u3002\
             \u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u54CD\u5E94\u8BA1\u5212\u3001\u57F9\
             \u8BAD\u6F14\u4E60\u548C\u901A\u4FE1\u534F\u8BAE\u3002"
+        nl: *id024
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
       depth: 3
@@ -7589,6 +8310,7 @@ objects:
             \u52A8\u7684\u6D41\u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u6839\u672C\u539F\
             \u56E0\u5206\u6790\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u7F13\u89E3\u8BA1\
             \u5212\u3002"
+        nl: *id025
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
       depth: 3
@@ -7645,6 +8367,7 @@ objects:
             \u9650\u5EA6\u5730\u51CF\u5C11\u5F71\u54CD\u5E76\u8FC5\u901F\u6062\u590D\
             \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u3001\u5347\u7EA7\
             \u534F\u8BAE\u548C\u904F\u5236\u7B56\u7565\u3002"
+        nl: *id026
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
       depth: 3
@@ -7702,6 +8425,7 @@ objects:
             \u5F55\u5E76\u52A0\u4EE5\u5B9E\u65BD\uFF0C\u4EE5\u6539\u8FDB\u6D41\u7A0B\
             \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u540E\u5BA1\u67E5\u3001\u884C\
             \u52A8\u8BA1\u5212\u548C\u653F\u7B56\u66F4\u65B0\u3002"
+        nl: *id027
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
       depth: 3
@@ -7758,6 +8482,7 @@ objects:
             \u4EE5\u652F\u6301\u8C03\u67E5\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7BA1\
             \u94FE\u7A0B\u5E8F\u3001\u5B89\u5168\u5B58\u50A8\u548C\u95E8\u7981\u63A7\
             \u5236\u3002"
+        nl: *id028
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
       depth: 3
@@ -7813,6 +8538,7 @@ objects:
             \u8FD0\u8425\u7684\u8FDE\u7EED\u6027\u3002\u63AA\u65BD\u5305\u62EC\u5E94\
             \u6025\u9884\u6848\u3001\u5907\u4EFD\u7CFB\u7EDF\u548C\u6545\u969C\u5207\
             \u6362\u673A\u5236\u3002"
+        nl: *id029
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
       depth: 3
@@ -7871,6 +8597,7 @@ objects:
             \u51CF\u5C11\u4E2D\u65AD\u671F\u95F4\u7684\u505C\u673A\u65F6\u95F4\u3002\
             \u63AA\u65BD\u5305\u62EC\u6D4B\u8BD5\u6062\u590D\u8BA1\u5212\u3001\u5197\
             \u4F59\u7CFB\u7EDF\u548C\u707E\u96BE\u6062\u590D\u7AD9\u70B9\u3002"
+        nl: *id030
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
       depth: 3
@@ -7925,6 +8652,7 @@ objects:
             \u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\u4FE1\u606F\u5B89\
             \u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\u62EC\u653F\u7B56\u5BA1\u67E5\
             \u3001\u5BA1\u8BA1\u548C\u8BC1\u636E\u8BB0\u5F55\u3002"
+        nl: *id031
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
       depth: 3
@@ -7978,6 +8706,7 @@ objects:
             \u901A\u8FC7\u9002\u5F53\u7684\u4FE1\u606F\u5B89\u5168\u63AA\u65BD\u5F97\
             \u5230\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\u62EC\u8BBF\u95EE\u9650\u5236\
             \u3001\u52A0\u5BC6\u548C\u6CD5\u5F8B\u534F\u8BAE\u3002"
+        nl: *id032
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
       depth: 3
@@ -8036,6 +8765,7 @@ objects:
             \u7ECF\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7559\
             \u653F\u7B56\u3001\u5B89\u5168\u5B58\u50A8\u548C\u8BBF\u95EE\u63A7\u5236\
             \u3002"
+        nl: *id033
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
       depth: 3
@@ -8094,6 +8824,7 @@ objects:
             \u4FDD\u4E2A\u4EBA\u8EAB\u4EFD\u4FE1\u606F\uFF08PII\uFF09\u7684\u5B89\u5168\
             \u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u533F\u540D\u5316\u3001\u52A0\
             \u5BC6\u4EE5\u53CA\u9075\u5B88\u9690\u79C1\u6CD5\u5F8B\u3002"
+        nl: *id034
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
       depth: 3
@@ -8151,6 +8882,7 @@ objects:
             \u6709\u6548\u6027\u548C\u5408\u89C4\u6027\u3002\u63AA\u65BD\u5305\u62EC\
             \u5916\u90E8\u5BA1\u8BA1\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u540E\u7EED\
             \u884C\u52A8\u3002"
+        nl: *id035
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
       depth: 3
@@ -8210,6 +8942,7 @@ objects:
             \u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\u5219\u548C\u6807\
             \u51C6\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\u653F\
             \u7B56\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\u5236\u3002"
+        nl: *id036
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
       depth: 3
@@ -8270,6 +9003,7 @@ objects:
             \u6863\u7684\u4F5C\u7A0B\u5E8F\uFF0C\u4EE5\u786E\u4FDD\u5B89\u5168\u5B9E\
             \u8DF5\u7684\u4E00\u81F4\u6027\u3002\u63AA\u65BD\u5305\u62EC\u6D41\u7A0B\
             \u6587\u6863\u3001\u7248\u672C\u63A7\u5236\u548C\u65E0\u969C\u788D\u3002"
+        nl: *id037
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
       depth: 2
@@ -8291,6 +9025,8 @@ objects:
           name: "Personenbezogene Ma\xDFnahmen"
         zh:
           name: "\u4EBA\u5458\u63A7\u5236"
+        nl:
+          name: Mensgerichte beheersmaatregelen
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
       depth: 3
@@ -8350,6 +9086,7 @@ objects:
             \u4EBA\u7684\u9002\u4EFB\u6027\u3002\u63AA\u65BD\u5305\u62EC\u80CC\u666F\
             \u8C03\u67E5\u3001\u8EAB\u4EFD\u9A8C\u8BC1\u548C\u8D44\u683C\u8BC4\u4F30\
             \uFF0C\u4EE5\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002"
+        nl: *id038
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
       depth: 3
@@ -8404,6 +9141,7 @@ objects:
             \u63AA\u65BD\u5305\u62EC\u660E\u786E\u89C4\u5B9A\u4FDD\u5BC6\u3001\u9075\
             \u5B88\u653F\u7B56\u4EE5\u53CA\u8FDD\u89C4\u540E\u679C\u7B49\u6761\u6B3E\
             \u3002"
+        nl: *id039
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
       depth: 3
@@ -8463,6 +9201,7 @@ objects:
             \u57F9\u8BAD\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\
             \u7535\u5B50\u5B66\u4E60\u9879\u76EE\u548C\u6A21\u62DF\u9493\u9C7C\u6F14\
             \u4E60\u3002"
+        nl: *id040
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
       depth: 3
@@ -8518,6 +9257,7 @@ objects:
             \u89C4\u884C\u4E3A\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u7684\u6307\
             \u5BFC\u65B9\u9488\u3001\u5347\u7EA7\u7A0B\u5E8F\u548C\u6301\u7EED\u7684\
             \u6267\u6CD5\uFF0C\u4EE5\u4FDD\u6301\u95EE\u8D23\u5236\u3002"
+        nl: *id041
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
       depth: 3
@@ -8582,6 +9322,7 @@ objects:
             \u66F4\u540E\u5F97\u5230\u5B9A\u4E49\u548C\u6267\u884C\u3002\u63AA\u65BD\
             \u5305\u62EC\u64A4\u9500\u8BBF\u95EE\u6743\u3001\u6536\u7F34\u7EC4\u7EC7\
             \u8D44\u4EA7\u4EE5\u53CA\u8FDB\u884C\u79BB\u804C\u9762\u8C08\u3002"
+        nl: *id042
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
       depth: 3
@@ -8640,6 +9381,7 @@ objects:
             \u63AA\u65BD\u5305\u62EC\u5165\u804C\u65F6\u7B7E\u7F72\u534F\u8BAE\u3001\
             \u5B9A\u671F\u63D0\u9192\u4EE5\u53CA\u5728\u8FDD\u89C4\u65F6\u6267\u884C\
             \u6CD5\u5F8B\u884C\u52A8\u3002"
+        nl: *id043
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
       depth: 3
@@ -8702,6 +9444,7 @@ objects:
             \u7684\u5B89\u5168\u8BBF\u95EE\u3001\u5F3A\u5236\u4F7F\u7528VPN\uFF0C\u4EE5\
             \u53CA\u5236\u5B9A\u8FDC\u7A0B\u5904\u7406\u654F\u611F\u6570\u636E\u7684\
             \u653F\u7B56\u3002"
+        nl: *id044
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
       depth: 3
@@ -8760,6 +9503,7 @@ objects:
             \u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u6E20\u9053\u3001\u5BA3\u4F20\
             \u6D3B\u52A8\u4EE5\u53CA\u8C03\u67E5\u548C\u5904\u7406\u62A5\u544A\u4E8B\
             \u4EF6\u7684\u540E\u7EED\u7A0B\u5E8F\u3002"
+        nl: *id045
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
       depth: 2
@@ -8781,6 +9525,8 @@ objects:
           name: "Physische Ma\xDFnahmen"
         zh:
           name: "\u7269\u7406\u63A7\u5236"
+        nl:
+          name: Fysieke beheersmaatregelen
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
       depth: 3
@@ -8840,6 +9586,7 @@ objects:
             \u8BBE\u7F6E\u969C\u788D\u7269\u3001\u95E8\u7981\u63A7\u5236\u548C\u76D1\
             \u63A7\u7CFB\u7EDF\uFF0C\u786E\u4FDD\u53EA\u6709\u6388\u6743\u4EBA\u5458\
             \u624D\u80FD\u8FDB\u5165\u3002"
+        nl: *id046
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
       depth: 3
@@ -8895,6 +9642,7 @@ objects:
             \u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u5FBD\
             \u7AE0\u7CFB\u7EDF\u3001\u5B89\u4FDD\u4EBA\u5458\u548C\u8BBF\u5BA2\u8BB0\
             \u5F55\u3002"
+        nl: *id047
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
       depth: 3
@@ -8948,6 +9696,7 @@ objects:
             \u623F\u95F4\u548C\u8BBE\u65BD\u7684\u5B89\u5168\uFF0C\u4EE5\u4FDD\u62A4\
             \u4FE1\u606F\u548C\u8D44\u6E90\u3002\u63AA\u65BD\u5305\u62EC\u4E0A\u9501\
             \u95E8\u3001\u9650\u5236\u533A\u57DF\u548C\u76D1\u63A7\u7CFB\u7EDF\u3002"
+        nl: *id048
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
       depth: 3
@@ -8999,6 +9748,7 @@ objects:
             \u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u5E76\u8FC5\u901F\u54CD\u5E94\u5A01\
             \u80C1\u3002\u63AA\u65BD\u5305\u62EC\u95ED\u8DEF\u7535\u89C6\u7CFB\u7EDF\
             \u3001\u8FD0\u52A8\u63A2\u6D4B\u5668\u548C\u5B9E\u65F6\u8B66\u62A5\u3002"
+        nl: *id049
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
       depth: 3
@@ -9051,6 +9801,7 @@ objects:
             \u6E90\u514D\u53D7\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1\u3002\u63AA\
             \u65BD\u5305\u62EC\u706D\u706B\u7CFB\u7EDF\u3001\u6E29\u5EA6\u63A7\u5236\
             \u548C\u9632\u6D2A\u5C4F\u969C\u3002"
+        nl: *id050
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
       depth: 3
@@ -9103,6 +9854,7 @@ objects:
             \u53EA\u5141\u8BB8\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
             \u95E8\u7981\u7CFB\u7EDF\u3001\u8BBF\u5BA2\u62A4\u9001\u548C\u6D3B\u52A8\
             \u76D1\u6D4B\u3002"
+        nl: *id051
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
       depth: 3
@@ -9159,6 +9911,7 @@ objects:
             \u654F\u611F\u4FE1\u606F\u4E0D\u4F1A\u88AB\u9057\u6F0F\u3002\u63AA\u65BD\
             \u5305\u62EC\u5C06\u654F\u611F\u6587\u4EF6\u9501\u597D\uFF0C\u5E76\u5728\
             \u672A\u4F7F\u7528\u65F6\u81EA\u52A8\u9501\u5B9A\u5C4F\u5E55\u3002"
+        nl: *id052
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
       depth: 3
@@ -9214,6 +9967,7 @@ objects:
             \u7684\u8BBF\u95EE\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u5B89\
             \u5168\u5B89\u88C5\u3001\u4E0A\u9501\u67DC\u5B50\u548C\u9650\u5236\u8FDB\
             \u5165\u533A\u57DF\u3002"
+        nl: *id053
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
       depth: 3
@@ -9269,6 +10023,7 @@ objects:
             \u4EE5\u7EF4\u62A4\u673A\u5BC6\u6027\u548C\u5B8C\u6574\u6027\u3002\u63AA\
             \u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u5B89\u5168\u4F20\u8F93\u548C\u8BBF\
             \u95EE\u8FFD\u8E2A\u3002"
+        nl: *id054
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
       depth: 3
@@ -9320,6 +10075,7 @@ objects:
             \uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u6216\u7BE1\
             \u6539\u3002\u63AA\u65BD\u5305\u62EC\u5B89\u5168\u5B58\u50A8\u3001\u52A0\
             \u5BC6\u548C\u8BBF\u95EE\u9650\u5236\u3002"
+        nl: *id055
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
       depth: 3
@@ -9373,6 +10129,7 @@ objects:
             \u516C\u7528\u4E8B\u4E1A\uFF0C\u5982\u7535\u529B\u548C\u51B7\u5374\u7CFB\
             \u7EDF\uFF0C\u53EF\u9760\u4E14\u4E0D\u53D7\u5E72\u6270\u3002\u63AA\u65BD\
             \u5305\u62EC\u5197\u4F59\u7CFB\u7EDF\u548C\u7269\u7406\u5B89\u5168\u3002"
+        nl: *id056
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
       depth: 3
@@ -9424,6 +10181,7 @@ objects:
             \u62E6\u622A\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u62A4\
             \u7BA1\u9053\u3001\u6B63\u786E\u6807\u8BC6\u548C\u5B89\u5168\u5E03\u7EBF\
             \u3002"
+        nl: *id057
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
       depth: 3
@@ -9480,6 +10238,7 @@ objects:
             \u6545\u969C\u53D1\u751F\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u4FDD\
             \u517B\u3001\u5B89\u5168\u7EF4\u62A4\u5B9E\u8DF5\u4EE5\u53CA\u6388\u6743\
             \u4EBA\u5458\u901A\u884C\u3002"
+        nl: *id058
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
       depth: 3
@@ -9537,6 +10296,7 @@ objects:
             \u5904\u7F6E\u6216\u518D\u5229\u7528\uFF0C\u4EE5\u4FDD\u62A4\u654F\u611F\
             \u4FE1\u606F\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u51C0\u5316\u3001\
             \u7269\u7406\u9500\u6BC1\u548C\u8BA4\u8BC1\u5904\u7406\u6D41\u7A0B\u3002"
+        nl: *id059
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
       depth: 2
@@ -9558,6 +10318,8 @@ objects:
           name: "Technologische Ma\xDFnahmen"
         zh:
           name: "\u6280\u672F\u63A7\u5236"
+        nl:
+          name: Technologische beheersmaatregelen
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
       depth: 3
@@ -9616,6 +10378,7 @@ objects:
             \u3001\u53F0\u5F0F\u673A\u548C\u79FB\u52A8\u8BBE\u5907\u7B49\u7EC8\u7AEF\
             \u8BBE\u5907\u7684\u4FDD\u62A4\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\
             \u964D\u4F4E\u98CE\u9669\u3002"
+        nl: *id060
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
       depth: 3
@@ -9677,6 +10440,7 @@ objects:
             \u6027\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\
             \u95EE\u63A7\u5236\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u4E25\u683C\u7684\
             \u8D26\u6237\u7BA1\u7406\u3002"
+        nl: *id061
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
       depth: 3
@@ -9730,6 +10494,7 @@ objects:
             \u95EE\u3002\u63AA\u65BD\u5305\u62EC\u7528\u6237\u8BA4\u8BC1\u3001\u57FA\
             \u4E8E\u89D2\u8272\u7684\u6743\u9650\u4EE5\u53CA\u5B9A\u671F\u7684\u8BBF\
             \u95EE\u5BA1\u67E5\u3002"
+        nl: *id062
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
       depth: 3
@@ -9785,6 +10550,7 @@ objects:
             \u4FDD\u969C\u4E86\u5BF9\u6E90\u4EE3\u7801\u7684\u8BBF\u95EE\u3002\u63AA\
             \u65BD\u5305\u62EC\u7248\u672C\u63A7\u5236\u3001\u5B89\u5168\u4ED3\u5E93\
             \u548C\u9650\u5236\u5F00\u53D1\u8005\u8BBF\u95EE\u3002"
+        nl: *id063
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
       depth: 3
@@ -9834,6 +10600,7 @@ objects:
             \uFF0C\u5982\u591A\u56E0\u7D20\u8BA4\u8BC1\uFF0C\u4EE5\u9A8C\u8BC1\u7528\
             \u6237\u8EAB\u4EFD\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
             \u95EE\u3002"
+        nl: *id064
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
       depth: 3
@@ -9888,6 +10655,7 @@ objects:
             \u80FD\u5E76\u9632\u6B62\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u76D1\
             \u63A7\u8D44\u6E90\u4F7F\u7528\u548C\u89C4\u5212\u672A\u6765\u9700\u6C42\
             \u3002"
+        nl: *id065
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
       depth: 3
@@ -9939,6 +10707,7 @@ objects:
             \u3001\u5A01\u80C1\u68C0\u6D4B\u5DE5\u5177\u548C\u5B9A\u671F\u66F4\u65B0\
             \u7B49\u63AA\u65BD\uFF0C\u4EE5\u4FDD\u62A4\u7CFB\u7EDF\u514D\u53D7\u6076\
             \u610F\u8F6F\u4EF6\u548C\u6076\u610F\u653B\u51FB\u3002"
+        nl: *id066
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
       depth: 3
@@ -9994,6 +10763,7 @@ objects:
             \u5927\u9650\u5EA6\u5730\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002\u63AA\
             \u65BD\u5305\u62EC\u6F0F\u6D1E\u626B\u63CF\u548C\u8865\u4E01\u7BA1\u7406\
             \u3002"
+        nl: *id067
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
       depth: 3
@@ -10040,6 +10810,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u914D\u7F6E\
             \u7684\u4E00\u81F4\u7BA1\u7406\uFF0C\u4EE5\u7EF4\u62A4\u5B89\u5168\u8BBE\
             \u7F6E\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u66F4\u6539\u3002"
+        nl: *id068
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
       depth: 3
@@ -10091,6 +10862,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u654F\u611F\u4FE1\u606F\
             \u5728\u4E0D\u518D\u9700\u8981\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
             \u6062\u590D\u6216\u66DD\u5149\u65F6\u88AB\u5B89\u5168\u5220\u9664\u3002"
+        nl: *id069
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
       depth: 3
@@ -10139,6 +10911,7 @@ objects:
           description: "\u8BE5\u63A7\u5236\u901A\u8FC7\u4F7F\u7528\u6570\u636E\u63A9\
             \u853D\u6280\u672F\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\uFF0C\u9632\u6B62\
             \u672A\u6388\u6743\u7528\u6237\u53D1\u73B0\u3002"
+        nl: *id070
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
       depth: 3
@@ -10187,6 +10960,7 @@ objects:
             \u654F\u611F\u6570\u636E\u901A\u8FC7\u7535\u5B50\u90AE\u4EF6\u3001\u53EF\
             \u79FB\u52A8\u5A92\u4F53\u6216\u5176\u4ED6\u6E20\u9053\u610F\u5916\u6CC4\
             \u9732\u7684\u673A\u5236\u3002"
+        nl: *id071
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
       depth: 3
@@ -10236,6 +11010,7 @@ objects:
             \u80FD\u591F\u5B9A\u671F\u4E14\u5B89\u5168\u5730\u5907\u4EFD\uFF0C\u786E\
             \u4FDD\u5728\u4E8B\u6545\u6216\u707E\u96BE\u53D1\u751F\u65F6\u5176\u53EF\
             \u7528\u6027\u3002"
+        nl: *id072
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
       depth: 3
@@ -10287,6 +11062,7 @@ objects:
             \u5185\u7F6E\u5197\u4F59\uFF0C\u4EE5\u5728\u7CFB\u7EDF\u6545\u969C\u6216\
             \u7D27\u6025\u60C5\u51B5\u4E0B\u4FDD\u6301\u53EF\u7528\u6027\u548C\u8FD0\
             \u884C\u3002"
+        nl: *id073
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
       depth: 3
@@ -10334,6 +11110,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u4F7F\u7CFB\u7EDF\u5185\u6D3B\u52A8\
             \u80FD\u591F\u8BB0\u5F55\uFF0C\u4EE5\u652F\u6301\u76D1\u63A7\u3001\u4E8B\
             \u4EF6\u68C0\u6D4B\u548C\u53D6\u8BC1\u8C03\u67E5\u3002"
+        nl: *id074
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -10379,6 +11156,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u6D3B\u52A8\
             \u6301\u7EED\u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u3001\u54CD\u5E94\u5E76\
             \u7F13\u89E3\u5B89\u5168\u5A01\u80C1\u3002"
+        nl: *id075
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
       depth: 3
@@ -10424,6 +11202,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u65F6\u949F\
             \u540C\u6B65\uFF0C\u4EE5\u4FDD\u6301\u65E5\u5FD7\u53CA\u5176\u4ED6\u5173\
             \u952E\u8FDB\u7A0B\u7684\u65F6\u95F4\u6233\u51C6\u786E\u4E00\u81F4\u3002"
+        nl: *id076
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
       depth: 3
@@ -10471,6 +11250,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u9650\u5236\u5E76\u76D1\u63A7\u7279\
             \u6743\u5DE5\u5177\u7A0B\u5E8F\u7684\u4F7F\u7528\uFF0C\u4EE5\u9632\u6B62\
             \u6EE5\u7528\u548C\u672A\u7ECF\u6388\u6743\u7684\u884C\u4E3A\u3002"
+        nl: *id077
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
       depth: 3
@@ -10520,6 +11300,7 @@ objects:
             \u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5\u5F97\u5230\u5B89\u5168\u7BA1\
             \u7406\uFF0C\u4EE5\u9632\u6B62\u6F0F\u6D1E\u6216\u672A\u7ECF\u6388\u6743\
             \u7684\u66F4\u6539\u3002"
+        nl: *id078
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
       depth: 3
@@ -10570,6 +11351,7 @@ objects:
             \u5165\u4FB5\u68C0\u6D4B\u7CFB\u7EDF\u548C\u8BBF\u95EE\u63A7\u5236\u786E\
             \u4FDD\u7F51\u7EDC\u5B89\u5168\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\
             \u7684\u8BBF\u95EE\u548C\u653B\u51FB\u3002"
+        nl: *id079
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
       depth: 3
@@ -10615,6 +11397,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7F51\u7EDC\u670D\u52A1\
             \u5728\u4F7F\u7528\u8FC7\u7A0B\u4E2D\u4FDD\u6301\u673A\u5BC6\u6027\u3001\
             \u5B8C\u6574\u6027\u548C\u53EF\u7528\u6027\u3002"
+        nl: *id080
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
       depth: 3
@@ -10660,6 +11443,7 @@ objects:
             \u79BB\uFF0C\u4EE5\u9650\u5236\u5A01\u80C1\u7684\u6269\u6563\uFF0C\u5E76\
             \u6700\u5927\u9650\u5EA6\u5730\u51CF\u5C11\u6F5C\u5728\u5165\u4FB5\u7684\
             \u5F71\u54CD\u3002"
+        nl: *id081
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
       depth: 3
@@ -10704,6 +11488,7 @@ objects:
           description: "\u8BE5\u63A7\u5236\u5229\u7528\u7F51\u7EDC\u8FC7\u6EE4\u5DE5\
             \u5177\u963B\u6B62\u672A\u7ECF\u6388\u6743\u6216\u6709\u5BB3\u5185\u5BB9\
             \u901A\u8FC7\u4E92\u8054\u7F51\u8BBF\u95EE\u3002"
+        nl: *id082
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
       depth: 3
@@ -10751,6 +11536,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u91C7\u7528\u5BC6\u7801\
             \u5B66\u6280\u672F\u6765\u4FDD\u62A4\u6570\u636E\u7684\u673A\u5BC6\u6027\
             \u3001\u5B8C\u6574\u6027\u548C\u771F\u5B9E\u6027\u3002"
+        nl: *id083
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
       depth: 3
@@ -10799,6 +11585,7 @@ objects:
           description: "\u8BE5\u63A7\u5236\u5C06\u5B89\u5168\u6574\u5408\u5230\u5F00\
             \u53D1\u751F\u547D\u5468\u671F\u7684\u6240\u6709\u9636\u6BB5\uFF0C\u786E\
             \u4FDD\u7CFB\u7EDF\u548C\u5E94\u7528\u7684\u5B89\u5168\u6784\u5EFA\u3002"
+        nl: *id084
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
       depth: 3
@@ -10841,6 +11628,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u6267\u884C\u5E94\
             \u7528\u7A0B\u5E8F\u7684\u5B89\u5168\u8981\u6C42\uFF0C\u4EE5\u9632\u8303\
             \u6F0F\u6D1E\u3002"
+        nl: *id085
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
       depth: 3
@@ -10888,6 +11676,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u7CFB\u7EDF\u67B6\
             \u6784\u5F00\u53D1\u8FC7\u7A0B\u4E2D\u91C7\u7528\u5B89\u5168\u7684\u8BBE\
             \u8BA1\u539F\u5219\u3002"
+        nl: *id086
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
       depth: 3
@@ -10932,6 +11721,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u5B89\u5168\u7684\
             \u7F16\u7801\u5B9E\u8DF5\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\u51CF\
             \u5C11\u5F00\u53D1\u8F6F\u4EF6\u4E2D\u7684\u6F0F\u6D1E\u3002"
+        nl: *id087
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
       depth: 3
@@ -10979,6 +11769,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u548C\
             \u9A8C\u6536\u9636\u6BB5\u8FDB\u884C\u5B89\u5168\u6D4B\u8BD5\uFF0C\u4EE5\
             \u8BC6\u522B\u5F31\u70B9\u3002"
+        nl: *id088
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
       depth: 3
@@ -11024,6 +11815,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u5916\
             \u5305\u7ED9\u7B2C\u4E09\u65B9\u4F9B\u5E94\u5546\u65F6\u5B89\u5168\u98CE\
             \u9669\u5F97\u5230\u6709\u6548\u7BA1\u7406\u3002"
+        nl: *id089
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
       depth: 3
@@ -11076,6 +11868,7 @@ objects:
             \u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u88AB\u9694\u79BB\uFF0C\u4EE5\u9632\
             \u6B62\u610F\u5916\u4EA4\u4E92\u548C\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
             \u95EE\u3002"
+        nl: *id090
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
       depth: 3
@@ -11122,6 +11915,7 @@ objects:
           description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u53D8\u66F4\
             \u5F97\u5230\u5B89\u5168\u7BA1\u7406\uFF0C\u4EE5\u964D\u4F4E\u98CE\u9669\
             \u5E76\u4FDD\u6301\u8FD0\u8425\u7A33\u5B9A\u6027\u3002"
+        nl: *id091
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
       depth: 3
@@ -11165,6 +11959,7 @@ objects:
           description: "\u8BE5\u63A7\u5236\u4FDD\u62A4\u6D4B\u8BD5\u6570\u636E\uFF0C\
             \u9632\u6B62\u654F\u611F\u6216\u673A\u5BC6\u4FE1\u606F\u5728\u6D4B\u8BD5\
             \u8FC7\u7A0B\u4E2D\u6CC4\u9732\u3002"
+        nl: *id092
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
       depth: 3
@@ -11231,3 +12026,4 @@ objects:
             \u975E\u751F\u4EA7\u73AF\u5883\u3001\u8BBF\u95EE\u9650\u5236\u548C\u4FDD\
             \u5BC6\u534F\u8BAE\uFF0C\u4EE5\u7EF4\u62A4\u7CFB\u7EDF\u5B89\u5168\u548C\
             \u5B8C\u6574\u6027\u3002"
+        nl: *id093
