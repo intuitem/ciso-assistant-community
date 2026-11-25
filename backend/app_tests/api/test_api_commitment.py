@@ -946,6 +946,38 @@ class TestVendorTaskSteps:
         task.refresh_from_db()
         assert task.commitment_reopen_count == 1
 
+    def test_reopening_a_fulfilled_commitment_starts_without_the_promised_date(
+        self, vendor_task: dict
+    ) -> None:
+        commit_in_the_past = (
+            "respondent",
+            "committed",
+            {"commitment_date": "2020-01-31"},
+        )
+        self.drive(vendor_task, self.OPEN, commit_in_the_past, self.FULFIL)
+        task = vendor_task["task"]
+        self.step(vendor_task["reviewer"], task, "in_negotiation", **self.REOPEN_NOTE)
+        task.refresh_from_db()
+        assert task.committed_eta is None
+        assert not task.commitment_is_breached
+        assert [cycle.committed_eta for cycle in task.commitment_history] == [
+            date(2020, 1, 31)
+        ]
+
+    def test_the_respondent_cannot_open_in_a_sub_folder_of_the_workspace(
+        self, vendor_task: dict
+    ) -> None:
+        sub_folder = Folder.objects.create(
+            parent_folder=vendor_task["workspace"],
+            name="Vendor sub-folder",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        task = TaskTemplate.objects.create(name="Nested", folder=sub_folder)
+        task.assigned_to.set(vendor_task["task"].assigned_to.all())
+        res = self.step(vendor_task["respondent"], task, "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+
     def test_reopening_a_fulfilled_commitment_needs_a_note(
         self, vendor_task: dict
     ) -> None:

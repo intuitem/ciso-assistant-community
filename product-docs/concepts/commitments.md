@@ -57,7 +57,7 @@ When nothing is accountable for the object — no owner set — there are no sid
 
 ## Reopening keeps the history
 
-Renegotiating doesn't overwrite the promised date. The current cycle is closed and a new one opens, carrying the previous committed date forward so a breach stays visible across the renegotiation. The panel shows **Reopened *n* times** and lists the closed cycles with the date each promised, who promised it, when, and the note that closed it.
+Renegotiating doesn't overwrite the promised date. The current cycle is closed and a new one opens, carrying the previous committed date forward so a breach stays visible across the renegotiation. Reopening a fulfilled commitment starts without a date instead: that promise was kept, so a new one is asked for. The panel shows **Reopened *n* times** and lists the closed cycles with the date each promised, who promised it, when, and the note that closed it.
 
 This is the point of the whole feature: *"the fix slipped three times and each time we heard about it after the date had passed"* is a sentence a report can now support.
 

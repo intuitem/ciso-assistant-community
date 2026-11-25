@@ -121,13 +121,21 @@ def user_is_respondent_for(folders: list[Folder], user) -> bool:
 
 
 def user_answers_for_vendor(folders: list[Folder], user) -> bool:
-    """Is *user* a respondent in a third party's workspace (an enclave) among *folders*?
+    """Is *user* a respondent in a third party's workspace among *folders*?
 
-    Only there does the reviewer alone drive the commitment: an internal auditee still
-    opens negotiations on the controls they own.
+    A workspace is an enclave and every folder nested in it, since the respondent role
+    reaches sub-folders too. Only there does the reviewer alone drive the commitment: an
+    internal auditee still opens negotiations on the controls they own.
     """
-    enclaves = [f for f in folders if f.content_type == Folder.ContentType.ENCLAVE]
-    return user_is_respondent_for(enclaves, user)
+    in_workspace = [
+        folder
+        for folder in folders
+        if any(
+            ancestor.content_type == Folder.ContentType.ENCLAVE
+            for ancestor in folder.get_parent_folders(include_self=True)
+        )
+    ]
+    return user_is_respondent_for(in_workspace, user)
 
 
 def user_may_take(instance, user, side: str, incoming: dict | None = None) -> bool:
@@ -198,12 +206,14 @@ def apply_transition(
     elif target == State.IN_NEGOTIATION and current.state in Commitment.CLOSING_STATES:
         current.is_current = False
         current.save(update_fields=["is_current", "updated_at"])
-        # Carried onto the new cycle: it marks a renegotiation rather than a fresh
-        # start, so a breach stays visible.
+        # A renegotiation carries the promise so a breach stays visible. A fulfilled one
+        # was kept: reopening it asks for a new promise, the old date stays in history.
         current = Commitment(
             target=instance,
             state=State.IN_NEGOTIATION,
-            committed_eta=current.committed_eta,
+            committed_eta=None
+            if current.state == State.FULFILLED
+            else current.committed_eta,
         )
 
     current.state = target
