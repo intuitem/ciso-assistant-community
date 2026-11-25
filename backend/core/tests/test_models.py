@@ -902,6 +902,22 @@ class TestAsset:
         assert asset.folder == root_folder
         assert asset.type == Asset.Type.SUPPORT
 
+    def test_prefetch_graph_data_keeps_only_the_subgraph(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        primary, support, sub, sibling, other_parent, other_child = (
+            Asset.objects.create(name=n, folder=root_folder)
+            for n in ("primary", "support", "sub", "sibling", "other", "other child")
+        )
+        support.parent_assets.add(primary)
+        sub.parent_assets.add(support)
+        sibling.parent_assets.add(primary)  # an ancestor's other child: not relevant
+        other_child.parent_assets.add(other_parent)  # unrelated graph
+
+        graph = Asset._prefetch_graph_data([support])
+
+        assert graph["child_to_parents"] == {support: {primary}, sub: {support}}
+        assert graph["parent_to_children"] == {primary: {support}, support: {sub}}
+
     def test_asset_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         Asset.objects.create(name="Asset", folder=root_folder)
