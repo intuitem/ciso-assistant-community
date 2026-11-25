@@ -904,27 +904,15 @@ class TestCelTrigger:
 # TestCelErrorContainment  (CA-1945)
 # ---------------------------------------------------------------------------
 class TestCelErrorContainment:
-    """celpy builds the error of `a || b` from the repr of both operands, so a
-    chain of failing `||` terms produces a message that grows exponentially.
-    Logging it in full (exc_info) while re-evaluating a framework's audits on
-    publish was enough to OOM the worker. The error must be contained: bounded
-    in the log and never crashing the evaluation (fail-open)."""
+    """celpy builds the error of `a || b` from both operands' repr, so a chain
+    of failing `||` grows exponentially. `safe_program` bounds it at the source
+    (one operand error is propagated), and the evaluation never crashes
+    (fail-open). The log keeps a bounded, useful summary."""
 
-    def test_cel_error_is_bounded_and_drops_the_traceback(self):
+    def test_cel_error_is_bounded(self):
         from core.cel_service import _MAX_CEL_ERROR_CHARS, _cel_error
 
-        text, keep_traceback = _cel_error(Exception("x" * 100_000))
-        assert len(text) <= _MAX_CEL_ERROR_CHARS
-        # A huge message is the exponential `||` blow-up: no traceback is logged.
-        assert keep_traceback is False
-
-    def test_cel_error_keeps_the_traceback_for_an_ordinary_error(self):
-        from core.cel_service import _cel_error
-
-        # A small, unexpected error keeps its traceback for debuggability.
-        text, keep_traceback = _cel_error(ValueError("boom"))
-        assert text == "boom"
-        assert keep_traceback is True
+        assert len(_cel_error(Exception("x" * 100_000))) <= _MAX_CEL_ERROR_CHARS
 
     def test_cel_error_survives_a_broken_str(self):
         from core.cel_service import _cel_error
@@ -934,7 +922,7 @@ class TestCelErrorContainment:
                 raise RuntimeError("no str for you")
 
         # A pathological __str__ must not mask the original failure.
-        assert _cel_error(Boom()) == ("Boom", False)
+        assert _cel_error(Boom()) == "Boom"
 
     def test_deferred_evaluation_failure_is_contained(
         self, cel_setup, django_capture_on_commit_callbacks
@@ -964,12 +952,14 @@ class TestCelErrorContainment:
             defer_outcome_evaluation(cel_setup["ca"].pk)
         evaluator.assert_called_once()
 
-    def test_missing_key_chained_or_fails_open_and_is_logged_bounded(self):
-        """A rule whose terms all error (reading a missing answer key) and are
-        chained with `||` must be skipped, not crash the whole evaluation — and
-        the error it logs must be bounded and carry no traceback, so a run of
-        such rules cannot OOM the worker. (On main this logs the full celpy
-        message with exc_info, so the log assertions below fail there.)"""
+    def test_chained_or_missing_key_is_bounded_and_logged_usefully(self):
+        """A rule whose terms all error (a missing answer key) chained with `||`
+        must fail open, stay bounded in MEMORY, and log a useful `no such key`
+        instead of celpy's exponential message. (On main the 24-term expression
+        below builds a ~369 MB message and peaks above 1 GB, so this test fails
+        there; with `safe_program` the peak is well under a megabyte.)"""
+        import tracemalloc
+
         import celpy
         from structlog.testing import capture_logs
 
@@ -979,36 +969,42 @@ class TestCelErrorContainment:
         rules = [
             {
                 "ref_id": "crash",
-                "expression": " || ".join([term] * 16),
+                "expression": " || ".join([term] * 24),
                 "result": "broken",
             },
             {"ref_id": "ok", "expression": "true", "result": "fine", "label": "OK"},
         ]
         errors: list[str] = []
+        tracemalloc.start()
         with capture_logs() as logs:
             fired, _values = _evaluate_rules(
                 celpy.Environment(), rules, {"answers": {}}, errors=errors
             )
+        peak = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+
         # Fail-open: the broken rule is dropped, the sound rule still fires.
         assert "crash" not in fired
         assert fired["ok"] == {"result": "fine", "label": "OK"}
         assert errors == ["crash"]
-        # The failure is logged, bounded, and without a traceback (no exc_info).
+        # Bounded memory — celpy's default peaks above 1 GB at 24 terms.
+        assert peak < 50 * 1024 * 1024, f"peak was {peak / 1e6:.1f} MB"
+        # The log names the missing key (not celpy boilerplate) and is bounded.
         logged = [
             e
             for e in logs
             if e.get("event") == "cel_evaluation_error" and e.get("rule") == "crash"
         ]
         assert len(logged) == 1, logs
+        assert "no such key" in logged[0]["error"]
         assert len(logged[0]["error"]) <= _MAX_CEL_ERROR_CHARS
-        assert logged[0].get("exc_info") in (False, None)
 
-    def test_out_of_scope_question_does_not_error(self, db):
-        """The real CA-1945 reproducer: an outcome rule reads the answer of a
-        question whose requirement is OUTSIDE the audit's implementation-group
-        scope. `_build_answer_data` only loads in-scope answers, so without the
-        zero-fill the key is missing and evaluation raises `no such key`. With
-        every framework question seeded, the rule evaluates with no error."""
+    def test_rule_over_out_of_scope_question_is_contained(self, db):
+        """A rule reading a question whose requirement is outside the audit's
+        implementation-group scope hits `no such key` (the same shape as a rule
+        over a hidden requirement). It must fail open — the rule is reported, not
+        fired — and the bounded `||`/`&&` keep the evaluation cheap. Whether such
+        a rule should instead evaluate to false is a separate product question."""
         from core.cel_service import evaluate_outcomes
 
         folder = Folder.get_root_folder()
@@ -1066,5 +1062,6 @@ class TestCelErrorContainment:
 
         evaluate_outcomes(ca)
         ca.refresh_from_db()
-        # No `no such key`: the out-of-scope question's answer key was seeded.
-        assert not ca.outcome_errors
+        # Contained: the rule is reported as an error, not fired, no crash.
+        assert ca.outcome_errors == ["r"]
+        assert "r" not in (ca.computed_outcome or {})

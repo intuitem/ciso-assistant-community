@@ -9,6 +9,7 @@ import celpy
 import celpy.celtypes as celtypes
 import structlog
 
+from core.cel_safe import safe_program
 from core.quick_form_ratings import (
     cel_ratings,
     evaluate_ratings,
@@ -36,30 +37,19 @@ from core.quick_form_scoring import (
 logger = structlog.get_logger(__name__)
 
 _MAX_CEL_ERROR_CHARS = 200
-# Above this, the message is the exponential `||` blow-up (celtypes.logical_or
-# embeds both operands' repr); its traceback is dropped so logging cannot OOM.
-_MAX_TRACEBACK_CHARS = 2000
 
 
-def _cel_error(exc: Exception) -> tuple[str, bool]:
-    """A bounded summary of a celpy evaluation error, and whether logging its
-    traceback is safe.
+def _cel_error(exc: Exception) -> str:
+    """A bounded one-line summary of a CEL evaluation error, for logging.
 
-    celpy builds the error of `a || b` from the repr of BOTH operands
-    (celtypes.logical_or raises ``TypeError(f"... {x!r} or {y!r}")``), so a
-    chain of failing ``||`` terms yields a message whose size doubles with each
-    term — megabytes for a handful of terms. Logging such an error with
-    ``exc_info`` reformats that whole message into the traceback and feeds it to
-    the handlers, and doing so once per audit while re-evaluating a framework's
-    audits on publish was enough to OOM the worker. So the message is truncated,
-    and the traceback is kept only when the message is small: an ordinary,
-    unexpected error still logs its stack, while the pathological one does not.
+    With `safe_program` the message of a failing rule stays small and to the
+    point (`no such key: 'Q'`), so the bound is only a backstop against any
+    other long message; it never hides the useful part.
     """
     try:
-        text = str(exc)
+        return str(exc)[:_MAX_CEL_ERROR_CHARS]
     except Exception:  # a pathological __str__ must not mask the real error
-        return type(exc).__name__, False
-    return text[:_MAX_CEL_ERROR_CHARS], len(text) <= _MAX_TRACEBACK_CHARS
+        return type(exc).__name__
 
 
 def _python_to_cel(value):
@@ -122,44 +112,6 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
         if q_node_id:
             result[q_node_id] = entry
     return result
-
-
-def _zero_filled_answers(framework, exclude_requirement_urns=()) -> dict[str, dict]:
-    """A zero-filled answer entry for every question of the framework, in the
-    same shape `_build_answer_data` produces and `_framework_probe` validates
-    against. Questions on `exclude_requirement_urns` are left out — that is how
-    a hidden requirement's answers stay out of the context.
-
-    `_build_answer_data` only loads answers of in-scope requirements that have an
-    Answer row, so a rule reading `answers["Q"]` of an unanswered question — or
-    of a question whose requirement is outside the audit's implementation-group
-    scope — would hit `no such key` and raise at evaluation. celpy builds the
-    error of a chain of failing `||` from both operands' repr, so the message
-    (and memory) grows exponentially; a handful of terms is enough to OOM the
-    worker. Seeding every key removes the error at its source, so the runtime
-    context matches what the builder already validates.
-    """
-    from core.models import Question
-    from core.utils import extract_node_id
-
-    questions = Question.objects.filter(requirement_node__framework=framework)
-    if exclude_requirement_urns:
-        questions = questions.exclude(
-            requirement_node__urn__in=exclude_requirement_urns
-        )
-    defaults: dict[str, dict] = {}
-    for urn, q_type, weight in questions.values_list("urn", "type", "weight"):
-        node_id = extract_node_id(urn)
-        if node_id:
-            defaults[node_id] = {
-                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
-                "score": 0,
-                "selected_choices": [],
-                # A negative weight has no defined meaning; treat it as 0.
-                "weight": max(weight or 0, 0),
-                "type": q_type,
-            }
-    return defaults
 
 
 def _requirement_layers(ca, node, ra) -> dict:
@@ -342,13 +294,8 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         )
     }
 
-    # Query 3: answer-level data for in-scope requirements. Seed every question
-    # of the framework first so a rule can read any answer key without raising,
-    # whatever the audit's scope; real answers overwrite the zero-filled ones.
-    answer_data = {
-        **_zero_filled_answers(framework),
-        **_build_answer_data(ca, in_scope_node_ids),
-    }
+    # Query 3: answer-level data for in-scope requirements
+    answer_data = _build_answer_data(ca, in_scope_node_ids)
 
     max_score = ca.max_score or 100
     computed_outcomes = ca.computed_outcome if ca.computed_outcome else {}
@@ -374,19 +321,17 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 continue
             try:
                 ast = env.compile(vis_expr)
-                prog = env.program(ast)
+                prog = safe_program(env, ast)
                 result = prog.evaluate(cel_context)
                 if not result:
                     hidden_urns.add(node["urn"])
             except Exception as exc:
-                error, keep_traceback = _cel_error(exc)
                 logger.warning(
                     "cel_visibility_error",
                     expression=vis_expr,
                     requirement_urn=node["urn"],
                     compliance_assessment_id=str(ca.pk),
-                    error=error,
-                    exc_info=keep_traceback,
+                    error=_cel_error(exc),
                 )
                 # Fail-open: keep requirement visible on error
 
@@ -399,12 +344,7 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     if hidden_assessable:
         visible_scope = [n for n in in_scope if n["urn"] not in hidden_assessable]
         visible_urns = {n["urn"] for n in visible_scope}
-        visible_answer_data = {
-            # A hidden requirement's questions stay out of the context, just as
-            # its real answers do.
-            **_zero_filled_answers(framework, exclude_requirement_urns=hidden_urns),
-            **_build_answer_data(ca, [n["id"] for n in visible_scope]),
-        }
+        visible_answer_data = _build_answer_data(ca, [n["id"] for n in visible_scope])
         visible_ra_rows = {k: v for k, v in ra_rows.items() if k in visible_urns}
         final_context = _build_context_dict(
             visible_scope,
@@ -419,13 +359,6 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         ]
     else:
         final_context = initial_context
-        if hidden_urns:
-            # No assessable requirement is hidden, so scores stand; only drop a
-            # hidden (non-assessable) node's seeded questions from the answers.
-            final_context["answers"] = {
-                **_zero_filled_answers(framework, exclude_requirement_urns=hidden_urns),
-                **_build_answer_data(ca, in_scope_node_ids),
-            }
         final_context["hidden_requirements"] = [
             extract_node_id(u) for u in hidden_urns if extract_node_id(u)
         ]
@@ -950,7 +883,7 @@ def _evaluate_rules(
     }
 
     def run(rule):
-        return env.program(env.compile(rule["expression"])).evaluate(
+        return safe_program(env, env.compile(rule["expression"])).evaluate(
             {
                 **base,
                 "values": _python_to_cel(values),
@@ -962,13 +895,11 @@ def _evaluate_rules(
         try:
             result = run(rule)
         except Exception as exc:
-            error, keep_traceback = _cel_error(exc)
             logger.warning(
                 "cel_value_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                error=error,
-                exc_info=keep_traceback,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -994,13 +925,11 @@ def _evaluate_rules(
                     k: v for k, v in rule.items() if k not in _NOT_PASSED_ON
                 }
         except Exception as exc:
-            error, keep_traceback = _cel_error(exc)
             logger.warning(
                 "cel_evaluation_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                error=error,
-                exc_info=keep_traceback,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -1308,7 +1237,7 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         if not expression:
             return None
         try:
-            return env.program(env.compile(expression)).evaluate(
+            return safe_program(env, env.compile(expression)).evaluate(
                 {k: _python_to_cel(v) for k, v in context.items()}
             )
         except Exception as e:
@@ -1406,7 +1335,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             return None
         context = raw_probe if context is None else context
         try:
-            return env.program(env.compile(expression)).evaluate(
+            return safe_program(env, env.compile(expression)).evaluate(
                 {k: _python_to_cel(v) for k, v in context.items()}
             )
         except Exception as e:
@@ -1699,7 +1628,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         if not expression:
             continue
         try:
-            if not env.program(env.compile(expression)).evaluate(cel_context):
+            if not safe_program(env, env.compile(expression)).evaluate(cel_context):
                 hidden.add(page.get("urn"))
         except Exception:
             # Same fail-open as a real evaluation; the author sees the page.
@@ -1793,19 +1722,17 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
             if not expression:
                 continue
             try:
-                prog = env.program(env.compile(expression))
+                prog = safe_program(env, env.compile(expression))
                 if not prog.evaluate(cel_context):
                     hidden_page_ids.add(page["id"])
                     hidden_page_urns.add(page["urn"])
             except Exception as exc:
-                error, keep_traceback = _cel_error(exc)
                 logger.warning(
                     "cel_visibility_error",
                     expression=expression,
                     page_urn=page["urn"],
                     quick_form_response_id=str(response.pk),
-                    error=error,
-                    exc_info=keep_traceback,
+                    error=_cel_error(exc),
                 )
 
     context = (
