@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import requests
 import structlog
 
-from core.net_safety import DnsLookupError, assert_public_url_unless_dev
+from core.net_safety import DnsLookupError, assert_public_url_unless_dev, public_post
 
 logger = structlog.get_logger(__name__)
 
@@ -78,9 +78,7 @@ def _fetch(cfg: dict) -> tuple[str, float]:
         data["scope"] = cfg["scope"]
 
     try:
-        response = requests.post(
-            token_url, data=data, timeout=15, allow_redirects=False
-        )
+        response = public_post(token_url, data=data, timeout=15, allow_redirects=False)
     except requests.exceptions.RequestException as exc:
         raise OAuthError(f"token endpoint unreachable: {type(exc).__name__}") from exc
     if response.status_code != 200:
