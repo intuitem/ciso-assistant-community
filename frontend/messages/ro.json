@@ -2290,5 +2290,6 @@
 	"viewAll": "Vezi tot",
 	"briefingOfAssessedRequirements": "din {total} cerințe evaluate",
 	"briefingPartialCount": "{count} parțial",
-	"onlyTheReviewerCanDoThis": "Doar evaluatorul poate efectua acest pas"
+	"onlyTheReviewerCanDoThis": "Doar evaluatorul poate efectua acest pas",
+	"commitmentChangedMeanwhile": "Acest angajament s-a schimbat între timp: reîncărcați pagina pentru a vedea starea actuală"
 }

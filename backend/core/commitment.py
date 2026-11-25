@@ -6,7 +6,9 @@ no columns and the machine runs off serializer fields, so every write path enfor
 """
 
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
+from datetime import date
+
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -49,6 +51,15 @@ TRANSITIONS = {
     (State.FULFILLED, State.IN_NEGOTIATION): {"side": REVIEWER, "requires_note": True},
 }
 
+
+def changed_meanwhile() -> serializers.ValidationError:
+    # Raised after validation, so DRF does not wrap it: the list keeps the field-error
+    # shape the client reads.
+    return serializers.ValidationError(
+        {"commitment_state": ["commitmentChangedMeanwhile"]}
+    )
+
+
 SIDE_REFUSALS = {
     OWNER: "onlyTheAccountableActorCanDoThis",
     COUNTERPARTY: "theAccountableActorCannotCloseTheirOwnCommitment",
@@ -89,47 +100,48 @@ def side_allows(side: str, accountable: bool | None) -> bool:
     return accountable if side == OWNER else not accountable
 
 
-def user_is_respondent_for(instance, user) -> bool:
-    """Is *user* answering this object rather than reviewing it?
+def folders_involved(instance, incoming: dict | None) -> list[Folder]:
+    """The object's folder, plus the incoming one when the request creates or moves it."""
+    candidates = [getattr(instance, "folder", None), (incoming or {}).get("folder")]
+    return list({folder for folder in candidates if folder is not None})
+
+
+def user_is_respondent_for(folders: list[Folder], user) -> bool:
+    """Is *user* answering, rather than reviewing, in any of *folders*?
 
     A respondent is the promising side by construction; otherwise they fall into the
     no-sides hatch and can run the whole lifecycle alone.
     """
     from core.utils import get_respondent_scoped_folder_ids
 
-    folder_id = getattr(instance, "folder_id", None)
-    if folder_id is None or user is None:
+    if user is None or not folders:
         return False
-    return folder_id in get_respondent_scoped_folder_ids(user)
+    respondent_folder_ids = get_respondent_scoped_folder_ids(user)
+    return any(folder.id in respondent_folder_ids for folder in folders)
 
 
-def user_answers_for_vendor(folder, user) -> bool:
-    """Is *user* a respondent in this third party's workspace (an enclave)?
+def user_answers_for_vendor(folders: list[Folder], user) -> bool:
+    """Is *user* a respondent in a third party's workspace (an enclave) among *folders*?
 
     Only there does the reviewer alone drive the commitment: an internal auditee still
     opens negotiations on the controls they own.
     """
-    from core.utils import get_respondent_scoped_folder_ids
-
-    return (
-        folder is not None
-        and folder.content_type == Folder.ContentType.ENCLAVE
-        and folder.id in get_respondent_scoped_folder_ids(user)
-    )
+    enclaves = [f for f in folders if f.content_type == Folder.ContentType.ENCLAVE]
+    return user_is_respondent_for(enclaves, user)
 
 
 def user_may_take(instance, user, side: str, incoming: dict | None = None) -> bool:
     """Whether *user* is on the right side of the table for a *side* step.
 
-    *instance* is None on create, where the opening step is the only legal one, so its
-    folder is the incoming one.
+    *instance* is None on create. The sides are judged in both folders of a move, else
+    moving an object and taking a step in one request would skip the rule of one of them.
     """
     if side == ANY:
         return True
+    folders = folders_involved(instance, incoming)
     if side == REVIEWER:
-        folder = instance.folder if instance else (incoming or {}).get("folder")
-        return not user_answers_for_vendor(folder, user)
-    if side == COUNTERPARTY and user_is_respondent_for(instance, user):
+        return not user_answers_for_vendor(folders, user)
+    if side == COUNTERPARTY and user_is_respondent_for(folders, user):
         return False
     return side_allows(side, user_is_accountable(instance, user, incoming))
 
@@ -147,12 +159,24 @@ def serialize_commitment(entry) -> dict:
     }
 
 
-def apply_transition(instance, target: str, user=None, notes=None, promised_date=None):
-    """Move *instance* to *target*, writing the commitment rows. Assumes it is legal.
+def apply_transition(
+    instance,
+    target: str,
+    user=None,
+    notes: str | None = None,
+    promised_date: date | None = None,
+    validated_from: str | None = None,
+):
+    """Move *instance* to *target*, writing the commitment rows. Assumes the step is legal
+    from *validated_from*.
 
     The live row is re-read under a lock: validation ran against a cached read, and two
     counterparties transitioning at once would otherwise each persist from the state
     they saw.
+
+    Raises ValidationError when the locked state is no longer *validated_from*, or when
+    another request opened the first cycle meanwhile: the step was authorised for the
+    state it was validated against, not for whatever another request moved it to.
     """
     # Discard the cached cycles: the state validated against may already be stale.
     instance.__dict__.pop("commitment_entries", None)
@@ -165,6 +189,9 @@ def apply_transition(instance, target: str, user=None, notes=None, promised_date
         )
         .first()
     )
+    locked_state = current.state if current else State.UNDEFINED
+    if validated_from is not None and locked_state != validated_from:
+        raise changed_meanwhile()
 
     if current is None:
         current = Commitment(target=instance, state=State.IN_NEGOTIATION)
@@ -190,7 +217,13 @@ def apply_transition(instance, target: str, user=None, notes=None, promised_date
         if actors:
             current.committed_by = actors[0]
 
-    current.save()
+    try:
+        with transaction.atomic():
+            current.save()
+    except IntegrityError:
+        # A first opening has no row to lock: two at once both pass the check above,
+        # and the one-current-row constraint is what turns the second away.
+        raise changed_meanwhile() from None
     instance.__dict__.pop("commitment_entries", None)
     return current
 
@@ -309,7 +342,7 @@ class CommitmentSerializerMixin:
                 {"commitment_state": "aDateIsRequiredToCommit"}
             )
 
-        self._commitment_move = (target, promised_date)
+        self._commitment_move = (target, promised_date, current)
         return attrs
 
     def pop_commitment(self, validated_data: dict) -> None:
@@ -322,7 +355,7 @@ class CommitmentSerializerMixin:
         move = getattr(self, "_commitment_move", None)
         if move is None:
             return
-        target, promised_date = move
+        target, promised_date, validated_from = move
         request = self.context.get("request")
         # One transaction: the row lock taken inside is only worth anything while it
         # is held, and closing a cycle then opening the next must not half-apply.
@@ -333,6 +366,7 @@ class CommitmentSerializerMixin:
                 user=request.user if request else None,
                 notes=(validated_data.get("commitment_notes") or "").strip() or None,
                 promised_date=promised_date,
+                validated_from=validated_from,
             )
 
 

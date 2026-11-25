@@ -5609,5 +5609,6 @@
 	"viewAll": "Vis alle",
 	"briefingOfAssessedRequirements": "av {total} vurderte krav",
 	"briefingPartialCount": "{count} delvis",
-	"onlyTheReviewerCanDoThis": "Bare den som gjennomgår kan utføre dette trinnet"
+	"onlyTheReviewerCanDoThis": "Bare den som gjennomgår kan utføre dette trinnet",
+	"commitmentChangedMeanwhile": "Denne forpliktelsen er endret i mellomtiden: last inn på nytt for å se gjeldende status"
 }

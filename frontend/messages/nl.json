@@ -6409,5 +6409,6 @@
 	"commandKeywordSearch": "zoek",
 	"briefingOfAssessedRequirements": "van {total} beoordeelde eisen",
 	"briefingPartialCount": "{count} gedeeltelijk",
-	"onlyTheReviewerCanDoThis": "Alleen de beoordelaar kan deze stap uitvoeren"
+	"onlyTheReviewerCanDoThis": "Alleen de beoordelaar kan deze stap uitvoeren",
+	"commitmentChangedMeanwhile": "Deze toezegging is intussen gewijzigd: laad de pagina opnieuw om de huidige stand te zien"
 }

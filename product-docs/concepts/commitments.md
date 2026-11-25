@@ -51,7 +51,7 @@ Two rules carry the intent of the model:
 
 **The owner cannot close their own commitment.** Someone who both makes and confirms delivery of a promise is self-certifying. Fulfilment is a counterparty step, deliberately.
 
-**A third-party respondent is always the promising side.** They can commit, decline and ask for a delay, even after submitting their questionnaire; opening, relaunching and reopening a negotiation is left to the reviewer, and they can't sign off their own delivery.
+**A third-party respondent is always the promising side.** They can commit, decline and ask for a delay on a commitment they made, even after submitting their questionnaire. Opening a negotiation, relaunching it after a decline and reopening a fulfilled commitment are left to the reviewer, and they can't sign off their own delivery.
 
 When nothing is accountable for the object — no owner set — there are no sides, and anyone who can change the object can run the whole lifecycle. That's a deliberate escape hatch so an unassigned control doesn't deadlock.
 

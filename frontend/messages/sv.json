@@ -2285,5 +2285,6 @@
 	"viewAll": "Visa alla",
 	"briefingOfAssessedRequirements": "av {total} bedömda krav",
 	"briefingPartialCount": "{count} delvis",
-	"onlyTheReviewerCanDoThis": "Endast granskaren kan utföra detta steg"
+	"onlyTheReviewerCanDoThis": "Endast granskaren kan utföra detta steg",
+	"commitmentChangedMeanwhile": "Det här åtagandet har ändrats under tiden: läs in sidan igen för att se aktuell status"
 }

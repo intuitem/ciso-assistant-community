@@ -2419,5 +2419,6 @@
 	"viewAll": "Lihat semua",
 	"briefingOfAssessedRequirements": "dari {total} persyaratan yang dinilai",
 	"briefingPartialCount": "{count} sebagian",
-	"onlyTheReviewerCanDoThis": "Hanya peninjau yang dapat melakukan langkah ini"
+	"onlyTheReviewerCanDoThis": "Hanya peninjau yang dapat melakukan langkah ini",
+	"commitmentChangedMeanwhile": "Komitmen ini telah berubah sementara itu: muat ulang untuk melihat statusnya saat ini"
 }

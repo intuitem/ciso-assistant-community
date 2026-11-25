@@ -1,8 +1,11 @@
-from unittest.mock import patch
+from datetime import date
+from unittest.mock import MagicMock, patch
 
 import pytest
+from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APIRequestFactory
 
 from core.models import (
     Actor,
@@ -14,6 +17,8 @@ from core.models import (
     TaskNode,
     TaskTemplate,
 )
+from core.commitment import apply_transition
+from core.serializers import TaskTemplateWriteSerializer
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
@@ -962,6 +967,128 @@ class TestVendorTaskSteps:
         )
         assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
         assert not TaskTemplate.objects.filter(name="Self-raised").exists()
+
+    @staticmethod
+    def analyst_elsewhere(vendor_task: dict) -> tuple[APIClient, Folder]:
+        """A respondent of the workspace who is also an analyst in an unrelated domain."""
+        elsewhere = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Unrelated domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("commitment-analyst-respondent@tests.com")
+        respondent_on(elsewhere, user, "BI-RL-ANA")
+        return respondent_on(vendor_task["workspace"], user, "BI-RL-TPR"), elsewhere
+
+    @staticmethod
+    def move(
+        client: APIClient, task: TaskTemplate, folder: Folder, state: str
+    ) -> Response:
+        return client.patch(
+            f"/api/task-templates/{task.id}/",
+            {"folder": str(folder.id), "commitment_state": state},
+            format="json",
+        )
+
+    def test_the_respondent_cannot_launch_by_moving_a_task_in(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = TaskTemplate.objects.create(name="Moved in", folder=elsewhere)
+        res = self.move(client, task, vendor_task["workspace"], "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+        task.refresh_from_db()
+        assert task.folder_id == elsewhere.id
+
+    def test_the_respondent_cannot_launch_by_moving_a_task_out(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = vendor_task["task"]
+        res = self.move(client, task, elsewhere, "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+        task.refresh_from_db()
+        assert task.folder_id == vendor_task["workspace"].id
+
+    def test_the_respondent_cannot_fulfil_by_moving_a_task_in(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = TaskTemplate.objects.create(name="Promised", folder=elsewhere)
+        task.assigned_to.set(vendor_task["task"].assigned_to.all())
+        apply_transition(task, "in_negotiation")
+        apply_transition(task, "committed", promised_date=date(2027, 3, 31))
+        res = self.move(client, task, vendor_task["workspace"], "fulfilled")
+        assert res.status_code == 400
+        assert res.json() == {
+            "commitment_state": ["theAccountableActorCannotCloseTheirOwnCommitment"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "committed"
+
+    def delay_validated_as_respondent(
+        self, task: TaskTemplate
+    ) -> TaskTemplateWriteSerializer:
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-respondent@tests.com")
+        delay = TaskTemplateWriteSerializer(
+            task,
+            data={
+                "commitment_state": "in_negotiation",
+                "commitment_notes": "late",
+                "name": "Renamed with the delay",
+            },
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert delay.is_valid(), delay.errors
+        return delay
+
+    def test_a_delay_does_not_overwrite_a_fulfilment_made_meanwhile(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT)
+        task = vendor_task["task"]
+        delay = self.delay_validated_as_respondent(task)
+        apply_transition(task, "fulfilled")
+
+        with pytest.raises(ValidationError) as refused:
+            delay.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "fulfilled"
+        assert task.name == "Adopt a security policy"
+
+    def test_two_first_openings_at_once_refuse_the_second(
+        self, vendor_task: dict
+    ) -> None:
+        task = vendor_task["task"]
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-manager@tests.com")
+        second = TaskTemplateWriteSerializer(
+            task,
+            data={"commitment_state": "in_negotiation"},
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert second.is_valid(), second.errors
+        Commitment.objects.create(target=task, state="in_negotiation")
+        # The first opening committed after the second read "no row": nothing was
+        # there to lock, so the second's locked read still finds nothing.
+        unlocked = MagicMock()
+        unlocked.filter.return_value.first.return_value = None
+        with patch.object(
+            Commitment.objects, "select_for_update", return_value=unlocked
+        ):
+            with pytest.raises(ValidationError) as refused:
+                second.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
 
     def test_the_respondent_can_still_ask_for_a_delay(self, vendor_task: dict) -> None:
         self.drive(vendor_task, self.OPEN, self.COMMIT)

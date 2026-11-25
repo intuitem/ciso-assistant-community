@@ -3173,6 +3173,7 @@
 	"commitmentActionFulfil": "وضع علامة مُنفَّذ",
 	"onlyTheAccountableActorCanDoThis": "لا يمكن سوى للمالك المُسنَد اتخاذ هذه الخطوة",
 	"onlyTheReviewerCanDoThis": "لا يمكن إلا للمراجع تنفيذ هذه الخطوة",
+	"commitmentChangedMeanwhile": "تغيّر هذا الالتزام في هذه الأثناء: أعد تحميل الصفحة لمعرفة حالته الحالية",
 	"commitmentManagement": "إدارة الالتزامات",
 	"commitmentManagementDescription": "تتبّع تاريخ المعالجة الذي يلتزم به المالك وإعادة التفاوض عليه",
 	"dora": "DORA",

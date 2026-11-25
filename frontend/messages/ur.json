@@ -2268,5 +2268,6 @@
 	"viewAll": "سب دیکھیں",
 	"briefingOfAssessedRequirements": "{total} جانچی گئی ضروریات میں سے",
 	"briefingPartialCount": "{count} جزوی",
-	"onlyTheReviewerCanDoThis": "صرف جائزہ لینے والا یہ قدم اٹھا سکتا ہے"
+	"onlyTheReviewerCanDoThis": "صرف جائزہ لینے والا یہ قدم اٹھا سکتا ہے",
+	"commitmentChangedMeanwhile": "اس دوران یہ عہد تبدیل ہو گیا ہے: اس کی موجودہ حالت دیکھنے کے لیے صفحہ دوبارہ لوڈ کریں"
 }

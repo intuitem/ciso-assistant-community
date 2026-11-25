@@ -5941,6 +5941,7 @@
 	"commitmentActionFulfil": "Označit jako splněné",
 	"onlyTheAccountableActorCanDoThis": "Tento krok může provést pouze odpovědný vlastník",
 	"onlyTheReviewerCanDoThis": "Tento krok může provést pouze posuzovatel",
+	"commitmentChangedMeanwhile": "Tento závazek se mezitím změnil: načtěte stránku znovu a zobrazte jeho aktuální stav",
 	"commitmentManagement": "Správa závazků",
 	"commitmentManagementDescription": "Sledujte datum nápravy, ke kterému se vlastník zaváže, a případná opětovná vyjednávání",
 	"dora": "DORA",

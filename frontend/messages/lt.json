@@ -4900,5 +4900,6 @@
 	"viewAll": "Rodyti viską",
 	"briefingOfAssessedRequirements": "iš {total} įvertintų reikalavimų",
 	"briefingPartialCount": "{count} iš dalies",
-	"onlyTheReviewerCanDoThis": "Šį veiksmą gali atlikti tik peržiūrėtojas"
+	"onlyTheReviewerCanDoThis": "Šį veiksmą gali atlikti tik peržiūrėtojas",
+	"commitmentChangedMeanwhile": "Šis įsipareigojimas per tą laiką pasikeitė: įkelkite puslapį iš naujo, kad pamatytumėte dabartinę būseną"
 }

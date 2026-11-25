@@ -5949,6 +5949,7 @@
 	"commitmentActionFulfil": "Позначити як виконане",
 	"onlyTheAccountableActorCanDoThis": "Лише призначений власник може виконати цей крок",
 	"onlyTheReviewerCanDoThis": "Цей крок може виконати лише рецензент",
+	"commitmentChangedMeanwhile": "Це зобов'язання тим часом змінилося: перезавантажте сторінку, щоб побачити його поточний стан",
 	"commitmentManagement": "Керування зобов'язаннями",
 	"commitmentManagementDescription": "Відстежуйте дату усунення недоліків, яку зобов'язується дотримати власник, і її повторне узгодження",
 	"dora": "DORA",
