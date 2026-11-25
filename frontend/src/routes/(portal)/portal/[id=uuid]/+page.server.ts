@@ -1,11 +1,11 @@
-import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { defaultWriteFormAction, REDIRECT_AFTER_CREATE } from '#lib/utils/actions.js';
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { getModelInfo, URL_MODEL_MAP, urlParamModelSelectFields } from '#lib/utils/crud.js';
 import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
 import { canUseTile } from '#lib/utils/portalTileAccess.js';
 import { formatSelectFieldData } from '#lib/utils/load.js';
 import { modelSchema } from '#lib/utils/schemas.js';
-import { URL_MODEL, type ModelInfo } from '#lib/utils/types.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions, error, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -87,10 +87,18 @@ const readError = async (res: Response) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const urlModel = event.url.searchParams.get('model');
-		if (!urlModel || !URL_MODEL.includes(urlModel as (typeof URL_MODEL)[number])) {
+		// Not URL_MODEL: it leaves out ebios-rm (own route), which a tile can still create.
+		// The `_duplicate` entries only configure the duplicate modal, nothing to create.
+		if (!urlModel || !Object.hasOwn(URL_MODEL_MAP, urlModel) || urlModel.endsWith('_duplicate')) {
 			return fail(400, { error: 'invalid model' });
 		}
-		return defaultWriteFormAction({ event, urlModel, action: 'create', doRedirect: false });
+		return defaultWriteFormAction({
+			event,
+			urlModel,
+			action: 'create',
+			doRedirect: false,
+			redirectToWrittenObject: REDIRECT_AFTER_CREATE.has(urlModel)
+		});
 	},
 	launchQuickForm: async ({ params, request, fetch }) => {
 		const data = await request.formData();
