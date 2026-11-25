@@ -4,6 +4,7 @@ import { getModelInfo, URL_MODEL_MAP, urlParamModelSelectFields } from '#lib/uti
 import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
 import { canUseTile } from '#lib/utils/portalTileAccess.js';
 import { formatSelectFieldData } from '#lib/utils/load.js';
+import { SCAFFOLDABLE_MODELS } from '#lib/utils/modelTargets.js';
 import { modelSchema } from '#lib/utils/schemas.js';
 import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions, error, fail } from '@sveltejs/kit';
@@ -87,9 +88,9 @@ const readError = async (res: Response) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const urlModel = event.url.searchParams.get('model');
-		// Not URL_MODEL: it leaves out ebios-rm (own route), which a tile can still create.
-		// The `_duplicate` entries only configure the duplicate modal, nothing to create.
-		if (!urlModel || !Object.hasOwn(URL_MODEL_MAP, urlModel) || urlModel.endsWith('_duplicate')) {
+		// The models the tile picker offers, not URL_MODEL (routing: it leaves out ebios-rm)
+		// nor URL_MODEL_MAP (it holds entries with no create endpoint).
+		if (!urlModel || !SCAFFOLDABLE_MODELS.includes(urlModel)) {
 			return fail(400, { error: 'invalid model' });
 		}
 		return defaultWriteFormAction({

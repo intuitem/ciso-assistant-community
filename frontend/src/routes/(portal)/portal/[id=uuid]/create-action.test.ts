@@ -44,7 +44,10 @@ describe('portal create action', () => {
 		'',
 		'ebios-rm_duplicate',
 		'risk-assessment_duplicate',
-		'applied-controls_duplicate'
+		'applied-controls_duplicate',
+		'vulnerability-sla',
+		'sec-intel-feeds',
+		'users'
 	])('refuses %j', async (model) => {
 		expect(await create(model)).toMatchObject({ status: 400 });
 		expect(vi.mocked(defaultWriteFormAction)).not.toHaveBeenCalled();
