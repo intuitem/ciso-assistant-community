@@ -19648,6 +19648,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "applied_controls",
                 "evidences",
+                "threats",
                 "vulnerabilities",
                 "filtering_labels",
             )
@@ -19664,6 +19665,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "name": finding.name,
                 "description": finding.description,
                 "status": finding.status,
+                "threats": ",".join([threat.name for threat in finding.threats.all()]),
                 "severity": finding.get_severity_display(),
                 "priority": str(finding.get_priority_display())
                 if finding.priority
@@ -19772,6 +19774,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "applied_controls",
                 "evidences",
+                "threats",
                 actor_prefetch("owner"),
                 "filtering_labels",
             )
@@ -19855,6 +19858,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         for finding in findings:
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
+            if finding.threats.all():
+                md_content += f"- **Threats**: {', '.join([threat.name for threat in finding.threats.all()])}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
