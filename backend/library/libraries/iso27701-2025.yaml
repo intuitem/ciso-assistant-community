@@ -11,7 +11,7 @@ description: "Outline of ISO/IEC 27701:2025 \u2014 Privacy information managemen
   You can purchase the standard for full details."
 copyright: ISO - You can purchase the standard for full details.
 version: 2
-publication_date: 2026-08-07
+publication_date: 2026-11-25
 provider: ISO
 packager: intuitem
 objects:
@@ -281,7 +281,7 @@ objects:
       translations:
         nl:
           name: Privacydoelstellingen en de planning om ze te halen
-          description: Stel meetbare privacydoelen en plan hoe die worden gehaald.
+          description: Stel meetbare privacydoelen vast en plan hoe die worden gehaald.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.3
       assessable: true
       depth: 2
