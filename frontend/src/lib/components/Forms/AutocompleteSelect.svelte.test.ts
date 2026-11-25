@@ -151,6 +151,24 @@ describe('AutocompleteSelect selected-value hydration', () => {
 		]);
 	});
 
+	it('asks for deactivated rows on the actors endpoint only', async () => {
+		const fetchMock = stubActorsEndpoint();
+		field.initial = [ALICE.id, 'elsewhere'];
+
+		const { container } = render(AutocompleteSelect, {
+			form,
+			field: 'assets',
+			multiple: true,
+			optionsEndpoint: 'assets',
+			optionsLabelField: 'str'
+		});
+
+		await waitFor(() => expect(container.textContent).toContain(ALICE.str));
+		const urls = fetchMock.mock.calls.map(([u]) => new URL(String(u), 'http://localhost'));
+		expect(urls.some((u) => u.searchParams.get('id') === 'elsewhere')).toBe(true);
+		expect(urls.some((u) => u.searchParams.has('include_inactive'))).toBe(false);
+	});
+
 	it('does not resolve by id when every value is already listed', async () => {
 		const fetchMock = stubActorsEndpoint();
 		field.initial = [ALICE.id];

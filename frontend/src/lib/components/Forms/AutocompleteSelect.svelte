@@ -422,11 +422,12 @@
 		// Chunked and paged: the id list can exceed both the URL length budget
 		// and the server page size, and a truncated hydration would sync a
 		// truncated selection back into the form value (silent data loss).
-		// include_inactive: the value may be hidden from browsing (a deactivated
-		// user's actor); endpoints without that switch ignore it.
+		// Actors hide deactivated users from browsing: a lookup by id asks for
+		// them, so a value an object already holds still resolves.
+		const isActors = optionsEndpoint.split('?')[0].replace(/\/autocomplete$/, '') === 'actors';
 		const data = await fetchAllByIds(
 			cachedFetch,
-			buildEndpoint({ include_inactive: 'true' }, lazyBase),
+			buildEndpoint(isActors ? { include_inactive: 'true' } : undefined, lazyBase),
 			ids
 		);
 		if (data.length > 0) {
