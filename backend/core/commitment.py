@@ -5,9 +5,11 @@ One row per negotiation cycle, so promised dates are not overwritten; the host k
 no columns and the machine runs off serializer fields, so every write path enforces it.
 """
 
-from django.contrib.contenttypes.models import ContentType
+from dataclasses import dataclass
 from datetime import date
+from uuid import UUID
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import serializers
@@ -17,6 +19,19 @@ from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
 State = Commitment.State
+
+
+@dataclass(frozen=True)
+class ValidatedStep:
+    """The commitment a step was validated against: its state and its current cycle.
+
+    Both are needed: a delay closes a cycle and opens the next one in the same state, so
+    the state alone would let a stale step land on a cycle it never saw.
+    """
+
+    state: str
+    cycle: UUID | None
+
 
 # Exposed on the host serializer; only the first three are writable.
 COMMITMENT_LIST_FIELDS = ("commitment_state", "committed_eta")
@@ -173,18 +188,18 @@ def apply_transition(
     user=None,
     notes: str | None = None,
     promised_date: date | None = None,
-    validated_from: str | None = None,
+    validated: ValidatedStep | None = None,
 ):
     """Move *instance* to *target*, writing the commitment rows. Assumes the step is legal
-    from *validated_from*.
+    from *validated*.
 
     The live row is re-read under a lock: validation ran against a cached read, and two
     counterparties transitioning at once would otherwise each persist from the state
     they saw.
 
-    Raises ValidationError when the locked state is no longer *validated_from*, or when
-    another request opened the first cycle meanwhile: the step was authorised for the
-    state it was validated against, not for whatever another request moved it to.
+    Raises ValidationError when the locked commitment is no longer *validated*, or when
+    another request opened the first cycle meanwhile: the step was authorised for what it
+    was validated against, not for whatever another request moved it to.
     """
     # Discard the cached cycles: the state validated against may already be stale.
     instance.__dict__.pop("commitment_entries", None)
@@ -197,8 +212,11 @@ def apply_transition(
         )
         .first()
     )
-    locked_state = current.state if current else State.UNDEFINED
-    if validated_from is not None and locked_state != validated_from:
+    locked = ValidatedStep(
+        state=current.state if current else State.UNDEFINED,
+        cycle=current.id if current else None,
+    )
+    if validated is not None and locked != validated:
         raise changed_meanwhile()
 
     if current is None:
@@ -352,7 +370,12 @@ class CommitmentSerializerMixin:
                 {"commitment_state": "aDateIsRequiredToCommit"}
             )
 
-        self._commitment_move = (target, promised_date, current)
+        cycle = self.instance.commitment if self.instance else None
+        self._commitment_move = (
+            target,
+            promised_date,
+            ValidatedStep(state=current, cycle=cycle.id if cycle else None),
+        )
         return attrs
 
     def pop_commitment(self, validated_data: dict) -> None:
@@ -365,7 +388,7 @@ class CommitmentSerializerMixin:
         move = getattr(self, "_commitment_move", None)
         if move is None:
             return
-        target, promised_date, validated_from = move
+        target, promised_date, validated = move
         request = self.context.get("request")
         # One transaction: the row lock taken inside is only worth anything while it
         # is held, and closing a cycle then opening the next must not half-apply.
@@ -376,7 +399,7 @@ class CommitmentSerializerMixin:
                 user=request.user if request else None,
                 notes=(validated_data.get("commitment_notes") or "").strip() or None,
                 promised_date=promised_date,
-                validated_from=validated_from,
+                validated=validated,
             )
 
 

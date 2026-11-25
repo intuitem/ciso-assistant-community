@@ -1095,6 +1095,33 @@ class TestVendorTaskSteps:
         assert task.commitment_state == "fulfilled"
         assert task.name == "Adopt a security policy"
 
+    def test_a_stale_commit_does_not_land_on_the_next_cycle(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN)
+        task = vendor_task["task"]
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-respondent@tests.com")
+        stale = TaskTemplateWriteSerializer(
+            task,
+            data={"commitment_state": "committed", "commitment_date": "2027-01-01"},
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert stale.is_valid(), stale.errors
+        # Meanwhile the same cycle is committed then reopened for a delay: a new cycle
+        # back in negotiation, the state the stale step was validated against.
+        apply_transition(task, "committed", promised_date=date(2027, 3, 31))
+        apply_transition(task, "in_negotiation", notes="supplier delay")
+
+        with pytest.raises(ValidationError) as refused:
+            stale.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "in_negotiation"
+
     def test_two_first_openings_at_once_refuse_the_second(
         self, vendor_task: dict
     ) -> None:
