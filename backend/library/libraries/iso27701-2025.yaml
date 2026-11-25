@@ -10,8 +10,8 @@ description: "Outline of ISO/IEC 27701:2025 \u2014 Privacy information managemen
   \ processors (A.2) and the information security controls shared by both (A.3).\n\
   You can purchase the standard for full details."
 copyright: ISO - You can purchase the standard for full details.
-version: 1
-publication_date: 2026-08-07
+version: 2
+publication_date: 2026-11-25
 provider: ISO
 packager: intuitem
 objects:
@@ -49,15 +49,27 @@ objects:
     - ref_id: clauses
       name: Clauses
       description: PIMS requirements, clauses 4 to 10
+      translations:
+        nl:
+          name: Hoofdstukken
     - ref_id: controller
       name: PII controller controls
       description: Annex A, Table A.1
+      translations:
+        nl:
+          name: Beheersmaatregelen voor verwerkingsverantwoordelijken
     - ref_id: processor
       name: PII processor controls
       description: Annex A, Table A.2
+      translations:
+        nl:
+          name: Beheersmaatregelen voor verwerkers
     - ref_id: shared
       name: Shared information security controls
       description: Annex A, Table A.3
+      translations:
+        nl:
+          name: Gedeelde beheersmaatregelen voor informatiebeveiliging
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4
       assessable: false
@@ -66,6 +78,11 @@ objects:
       name: Context of the organization
       description: Requirements for establishing the organizational context of the
         PIMS.
+      translations:
+        nl:
+          name: Context van de organisatie
+          description: Eisen voor het vastleggen van de context van de organisatie
+            voor het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.1
       assessable: true
       depth: 2
@@ -76,6 +93,12 @@ objects:
         applicable privacy legislation, and whether climate change is a relevant issue.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Inzicht in de organisatie en haar context
+          description: Bepaal de interne en externe kwesties die van belang zijn voor
+            privacy, waaronder de geldende privacywetgeving, en of klimaatverandering
+            een relevante kwestie is.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.2
       assessable: true
       depth: 2
@@ -87,6 +110,12 @@ objects:
         to climate change.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Inzicht in de behoeften en verwachtingen van belanghebbenden
+          description: Bepaal de belanghebbenden en hun eisen op het gebied van privacy,
+            onder wie betrokkenen en toezichthouders; die eisen kunnen ook over klimaatverandering
+            gaan.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.3
       assessable: true
       depth: 2
@@ -97,6 +126,11 @@ objects:
         the roles of PII controller and PII processor.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Bepalen van de reikwijdte van het managementsysteem voor privacy-informatie
+          description: Leg de grenzen en de toepasbaarheid van het PIMS vast, inclusief
+            de rollen van verwerkingsverantwoordelijke en verwerker.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.4
       assessable: true
       depth: 2
@@ -106,6 +140,11 @@ objects:
       description: Establish, implement, maintain and continually improve the PIMS.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Managementsysteem voor privacy-informatie
+          description: Richt het PIMS in, voer het in, houd het in stand en verbeter
+            het voortdurend.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:5
       assessable: false
       depth: 1
@@ -113,6 +152,11 @@ objects:
       name: Leadership
       description: Requirements for top management commitment and direction of the
         PIMS.
+      translations:
+        nl:
+          name: Leiderschap
+          description: Eisen voor de betrokkenheid en sturing van de directie bij
+            het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:5.1
       assessable: true
       depth: 2
@@ -123,6 +167,11 @@ objects:
         of PII.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Leiderschap en betrokkenheid
+          description: Toon de betrokkenheid van de directie bij het PIMS en bij de
+            bescherming van persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:5.2
       assessable: true
       depth: 2
@@ -133,6 +182,11 @@ objects:
         to the organization.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacybeleid
+          description: Stel een privacybeleid op dat bij de organisatie past, communiceer
+            het en maak het beschikbaar.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:5.3
       assessable: true
       depth: 2
@@ -142,12 +196,21 @@ objects:
       description: Assign and communicate privacy roles, responsibilities and authorities.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Rollen, verantwoordelijkheden en bevoegdheden
+          description: Wijs rollen, verantwoordelijkheden en bevoegdheden voor privacy
+            toe en communiceer ze.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6
       assessable: false
       depth: 1
       ref_id: '6'
       name: Planning
       description: Requirements for planning the PIMS.
+      translations:
+        nl:
+          name: Planning
+          description: Eisen voor het plannen van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1
       assessable: false
       depth: 2
@@ -155,6 +218,10 @@ objects:
       ref_id: '6.1'
       name: Actions to address risks and opportunities
       description: Requirements for addressing privacy risks and opportunities.
+      translations:
+        nl:
+          name: Maatregelen om risico's en kansen aan te pakken
+          description: Eisen voor het aanpakken van privacyrisico's en -kansen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.1
       assessable: true
       depth: 3
@@ -165,6 +232,11 @@ objects:
         risks and opportunities.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Algemeen
+          description: Houd bij het plannen van maatregelen voor risico's en kansen
+            rekening met de kwesties en eisen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.2
       assessable: true
       depth: 3
@@ -175,6 +247,11 @@ objects:
         to PII principals.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacyrisicobeoordeling
+          description: Leg een proces vast voor het beoordelen van privacyrisico's,
+            ook voor betrokkenen, en pas het toe.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.3
       assessable: true
       depth: 3
@@ -185,6 +262,12 @@ objects:
         and produce a Statement of Applicability against Annex A.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacyrisicobehandeling
+          description: Leg een proces vast voor het behandelen van privacyrisico's
+            en pas het toe, kies beheersmaatregelen en stel een verklaring van toepasselijkheid
+            op tegen bijlage A.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.2
       assessable: true
       depth: 2
@@ -195,6 +278,10 @@ objects:
         them.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacydoelstellingen en de planning om ze te halen
+          description: Stel meetbare privacydoelen vast en plan hoe die worden gehaald.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:6.3
       assessable: true
       depth: 2
@@ -204,12 +291,20 @@ objects:
       description: Plan changes to the PIMS in a controlled manner.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Planning van wijzigingen
+          description: Plan wijzigingen in het PIMS op een beheerste manier.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7
       assessable: false
       depth: 1
       ref_id: '7'
       name: Support
       description: Requirements for the resources and support of the PIMS.
+      translations:
+        nl:
+          name: Ondersteuning
+          description: Eisen voor de middelen en ondersteuning van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.1
       assessable: true
       depth: 2
@@ -219,6 +314,10 @@ objects:
       description: Determine and provide the resources needed for the PIMS.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Middelen
+          description: Bepaal welke middelen het PIMS nodig heeft en stel ze beschikbaar.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.2
       assessable: true
       depth: 2
@@ -228,6 +327,11 @@ objects:
       description: Ensure the competence of persons performing privacy-related work.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Competentie
+          description: Zorg dat mensen die werk op het gebied van privacy doen daarvoor
+            bekwaam zijn.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.3
       assessable: true
       depth: 2
@@ -238,6 +342,11 @@ objects:
         and consequences of nonconformity.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Bewustzijn
+          description: Zorg dat mensen het privacybeleid kennen, weten wat hun eigen
+            bijdrage is en wat de gevolgen zijn als eisen niet worden nageleefd.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.4
       assessable: true
       depth: 2
@@ -248,6 +357,11 @@ objects:
         PIMS.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Communicatie
+          description: Bepaal welke interne en externe communicatie voor het PIMS
+            van belang is.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5
       assessable: false
       depth: 2
@@ -255,6 +369,10 @@ objects:
       ref_id: '7.5'
       name: Documented information
       description: Requirements for documented information of the PIMS.
+      translations:
+        nl:
+          name: Gedocumenteerde informatie
+          description: Eisen voor de gedocumenteerde informatie van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.1
       assessable: true
       depth: 3
@@ -265,6 +383,11 @@ objects:
         by the organization.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Algemeen
+          description: Houd de gedocumenteerde informatie bij die de norm en de organisatie
+            vragen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.2
       assessable: true
       depth: 3
@@ -275,6 +398,11 @@ objects:
         information.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Opstellen en bijwerken van gedocumenteerde informatie
+          description: Zorg voor een juiste aanduiding, vorm en beoordeling van gedocumenteerde
+            informatie.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.3
       assessable: true
       depth: 3
@@ -285,12 +413,21 @@ objects:
         and retention.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Beheersing van gedocumenteerde informatie
+          description: Beheer gedocumenteerde informatie op beschikbaarheid, bescherming,
+            verspreiding en bewaring.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:8
       assessable: false
       depth: 1
       ref_id: '8'
       name: Operation
       description: Requirements for operating the PIMS.
+      translations:
+        nl:
+          name: Uitvoering
+          description: Eisen voor het uitvoeren van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:8.1
       assessable: true
       depth: 2
@@ -301,6 +438,11 @@ objects:
         including outsourced processes.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Operationele planning en beheersing
+          description: Plan, voer uit en beheers de processen die nodig zijn om aan
+            de eisen van het PIMS te voldoen, ook uitbestede processen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:8.2
       assessable: true
       depth: 2
@@ -311,6 +453,11 @@ objects:
         significant change, and retain the results.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacyrisicobeoordeling
+          description: Voer privacyrisicobeoordelingen uit op geplande momenten en
+            bij grote wijzigingen, en bewaar de uitkomsten.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:8.3
       assessable: true
       depth: 2
@@ -320,12 +467,21 @@ objects:
       description: Implement the privacy risk treatment plan and retain the results.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Privacyrisicobehandeling
+          description: Voer het plan voor privacyrisicobehandeling uit en bewaar de
+            uitkomsten.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9
       assessable: false
       depth: 1
       ref_id: '9'
       name: Performance evaluation
       description: Requirements for evaluating PIMS performance.
+      translations:
+        nl:
+          name: Evaluatie van de prestaties
+          description: Eisen voor het evalueren van de prestaties van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.1
       assessable: true
       depth: 2
@@ -336,6 +492,11 @@ objects:
         and effectiveness of the PIMS.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Monitoren, meten, analyseren en evalueren
+          description: Bepaal wat wordt gemonitord en gemeten, en evalueer de prestaties
+            en de doeltreffendheid van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2
       assessable: false
       depth: 2
@@ -343,6 +504,10 @@ objects:
       ref_id: '9.2'
       name: Internal audit
       description: Requirements for internal audits of the PIMS.
+      translations:
+        nl:
+          name: Interne audit
+          description: Eisen voor interne audits van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2.1
       assessable: true
       depth: 3
@@ -353,6 +518,11 @@ objects:
         and effective implementation.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Algemeen
+          description: Voer op geplande momenten interne audits uit om na te gaan
+            of het PIMS aan de eisen voldoet en goed is ingevoerd.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2.2
       assessable: true
       depth: 3
@@ -362,6 +532,11 @@ objects:
       description: Plan, establish, implement and maintain an internal audit programme.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Programma voor interne audits
+          description: Plan een programma voor interne audits, richt het in, voer
+            het uit en houd het bij.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3
       assessable: false
       depth: 2
@@ -369,6 +544,10 @@ objects:
       ref_id: '9.3'
       name: Management review
       description: Requirements for management review of the PIMS.
+      translations:
+        nl:
+          name: Directiebeoordeling
+          description: Eisen voor de directiebeoordeling van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.1
       assessable: true
       depth: 3
@@ -379,6 +558,11 @@ objects:
         adequacy and effectiveness.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Algemeen
+          description: Beoordeel het PIMS op geplande momenten om na te gaan of het
+            geschikt, toereikend en doeltreffend blijft.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.2
       assessable: true
       depth: 3
@@ -388,6 +572,10 @@ objects:
       description: Include the specified inputs in the management review.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Input voor de directiebeoordeling
+          description: Neem de voorgeschreven onderwerpen mee in de directiebeoordeling.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.3
       assessable: true
       depth: 3
@@ -397,12 +585,20 @@ objects:
       description: Record decisions and actions arising from the management review.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Resultaten van de directiebeoordeling
+          description: Leg de besluiten en acties uit de directiebeoordeling vast.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:10
       assessable: false
       depth: 1
       ref_id: '10'
       name: Improvement
       description: Requirements for continual improvement of the PIMS.
+      translations:
+        nl:
+          name: Verbetering
+          description: Eisen voor voortdurende verbetering van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:10.1
       assessable: true
       depth: 2
@@ -413,6 +609,11 @@ objects:
         of the PIMS.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Voortdurende verbetering
+          description: Verbeter voortdurend de geschiktheid, toereikendheid en doeltreffendheid
+            van het PIMS.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:10.2
       assessable: true
       depth: 2
@@ -422,6 +623,11 @@ objects:
       description: React to nonconformities, evaluate causes and take corrective action.
       implementation_groups:
       - clauses
+      translations:
+        nl:
+          name: Afwijkingen en corrigerende maatregelen
+          description: Reageer op afwijkingen, onderzoek de oorzaken en neem corrigerende
+            maatregelen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
       assessable: false
       depth: 1
@@ -429,6 +635,11 @@ objects:
       name: PIMS reference control objectives and controls for PII controllers
       description: "Annex A, Table A.1 \u2014 controls applicable to organizations\
         \ acting as PII controllers."
+      translations:
+        nl:
+          name: Referentiedoelen en beheersmaatregelen van het PIMS voor verwerkingsverantwoordelijken
+          description: 'Bijlage A, tabel A.1: beheersmaatregelen voor organisaties
+            die optreden als verwerkingsverantwoordelijke.'
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
       assessable: false
       depth: 2
@@ -436,6 +647,11 @@ objects:
       ref_id: A.1.2
       name: Conditions for collection and processing
       description: Controls on the lawfulness and documentation of PII processing.
+      translations:
+        nl:
+          name: Voorwaarden voor verzamelen en verwerken
+          description: Beheersmaatregelen voor de rechtmatigheid en de vastlegging
+            van verwerkingen van persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.2
       assessable: true
       depth: 3
@@ -445,6 +661,11 @@ objects:
       description: Identify and document the specific purposes for which PII is processed.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Doel bepalen en vastleggen
+          description: Bepaal en leg vast voor welke specifieke doelen persoonsgegevens
+            worden verwerkt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.3
       assessable: true
       depth: 3
@@ -455,6 +676,11 @@ objects:
         purpose.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Rechtsgrond bepalen
+          description: Bepaal voor elk verwerkingsdoel de rechtsgrond, leg die vast
+            en houd je eraan.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.4
       assessable: true
       depth: 3
@@ -465,6 +691,11 @@ objects:
         principals.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Bepalen wanneer en hoe toestemming wordt gevraagd
+          description: Leg het proces vast voor het vragen en vastleggen van toestemming
+            van betrokkenen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.5
       assessable: true
       depth: 3
@@ -474,6 +705,11 @@ objects:
       description: Obtain and retain verifiable records of consent.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Toestemming verkrijgen en vastleggen
+          description: Verkrijg toestemming en bewaar controleerbare vastleggingen
+            ervan.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.6
       assessable: true
       depth: 3
@@ -483,6 +719,11 @@ objects:
       description: Assess the privacy impact of processing and act on the outcome.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Gegevensbeschermingseffectbeoordeling
+          description: Beoordeel de gevolgen van een verwerking voor de privacy en
+            handel naar de uitkomst.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.7
       assessable: true
       depth: 3
@@ -492,6 +733,11 @@ objects:
       description: Ensure contracts with PII processors address the controller's obligations.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Contracten met verwerkers
+          description: Zorg dat contracten met verwerkers de verplichtingen van de
+            verwerkingsverantwoordelijke afdekken.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.8
       assessable: true
       depth: 3
@@ -502,6 +748,11 @@ objects:
         joint controllers.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Gezamenlijke verwerkingsverantwoordelijke
+          description: Bepaal en leg vast welke rollen en verantwoordelijkheden elke
+            gezamenlijke verwerkingsverantwoordelijke heeft.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.9
       assessable: true
       depth: 3
@@ -511,6 +762,10 @@ objects:
       description: Maintain records of PII processing activities.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Registers van verwerkingen van persoonsgegevens
+          description: Houd een register bij van de verwerkingen van persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
       assessable: false
       depth: 2
@@ -518,6 +773,11 @@ objects:
       ref_id: A.1.3
       name: Obligations to PII principals
       description: Controls on informing PII principals and handling their requests.
+      translations:
+        nl:
+          name: Verplichtingen jegens betrokkenen
+          description: Beheersmaatregelen voor het informeren van betrokkenen en het
+            afhandelen van hun verzoeken.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.2
       assessable: true
       depth: 3
@@ -528,6 +788,11 @@ objects:
         how they are met.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Bepalen en nakomen van verplichtingen jegens betrokkenen
+          description: Bepaal en leg vast welke verplichtingen er zijn jegens betrokkenen
+            en hoe die worden nagekomen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.3
       assessable: true
       depth: 3
@@ -538,6 +803,10 @@ objects:
         when.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Bepalen van informatie voor betrokkenen
+          description: Bepaal welke informatie betrokkenen krijgen en wanneer.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.4
       assessable: true
       depth: 3
@@ -547,6 +816,11 @@ objects:
       description: Provide PII principals with clear and accessible privacy information.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Verstrekken van informatie aan betrokkenen
+          description: Geef betrokkenen duidelijke en toegankelijke informatie over
+            privacy.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.5
       assessable: true
       depth: 3
@@ -556,6 +830,11 @@ objects:
       description: Offer a means for PII principals to modify or withdraw consent.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Middel bieden om toestemming te wijzigen of in te trekken
+          description: Bied betrokkenen een manier om hun toestemming te wijzigen
+            of in te trekken.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.6
       assessable: true
       depth: 3
@@ -565,6 +844,10 @@ objects:
       description: Offer a means for PII principals to object to processing.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Middel bieden om bezwaar te maken tegen verwerking
+          description: Bied betrokkenen een manier om bezwaar te maken tegen een verwerking.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.7
       assessable: true
       depth: 3
@@ -574,6 +857,11 @@ objects:
       description: Enable access to, correction of and erasure of PII on request.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Inzage, rectificatie of wissen
+          description: Maak inzage, rectificatie en wissen van persoonsgegevens op
+            verzoek mogelijk.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.8
       assessable: true
       depth: 3
@@ -583,6 +871,11 @@ objects:
       description: Inform third parties of corrections, erasures or processing restrictions.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Verplichting van verwerkingsverantwoordelijken om derden te informeren
+          description: Informeer derden over rectificatie, wissen of beperking van
+            de verwerking.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.9
       assessable: true
       depth: 3
@@ -592,6 +885,10 @@ objects:
       description: Provide a copy of the PII processed when requested.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Verstrekken van een kopie van verwerkte persoonsgegevens
+          description: Verstrek op verzoek een kopie van de verwerkte persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.10
       assessable: true
       depth: 3
@@ -601,6 +898,11 @@ objects:
       description: Define and operate a process for handling requests from PII principals.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Afhandelen van verzoeken
+          description: Leg een proces vast voor het afhandelen van verzoeken van betrokkenen
+            en voer het uit.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.11
       assessable: true
       depth: 3
@@ -611,6 +913,11 @@ objects:
         making.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Geautomatiseerde besluitvorming
+          description: Bepaal welke verplichtingen gelden bij geautomatiseerde besluitvorming
+            en kom ze na.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
       assessable: false
       depth: 2
@@ -619,6 +926,11 @@ objects:
       name: Privacy by design and privacy by default
       description: Controls limiting collection, processing, retention and disposal
         of PII.
+      translations:
+        nl:
+          name: Privacy by design en privacy by default
+          description: Beheersmaatregelen die het verzamelen, verwerken, bewaren en
+            vernietigen van persoonsgegevens beperken.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.2
       assessable: true
       depth: 3
@@ -629,6 +941,11 @@ objects:
         identified purposes.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Verzamelen beperken
+          description: Verzamel alleen persoonsgegevens die relevant en nodig zijn
+            voor de vastgestelde doelen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.3
       assessable: true
       depth: 3
@@ -639,6 +956,11 @@ objects:
         identified purposes.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Verwerken beperken
+          description: Verwerk alleen persoonsgegevens voor zover dat passend en nodig
+            is voor de vastgestelde doelen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.4
       assessable: true
       depth: 3
@@ -648,6 +970,11 @@ objects:
       description: Ensure PII is accurate, complete and up to date for its purpose.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Juistheid en kwaliteit
+          description: Zorg dat persoonsgegevens juist, volledig en actueel zijn voor
+            hun doel.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.5
       assessable: true
       depth: 3
@@ -658,6 +985,11 @@ objects:
         used.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Doelen voor minimalisatie van persoonsgegevens
+          description: Leg doelen voor het minimaliseren van persoonsgegevens vast,
+            en de middelen die daarvoor worden gebruikt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.6
       assessable: true
       depth: 3
@@ -667,6 +999,12 @@ objects:
       description: De-identify or delete PII once the processing purpose is fulfilled.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: De-identificatie en verwijdering van persoonsgegevens na afloop van
+            de verwerking
+          description: De-identificeer of verwijder persoonsgegevens zodra het doel
+            van de verwerking is bereikt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.7
       assessable: true
       depth: 3
@@ -677,6 +1015,11 @@ objects:
         periods.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Tijdelijke bestanden
+          description: Beheer tijdelijke bestanden met persoonsgegevens en wis ze
+            binnen vastgestelde termijnen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.8
       assessable: true
       depth: 3
@@ -686,6 +1029,11 @@ objects:
       description: Retain PII no longer than necessary for the identified purposes.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Bewaren
+          description: Bewaar persoonsgegevens niet langer dan nodig is voor de vastgestelde
+            doelen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.9
       assessable: true
       depth: 3
@@ -695,6 +1043,11 @@ objects:
       description: Dispose of PII securely using documented policies and procedures.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Vernietigen
+          description: Vernietig persoonsgegevens veilig volgens vastgelegd beleid
+            en vastgelegde procedures.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.10
       assessable: true
       depth: 3
@@ -704,6 +1057,10 @@ objects:
       description: Protect PII transmitted over data transmission networks.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Beheersmaatregelen voor het verzenden van persoonsgegevens
+          description: Bescherm persoonsgegevens die over datanetwerken worden verzonden.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
       assessable: false
       depth: 2
@@ -711,6 +1068,11 @@ objects:
       ref_id: A.1.5
       name: PII sharing, transfer and disclosure
       description: Controls on cross-border transfers and disclosures of PII.
+      translations:
+        nl:
+          name: Delen, doorgeven en verstrekken van persoonsgegevens
+          description: Beheersmaatregelen voor doorgifte over de grens en verstrekking
+            van persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.2
       assessable: true
       depth: 3
@@ -720,6 +1082,12 @@ objects:
       description: Identify and document the basis for transferring PII between jurisdictions.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Grondslag voor doorgifte van persoonsgegevens tussen rechtsgebieden
+            bepalen
+          description: Bepaal en leg vast op welke grondslag persoonsgegevens tussen
+            rechtsgebieden worden doorgegeven.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.3
       assessable: true
       depth: 3
@@ -730,6 +1098,12 @@ objects:
         to which PII can be transferred.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Landen en internationale organisaties waaraan persoonsgegevens mogen
+            worden doorgegeven
+          description: Leg vast aan welke landen en internationale organisaties persoonsgegevens
+            mogen worden doorgegeven en maak dat beschikbaar.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.4
       assessable: true
       depth: 3
@@ -739,6 +1113,10 @@ objects:
       description: Record transfers of PII to or from third parties.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Vastleggen van doorgifte van persoonsgegevens
+          description: Leg doorgiften van persoonsgegevens aan of van derden vast.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.5
       assessable: true
       depth: 3
@@ -749,6 +1127,11 @@ objects:
         disclosed and to whom.
       implementation_groups:
       - controller
+      translations:
+        nl:
+          name: Vastleggen van verstrekking van persoonsgegevens aan derden
+          description: Leg verstrekkingen van persoonsgegevens aan derden vast, met
+            wat is verstrekt en aan wie.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
       assessable: false
       depth: 1
@@ -756,6 +1139,11 @@ objects:
       name: PIMS reference control objectives and controls for PII processors
       description: "Annex A, Table A.2 \u2014 controls applicable to organizations\
         \ acting as PII processors."
+      translations:
+        nl:
+          name: Referentiedoelen en beheersmaatregelen van het PIMS voor verwerkers
+          description: 'Bijlage A, tabel A.2: beheersmaatregelen voor organisaties
+            die optreden als verwerker.'
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
       assessable: false
       depth: 2
@@ -763,6 +1151,11 @@ objects:
       ref_id: A.2.2
       name: Conditions for collection and processing
       description: Controls on processing PII strictly under customer instructions.
+      translations:
+        nl:
+          name: Voorwaarden voor verzamelen en verwerken
+          description: Beheersmaatregelen voor het verwerken van persoonsgegevens
+            strikt volgens de instructies van de klant.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.2
       assessable: true
       depth: 3
@@ -773,6 +1166,11 @@ objects:
         processing.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Overeenkomst met de klant
+          description: Spreek met de klant de rollen en verplichtingen rond de verwerking
+            van persoonsgegevens af.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.3
       assessable: true
       depth: 3
@@ -782,6 +1180,11 @@ objects:
       description: Process PII only for the customer's documented purposes.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Doelen van de organisatie
+          description: Verwerk persoonsgegevens alleen voor de vastgelegde doelen
+            van de klant.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.4
       assessable: true
       depth: 3
@@ -792,6 +1195,11 @@ objects:
         consent.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Gebruik voor marketing en reclame
+          description: Gebruik persoonsgegevens niet voor marketing of reclame zonder
+            aantoonbare toestemming.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.5
       assessable: true
       depth: 3
@@ -802,6 +1210,11 @@ objects:
         applicable legislation.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Onrechtmatige instructie
+          description: Laat de klant weten wanneer een instructie volgens de organisatie
+            in strijd is met de geldende wetgeving.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.6
       assessable: true
       depth: 3
@@ -812,6 +1225,11 @@ objects:
         its own compliance.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Verplichtingen van de klant
+          description: Geef de klant de informatie die nodig is om zelf aan te tonen
+            dat hij aan de eisen voldoet.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.7
       assessable: true
       depth: 3
@@ -821,6 +1239,11 @@ objects:
       description: Maintain records of PII processing carried out on behalf of customers.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Registers van verwerkingen van persoonsgegevens
+          description: Houd een register bij van de verwerkingen van persoonsgegevens
+            die namens klanten worden uitgevoerd.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.3
       assessable: false
       depth: 2
@@ -828,6 +1251,11 @@ objects:
       ref_id: A.2.3
       name: Obligations to PII principals
       description: Controls supporting the customer's obligations to PII principals.
+      translations:
+        nl:
+          name: Verplichtingen jegens betrokkenen
+          description: Beheersmaatregelen die de klant ondersteunen bij zijn verplichtingen
+            jegens betrokkenen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.3.2
       assessable: true
       depth: 3
@@ -838,6 +1266,11 @@ objects:
         PII principals.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Verplichtingen jegens betrokkenen
+          description: Geef de klant de middelen om zijn verplichtingen jegens betrokkenen
+            na te komen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4
       assessable: false
       depth: 2
@@ -846,6 +1279,11 @@ objects:
       name: Privacy by design and privacy by default
       description: Controls on temporary files, return and disposal, and transmission
         of PII.
+      translations:
+        nl:
+          name: Privacy by design en privacy by default
+          description: Beheersmaatregelen voor tijdelijke bestanden, teruggave en
+            vernietiging, en verzending van persoonsgegevens.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.2
       assessable: true
       depth: 3
@@ -856,6 +1294,11 @@ objects:
         periods.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Tijdelijke bestanden
+          description: Beheer tijdelijke bestanden met persoonsgegevens en wis ze
+            binnen vastgestelde termijnen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.3
       assessable: true
       depth: 3
@@ -866,6 +1309,11 @@ objects:
         the end of processing.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Teruggeven, overdragen of vernietigen van persoonsgegevens
+          description: Leg vast hoe persoonsgegevens na afloop van de verwerking worden
+            teruggegeven, overgedragen of vernietigd.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.4
       assessable: true
       depth: 3
@@ -875,6 +1323,10 @@ objects:
       description: Protect PII transmitted over data transmission networks.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Beheersmaatregelen voor het verzenden van persoonsgegevens
+          description: Bescherm persoonsgegevens die over datanetwerken worden verzonden.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
       assessable: false
       depth: 2
@@ -882,6 +1334,11 @@ objects:
       ref_id: A.2.5
       name: PII sharing, transfer and disclosure
       description: Controls on transfers, disclosures and use of subcontractors.
+      translations:
+        nl:
+          name: Delen, doorgeven en verstrekken van persoonsgegevens
+          description: Beheersmaatregelen voor doorgifte, verstrekking en het inschakelen
+            van subverwerkers.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.2
       assessable: true
       depth: 3
@@ -891,6 +1348,11 @@ objects:
       description: Inform the customer of the basis for transferring PII between jurisdictions.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Grondslag voor doorgifte van persoonsgegevens tussen rechtsgebieden
+          description: Laat de klant weten op welke grondslag persoonsgegevens tussen
+            rechtsgebieden worden doorgegeven.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.3
       assessable: true
       depth: 3
@@ -901,6 +1363,12 @@ objects:
         PII may be processed.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Landen en internationale organisaties waaraan persoonsgegevens mogen
+            worden doorgegeven
+          description: Maak bekend in welke landen en bij welke internationale organisaties
+            persoonsgegevens kunnen worden verwerkt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.4
       assessable: true
       depth: 3
@@ -910,6 +1378,10 @@ objects:
       description: Record disclosures of PII to third parties.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Vastleggen van verstrekking van persoonsgegevens aan derden
+          description: Leg verstrekkingen van persoonsgegevens aan derden vast.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.5
       assessable: true
       depth: 3
@@ -920,6 +1392,11 @@ objects:
         of PII.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Melden van verzoeken om verstrekking van persoonsgegevens
+          description: Meld juridisch bindende verzoeken om verstrekking van persoonsgegevens
+            aan de klant.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.6
       assessable: true
       depth: 3
@@ -930,6 +1407,11 @@ objects:
         customer where permitted.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Juridisch bindende verstrekkingen van persoonsgegevens
+          description: Weiger verzoeken om verstrekking die niet juridisch bindend
+            zijn en overleg met de klant waar dat mag.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.7
       assessable: true
       depth: 3
@@ -939,6 +1421,11 @@ objects:
       description: Disclose the use of subcontractors to process PII before use.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Bekendmaken van subverwerkers voor het verwerken van persoonsgegevens
+          description: Maak het inschakelen van subverwerkers bekend voordat ze worden
+            ingezet.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.8
       assessable: true
       depth: 3
@@ -949,6 +1436,11 @@ objects:
         obligations.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Inschakelen van een subverwerker voor het verwerken van persoonsgegevens
+          description: Schakel subverwerkers alleen in met een schriftelijk contract
+            dat gelijkwaardige verplichtingen oplegt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.9
       assessable: true
       depth: 3
@@ -959,6 +1451,11 @@ objects:
         to object.
       implementation_groups:
       - processor
+      translations:
+        nl:
+          name: Wisselen van subverwerker voor het verwerken van persoonsgegevens
+          description: Laat de klant op tijd weten dat een subverwerker wisselt, zodat
+            hij bezwaar kan maken.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
       assessable: false
       depth: 1
@@ -966,6 +1463,12 @@ objects:
       name: Information security controls for PII controllers and PII processors
       description: "Annex A, Table A.3 \u2014 information security controls applicable\
         \ to both PII controllers and PII processors."
+      translations:
+        nl:
+          name: Beheersmaatregelen voor informatiebeveiliging voor verwerkingsverantwoordelijken
+            en verwerkers
+          description: 'Bijlage A, tabel A.3: beheersmaatregelen voor informatiebeveiliging
+            die gelden voor zowel verwerkingsverantwoordelijken als verwerkers.'
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.3
       assessable: true
       depth: 2
@@ -975,6 +1478,11 @@ objects:
       description: Define, approve, publish and review information security policies.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Beleid voor informatiebeveiliging
+          description: Stel beleid voor informatiebeveiliging op, laat het goedkeuren,
+            publiceer het en beoordeel het.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.4
       assessable: true
       depth: 2
@@ -984,6 +1492,11 @@ objects:
       description: Define and allocate information security roles and responsibilities.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Rollen en verantwoordelijkheden voor informatiebeveiliging
+          description: Leg rollen en verantwoordelijkheden voor informatiebeveiliging
+            vast en wijs ze toe.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.5
       assessable: true
       depth: 2
@@ -993,6 +1506,10 @@ objects:
       description: Classify information according to its protection needs.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Classificatie van informatie
+          description: Deel informatie in naar de bescherming die ze nodig heeft.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.6
       assessable: true
       depth: 2
@@ -1002,6 +1519,10 @@ objects:
       description: Label information in accordance with the classification scheme.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Labelen van informatie
+          description: Label informatie volgens het classificatieschema.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.7
       assessable: true
       depth: 2
@@ -1012,6 +1533,11 @@ objects:
         external parties.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Overdracht van informatie
+          description: Bescherm informatie die binnen de organisatie en met externe
+            partijen wordt overgedragen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.8
       assessable: true
       depth: 2
@@ -1021,6 +1547,10 @@ objects:
       description: Manage the full life cycle of identities.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Identiteitsbeheer
+          description: Beheer de volledige levenscyclus van identiteiten.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.9
       assessable: true
       depth: 2
@@ -1031,6 +1561,11 @@ objects:
         and assets.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Toegangsrechten
+          description: Ken toegangsrechten tot informatie en bedrijfsmiddelen toe,
+            beoordeel, wijzig en trek ze in.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.10
       assessable: true
       depth: 2
@@ -1040,6 +1575,11 @@ objects:
       description: Establish and agree information security requirements with suppliers.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Informatiebeveiliging in overeenkomsten met leveranciers
+          description: Stel eisen voor informatiebeveiliging op en spreek ze af met
+            leveranciers.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.11
       assessable: true
       depth: 2
@@ -1049,6 +1589,11 @@ objects:
       description: Plan and prepare the management of information security incidents.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Planning en voorbereiding van het beheer van informatiebeveiligingsincidenten
+          description: Plan en bereid het afhandelen van informatiebeveiligingsincidenten
+            voor.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.12
       assessable: true
       depth: 2
@@ -1059,6 +1604,11 @@ objects:
         procedures.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Reactie op informatiebeveiligingsincidenten
+          description: Reageer op informatiebeveiligingsincidenten volgens vastgelegde
+            procedures.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.13
       assessable: true
       depth: 2
@@ -1069,6 +1619,11 @@ objects:
         requirements.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Wettelijke, statutaire, regelgevende en contractuele eisen
+          description: Bepaal de geldende wettelijke en contractuele eisen, leg ze
+            vast en houd ze actueel.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.14
       assessable: true
       depth: 2
@@ -1079,6 +1634,11 @@ objects:
         access.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Beschermen van registraties
+          description: Bescherm registraties tegen verlies, vernietiging, vervalsing
+            en onbevoegde toegang.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.15
       assessable: true
       depth: 2
@@ -1089,6 +1649,11 @@ objects:
         at planned intervals.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Onafhankelijke beoordeling van informatiebeveiliging
+          description: Laat de aanpak van informatiebeveiliging op geplande momenten
+            onafhankelijk beoordelen.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.16
       assessable: true
       depth: 2
@@ -1099,6 +1664,10 @@ objects:
         standards.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Naleving van beleid, regels en normen voor informatiebeveiliging
+          description: Controleer de naleving van beleid, regels en normen voor informatiebeveiliging.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.17
       assessable: true
       depth: 2
@@ -1108,6 +1677,11 @@ objects:
       description: Provide awareness, education and training relevant to job roles.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Bewustzijn, opleiding en training op het gebied van informatiebeveiliging
+          description: Bied bewustwording, opleiding en training die passen bij de
+            functie.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.18
       assessable: true
       depth: 2
@@ -1118,6 +1692,11 @@ objects:
         agreements.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Vertrouwelijkheids- of geheimhoudingsovereenkomsten
+          description: Bepaal welke vertrouwelijkheids- of geheimhoudingsovereenkomsten
+            nodig zijn, leg ze vast en beoordeel ze.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.19
       assessable: true
       depth: 2
@@ -1127,6 +1706,11 @@ objects:
       description: Define and enforce clear desk and clear screen rules.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Clean desk en clear screen
+          description: Stel regels op voor een opgeruimd bureau en een vergrendeld
+            scherm en handhaaf ze.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.20
       assessable: true
       depth: 2
@@ -1137,6 +1721,11 @@ objects:
         transport and disposal.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Opslagmedia
+          description: 'Beheer opslagmedia gedurende hun hele levenscyclus: aanschaf,
+            gebruik, transport en afvoer.'
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.21
       assessable: true
       depth: 2
@@ -1146,6 +1735,11 @@ objects:
       description: Verify removal of information before disposal or re-use of equipment.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Veilig verwijderen of hergebruiken van apparatuur
+          description: Controleer dat informatie is verwijderd voordat apparatuur
+            wordt afgevoerd of hergebruikt.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.22
       assessable: true
       depth: 2
@@ -1156,6 +1750,11 @@ objects:
         endpoint devices.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Eindgebruikersapparatuur
+          description: Bescherm informatie die op eindapparaten staat, erop wordt
+            verwerkt of ermee bereikbaar is.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.23
       assessable: true
       depth: 2
@@ -1165,6 +1764,10 @@ objects:
       description: Implement secure authentication technologies and procedures.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Veilige authenticatie
+          description: Zorg voor veilige authenticatietechnieken en -procedures.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.24
       assessable: true
       depth: 2
@@ -1174,6 +1777,10 @@ objects:
       description: Maintain and test backups in line with the agreed backup policy.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Back-up van informatie
+          description: Houd back-ups bij en test ze volgens het afgesproken back-upbeleid.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.25
       assessable: true
       depth: 2
@@ -1184,6 +1791,11 @@ objects:
         and events.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Logging
+          description: Maak logs van activiteiten, uitzonderingen en gebeurtenissen,
+            bewaar en bescherm ze en analyseer ze.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.26
       assessable: true
       depth: 2
@@ -1194,6 +1806,11 @@ objects:
         and key management.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Gebruik van cryptografie
+          description: Stel regels op voor goed gebruik van cryptografie en sleutelbeheer
+            en pas ze toe.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.27
       assessable: true
       depth: 2
@@ -1204,6 +1821,11 @@ objects:
         and systems.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Beveiligen tijdens de ontwikkelcyclus
+          description: Stel regels op voor het veilig ontwikkelen van software en
+            systemen en pas ze toe.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.28
       assessable: true
       depth: 2
@@ -1214,6 +1836,11 @@ objects:
         for applications.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Beveiligingseisen voor applicaties
+          description: Bepaal, beschrijf en keur de eisen voor informatiebeveiliging
+            van applicaties goed.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.29
       assessable: true
       depth: 2
@@ -1223,6 +1850,11 @@ objects:
       description: Establish and apply principles for engineering secure systems.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Principes voor veilige systeemarchitectuur en -engineering
+          description: Stel principes op voor het bouwen van veilige systemen en pas
+            ze toe.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.30
       assessable: true
       depth: 2
@@ -1232,6 +1864,11 @@ objects:
       description: Direct, monitor and review outsourced system development activities.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Uitbestede ontwikkeling
+          description: Stuur uitbestede systeemontwikkeling aan, volg die en beoordeel
+            die.
     - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.31
       assessable: true
       depth: 2
@@ -1241,3 +1878,28 @@ objects:
       description: Select, protect and manage test information appropriately.
       implementation_groups:
       - shared
+      translations:
+        nl:
+          name: Testgegevens
+          description: Kies, bescherm en beheer testgegevens op een passende manier.
+    translations:
+      nl:
+        name: 'ISO 27701-2025: managementsystemen voor privacy-informatie, overzicht
+          van eisen en beheersmaatregelen'
+        description: 'Overzicht van ISO/IEC 27701:2025, managementsysteem voor privacy-informatie
+          (PIMS), met referentiemaatregelen in bijlage A voor verwerkingsverantwoordelijken
+          (A.1), verwerkers (A.2) en de beveiligingsmaatregelen die voor beide gelden
+          (A.3).
+
+          De volledige norm is te koop voor alle details.'
+translations:
+  nl:
+    name: 'ISO 27701-2025: managementsystemen voor privacy-informatie, overzicht van
+      eisen en beheersmaatregelen'
+    description: 'Overzicht van ISO/IEC 27701:2025, managementsysteem voor privacy-informatie
+      (PIMS), met referentiemaatregelen in bijlage A voor verwerkingsverantwoordelijken
+      (A.1), verwerkers (A.2) en de beveiligingsmaatregelen die voor beide gelden
+      (A.3).
+
+      De volledige norm is te koop voor alle details.'
+    copyright: ISO - De volledige norm is te koop voor alle details.
