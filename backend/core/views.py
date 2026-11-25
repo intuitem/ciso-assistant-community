@@ -2951,12 +2951,14 @@ class IntegrationLinkViewSetMixin:
 
         super().perform_create(serializer)
 
-        # Skip when the caller targets an existing remote object, and for
-        # configs already pushed to by the model's save(), which would
+        if integration_config and remote_object_id:
+            self._link_remote_object(
+                serializer.instance, integration_config, remote_object_id
+            )
+        # Skip configs already pushed to by the model's save(), which would
         # otherwise create a duplicate remote object.
-        if (
+        elif (
             integration_config
-            and not remote_object_id
             and integration_config.id not in self.model.auto_sync_config_ids()
         ):
             from django.contrib.contenttypes.models import ContentType
@@ -2984,9 +2986,12 @@ class IntegrationLinkViewSetMixin:
 
         super().perform_update(serializer)
 
-        if not (integration_config and remote_object_id):
-            return
+        if integration_config and remote_object_id:
+            self._link_remote_object(
+                serializer.instance, integration_config, remote_object_id
+            )
 
+    def _link_remote_object(self, instance, integration_config, remote_object_id):
         from django.contrib.contenttypes.models import ContentType
 
         try:
@@ -2996,7 +3001,7 @@ class IntegrationLinkViewSetMixin:
             sync_mapping, _ = SyncMapping.objects.update_or_create(
                 configuration=integration_config,
                 content_type=ContentType.objects.get_for_model(self.model),
-                local_object_id=serializer.instance.id,
+                local_object_id=instance.id,
                 defaults={
                     "remote_id": remote_object_id,
                     "sync_status": SyncMapping.SyncStatus.PENDING,
@@ -3007,7 +3012,7 @@ class IntegrationLinkViewSetMixin:
             sync_object_to_integrations.schedule(
                 args=(
                     sync_mapping.content_type,
-                    serializer.instance.id,
+                    instance.id,
                     [integration_config.id],
                     [],
                 ),
@@ -6872,14 +6877,14 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         super().perform_create(serializer)
         instance = serializer.instance
 
-        # Selecting an integration provider on creation implies creating the
-        # remote object, unless the caller targets an existing remote object or
-        # the model's save() already pushed to this config.
-        if (
-            integration_config
-            and not remote_object_id
-            and integration_config.id not in self.model.auto_sync_config_ids()
-        ):
+        if not integration_config:
+            return
+        # save() pushes nothing on creation (INTEGRATION_SYNC_ON_CREATE), so
+        # only the selected provider is touched: link the given remote object,
+        # or create a new one there.
+        if remote_object_id:
+            self._link_remote_object(instance, integration_config, remote_object_id)
+        else:
             try:
                 logger.info(
                     "Creating remote object for Applied Control",
@@ -6908,36 +6913,39 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
 
         super().perform_update(serializer)
-        if not integration_config or not remote_object_id:
-            return
+        if integration_config and remote_object_id:
+            self._link_remote_object(
+                serializer.instance, integration_config, remote_object_id
+            )
+
+    def _link_remote_object(self, instance, integration_config, remote_object_id):
         try:
-            if remote_object_id:
-                logger.info(
-                    "Attaching applied control to external object",
-                    applied_control_id=serializer.instance.id,
-                    remote_id=remote_object_id,
-                )
-                # Upsert: SyncMapping is unique on (configuration, content_type,
-                # local_object_id); relinking must reuse the row instead of
-                # raising IntegrityError (swallowed below → silent relink loss).
-                sync_mapping, _ = SyncMapping.objects.update_or_create(
-                    configuration=integration_config,
-                    content_type=ContentType.objects.get_for_model(self.model),
-                    local_object_id=serializer.instance.id,
-                    defaults={
-                        "remote_id": remote_object_id,
-                        "sync_status": SyncMapping.SyncStatus.PENDING,
-                    },
-                )
-                sync_object_to_integrations.schedule(
-                    args=(
-                        sync_mapping.content_type,
-                        serializer.instance.id,
-                        [integration_config.id],
-                        ["status"],
-                    ),
-                    delay=1,  # Small delay to ensure transaction is committed
-                )
+            logger.info(
+                "Attaching applied control to external object",
+                applied_control_id=instance.id,
+                remote_id=remote_object_id,
+            )
+            # Upsert: SyncMapping is unique on (configuration, content_type,
+            # local_object_id); relinking must reuse the row instead of
+            # raising IntegrityError (swallowed below → silent relink loss).
+            sync_mapping, _ = SyncMapping.objects.update_or_create(
+                configuration=integration_config,
+                content_type=ContentType.objects.get_for_model(self.model),
+                local_object_id=instance.id,
+                defaults={
+                    "remote_id": remote_object_id,
+                    "sync_status": SyncMapping.SyncStatus.PENDING,
+                },
+            )
+            sync_object_to_integrations.schedule(
+                args=(
+                    sync_mapping.content_type,
+                    instance.id,
+                    [integration_config.id],
+                    ["status"],
+                ),
+                delay=1,  # Small delay to ensure transaction is committed
+            )
 
         except Exception:
             logger.error("Error creating SyncMapping", exc_info=True)

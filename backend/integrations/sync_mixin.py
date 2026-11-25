@@ -16,6 +16,9 @@ class IntegrationSyncableMixin:
     # Overridden per model.
     INTEGRATION_MODEL_KEY: str = ""
     INTEGRATION_SYNCABLE_FIELDS: set[str] = set()
+    # When False, creating an object pushes nothing on save(): the remote
+    # object is only created for the integration picked by the user.
+    INTEGRATION_SYNC_ON_CREATE: bool = True
 
     def _get_changed_fields(self, old_instance) -> list[str]:
         """Names of syncable fields that differ from ``old_instance``."""
@@ -67,6 +70,8 @@ class IntegrationSyncableMixin:
         mapping configured for this model. No-op when nothing relevant changed
         or no configured integration applies."""
         if not (is_new or changed_fields):
+            return
+        if is_new and not self.INTEGRATION_SYNC_ON_CREATE:
             return
 
         from django.contrib.contenttypes.models import ContentType
