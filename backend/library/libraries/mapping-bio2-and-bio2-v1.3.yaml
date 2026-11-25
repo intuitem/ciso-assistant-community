@@ -9,7 +9,7 @@ description: Mapping between Baseline Information Security for Government 2 (BIO
   v1.3 revision history
 copyright: intuitem
 version: 1
-publication_date: 2026-11-24
+publication_date: 2026-11-25
 provider: intuitem
 packager: intuitem
 dependencies:
@@ -466,13 +466,6 @@ objects:
       annotation: Same check and reporting; the first paragraph (irretrievable deletion)
         moved to 7.10.01 per the official revision history.
       strength_of_relationship: 9
-    - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
-      target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
-      relationship: intersect
-      rationale: semantic
-      annotation: Per the official revision history, the first paragraph of v1.2 7.10.02
-        is now described under 7.10.01.
-      strength_of_relationship: 7
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.03
       target_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.03
       relationship: equal
@@ -1274,13 +1267,6 @@ objects:
       annotation: Same check and reporting; the first paragraph (irretrievable deletion)
         moved to 7.10.01 per the official revision history.
       strength_of_relationship: 9
-    - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.01
-      target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.02
-      relationship: intersect
-      rationale: semantic
-      annotation: Per the official revision history, the first paragraph of v1.2 7.10.02
-        is now described under 7.10.01.
-      strength_of_relationship: 7
     - source_requirement_urn: urn:intuitem:risk:req_node:bio2-v1.3:7.10.03
       target_requirement_urn: urn:intuitem:risk:req_node:bio2:7.10.03
       relationship: equal

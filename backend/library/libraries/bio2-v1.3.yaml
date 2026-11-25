@@ -12,29 +12,32 @@ description: 'Baseline Information Security for Government 2 (BIO2)
   information security within the Dutch government. The BIO2 offers a uniform approach
   and a common framework of standards for information security within the government,
   in which risk management is central.'
-copyright: "The Baseline Information Security for Government 2 (BIO2): Part 1 BIO2\
-  \ framework is structured in accordance with NEN-EN-ISO/IEC 27001:2023, and part\
-  \ 2 BIO government measures is structured in accordance with NEN-EN-ISO/IEC 27002:2022.\
-  \ Entities can access these standards free of charge via NEN connect, the digital\
+copyright: "Part 1 of the Baseline Information Security for Government 2 (BIO2) framework\
+  \ is structured according to NEN-EN-ISO/IEC 27001:2023, and part 2 \u2013 BIO and\
+  \ government measures - is structured according to NEN-EN-ISO/IEC 27002:2022. Entities\
+  \ have these standards at their disposal free of charge via NEN Connect, the digital\
   \ platform of the Netherlands Standardisation Institute (NEN). The Netherlands Standardisation\
-  \ Forum has included these standards in the \u2018comply-or-explain\u2019 list with\
-  \ compulsory standards for the public sector. This means that the government will\
-  \ apply these standards unless there are explicitly formulated reasons not to do\
-  \ so. The BIO2 describes the details of NEN-EN-ISO/IEC 27001:2023 and NEN-EN-ISO/IEC\
-  \ 27002:2022 for the government. The BIO2 does not replace these two standards but\
-  \ supplements them. NEN-EN-ISO/IEC 27001 and NEN-EN-ISO/IEC 27002 describe the details\
-  \ for implementation (guidelines) and requirements for process structure (including\
-  \ the ISMS from NEN-EN-ISO/IEC 27001). ISO 27001 is mandatory for establishing the\
-  \ information security management system. Where the BIO2 does not specifically prescribe\
-  \ certain rules, both ISO standards are used to ensure a solid risk management structure.\
-  \ These ISO standards therefore provide the application details that are not described\
-  \ in the BIO2 but which are nevertheless necessary for its proper implementation.\
-  \ The use of information from NEN-EN-ISO/IEC 27001 and NEN-EN-ISO/IEC 27002 in the\
-  \ BIO is copyright protected. The use of texts from these standards in the BIO is\
-  \ subject to permission by NEN. For more information about NEN and the use of their\
-  \ products, see: www.nen.nl."
+  \ Forum (Forum Standaardisatie) has included these standards on the \u2018apply\
+  \ or explain\u2019 list with mandatory standards for the public sector. This means\
+  \ that the government applies these standards unless there are explicit reasons\
+  \ not to do so. The BIO2 describes the specifics of NEN-EN-ISO/IEC 27001:2023 and\
+  \ NEN-EN-ISO/IEC 27002:2022 for the government. The BIO2 does not replace these\
+  \ two standards but complements them. NEN-EN-ISO/IEC 27001 and NEN-EN-ISO/IEC 27002\
+  \ describes the details for implementation (guidelines) and requirements for the\
+  \ implementation of the process (the Information Security Management System (ISMS)\
+  \ from NEN-EN-ISO/IEC 27001). ISO 27001 is mandatory for establishing the information\
+  \ security management system. Wherever the BIO2 gives no explicit requirements,\
+  \ both ISO standards are used to ensure prober implementation of risk management.\
+  \ These ISO standards therefore provide the application details not described in\
+  \ the BIO2 and which continue to be necessary for a proper implementation of the\
+  \ BIO2. The use of information from NEN-EN-ISO/IEC 27001 and NEN-EN-ISO/IEC 27002\
+  \ in the BIO is copyrighted. The use of texts from these standards in the BIO requires\
+  \ NEN permission. For more information on NEN and the use of their products, go\
+  \ to: www.nen.nl. This document is a translation of BIO v1.3. In the event of any\
+  \ inconsistencies or ambiguities arising from the translation, the Dutch version\
+  \ shall be leading and binding."
 version: 1
-publication_date: 2026-11-24
+publication_date: 2026-11-25
 provider: Rijksoverheid
 packager: intuitem
 translations:
@@ -48,6 +51,28 @@ translations:
       informatiebeveiliging binnen de Nederlandse overheid. De BIO2 biedt een uniforme
       aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging binnen
       de overheid, waarbij risicomanagement centraal staat.'
+    copyright: "Deel 1 BIO2-kader van de Baseline Informatiebeveiliging Overheid 2\
+      \ (BIO2) is gestructureerd volgens NEN-EN-ISO/IEC 27001:2023, en deel 2 BIO-overheidsmaatregelen\
+      \ van de BIO2 is gestructureerd volgens NEN-EN-ISO/IEC 27002:2022. Entiteiten\
+      \ kunnen kosteloos beschikken over deze normen via NEN connect, het digitale\
+      \ platform van het Nederlands Normalisatie Instituut (NEN). Forum Standaardisatie\
+      \ heeft deze normen opgenomen in de \u2018pas-toe-of-leg-uit\u2019-lijst met\
+      \ verplichte standaarden voor de publieke sector. Dit betekent dat de overheid\
+      \ deze normen toepast tenzij er expliciet geformuleerde redenen zijn om dat\
+      \ niet te doen. De BIO2 beschrijft de invulling van NEN-EN-ISO/IEC 27001:2023\
+      \ en NEN-EN-ISO/IEC 27002:2022 voor de overheid. De BIO2 vervangt deze twee\
+      \ normen niet, maar vult ze aan. NEN-EN-ISO/IEC 27001 en NEN-EN-ISO/IEC 27002\
+      \ beschrijven de details voor implementatie (richtlijnen) en eisen voor de procesinrichting\
+      \ (onder andere het ISMS uit NEN-EN-ISO/IEC 27001). ISO 27001 is verplicht voor\
+      \ het inrichten van het managementsysteem voor informatiebeveiliging. Daar waar\
+      \ de BIO2 niet expliciet iets voorschrijft, worden beide ISO-normen gebruikt,\
+      \ om te komen tot een goede inrichting voor risicomanagement. Deze ISO-normen\
+      \ geven dus de details voor de toepassing, die niet in de BIO2 zijn beschreven\
+      \ en die nodig blijven voor een goede implementatie van de BIO2. Het gebruik\
+      \ van informatie uit NEN-EN-ISO/IEC 27001 en NEN-EN-ISO/IEC 27002 in de BIO\
+      \ is auteursrechtelijk beschermd. Het gebruik van teksten uit deze normen in\
+      \ de BIO geschiedt met toestemming van NEN. Voor meer informatie over de NEN\
+      \ en het gebruik van hun producten zie: www.nen.nl."
 objects:
   frameworks:
   - urn: urn:intuitem:risk:framework:bio2-v1.3
@@ -1292,6 +1317,9 @@ objects:
         vulnerability assessments, penetration tests or red teaming tests. Internet
         facing information systems are tested continuously where possible for weaknesses
         and vulnerabilities.
+      annotation: The binding Dutch text requires this check annually where possible
+        (waar mogelijk jaarlijks), while the official English translation does not
+        state this frequency.
       translations:
         nl:
           description: "Informatiesystemen worden waar mogelijk jaarlijks gecontroleerd\
@@ -1299,6 +1327,9 @@ objects:
             \ feitelijke veiligheid. Dit kan bijvoorbeeld door (geautomatiseerde)\
             \ kwetsbaarheidsanalyses, penetratietesten of red-teamingstesten. Internetfacing-informatiesystemen\
             \ worden waar mogelijk continue getest op zwakheden en kwetsbaarheden."
+          annotation: "De bindende Nederlandse tekst schrijft voor dat deze controle\
+            \ waar mogelijk jaarlijks plaatsvindt; de offici\xEBle Engelse vertaling\
+            \ noemt deze frequentie niet."
     - urn: urn:intuitem:risk:req_node:bio2-v1.3:8.08.05
       assessable: true
       depth: 1

@@ -137,6 +137,19 @@ class TestBio2V13Mapping:
             assert mapped[V12_NODE + ref_id]["result"] != "compliant", ref_id
             assert mapped[V12_NODE + ref_id].get("status") != "done", ref_id
 
+    def test_absorbed_measures_only_lower_their_target(self, libraries):
+        source = audit(
+            V12, overrides={"7.10.02": "non_compliant", "5.21.01": "non_compliant"}
+        )
+        inferences, _ = MappingEngine().best_mapping_inferences(source, V12, V13)
+        mapped = inferences["requirement_assessments"]
+        # v1.3 7.10.01 keeps the v1.2 7.10.01 text: the 7.10.02 gap stays on check and report
+        assert mapped[V13_NODE + "7.10.01"]["result"] == "compliant"
+        assert mapped[V13_NODE + "7.10.02"]["result"] == "non_compliant"
+        # 5.21.01 is described in 5.21.03: the gap lowers it, and it stays closed
+        assert mapped[V13_NODE + "5.21.03"]["result"] == "non_compliant"
+        assert mapped[V13_NODE + "5.21.03"]["status"] == "done"
+
     def test_v13_drops_implementation_groups(self, libraries):
         framework = RequirementNode.objects.filter(framework__urn=V13).first().framework
         assert not framework.implementation_groups_definition
@@ -164,7 +177,6 @@ def test_renumbered_requirements_map_as_equal(forward, old, new):
     [
         ("5.01.01", "5.02.01"),
         ("5.21.01", "5.21.03"),
-        ("7.10.02", "7.10.01"),
         ("8.01.02", "6.03.04"),
         ("8.24.03", "8.24.01"),
     ],
