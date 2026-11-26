@@ -20,6 +20,10 @@ ALLOW_PRIVATE_NETWORK_REQUESTS=True
 
 Accepted values are `True`, `1` and `yes`, in any case. The default is `False`. This variable was previously named `WEBHOOK_ALLOW_PRIVATE_IPS`; the old name is no longer recognized.
 
+{% hint style="info" %}
+**On SaaS**, environment variables are managed by intuitem and cannot be set from your instance, and this one stays off: a SaaS instance runs on intuitem's network, so it could not reach your private network anyway. Give the service a public HTTPS address instead, protected by authentication, and if your firewall only accepts known senders, open a ticket on the [customer support portal](https://intuitem.atlassian.net/servicedesk/customer/portal/4) for the addresses to allow.
+{% endhint %}
+
 ## Features it applies to
 
 | Feature | URL that is checked |

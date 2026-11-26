@@ -14,7 +14,7 @@ The chat assistant answers questions about your data and frameworks. It needs th
 {% step %}
 ### Allow the assistant on the instance
 
-**On SaaS**, ask intuitem support to enable the assistant on your instance, then go to the next step.
+**On SaaS**, environment variables are managed by intuitem and cannot be set from your instance. Open a ticket on the [customer support portal](https://intuitem.atlassian.net/servicedesk/customer/portal/4) asking to enable the AI assistant, then go to the next step once it is done.
 
 **On-premises**, start the backend **and** the Huey worker with `ENABLE_CHAT=True`. In Docker Compose, add it to the `environment` section of both services, then run `docker compose up -d`:
 
