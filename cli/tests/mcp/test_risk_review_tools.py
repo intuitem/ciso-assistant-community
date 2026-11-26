@@ -113,7 +113,11 @@ class TestResolveActor:
         fake = _router({"/actors/": actors})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_actor_id("enzo@acme.io") == UUID_A
-        assert fake.calls[0] == ("/actors/", {"search": "enzo@acme.io"})
+        # include_inactive: an owner deactivated since must still resolve
+        assert fake.calls[0] == (
+            "/actors/",
+            {"search": "enzo@acme.io", "include_inactive": "true"},
+        )
 
     def test_owner_by_email_via_users_lookup(self):
         # /actors/ only returns {id, str} in `specific`: map the email through /users/
@@ -144,7 +148,10 @@ class TestResolveActor:
         fake = _router({"/actors/": actors, "/users/": []})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_actor_id(ref) == UUID_A
-        assert fake.calls[0] == ("/actors/", {"search": ref})
+        assert fake.calls[0] == (
+            "/actors/",
+            {"search": ref, "include_inactive": "true"},
+        )
 
     def test_partial_name_single_hit(self):
         actors = [

@@ -58,6 +58,17 @@ class TestDeactivatedActors:
 
         assert ids == {actors["inactive"], actors["active"]}
 
+    def test_search_with_include_inactive(self, authenticated_client, actors):
+        """The MCP server resolves an owner named by email or name this way."""
+        url = reverse("actors-list")
+
+        assert _ids(authenticated_client.get(url, {"search": "inactive@"})) == set()
+        assert _ids(
+            authenticated_client.get(
+                url, {"search": "inactive@", "include_inactive": "true"}
+            )
+        ) == {actors["inactive"]}
+
     def test_retrieve_by_id_unaffected(self, authenticated_client, actors):
         response = authenticated_client.get(
             reverse("actors-detail", args=[actors["inactive"]])
