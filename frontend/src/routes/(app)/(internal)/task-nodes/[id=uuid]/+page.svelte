@@ -132,33 +132,35 @@
 	}
 
 	// Derived: previous / next reuse this page for another occurrence.
-	const categories = $derived([
-		{
-			label: m.appliedControls(),
-			items: taskNode.applied_controls,
-			baseUrl: '/applied-controls'
-		},
-		{
-			label: m.complianceAssessments(),
-			items: taskNode.compliance_assessments,
-			baseUrl: '/compliance-assessments'
-		},
-		{
-			label: m.assets(),
-			items: taskNode.assets,
-			baseUrl: '/assets'
-		},
-		{
-			label: m.riskAssessments(),
-			items: taskNode.risk_assessments,
-			baseUrl: '/risk-assessments'
-		},
-		{
-			label: m.findingsAssessments(),
-			items: taskNode.findings_assessment,
-			baseUrl: '/finding-assessments'
-		}
-	].map((cat) => ({ ...cat, items: visibleRelated(cat.items), hidden: countMasked(cat.items) })));
+	const categories = $derived(
+		[
+			{
+				label: m.appliedControls(),
+				items: taskNode.applied_controls,
+				baseUrl: '/applied-controls'
+			},
+			{
+				label: m.complianceAssessments(),
+				items: taskNode.compliance_assessments,
+				baseUrl: '/compliance-assessments'
+			},
+			{
+				label: m.assets(),
+				items: taskNode.assets,
+				baseUrl: '/assets'
+			},
+			{
+				label: m.riskAssessments(),
+				items: taskNode.risk_assessments,
+				baseUrl: '/risk-assessments'
+			},
+			{
+				label: m.findingsAssessments(),
+				items: taskNode.findings_assessment,
+				baseUrl: '/finding-assessments'
+			}
+		].map((cat) => ({ ...cat, items: visibleRelated(cat.items), hidden: countMasked(cat.items) }))
+	);
 
 	// The task's history, oldest first. The viewed occurrence is added when it
 	// falls outside the history's window, so it is always there to ring.
@@ -340,8 +342,7 @@
 	<!-- EXPECTED EVIDENCE TABLE -->
 	<p class="text-surface-700-300 text-md font-medium mb-1">
 		{m.expectedEvidence()}
-		{#if expectedEvidence.length - reviewedCount > 0}<span
-				class="badge bg-amber-100 text-amber-700"
+		{#if expectedEvidence.length - reviewedCount > 0}<span class="badge bg-amber-100 text-amber-700"
 				>{expectedEvidence.length - reviewedCount}
 				{m.pending()}</span
 			>{/if}
