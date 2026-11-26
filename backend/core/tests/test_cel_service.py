@@ -952,6 +952,32 @@ class TestCelErrorContainment:
             defer_outcome_evaluation(cel_setup["ca"].pk)
         evaluator.assert_called_once()
 
+    def test_safe_program_keeps_cel_logical_semantics(self):
+        """`safe_program` only bounds the error of two FAILING operands; it must
+        keep CEL semantics everywhere else. In particular `||`/`&&` are defined
+        only for booleans, so two non-boolean operands must still raise (not
+        return one operand), and short-circuit with booleans must hold."""
+        import celpy
+
+        from core.cel_safe import safe_program
+
+        env = celpy.Environment()
+
+        def run(expr):
+            return safe_program(env, env.compile(expr)).evaluate({})
+
+        # Non-boolean operands have no overload for ||/&&: they must raise.
+        for expr in ('"a" || "b"', "1 && 2", '"yes" && ""'):
+            with pytest.raises(Exception):
+                run(expr)
+
+        # Boolean logic, including short-circuit past an erroring operand.
+        assert bool(run("true || false")) is True
+        assert bool(run("false || false")) is False
+        assert bool(run("true && false")) is False
+        assert bool(run("true || (1 / 0 > 0)")) is True
+        assert bool(run("false && (1 / 0 > 0)")) is False
+
     def test_chained_or_missing_key_is_bounded_and_logged_usefully(self):
         """A rule whose terms all error (a missing answer key) chained with `||`
         must fail open, stay bounded in MEMORY, and log a useful `no such key`

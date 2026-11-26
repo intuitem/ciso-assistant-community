@@ -1,50 +1,38 @@
 """Shared CEL evaluation helpers.
 
 The one thing the outcome and rating evaluators need in common is a program
-whose ``||`` / ``&&`` cannot blow up. celpy's default ``logical_or`` /
-``logical_and`` raise ``TypeError(f"{x!r} or {y!r}")`` when both operands are
-errors, and celpy wraps that text into a new error value, so a chain of failing
-``||`` — a rule reading answers that are not in play, e.g. out of the audit's
-implementation-group scope or on a hidden requirement — builds a message whose
-size, and memory, doubles with every term. A couple dozen terms is enough to OOM
-the worker while re-evaluating a framework's audits on publish.
+whose ``||`` / ``&&`` cannot blow up. When both operands are errors, celpy's
+``logical_or`` / ``logical_and`` raise ``TypeError(f"{x!r} or {y!r}")``, which
+celpy wraps into a new error value; so a chain of failing ``||`` — a rule reading
+answers that are not in play, e.g. out of the audit's implementation-group scope
+or on a hidden requirement — builds an error whose repr, and memory, doubles with
+every term. A couple dozen terms is enough to OOM the worker re-evaluating a
+framework's audits on publish.
 
-The wrappers below keep celpy's exact semantics for every case where at least one
-operand is a boolean, and simply propagate one operand's error (instead of
-combining both reprs) when neither is. The result of a failing chain stays a
-single ``no such key`` instead of a megabyte of nested text.
+The wrappers below change exactly one case: when BOTH operands are already CEL
+errors, they propagate one of them instead of combining both reprs (``error ||
+error == error`` and ``error && error == error`` in CEL anyway). Every other case
+is delegated to celpy unchanged, so the operators keep CEL semantics — in
+particular two non-boolean, non-error operands (``"a" || "b"``) still raise, as
+the CEL spec requires: https://github.com/cel-expr/cel-spec/blob/master/doc/langdef.md#logical-operators-1
 """
 
 from __future__ import annotations
 
 import celpy
-import celpy.celtypes as celtypes
+from celpy import CELEvalError, celtypes
 
 
 def _logical_or(x, y):
-    x_bool = isinstance(x, celtypes.BoolType)
-    y_bool = isinstance(y, celtypes.BoolType)
-    if not x_bool and not y_bool:
-        # Both errored: propagate one, do not combine their reprs.
-        return x
-    if not x_bool and y_bool:
-        return y if y else x  # _ || true == true ; _ || false == _
-    if x_bool and not y_bool:
-        return x if x else y  # true || _ == true ; false || _ == _
-    return celtypes.BoolType(bool(x) or bool(y))
+    if isinstance(x, CELEvalError) and isinstance(y, CELEvalError):
+        return x  # error || error == error: propagate one, don't combine reprs
+    return celtypes.logical_or(x, y)
 
 
 def _logical_and(x, y):
-    x_bool = isinstance(x, celtypes.BoolType)
-    y_bool = isinstance(y, celtypes.BoolType)
-    if not x_bool and not y_bool:
-        # Both errored: propagate one, do not combine their reprs.
-        return x
-    if not x_bool and y_bool:
-        return x if y else y  # _ && true == _ ; _ && false == false
-    if x_bool and not y_bool:
-        return y if x else x  # true && _ == _ ; false && _ == false
-    return celtypes.BoolType(bool(x) and bool(y))
+    if isinstance(x, CELEvalError) and isinstance(y, CELEvalError):
+        return x  # error && error == error: propagate one, don't combine reprs
+    return celtypes.logical_and(x, y)
 
 
 _SAFE_FUNCTIONS = {"_||_": _logical_or, "_&&_": _logical_and}
