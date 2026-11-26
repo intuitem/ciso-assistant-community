@@ -22,3 +22,13 @@ We will replace Poetry with uv as the backend's dependency and environment manag
 - PyTorch is pinned to its CPU index via `[tool.uv.sources]`; the force-reinstall/purge hack is gone.
 - Usage stays close to Poetry (`uv add`, `uv run`, lockfiles), so adoption cost was low.
 - `poetry.lock` → `uv.lock`; build backend moved to `setuptools`.
+
+## Security considerations
+
+The decision changes how dependencies are resolved and installed, so it touches the supply chain. It does not widen it:
+
+- `uv.lock` records a hash for every artifact, and Docker images and CI install with `uv sync --locked`, which fails when the lock is out of date with `pyproject.toml` instead of resolving anew.
+- Packages come from PyPI only; no extra index is configured, so no dependency can be shadowed from a second index.
+- The image's interpreter is the base image's own (`UV_PYTHON_DOWNLOADS=never`), and the venv is not re-synced at runtime (`UV_NO_SYNC=1`).
+
+Accepted risk: a malicious release that is locked in a dependency update still installs. Reviewing lock changes is the mitigation, as it was with Poetry.
