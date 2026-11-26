@@ -43,6 +43,41 @@ const schema = z
 		}
 	});
 
+// The page waits for this call, and the backend's Jira client can take 30s+
+// with retries when Jira is slow or unreachable.
+const RESOLVE_TABLE_TIMEOUT_MS = 5000;
+
+// Configs saved before issue types were referenced by id hold the issue type
+// name ("KAN:Tâche"). It matches none of the picker's "<KEY>:<id>" options, so
+// the picker would clear the table and its maps: resolve it to its id form
+// before the form is built. On failure or timeout the value is kept as is.
+async function resolveTableName(
+	fetch: typeof globalThis.fetch,
+	configId: string,
+	modelKey: string,
+	tableName: string | undefined
+): Promise<string | undefined> {
+	const separator = tableName?.indexOf(':') ?? -1;
+	if (!tableName || separator === -1 || /^\d+$/.test(tableName.slice(separator + 1))) {
+		return tableName;
+	}
+	try {
+		const response = await fetch(`${BASE_API_URL}/integrations/configs/${configId}/rpc/`, {
+			method: 'POST',
+			body: JSON.stringify({
+				action: 'resolve_table',
+				params: { table_name: tableName, model_key: modelKey }
+			}),
+			signal: AbortSignal.timeout(RESOLVE_TABLE_TIMEOUT_MS)
+		});
+		if (!response.ok) return tableName;
+		const data = await response.json();
+		return data?.result || tableName;
+	} catch {
+		return tableName;
+	}
+}
+
 export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=jira`);
 	let config: Record<string, any> = {};
@@ -78,6 +113,25 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		field_map: {},
 		value_map: {}
 	};
+
+	if (config.id) {
+		// Every settings block a FieldMapper binds its table picker to, with its
+		// model key: the top-level one is the applied control mapping.
+		const targets: [Record<string, any>, string][] = [
+			[config.settings, 'applied_control'],
+			...Object.entries(config.settings.models)
+				.filter(([, modelSettings]) => modelSettings)
+				.map(
+					([modelKey, modelSettings]) => [modelSettings, modelKey] as [Record<string, any>, string]
+				)
+		];
+		await Promise.all(
+			targets.map(async ([target, modelKey]) => {
+				const resolved = await resolveTableName(fetch, config.id, modelKey, target.table_name);
+				if (resolved !== target.table_name) target.table_name = resolved;
+			})
+		);
+	}
 
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {
