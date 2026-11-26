@@ -298,33 +298,9 @@ def test_rag_search_hides_audits_from_a_respondent_with_another_role(
     assert names == {"backups"}
 
 
-@pytest.mark.parametrize(
-    "missing, expected",
-    [
-        (
-            {"attack_path_count", "operational_scenario_count"},
-            ["change_ebiosrmstudy", "add_attackpath", "add_operationalscenario"],
-        ),
-        ({"feared_event_count"}, ["change_ebiosrmstudy", "add_fearedevent"]),
-        (set(), ["change_ebiosrmstudy"]),
-    ],
-)
-def test_existing_study_requires_only_the_permissions_it_writes(
-    monkeypatch, missing, expected
-):
+def test_existing_study_entry_requires_only_change_permission(monkeypatch):
     import chat.workflows.ebios_rm_assist as assist
 
-    counts = {
-        k: 0 if k in missing else 1
-        for k in (
-            "asset_count",
-            "feared_event_count",
-            "roto_count",
-            "strategic_scenario_count",
-            "attack_path_count",
-            "operational_scenario_count",
-        )
-    }
     checked = []
     workflow = assist.EbiosRMAssistWorkflow()
     monkeypatch.setattr(
@@ -332,10 +308,50 @@ def test_existing_study_requires_only_the_permissions_it_writes(
         "_fetch_study",
         lambda ctx: {"obj": SimpleNamespace(folder=None), "name": "s"},
     )
-    monkeypatch.setattr(workflow, "_get_study_state", lambda study: counts)
+    monkeypatch.setattr(workflow, "_facilitate", lambda ctx, study: iter(()))
     monkeypatch.setattr(
-        assist, "_can_write", lambda user, folder, perms: checked.append(perms)
+        assist, "_can_write", lambda user, folder, perms: checked.append(perms) or True
     )
-
     list(workflow._run_from_study(SimpleNamespace(scope=SimpleNamespace(user=None))))
-    assert list(checked[0]) == expected
+    assert [list(p) for p in checked] == [["change_ebiosrmstudy"]]
+
+
+@pytest.mark.parametrize("step", ["gravity", "rotos", "strategic_scenarios"])
+def test_facilitation_records_a_step_only_with_its_write_permissions(monkeypatch, step):
+    import chat.workflows.ebios_rm_assist as assist
+    from chat.workflows.ebios_facilitation import WRITE_PERMS
+
+    checked, applied = [], []
+    workflow = assist.EbiosRMAssistWorkflow()
+    study = SimpleNamespace(id="s1", folder=None)
+    monkeypatch.setattr(
+        workflow,
+        "_load_state",
+        lambda ctx: {
+            "step": "facilitate",
+            "data": {"study_id": "s1", "phase": "proposed", "proposal": [{}]},
+        },
+    )
+    monkeypatch.setattr(workflow, "_save_state", lambda *a: None)
+    monkeypatch.setattr(workflow, "_clear_state", lambda *a: None)
+    monkeypatch.setattr(
+        workflow,
+        "_next_step",
+        lambda ctx, s, skipped: step if step not in skipped else None,
+    )
+    monkeypatch.setattr(
+        workflow, "_call_llm", lambda ctx, prompt: '{"intent": "accept"}'
+    )
+    monkeypatch.setattr(workflow, "_apply", lambda *a: applied.append(a) or "x")
+    monkeypatch.setattr(
+        assist,
+        "_can_write",
+        lambda user, folder, perms: checked.append(perms) and False,
+    )
+    ctx = SimpleNamespace(
+        scope=SimpleNamespace(user=None), history=[], user_message="oui", user_lang="fr"
+    )
+    events = list(workflow._facilitate(ctx, study))
+    assert list(checked[0]) == list(WRITE_PERMS[step])
+    assert not applied
+    assert any("permission" in str(e.content) for e in events)

@@ -174,10 +174,16 @@ def _compute_readable_document_ids(scope, folders) -> list[str]:
     )
     docs = IndexedDocument.objects.filter(folder_id__in=folders)
     readable = list(
-        docs.exclude(source_type__in=[source_type for source_type, _, _ in gated])
+        docs.exclude(
+            source_type__in=[source_type for source_type, _, _ in gated] + [Source.CHAT]
+        )
         .values_list("id", flat=True)
         .order_by()
     )
+    # A chat upload belongs to its session: only that session's owner retrieves it.
+    readable += docs.filter(
+        source_type=Source.CHAT, source_object_id__in=owned_chat_session_ids(scope.user)
+    ).values_list("id", flat=True)
     for source_type, model, still_indexed in gated:
         source = model.objects.filter(
             still_indexed,
@@ -194,6 +200,12 @@ def _compute_readable_document_ids(scope, folders) -> list[str]:
             .order_by()
         )
     return [str(doc_id) for doc_id in readable]
+
+
+def owned_chat_session_ids(user):
+    from .models import ChatSession
+
+    return ChatSession.objects.filter(owner=user).values("id")
 
 
 def _source_folder_ids(scope, model_class) -> set[str]:
