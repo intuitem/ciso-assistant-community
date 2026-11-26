@@ -1,0 +1,1321 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:athanor:risk:library:msia-cl-0.6
+locale: es
+ref_id: msia-cl-0.6
+name: "MSIA-CL v0.6 \u2014 Marco de Seguridad y Gobierno de la IA para Chile"
+description: "Marco de Seguridad y Gobierno de la IA para Chile (MSIA-CL), de Athanor\
+  \ Tech. 43 controles en 8 dominios para la IA desarrollada, comprada, de uso del\
+  \ personal y los agentes, con perfiles Base, Est\xE1ndar y Reforzado y su relaci\xF3\
+  n con la normativa chilena (Ley 21.663, Ley 21.719 y otras) y con ISO/IEC 42001,\
+  \ NIST AI RMF, OWASP y la Ley de IA de la UE. Fuente: cap\xEDtulo 6 del marco v0.6\
+  \ (2026-11-16), https://doi.org/10.5281/zenodo.24348333. P\xE1gina del proyecto:\
+  \ https://www.athanortech.net/msia-cl. No constituye asesor\xEDa ni validaci\xF3\
+  n jur\xEDdica."
+copyright: "\xA9 Athanor Tech \u2014 MSIA-CL v0.6 \u2014 CC BY 4.0 \u2014 https://doi.org/10.5281/zenodo.24348333"
+version: 3
+publication_date: 2026-11-16
+provider: Athanor Tech
+packager: Athanor Tech
+labels:
+- CHILE
+- GOBERNANZA-IA
+- MSIA-CL
+- IA
+translations:
+  en:
+    name: "MSIA-CL v0.6 \u2014 AI Security and Governance Framework for Chile"
+    description: 'AI Security and Governance Framework for Chile (MSIA-CL), by Athanor
+      Tech. 43 controls in 8 domains covering in-house, purchased and staff-used AI
+      as well as agents, with Base, Standard and Reinforced profiles and their relation
+      to Chilean regulation (Law 21.663, Law 21.719 and others) and to ISO/IEC 42001,
+      NIST AI RMF, OWASP and the EU AI Act. Control texts are in Spanish (official
+      version). Source: chapter 6 of framework v0.6 (2026-11-16), https://doi.org/10.5281/zenodo.24348333.
+      Project page: https://www.athanortech.net/msia-cl. Not legal advice.'
+objects:
+  frameworks:
+  - urn: urn:athanor:risk:framework:msia-cl-0.6
+    ref_id: msia-cl-0.6
+    name: MSIA-CL v0.6
+    description: "Marco de Seguridad y Gobierno de la IA para Chile. Al crear una\
+      \ evaluaci\xF3n, seleccione UN perfil (grupo de implementaci\xF3n): Base = 17\
+      \ controles, Est\xE1ndar = 41, Reforzado = 43. Los perfiles son acumulativos."
+    translations:
+      en:
+        name: MSIA-CL v0.6
+        description: 'AI Security and Governance Framework for Chile. When creating
+          an audit, select ONE profile (implementation group): Base = 17 controls,
+          Standard = 41, Reinforced = 43. Profiles are cumulative.'
+    implementation_groups_definition:
+    - ref_id: base
+      name: Perfil Base
+      description: "Riesgo bajo o autonom\xEDa A0-A1. Aprueba el due\xF1o del sistema\
+        \ con visto bueno del responsable de IA."
+      default_selected: true
+      translations:
+        en:
+          name: Base profile
+          description: Low risk or autonomy A0-A1. Approved by the system owner with
+            sign-off from the AI officer.
+    - ref_id: estandar
+      name: "Perfil Est\xE1ndar"
+      description: "Riesgo medio o autonom\xEDa A2-A3, o contexto regulatorio (servicio\
+        \ esencial, informaci\xF3n de clientes CMF). Aprueba la instancia de gobierno."
+      translations:
+        en:
+          name: Standard profile
+          description: Medium risk or autonomy A2-A3, or regulatory context (essential
+            service, CMF customer information). Approved by the AI governance body.
+    - ref_id: reforzado
+      name: Perfil Reforzado
+      description: "Riesgo alto o autonom\xEDa A4. Aprueba la instancia de gobierno\
+        \ con informe a la alta direcci\xF3n."
+      translations:
+        en:
+          name: Reinforced profile
+          description: High risk or autonomy A4. Approved by the AI governance body,
+            reporting to senior management.
+    requirement_nodes:
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      assessable: false
+      depth: 1
+      ref_id: GOB
+      name: Gobierno y responsabilidad
+      translations:
+        en:
+          name: Governance and accountability
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      ref_id: GOB-01
+      name: "Pol\xEDtica de IA"
+      description: "Pol\xEDtica aprobada por el directorio o la autoridad superior\
+        \ del servicio (secci\xF3n 2.4) con: usos permitidos y prohibidos, niveles\
+        \ de autonom\xEDa autorizados, apetito de riesgo, qui\xE9n aprueba qu\xE9\
+        \ (secci\xF3n 2.4), qui\xE9n es la persona responsable de la IA (secci\xF3\
+        n 2.1), cu\xE1ndo se informa a las personas que interact\xFAan con una IA\
+        \ o que reciben contenido generado por IA y requisitos m\xEDnimos de este\
+        \ marco. Cubre los cuatro tipos de IA. Revisi\xF3n anual."
+      annotation: "Riesgo que reduce: Reglas claras para usar, desarrollar y comprar\
+        \ IA.\nPerfil m\xEDnimo: Base\n\xC1mbito: organizaci\xF3n (se eval\xFAa una\
+        \ vez, para la organizaci\xF3n)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4] y art. 8 a) [OIV]; L21.719 art. 14 quinquies; Circular\
+        \ 711 [Estado]; PNIA (orientaci\xF3n)\nEst\xE1ndares internacionales: AI RMF\
+        \ GOVERN 1; ISO 42001 5.2, A.2"
+      typical_evidence: "Pol\xEDtica firmada y versionada\nacta de aprobaci\xF3n\n\
+        designaci\xF3n del responsable de IA\nregistro de difusi\xF3n"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI policy
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      ref_id: GOB-02
+      name: Instancia de gobierno de IA
+      description: "Comit\xE9 o grupo designado por la alta direcci\xF3n, con participaci\xF3\
+        n de TI, seguridad, datos personales, legal, personas y negocio. Aprueba los\
+        \ casos de riesgo alto, las excepciones y los controles compensatorios que\
+        \ le corresponden seg\xFAn la secci\xF3n 2.4 (Anexo C). Puede ser un comit\xE9\
+        \ existente."
+      annotation: "Riesgo que reduce: Decisiones colegiadas y trazables.\nPerfil m\xED\
+        nimo: Est\xE1ndar\n\xC1mbito: organizaci\xF3n (se eval\xFAa una vez, para\
+        \ la organizaci\xF3n)\nAplicabilidad por tipo de IA: desarrollada: plena;\
+        \ comprada: plena; uso del personal: plena; agentes: plena\nLey chilena: L21.663\
+        \ art. 8 i) [OIV]; L21.719 arts. 49\u201350 (voluntarios); RAN 20-10 [CMF]\
+        \ (rol del directorio)\nEst\xE1ndares internacionales: AI RMF GOVERN 2; ISO\
+        \ 42001 5.3, A.3.2"
+      typical_evidence: 'Mandato
+
+        actas
+
+        registro de casos aprobados y rechazados'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI governance body
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      ref_id: GOB-03
+      name: "Due\xF1o de cada sistema"
+      description: "Cada sistema de IA, incluida la IA comprada y cada herramienta\
+        \ aprobada para el personal, tiene un due\xF1o de negocio (responde por el\
+        \ uso) y un custodio t\xE9cnico (responde por la operaci\xF3n). Si el due\xF1\
+        o se va, el sistema se suspende o se reasigna."
+      annotation: "Riesgo que reduce: Siempre hay una persona que responde.\nPerfil\
+        \ m\xEDnimo: Base\n\xC1mbito: organizaci\xF3n (se eval\xFAa una vez, para\
+        \ la organizaci\xF3n)\nAplicabilidad por tipo de IA: desarrollada: plena;\
+        \ comprada: plena; uso del personal: plena; agentes: plena\nLey chilena: Circular\
+        \ 711 [Estado] (responsabilidad); ciberconsejo ANCI (orientaci\xF3n)\nEst\xE1\
+        ndares internacionales: AI RMF GOVERN 2.1; ISO 42001 A.3.2, A.3.3; OWASP ASI03"
+      typical_evidence: "Campo \"due\xF1o\" obligatorio en el inventario\nprocedimiento\
+        \ de reasignaci\xF3n\nmuestra con due\xF1o vigente"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Owner for each system
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      ref_id: GOB-04
+      name: Uso aceptable de la IA por el personal e IA no autorizada
+      description: "Pol\xEDtica de uso aceptable (secci\xF3n 2.3), difundida y aceptada.\
+        \ Lista de herramientas aprobadas, con el nivel de informaci\xF3n que admite\
+        \ cada una. Alternativas oficiales para las necesidades comunes, con acceso\
+        \ o licencias suficientes para quienes las necesitan. Canal para pedir herramientas\
+        \ nuevas, con plazo de respuesta. Detecci\xF3n del uso no autorizado con las\
+        \ fuentes disponibles (registros de red o DNS, revisi\xF3n de aplicaciones\
+        \ autorizadas con OAuth y de extensiones, gastos y, donde exista, proxy o\
+        \ CASB) y decisi\xF3n sobre cada hallazgo: aprobar o bloquear. Bloqueo por\
+        \ defecto: en los equipos y redes que administra la organizaci\xF3n, los servicios\
+        \ de IA no aprobados se bloquean, incluido el uso de cuentas personales en\
+        \ herramientas aprobadas, con los medios que la organizaci\xF3n tiene o puede\
+        \ configurar (por ejemplo, filtrado web o DNS, administraci\xF3n de equipos\
+        \ y navegadores, control de extensiones y de autorizaciones OAuth desde la\
+        \ consola de identidad), por categor\xEDa y no solo por lista cuando esos\
+        \ medios lo permiten; las funciones de IA incluidas en productos permitidos\
+        \ se controlan desde su consola. Este control no exige un proxy ni un CASB:\
+        \ el punto de control centralizado corresponde a OPE-01, en perfil Est\xE1\
+        ndar. Si con los medios disponibles algo no se puede bloquear, se documentan\
+        \ la limitaci\xF3n y la medida que la compensa; las excepciones se aprueban\
+        \ con justificaci\xF3n y vencimiento (secci\xF3n 2.4, Anexo C). Las medidas\
+        \ de control y monitoreo se informan al personal y se regulan en el reglamento\
+        \ interno, respetando sus derechos [POR VERIFICAR con asesor\xEDa laboral]."
+      annotation: "Riesgo que reduce: Que el personal use IA de forma segura y con\
+        \ herramientas aprobadas.\nPerfil m\xEDnimo: Base\n\xC1mbito: organizaci\xF3\
+        n (se eval\xFAa una vez, para la organizaci\xF3n)\nAplicabilidad por tipo\
+        \ de IA: desarrollada: parcial; comprada: parcial; uso del personal: plena;\
+        \ agentes: parcial\nLey chilena: Circular 711 [Estado] (datos personales en\
+        \ IA generativa no contratada); L21.719 art. 14 quinquies; ciberconsejo ANCI\
+        \ (orientaci\xF3n)\nEst\xE1ndares internacionales: AI RMF GOVERN 1; ISO 42001\
+        \ A.9.2 a A.9.4; OWASP LLM02"
+      typical_evidence: "Pol\xEDtica aceptada\nlista de herramientas aprobadas\nreportes\
+        \ de detecci\xF3n\nsolicitudes atendidas y sus plazos\nconfiguraci\xF3n del\
+        \ bloqueo por defecto y excepciones vigentes"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Acceptable use of AI by staff and unauthorized AI
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:gob-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:gob
+      ref_id: GOB-05
+      name: "Alfabetizaci\xF3n y capacitaci\xF3n"
+      description: "Formaci\xF3n b\xE1sica para todo el personal (qu\xE9 datos no\
+        \ ingresar, c\xF3mo revisar lo que produce la IA, c\xF3mo reconocer manipulaci\xF3\
+        n o deepfakes) y formaci\xF3n espec\xEDfica para due\xF1os, compradores, desarrolladores\
+        \ y aprobadores."
+      annotation: "Riesgo que reduce: Que las personas entiendan los riesgos y sus\
+        \ obligaciones.\nPerfil m\xEDnimo: Base\n\xC1mbito: organizaci\xF3n (se eval\xFA\
+        a una vez, para la organizaci\xF3n)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 8 h) [OIV]; L21.719 art. 49 (voluntario); ciberconsejo ANCI\
+        \ (orientaci\xF3n)\nEst\xE1ndares internacionales: AI RMF GOVERN 2.2; ISO\
+        \ 42001 7.2, 7.3; EU AI Act art. 4"
+      typical_evidence: "Plan de capacitaci\xF3n\nregistros de asistencia\nresultados\
+        \ de evaluaciones"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI literacy and training
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      assessable: false
+      depth: 1
+      ref_id: INV
+      name: "Inventario, clasificaci\xF3n, impacto y proveedores"
+      translations:
+        en:
+          name: Inventory, classification, impact and suppliers
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      ref_id: INV-01
+      name: Inventario de la IA
+      description: "Registro \xFAnico con la ficha de cada sistema (secci\xF3n 3.6),\
+        \ de los cuatro tipos: desarrollada, comprada o incluida (incluidas las funciones\
+        \ de IA que el proveedor activa en productos ya contratados), herramientas\
+        \ aprobadas para el personal y agentes. Se concilia con lo que se detecta\
+        \ t\xE9cnicamente."
+      annotation: "Riesgo que reduce: Saber qu\xE9 existe para poder protegerlo.\n\
+        Perfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\n\
+        Aplicabilidad por tipo de IA: desarrollada: plena; comprada: plena; uso del\
+        \ personal: plena; agentes: plena\nLey chilena: L21.663 art. 7 [art. 4] (y\
+        \ 8 a) [OIV]); CPLT [Estado] (voluntario) (registro de sistemas automatizados)\n\
+        Est\xE1ndares internacionales: AI RMF GOVERN 1.6; ISO 42001 A.4, A.6; OWASP\
+        \ ASI04"
+      typical_evidence: "Inventario actualizado\nconciliaci\xF3n peri\xF3dica con\
+        \ lo que detecta GOB-04 y, desde el perfil Est\xE1ndar, TRZ-03"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI inventory
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      ref_id: INV-02
+      name: "Clasificaci\xF3n de riesgo y autonom\xEDa"
+      description: Clasificar cada sistema con las tablas 3.2 y 3.3 y asignar su perfil
+        (3.4) antes de usarlo y ante cambios relevantes, incluidos los cambios que
+        haga el proveedor. Las herramientas del personal se clasifican por los datos
+        que se permite usar con ellas.
+      annotation: "Riesgo que reduce: Controles proporcionales.\nPerfil m\xEDnimo:\
+        \ Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: Proyecto de ley de IA (en tr\xE1mite)\
+        \ (niveles de riesgo; puede cambiar)\nEst\xE1ndares internacionales: AI RMF\
+        \ MAP 1, MAP 5; ISO 42001 6.1.2, 8.2"
+      typical_evidence: "Clasificaci\xF3n registrada y aprobada\njustificaci\xF3n"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Risk and autonomy classification
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      ref_id: INV-03
+      name: "Evaluaci\xF3n de impacto"
+      description: "Para sistemas de riesgo medio y alto, propios o comprados: evaluaci\xF3\
+        n de impacto en protecci\xF3n de datos cuando corresponda seg\xFAn la Ley\
+        \ 21.719 y evaluaci\xF3n de impacto del sistema de IA (ISO/IEC 42001). En\
+        \ el Estado, considerar la transparencia algor\xEDtmica del CPLT. En un sistema\
+        \ de perfil Est\xE1ndar con riesgo bajo, el control se cumple dejando constancia\
+        \ en la ficha de que no requiere evaluaci\xF3n."
+      annotation: "Riesgo que reduce: Anticipar da\xF1os a personas y a la organizaci\xF3\
+        n.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema\
+        \ de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: parcial; agentes: plena\nLey chilena: L21.719 art. 15\
+        \ ter; CPLT [Estado] (voluntario); Circular 711 [Estado]; Bases Tipo ChileCompra\
+        \ [Estado]\nEst\xE1ndares internacionales: AI RMF MAP 3, MAP 5; ISO 42001\
+        \ 6.1.4, 8.4, A.5"
+      typical_evidence: "Informe de evaluaci\xF3n\nplan de mitigaci\xF3n\naprobaci\xF3\
+        n de GOB-02"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Impact assessment
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      ref_id: INV-04
+      name: "Requisitos para comprar IA y evaluaci\xF3n de proveedores"
+      description: "Evaluar al proveedor con las preguntas de la secci\xF3n 4.2, con\
+        \ profundidad seg\xFAn el perfil. Cl\xE1usulas tipo: uso de datos para entrenamiento,\
+        \ ubicaci\xF3n y transferencia, registros de auditor\xEDa, aviso de cambios\
+        \ del modelo y de nuevas funciones de IA, notificaci\xF3n de incidentes en\
+        \ plazos compatibles con la Ley 21.663, derecho a auditar, subprocesadores\
+        \ y eliminaci\xF3n al terminar. En el Estado, usar como base las Bases Tipo\
+        \ de ChileCompra. En el Estado, los contratos con proveedores de tecnolog\xED\
+        as de la informaci\xF3n, incluidos los de IA, les exigen compartir informaci\xF3\
+        n sobre vulnerabilidades e incidentes que puedan afectar a los sistemas del\
+        \ servicio, y no pueden contener cl\xE1usulas que lo limiten (Ley 21.663 art.\
+        \ 9; D.295 art. 15). A los contratistas y proveedores que manejan informaci\xF3\
+        n de la organizaci\xF3n, aunque no vendan IA, exigirles por contrato que no\
+        \ la ingresen en herramientas de IA que la organizaci\xF3n no haya autorizado,\
+        \ o darles acceso a las aprobadas."
+      annotation: "Riesgo que reduce: Que los proveedores y los contratos cumplan\
+        \ los requisitos.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFA\
+        a por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: parcial;\
+        \ comprada: plena; uso del personal: plena; agentes: parcial\nLey chilena:\
+        \ L21.719 art. 15 bis (encargado); L21.663 art. 7 [art. 4]; L21.663 art. 9\
+        \ y D.295 art. 15 [Estado] (proveedores de TI); Bases Tipo ChileCompra [Estado];\
+        \ RAN 20-10 y Cap\xEDtulo 20-7 [CMF] (servicios externalizados); ciberconsejo\
+        \ ANCI (orientaci\xF3n)\nEst\xE1ndares internacionales: AI RMF GOVERN 6; ISO\
+        \ 42001 A.10.2, A.10.3; OWASP LLM03"
+      typical_evidence: "Evaluaciones registradas\ncontratos con cl\xE1usulas\nreevaluaci\xF3\
+        n al renovar"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI procurement requirements and supplier assessment
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:inv-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:inv
+      ref_id: INV-05
+      name: Retiro de sistemas
+      description: "Procedimiento de baja: revocar identidades, credenciales y autorizaciones\
+        \ OAuth; borrar o retener datos y memoria seg\xFAn la pol\xEDtica; en IA comprada,\
+        \ pedir la eliminaci\xF3n de los datos al proveedor; archivar registros y\
+        \ actualizar el inventario."
+      annotation: "Riesgo que reduce: Evitar sistemas hu\xE9rfanos con permisos vivos.\n\
+        Perfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\n\
+        Aplicabilidad por tipo de IA: desarrollada: plena; comprada: plena; uso del\
+        \ personal: plena; agentes: plena\nLey chilena: L21.719 art. 14 quinquies\n\
+        Est\xE1ndares internacionales: AI RMF GOVERN 1.7; ISO 42001 A.6; OWASP ASI10"
+      typical_evidence: "Registros de baja\nverificaci\xF3n de credenciales revocadas\n\
+        certificados de eliminaci\xF3n"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: System retirement
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      assessable: false
+      depth: 1
+      ref_id: IDA
+      name: Identidad y acceso
+      translations:
+        en:
+          name: Identity and access
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      ref_id: IDA-01
+      name: Identidad propia y cuentas corporativas
+      description: "Las personas usan las herramientas de IA aprobadas con su cuenta\
+        \ corporativa e inicio de sesi\xF3n \xFAnico, no con cuentas personales. Cada\
+        \ sistema propio, integraci\xF3n de un SaaS y agente tiene una identidad t\xE9\
+        cnica propia (cuenta de servicio o identidad de agente). Se proh\xEDbe que\
+        \ un sistema use cuentas humanas o compartidas. Cuando una persona deja la\
+        \ organizaci\xF3n o cambia de funci\xF3n, se revoca o ajusta su acceso a las\
+        \ herramientas de IA en el mismo plazo que el resto de sus accesos, de preferencia\
+        \ de forma autom\xE1tica desde el directorio, y se decide qu\xE9 pasa con\
+        \ sus conversaciones, proyectos y archivos."
+      annotation: "Riesgo que reduce: Distinguir siempre qui\xE9n o qu\xE9 actu\xF3\
+        .\nPerfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de\
+        \ IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: plena; agentes: plena\nLey chilena: L21.663 art. 7 [art.\
+        \ 4] (y 8 a) [OIV]); L21.719 art. 14 quinquies\nEst\xE1ndares internacionales:\
+        \ ISO 27001 5.16; ISO 42001 A.6 (indirecto); OWASP ASI03"
+      typical_evidence: "Lista de identidades t\xE9cnicas conciliada con INV-01\n\
+        configuraci\xF3n de inicio de sesi\xF3n \xFAnico\ncero cuentas compartidas\
+        \ en la revisi\xF3n\nbajas revocadas dentro del plazo"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Dedicated identity and corporate accounts
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      ref_id: IDA-02
+      name: "M\xEDnimo privilegio"
+      description: "Permisos por herramienta y acci\xF3n (leer, escribir, borrar,\
+        \ pagar), nunca \"acceso total\". Antes de activar un asistente que busca\
+        \ en los documentos de la organizaci\xF3n, revisar y corregir el contenido\
+        \ compartido de m\xE1s, porque el asistente ver\xE1 todo lo que el usuario\
+        \ puede ver. Dentro de las herramientas de IA, los espacios compartidos (proyectos,\
+        \ bases de conocimiento, conversaciones compartidas) se abren por equipo o\
+        \ proyecto seg\xFAn la necesidad de saber, no a toda la organizaci\xF3n por\
+        \ defecto. Revisar los permisos al menos cada 6 meses, y cada 3 en los sistemas\
+        \ de perfil Reforzado."
+      annotation: "Riesgo que reduce: Limitar el da\xF1o si la IA es manipulada, falla\
+        \ o ve de m\xE1s.\nPerfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFA\
+        a por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ plena; uso del personal: plena; agentes: plena\nLey chilena: L21.663 art.\
+        \ 7 [art. 4]; L21.719 art. 14 quinquies; RAN 20-10 [CMF] (accesos)\nEst\xE1\
+        ndares internacionales: AI RMF MANAGE 1; ISO 27001 5.15, 5.18; OWASP LLM06,\
+        \ ASI02"
+      typical_evidence: "Matriz de permisos\nrevisi\xF3n de contenido sobreexpuesto\n\
+        registros de revisi\xF3n de accesos"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Least privilege
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      ref_id: IDA-03
+      name: Credenciales temporales y secretos
+      description: "Tokens de corta duraci\xF3n; secretos en un gestor de secretos,\
+        \ nunca en prompts, c\xF3digo ni memoria; rotaci\xF3n autom\xE1tica. Se proh\xED\
+        be usar llaves de API personales para sistemas de la organizaci\xF3n; las\
+        \ llaves se emiten a nombre de la organizaci\xF3n y por sistema."
+      annotation: "Riesgo que reduce: Evitar llaves permanentes expuestas.\nPerfil\
+        \ m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema de\
+        \ IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: parcial;\
+        \ uso del personal: parcial; agentes: plena\nLey chilena: L21.663 art. 7 [art.\
+        \ 4]; L21.719 art. 14 quinquies\nEst\xE1ndares internacionales: ISO 27001\
+        \ 5.17, 8.24; OWASP ASI03"
+      typical_evidence: "Configuraci\xF3n del gestor de secretos\npol\xEDtica de duraci\xF3\
+        n\nescaneo sin secretos expuestos\ninventario de llaves de API"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Temporary credentials and secrets
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      ref_id: IDA-04
+      name: "Delegaci\xF3n expl\xEDcita"
+      description: "Cuando un sistema act\xFAa por un usuario (copilotos, agentes),\
+        \ usar delegaci\xF3n expl\xEDcita (on-behalf-of), con los permisos del usuario\
+        \ como techo. El sistema nunca suma permisos propios a los del usuario."
+      annotation: "Riesgo que reduce: Saber siempre en nombre de qui\xE9n act\xFA\
+        a la IA.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa\
+        \ por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: parcial;\
+        \ comprada: parcial; uso del personal: no; agentes: plena\nLey chilena: L21.663\
+        \ art. 7 [art. 4]; L21.719 art. 14 quinquies\nEst\xE1ndares internacionales:\
+        \ AI RMF GOVERN 3.2; ISO 27001 5.15; OWASP LLM06, ASI03"
+      typical_evidence: "Dise\xF1o de flujos de delegaci\xF3n\nregistros con la identidad\
+        \ del sistema y la del usuario"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Explicit delegation
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ida-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ida
+      ref_id: IDA-05
+      name: "Autenticaci\xF3n entre sistemas"
+      description: "Autenticaci\xF3n mutua entre agentes, herramientas, servidores\
+        \ MCP e integraciones; lista de sistemas confiables; validar la identidad\
+        \ antes de aceptar instrucciones de otro sistema."
+      annotation: "Riesgo que reduce: Evitar suplantaci\xF3n entre agentes, herramientas\
+        \ y servicios.\nPerfil m\xEDnimo: Reforzado\n\xC1mbito: sistema (se eval\xFA\
+        a por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: parcial;\
+        \ comprada: parcial; uso del personal: no; agentes: plena\nLey chilena: L21.663\
+        \ art. 7 [art. 4]\nEst\xE1ndares internacionales: ISO 27001 8.5, 8.20; OWASP\
+        \ ASI07"
+      typical_evidence: "Configuraci\xF3n\nlista de confianza\npruebas de suplantaci\xF3\
+        n"
+      implementation_groups:
+      - reforzado
+      translations:
+        en:
+          name: System-to-system authentication
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      assessable: false
+      depth: 1
+      ref_id: OPE
+      name: "Operaci\xF3n y supervisi\xF3n humana"
+      translations:
+        en:
+          name: Operation and human oversight
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-01
+      name: Punto de control del uso de IA
+      description: "Definir por d\xF3nde pasa el acceso a la IA y aplicar ah\xED las\
+        \ reglas y el registro, seg\xFAn el tipo de IA (tabla 6.3): una pasarela para\
+        \ los sistemas propios y los agentes (con bloqueo de las conexiones directas;\
+        \ ver 7.3); un proxy, CASB u otro punto centralizado equivalente para el uso\
+        \ del personal; la consola de administraci\xF3n del proveedor para la IA comprada.\
+        \ El punto de control se trata como infraestructura cr\xEDtica."
+      annotation: "Riesgo que reduce: Que el uso de la IA pase por un lugar donde\
+        \ se aplican las reglas.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema\
+        \ (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: parcial; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4]; L21.719 art. 14 quinquies\nEst\xE1ndares internacionales:\
+        \ AI RMF MANAGE 1, 2; ISO 42001 A.9; OWASP LLM06, LLM10"
+      typical_evidence: "Arquitectura documentada\nreglas de red o de proxy\nconfiguraci\xF3\
+        n de las consolas\nreglas versionadas"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI usage control point
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-02
+      name: Contenido externo no confiable
+      description: "Tratar correos, documentos, web, respuestas de herramientas y\
+        \ mensajes de otros sistemas como datos, no como \xF3rdenes. Filtros de entrada\
+        \ y salida y menos herramientas disponibles cuando se procesa contenido externo.\
+        \ En IA comprada, activar las protecciones que ofrezca el proveedor y limitar\
+        \ sus conectores (OPE-07). En perfil Base basta con no dar al sistema herramientas\
+        \ ni permisos que no necesita y con activar las protecciones del proveedor;\
+        \ los filtros propios y las pruebas de inyecci\xF3n se exigen desde el perfil\
+        \ Est\xE1ndar."
+      annotation: "Riesgo que reduce: Reducir la inyecci\xF3n de prompts directa e\
+        \ indirecta.\nPerfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por\
+        \ sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ parcial; uso del personal: parcial; agentes: plena\nLey chilena: L21.663\
+        \ art. 7 [art. 4]; L21.719 art. 14 quinquies\nEst\xE1ndares internacionales:\
+        \ AI RMF MEASURE 2.7; OWASP LLM01, ASI01; ATLAS AML.T0051"
+      typical_evidence: "Dise\xF1o documentado\nconfiguraci\xF3n de filtros o del\
+        \ proveedor\ndesde el perfil Est\xE1ndar, resultados de pruebas de inyecci\xF3\
+        n (CAD-03)"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Untrusted external content
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-03
+      name: "Supervisi\xF3n humana proporcional al impacto"
+      description: "Definir, seg\xFAn la autonom\xEDa, qu\xE9 decisiones y acciones\
+        \ requieren revisi\xF3n o aprobaci\xF3n humana (pagos, cambios a datos de\
+        \ clientes, env\xEDos externos, borrados, decisiones sobre personas). La persona\
+        \ ve qu\xE9 har\xE1 exactamente el sistema. Para la IA generativa, una persona\
+        \ revisa el resultado antes de publicarlo, enviarlo a terceros o usarlo para\
+        \ decidir."
+      annotation: "Riesgo que reduce: Que las decisiones relevantes las tome o revise\
+        \ una persona.\nPerfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por\
+        \ sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ plena; uso del personal: plena; agentes: plena\nLey chilena: L21.719 art.\
+        \ 8 bis (intervenci\xF3n humana); Circular 711 [Estado]; proyecto de ley de\
+        \ IA (en tr\xE1mite); ciberconsejo ANCI (orientaci\xF3n)\nEst\xE1ndares internacionales:\
+        \ AI RMF GOVERN 3.2, MAP 3.5; ISO 42001 A.9; EU AI Act art. 14"
+      typical_evidence: "Cat\xE1logo de acciones con aprobaci\xF3n\nregistros de aprobaciones\
+        \ y rechazos\ninstrucci\xF3n en la pol\xEDtica de uso aceptable"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Human oversight proportional to impact
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-04
+      name: "Aislamiento de ejecuci\xF3n"
+      description: "Ejecutar el c\xF3digo generado por IA en entornos aislados (sandbox)\
+        \ sin acceso a producci\xF3n ni a credenciales; separar desarrollo, pruebas\
+        \ y producci\xF3n; limitar la salida a Internet."
+      annotation: "Riesgo que reduce: Contener la ejecuci\xF3n de c\xF3digo y las\
+        \ acciones peligrosas.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema\
+        \ (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ parcial; comprada: no; uso del personal: no; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4]\nEst\xE1ndares internacionales: AI RMF MANAGE 2;\
+        \ ISO 27001 8.22, 8.31; OWASP LLM05, ASI05"
+      typical_evidence: "Configuraci\xF3n del entorno aislado\nsegmentaci\xF3n de\
+        \ red\npruebas de escape"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Execution isolation
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-05
+      name: "L\xEDmites y apagado"
+      description: "L\xEDmites de uso, gasto, pasos y alcance de datos por sistema.\
+        \ Mecanismo probado para detener: el interruptor (kill switch) por agente\
+        \ y global; desactivar una funci\xF3n de IA en un producto comprado desde\
+        \ su consola; bloquear una herramienta del personal en toda la organizaci\xF3\
+        n. En perfil Base, se comprueba que el sistema se puede detener al ponerlo\
+        \ en marcha y despu\xE9s de cada cambio relevante (CAD-04 o aviso del proveedor).\
+        \ En Est\xE1ndar y Reforzado, adem\xE1s, se prueba al menos una vez al a\xF1\
+        o."
+      annotation: "Riesgo que reduce: Poder detener la IA a tiempo.\nPerfil m\xED\
+        nimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: L21.663 art. 8 e) [OIV]\nEst\xE1ndares\
+        \ internacionales: AI RMF MANAGE 2.4; EU AI Act art. 14; OWASP LLM10, ASI08"
+      typical_evidence: "Configuraci\xF3n de l\xEDmites\npruebas del apagado\nalertas\
+        \ al superar umbrales"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Limits and shutdown
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-06
+      name: "Verificaci\xF3n de resultados"
+      description: "Validar y sanear las salidas antes de pasarlas a otros sistemas\
+        \ (consultas, comandos, HTML). Verificar los datos cr\xEDticos contra la fuente,\
+        \ porque la IA puede inventar datos, citas o cifras. Marcar el contenido generado\
+        \ por IA cuando corresponda."
+      annotation: "Riesgo que reduce: Que lo que produce la IA no se ejecute, publique\
+        \ ni use sin control.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se\
+        \ eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4]; proyecto de ley de IA (en tr\xE1mite) (transparencia)\n\
+        Est\xE1ndares internacionales: AI RMF MEASURE 2.5; NIST AI 600-1 (confabulaci\xF3\
+        n); OWASP LLM05, LLM09"
+      typical_evidence: "Reglas de validaci\xF3n\npruebas\nmuestras revisadas"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Output verification
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:ope-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:ope
+      ref_id: OPE-07
+      name: Herramientas, conectores y extensiones
+      description: "Cat\xE1logo de herramientas, servidores MCP, plugins, conectores\
+        \ de copilotos SaaS y extensiones del navegador aprobados, con due\xF1o, versi\xF3\
+        n y permisos. Las nuevas pasan por CAD-01. Se restringe que los usuarios autoricen\
+        \ aplicaciones de IA con OAuth sin aprobaci\xF3n, y que un agente instale\
+        \ o registre herramientas por s\xED mismo. Incluye los asistentes que se unen\
+        \ a reuniones para grabar o transcribir: solo se usan los aprobados, configurados\
+        \ desde la plataforma de reuniones, y se informa a los participantes."
+      annotation: "Riesgo que reduce: Que la IA solo se conecte a lo aprobado y con\
+        \ el alcance m\xEDnimo.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema\
+        \ (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ parcial; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4]\nEst\xE1ndares internacionales: AI RMF GOVERN 6;\
+        \ ISO 42001 A.10; OWASP LLM03, ASI02, ASI04; ATLAS AML.T0053, AML.T0110"
+      typical_evidence: "Cat\xE1logo\nregistros de aprobaci\xF3n\nbloqueo t\xE9cnico\
+        \ de lo no catalogado\nconfiguraci\xF3n de consentimientos OAuth"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Tools, connectors and extensions
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      assessable: false
+      depth: 1
+      ref_id: DAT
+      name: Datos, privacidad y memoria
+      translations:
+        en:
+          name: Data, privacy and memory
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-01
+      name: "Datos permitidos y minimizaci\xF3n"
+      description: "Definir qu\xE9 clasificaciones de informaci\xF3n se pueden usar\
+        \ en cada herramienta o sistema (por ejemplo: p\xFAblica e interna en el asistente\
+        \ general; datos de clientes solo en la versi\xF3n contratada). Excluir o\
+        \ enmascarar datos personales y sensibles cuando no son necesarios. Respetar\
+        \ los permisos del usuario en las b\xFAsquedas (RAG)."
+      annotation: "Riesgo que reduce: Que cada IA vea solo los datos que necesita.\n\
+        Perfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\n\
+        Aplicabilidad por tipo de IA: desarrollada: plena; comprada: plena; uso del\
+        \ personal: plena; agentes: plena\nLey chilena: L21.719 art. 14 quinquies\
+        \ y principios; Circular 711 [Estado]; ciberconsejo ANCI (orientaci\xF3n)\n\
+        Est\xE1ndares internacionales: AI RMF MAP 4; ISO 42001 A.7; OWASP LLM02, LLM08"
+      typical_evidence: "Tabla de datos permitidos por herramienta\nreglas de enmascaramiento\n\
+        pruebas de sobreexposici\xF3n"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Permitted data and minimization
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-02
+      name: Memoria y bases de conocimiento
+      description: "Controlar qui\xE9n puede escribir en las bases de conocimiento\
+        \ y en la memoria; memoria aislada por usuario o contexto; procedencia y versionado;\
+        \ revisi\xF3n peri\xF3dica. En IA comprada, configurar o desactivar la memoria\
+        \ seg\xFAn la pol\xEDtica."
+      annotation: "Riesgo que reduce: Evitar el envenenamiento de lo que la IA recuerda\
+        \ o consulta.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFA\
+        a por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ parcial; uso del personal: parcial; agentes: plena\nLey chilena: L21.719\
+        \ art. 14 quinquies\nEst\xE1ndares internacionales: AI RMF MEASURE 2.7; OWASP\
+        \ LLM04, ASI06; ATLAS AML.T0020, AML.T0080"
+      typical_evidence: "Permisos de escritura\nregistros de cambios\nconfiguraci\xF3\
+        n de memoria"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Memory and knowledge bases
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-03
+      name: "Prevenci\xF3n de fuga de datos"
+      description: "DLP sobre prompts, archivos subidos y respuestas: en la pasarela,\
+        \ en el proxy del personal o en la consola del proveedor. Control del destino\
+        \ de las acciones (correos, URLs, archivos). Protecci\xF3n del prompt de sistema.\
+        \ Desactivar o restringir en las herramientas de IA la publicaci\xF3n de conversaciones,\
+        \ archivos y resultados mediante enlaces p\xFAblicos."
+      annotation: "Riesgo que reduce: Evitar que datos confidenciales salgan por la\
+        \ IA.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por\
+        \ sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ parcial; uso del personal: plena; agentes: plena\nLey chilena: L21.719 arts.\
+        \ 14 quinquies y 14 sexies; L21.663 art. 7 [art. 4]\nEst\xE1ndares internacionales:\
+        \ AI RMF MEASURE 2.7; OWASP LLM02, LLM07; ATLAS AML.T0085.002, AML.T0136"
+      typical_evidence: "Pol\xEDtica DLP\nalertas y casos\npruebas de exfiltraci\xF3\
+        n"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Data leakage prevention
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-04
+      name: Decisiones automatizadas y derechos de las personas
+      description: "Identificar los sistemas, propios o comprados, que toman o preparan\
+        \ decisiones con efectos sobre personas. Habilitar la oposici\xF3n y, cuando\
+        \ la decisi\xF3n automatizada procede por excepci\xF3n, la explicaci\xF3n,\
+        \ la intervenci\xF3n humana, la posibilidad de expresar el punto de vista\
+        \ y de pedir revisi\xF3n (art. 8 bis). Informar sobre las decisiones automatizadas\
+        \ (art. 14 ter l) y aplicar protecci\xF3n desde el dise\xF1o (art. 14 qu\xE1\
+        ter). En el Estado, transparencia algor\xEDtmica."
+      annotation: "Riesgo que reduce: Respetar los derechos frente a decisiones automatizadas.\n\
+        Perfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema\
+        \ de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: parcial; agentes: plena\nLey chilena: L21.719 arts. 8\
+        \ bis, 14 ter l), 14 qu\xE1ter; CPLT Res. Ex. 372/2024 [Estado] (voluntario);\
+        \ proyecto de ley de IA (en tr\xE1mite)\nEst\xE1ndares internacionales: AI\
+        \ RMF MAP 3.5, GOVERN 4; ISO 42001 A.8.2; EU AI Act arts. 13, 14, 86"
+      typical_evidence: 'Inventario de decisiones automatizadas
+
+        procedimiento de solicitudes
+
+        textos informativos'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Automated decisions and individuals' rights
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-05
+      name: "Transferencia, retenci\xF3n y uso por el proveedor"
+      description: "Conocer d\xF3nde se procesan los datos; prohibir por contrato\
+        \ o configuraci\xF3n el entrenamiento con datos propios salvo autorizaci\xF3\
+        n; definir la retenci\xF3n de prompts, archivos, registros y memoria, y configurarla\
+        \ en las consolas de los proveedores; evaluar las transferencias internacionales."
+      annotation: "Riesgo que reduce: Controlar d\xF3nde quedan los datos, por cu\xE1\
+        nto tiempo y para qu\xE9.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema\
+        \ (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ parcial; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.719 arts. 15 bis y 27\u201328; Circular 711 [Estado]\nEst\xE1ndares\
+        \ internacionales: AI RMF GOVERN 6; ISO 42001 A.7, A.10; OWASP LLM02"
+      typical_evidence: "Contratos\nconfiguraci\xF3n de retenci\xF3n\nregistro de\
+        \ transferencias"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Transfer, retention and use by the provider
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:dat-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:dat
+      ref_id: DAT-06
+      name: Datos de entrenamiento y ajuste
+      description: "Para la IA que la organizaci\xF3n entrena o ajusta, incluido el\
+        \ ajuste fino de modelos de terceros y los conjuntos de evaluaci\xF3n: registrar\
+        \ el origen y la base de licitud de cada conjunto de datos, sus condiciones\
+        \ de uso o licencia, su calidad y representatividad para el prop\xF3sito,\
+        \ y qui\xE9n puede modificarlo; versionarlo junto con el modelo (CAD-02);\
+        \ excluir o anonimizar los datos personales que no se necesiten. En IA comprada,\
+        \ pedir al proveedor la informaci\xF3n disponible sobre sus datos de entrenamiento."
+      annotation: "Riesgo que reduce: Que los datos con que se entrena o ajusta un\
+        \ modelo sean l\xEDcitos, adecuados y trazables.\nPerfil m\xEDnimo: Est\xE1\
+        ndar\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad por\
+        \ tipo de IA: desarrollada: plena; comprada: parcial; uso del personal: no;\
+        \ agentes: parcial\nLey chilena: L21.719 principios y art. 14 quinquies; Circular\
+        \ 711 [Estado]\nEst\xE1ndares internacionales: AI RMF MAP 4; ISO 42001 A.7;\
+        \ EU AI Act art. 10; OWASP LLM04; ATLAS AML.T0020 [POR VERIFICAR]"
+      typical_evidence: "Ficha de cada conjunto de datos\nregistros de versiones\n\
+        revisi\xF3n de licitud y licencias"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Training and fine-tuning data
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      assessable: false
+      depth: 1
+      ref_id: CAD
+      name: Proveedores, cadena de suministro y desarrollo seguro
+      translations:
+        en:
+          name: Suppliers, supply chain and secure development
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-01
+      name: "Evaluaci\xF3n de componentes y servicios de IA"
+      description: "Antes de usarlos, evaluar modelos, servidores MCP, plugins, extensiones,\
+        \ librer\xEDas y servicios SaaS de IA: origen, mantenimiento, permisos que\
+        \ piden y antecedentes de seguridad. Incluye las funciones de IA nuevas que\
+        \ un proveedor activa en un producto ya contratado: se eval\xFAan antes de\
+        \ habilitarlas para los usuarios. Si el componente o servicio es de un proveedor,\
+        \ la evaluaci\xF3n incluye al menos las preguntas 1 a 5 de la secci\xF3n 4.2."
+      annotation: "Riesgo que reduce: No incorporar componentes inseguros.\nPerfil\
+        \ m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: L21.663 art. 7 [art. 4]; Bases Tipo\
+        \ ChileCompra [Estado]; ciberconsejo ANCI (orientaci\xF3n)\nEst\xE1ndares\
+        \ internacionales: AI RMF GOVERN 6, MAP 4; ISO 42001 A.10.2; OWASP LLM03;\
+        \ ATLAS AML.T0010"
+      typical_evidence: "Evaluaciones\naprobaci\xF3n registrada"
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Assessment of AI components and services
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-02
+      name: Inventario de componentes de IA (AI-BOM) e integridad
+      description: "Lista de componentes por sistema (modelo, versi\xF3n, prompts,\
+        \ herramientas, datos); verificaci\xF3n de integridad cuando est\xE9 disponible;\
+        \ versiones fijadas. En IA comprada, pedir al proveedor la informaci\xF3n\
+        \ disponible."
+      annotation: "Riesgo que reduce: Saber qu\xE9 componentes y versiones usa cada\
+        \ sistema.\nPerfil m\xEDnimo: Reforzado\n\xC1mbito: sistema (se eval\xFAa\
+        \ por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ parcial; uso del personal: no; agentes: plena\nLey chilena: \u2014\nEst\xE1\
+        ndares internacionales: AI RMF MAP 4; ISO 42001 A.4.4; OWASP LLM03; ATLAS\
+        \ AML.T0010"
+      typical_evidence: "AI-BOM por sistema\nregistros de verificaci\xF3n"
+      implementation_groups:
+      - reforzado
+      translations:
+        en:
+          name: AI component inventory (AI-BOM) and integrity
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-03
+      name: Pruebas adversariales (red teaming)
+      description: "Antes de producci\xF3n, ante cambios relevantes y, en agentes\
+        \ que ya operan, antes de pasar a modo bloqueo (7.5): pruebas de inyecci\xF3\
+        n, abuso de herramientas, fuga de datos, escalamiento de privilegios y jailbreak,\
+        \ con OWASP y MITRE ATLAS como gu\xEDa. En IA comprada, pedir al proveedor\
+        \ evidencia de sus pruebas y, si el contrato lo permite, probar la configuraci\xF3\
+        n propia."
+      annotation: "Riesgo que reduce: Encontrar fallas antes que los atacantes.\n\
+        Perfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema\
+        \ de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: parcial;\
+        \ uso del personal: no; agentes: plena\nLey chilena: L21.663 art. 8 d) [OIV];\
+        \ RAN 20-10 [CMF] (resultados al directorio al menos semestralmente)\nEst\xE1\
+        ndares internacionales: AI RMF MEASURE 2.7; ISO 27001 8.29; OWASP LLM01, ASI01;\
+        \ ATLAS v2026.10"
+      typical_evidence: 'Plan y resultados
+
+        hallazgos corregidos
+
+        evidencia del proveedor'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Adversarial testing (red teaming)
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-04
+      name: "Gesti\xF3n de cambios"
+      description: "Versionar prompts de sistema, configuraci\xF3n y modelos propios;\
+        \ evaluar antes de cambiar; poder volver atr\xE1s. Para IA comprada: seguir\
+        \ los avisos del proveedor sobre cambios de modelo o de funciones y evaluar\
+        \ su efecto antes de que lleguen a los usuarios, cuando la consola lo permita."
+      annotation: "Riesgo que reduce: Evitar cambios no evaluados que alteren el comportamiento.\n\
+        Perfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema\
+        \ de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: parcial; agentes: plena\nLey chilena: \u2014\nEst\xE1\
+        ndares internacionales: AI RMF MANAGE 4; ISO 42001 A.6; ISO 27001 8.32"
+      typical_evidence: 'Repositorio versionado
+
+        registros de cambios
+
+        avisos de proveedores revisados'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Change management
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-05
+      name: Desarrollo seguro con IA
+      description: "En el ciclo de desarrollo: modelado de amenazas para aplicaciones\
+        \ con IA y agentes (OWASP), revisi\xF3n del c\xF3digo, incluido el generado\
+        \ con asistentes de programaci\xF3n, y escaneo de secretos y dependencias."
+      annotation: "Riesgo que reduce: Seguridad desde el dise\xF1o, tambi\xE9n en\
+        \ el c\xF3digo que escribe la IA.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito:\
+        \ sistema (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA:\
+        \ desarrollada: plena; comprada: no; uso del personal: parcial; agentes: plena\n\
+        Ley chilena: L21.663 art. 7 [art. 4]; L21.719 arts. 14 qu\xE1ter y 14 quinquies\n\
+        Est\xE1ndares internacionales: AI RMF MEASURE 2.7; ISO 27001 8.25 a 8.28;\
+        \ OWASP LLM05, ASI05"
+      typical_evidence: 'Modelos de amenazas
+
+        resultados de revisiones y escaneos'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Secure development with AI
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:cad-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:cad
+      ref_id: CAD-06
+      name: "Evaluaci\xF3n de validez, desempe\xF1o y equidad"
+      description: "Antes de producci\xF3n y ante cambios relevantes (CAD-04): definir\
+        \ los criterios de aceptaci\xF3n del sistema seg\xFAn su prop\xF3sito (por\
+        \ ejemplo, exactitud, tasa de error aceptable y comportamiento ante entradas\
+        \ inusuales) y probarlo con datos representativos del uso real. Si toma o\
+        \ prepara decisiones sobre personas, medir si sus resultados o errores difieren\
+        \ entre grupos, cuando sea l\xEDcito y posible medirlo, y documentar c\xF3\
+        mo se explica cada resultado. En IA comprada, pedir al proveedor sus resultados\
+        \ y, si se puede, probar con casos propios."
+      annotation: "Riesgo que reduce: Que el sistema haga bien lo que promete, tambi\xE9\
+        n para los distintos grupos de personas.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1\
+        mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de\
+        \ IA: desarrollada: plena; comprada: parcial; uso del personal: no; agentes:\
+        \ plena\nLey chilena: L21.719 art. 8 bis (relaci\xF3n indirecta); Bases Tipo\
+        \ ChileCompra [Estado]; proyecto de ley de IA (en tr\xE1mite)\nEst\xE1ndares\
+        \ internacionales: AI RMF MEASURE 2.3, 2.5, 2.11; ISO 42001 A.6.2.4; EU AI\
+        \ Act art. 15; NIST AI 600-1 [POR VERIFICAR]"
+      typical_evidence: "Criterios de aceptaci\xF3n aprobados\nresultados de pruebas\
+        \ por versi\xF3n\nan\xE1lisis de diferencias entre grupos y medidas tomadas"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Validity, performance and fairness evaluation
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      assessable: false
+      depth: 1
+      ref_id: TRZ
+      name: Registro, monitoreo y evidencia
+      translations:
+        en:
+          name: Logging, monitoring and evidence
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      ref_id: TRZ-01
+      name: Registro de uso y acciones
+      description: "En sistemas propios y agentes: registrar cada acci\xF3n con fecha\
+        \ y hora, sistema, identidad, usuario delegante, herramienta, par\xE1metros\
+        \ relevantes, datos tocados, aprobaci\xF3n y resultado. En IA comprada: activar\
+        \ y exportar los registros de auditor\xEDa nativos del proveedor. En el uso\
+        \ del personal: registros de acceso del proxy o de la consola de la herramienta\
+        \ aprobada. Por defecto se registran metadatos (qui\xE9n, qu\xE9 sistema,\
+        \ qu\xE9 acci\xF3n, cu\xE1ndo y con qu\xE9 resultado); el contenido (prompts,\
+        \ archivos y respuestas) se guarda solo cuando el perfil o una investigaci\xF3\
+        n lo justifican, con retenci\xF3n y acceso definidos, porque tambi\xE9n es\
+        \ un tratamiento de datos (DAT-01)."
+      annotation: "Riesgo que reduce: Poder reconstruir qu\xE9 hizo la IA y qui\xE9\
+        n la us\xF3.\nPerfil m\xEDnimo: Base\n\xC1mbito: sistema (se eval\xFAa por\
+        \ sistema de IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada:\
+        \ plena; uso del personal: parcial; agentes: plena\nLey chilena: L21.663 art.\
+        \ 7 [art. 4]; art. 8 b) [OIV] (registro de las acciones del SGSI; relaci\xF3\
+        n indirecta)\nEst\xE1ndares internacionales: AI RMF MANAGE 4.1; ISO 42001\
+        \ A.6.2.8; OWASP ASI10"
+      typical_evidence: 'Muestras de registros
+
+        porcentaje de sistemas con registro activo'
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Usage and action logging
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      ref_id: TRZ-02
+      name: "Integridad y retenci\xF3n de registros"
+      description: "Registros centralizados, protegidos contra modificaci\xF3n, con\
+        \ retenci\xF3n definida seg\xFAn las obligaciones legales y contractuales;\
+        \ sincronizaci\xF3n horaria."
+      annotation: "Riesgo que reduce: Que los registros sirvan como evidencia.\nPerfil\
+        \ m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema de\
+        \ IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: parcial; agentes: plena\nLey chilena: L21.663 art. 7 [art.\
+        \ 4]\nEst\xE1ndares internacionales: AI RMF MANAGE 4.1; ISO 42001 A.6.2.8;\
+        \ ISO 27001 8.15, 8.17"
+      typical_evidence: "Configuraci\xF3n del repositorio\npol\xEDtica de retenci\xF3\
+        n"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Log integrity and retention
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      ref_id: TRZ-03
+      name: "Monitoreo y detecci\xF3n"
+      description: "Integrar la telemetr\xEDa de la IA en el SOC o SIEM. Alertas por\
+        \ patrones an\xF3malos: volumen, herramientas inusuales, acceso masivo a datos,\
+        \ intentos de inyecci\xF3n, sistemas no registrados. Detecci\xF3n de IA no\
+        \ autorizada: tr\xE1fico hacia servicios de IA no aprobados, extensiones y\
+        \ autorizaciones OAuth nuevas."
+      annotation: "Riesgo que reduce: Detectar abusos, desv\xEDos, ataques e IA no\
+        \ autorizada a tiempo.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema\
+        \ (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: plena; uso del personal: plena; agentes: plena\nLey chilena:\
+        \ L21.663 art. 7 [art. 4]; RAN 20-10 [CMF] (monitoreo continuo, SOC 24 h)\n\
+        Est\xE1ndares internacionales: AI RMF MANAGE 4.1; ISO 42001 A.6.2.6; OWASP\
+        \ LLM10, ASI10; ATLAS"
+      typical_evidence: "Casos de uso de detecci\xF3n\nalertas gestionadas\ntiempo\
+        \ de detecci\xF3n"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Monitoring and detection
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      ref_id: TRZ-04
+      name: "Indicadores e informe a la direcci\xF3n"
+      description: "Indicadores m\xEDnimos (secci\xF3n 9.1). Informe peri\xF3dico\
+        \ a GOB-02 y al directorio, con el nivel de madurez y el cumplimiento de los\
+        \ perfiles."
+      annotation: "Riesgo que reduce: Que la direcci\xF3n vea el riesgo real.\nPerfil\
+        \ m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema de\
+        \ IA)\nAplicabilidad por tipo de IA: desarrollada: plena; comprada: plena;\
+        \ uso del personal: plena; agentes: plena\nLey chilena: L21.663 art. 7 [art.\
+        \ 4]; RAN 20-10 [CMF] (informaci\xF3n al directorio); L21.719 art. 49 (voluntario)\n\
+        Est\xE1ndares internacionales: AI RMF MANAGE 4; ISO 42001 9.1, 9.3"
+      typical_evidence: 'Tablero
+
+        informes presentados
+
+        actas'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Indicators and management reporting
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:trz-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:trz
+      ref_id: TRZ-05
+      name: "Desempe\xF1o en operaci\xF3n y deriva"
+      description: "Definir indicadores y umbrales a partir de los criterios de CAD-06;\
+        \ medirlos peri\xF3dicamente con muestras revisadas o con resultados reales;\
+        \ alertar cuando se alejan de lo aprobado (por cambios en los datos, en el\
+        \ uso o en el modelo del proveedor) y, seg\xFAn el caso, revisar, reentrenar,\
+        \ volver a una versi\xF3n anterior o suspender (OPE-05). En sistemas que deciden\
+        \ sobre personas, seguir tambi\xE9n las diferencias entre grupos. Los reclamos\
+        \ de usuarios y de personas afectadas cuentan como se\xF1al."
+      annotation: "Riesgo que reduce: Detectar cuando el sistema deja de funcionar\
+        \ como se aprob\xF3.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito: sistema (se\
+        \ eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA: desarrollada:\
+        \ plena; comprada: parcial; uso del personal: no; agentes: plena\nLey chilena:\
+        \ \u2014\nEst\xE1ndares internacionales: AI RMF MEASURE 2.4, MANAGE 4.1; ISO\
+        \ 42001 A.6.2.6; EU AI Act art. 72 [POR VERIFICAR]"
+      typical_evidence: "Indicadores y umbrales\nmediciones peri\xF3dicas\nalertas\
+        \ y acciones tomadas"
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Operational performance and drift
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:res
+      assessable: false
+      depth: 1
+      ref_id: RES
+      name: "Respuesta, notificaci\xF3n y resiliencia"
+      translations:
+        en:
+          name: Response, notification and resilience
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:res-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:res
+      ref_id: RES-01
+      name: Manual de incidentes de IA
+      description: "Escenarios de IA en el plan de incidentes: agente o sistema manipulado;\
+        \ fuga de datos por una herramienta de IA, incluido el caso de una persona\
+        \ que ingres\xF3 datos donde no deb\xEDa; envenenamiento; incidente en un\
+        \ proveedor de IA; fraude con deepfake. Incluye detener (OPE-05), revocar\
+        \ credenciales y preservar evidencia (IDA-03 y TRZ-02 desde el perfil Est\xE1\
+        ndar)."
+      annotation: "Riesgo que reduce: Responder de forma ordenada.\nPerfil m\xEDnimo:\
+        \ Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: L21.663 arts. 7 y 9 [art. 4]; D.295;\
+        \ L21.719 art. 14 sexies\nEst\xE1ndares internacionales: AI RMF MANAGE 4.3;\
+        \ ISO 42001 A.8.4; ISO 27001 5.24 a 5.28"
+      typical_evidence: 'Manual
+
+        matriz de escalamiento
+
+        registros de casos'
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: AI incident playbook
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:res-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:res
+      ref_id: RES-02
+      name: "Notificaci\xF3n regulatoria"
+      description: "Identificar qu\xE9 obligaciones de notificaci\xF3n aplican a la\
+        \ organizaci\xF3n y a cada sistema, con un responsable para cada una. Instituciones\
+        \ del art. 4 de la Ley 21.663, ante un incidente con efecto significativo:\
+        \ alerta temprana al CSIRT Nacional dentro de 3 horas desde que se tiene conocimiento,\
+        \ actualizaci\xF3n dentro de 72 horas (24 horas para un OIV cuyo servicio\
+        \ esencial se vea afectado) e informe final dentro de 15 d\xEDas corridos\
+        \ desde la alerta. Los OIV presentan adem\xE1s su plan de acci\xF3n en un\
+        \ m\xE1ximo de 7 d\xEDas corridos (art. 9; D.295 art. 11). El reporte omite\
+        \ datos personales (D.295 art. 6). Datos personales: informar a la Agencia\
+        \ de Protecci\xF3n de Datos Personales \"sin dilaciones indebidas\" (Ley 21.719\
+        \ art. 14 sexies; sin plazo en horas). Fiscalizados CMF: Cap\xEDtulo 20-8\
+        \ RAN (30 minutos para comunicar el incidente, seg\xFAn una copia no oficial;\
+        \ plazo [POR VERIFICAR] en el texto vigente). Exigir a los proveedores de\
+        \ IA avisos compatibles con estos plazos (INV-04)."
+      annotation: "Riesgo que reduce: Cumplir los plazos legales.\nPerfil m\xEDnimo:\
+        \ Base\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: L21.663 art. 9 [art. 4]; D.295 arts.\
+        \ 6 y 11; L21.719 art. 14 sexies; RAN 20-10 [CMF] / Cap. 20-8; NCG 454 [CMF]\n\
+        Est\xE1ndares internacionales: AI RMF MANAGE 4.3; ISO 42001 A.8.4; ISO 27001\
+        \ 5.5, 5.26"
+      typical_evidence: 'Procedimiento con plazos
+
+        plantillas
+
+        registros de notificaciones'
+      implementation_groups:
+      - base
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Regulatory notification
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:res-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:res
+      ref_id: RES-03
+      name: "Continuidad y degradaci\xF3n segura"
+      description: Modo manual o degradado para los procesos que dependen de la IA;
+        incluirlos en los planes de continuidad; evaluar la dependencia de un solo
+        proveedor de modelos o de un solo SaaS.
+      annotation: "Riesgo que reduce: Que la operaci\xF3n siga si la IA falla, se\
+        \ apaga o el proveedor no responde.\nPerfil m\xEDnimo: Est\xE1ndar\n\xC1mbito:\
+        \ sistema (se eval\xFAa por sistema de IA)\nAplicabilidad por tipo de IA:\
+        \ desarrollada: plena; comprada: plena; uso del personal: parcial; agentes:\
+        \ plena\nLey chilena: L21.663 art. 8 c) [OIV]\nEst\xE1ndares internacionales:\
+        \ AI RMF MANAGE 2.4; ISO 27001 5.29, 5.30; OWASP ASI08"
+      typical_evidence: 'Planes de continuidad
+
+        pruebas'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Continuity and safe degradation
+    - urn: urn:athanor:risk:req_node:msia-cl-0.6:res-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:athanor:risk:req_node:msia-cl-0.6:res
+      ref_id: RES-04
+      name: Ejercicios y lecciones aprendidas
+      description: "Ejercicios al menos una vez al a\xF1o con escenarios de IA; an\xE1\
+        lisis post-incidente; actualizaci\xF3n de controles y del marco interno."
+      annotation: "Riesgo que reduce: Mejorar con cada evento.\nPerfil m\xEDnimo:\
+        \ Est\xE1ndar\n\xC1mbito: sistema (se eval\xFAa por sistema de IA)\nAplicabilidad\
+        \ por tipo de IA: desarrollada: plena; comprada: plena; uso del personal:\
+        \ plena; agentes: plena\nLey chilena: L21.663 art. 8 d) [OIV]\nEst\xE1ndares\
+        \ internacionales: AI RMF MANAGE 4; ISO 42001 10.1, 10.2"
+      typical_evidence: 'Informes de ejercicios
+
+        acciones de mejora cerradas'
+      implementation_groups:
+      - estandar
+      - reforzado
+      translations:
+        en:
+          name: Exercises and lessons learned
