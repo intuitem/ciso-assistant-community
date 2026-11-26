@@ -366,6 +366,8 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     evidences = FieldsRelatedField(["name", "id"])
+    status = serializers.CharField(source="get_status_display", read_only=True)
+    status_code = serializers.CharField(source="status", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
     )

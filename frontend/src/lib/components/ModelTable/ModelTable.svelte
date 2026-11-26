@@ -1043,6 +1043,23 @@
 		),
 		...APPLIED_CONTROL_STATUS_PRESETS
 	};
+	// Keyed on the Django labels, which are untranslated: the more favourable, the greener.
+	const LEVEL_PRESETS: Record<string, Record<string, string>> = {
+		control_impact: {
+			'Very Low': NEUTRAL_STATUS_PRESET,
+			Low: NEUTRAL_STATUS_PRESET,
+			Medium: 'preset-tonal-primary',
+			High: 'preset-tonal-success',
+			'Very High': 'preset-tonal-success'
+		},
+		effort: {
+			'Extra Small': 'preset-tonal-success',
+			Small: 'preset-tonal-success',
+			Medium: 'preset-tonal-primary',
+			Large: 'preset-tonal-warning',
+			'Extra Large': 'preset-tonal-warning'
+		}
+	};
 	// Same flag tones as the detail view.
 	const PRIORITY_FLAGS: Record<string, string> = {
 		'1': 'text-red-500',
@@ -1546,7 +1563,12 @@
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
 														<span
-															class="badge text-xs {STATUS_PRESETS[value] ?? NEUTRAL_STATUS_PRESET}"
+															class="badge text-xs {STATUS_PRESETS[
+																row.meta?.status_code ?? value
+															] ?? NEUTRAL_STATUS_PRESET}">{safeTranslate(value)}</span
+														>
+													{:else if LEVEL_PRESETS[key]?.[value]}
+														<span class="badge text-xs {LEVEL_PRESETS[key][value]}"
 															>{safeTranslate(value)}</span
 														>
 													{:else if key === 'priority' && PRIORITY_FLAGS[String(value).replace('P', '')]}
