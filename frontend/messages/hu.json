@@ -3125,6 +3125,7 @@
 	"changeAttackStage": "Támadási szakasz módosítása",
 	"changeOwner": "Felelős módosítása",
 	"changeDomain": "Tartomány módosítása",
+	"changeParentDomain": "Szülőtartomány módosítása",
 	"batchChangePriority": "Prioritás módosítása",
 	"changeEta": "Várható befejezés módosítása",
 	"changeDocumentType": "Dokumentumtípus módosítása",
@@ -5342,6 +5343,9 @@
 	"info": "Információ",
 	"cascadeDeleteWarning": "Figyelmeztetés: a törléssel véglegesen törlődik {count} kapcsolódó objektum is:",
 	"cascadeBlockedWarning": "Nem törölhető: még {count} objektum hivatkozik rá. Előbb törölje vagy rendelje át őket.",
+	"batchMoveCarriedNotice": "A kijelölt tartományok alá tartozó {count} kapcsolódó objektum is velük együtt átkerül:",
+	"enclaves": "Harmadik felek munkaterületei",
+	"otherObjects": "Egyéb objektumok",
 	"errorFetching": "Nem sikerült betölteni a kapcsolódó törlések adatait. Kérjük, próbálja újra.",
 	"cascadeAffectedNotice": [
 		{
@@ -5401,6 +5405,8 @@
 	"deputies": "Helyettesek",
 	"members": "Tagok",
 	"confirmRemoveSelected": "Biztosan eltávolítja a kijelölt {count} tételt?",
+	"batchMoveFlattenWarning": "A következő tartományok egy másik kijelölt tartomány alatt vannak, és közvetlenül a céltartomány alá kerülnek: {names}",
+	"batchMoveNotAllowed": "{count} kijelölt tétel nem helyezhető át: csak azok a tartományok kerülnek át, amelyeket módosíthat. A folytatáshoz szüntesse meg a nem áthelyezhető tételek kijelölését.",
 	"confirmRemoveAssetAssessments": "Az eszköz(ök) nem törlődnek, de az ebben a BIA-ban szereplő értékeléseik és eszkalációs küszöbeik igen.",
 	"addTeam": "Csapat hozzáadása",
 	"viewTeam": "Csapat megtekintése",
