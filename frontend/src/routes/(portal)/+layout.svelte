@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
 	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
+	import Logo from '#lib/components/Logo/Logo.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
 	import { initThemeFromUser } from '#lib/utils/theme.js';
 	import type { LayoutData } from './$types';
@@ -32,8 +33,9 @@
 		class="sticky top-0 z-50 flex items-center justify-between border-b border-surface-200-800 bg-surface-50-950/80 px-6 py-3 backdrop-blur"
 	>
 		<div class="flex items-center gap-3">
-			<!-- Brand mark: overridable on the PRO plan (branding) -->
-			<img src="/favicon.ico" alt="" class="h-7 w-7" />
+			<span class="flex items-center [&_img]:h-8 [&_img]:w-auto [&_p]:hidden">
+				<Logo />
+			</span>
 			<!-- Portal switcher -->
 			<div class="relative">
 				<button
