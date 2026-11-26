@@ -783,7 +783,7 @@ objects:
       name: Art. 22 – Trámite de la demanda de hábeas data
       description: Sometida la acción, el juez requerirá, mediante resolución motivada, al archivo, registro o banco de datos la remisión de la información concerniente al demandante. Podrá, asimismo, solicitar informes sobre el soporte técnico de datos.
     - urn: urn:soluciones-ge:risk:req_node:ley-172-13:23
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
       ref_id: '23'
@@ -1765,7 +1765,7 @@ objects:
         Mediante acuerdos sectoriales, convenios administrativos o decisiones de empresa, los responsables de tratamientos de titularidad pública y privada, así como las organizaciones en que se agrupen, pueden formular códigos tipo que establezcan las condiciones de organización, régimen de funcionamiento, procedimientos aplicables, normas de seguridad del entorno, programas o equipos, obligaciones de los implicados en el tratamiento y uso de la información personal, así como las garantías, en su ámbito, para el ejercicio de los derechos de las personas con pleno respeto a los principios y disposiciones de la presente ley.
         Los citados códigos podrán contener o no reglas operacionales detalladas de cada sistema particular y estándares técnicos de aplicación, y en el supuesto de que tales reglas o estándares no se incorporen directamente al código, las instrucciones u órdenes que los establecieran deberán respetar los principios fijados en aquél.
     - urn: urn:soluciones-ge:risk:req_node:ley-172-13:74
-      assessable: false
+      assessable: true
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
       ref_id: '74'
