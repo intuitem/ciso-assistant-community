@@ -82,7 +82,8 @@ export async function handleErrorResponse({
 	if (res.error || res.detail) {
 		const rawError = res.error || res.detail;
 		const errorKey = Array.isArray(rawError) ? rawError[0] : rawError;
-		const translated = safeTranslate(errorKey);
+		// A 401 means the auth token was rejected, almost always an expired session.
+		const translated = response.status === 401 ? m.sessionExpired() : safeTranslate(errorKey);
 		setFlash({ type: 'error', message: translated, timeout: 10000 }, event);
 		// Flash toasts are reliable on redirects but not guaranteed on a form action
 		// that re-renders in place (e.g. inside a modal) — also surface it inline via

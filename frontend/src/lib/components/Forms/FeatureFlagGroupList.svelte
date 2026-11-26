@@ -61,7 +61,6 @@
 					errors={errorsFor(field)}
 					onToggle={(next) => onToggle(field, next)}
 					classesContainer="h-full"
-					classes="h-full"
 				/>
 			{/each}
 		</div>
