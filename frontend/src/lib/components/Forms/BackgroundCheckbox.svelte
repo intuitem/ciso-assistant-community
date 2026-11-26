@@ -115,13 +115,18 @@
 				{helpText}
 			</p>
 		{/if}
-	</div>
 
-	{#if errors.length}
-		<div class="mt-1">
-			{#each errors as error (error)}
-				<p class="text-red-500 text-xs font-medium">{error}</p>
-			{/each}
-		</div>
-	{/if}
+		{#if errors.length}
+			<!-- Inside the tile: below it, the grid's equal row heights clip the message. -->
+			<div class="mt-auto pt-3" role="alert">
+				{#each errors as error (error)}
+					<p
+						class="rounded-md bg-error-50-950 text-error-800-200 border border-error-300-700 px-2 py-1 text-xs font-medium"
+					>
+						{error}
+					</p>
+				{/each}
+			</div>
+		{/if}
+	</div>
 </div>
