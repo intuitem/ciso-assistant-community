@@ -19668,7 +19668,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "threats": ",".join(
                     [
                         threat.get_name_translated or threat.ref_id or ""
-                        for threat in finding.threats.all()
+                        for threat in viewable(finding.threats.all())
                     ]
                 ),
                 "asset": finding.asset.name
