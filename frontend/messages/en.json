@@ -8623,5 +8623,7 @@
 	"glpiTableHelpText": "Select the GLPI item type to sync with (ticket, change or problem).",
 	"glpiField": "GLPI Field",
 	"glpiAssetMappingsHelpText": "Map your assets to GLPI items. Assets are synced once an item type is selected.",
-	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...)."
+	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...).",
+	"sessionExpired": "Your session has expired. Please log in again, then retry.",
+	"errorMcpNeedsSharedCache": "AI app connections need a shared cache (memcached). Configure it first, then enable this option."
 }
