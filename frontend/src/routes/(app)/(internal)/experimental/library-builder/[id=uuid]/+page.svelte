@@ -4,6 +4,7 @@
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
+	import FrameworkPicker from './mapping/FrameworkPicker.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
@@ -290,6 +291,8 @@
 
 	onMount(() => {
 		if (!draft.identity_locked) loadConflicts();
+		loadOriginals();
+		if (new URLSearchParams(window.location.search).get('new_mapping')) openMappingPanel();
 		try {
 			const stored = localStorage.getItem(viewKey());
 			if (stored === 'simple' || stored === 'full') viewChoice = stored;
@@ -647,6 +650,73 @@
 		return `/experimental/library-builder/${draft.id}/framework?framework_urn=${encodeURIComponent(
 			framework.urn
 		)}`;
+	}
+
+	// --- Mapping sets -------------------------------------------------------------
+	function mappingEditorHref(urn: string): string {
+		return `${base()}/mapping?set_urn=${encodeURIComponent(urn)}`;
+	}
+
+	function setBetween(source: string, target: string): any {
+		return mappingSets.find(
+			(s) =>
+				String(s.source_framework_urn).toLowerCase() === source &&
+				String(s.target_framework_urn).toLowerCase() === target
+		);
+	}
+
+	// Clone origin per draft framework (detected server-side, see mapping-original).
+	let originals: Record<string, any> = $state({});
+	async function loadOriginals() {
+		for (const framework of frameworks) {
+			const urn = String(framework.urn).toLowerCase();
+			const res = await fetch(
+				`${base()}?action=mapping-original&framework_urn=${encodeURIComponent(urn)}`
+			);
+			if (res.ok) {
+				const result = await res.json();
+				if (result.original) originals[urn] = result.original;
+			}
+		}
+	}
+
+	let mappingPanelOpen = $state(false);
+	let mappingFrameworks: any[] = $state([]);
+	let mapSource = $state('');
+	let mapTarget = $state('');
+	let creatingMapping = $state(false);
+
+	async function openMappingPanel() {
+		mappingPanelOpen = true;
+		if (mappingFrameworks.length) return;
+		const res = await fetch(`${base()}?action=mapping-frameworks`);
+		if (!res.ok) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
+		mappingFrameworks = (await res.json()).frameworks ?? [];
+		mapSource ||= mappingFrameworks.find((f) => f.kind === 'draft')?.urn ?? '';
+	}
+
+	async function createMappingSet(source: string, target: string) {
+		const existing = setBetween(source, target);
+		if (existing) {
+			window.location.href = mappingEditorHref(existing.urn);
+			return;
+		}
+		creatingMapping = true;
+		const res = await fetch(base(), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				action: 'add-mapping-set',
+				source_framework_urn: source,
+				target_framework_urn: target
+			})
+		});
+		const result = await res.json();
+		if (!res.ok) {
+			creatingMapping = false;
+			return setStatus(safeTranslate(result.error ?? 'error'), 'error');
+		}
+		window.location.href = mappingEditorHref(result.urn);
 	}
 
 	function quickFormEditorHref(quickForm: any): string {
@@ -1119,6 +1189,7 @@
 			{#if frameworks.length > 0}
 				<ul class="space-y-2">
 					{#each frameworks as framework}
+						{@const original = originals[String(framework.urn).toLowerCase()]}
 						<li
 							class="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200-800 hover:border-primary-300 dark:hover:border-primary-500/50 transition-colors"
 						>
@@ -1137,6 +1208,22 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
+								{#if original}
+									{@const existing = setBetween(String(framework.urn).toLowerCase(), original.urn)}
+									<button
+										type="button"
+										class="btn btn-sm preset-outlined-primary-500"
+										title={m.lbMappingMapToOriginalHelp({ name: original.name })}
+										disabled={creatingMapping}
+										onclick={() =>
+											createMappingSet(String(framework.urn).toLowerCase(), original.urn)}
+									>
+										<i class="fa-solid fa-arrows-left-right mr-1" aria-hidden="true"></i>
+										{existing
+											? m.lbMappingEditMappingTo({ name: original.name })
+											: m.lbMappingMapTo({ name: original.name })}
+									</button>
+								{/if}
 								<a
 									href={frameworkEditorHref(framework)}
 									class="btn btn-sm preset-filled-primary-500"
@@ -1560,14 +1647,59 @@
 			</div>
 		{/each}
 
-		<!-- Requirement mapping sets: arrive via import, removable here -->
-		{#if mappingSets.length > 0}
-			<div class="card p-4 space-y-3">
+		<!-- Requirement mapping sets: created here or imported, edited in ./mapping -->
+		<div class="card p-4 space-y-3">
+			<div class="flex items-center justify-between gap-2">
 				<h3
 					class="text-xs font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1.5"
 				>
 					<i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i>{m.lbDraftMappingSets()}
 				</h3>
+				<button
+					type="button"
+					class="btn btn-sm preset-outlined-primary-500"
+					onclick={() => (mappingPanelOpen ? (mappingPanelOpen = false) : openMappingPanel())}
+				>
+					<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{m.lbMappingNewSet()}
+				</button>
+			</div>
+			{#if mappingPanelOpen}
+				<div class="border border-surface-200-800 rounded-lg p-3 space-y-3">
+					<div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
+						<FrameworkPicker
+							label={m.lbMappingSource()}
+							options={mappingFrameworks}
+							bind:value={mapSource}
+						/>
+						<button
+							type="button"
+							class="btn-icon preset-outlined-surface-500 justify-self-center"
+							title={m.lbMappingSwap()}
+							aria-label={m.lbMappingSwap()}
+							onclick={() => ([mapSource, mapTarget] = [mapTarget, mapSource])}
+						>
+							<i class="fa-solid fa-right-left" aria-hidden="true"></i>
+						</button>
+						<FrameworkPicker
+							label={m.lbMappingTarget()}
+							options={mappingFrameworks}
+							bind:value={mapTarget}
+						/>
+					</div>
+					<div class="flex justify-end">
+						<button
+							type="button"
+							class="btn btn-sm preset-filled-primary-500"
+							disabled={!mapSource || !mapTarget || mapSource === mapTarget || creatingMapping}
+							onclick={() => createMappingSet(mapSource, mapTarget)}
+						>
+							{#if creatingMapping}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{/if}
+							{m.lbMappingCreateAndEdit()}
+						</button>
+					</div>
+				</div>
+			{/if}
+			{#if mappingSets.length > 0}
 				<ul class="divide-y divide-surface-200-800">
 					{#each mappingSets as mappingSet}
 						<li class="flex items-center justify-between py-2 gap-3">
@@ -1583,19 +1715,28 @@
 									})}
 								</p>
 							</div>
-							<button
-								type="button"
-								class="btn btn-sm preset-outlined-error-500 shrink-0"
-								onclick={() => deleteObject(mappingSet)}
-								aria-label={m.lbDraftDeleteMappingSet()}
-							>
-								<i class="fa-solid fa-trash"></i>
-							</button>
+							<div class="flex items-center gap-1 shrink-0">
+								<a
+									href={mappingEditorHref(mappingSet.urn)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
+									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+									{m.edit()}
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm preset-outlined-error-500"
+									onclick={() => deleteObject(mappingSet)}
+									aria-label={m.lbDraftDeleteMappingSet()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
 						</li>
 					{/each}
 				</ul>
-			</div>
-		{/if}
+			{/if}
+		</div>
 
 		<!-- Metric definitions: arrive via import, removable here -->
 		{#if metricDefinitions.length > 0}

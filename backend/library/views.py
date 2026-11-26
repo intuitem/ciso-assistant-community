@@ -1,4 +1,5 @@
 from itertools import chain
+import difflib
 import json
 import re
 import uuid
@@ -18,6 +19,8 @@ from django.db.models import (
     When,
 )
 from django.db import models
+from django.db.models.fields.json import KT
+from django.db.models.functions import Coalesce
 from django.utils.timezone import now
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
@@ -72,6 +75,7 @@ from core.views import BaseModelViewSet, GenericFilterSet, SmartOrderingFilter
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
 from library import framework_editor as fw_editor
+from library import mapping_editor
 from library import quick_form_editor as qf_editor
 from library.validators import validate_file_extension
 from .helpers import update_translations
@@ -1089,6 +1093,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
         "delete_object": "change_librarydraft",
         "preset_editor_preview": "view_librarydraft",
         "reference_catalog": "view_librarydraft",
+        "mapping_frameworks": "view_librarydraft",
+        "mapping_original": "view_librarydraft",
+        "mapping_editor": "view_librarydraft",
+        "add_mapping_set": "change_librarydraft",
+        "edit_mapping_pairs": "change_librarydraft",
+        "generate_reverse_set": "change_librarydraft",
     }
 
     # Object kinds editable through the generic upsert action; frameworks go
@@ -2239,6 +2249,414 @@ class LibraryDraftViewSet(BaseModelViewSet):
             key=lambda entry: str(entry["name"] or "").lower(),
         )
         return Response({"sources": sources, "libraries": libraries})
+
+    # --- Mapping-set editor -------------------------------------------------
+
+    @staticmethod
+    def _stored_framework_rows(user) -> list:
+        """Frameworks of readable stored libraries, latest version per library,
+        read from content without parsing it in Python."""
+        rows = (
+            StoredLibrary.objects.filter(
+                id__in=builder.accessible_stored_library_ids(user)
+            )
+            .annotate(
+                fw_urn=Coalesce(
+                    KT("content__framework__urn"), KT("content__frameworks__0__urn")
+                ),
+                fw_name=Coalesce(
+                    KT("content__framework__name"), KT("content__frameworks__0__name")
+                ),
+                fw_ref_id=Coalesce(
+                    KT("content__framework__ref_id"),
+                    KT("content__frameworks__0__ref_id"),
+                ),
+            )
+            .filter(fw_urn__isnull=False)
+            .values("id", "urn", "name", "version", "fw_urn", "fw_name", "fw_ref_id")
+        )
+        latest: dict = {}
+        for row in rows:
+            current = latest.get(row["urn"])
+            if current is None or row["version"] > current["version"]:
+                latest[row["urn"]] = row
+        return list(latest.values())
+
+    def _mapping_framework(self, content: dict, urn, user):
+        """(framework object, owning stored library urn or None for the draft's
+        own), or (None, None) when the user cannot read such a framework."""
+        urn = str(urn or "").lower()
+        if not urn:
+            return None, None
+        for framework in content.get("frameworks") or []:
+            if str(framework.get("urn", "")).lower() == urn:
+                return framework, None
+        row = next(
+            (
+                r
+                for r in self._stored_framework_rows(user)
+                if str(r["fw_urn"]).lower() == urn
+            ),
+            None,
+        )
+        if row is None:
+            return None, None
+        stored = StoredLibrary.objects.only("content").get(id=row["id"])
+        for framework in (
+            builder.normalize_objects(stored.content or {}).get("frameworks") or []
+        ):
+            if str(framework.get("urn", "")).lower() == urn:
+                return framework, row["urn"]
+        return None, None
+
+    @staticmethod
+    def _find_mapping_set(content: dict, source_urn, target_urn=None):
+        """By set URN, or by (source framework, target framework) pair."""
+        for mapping_set in content.get("requirement_mapping_sets") or []:
+            if target_urn is None:
+                if str(mapping_set.get("urn", "")).lower() == str(source_urn).lower():
+                    return mapping_set
+            elif (
+                str(mapping_set.get("source_framework_urn", "")).lower()
+                == str(source_urn).lower()
+                and str(mapping_set.get("target_framework_urn", "")).lower()
+                == str(target_urn).lower()
+            ):
+                return mapping_set
+        return None
+
+    @staticmethod
+    def _mint_mapping_set(draft, content: dict, source: dict, target: dict) -> dict:
+        def leaf(framework):
+            return str(framework.get("urn", "")).lower().rsplit(":", 1)[-1]
+
+        base = builder.leaf_object_base(draft.effective_urn, "requirement_mapping_sets")
+        taken = {
+            str(ms.get("urn", "")).lower()
+            for ms in content.get("requirement_mapping_sets") or []
+        }
+        ref_id = builder.urn_safe_leaf(f"{leaf(source)}-to-{leaf(target)}")
+        candidate, suffix = ref_id, 2
+        while f"{base}:{candidate}" in taken:
+            candidate, suffix = f"{ref_id}-{suffix}", suffix + 1
+        mapping_set = {
+            "urn": f"{base}:{candidate}",
+            "ref_id": candidate,
+            "name": f"{source.get('name') or leaf(source)} → "
+            f"{target.get('name') or leaf(target)}",
+            "source_framework_urn": str(source["urn"]).lower(),
+            "target_framework_urn": str(target["urn"]).lower(),
+            "requirement_mappings": [],
+        }
+        content.setdefault("requirement_mapping_sets", []).append(mapping_set)
+        return mapping_set
+
+    def _mapping_set_context(self, request, content: dict, set_urn):
+        """(set, source fw, target fw, error response)."""
+        mapping_set = self._find_mapping_set(content, set_urn or "")
+        if mapping_set is None:
+            return (
+                None,
+                None,
+                None,
+                Response({"error": "objectNotFoundInDraft"}, status=HTTP_404_NOT_FOUND),
+            )
+        source, _ = self._mapping_framework(
+            content, mapping_set.get("source_framework_urn"), request.user
+        )
+        target, _ = self._mapping_framework(
+            content, mapping_set.get("target_framework_urn"), request.user
+        )
+        if source is None or target is None:
+            return (
+                None,
+                None,
+                None,
+                Response(
+                    {"error": "mappingFrameworkNotFound"}, status=HTTP_404_NOT_FOUND
+                ),
+            )
+        return mapping_set, source, target, None
+
+    @action(detail=True, methods=["get"], url_path="mapping-frameworks")
+    def mapping_frameworks(self, request, pk):
+        """Frameworks a mapping set can join: the draft's own, then those of
+        readable stored libraries (loaded or not)."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        own = [
+            {
+                "urn": str(fw.get("urn", "")).lower(),
+                "name": fw.get("name") or fw.get("ref_id") or fw.get("urn"),
+                "library_urn": draft.effective_urn,
+                "kind": "draft",
+            }
+            for fw in content.get("frameworks") or []
+            if fw.get("urn")
+        ]
+        own_urns = {fw["urn"] for fw in own}
+        stored = sorted(
+            (
+                {
+                    "urn": str(row["fw_urn"]).lower(),
+                    "name": row["fw_name"] or row["name"],
+                    "library_urn": row["urn"],
+                    "kind": "library",
+                }
+                for row in self._stored_framework_rows(request.user)
+                if str(row["fw_urn"]).lower() not in own_urns
+            ),
+            key=lambda entry: str(entry["name"] or "").lower(),
+        )
+        return Response({"frameworks": own + stored})
+
+    @action(detail=True, methods=["get"], url_path="mapping-original")
+    def mapping_original(self, request, pk):
+        """Detect the stored framework a draft framework was cloned from.
+
+        Clone provenance is not recorded; a clone keeps the original's
+        framework ref_id (or name) and its node URN tails, so candidates are
+        matched on the former and scored on the latter.
+        """
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        clone_urn = str(request.query_params.get("framework_urn") or "").lower()
+        clone = next(
+            (
+                fw
+                for fw in content.get("frameworks") or []
+                if str(fw.get("urn", "")).lower() == clone_urn
+            ),
+            None,
+        )
+        if clone is None:
+            return Response(
+                {"error": "objectNotFoundInDraft"}, status=HTTP_404_NOT_FOUND
+            )
+        ref_id = str(clone.get("ref_id") or "").strip().lower()
+        name = str(clone.get("name") or "").strip().lower()
+
+        def closeness(row) -> float:
+            if ref_id and str(row["fw_ref_id"] or "").strip().lower() == ref_id:
+                return 2.0
+            return difflib.SequenceMatcher(
+                None, name, str(row["fw_name"] or "").strip().lower()
+            ).ratio()
+
+        # Clones are often renamed ("… (copy)"): rank by name closeness, then
+        # let the URN-tail overlap decide.
+        candidates = sorted(
+            (
+                row
+                for row in self._stored_framework_rows(request.user)
+                if str(row["fw_urn"]).lower() != clone_urn
+            ),
+            key=closeness,
+            reverse=True,
+        )
+        best = None
+        # shortcut: only the 10 closest names are scored; a clone renamed beyond
+        # recognition is missed — score all frameworks if that shows up.
+        for row in candidates[:10]:
+            stored = StoredLibrary.objects.only("content").get(id=row["id"])
+            for framework in (
+                builder.normalize_objects(stored.content or {}).get("frameworks") or []
+            ):
+                score = mapping_editor.clone_score(clone, framework)
+                if score >= mapping_editor.CLONE_THRESHOLD and (
+                    best is None or score > best["score"]
+                ):
+                    best = {
+                        "urn": str(framework.get("urn", "")).lower(),
+                        "name": framework.get("name") or row["name"],
+                        "library_urn": row["urn"],
+                        "score": round(score, 3),
+                    }
+        return Response({"original": best})
+
+    @action(detail=True, methods=["post"], url_path="add-mapping-set")
+    def add_mapping_set(self, request, pk):
+        """Create an empty mapping set between two frameworks and declare the
+        libraries owning them as dependencies."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        source, source_library = self._mapping_framework(
+            content, request.data.get("source_framework_urn"), request.user
+        )
+        target, target_library = self._mapping_framework(
+            content, request.data.get("target_framework_urn"), request.user
+        )
+        if source is None or target is None:
+            return Response(
+                {"error": "mappingFrameworkNotFound"}, status=HTTP_404_NOT_FOUND
+            )
+        if str(source["urn"]).lower() == str(target["urn"]).lower():
+            return Response(
+                {"error": "mappingSameFramework"}, status=HTTP_400_BAD_REQUEST
+            )
+        existing = self._find_mapping_set(content, source["urn"], target["urn"])
+        if existing is not None:
+            return Response(
+                {"error": "mappingSetAlreadyExists", "urn": existing["urn"]},
+                status=HTTP_409_CONFLICT,
+            )
+        try:
+            mapping_set = self._mint_mapping_set(draft, content, source, target)
+        except builder.BuilderError as e:
+            logger.warning("Builder rejected the draft", error=e)
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        own = draft.effective_urn.lower()
+        added = {
+            lib.lower()
+            for lib in (source_library, target_library)
+            if lib and lib.lower() != own
+        }
+        draft.dependencies = sorted(
+            {str(d).lower() for d in draft.dependencies or []} | added
+        )
+        draft.content = content
+        draft.save(update_fields=["content", "dependencies", "updated_at"])
+        return Response(
+            {"status": "ok", "urn": mapping_set["urn"]}, status=HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["get"], url_path="mapping-editor")
+    def mapping_editor(self, request, pk):
+        """Everything the mapping editor needs in one payload: the set, the
+        assessable nodes of both sides (searched client-side), the pairs,
+        obvious suggestions and the reverse set's status."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        mapping_set, source, target, error = self._mapping_set_context(
+            request, content, request.query_params.get("set_urn")
+        )
+        if error is not None:
+            return error
+        source_nodes = mapping_editor.assessable_nodes(source)
+        target_nodes = mapping_editor.assessable_nodes(target)
+        by_urn = {n["urn"]: n for n in source_nodes + target_nodes}
+        pairs = []
+        for pair in mapping_set.get("requirement_mappings") or []:
+            src = by_urn.get(str(pair.get("source_requirement_urn", "")).lower())
+            tgt = by_urn.get(str(pair.get("target_requirement_urn", "")).lower())
+            pairs.append(
+                {
+                    **pair,
+                    "reworded": bool(
+                        src
+                        and tgt
+                        and pair.get("relationship") == "equal"
+                        and mapping_editor.is_reworded(src, tgt)
+                    ),
+                }
+            )
+        mapped = {str(p.get("source_requirement_urn", "")).lower() for p in pairs}
+        reverse = self._find_mapping_set(
+            content,
+            mapping_set["target_framework_urn"],
+            mapping_set["source_framework_urn"],
+        )
+
+        def pair_keys(items):
+            return {
+                (
+                    str(p.get("source_requirement_urn", "")).lower(),
+                    str(p.get("target_requirement_urn", "")).lower(),
+                    p.get("relationship"),
+                )
+                for p in items
+            }
+
+        return Response(
+            {
+                "set": {
+                    key: value
+                    for key, value in mapping_set.items()
+                    if key != "requirement_mappings"
+                },
+                "source": {
+                    "urn": str(source["urn"]).lower(),
+                    "name": source.get("name"),
+                    "nodes": source_nodes,
+                },
+                "target": {
+                    "urn": str(target["urn"]).lower(),
+                    "name": target.get("name"),
+                    "nodes": target_nodes,
+                },
+                "pairs": pairs,
+                "suggestions": mapping_editor.suggest_pairs(
+                    source_nodes,
+                    target_nodes,
+                    mapped,
+                    mapping_editor.node_base(source),
+                    mapping_editor.node_base(target),
+                ),
+                "reverse": reverse
+                and {
+                    "urn": reverse["urn"],
+                    "in_sync": pair_keys(reverse.get("requirement_mappings") or [])
+                    == pair_keys(mapping_editor.reverse_mappings(mapping_set)),
+                },
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="edit-mapping-pairs")
+    def edit_mapping_pairs(self, request, pk):
+        """Batched pair edits keyed by (source, target), applied all or none.
+        Answers with the pair count only: echoing the draft would dwarf the
+        edit on large sets."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        mapping_set, source, target, error = self._mapping_set_context(
+            request, content, request.data.get("set_urn")
+        )
+        if error is not None:
+            return error
+        try:
+            pairs = mapping_editor.apply_pair_ops(
+                mapping_set,
+                request.data.get("ops"),
+                {n["urn"] for n in mapping_editor.assessable_nodes(source)},
+                {n["urn"] for n in mapping_editor.assessable_nodes(target)},
+            )
+        except builder.BuilderError as e:
+            # Error codes from a fixed set — see apply_pair_ops.
+            logger.warning("Mapping pair edit rejected", error=e)
+            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        mapping_set["requirement_mappings"] = pairs
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response({"status": "ok", "count": len(pairs)})
+
+    @action(detail=True, methods=["post"], url_path="generate-reverse-set")
+    def generate_reverse_set(self, request, pk):
+        """(Re)build the B→A set from A→B. The reverse is derived, so it is
+        overwritten rather than merged."""
+        draft = self.get_object()
+        content = builder.normalize_objects(draft.content or {})
+        mapping_set, source, target, error = self._mapping_set_context(
+            request, content, request.data.get("set_urn")
+        )
+        if error is not None:
+            return error
+        reverse = self._find_mapping_set(content, target["urn"], source["urn"])
+        if reverse is None:
+            try:
+                reverse = self._mint_mapping_set(draft, content, target, source)
+            except builder.BuilderError as e:
+                logger.warning("Builder rejected the draft", error=e)
+                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+        reverse["requirement_mappings"] = mapping_editor.reverse_mappings(mapping_set)
+        draft.content = content
+        draft.save(update_fields=["content", "updated_at"])
+        return Response(
+            {
+                "status": "ok",
+                "urn": reverse["urn"],
+                "count": len(reverse["requirement_mappings"]),
+            }
+        )
 
     @action(detail=True, methods=["post"], url_path="add-framework")
     def add_framework(self, request, pk):
