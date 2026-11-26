@@ -4000,6 +4000,10 @@ export const listViewFields = {
 			'last_refresh',
 			'folder'
 		],
+		optionalFields: {
+			head: ['collectionFrequency'],
+			body: ['collection_frequency']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
