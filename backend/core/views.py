@@ -19665,7 +19665,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "name": finding.name,
                 "description": finding.description,
                 "status": finding.status,
-                "threats": ",".join([threat.name for threat in finding.threats.all()]),
+                "threats": ",".join(
+                    [
+                        threat.get_name_translated or threat.ref_id or ""
+                        for threat in finding.threats.all()
+                    ]
+                ),
                 "asset": finding.asset.name
                 if finding.asset and viewable.allows(finding.asset)
                 else "",
@@ -19862,7 +19867,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
             if finding.threats.all():
-                md_content += f"- **Threats**: {', '.join([threat.name for threat in finding.threats.all()])}\n"
+                threat_names = [
+                    threat.get_name_translated or threat.ref_id or ""
+                    for threat in finding.threats.all()
+                ]
+                md_content += f"- **Threats**: {', '.join(threat_names)}\n"
             if finding.asset:
                 md_content += f"- **Asset**: {finding.asset.name}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
