@@ -295,7 +295,20 @@ export const actions: Actions = {
 
 		const response = await event.fetch(endpoint, requestInitOptions);
 
-		if (!response.ok) return handleErrorResponse({ event, response, form });
+		if (!response.ok) {
+			const result = await handleErrorResponse({ event, response, form });
+			// Flag errors land on a tile that may be off-screen: toast them too.
+			const fieldErrors = Object.values(form.errors)
+				.flat()
+				.filter((e): e is string => typeof e === 'string' && e !== '');
+			if (fieldErrors.length) {
+				setFlash(
+					{ type: 'error', message: [...new Set(fieldErrors)].join(' '), timeout: 10000 },
+					event
+				);
+			}
+			return result;
+		}
 
 		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
 

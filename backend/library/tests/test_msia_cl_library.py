@@ -127,11 +127,26 @@ class TestMsiaClLibrary(TestCase):
         ]
         # Clause-level references must not imply unrelated requirements.
         removed = [
-            (msia + "inv-05", iso_node + "a.6.2.4"),  # retirement is not verification and validation
-            (msia + "gob-04", nist_node + "govern-1.7"),  # acceptable use is not safe decommissioning
-            (msia + "cad-02", nist_node + "map-4.1"),  # an inventory is not a risk mapping
-            (msia + "trz-04", nist_node + "manage-4.2"),  # reporting is not improving the system
-            (msia + "res-04", nist_node + "manage-4.3"),  # an exercise is not incident communication
+            (
+                msia + "inv-05",
+                iso_node + "a.6.2.4",
+            ),  # retirement is not verification and validation
+            (
+                msia + "gob-04",
+                nist_node + "govern-1.7",
+            ),  # acceptable use is not safe decommissioning
+            (
+                msia + "cad-02",
+                nist_node + "map-4.1",
+            ),  # an inventory is not a risk mapping
+            (
+                msia + "trz-04",
+                nist_node + "manage-4.2",
+            ),  # reporting is not improving the system
+            (
+                msia + "res-04",
+                nist_node + "manage-4.3",
+            ),  # an exercise is not incident communication
         ]
         for source, target in kept:
             assert (source, target) in forward, (source, target)
