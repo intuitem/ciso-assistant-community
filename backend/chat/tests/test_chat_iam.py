@@ -316,7 +316,9 @@ def test_existing_study_entry_requires_only_change_permission(monkeypatch):
     assert [list(p) for p in checked] == [["change_ebiosrmstudy"]]
 
 
-@pytest.mark.parametrize("step", ["gravity", "rotos", "strategic_scenarios"])
+@pytest.mark.parametrize(
+    "step", ["gravity", "rotos", "strategic_scenarios", "risk_assessment", "treatment"]
+)
 def test_facilitation_records_a_step_only_with_its_write_permissions(monkeypatch, step):
     import chat.workflows.ebios_rm_assist as assist
     from chat.workflows.ebios_facilitation import WRITE_PERMS

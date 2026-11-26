@@ -178,6 +178,32 @@ def study_state(url, h, study_ids):
                 }
                 for r in rows
             ]
+        # workshop 5: the risk assessment generated from the study and its treated scenarios
+        assessments = requests.get(
+            f"{url}/risk-assessments/",
+            params={"ebios_rm_study": sid},
+            headers=h,
+            timeout=30,
+        ).json()
+        entry["risk-scenarios"] = []
+        for ra in assessments.get("results", assessments):
+            rows = requests.get(
+                f"{url}/risk-scenarios/",
+                params={"risk_assessment": ra["id"]},
+                headers=h,
+                timeout=30,
+            ).json()
+            entry["risk-scenarios"] += [
+                {
+                    "name": r.get("name"),
+                    "treatment": r.get("treatment"),
+                    "residual_proba": r.get("residual_proba"),
+                    "applied_controls": [
+                        c.get("str") for c in r.get("applied_controls", [])
+                    ],
+                }
+                for r in rows.get("results", rows)
+            ]
         state[sid] = entry
     return state
 

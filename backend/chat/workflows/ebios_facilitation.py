@@ -53,6 +53,13 @@ STEPS = (
         4,
         "how each attack path is carried out technically, and its likelihood",
     ),
+    ("risk_assessment", 5, "the risk assessment built from the operational scenarios"),
+    (
+        "treatment",
+        5,
+        "the treatment of each risk: strategy (mitigate, accept, avoid, transfer), security measures "
+        "and residual likelihood",
+    ),
 )
 WRITE_PERMS = {
     "framing": ("change_ebiosrmstudy",),
@@ -64,6 +71,8 @@ WRITE_PERMS = {
     "stakeholders": ("add_stakeholder",),
     "strategic_scenarios": ("add_strategicscenario", "add_attackpath"),
     "operational_scenarios": ("add_operationalscenario", "change_operationalscenario"),
+    "risk_assessment": ("add_riskassessment",),
+    "treatment": ("change_riskscenario", "add_appliedcontrol"),
 }
 ITEM_FORMATS = {
     "framing": '{"objectives": "...", "scope": "what is in and out", "constraints": "deadline, budget..."} (one item)',
@@ -84,6 +93,10 @@ ITEM_FORMATS = {
     '"feared_event": "exact name", "attack_paths": [{"name": "...", "stakeholders": ["entity names"]}]}',
     "operational_scenarios": '{"attack_path": "exact name", "description": "how it is carried out", '
     '"likelihood": "the level as written in the scale (e.g. its code)"}',
+    "risk_assessment": '{"name": "..."} (one item)',
+    "treatment": '{"risk_scenario": "exact name", "treatment": "mitigate", "accept", "avoid" or "transfer", '
+    '"measures": ["security measures: the user\'s, or a few concrete ones if the user asked you to suggest"], '
+    '"residual_likelihood": "the level as written in the scale, only if the user gave it"}',
 }
 
 REQUIRED = {
@@ -94,14 +107,39 @@ REQUIRED = {
     "baseline": (),
     "rotos": ("risk_origin", "target_objective"),
     "stakeholders": ("entity", "category"),
-    "strategic_scenarios": ("name", "roto"),
+    "strategic_scenarios": ("name",),
     "operational_scenarios": ("attack_path",),
+    "risk_assessment": ("name",),
+    "treatment": ("risk_scenario", "treatment"),
 }
 EXISTING = {
     "assets": "core.Asset",
     "feared_events": "ebios_rm.FearedEvent",
     "gravity": "ebios_rm.FearedEvent",
     "strategic_scenarios": "ebios_rm.StrategicScenario",
+}
+# Ratings a model tends to fill in on its own, and the words that show the user gave them
+# (criterion names; level codes and names come from the study's matrix, see _level_words).
+RATINGS = {
+    "feared_events": {"gravity": ("gravity", "gravité", "severity")},
+    "gravity": {"gravity": ("gravity", "gravité", "severity")},
+    "rotos": {
+        "motivation": ("motivation", "motivé", "motivated"),
+        "resources": ("resources", "ressources", "moyens", "means"),
+        "activity": ("activity", "activité", "actif", "active"),
+    },
+    "stakeholders": {
+        "dependency": ("dependency", "dépendance", "dépend"),
+        "penetration": ("penetration", "pénétration"),
+        "maturity": ("maturity", "maturité"),
+        "trust": ("trust", "confiance"),
+    },
+    "operational_scenarios": {
+        "likelihood": ("likelihood", "vraisemblance", "likely", "probab")
+    },
+    "treatment": {
+        "residual_likelihood": ("residual", "résiduel", "vraisemblance", "likelihood")
+    },
 }
 RISK_ORIGINS = {  # the interface's own French names for the built-in risk origins
     "fr": {
@@ -116,31 +154,34 @@ RISK_ORIGINS = {  # the interface's own French names for the built-in risk origi
         "terrorist": "terroriste",
     }
 }
+PATHLESS = {
+    "fr": "Ces scénarios stratégiques n'ont pas encore de **chemin d'attaque** : {scenarios}. "
+    "Par quelles parties prenantes l'attaquant passerait-il pour chacun ?",
+    "en": "These strategic scenarios have no **attack path** yet: {scenarios}. Through which "
+    "stakeholders would the attacker go for each?",
+}
+REWRITE = {
+    "fr": "Écrivez le cadrage complet tel que vous voulez l'enregistrer (objectif, périmètre, échéance).",
+    "en": "Write the full framing as you want it recorded (objective, scope, deadline).",
+}
 BUTTONS = {
     "en": {"record": "Record", "change": "Change", "skip": "Skip this step"},
     "fr": {"record": "Enregistrer", "change": "Modifier", "skip": "Passer cette étape"},
 }
 DONE = {
     "fr": {
-        "complete": "Les ateliers 1 à 4 sont renseignés pour cette étude. Étape suivante : le "
-        "traitement du risque (atelier 5) ; vous pouvez aussi revoir chaque atelier dans les pages "
-        "de l'étude.",
-        "treatment": "L'atelier 5 se fait dans la page de l'étude, section « Atelier 5 : Traitement "
-        "du risque » : « Générer l'analyse de risques » crée l'analyse de risques à partir des "
-        "scénarios opérationnels. Ensuite, sur chaque scénario de risque, je peux vous proposer des "
-        "mesures de sécurité.",
-        "skipped": "J'ai parcouru les ateliers 1 à 4, mais ces étapes ont été passées : {steps}. "
-        "Dites-moi si vous voulez y revenir ; sinon, l'étape suivante est le traitement du risque "
-        "(atelier 5).",
+        "complete": "Les ateliers 1 à 5 sont renseignés pour cette étude : les mesures sont dans "
+        "l'analyse de risques, à suivre dans le plan d'action. Vous pouvez revoir chaque atelier "
+        "dans les pages de l'étude.",
+        "skipped": "J'ai parcouru les ateliers 1 à 5, mais ces étapes ont été passées : {steps}. "
+        "Dites-moi si vous voulez y revenir.",
     },
     "en": {
-        "complete": "Workshops 1 to 4 are filled in for this study. Next comes the risk treatment "
-        "(workshop 5); you can also review each workshop in the study pages.",
-        "treatment": "Workshop 5 is done in the study page, section “Workshop 5: Risk Treatment”: "
-        "“Generate the risk assessment” builds the risk assessment from the operational "
-        "scenarios. Then, on each risk scenario, I can suggest security measures.",
-        "skipped": "I went through workshops 1 to 4, but these steps were skipped: {steps}. Tell me "
-        "if you want to go back to them; otherwise, next comes the risk treatment (workshop 5).",
+        "complete": "Workshops 1 to 5 are filled in for this study: the measures are in the risk "
+        "assessment, to follow up in the action plan. You can review each workshop in the study "
+        "pages.",
+        "skipped": "I went through workshops 1 to 5, but these steps were skipped: {steps}. Tell me "
+        "if you want to go back to them.",
     },
 }
 QUESTIONS = {
@@ -170,6 +211,13 @@ QUESTIONS = {
         "operational_scenarios": "Atelier 4 : pour chaque chemin d'attaque ({paths}), comment "
         "l'attaque se déroulerait-elle techniquement, et avec quelle **vraisemblance** "
         "({likelihood_scale}) ?",
+        "risk_assessment": "Atelier 5 : je peux générer l'**analyse de risques** de l'étude à "
+        "partir de ses {operational_count} scénarios opérationnels retenus, comme le bouton « Générer "
+        "l'analyse de risques » de la page de l'étude.",
+        "treatment": "Atelier 5 : pour chaque risque ({open_risks}), quelle **stratégie de "
+        "traitement** (réduire, accepter, éviter, transférer), quelles **mesures de sécurité**, et "
+        "quelle vraisemblance résiduelle visée ({likelihood_scale}) ? Je peux aussi vous suggérer "
+        "des mesures.",
     },
     "en": {
         "framing": "Let's start with the framing of the study **{study}**. What is its objective, "
@@ -193,6 +241,12 @@ QUESTIONS = {
         "feared event would they reach?",
         "operational_scenarios": "Workshop 4: for each attack path ({paths}), how would the attack "
         "unfold technically, and how **likely** is it ({likelihood_scale})?",
+        "risk_assessment": "Workshop 5: I can generate the study's **risk assessment** from its "
+        "{operational_count} selected operational scenarios, like the \u201cGenerate the risk "
+        "assessment\u201d button on the study page.",
+        "treatment": "Workshop 5: for each risk ({open_risks}), which **treatment strategy** "
+        "(mitigate, accept, avoid, transfer), which **security measures**, and which target "
+        "residual likelihood ({likelihood_scale})? I can also suggest measures.",
     },
 }
 LABELS = {
@@ -223,6 +277,13 @@ LABELS = {
         "stakeholders": "stakeholders",
         "supports": "supports",
         "likelihood": "likelihood",
+        "treatment": "treatment",
+        "measures": "measures",
+        "residual_likelihood": "residual likelihood",
+        "mitigate": "mitigate",
+        "accept": "accept",
+        "avoid": "avoid",
+        "transfer": "transfer",
         "new": "new",
         "existing": "already in the tool, reused or updated",
     },
@@ -253,6 +314,13 @@ LABELS = {
         "stakeholders": "parties prenantes",
         "supports": "au service de",
         "likelihood": "vraisemblance",
+        "treatment": "traitement",
+        "measures": "mesures",
+        "residual_likelihood": "vraisemblance résiduelle",
+        "mitigate": "réduire",
+        "accept": "accepter",
+        "avoid": "éviter",
+        "transfer": "transférer",
         "new": "nouveau",
         "existing": "déjà dans l'outil, réutilisé ou mis à jour",
     },
@@ -313,6 +381,10 @@ def _parse_json(text: str) -> dict:
         return {}
 
 
+def _lang(ctx, table: dict) -> str:
+    return ctx.user_lang[:2] if ctx.user_lang[:2] in table else "en"
+
+
 def _refresh_scope(ctx) -> None:
     """ReadScope caches readable ids for the request; objects created since are not in them."""
     from chat.scoping import ReadScope
@@ -332,6 +404,15 @@ def _find(by_name: dict, name):
         return by_name[wanted]
     close = difflib.get_close_matches(wanted, list(by_name), n=1, cutoff=0.8)
     return by_name[close[0]] if close else None
+
+
+def _mentions(text: str, token: str) -> bool:
+    """`token` in `text` at a word start ("fort" in "forte", "g4" in "(g4)", not "v1" in "v12")."""
+    if not token:
+        return False
+    if re.search(r"\d$", token):
+        return re.search(rf"(?<![\w]){re.escape(token)}(?!\d)", text) is not None
+    return re.search(rf"(?<![\w]){re.escape(token)}", text) is not None
 
 
 def _norm(text) -> str:
@@ -366,7 +447,12 @@ class EbiosFacilitationMixin:
         if data.get("phase") == "proposed" and clicked == "change":
             data["awaiting_change"] = True
             self._save_state(ctx, "facilitate", data)
-            yield self._token("What should I change?")
+            if (
+                data.get("proposal_step") == "framing"
+            ):  # recorded as written: ask for the full text
+                yield SSEEvent(type="token", content=REWRITE[_lang(ctx, REWRITE)])
+            else:
+                yield self._token("What should I change?")
             return
         if clicked == "skip":
             intent = "skip"
@@ -379,8 +465,7 @@ class EbiosFacilitationMixin:
                     INTENT.format(
                         last=last[-1500:],
                         message=ctx.user_message,
-                        steps=", ".join(f'"{k}" ({g})' for k, _, g in STEPS)
-                        + ', "treatment" (workshop 5: risk treatment, security measures, residual risk)',
+                        steps=", ".join(f'"{k}" ({g})' for k, _, g in STEPS),
                     ),
                 )
             )
@@ -392,13 +477,17 @@ class EbiosFacilitationMixin:
             ):
                 intent = "amend"
             # The user may come back to an earlier step (a missing feared event, the baseline...)
-            if verdict.get("step") == "treatment":
-                # Workshop 5 lives in the study page; say where, in the interface's own words.
-                lang = ctx.user_lang[:2] if ctx.user_lang[:2] in DONE else "en"
-                self._save_state(ctx, "facilitate", data)
-                yield SSEEvent(type="token", content=DONE[lang]["treatment"])
-                return
-            if data.get("phase") == "finished" and verdict.get("step") in WRITE_PERMS:
+            if verdict.get("step") in ("risk_assessment", "treatment"):
+                # workshop 5: the first of its steps the study still needs
+                data["skipped"] = [
+                    k
+                    for k in data.get("skipped", [])
+                    if k not in ("risk_assessment", "treatment")
+                ]
+                for key in ("phase", "proposal", "proposal_step", "focus"):
+                    data.pop(key, None)
+                intent = "start"
+            elif data.get("phase") == "finished" and verdict.get("step") in WRITE_PERMS:
                 # Going back to a step after the end: ask its question again
                 data["skipped"] = [
                     k for k in data.get("skipped", []) if k != verdict["step"]
@@ -504,6 +593,15 @@ class EbiosFacilitationMixin:
         goal = dict((s, g) for s, _, g in STEPS)[step]
         summary, extra = self._study_snapshot(ctx, study_obj, step)
 
+        if step == "risk_assessment" and intent in ("start", "skip"):
+            # nothing to extract from the user: propose right away, the buttons decide
+            noun = NOUNS[_lang(ctx, NOUNS)]["risk_assessment"]
+            items = [{"name": f"{study_obj.name} — {noun}"}]
+            data.update(phase="proposed", proposal=items, proposal_step=step)
+            self._save_state(ctx, "facilitate", data)
+            yield from self._ask(ctx, study_obj, step, buttons=False)
+            yield from self._render_proposal(ctx, step, items)
+            return
         if intent == "start" or data.get("phase") is None and intent in ("skip",):
             data["phase"] = "asked"
             self._save_state(ctx, "facilitate", data)
@@ -518,20 +616,24 @@ class EbiosFacilitationMixin:
                 f"Your previous proposal was {json.dumps(data.get('proposal'), ensure_ascii=False)}; "
                 f"the user replied: {ctx.user_message!r}. Take it into account.\n"
             )
-        reply = _parse_json(
-            self._call_llm(
-                ctx,
-                PROPOSE.format(
-                    message=ctx.user_message,
-                    workshop=workshop,
-                    goal=goal,
-                    state=summary,
-                    extra=extra,
-                    fmt=ITEM_FORMATS[step],
-                    feedback=feedback,
-                ),
+        if step == "framing":
+            # Free text needs no extraction: the user's own words, so nothing is invented
+            reply = {"items": [{"objectives": ctx.user_message.strip()}]}
+        else:
+            reply = _parse_json(
+                self._call_llm(
+                    ctx,
+                    PROPOSE.format(
+                        message=ctx.user_message,
+                        workshop=workshop,
+                        goal=goal,
+                        state=summary,
+                        extra=extra,
+                        fmt=ITEM_FORMATS[step],
+                        feedback=feedback,
+                    ),
+                )
             )
-        )
         # Only items shaped for this step: a model answering another step is not recorded here.
         items = [
             i
@@ -540,6 +642,7 @@ class EbiosFacilitationMixin:
             and all(i.get(k) not in (None, "", []) for k in REQUIRED[step])
             and (step != "baseline" or i.get("frameworks") or i.get("gaps"))
         ]
+        items = self._drop_unstated_ratings(ctx, study_obj, step, items)
         if not items:
             data["phase"] = "asked"
             self._save_state(ctx, "facilitate", data)
@@ -550,7 +653,7 @@ class EbiosFacilitationMixin:
         self._save_state(ctx, "facilitate", data)
         yield from self._render_proposal(ctx, step, items)
 
-    def _ask(self, ctx, study, step: str) -> Iterator[SSEEvent]:
+    def _ask(self, ctx, study, step: str, buttons: bool = True) -> Iterator[SSEEvent]:
         """The step's question, written once per language and filled from the study's data:
         method-correct and the same with any model. Other languages get the English one translated."""
         lang = ctx.user_lang[:2] if ctx.user_lang[:2] in QUESTIONS else "en"
@@ -594,13 +697,30 @@ class EbiosFacilitationMixin:
             )
             or none,
         }
+        scenarios = self._scoped(ctx, "core.RiskScenario").filter(
+            risk_assessment__ebios_rm_study=study
+        )
+        values["operational_count"] = (
+            self._scoped(ctx, "ebios_rm.OperationalScenario")
+            .filter(ebios_rm_study=study, is_selected=True)
+            .count()
+        )
+        values["open_risks"] = (
+            "; ".join(r.name for r in scenarios.filter(treatment="open")[:20]) or none
+        )
         text = QUESTIONS[lang][step].format(**values)
+        pathless = self._pathless(ctx, study) if step == "strategic_scenarios" else []
+        if pathless:
+            text = PATHLESS[lang].format(scenarios=", ".join(pathless))
         # French and English are written natively; another language is translated as fixed text.
         yield (
             SSEEvent(type="token", content=text)
             if lang == ctx.user_lang[:2]
             else self._token(text)
         )
+        if not buttons:
+            yield SSEEvent(type="token", content="\n\n")
+            return
         buttons = BUTTONS.get(ctx.user_lang[:2], BUTTONS["en"])
         yield self._pending_choice(
             field="ebios_step",
@@ -634,13 +754,25 @@ class EbiosFacilitationMixin:
             "stakeholders": self._scoped(ctx, "ebios_rm.Stakeholder")
             .filter(ebios_rm_study=study)
             .exists(),
+            # every strategic scenario needs an attack path, or it never reaches workshop 4
             "strategic_scenarios": self._scoped(ctx, "ebios_rm.StrategicScenario")
             .filter(ebios_rm_study=study)
-            .exists(),
+            .exists()
+            and not self._pathless(ctx, study),
             "operational_scenarios": aps.exists()
             and not aps.exclude(operational_scenario__likelihood__gte=0).exists()
             and ops.exists(),
         }
+        assessments = self._scoped(ctx, "core.RiskAssessment").filter(
+            ebios_rm_study=study
+        )
+        scenarios = self._scoped(ctx, "core.RiskScenario").filter(
+            risk_assessment__in=assessments
+        )
+        done["risk_assessment"] = assessments.exists()
+        done["treatment"] = (
+            scenarios.exists() and not scenarios.filter(treatment="open").exists()
+        )
         for step, _, _ in STEPS:
             if step not in skipped and not done[step]:
                 return step
@@ -648,6 +780,63 @@ class EbiosFacilitationMixin:
 
     def _study_assets(self, ctx, study):
         return self._scoped(ctx, "core.Asset").filter(id__in=study.assets.values("id"))
+
+    def _drop_unstated_ratings(
+        self, ctx, study, step: str, items: list[dict]
+    ) -> list[dict]:
+        """A rating the user never gave is dropped, not recorded: kept only when the user's recent
+        messages name its criterion or one of its levels (code, name or translation, from the
+        study's matrix and the tool's default scales). The same for any model."""
+        fields = RATINGS.get(step)
+        if not fields:
+            return items
+        said = " ".join(
+            [m.get("content", "") for m in ctx.history if m.get("role") == "user"][-3:]
+            + [ctx.user_message]
+        )
+        said = f" {_norm(said)} "
+        kept = []
+        for item in items:
+            item = dict(item)
+            for field, words in fields.items():
+                if item.get(field) in (None, "", []):
+                    continue
+                tokens = set(words) | self._level_words(study, field)
+                if not any(_mentions(said, t) for t in tokens):
+                    item.pop(field)
+            kept.append(item)
+        return kept
+
+    def _level_words(self, study, field: str) -> set[str]:
+        """Codes, names and translated names of a rating's levels in the study's matrix."""
+        axis = {
+            "gravity": "impact",
+            "likelihood": "probability",
+            "residual_likelihood": "probability",
+        }
+        try:
+            matrix = study.risk_matrix.parse_json_translated()
+        except Exception:
+            return set()
+        if field in axis:
+            levels = matrix.get(axis[field], [])
+        else:
+            levels = ((matrix.get("ebios_rm") or {}).get("ro_to") or {}).get(field, [])
+        words = set()
+        for level in levels:
+            words |= {_norm(level.get("abbreviation")), _norm(level.get("name"))}
+            words |= {
+                _norm(t.get("name")) for t in (level.get("translations") or {}).values()
+            }
+        return {w for w in words if w}
+
+    def _pathless(self, ctx, study) -> list[str]:
+        """Strategic scenarios with no attack path yet."""
+        return list(
+            self._scoped(ctx, "ebios_rm.StrategicScenario")
+            .filter(ebios_rm_study=study, attack_paths__isnull=True)
+            .values_list("name", flat=True)
+        )
 
     def _levels(self, study, axis: str) -> list[dict]:
         try:
@@ -728,6 +917,19 @@ class EbiosFacilitationMixin:
         elif step in ("gravity", "feared_events"):
             extra = "Gravity scale of the study: " + "; ".join(
                 self._scale(study, "impact")
+            )
+        elif step == "treatment":
+            risks = self._scoped(ctx, "core.RiskScenario").filter(
+                risk_assessment__ebios_rm_study=study
+            )
+            extra = (
+                "Risks to treat: "
+                + (
+                    "; ".join(r.name for r in risks.filter(treatment="open"))
+                    or "(none)"
+                )
+                + "\nLikelihood scale of the study: "
+                + "; ".join(self._scale(study, "probability"))
             )
         elif step == "operational_scenarios":
             extra = "Likelihood scale of the study: " + "; ".join(
@@ -866,7 +1068,15 @@ class EbiosFacilitationMixin:
             shown = [
                 f"{labels.get(k, k.replace('_', ' '))}: {_shown(_readable(k, v, labels, terms))}"
                 for k, v in item.items()
-                if k not in ("name", "entity", "feared_event", "attack_path", "new")
+                if k
+                not in (
+                    "name",
+                    "entity",
+                    "feared_event",
+                    "attack_path",
+                    "risk_scenario",
+                    "new",
+                )
                 and v not in (None, "", [])
             ]
             title = _item_title(
@@ -1114,6 +1324,7 @@ class EbiosFacilitationMixin:
         stakeholder.current_penetration = _level(item.get("penetration"), 0, 4)
         stakeholder.current_maturity = _level(item.get("maturity"), 1, 4, default=1)
         stakeholder.current_trust = _level(item.get("trust"), 1, 4, default=1)
+        stakeholder.is_selected = True  # the user just retained it
         stakeholder.save()
         return True
 
@@ -1122,19 +1333,21 @@ class EbiosFacilitationMixin:
         AttackPath = apps.get_model("ebios_rm", "AttackPath")
         rotos = list(self._scoped(ctx, "ebios_rm.RoTo").filter(ebios_rm_study=study))
         index, name = item.get("roto"), str(item.get("name") or "").strip()
-        if not name or not isinstance(index, int) or not 1 <= index <= len(rotos):
-            return False
+        valid_couple = isinstance(index, int) and 1 <= index <= len(rotos)
         fes = self._by_name(ctx, "ebios_rm.FearedEvent", study)
-        scenario = self._by_name(ctx, "ebios_rm.StrategicScenario", study).get(
-            _norm(name)
-        )
+        scenario = _find(self._by_name(ctx, "ebios_rm.StrategicScenario", study), name)
         if scenario is None:
+            if not name or not valid_couple:  # a new scenario needs its couple
+                return False
             scenario = StrategicScenario(ebios_rm_study=study, name=name[:200])
         scenario.description = str(
             item.get("description") or scenario.description or ""
         )
-        scenario.ro_to_couple = rotos[index - 1]
-        scenario.focused_feared_event = _find(fes, item.get("feared_event"))
+        if valid_couple:
+            scenario.ro_to_couple = rotos[index - 1]
+        scenario.focused_feared_event = (
+            _find(fes, item.get("feared_event")) or scenario.focused_feared_event
+        )
         scenario.save()
         stakeholders = {
             _norm(s.entity.name): s
@@ -1181,6 +1394,71 @@ class EbiosFacilitationMixin:
         scenario.save()
         return True
 
+    def _record_risk_assessment(self, ctx, study, item):
+        """Through the risk assessment API view, as the user: the same validation, permissions and
+        generation from the operational scenarios as the study page's button."""
+        from core.views import RiskAssessmentViewSet
+
+        view = RiskAssessmentViewSet()
+        view.request, view.format_kwarg, view.action, view.kwargs = (
+            ctx.request,
+            None,
+            "create",
+            {},
+        )
+        serializer = view.get_serializer(
+            data={
+                "name": str(item.get("name") or study.name)[:200],
+                "folder": str(study.folder_id),
+                "risk_matrix": str(study.risk_matrix_id),
+                "ebios_rm_study": str(study.id),
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        view.perform_create(serializer)
+        return True
+
+    def _record_treatment(self, ctx, study, item):
+        from .ebios_rm_assist import _can_write
+
+        AppliedControl = apps.get_model("core", "AppliedControl")
+        treatment = str(item.get("treatment") or "").lower()
+        if treatment not in ("mitigate", "accept", "avoid", "transfer"):
+            return False
+        scenarios = {
+            _norm(r.name): r
+            for r in self._scoped(ctx, "core.RiskScenario").filter(
+                risk_assessment__ebios_rm_study=study
+            )
+        }
+        scenario = _find(scenarios, item.get("risk_scenario"))
+        if scenario is None:
+            return False
+        scenario.treatment = treatment
+        level = self._level_index(study, "probability", item.get("residual_likelihood"))
+        if level is not None:
+            scenario.residual_proba = level
+            if scenario.residual_impact < 0:
+                scenario.residual_impact = scenario.current_impact
+        scenario.save()
+        folder = scenario.risk_assessment.folder
+        controls = {
+            _norm(c.name): c
+            for c in self._scoped(ctx, "core.AppliedControl").filter(folder=folder)
+        }
+        can_add = _can_write(ctx.scope.user, folder, ("add_appliedcontrol",))
+        for name in item.get("measures") or []:
+            name = str(name).strip()
+            control = _find(controls, name)
+            if control is None and name and can_add:
+                control = AppliedControl.objects.create(
+                    name=name[:200], folder=folder, status="to_do"
+                )
+                controls[_norm(name)] = control
+            if control is not None:
+                scenario.applied_controls.add(control)
+        return True
+
     def _draft_remaining(self, ctx, study_obj) -> Iterator[SSEEvent]:
         """The user asked for a full draft: the one-shot generator fills the empty workshops."""
         study = {
@@ -1220,6 +1498,8 @@ NOUNS = {
         "stakeholders": "stakeholders",
         "strategic_scenarios": "strategic scenarios",
         "operational_scenarios": "operational scenarios",
+        "risk_assessment": "risk assessment",
+        "treatment": "risk treatment",
     },
     "fr": {
         "recorded": "Enregistré dans l'étude :",
@@ -1235,6 +1515,8 @@ NOUNS = {
         "stakeholders": "parties prenantes",
         "strategic_scenarios": "scénarios stratégiques",
         "operational_scenarios": "scénarios opérationnels",
+        "risk_assessment": "analyse de risques",
+        "treatment": "traitement du risque",
     },
 }
 
@@ -1243,6 +1525,8 @@ def _readable(key, value, labels, terms=None):
     """Codes as a reader says them: PR/SP, risk origins and categories in the user's language."""
     if key == "type" and value in ("PR", "SP"):
         return labels[value]
+    if key == "treatment" and isinstance(value, str):
+        return labels.get(value.lower(), value)
     if key in ("risk_origin", "category") and isinstance(value, str):
         return (terms or {}).get(value) or value.replace("_", " ")
     return value
@@ -1251,6 +1535,7 @@ def _readable(key, value, labels, terms=None):
 def _item_title(item: dict) -> str:
     return str(
         item.get("name")
+        or item.get("risk_scenario")
         or item.get("entity")
         or item.get("feared_event")
         or item.get("attack_path")

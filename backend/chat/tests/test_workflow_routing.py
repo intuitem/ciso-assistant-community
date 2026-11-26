@@ -122,6 +122,8 @@ def test_every_step_has_a_question_in_each_language():
         "entities",
         "rotos",
         "paths",
+        "operational_count",
+        "open_risks",
     }
     for lang, questions in QUESTIONS.items():
         assert set(questions) == {step for step, _, _ in STEPS}, lang
@@ -139,3 +141,49 @@ def test_names_match_despite_small_paraphrases():
     assert _find(paths, "Compromission de la télémaintenance Hôpisoft") == "p1"
     assert _find(paths, "Attaque du portail patient") is None
     assert _find(paths, "") is None
+
+
+def test_ratings_the_user_never_gave_are_dropped():
+    from types import SimpleNamespace
+
+    from chat.workflows.ebios_rm_assist import EbiosRMAssistWorkflow
+
+    matrix = {
+        "impact": [{"abbreviation": f"G{i}", "name": f"g{i}"} for i in range(1, 5)],
+        "ebios_rm": {
+            "ro_to": {
+                "motivation": [
+                    {"name": "Strong", "translations": {"fr": {"name": "Fort"}}}
+                ],
+                "resources": [
+                    {"name": "Unlimited", "translations": {"fr": {"name": "Illimité"}}}
+                ],
+            }
+        },
+    }
+    study = SimpleNamespace(
+        risk_matrix=SimpleNamespace(parse_json_translated=lambda: matrix)
+    )
+    workflow = EbiosRMAssistWorkflow()
+    ctx = SimpleNamespace(
+        history=[], user_message="Crime organisé, motivation forte. Rien d'autre."
+    )
+    couple = {
+        "risk_origin": "organized_crime",
+        "target_objective": "rançon",
+        "motivation": 4,
+        "resources": 4,
+    }
+    kept = workflow._drop_unstated_ratings(ctx, study, "rotos", [couple])[0]
+    assert kept["motivation"] == 4 and "resources" not in kept
+    ctx.user_message = "Fuite de données : G4"
+    fe = {"name": "Fuite", "gravity": "G4"}
+    assert (
+        workflow._drop_unstated_ratings(ctx, study, "feared_events", [fe])[0]["gravity"]
+        == "G4"
+    )
+    ctx.user_message = "Fuite de données de santé"
+    assert (
+        "gravity"
+        not in workflow._drop_unstated_ratings(ctx, study, "feared_events", [fe])[0]
+    )
