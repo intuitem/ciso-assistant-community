@@ -39,8 +39,6 @@
 	const setUrn: string = editor.set.urn;
 	const draftBase = `/experimental/library-builder/${data.draftId}`;
 
-	$pageTitle = m.lbMappingPageTitle({ name: editor.set.name || editor.set.ref_id });
-
 	const sourceNodes: Node[] = editor.source.nodes;
 	const targetNodes: Node[] = editor.target.nodes;
 	const targetByUrn = new Map(targetNodes.map((n) => [n.urn, n]));
@@ -105,6 +103,7 @@
 		editor.set.name === `${editor.source.name} → ${editor.target.name}`
 			? `${editor.source.name} (${frameworkTag(editor.source)}) → ${editor.target.name} (${frameworkTag(editor.target)})`
 			: editor.set.name || editor.set.ref_id;
+	$pageTitle = m.lbMappingPageTitle({ name: title });
 	let defaultRelationship = $state('intersect');
 
 	let pairsBySource = $derived.by(() => {
