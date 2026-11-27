@@ -574,7 +574,7 @@
 
 	function ignoreSaved() {
 		useSaved = false;
-		pick(file ?? undefined);
+		pick(file ?? undefined, false);
 	}
 
 	// What a saved mapping keeps per sheet: enough to recognise the layout and
@@ -1075,7 +1075,12 @@
 				</span>
 			</div>
 			<span class="grow"></span>
-			<button type="button" class="btn btn-sm preset-tonal" onclick={reset} disabled={running}>
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal"
+				onclick={reset}
+				disabled={running || analysing}
+			>
 				<i class="fa-solid fa-rotate-left mr-1"></i>{m.dataImportChooseAnother()}
 			</button>
 		</div>
@@ -1105,7 +1110,7 @@
 					class="anchor"
 					onclick={() => {
 						useSaved = true;
-						pick(file ?? undefined);
+						pick(file ?? undefined, false);
 					}}>{m.dataImportUseAgain()}</button
 				>
 			</p>

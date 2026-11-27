@@ -125,6 +125,12 @@ class TestRecognisedFormats:
         "content,model_type",
         [
             (MINIMAL_EGERIE_XML, ModelType.EBIOS_RM_STUDY_EGERIE_XML),
+            (
+                MINIMAL_EGERIE_XML.replace(
+                    b"?>\n", b"?>\n<!--" + b"x" * 8000 + b"-->\n", 1
+                ),
+                ModelType.EBIOS_RM_STUDY_EGERIE_XML,
+            ),
             (build_workbook(EN_SHEETS), ModelType.EBIOS_RM_STUDY_ARM),
             (build_archive(PER_TABLE_EXPORTS), ModelType.EBIOS_RM_STUDY_ARM),
             (filled_2023_tool(), ModelType.CYFUN_ASSESSMENT),
@@ -152,6 +158,10 @@ class TestRecognisedFormats:
     def test_other_files_are_not(self):
         assert mapping.recognise_format(b"<?xml version='1.0'?><a/>") is None
         assert mapping.recognise_format(build_archive({"x.xlsx": [["a"]]})) is None
+        csv = b"name,link\nStudy,http://www.egerie-software.com/riskmanager\n"
+        assert mapping.recognise_format(csv) is None
+        numbered = build_workbook({n: [["name"], ["x"]] for n in ("1", "2", "3")})
+        assert mapping.recognise_format(numbered) is None
 
     def test_analysis_names_the_format(self, api_client):
         resp = api_client.post(
@@ -207,3 +217,89 @@ class TestRecognisedFormats:
         [step] = resp.json()["steps"]
         assert step["status"] == 200
         assert EbiosRMStudy.objects.exists() is not dry_run
+
+
+def test_whole_file_importers_may_analyse(monkeypatch):
+    monkeypatch.setattr(
+        mapping.RoleAssignment,
+        "has_permission_anywhere",
+        lambda user, perm: perm == "add_ebiosrmstudy",
+    )
+    assert mapping.may_import_something(None)
+
+
+def test_generated_occurrence_does_not_duplicate_history():
+    import pandas as pd
+
+    history = pd.DataFrame(
+        [
+            {"due_date": "2026-01-15", "status": "completed", "observation": "kept"},
+            {"due_date": "2026-02-01", "status": "completed", "observation": "kept"},
+        ]
+    )
+    generated = pd.DataFrame(
+        [
+            {"due_date": pd.Timestamp("2026-02-01"), "status": "completed"},
+            {"due_date": "2026-03-01", "status": "completed"},
+        ]
+    )
+    merged = mapping._merge_occurrences(history, generated)
+    assert list(merged["due_date"].astype(str).str[:10]) == [
+        "2026-01-15",
+        "2026-02-01",
+        "2026-03-01",
+    ]
+    assert merged.loc[1, "observation"] == "kept"
+
+
+@pytest.mark.django_db
+def test_last_done_keeps_the_task_history(api_client, domain_folder, all_accessible):
+    import datetime
+
+    import openpyxl
+
+    workbook = openpyxl.load_workbook(IMPORT_TEMPLATES_DIR / "tasks_template.xlsx")
+    summary = workbook["Summary"]
+    column = summary.max_column + 1
+    summary.cell(1, column, "last_done")
+    summary.cell(2, column, "2026-02-01")
+    history = workbook["1-task"]
+    # A hand-made history: display headers, a past completed occurrence.
+    for cell, header in zip(history[1], ("Due date", "Scheduled date", "Status")):
+        cell.value = header
+    history["A2"], history["B2"], history["C2"] = (
+        "2026-01-15",
+        "2026-01-15",
+        "completed",
+    )
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    columns = {
+        h: c["key"]
+        for h, c in next(
+            s for s in _analyse(ModelType.TASK_TEMPLATE) if s["name"] == "Summary"
+        )["mapping"]["columns"].items()
+    } | {"last_done": "last_done"}
+    step = {
+        "model_type": "TaskTemplate",
+        "sheets": [
+            {
+                "source": "Summary",
+                "target": "Summary",
+                "header_row": 1,
+                "columns": columns,
+            }
+        ],
+    }
+    resp = api_client.post(
+        IMPORT_URL,
+        {
+            "file": SimpleUploadedFile("tasks.xlsx", buffer.getvalue()),
+            "mapping": json.dumps({"steps": [step]}),
+            "options": json.dumps({"folder_id": str(domain_folder.id)}),
+        },
+        format="multipart",
+    )
+    assert resp.status_code == 200, resp.json()
+    dates = set(TaskNode.objects.values_list("due_date", flat=True))
+    assert {datetime.date(2026, 1, 15), datetime.date(2026, 2, 1)} <= dates

@@ -54,6 +54,7 @@ from .egerie_xml_helpers import EGERIE_NS
 from .models import ImportMapping
 from .serializers import LoadFileSerializer
 from .views import (
+    IMPORT_ROOT_MODEL,
     IMPORT_TEMPLATES,
     IMPORT_TEMPLATES_DIR,
     SHEET_NAME_INVALID_CHARS,
@@ -383,6 +384,8 @@ WHOLE_FILE_TYPES = (
 )
 # Sheets of a task export holding one task's past occurrences: "{row}-{name}".
 OCCURRENCE_SHEET = re.compile(r"^\d+-")
+# A sheet name this long may be an ARM name cut at 31 characters (trailing space dropped).
+ARM_CUT_NAME = 28
 
 
 def _arm_tables(names: list[str]) -> int:
@@ -390,7 +393,8 @@ def _arm_tables(names: list[str]) -> int:
     sheets = [normalize_label(n) for n in names]
     return sum(
         any(
-            s == normalize_label(v) or normalize_label(v).startswith(s)
+            s == normalize_label(v)
+            or (len(s) >= ARM_CUT_NAME and normalize_label(v).startswith(s))
             for v in variants
             for s in sheets
         )
@@ -401,9 +405,10 @@ def _arm_tables(names: list[str]) -> int:
 def recognise_format(content: bytes) -> ModelType | None:
     """The whole-file import a file is made for, if any."""
     if not content.startswith(b"PK"):
+        is_xml = content.lstrip(b"\xef\xbb\xbf \t\r\n").startswith(b"<")
         return (
             ModelType.EBIOS_RM_STUDY_EGERIE_XML
-            if EGERIE_NS.encode() in content[:4096]
+            if is_xml and EGERIE_NS.encode() in content[:65536]
             else None
         )
     if not is_xlsx(content):
@@ -1240,6 +1245,13 @@ def _task_occurrences(summary: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return summary.drop(columns=dropped, errors="ignore"), occurrences
 
 
+def _merge_occurrences(history: pd.DataFrame, generated: pd.DataFrame) -> pd.DataFrame:
+    """The file's history plus generated occurrences on dates it does not have."""
+    merged = pd.concat([history, generated], ignore_index=True)
+    day = pd.to_datetime(merged["due_date"], errors="coerce").dt.date
+    return merged[day.isna() | ~day.duplicated()].reset_index(drop=True)
+
+
 def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
     """The workbook the step's template describes, filled from the source."""
     by_name = {s.name: s for s in sources}
@@ -1274,19 +1286,22 @@ def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
                 if step.model_type == ModelType.TASK_TEMPLATE:
                     frame, occurrences = _task_occurrences(frame)
                 frame.to_excel(writer, sheet_name=target, index=False)
-        for title, rows in occurrences.items():
-            rows.to_excel(writer, sheet_name=title, index=False)
         if step.model_type == ModelType.TASK_TEMPLATE:
-            # Past occurrences of a task export, read as they are by the importer.
+            # Past occurrences of a task export, merged with any from last-done dates.
             mapped = {s.source for s in step.sheets}
             for source in sources:
                 if (
                     OCCURRENCE_SHEET.match(source.name)
-                    and source.name not in mapped | occurrences.keys()
+                    and source.name not in mapped
                     and not source.raw.empty
                     and "due_date" in map(normalize, source.headers)
                 ):
-                    source.frame().to_excel(writer, sheet_name=source.name, index=False)
+                    history = source.frame().rename(columns=normalize)
+                    if source.name in occurrences:
+                        history = _merge_occurrences(history, occurrences[source.name])
+                    occurrences[source.name] = history
+        for title, rows in occurrences.items():
+            rows.to_excel(writer, sheet_name=title, index=False)
     buffer.seek(0)
     return buffer
 
@@ -1422,12 +1437,13 @@ class MappingSchemaView(APIView):
 
 
 def may_import_something(user) -> bool:
-    return any(
-        RoleAssignment.has_permission_anywhere(
-            user, f"add_{label.split('.')[1].lower()}"
-        )
+    models = {
+        label.split(".")[1].lower()
         for rows in TEMPLATE_ROW_MODELS.values()
         for label in rows.values()
+    } | {IMPORT_ROOT_MODEL[t] for t in WHOLE_FILE_TYPES}
+    return any(
+        RoleAssignment.has_permission_anywhere(user, f"add_{model}") for model in models
     )
 
 
