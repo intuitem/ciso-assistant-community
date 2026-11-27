@@ -965,20 +965,100 @@
 		handler.invalidate();
 	}
 
+	// preset-tonal-surface matches the striped rows and vanishes on every other one.
+	const NEUTRAL_STATUS_PRESET = 'bg-surface-300-700 text-surface-900-100';
 	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
 		to_do: 'preset-tonal-primary',
 		in_progress: 'preset-tonal-warning',
 		on_hold: 'preset-tonal-secondary',
 		active: 'preset-tonal-success',
 		degraded: 'preset-tonal-error',
-		deprecated: 'preset-tonal-surface'
+		deprecated: NEUTRAL_STATUS_PRESET
 	};
-	// Status column badges: the applied-control tones plus the shared assessment statuses.
+	// Status column badges, by meaning: every model's status choices land in one tone.
+	const STATUS_TONES: Record<string, string[]> = {
+		'preset-tonal-success': [
+			'done',
+			'approved',
+			'achieved',
+			'completed',
+			'succeeded',
+			'resolved',
+			'closed',
+			'published',
+			'validated',
+			'accepted',
+			'fixed',
+			'mitigated',
+			'indexed',
+			'parsed',
+			'not_exploitable',
+			'unaffected',
+			'privacy_approved',
+			'privacy_closed'
+		],
+		'preset-tonal-error': [
+			'missing',
+			'rejected',
+			'expired',
+			'failed',
+			'error',
+			'exploitable',
+			'terminated'
+		],
+		'preset-tonal-warning': [
+			'ongoing',
+			'running',
+			'processing',
+			'parsing',
+			'retrying',
+			'waiting',
+			'queued',
+			'stale',
+			'potential',
+			'change_requested',
+			'changes_requested',
+			'privacy_under_investigation'
+		],
+		'preset-tonal-secondary': [
+			'in_review',
+			'submitted',
+			'pending',
+			'confirmed',
+			'assigned',
+			'privacy_in_review'
+		],
+		'preset-tonal-primary': [
+			'planned',
+			'new',
+			'identified',
+			'privacy_discovered',
+			'privacy_authority_notified',
+			'privacy_subjects_notified'
+		]
+	};
 	const STATUS_PRESETS: Record<string, string> = {
-		...APPLIED_CONTROL_STATUS_PRESETS,
-		planned: 'preset-tonal-primary',
-		in_review: 'preset-tonal-secondary',
-		done: 'preset-tonal-success'
+		...Object.fromEntries(
+			Object.entries(STATUS_TONES).flatMap(([tone, values]) => values.map((v) => [v, tone]))
+		),
+		...APPLIED_CONTROL_STATUS_PRESETS
+	};
+	// Keyed on the Django labels, which are untranslated: the more favourable, the greener.
+	const LEVEL_PRESETS: Record<string, Record<string, string>> = {
+		control_impact: {
+			'Very Low': NEUTRAL_STATUS_PRESET,
+			Low: NEUTRAL_STATUS_PRESET,
+			Medium: 'preset-tonal-primary',
+			High: 'preset-tonal-success',
+			'Very High': 'preset-tonal-success'
+		},
+		effort: {
+			'Extra Small': 'preset-tonal-success',
+			Small: 'preset-tonal-success',
+			Medium: 'preset-tonal-primary',
+			Large: 'preset-tonal-warning',
+			'Extra Large': 'preset-tonal-warning'
+		}
 	};
 	// Same flag tones as the detail view.
 	const PRIORITY_FLAGS: Record<string, string> = {
@@ -1391,7 +1471,7 @@
 																				<span
 																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
 																						val.status
-																					] ?? 'preset-tonal-surface'}"
+																					] ?? NEUTRAL_STATUS_PRESET}"
 																					>{safeTranslate(val.status)}</span
 																				>
 																			{/if}
@@ -1483,8 +1563,13 @@
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
 													{:else if key === 'status' && typeof value === 'string' && !(URLModel == 'document-containers' && row.meta?.pending_revision)}
 														<span
-															class="badge text-xs {STATUS_PRESETS[value] ??
-																'preset-tonal-surface'}">{safeTranslate(value)}</span
+															class="badge text-xs {STATUS_PRESETS[
+																row.meta?.status_code ?? value
+															] ?? NEUTRAL_STATUS_PRESET}">{safeTranslate(value)}</span
+														>
+													{:else if LEVEL_PRESETS[key]?.[value]}
+														<span class="badge text-xs {LEVEL_PRESETS[key][value]}"
+															>{safeTranslate(value)}</span
 														>
 													{:else if key === 'priority' && PRIORITY_FLAGS[String(value).replace('P', '')]}
 														<span class="whitespace-nowrap"
