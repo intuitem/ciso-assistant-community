@@ -12,7 +12,7 @@ from rest_framework import status as http
 from rest_framework.test import APIClient
 
 from core.generators import findings_assessment_context
-from core.models import Finding, FilteringLabel, FindingsAssessment
+from core.models import Asset, Finding, FilteringLabel, FindingsAssessment, Threat
 from core.typst_render import TEMPLATE_DIR, localized_template, render_pdf
 from core.tests.test_audit_word_export import (  # noqa: F401
     admin_client,
@@ -55,6 +55,16 @@ def _findings(assessment_obj, severities, rich=False):
                 FilteringLabel.objects.create(label=f"tag-{finding.ref_id}")
             )
     return made
+
+
+def _link_threats_and_asset(finding):
+    folder = finding.folder
+    finding.threats.add(
+        Threat.objects.create(name="Phishing", folder=folder),
+        Threat.objects.create(name="Ransomware", folder=folder),
+    )
+    finding.asset = Asset.objects.create(name="Mail server", folder=folder)
+    finding.save()
 
 
 def _render(assessment_obj, lang="en"):
@@ -281,11 +291,12 @@ def test_recommendation_and_priority_reach_the_report(assessment, lang):
 
 
 @pytest.mark.django_db
-def test_markdown_export_carries_recommendation_and_priority(
+def test_markdown_export_carries_recommendation_priority_threats_and_asset(
     admin_client,  # noqa: F811
     assessment,
 ):
-    _findings(assessment, [3], rich=True)
+    (finding,) = _findings(assessment, [3], rich=True)
+    _link_threats_and_asset(finding)
     url = reverse("findings-assessments-md", kwargs={"pk": str(assessment.pk)})
     response = admin_client.get(url)
     assert response.status_code == http.HTTP_200_OK
@@ -293,11 +304,24 @@ def test_markdown_export_carries_recommendation_and_priority(
     content = response.content.decode()
     assert "- **Priority**: P1" in content
     assert "- **Recommendation**: Rotate the key." in content
+    # Threat has no default ordering, so the joined names come in any order
+    (threats,) = [
+        line for line in content.splitlines() if line.startswith("- **Threats**: ")
+    ]
+    assert set(threats.removeprefix("- **Threats**: ").split(", ")) == {
+        "Phishing",
+        "Ransomware",
+    }
+    assert "- **Asset**: Mail server" in content
 
 
 @pytest.mark.django_db
-def test_xlsx_export_carries_recommendation(admin_client, assessment):  # noqa: F811
-    _findings(assessment, [3], rich=True)
+def test_xlsx_export_carries_recommendation_threats_and_asset(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    (finding,) = _findings(assessment, [3], rich=True)
+    _link_threats_and_asset(finding)
     url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
     response = admin_client.get(url)
     assert response.status_code == http.HTTP_200_OK
@@ -307,6 +331,11 @@ def test_xlsx_export_carries_recommendation(admin_client, assessment):  # noqa: 
     header, first = rows[0], rows[1]
     assert "recommendation" in header
     assert first[header.index("recommendation")] == "Rotate the key."
+    assert set(first[header.index("threats")].split(",")) == {
+        "Phishing",
+        "Ransomware",
+    }
+    assert first[header.index("asset")] == "Mail server"
 
 
 @pytest.mark.django_db
