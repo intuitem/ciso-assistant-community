@@ -20026,8 +20026,6 @@ class FindingViewSet(ExportMixin, BaseModelViewSet):
         "description",
         "observation",
         "recommendation",
-        "asset__name",
-        "findings_assessment__name",
     ]
 
     export_config = {

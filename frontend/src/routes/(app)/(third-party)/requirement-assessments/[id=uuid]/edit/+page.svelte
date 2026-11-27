@@ -475,6 +475,18 @@
 
 	let formStore = $derived(requirementAssessmentForm.form);
 	const tabFormData = requirementAssessmentForm.form;
+	// The form keeps links the user cannot see so a save preserves them; badges count only the visible ones.
+	const hiddenLinks = $derived(
+		Object.fromEntries(
+			['applied_controls', 'task_templates', 'evidences', 'security_exceptions'].map((field) => {
+				const visible = new Set((data.requirementAssessment[field] ?? []).map((o: any) => o?.id));
+				return [
+					field,
+					new Set((data.form.data[field] ?? []).filter((id: string) => !visible.has(id)))
+				];
+			})
+		)
+	);
 	// Entering a score is what makes a requirement scored (as in table mode).
 	function markScored() {
 		requirementAssessmentForm.form.update((d) => ({ ...d, is_scored: true }));
@@ -741,26 +753,32 @@
 								{#if canShowAppliedControls}
 									<Tabs.Trigger value="applied_controls" data-testid="applied-controls-tab"
 										>{m.appliedControls()}{@render tabCount(
-											$tabFormData.applied_controls
+											$tabFormData.applied_controls,
+											'applied_controls'
 										)}</Tabs.Trigger
 									>
 								{/if}
 								{#if showTaskTemplates}
 									<Tabs.Trigger value="task_templates" data-testid="task-templates-tab"
 										>{m.taskTemplates()}{@render tabCount(
-											$tabFormData.task_templates
+											$tabFormData.task_templates,
+											'task_templates'
 										)}</Tabs.Trigger
 									>
 								{/if}
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
-										>{m.evidences()}{@render tabCount($tabFormData.evidences)}</Tabs.Trigger
+										>{m.evidences()}{@render tabCount(
+											$tabFormData.evidences,
+											'evidences'
+										)}</Tabs.Trigger
 									>
 								{/if}
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions"
 										>{m.securityExceptions()}{@render tabCount(
-											$tabFormData.security_exceptions
+											$tabFormData.security_exceptions,
+											'security_exceptions'
 										)}</Tabs.Trigger
 									>
 								{/if}
@@ -1316,8 +1334,9 @@
 	{/if}
 </div>
 
-{#snippet tabCount(ids: unknown)}
-	{#if Array.isArray(ids) && ids.length}
-		<span class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary">{ids.length}</span>
+{#snippet tabCount(ids: unknown, field: string)}
+	{@const count = Array.isArray(ids) ? ids.filter((id) => !hiddenLinks[field]?.has(id)).length : 0}
+	{#if count}
+		<span class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary">{count}</span>
 	{/if}
 {/snippet}
