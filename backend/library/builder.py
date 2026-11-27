@@ -1110,7 +1110,7 @@ def _check_mapping_sets(objects: dict, stored_frameworks=()) -> tuple:
         if isinstance(fw, dict)
     }
     ref_ids = {
-        str(n.get("urn", "")).lower(): n["ref_id"]
+        str(n.get("urn", "")).lower(): str(n["ref_id"])
         for fw in [*stored_frameworks, *(objects.get("frameworks") or [])]
         if isinstance(fw, dict)
         for n in fw.get("requirement_nodes") or []

@@ -892,3 +892,31 @@ def test_mapped_clone_loads_its_dependencies():
     assert check(mapping) is None
     # A clone shipped with its mapping still needs, e.g., its controls library.
     assert missing in check({**mapping, "frameworks": [{"urn": "urn:x:f"}]})
+
+
+@pytest.mark.django_db
+def test_dependency_with_several_locales_loads_the_matching_one(monkeypatch):
+    from types import SimpleNamespace
+
+    from library.utils import LibraryImporter
+
+    urn = "urn:x:risk:library:two-locales"
+    for locale, version in (("en", 1), ("fr", 2)):
+        StoredLibrary.objects.create(
+            urn=urn,
+            ref_id="two-locales",
+            name=locale,
+            locale=locale,
+            version=version,
+            content={},
+            objects_meta={},
+        )
+    loaded = []
+    monkeypatch.setattr(StoredLibrary, "load", lambda self: loaded.append(self.locale))
+    library = SimpleNamespace(
+        content={"frameworks": [{"urn": "urn:x:f"}], "requirement_mapping_sets": [{}]},
+        dependencies=[urn],
+        locale="fr",
+    )
+    assert LibraryImporter(library).check_and_import_dependencies() is None
+    assert loaded == ["fr"]

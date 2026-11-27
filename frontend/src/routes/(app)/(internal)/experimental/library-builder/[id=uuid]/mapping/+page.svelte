@@ -252,7 +252,7 @@
 	function flush(): Promise<void> {
 		clearTimeout(flushTimer);
 		if (inFlight) return inFlight;
-		if (queue.length === 0) return Promise.resolve();
+		if (queue.length === 0 || saveRejected) return Promise.resolve();
 		inFlight = saveBatch().finally(() => {
 			inFlight = null;
 			if (queue.length && !connectionLost) flush();
@@ -569,6 +569,7 @@
 					<a
 						class="btn btn-sm preset-outlined-surface-500"
 						href={`${draftBase}/mapping?set_urn=${encodeURIComponent(reverse.urn)}`}
+						data-sveltekit-reload
 						title={m.lbMappingDerivedHelp()}
 					>
 						<i class="fa-solid fa-right-left mr-1"></i>{m.lbMappingDerivedFrom()}
