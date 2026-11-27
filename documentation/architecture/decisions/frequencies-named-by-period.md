@@ -22,6 +22,10 @@ Frequencies are named by their period. `realtime` becomes `15min`, labelled "Eve
 - A new frequency comes with its period, staleness threshold, label and dataset interval. Formulas also need a backfill bound for periods under a day ([derived-metrics-from-other-metrics](derived-metrics-from-other-metrics.md)).
 - Restoring a backup taken before the rename is not handled: it brings `realtime` back unconverted.
 
+## Security considerations
+
+No security impact: the rename changes a choice value and its label, with no new input, data or access. Each use of the deprecated alias is logged.
+
 ## Alternatives considered
 
 - Redefining `realtime` as one minute. The frequency also sets the staleness threshold: sources built for fifteen minutes would turn stale and starve the formulas reading them.

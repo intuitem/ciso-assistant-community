@@ -12,17 +12,33 @@
 
 	let { message, tone, action, hideDismiss = false, classes = '', closeToast }: Props = $props();
 
-	const toneStyle: Record<ToastTone, { icon: string; color: string }> = {
-		success: { icon: 'fa-circle-check', color: 'text-success-600-400' },
-		error: { icon: 'fa-circle-exclamation', color: 'text-error-600-400' },
-		warning: { icon: 'fa-triangle-exclamation', color: 'text-warning-600-400' },
-		info: { icon: 'fa-circle-info', color: 'text-primary-600-400' }
+	const toneStyle: Record<ToastTone, { icon: string; color: string; stripe: string }> = {
+		success: {
+			icon: 'fa-circle-check',
+			color: 'text-success-600-400',
+			stripe: 'border-l-success-500 dark:border-l-success-500'
+		},
+		error: {
+			icon: 'fa-circle-exclamation',
+			color: 'text-error-600-400',
+			stripe: 'border-l-error-500 dark:border-l-error-500'
+		},
+		warning: {
+			icon: 'fa-triangle-exclamation',
+			color: 'text-warning-600-400',
+			stripe: 'border-l-warning-500 dark:border-l-warning-500'
+		},
+		info: {
+			icon: 'fa-circle-info',
+			color: 'text-primary-600-400',
+			stripe: 'border-l-primary-500 dark:border-l-primary-500'
+		}
 	};
 	const style = $derived(toneStyle[tone]);
 </script>
 
 <div
-	class="flex w-[min(100vw-2rem,26rem)] items-start gap-3 rounded-xl border border-surface-200-800 bg-surface-50-950 py-3 pl-3.5 pr-2 text-surface-950-50 shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)] {classes}"
+	class="flex w-[min(100vw-2rem,26rem)] items-start gap-3 rounded-xl border border-l-4 border-surface-200 dark:border-surface-600 {style.stripe} bg-surface-50 dark:bg-surface-800 py-3 pl-3.5 pr-2 text-surface-950-50 shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)] {classes}"
 	role={tone === 'error' ? 'alert' : 'status'}
 	data-testid="toast"
 	data-tone={tone}
