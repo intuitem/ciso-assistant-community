@@ -19862,29 +19862,35 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += "\n"
 
         # Findings details
+        viewable = ViewableFilter(request.user)
         md_content += "## Findings\n\n"
-        for finding in findings:
+        for finding in viewable(findings):
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
-            if finding.threats.all():
+            threats = viewable(finding.threats.all())
+            if threats:
                 threat_names = [
                     threat.get_name_translated or threat.ref_id or ""
-                    for threat in finding.threats.all()
+                    for threat in threats
                 ]
                 md_content += f"- **Threats**: {', '.join(threat_names)}\n"
-            if finding.asset:
+            if finding.asset and viewable.allows(finding.asset):
                 md_content += f"- **Asset**: {finding.asset.name}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
             md_content += f"- **Recommendation**: {finding.recommendation or 'N/A'}\n"
-            if finding.applied_controls.exists():
+            applied_controls = viewable(finding.applied_controls.all())
+            if applied_controls:
                 md_content += "- **Applied Controls**:\n"
-                for ac in finding.applied_controls.all():
+                for ac in applied_controls:
                     md_content += f"  - {ac.name} [{ac.get_status_display().lower()}]\n"
-            if finding.evidences.exists():
-                md_content += f"- **Evidences**: {', '.join([ev.name for ev in finding.evidences.all()])}\n"
+            evidences = viewable(finding.evidences.all())
+            if evidences:
+                md_content += (
+                    f"- **Evidences**: {', '.join([ev.name for ev in evidences])}\n"
+                )
             if finding.eta:
                 md_content += f"- **ETA**: {finding.eta.strftime('%Y-%m-%d')}\n"
             if finding.due_date:
