@@ -1047,6 +1047,26 @@ def validate_draft_document(draft, *, user=None) -> dict:
             errors.append("libraryValidationInternalError")
 
     errors.extend(_check_reference_integrity(draft, user=user))
+    if draft.content:
+        from core.models import StoredLibrary
+
+        dependencies = StoredLibrary.objects.filter(
+            urn__in=[str(dep).lower() for dep in draft.dependencies or []]
+        )
+        accessible = accessible_stored_library_ids(user)
+        if accessible is not None:
+            dependencies = dependencies.filter(id__in=accessible)
+        mapping_errors, mapping_warnings = _check_mapping_sets(
+            normalize_objects(draft.content),
+            [
+                fw
+                for stored in dependencies
+                for fw in normalize_objects(stored.content or {}).get("frameworks")
+                or []
+            ],
+        )
+        errors.extend(mapping_errors)
+        warnings.extend(mapping_warnings)
 
     if not draft.identity_locked:
         for conflict in check_identity_conflicts(
@@ -1058,6 +1078,111 @@ def validate_draft_document(draft, *, user=None) -> dict:
                 )
             )
     return {"errors": errors, "warnings": warnings}
+
+
+# Translated by the frontend: {code: message key, params}.
+MAPPING_ISSUE_MESSAGES = {
+    "pairConflict": "lbValidateMappingConflict",
+    "reverseConflict": "lbValidateMappingReverse",
+    "pairNodeMissing": "lbValidateMappingMissing",
+}
+# Warnings come one line per kind and set, so errors are not buried.
+MAPPING_WARNING_MESSAGES = {
+    "pairDuplicate": "lbValidateMappingDuplicate",
+    "equalFanOut": "lbValidateMappingFanOut",
+    "equalFanOutTarget": "lbValidateMappingFanOutTarget",
+}
+MAPPING_WARNING_SAMPLE = 5
+
+
+def _check_mapping_sets(objects: dict, stored_frameworks=()) -> tuple:
+    """(errors, warnings) from mapping_editor.mapping_issues. Item existence
+    is checked for the draft's own frameworks only.
+    shortcut: items of stored frameworks are not checked here (the mapping
+    editor does); load them if dangling pairs show up at publish."""
+    from library import mapping_editor
+
+    own = {
+        str(fw.get("urn", "")).lower(): {
+            n["urn"] for n in mapping_editor.assessable_nodes(fw)
+        }
+        for fw in objects.get("frameworks") or []
+        if isinstance(fw, dict)
+    }
+    ref_ids = {
+        str(n.get("urn", "")).lower(): str(n["ref_id"])
+        for fw in [*stored_frameworks, *(objects.get("frameworks") or [])]
+        if isinstance(fw, dict)
+        for n in fw.get("requirement_nodes") or []
+        if isinstance(n, dict) and n.get("ref_id")
+    }
+
+    def label(urn) -> str:
+        urn = str(urn or "")
+        return ref_ids.get(urn.lower()) or urn.rsplit(":", 1)[-1]
+
+    sets = [
+        s for s in objects.get("requirement_mapping_sets") or [] if isinstance(s, dict)
+    ]
+    by_ends = {
+        (
+            str(s.get("source_framework_urn", "")).lower(),
+            str(s.get("target_framework_urn", "")).lower(),
+        ): s
+        for s in sets
+    }
+    errors, warnings = [], []
+    compared = set()
+    for mapping_set in sets:
+        source = str(mapping_set.get("source_framework_urn", "")).lower()
+        target = str(mapping_set.get("target_framework_urn", "")).lower()
+        # A contradiction between A→B and B→A is reported once, on the first.
+        reverse = (
+            None if (target, source) in compared else by_ends.get((target, source))
+        )
+        compared.add((source, target))
+        set_name = mapping_set.get("name") or label(mapping_set.get("urn"))
+        grouped = {}
+        for issue in mapping_editor.mapping_issues(
+            mapping_set, own.get(source), own.get(target), reverse
+        ):
+            detail = issue["detail"]
+            if issue["code"] == "equalFanOut":
+                code = "equalFanOut" if issue["source"] else "equalFanOutTarget"
+                item = label(issue["source"] or issue["target"])
+                grouped.setdefault(code, []).append(item)
+                continue
+            if issue["code"] == "pairDuplicate":
+                item = f"{label(issue['source'])} → {label(issue['target'])}"
+                grouped.setdefault("pairDuplicate", []).append(item)
+                continue
+            errors.append(
+                {
+                    "code": MAPPING_ISSUE_MESSAGES[issue["code"]],
+                    "params": {
+                        "set": set_name,
+                        "source": label(issue["source"]),
+                        "target": label(issue["target"]),
+                        "relationships": [str(value) for value in detail],
+                        "here": str(detail[0]),
+                        "there": str(detail[-1]),
+                    },
+                }
+            )
+        for code, items in grouped.items():
+            shown = items[:MAPPING_WARNING_SAMPLE]
+            more = len(items) - len(shown)
+            warnings.append(
+                {
+                    "code": MAPPING_WARNING_MESSAGES[code],
+                    "params": {
+                        "set": set_name,
+                        "count": len(items),
+                        "items": ", ".join(shown) + (f", +{more}" if more else ""),
+                    },
+                }
+            )
+    return errors, warnings
 
 
 def _check_reference_integrity(draft, user=None) -> list:
