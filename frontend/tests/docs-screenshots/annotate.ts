@@ -11,16 +11,23 @@ const STYLE_ID = 'docs-shots-annotations';
  * clips, both of which scroll or offset the frame away from the viewport.
  */
 export async function annotate(page: Page, annotations: Annotation[]): Promise<void> {
-	const boxes: { x: number; y: number; width: number; height: number; label?: string }[] = [];
+	const boxes: {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+		label?: string;
+		badgeRight?: boolean;
+	}[] = [];
 
-	for (const { at, label } of annotations) {
+	for (const { at, label, badgeRight } of annotations) {
 		await at.scrollIntoViewIfNeeded();
 		const box = await at.boundingBox();
 		if (!box) {
 			throw new Error(`annotation target is not visible: ${at}`);
 		}
 		const offset = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
-		boxes.push({ ...box, x: box.x + offset.x, y: box.y + offset.y, label });
+		boxes.push({ ...box, x: box.x + offset.x, y: box.y + offset.y, label, badgeRight });
 	}
 
 	await page.evaluate(
@@ -67,7 +74,7 @@ export async function annotate(page: Page, annotations: Annotation[]): Promise<v
 				if (box.label !== undefined) {
 					const badge = document.createElement('div');
 					badge.className = 'docs-shot-badge';
-					badge.style.left = `${box.x}px`;
+					badge.style.left = `${box.badgeRight ? box.x + box.width : box.x}px`;
 					badge.style.top = `${box.y}px`;
 					badge.textContent = box.label;
 					document.body.append(badge);

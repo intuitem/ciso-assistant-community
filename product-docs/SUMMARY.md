@@ -80,6 +80,7 @@
   * [Prometheus metrics](installation/prometheus-metrics.md)
   * [Structured logging](installation/structured-logging.md)
   * [Shared cache and login rate limiting](installation/shared-cache.md)
+  * [Reaching services on a private network](installation/private-network-requests.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -258,6 +259,7 @@
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)
+* [Setting up the AI assistant](integrations/ai-assistant-setup.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [Paul, the EBIOS RM model](integrations/paul.md)
 * [MCP setup guide](integrations/mcp.md)
