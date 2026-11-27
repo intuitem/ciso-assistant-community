@@ -7,6 +7,8 @@ export interface Shot {
 	url: string;
 	/** Which doc pages consume this image — kept here so a stale shot is traceable. */
 	usedBy: string[];
+	/** Frame size for this shot, set before the route loads. Defaults to the config's 1440×900. */
+	viewport?: { width: number; height: number };
 	/** Capture the whole scrollable page instead of the viewport. */
 	fullPage?: boolean;
 	/** Restrict the capture to one element — usually what a doc actually needs. */
@@ -19,11 +21,15 @@ export interface Shot {
 	 * a `label` adds a numbered badge so the prose can refer to it.
 	 */
 	annotate?: (page: Page) => Annotation[];
+	/** Undo what `act` changed in the fixture; runs even when the capture fails. */
+	cleanup?: (page: Page) => Promise<void>;
 }
 
 export interface Annotation {
 	at: Locator;
 	label?: string;
+	/** Put the badge on the top-right corner, when the top-left one would cover a field label. */
+	badgeRight?: boolean;
 }
 
 /**
@@ -52,6 +58,53 @@ async function pickScenarios(page: Page, filter: string, option: string) {
 	await page.waitForLoadState('networkidle');
 	// Closing hands focus back to the filter: drop its focus ring from the shot.
 	await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+}
+
+/** The AI assistant shots follow the reader's path from the sidebar, so they need a taller frame. */
+const AI_SHOT_VIEWPORT = { width: 1440, height: 1200 };
+
+/** On /settings the sidebar opens Extra by itself; scroll it so Extra and Settings sit near its bottom. */
+async function showSettingsInSidebar(page: Page) {
+	await page
+		.locator('nav a[href="/settings"]')
+		.first()
+		.evaluate((link) => {
+			const nav = link.closest('nav');
+			if (nav)
+				nav.scrollTop +=
+					link.getBoundingClientRect().bottom - nav.getBoundingClientRect().bottom + 160;
+		});
+}
+
+function sidebarPath(page: Page): Annotation[] {
+	return [
+		{
+			at: page.locator('#extra').getByRole('button', { name: 'Extra' }),
+			label: '1',
+			badgeRight: true
+		},
+		{ at: page.locator('nav a[href="/settings"]').first(), label: '2', badgeRight: true }
+	];
+}
+
+/** The Chat mode card; it carries the gradient classes only while checked. */
+function chatModeCard(page: Page) {
+	return page
+		.getByText('Chat mode', { exact: true })
+		.locator('xpath=ancestor::*[.//*[contains(text(),"Enable the chat assistant icon")]][1]');
+}
+
+/** Tick or untick Chat mode on the Feature flags tab and save, whatever state the flag is in. */
+async function setChatMode(page: Page, on: boolean) {
+	await page.goto('/settings?tab=featureFlags');
+	await page.locator('body[data-hydrated="true"]').waitFor();
+	await page.getByPlaceholder('Search...').fill('chat');
+	const checked = /from-primary-400/.test((await chatModeCard(page).getAttribute('class')) ?? '');
+	if (checked !== on) {
+		await chatModeCard(page).click();
+		await page.getByRole('button', { name: 'Save', exact: true }).click();
+		await page.waitForLoadState('networkidle');
+	}
 }
 
 const HEADER_CLEARANCE = 176;
@@ -454,5 +507,65 @@ export const shots: Shot[] = [
 				.getByTestId('widget-source-link')
 				.first()
 				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+	},
+	// Saves chat_mode so the chat icon shows, and turns it back off in cleanup.
+	{
+		slug: 'ai-assistant-feature-flag',
+		viewport: AI_SHOT_VIEWPORT,
+		url: '/settings',
+		usedBy: ['integrations/ai-assistant-setup.md'],
+		act: async (page) => {
+			await setChatMode(page, true);
+			await page.reload();
+			await page.locator('body[data-hydrated="true"]').waitFor();
+			await page.evaluate(() => document.fonts.ready);
+			await page.getByPlaceholder('Search...').fill('chat');
+			await page.getByRole('button', { name: 'Open chat assistant' }).waitFor();
+			await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+			await showSettingsInSidebar(page);
+		},
+		annotate: (page) => [
+			...sidebarPath(page),
+			{ at: page.getByRole('tab', { name: 'Feature flags' }), label: '3' },
+			{ at: page.getByPlaceholder('Search...'), label: '4' },
+			{ at: chatModeCard(page), label: '5' },
+			{ at: page.getByRole('button', { name: 'Save', exact: true }), label: '6' },
+			{ at: page.getByRole('button', { name: 'Open chat assistant' }), label: '7' }
+		],
+		cleanup: (page) => setChatMode(page, false)
+	},
+	// Fills the form without saving.
+	{
+		slug: 'ai-assistant-model-settings',
+		viewport: AI_SHOT_VIEWPORT,
+		url: '/settings',
+		usedBy: ['integrations/ai-assistant-setup.md'],
+		act: async (page) => {
+			const section = page.getByRole('button', { name: 'Chat / AI assistant' });
+			await section.click();
+			await page.locator('select[name="llm_provider"]').selectOption('openai_compatible');
+			await page
+				.locator('input[name="openai_api_base"]')
+				.fill('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1');
+			await page.locator('input[name="openai_model"]').fill('gpt-oss-120b');
+			await page.locator('input[name="openai_api_key"]').fill('xxxxxxxxxxxxxxxx');
+			await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+			// Keep the other General sections in frame above it, as the reader sees them.
+			await scrollUnderHeader(section, 560);
+			await showSettingsInSidebar(page);
+		},
+		annotate: (page) => [
+			...sidebarPath(page),
+			{
+				at: page.getByRole('button', { name: 'Chat / AI assistant' }),
+				label: '3',
+				badgeRight: true
+			},
+			{ at: page.locator('select[name="llm_provider"]'), label: '4', badgeRight: true },
+			{ at: page.locator('input[name="openai_api_base"]'), label: '5', badgeRight: true },
+			{ at: page.locator('input[name="openai_model"]'), label: '6', badgeRight: true },
+			{ at: page.locator('input[name="openai_api_key"]'), label: '7', badgeRight: true },
+			{ at: page.getByRole('button', { name: 'Save', exact: true }), label: '8' }
+		]
 	}
 ];

@@ -168,3 +168,7 @@ In order to upload larger files, this value must be increased. How to do so depe
 {% hint style="info" %}
 If you use helm, this value is overwritten by the `bodySizeLimit`  variable. Note the camel case here.
 {% endhint %}
+
+### "URL must point to a public address" for a service on my network
+
+The backend refuses private, loopback and internal addresses by default. Set `ALLOW_PRIVATE_NETWORK_REQUESTS=True` on both the backend and the Huey worker. See [Reaching services on a private network](private-network-requests.md) for the features it covers and its security impact.
