@@ -77,7 +77,7 @@ Any server that speaks the OpenAI API works too (LM Studio, llama.cpp's `llama-s
 
 A SaaS instance runs on intuitem's infrastructure, so two things change:
 
-- **The assistant is enabled for you.** `ENABLE_CHAT` is an instance setting you cannot change yourself: ask intuitem support to enable it, then turn on `chat_mode`.
+- **The assistant is enabled for you.** `ENABLE_CHAT` is an environment variable you cannot set yourself on SaaS: open a ticket on the [customer support portal](https://intuitem.atlassian.net/servicedesk/customer/portal/4) to enable it, then turn on `chat_mode`.
 - **The model must be reachable from the internet.** Private addresses are rejected, so the SaaS backend cannot reach a model on your laptop or office network.
 
 Serve Paul on a machine you control with a public HTTPS address, behind an OpenAI-compatible server that checks an API key, for example `llama-server -m Paul-Gen2-14B-Q4_K_M.gguf --jinja --temp 0.2 -c 16384 --api-key <key>` or `vllm serve intuitem/Paul-Gen2-14B --api-key <key>`, behind a TLS reverse proxy. Then set **LLM provider** to `OpenAI-compatible (hosted gateway or local server)`, **API base URL** to your address ending in `/v1`, **Model name** to the model your server reports at `/v1/models`, and **API key** to your key.

@@ -25,27 +25,32 @@ test.describe('documentation screenshots', () => {
 
 	for (const shot of shots) {
 		test(shot.slug, async ({ page }) => {
-			await page.goto(shot.url);
-			await page.locator('body[data-hydrated="true"]').waitFor();
-			await shot.act?.(page);
+			try {
+				if (shot.viewport) await page.setViewportSize(shot.viewport);
+				await page.goto(shot.url);
+				await page.locator('body[data-hydrated="true"]').waitFor();
+				await shot.act?.(page);
 
-			// Let tables, charts and lazy autocompletes settle before freezing the page.
-			await page.waitForLoadState('networkidle');
-			await page.addStyleTag({ content: FREEZE });
-			// Some detail routes nest a second <main>; the outer one is enough.
-			await expect(page.locator('main').first()).toBeVisible();
+				// Let tables, charts and lazy autocompletes settle before freezing the page.
+				await page.waitForLoadState('networkidle');
+				await page.addStyleTag({ content: FREEZE });
+				// Some detail routes nest a second <main>; the outer one is enough.
+				await expect(page.locator('main').first()).toBeVisible();
 
-			if (shot.annotate) {
-				await annotate(page, shot.annotate(page));
+				if (shot.annotate) {
+					await annotate(page, shot.annotate(page));
+				}
+
+				const target = shot.clip ? shot.clip(page) : page;
+				await target.screenshot({
+					path: path.join(ASSETS, `${shot.slug}.png`),
+					animations: 'disabled',
+					scale: process.env.DOCS_SHOTS_SCALE === 'device' ? 'device' : 'css',
+					...(shot.clip ? {} : { fullPage: shot.fullPage ?? false })
+				});
+			} finally {
+				await shot.cleanup?.(page);
 			}
-
-			const target = shot.clip ? shot.clip(page) : page;
-			await target.screenshot({
-				path: path.join(ASSETS, `${shot.slug}.png`),
-				animations: 'disabled',
-				scale: process.env.DOCS_SHOTS_SCALE === 'device' ? 'device' : 'css',
-				...(shot.clip ? {} : { fullPage: shot.fullPage ?? false })
-			});
 		});
 	}
 });
