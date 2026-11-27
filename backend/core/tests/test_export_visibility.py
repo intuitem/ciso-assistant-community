@@ -105,6 +105,21 @@ def test_action_plan_xlsx_drops_hidden_controls_evidences_and_tasks(setup):
 
 
 @pytest.mark.django_db
+def test_action_plan_exports_write_readable_status(setup):
+    client, ca = setup
+    AppliedControl.objects.filter(name="seen-control").update(
+        status=AppliedControl.Status.IN_PROGRESS
+    )
+    xlsx = client.get(f"/api/compliance-assessments/{ca.id}/action_plan_xlsx/")
+    assert pd.read_excel(io.BytesIO(xlsx.content))["status"][0] == "In progress"
+    csv_text = b"".join(
+        client.get(f"/api/compliance-assessments/{ca.id}/action_plan_csv/")
+    ).decode()
+    assert "In progress" in csv_text
+    assert "in_progress" not in csv_text
+
+
+@pytest.mark.django_db
 def test_list_export_drops_hidden_evidences(setup):
     client, _ = setup
     response = client.get("/api/applied-controls/export_csv/")

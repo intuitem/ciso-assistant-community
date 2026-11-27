@@ -130,6 +130,8 @@ fi
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
 export SQLITE_FILE="db/$DB_NAME"
 export DJANGO_DEBUG=True
+# Exposes the chat flag and settings for the AI assistant shots; indexing stays off while chat_mode is.
+export ENABLE_CHAT=True
 export ALLOWED_HOSTS=localhost,127.0.0.1
 export CISO_ASSISTANT_URL="http://localhost:$FRONTEND_PORT"
 export DJANGO_SUPERUSER_EMAIL=${DOCS_SHOTS_EMAIL:-admin@demo.local}

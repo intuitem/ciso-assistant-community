@@ -55,15 +55,16 @@
 	}: Props = $props();
 
 	const displayLabel = $derived(label ?? field);
+	const errorId = `${field}-errors`;
 
 	function toggle() {
 		if (!disabled) onToggle(!checked);
 	}
 </script>
 
-<div class="{classesContainer} {hidden ? 'hidden' : ''}">
+<div class="flex flex-col {classesContainer} {hidden ? 'hidden' : ''}">
 	<div
-		class="flex flex-col p-4 border rounded-lg transition-all duration-300 ease-in-out
+		class="flex flex-1 flex-col p-4 border rounded-lg transition-all duration-300 ease-in-out
 		       min-h-[150px]
 
 		       {disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} {classes}
@@ -79,6 +80,8 @@
 		aria-checked={checked}
 		aria-disabled={disabled}
 		aria-label={displayLabel}
+		aria-invalid={errors.length > 0}
+		aria-describedby={errors.length ? errorId : undefined}
 		title={tooltip}
 		tabindex="0"
 	>
@@ -117,10 +120,16 @@
 		{/if}
 	</div>
 
+	<!-- Outside the checkbox (its children are presentational, so an alert there is never
+	     announced) but inside the container, which fills the grid cell: nothing is clipped. -->
 	{#if errors.length}
-		<div class="mt-1">
+		<div id={errorId} class="mt-1" role="alert">
 			{#each errors as error (error)}
-				<p class="text-red-500 text-xs font-medium">{error}</p>
+				<p
+					class="rounded-md bg-error-50-950 text-error-800-200 border border-error-300-700 px-2 py-1 text-xs font-medium"
+				>
+					{error}
+				</p>
 			{/each}
 		</div>
 	{/if}

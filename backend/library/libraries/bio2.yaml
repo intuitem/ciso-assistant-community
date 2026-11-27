@@ -3,7 +3,7 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:bio2
 locale: en
 ref_id: bio2
-name: Baseline Information Security for Government 2 (BIO2)
+name: Baseline Information Security for Government 2 (BIO2) v1.2
 description: 'Baseline Information Security for Government 2 (BIO2)
 
   24 September 2025, version 1.2 final
@@ -32,13 +32,13 @@ copyright: "The Baseline Information Security for Government 2 (BIO2) is entirel
   \ from these standards in the BIO is subject to permission by the Netherlands Standardization\
   \ Institute. For more information about NEN and the use of their products, see:\
   \ www.nen.nl."
-version: 3
-publication_date: 2026-08-28
+version: 4
+publication_date: 2026-11-24
 provider: Rijksoverheid
 packager: intuitem
 translations:
   nl:
-    name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+    name: Baseline Informatiebeveiliging Overheid 2 (BIO2) v1.2
     description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
 
       24 september 2025, versie 1.2 definitief
@@ -68,10 +68,10 @@ translations:
       \ de BIO geschiedt met toestemming van het Nederlands Normalisatie Instituut.\
       \ Voor meer informatie over de NEN en het gebruik van hun producten zie: www.nen.nl.\""
 objects:
-  framework:
-    urn: urn:intuitem:risk:framework:bio2
+  frameworks:
+  - urn: urn:intuitem:risk:framework:bio2
     ref_id: bio2
-    name: Baseline Information Security for Government 2 (BIO2)
+    name: Baseline Information Security for Government 2 (BIO2) v1.2
     description: 'Baseline Information Security for Government 2 (BIO2)
 
       24 September 2025, version 1.2 final
@@ -82,7 +82,7 @@ objects:
       the government, in which risk management is central.'
     translations:
       nl:
-        name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+        name: Baseline Informatiebeveiliging Overheid 2 (BIO2) v1.2
         description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
 
           24 september 2025, versie 1.2 definitief
