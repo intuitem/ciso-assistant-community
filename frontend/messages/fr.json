@@ -8621,5 +8621,8 @@
 	"glpiTableHelpText": "Sélectionnez le type d'élément GLPI à synchroniser (ticket, changement ou problème).",
 	"glpiField": "Champ GLPI",
 	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
-	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...)."
+	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...).",
+	"mcpServerUrl": "URL du serveur MCP",
+	"mcpServerUrlHelp": "Ajoutez cette URL à votre assistant IA pour le connecter à CISO Assistant.",
+	"apiAllowedIpsHint": "Les appels directs à l'API (jetons d'accès personnels, Power BI, assistants IA, scripts) ne sont acceptés que depuis les adresses IP de la liste des IP autorisées. L'interface web n'est pas concernée. Demandez à un administrateur d'ajouter les adresses depuis lesquelles ces outils se connectent."
 }

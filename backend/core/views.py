@@ -20016,10 +20016,82 @@ class FindingFilterSet(GenericFilterSet):
         }
 
 
-class FindingViewSet(BaseModelViewSet):
+class FindingViewSet(ExportMixin, BaseModelViewSet):
     model = Finding
     filterset_class = FindingFilterSet
     ordering = ["ref_id"]
+    search_fields = [
+        "ref_id",
+        "name",
+        "description",
+        "observation",
+        "recommendation",
+        "asset__name",
+        "findings_assessment__name",
+    ]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "findings_assessment": {
+                "source": "findings_assessment.name",
+                "label": "findings_assessment",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "severity": {"source": "get_severity_display", "label": "severity"},
+            "priority": {"source": "get_priority_display", "label": "priority"},
+            "requirement": {
+                "source": "requirement_node.display_short",
+                "label": "requirement",
+                "escape": True,
+            },
+            "asset": {"source": "asset.name", "label": "asset", "escape": True},
+            "owner": {
+                "source": "owner",
+                "label": "owner",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(o)) for o in qs.all()
+                ),
+            },
+            "applied_controls": {
+                "source": "applied_controls",
+                "label": "applied_controls",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(o)) for o in qs.all()
+                ),
+            },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
+            "recommendation": {
+                "source": "recommendation",
+                "label": "recommendation",
+                "escape": True,
+            },
+            "eta": {"source": "eta", "label": "eta"},
+            "due_date": {"source": "due_date", "label": "due_date"},
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+        },
+        "filename": "findings_export",
+        "wrap_columns": ["name", "description", "observation", "recommendation"],
+        "select_related": [
+            "folder",
+            "findings_assessment",
+            "requirement_node",
+            "asset",
+        ],
+        "prefetch_related": ["owner", "applied_controls"],
+    }
 
     def get_queryset(self) -> models.query.QuerySet:
         return (
