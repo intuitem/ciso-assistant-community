@@ -6233,25 +6233,30 @@ class AppliedControlFilterSet(GenericFilterSet):
     )
     risk_assessments = df.ModelMultipleChoiceFilter(
         method="filter_risk_assessments",
-        queryset=request_viewable_choices(RiskAssessment),
+        queryset=RiskAssessment.objects.all(),
     )
     findings_assessments = df.ModelMultipleChoiceFilter(
         method="filter_findings_assessments",
         queryset=FindingsAssessment.objects.all(),
     )
-    # Scenario filters only take scenarios the requester can view.
-    risk_scenarios = df.ModelMultipleChoiceFilter(
-        queryset=request_viewable_choices(RiskScenario)
-    )
-    risk_scenarios_e = df.ModelMultipleChoiceFilter(
-        queryset=request_viewable_choices(RiskScenario)
-    )
+    risk_scenarios = df.ModelMultipleChoiceFilter(queryset=RiskScenario.objects.all())
+    risk_scenarios_e = df.ModelMultipleChoiceFilter(queryset=RiskScenario.objects.all())
     # A control linked to a scenario as an existing or an additional measure.
     linked_risk_scenarios = df.ModelMultipleChoiceFilter(
         method="filter_linked_risk_scenarios",
-        queryset=request_viewable_choices(RiskScenario),
+        queryset=RiskScenario.objects.all(),
         label="Linked risk scenarios",
     )
+    # These filters only take objects the requester can view. Working that out
+    # costs queries, so only the filters present in the request are scoped.
+    VIEWABLE_CHOICES = {
+        "compliance_assessments": ComplianceAssessment,
+        "risk_assessments": RiskAssessment,
+        "findings_assessments": FindingsAssessment,
+        "risk_scenarios": RiskScenario,
+        "risk_scenarios_e": RiskScenario,
+        "linked_risk_scenarios": RiskScenario,
+    }
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
@@ -6287,6 +6292,14 @@ class AppliedControlFilterSet(GenericFilterSet):
     priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
     effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
     control_impact = NullableChoiceFilter(choices=AppliedControl.IMPACT)
+
+    def __init__(self, data=None, *args, **kwargs):
+        super().__init__(data, *args, **kwargs)
+        if data is None:
+            return
+        for name, model in self.VIEWABLE_CHOICES.items():
+            if name in data:
+                self.filters[name].queryset = request_viewable_choices(model)
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:

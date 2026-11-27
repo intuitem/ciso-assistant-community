@@ -6,9 +6,21 @@ import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
-from core.models import AppliedControl, RiskAssessment, RiskMatrix, RiskScenario
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    Finding,
+    FindingsAssessment,
+    Framework,
+    RequirementAssessment,
+    RequirementNode,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
+)
 from core.startup import startup
-from iam.models import Folder, User, UserGroup
+from core.views import AppliedControlFilterSet
+from iam.models import Folder, RoleAssignment, User, UserGroup
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 pytestmark = pytest.mark.django_db
@@ -138,8 +150,8 @@ def test_impact_effort_honors_exclude_status(client, domain):
 
 @pytest.fixture
 def hidden_link(domain):
-    """A reader of one domain, and a control there linked both ways to a
-    scenario they can view and to one in a domain they cannot."""
+    """A reader of one domain, and a control there linked to a scenario, an audit
+    and a findings assessment in that domain and in one they cannot view."""
 
     def iam_domain(name):
         folder = Folder.objects.create(
@@ -153,16 +165,47 @@ def hidden_link(domain):
 
     visible_domain = iam_domain("visible domain")
     hidden_domain = iam_domain("hidden domain")
-    seen = RiskScenario.objects.create(
-        risk_assessment=_risk_assessment(visible_domain, "seen ra"), name="seen"
+    root = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="filters fw", urn="urn:test:control-filters:fw", folder=root
     )
-    unseen = RiskScenario.objects.create(
-        risk_assessment=_risk_assessment(hidden_domain, "unseen ra"), name="unseen"
+    requirement = RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:test:control-filters:req",
+        assessable=True,
+        folder=root,
     )
     control = _control(visible_domain, "shared control")
-    for scenario in (seen, unseen):
+
+    def linked_objects(folder, name):
+        scenario = RiskScenario.objects.create(
+            risk_assessment=_risk_assessment(folder, f"{name} ra"), name=name
+        )
         scenario.applied_controls.add(control)
         scenario.existing_applied_controls.add(control)
+        audit = ComplianceAssessment.objects.create(
+            name=f"{name} audit", framework=framework, folder=folder
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=audit, requirement=requirement, folder=folder
+        ).applied_controls.add(control)
+        findings = FindingsAssessment.objects.create(
+            name=f"{name} findings", folder=folder
+        )
+        Finding.objects.create(
+            findings_assessment=findings, folder=folder, name=f"{name} finding"
+        ).applied_controls.add(control)
+        return {
+            "linked_risk_scenarios": scenario.id,
+            "risk_scenarios": scenario.id,
+            "risk_scenarios_e": scenario.id,
+            "risk_assessments": scenario.risk_assessment_id,
+            "compliance_assessments": audit.id,
+            "findings_assessments": findings.id,
+        }
+
+    seen = linked_objects(visible_domain, "seen")
+    unseen = linked_objects(hidden_domain, "unseen")
 
     reader = User.objects.create_user("reader@control-filters-tests.com")
     UserGroup.objects.get(name="BI-UG-AUD", folder=visible_domain).user_set.add(reader)
@@ -170,24 +213,44 @@ def hidden_link(domain):
 
 
 @pytest.mark.parametrize(
-    "param, attribute",
+    "param",
     [
-        ("linked_risk_scenarios", "id"),
-        ("risk_scenarios", "id"),
-        ("risk_scenarios_e", "id"),
-        ("risk_assessments", "risk_assessment_id"),
+        "linked_risk_scenarios",
+        "risk_scenarios",
+        "risk_scenarios_e",
+        "risk_assessments",
+        "compliance_assessments",
+        "findings_assessments",
     ],
 )
-def test_filters_reject_objects_the_user_cannot_view(hidden_link, param, attribute):
+def test_filters_reject_objects_the_user_cannot_view(hidden_link, param):
     reader_client, seen, unseen = hidden_link
 
-    assert _names(reader_client, f"{param}={getattr(seen, attribute)}") == {
-        "shared control"
-    }
+    assert _names(reader_client, f"{param}={seen[param]}") == {"shared control"}
     # A hidden object is refused exactly like one that does not exist.
-    hidden = reader_client.get(
-        f"/api/applied-controls/?{param}={getattr(unseen, attribute)}"
-    )
+    hidden = reader_client.get(f"/api/applied-controls/?{param}={unseen[param]}")
     unknown = reader_client.get(f"/api/applied-controls/?{param}={uuid4()}")
     assert hidden.status_code == unknown.status_code == 400
     assert set(hidden.json()) == set(unknown.json()) == {param}
+
+
+def test_unused_filters_do_not_scope_their_choices(hidden_link, monkeypatch):
+    """Working out what a user can view costs queries: a list request pays for
+    it only for the scoped filters it uses."""
+    reader_client, seen, _ = hidden_link
+    original = RoleAssignment.get_viewable_object_ids
+    asked = []
+
+    def spy(user, model, *args, **kwargs):
+        asked.append(model)
+        return original(user, model, *args, **kwargs)
+
+    monkeypatch.setattr(RoleAssignment, "get_viewable_object_ids", spy)
+    scoped_models = set(AppliedControlFilterSet.VIEWABLE_CHOICES.values())
+
+    assert reader_client.get("/api/applied-controls/").status_code == 200
+    assert scoped_models.isdisjoint(asked)
+
+    asked.clear()
+    _names(reader_client, f"risk_scenarios={seen['risk_scenarios']}")
+    assert (set(asked) & scoped_models) == {RiskScenario}
