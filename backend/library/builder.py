@@ -1047,6 +1047,12 @@ def validate_draft_document(draft, *, user=None) -> dict:
             errors.append("libraryValidationInternalError")
 
     errors.extend(_check_reference_integrity(draft, user=user))
+    if draft.content:
+        mapping_errors, mapping_warnings = _check_mapping_sets(
+            normalize_objects(draft.content)
+        )
+        errors.extend(mapping_errors)
+        warnings.extend(mapping_warnings)
 
     if not draft.identity_locked:
         for conflict in check_identity_conflicts(
@@ -1058,6 +1064,69 @@ def validate_draft_document(draft, *, user=None) -> dict:
                 )
             )
     return {"errors": errors, "warnings": warnings}
+
+
+MAPPING_ISSUE_MESSAGES = {
+    "pairConflict": "{set}: {source} → {target} is recorded with conflicting relationships ({detail})",
+    "reverseConflict": "{set}: {source} → {target} is {first} but the reverse set says {second}; regenerate the reverse set",
+    "pairNodeMissing": "{set}: {source} → {target} points to an item that is not assessable in its framework",
+    "pairDuplicate": "{set}: {source} → {target} is recorded twice",
+    "equalFanOut": "{set}: {item} is equal to several items ({detail})",
+}
+MAPPING_ERROR_CODES = {"pairConflict", "reverseConflict", "pairNodeMissing"}
+
+
+def _check_mapping_sets(objects: dict) -> tuple:
+    """(errors, warnings) from mapping_editor.mapping_issues. Item existence
+    is checked for the draft's own frameworks only.
+    shortcut: items of stored frameworks are not checked here (the mapping
+    editor does); load them if dangling pairs show up at publish."""
+    from library import mapping_editor
+
+    own = {
+        str(fw.get("urn", "")).lower(): {
+            n["urn"] for n in mapping_editor.assessable_nodes(fw)
+        }
+        for fw in objects.get("frameworks") or []
+        if isinstance(fw, dict)
+    }
+    sets = [
+        s for s in objects.get("requirement_mapping_sets") or [] if isinstance(s, dict)
+    ]
+    by_ends = {
+        (
+            str(s.get("source_framework_urn", "")).lower(),
+            str(s.get("target_framework_urn", "")).lower(),
+        ): s
+        for s in sets
+    }
+    errors, warnings = [], []
+    compared = set()
+    for mapping_set in sets:
+        source = str(mapping_set.get("source_framework_urn", "")).lower()
+        target = str(mapping_set.get("target_framework_urn", "")).lower()
+        # A contradiction between A→B and B→A is reported once, on the first.
+        reverse = (
+            None if (target, source) in compared else by_ends.get((target, source))
+        )
+        compared.add((source, target))
+        for issue in mapping_editor.mapping_issues(
+            mapping_set, own.get(source), own.get(target), reverse
+        ):
+            detail = issue["detail"]
+            message = MAPPING_ISSUE_MESSAGES[issue["code"]].format(
+                set=mapping_set.get("urn"),
+                source=issue["source"],
+                target=issue["target"],
+                item=issue["source"] or issue["target"],
+                detail=", ".join(map(str, detail)),
+                first=detail[0],
+                second=detail[-1],
+            )
+            (errors if issue["code"] in MAPPING_ERROR_CODES else warnings).append(
+                message
+            )
+    return errors, warnings
 
 
 def _check_reference_integrity(draft, user=None) -> list:

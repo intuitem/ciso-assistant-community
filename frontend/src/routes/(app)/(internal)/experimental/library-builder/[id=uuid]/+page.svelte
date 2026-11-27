@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
@@ -291,7 +291,6 @@
 
 	onMount(() => {
 		if (!draft.identity_locked) loadConflicts();
-		loadOriginals();
 		if (new URLSearchParams(window.location.search).get('new_mapping')) openMappingPanel();
 		try {
 			const stored = localStorage.getItem(viewKey());
@@ -667,9 +666,17 @@
 
 	// Clone origin per draft framework (detected server-side, see mapping-original).
 	let originals: Record<string, any> = $state({});
-	async function loadOriginals() {
-		for (const framework of frameworks) {
-			const urn = String(framework.urn).toLowerCase();
+	const originalsChecked = new Set<string>();
+	// Runs for each framework URN not checked yet: a clone imported (or a
+	// framework renamed) without a reload gets its "Map to" button too.
+	$effect(() => {
+		const urns = frameworks.map((f) => String(f.urn).toLowerCase());
+		untrack(() => loadOriginals(urns));
+	});
+	async function loadOriginals(urns: string[]) {
+		for (const urn of urns) {
+			if (originalsChecked.has(urn)) continue;
+			originalsChecked.add(urn);
 			const res = await fetch(
 				`${base()}?action=mapping-original&framework_urn=${encodeURIComponent(urn)}`
 			);

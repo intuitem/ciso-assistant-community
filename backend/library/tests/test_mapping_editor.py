@@ -302,7 +302,7 @@ def test_clone_reword_map_to_original_round_trip(admin_client):
         format="json",
     )
     assert accepted.status_code == status.HTTP_200_OK, accepted.content
-    assert accepted.data == {"status": "ok", "count": 3}
+    assert accepted.data == {"status": "ok", "count": 3, "issues": []}
 
     bad = admin_client.post(
         url("edit-mapping-pairs"),
@@ -364,3 +364,315 @@ def test_add_mapping_set_refuses_unknown_and_identical_frameworks(admin_client):
         format="json",
     )
     assert missing.status_code == status.HTTP_404_NOT_FOUND
+
+
+# --- suggestions from stored mapping sets ------------------------------------
+
+
+def test_compose_relationship_and_pairs():
+    assert me.compose_relationship("equal", "subset") == "subset"
+    assert me.compose_relationship("subset", "equal") == "subset"
+    assert me.compose_relationship("subset", "subset") == "subset"
+    assert me.compose_relationship("subset", "superset") is None
+    assert me.compose_relationship("intersect", "intersect") is None
+    assert me.compose_relationship("equal", "intersect") == "intersect"
+    assert me.compose_relationship("equal", "not_related") is None
+    composed = me.compose_pairs(
+        [("a1", "p1", "equal"), ("a1", "p2", "subset"), ("a2", "p3", "equal")],
+        [("p1", "b1", "equal"), ("p2", "b1", "equal"), ("p3", "b2", "not_related")],
+    )
+    # two pivots disagree on (a1, b1): intersect; a2's only chain is not_related
+    assert composed == {("a1", "b1"): "intersect"}
+
+
+def test_oriented_pairs_turns_a_reverse_set_around():
+    sets = [
+        {
+            "source_framework_urn": "urn:x:risk:framework:p",
+            "target_framework_urn": "urn:x:risk:framework:a",
+            "requirement_mappings": [
+                {
+                    "source_requirement_urn": "p1",
+                    "target_requirement_urn": "a1",
+                    "relationship": "subset",
+                }
+            ],
+        }
+    ]
+    assert me.oriented_pairs(
+        sets, "urn:x:risk:framework:a", "urn:x:risk:framework:p"
+    ) == [("a1", "p1", "superset")]
+    assert (
+        me.oriented_pairs(sets, "urn:x:risk:framework:a", "urn:x:risk:framework:z")
+        == []
+    )
+
+
+def _store(objects, ref):
+    stored, error = StoredLibrary.store_library_content(
+        yaml.safe_dump(
+            {
+                "urn": f"urn:acme:risk:library:{ref}",
+                "locale": "en",
+                "ref_id": ref,
+                "name": ref,
+                "version": 1,
+                "packager": "acme",
+                "objects": objects,
+            }
+        ).encode(),
+        builtin=True,
+    )
+    assert error is None, error
+    return stored
+
+
+def _mapping(ref, source, target, links):
+    node = lambda fw, leaf: f"urn:acme:risk:req_node:{fw}:{leaf}"  # noqa: E731
+    return {
+        "urn": f"urn:acme:risk:req_mapping_set:{ref}",
+        "ref_id": ref,
+        "name": ref,
+        "source_framework_urn": f"urn:acme:risk:framework:{source}",
+        "target_framework_urn": f"urn:acme:risk:framework:{target}",
+        "requirement_mappings": [
+            {
+                "source_requirement_urn": node(source, s),
+                "target_requirement_urn": node(target, t),
+                "relationship": rel,
+            }
+            for s, t, rel in links
+        ],
+    }
+
+
+@pytest.mark.django_db
+def test_clone_gets_suggestions_from_shipped_and_chained_mappings(admin_client):
+    nodes = [("x1", "X1", "First"), ("x2", "X2", "Second")]
+    a = _store({"framework": _framework("acme", "a", nodes, "A", "Alpha")}, "a")
+    for ref in ("b", "c", "p"):
+        _store({"framework": _framework("acme", ref, nodes, ref.upper())}, ref)
+    _store(
+        {
+            "requirement_mapping_sets": [
+                _mapping("a-to-b", "a", "b", [("x1", "x2", "subset")])
+            ]
+        },
+        "map-a-b",
+    )
+    # A→P only exists as P→A: it must be turned around
+    _store(
+        {
+            "requirement_mapping_sets": [
+                _mapping(
+                    "p-to-a",
+                    "p",
+                    "a",
+                    [("x1", "x1", "equal"), ("x2", "x2", "superset")],
+                )
+            ]
+        },
+        "map-p-a",
+    )
+    _store(
+        {
+            "requirement_mapping_sets": [
+                _mapping(
+                    "p-to-c",
+                    "p",
+                    "c",
+                    [("x1", "x2", "equal"), ("x2", "x1", "subset")],
+                )
+            ]
+        },
+        "map-p-c",
+    )
+    draft = _create_draft(admin_client, content={})
+    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])  # noqa: E731
+    cloned = admin_client.post(
+        url("import-objects"),
+        {"source": str(a.id), "object_types": ["frameworks"]},
+        format="json",
+    )
+    assert cloned.status_code == status.HTTP_200_OK, cloned.content
+    clone = cloned.data["draft"]["content"]["frameworks"][0]
+    clone_node = {n["ref_id"]: n["urn"] for n in clone["requirement_nodes"]}
+
+    def suggestions_to(target):
+        created = admin_client.post(
+            url("add-mapping-set"),
+            {
+                "source_framework_urn": clone["urn"],
+                "target_framework_urn": f"urn:acme:risk:framework:{target}",
+            },
+            format="json",
+        )
+        assert created.status_code == status.HTTP_201_CREATED, created.content
+        editor = admin_client.get(
+            url("mapping-editor"), {"set_urn": created.data["urn"]}
+        )
+        return {
+            (s["source"], s["target"].rsplit(":", 1)[1]): (
+                s["relationship"],
+                s["reason"],
+                s["via"],
+            )
+            for s in editor.data["suggestions"]
+            # the fixtures share item ids, so the structural arms fire too
+            if s["reason"] in ("mapping", "via")
+        }
+
+    # direct: the shipped A→B set, rebased onto the clone's nodes
+    assert suggestions_to("b") == {
+        (clone_node["X1"], "x2"): ("subset", "mapping", "map-a-b")
+    }
+    # chained: clone→A (tails) →P (reversed) →C
+    assert suggestions_to("c") == {
+        (clone_node["X1"], "x2"): ("equal", "via", "p"),
+        (clone_node["X2"], "x1"): ("subset", "via", "p"),
+    }
+
+
+# --- wording hints and consistency checks ------------------------------------
+
+
+def _node(urn, name, description=""):
+    return {"urn": urn, "ref_id": "", "name": name, "description": description}
+
+
+def test_wording_hints_rank_shared_rare_words_and_drop_noise():
+    sources = [
+        _node("s:backup", "Backups are tested and restorable"),
+        _node("s:crypto", "Cryptographic keys are rotated"),
+        _node("s:fr", "Les sauvegardes sont testées"),
+    ]
+    targets = [
+        _node("t:keys", "Key management", "Cryptographic keys have a lifecycle"),
+        _node("t:backup", "Information backup", "Backup copies are tested"),
+        _node("t:hr", "Screening", "Candidates are screened before hiring"),
+    ]
+    hints = me.wording_hints(sources, targets)
+    assert hints["s:backup"][0][0] == "t:backup"
+    assert hints["s:crypto"][0][0] == "t:keys"
+    # nothing in common: no hint rather than noise
+    assert "s:fr" not in hints
+    assert all(score >= me.HINT_MIN_SCORE for h in hints.values() for _, score in h)
+
+
+def test_mapping_issues_flags_each_inconsistency():
+    def pair(s, t, rel):
+        return {
+            "source_requirement_urn": s,
+            "target_requirement_urn": t,
+            "relationship": rel,
+        }
+
+    mapping_set = {
+        "requirement_mappings": [
+            pair("a", "x", "equal"),
+            pair("a", "x", "subset"),
+            pair("b", "y", "intersect"),
+            pair("b", "y", "intersect"),
+            pair("c", "y", "equal"),
+            pair("c", "z", "equal"),
+            pair("gone", "z", "intersect"),
+        ]
+    }
+    reverse_set = {"requirement_mappings": [pair("y", "b", "subset")]}
+    issues = me.mapping_issues(
+        mapping_set, {"a", "b", "c"}, {"x", "y", "z"}, reverse_set
+    )
+    found = {(i["code"], i["source"], i["target"]): i["detail"] for i in issues}
+    assert found == {
+        ("pairConflict", "a", "x"): ["equal", "subset"],
+        ("pairDuplicate", "b", "y"): ["intersect"],
+        ("pairNodeMissing", "gone", "z"): ["source"],
+        ("equalFanOut", "c", None): ["y", "z"],
+        # reverse says y⊂b, i.e. b⊃y, while this set says b∩y
+        ("reverseConflict", "b", "y"): ["intersect", "superset"],
+    }
+    assert me.mapping_issues({"requirement_mappings": []}) == []
+
+
+@pytest.mark.django_db
+def test_editor_and_validate_report_conflicting_pairs(admin_client):
+    framework = _framework("me", "mylib", [("a", "A", "Alpha"), ("b", "B", "Beta")])
+    target = _framework("me", "other", [("x", "X", "Alpha"), ("y", "Y", "Gamma")])
+    node = lambda fw, leaf: f"urn:me:risk:req_node:{fw}:{leaf}"  # noqa: E731
+    mapping_set = {
+        "urn": "urn:me:risk:req_mapping_set:mylib:m",
+        "ref_id": "m",
+        "name": "m",
+        "source_framework_urn": framework["urn"],
+        "target_framework_urn": target["urn"],
+        "requirement_mappings": [
+            {
+                "source_requirement_urn": node("mylib", "a"),
+                "target_requirement_urn": node("other", "x"),
+                "relationship": rel,
+            }
+            for rel in ("equal", "subset")
+        ],
+    }
+    draft = _create_draft(
+        admin_client,
+        content={
+            "frameworks": [framework, target],
+            "requirement_mapping_sets": [mapping_set],
+        },
+    )
+    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])  # noqa: E731
+
+    validation = admin_client.get(url("validate")).data
+    assert any(
+        "conflicting relationships (equal, subset)" in e for e in validation["errors"]
+    )
+
+    editor = admin_client.get(
+        url("mapping-editor"), {"set_urn": mapping_set["urn"]}
+    ).data
+    assert [i["code"] for i in editor["issues"]] == ["pairConflict"]
+    # B "Beta" shares no word with any target; A "Alpha" matches X "Alpha"
+    assert editor["hints"] == {node("mylib", "a"): [[node("other", "x"), 1.0]]}
+
+    # choosing the relationship resolves the conflict
+    fixed = admin_client.post(
+        url("edit-mapping-pairs"),
+        {
+            "set_urn": mapping_set["urn"],
+            "ops": [
+                {
+                    "op": "update",
+                    "source": node("mylib", "a"),
+                    "target": node("other", "x"),
+                    "relationship": "equal",
+                }
+            ],
+        },
+        format="json",
+    )
+    assert fixed.status_code == status.HTTP_200_OK, fixed.content
+    assert fixed.data["issues"] == [] and fixed.data["count"] == 1
+
+    # a contradiction between both directions is reported once
+    regenerated = admin_client.post(
+        url("generate-reverse-set"), {"set_urn": mapping_set["urn"]}, format="json"
+    )
+    assert regenerated.status_code == status.HTTP_200_OK, regenerated.content
+    admin_client.post(
+        url("edit-mapping-pairs"),
+        {
+            "set_urn": mapping_set["urn"],
+            "ops": [
+                {
+                    "op": "update",
+                    "source": node("mylib", "a"),
+                    "target": node("other", "x"),
+                    "relationship": "intersect",
+                }
+            ],
+        },
+        format="json",
+    )
+    errors = admin_client.get(url("validate")).data["errors"]
+    assert sum("reverse set says" in e for e in errors) == 1, errors

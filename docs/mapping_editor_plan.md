@@ -91,3 +91,16 @@ AI/embedder suggestions (`project_mapping_assistant`), "reviewed by", and fixing
 - Frontend: `[id=uuid]/mapping/` editor, `FrameworkPicker.svelte`, the "Map to <original>" button on the framework card, the "New mapping set" panel, Edit links on sets, and the "New mapping" quick start (lands on the draft with the panel open).
 - Checked in the browser on a real NIST CSF 2.0 clone: detected the original → 106 suggestions → Accept all → cycle a chip / add a target / Ctrl+Z → reverse generated → validate clean.
 - Not checked in the browser: the quick start and the New mapping set panel (the session cookie expired), and the reworded flag (the clone wasn't reworded; it is covered by tests).
+
+## Status 2026-11-26: stored-mapping suggestions built (uncommitted)
+
+- Direct: a stored mapping set linking both frameworks (either direction) is offered as is, reason `mapping`. When one exists, nothing is chained on top.
+- Chained: A→P→B through at most 5 pivots, reason `via`. Only provable chains: equal∘x = x, subset∘subset, superset∘superset; overlap∘overlap gives nothing; pivots that disagree fall back to intersect.
+- A draft framework stands in for its detected original (URN-tail translation), so a clone inherits every shipped mapping of the original.
+- Stored mapping libraries are indexed from content via KT (first two sets only), then only the needed ones are loaded.
+- Picker: AutocompleteSelect single mode; the draft's own framework reads "· this library".
+
+## Status 2026-11-27: wording hints + consistency checks built (uncommitted)
+
+- Wording hints: TF-IDF cosine on name + description (numpy, no new dependency), top 3 above 0.1, shown in the add box when nothing is typed. Measured on 51 same-language shipped mapping sets: a right target is in the top 3 for 57% of items (median; CSF→ISO 46%, CMMC→CSF 37%, version-to-version ~99%). Different languages score 0, so they show nothing. Speed: median 15 ms, worst 152 ms (1,482 × 1,567 items).
+- Consistency checks (mapping_editor.mapping_issues): pairConflict, pairNodeMissing, reverseConflict are errors in Validate; pairDuplicate and equalFanOut are warnings. The editor shows them in a banner, an "Issues only" filter and a row icon, refreshed after every save and reverse generation.

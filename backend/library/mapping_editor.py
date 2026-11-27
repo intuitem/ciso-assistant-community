@@ -10,8 +10,13 @@ Pairs are keyed by (source_requirement_urn, target_requirement_urn), the
 YAML shape is untouched.
 """
 
+import collections
 import difflib
+import math
 import re
+import unicodedata
+
+import numpy
 
 from library.builder import BuilderError
 
@@ -216,3 +221,238 @@ def clone_score(clone: dict, candidate: dict) -> float:
         urn_tail(n["urn"], node_base(candidate)) for n in assessable_nodes(candidate)
     }
     return len(clone_tails & candidate_tails) / len(clone_tails)
+
+
+# --- Suggestions from stored mapping sets ------------------------------------
+
+
+def compose_relationship(first: str, second: str):
+    """A→P then P→B as A→B; None when the chain proves nothing (two
+    overlaps need not overlap each other)."""
+    if "not_related" in (first, second):
+        return None
+    if first == "equal":
+        return second
+    if second == "equal":
+        return first
+    if first == second and first in ("subset", "superset"):
+        return first
+    return None
+
+
+def oriented_pairs(mapping_sets: list, source_urn: str, target_urn: str) -> list:
+    """(source node, target node, relationship) from source_urn to target_urn,
+    read from a set in that direction, else from the reverse one turned
+    around."""
+    source_urn, target_urn = source_urn.lower(), target_urn.lower()
+    reverse = None
+    for mapping_set in mapping_sets:
+        ends = (
+            str(mapping_set.get("source_framework_urn", "")).lower(),
+            str(mapping_set.get("target_framework_urn", "")).lower(),
+        )
+        if ends == (source_urn, target_urn):
+            return [
+                (
+                    str(p.get("source_requirement_urn", "")).lower(),
+                    str(p.get("target_requirement_urn", "")).lower(),
+                    p.get("relationship"),
+                )
+                for p in mapping_set.get("requirement_mappings") or []
+            ]
+        if ends == (target_urn, source_urn):
+            reverse = mapping_set
+    if reverse is None:
+        return []
+    return [
+        (
+            str(p.get("source_requirement_urn", "")).lower(),
+            str(p.get("target_requirement_urn", "")).lower(),
+            p.get("relationship"),
+        )
+        for p in reverse_mappings(reverse)
+    ]
+
+
+def compose_pairs(first: list, second: list) -> dict:
+    """{(a, b): relationship} through the pivot nodes shared by A→P and P→B.
+    Pivots that disagree on a pair fall back to intersect."""
+    by_pivot: dict = {}
+    for pivot, target, relationship in second:
+        by_pivot.setdefault(pivot, []).append((target, relationship))
+    composed: dict = {}
+    for source, pivot, first_rel in first:
+        for target, second_rel in by_pivot.get(pivot, ()):
+            relationship = compose_relationship(first_rel, second_rel)
+            if relationship is None:
+                continue
+            key = (source, target)
+            if composed.get(key, relationship) != relationship:
+                relationship = "intersect"
+            composed[key] = relationship
+    return composed
+
+
+def clone_translation(clone: dict, original: dict) -> dict:
+    """{original node urn: clone node urn} for the tails both share."""
+    clone_base, original_base = node_base(clone), node_base(original)
+    by_tail = {
+        urn_tail(n["urn"], clone_base): n["urn"] for n in assessable_nodes(clone)
+    }
+    return {
+        n["urn"]: by_tail[tail]
+        for n in assessable_nodes(original)
+        if (tail := urn_tail(n["urn"], original_base)) in by_tail
+    }
+
+
+# --- Wording hints -------------------------------------------------------------
+
+# Cosine floor under which a wording hint is noise. Measured on the shipped
+# mapping sets: keeps 98% of right hints; different languages score 0.
+HINT_MIN_SCORE = 0.1
+HINT_COUNT = 3
+
+
+def _tokens(text: str) -> list:
+    text = unicodedata.normalize("NFKD", str(text or "").lower())
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return re.findall(r"\w\w+", text)
+
+
+def wording_hints(source_nodes: list, target_nodes: list) -> dict:
+    """{source urn: [[target urn, score], ...]}: the closest targets by
+    TF-IDF cosine over name + description (sublinear tf, smoothed idf, the
+    scikit-learn defaults), best first, at most HINT_COUNT above
+    HINT_MIN_SCORE."""
+    if not source_nodes or not target_nodes:
+        return {}
+    docs = [
+        collections.Counter(_tokens(f"{n['name']} {n['description']}"))
+        for n in source_nodes + target_nodes
+    ]
+    df = collections.Counter(term for doc in docs for term in doc)
+    idf = {t: math.log((1 + len(docs)) / (1 + count)) + 1 for t, count in df.items()}
+    sources, targets = docs[: len(source_nodes)], docs[len(source_nodes) :]
+    # Only terms on both sides move the dot product; norms use every term.
+    shared = sorted(
+        {t for doc in sources for t in doc} & {t for doc in targets for t in doc}
+    )
+    if not shared:
+        return {}
+    column = {t: i for i, t in enumerate(shared)}
+
+    def matrix(group):
+        out = numpy.zeros((len(group), len(shared)), dtype=numpy.float32)
+        for row, doc in enumerate(group):
+            weights = {t: (1 + math.log(c)) * idf[t] for t, c in doc.items()}
+            norm = math.sqrt(sum(w * w for w in weights.values())) or 1.0
+            for term, weight in weights.items():
+                if term in column:
+                    out[row, column[term]] = weight / norm
+        return out
+
+    similarity = matrix(sources) @ matrix(targets).T
+    hints = {}
+    for row, node in enumerate(source_nodes):
+        scores = similarity[row]
+        best = numpy.argsort(-scores)[:HINT_COUNT]
+        picked = [
+            [target_nodes[i]["urn"], round(float(scores[i]), 3)]
+            for i in best
+            if scores[i] >= HINT_MIN_SCORE
+        ]
+        if picked:
+            hints[node["urn"]] = picked
+    return hints
+
+
+# --- Consistency checks ----------------------------------------------------------
+
+
+def mapping_issues(
+    mapping_set: dict, source_urns=None, target_urns=None, reverse_set=None
+) -> list:
+    """Inconsistencies of a mapping set, as {code, source, target, detail}.
+
+    pairConflict: one pair recorded with several relationships (the editor
+      keeps the last one on its next edit of that pair).
+    pairDuplicate: one pair recorded twice with the same relationship.
+    pairNodeMissing: a side is not an assessable item of its framework
+      (checked only when the urn sets are given).
+    equalFanOut: an item declared equal to several items of the other side.
+    reverseConflict: the reverse set links the same items with a
+      relationship that is not the mirror of this one.
+    """
+    issues = []
+    seen: dict = {}
+    for pair in mapping_set.get("requirement_mappings") or []:
+        key = (
+            str(pair.get("source_requirement_urn", "")).lower(),
+            str(pair.get("target_requirement_urn", "")).lower(),
+        )
+        seen.setdefault(key, []).append(pair.get("relationship"))
+    for (source, target), relationships in seen.items():
+        if len(relationships) > 1:
+            distinct = sorted(set(map(str, relationships)))
+            issues.append(
+                {
+                    "code": "pairConflict" if len(distinct) > 1 else "pairDuplicate",
+                    "source": source,
+                    "target": target,
+                    "detail": distinct,
+                }
+            )
+        missing = [
+            side
+            for side, urn, urns in (
+                ("source", source, source_urns),
+                ("target", target, target_urns),
+            )
+            if urns is not None and urn not in urns
+        ]
+        if missing:
+            issues.append(
+                {
+                    "code": "pairNodeMissing",
+                    "source": source,
+                    "target": target,
+                    "detail": missing,
+                }
+            )
+    equal_by: dict = {"source": {}, "target": {}}
+    for (source, target), relationships in seen.items():
+        if relationships[-1] == "equal":
+            equal_by["source"].setdefault(source, []).append(target)
+            equal_by["target"].setdefault(target, []).append(source)
+    for side, groups in equal_by.items():
+        for urn, others in groups.items():
+            if len(others) > 1:
+                issues.append(
+                    {
+                        "code": "equalFanOut",
+                        "source": urn if side == "source" else None,
+                        "target": urn if side == "target" else None,
+                        "detail": sorted(others),
+                    }
+                )
+    if reverse_set is not None:
+        mirrored = {
+            (
+                str(p.get("source_requirement_urn", "")).lower(),
+                str(p.get("target_requirement_urn", "")).lower(),
+            ): p.get("relationship")
+            for p in reverse_mappings(reverse_set)
+        }
+        for key, relationships in seen.items():
+            other = mirrored.get(key)
+            if other is not None and other != relationships[-1]:
+                issues.append(
+                    {
+                        "code": "reverseConflict",
+                        "source": key[0],
+                        "target": key[1],
+                        "detail": [relationships[-1], other],
+                    }
+                )
+    return issues

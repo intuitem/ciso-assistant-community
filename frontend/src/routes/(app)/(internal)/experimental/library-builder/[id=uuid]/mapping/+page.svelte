@@ -23,7 +23,8 @@
 		source: string;
 		target: string;
 		relationship: string;
-		reason: 'urn' | 'ref_id' | 'name';
+		reason: 'urn' | 'ref_id' | 'name' | 'mapping' | 'via';
+		via?: string;
 		reworded: boolean;
 	}
 	type Op = { op: 'add' | 'update' | 'remove'; source: string; target: string } & Record<
@@ -51,10 +52,12 @@
 		superset: 'preset-filled-secondary-500',
 		not_related: 'preset-filled-surface-500'
 	};
-	const REASON_LABEL = {
-		urn: m.lbMappingReasonUrn,
-		ref_id: m.lbMappingReasonRefId,
-		name: m.lbMappingReasonName
+	const REASON_LABEL: Record<Suggestion['reason'], (s: Suggestion) => string> = {
+		urn: () => m.lbMappingReasonUrn(),
+		ref_id: () => m.lbMappingReasonRefId(),
+		name: () => m.lbMappingReasonName(),
+		mapping: (s) => m.lbMappingReasonMapping({ name: s.via ?? '' }),
+		via: (s) => m.lbMappingReasonVia({ name: s.via ?? '' })
 	};
 
 	const key = (source: string, target: string) => `${source}|${target}`;
@@ -67,6 +70,16 @@
 		)
 	);
 	let suggestions: Suggestion[] = $state(editor.suggestions);
+	// Wording hints: [target urn, score][] per source, best first.
+	const hints: Record<string, [string, number][]> = editor.hints ?? {};
+	interface Issue {
+		code: 'pairConflict' | 'pairDuplicate' | 'pairNodeMissing' | 'equalFanOut' | 'reverseConflict';
+		source: string | null;
+		target: string | null;
+		detail: string[];
+	}
+	let issues: Issue[] = $state(editor.issues ?? []);
+	const sourceByUrn = new Map(sourceNodes.map((n) => [n.urn, n]));
 	let reverse: { urn: string; in_sync: boolean } | null = $state(editor.reverse);
 	let defaultRelationship = $state('intersect');
 
@@ -79,7 +92,69 @@
 		}
 		return grouped;
 	});
-	let suggestionsBySource = $derived(new Map(suggestions.map((s) => [s.source, s])));
+	let suggestionsBySource = $derived.by(() => {
+		const grouped = new Map<string, Suggestion[]>();
+		for (const s of suggestions) grouped.set(s.source, [...(grouped.get(s.source) ?? []), s]);
+		return grouped;
+	});
+	let issuesBySource = $derived.by(() => {
+		const grouped = new Map<string, Issue[]>();
+		for (const issue of issues) {
+			// A target equal to several sources concerns each of those rows.
+			const rows = issue.source ? [issue.source] : issue.detail;
+			for (const urn of rows) grouped.set(urn, [...(grouped.get(urn) ?? []), issue]);
+		}
+		return grouped;
+	});
+	const nodeLabel = (urn: string | null) => {
+		const node = urn ? (sourceByUrn.get(urn) ?? targetByUrn.get(urn)) : undefined;
+		return node?.ref_id || urn?.split(':').at(-1) || '';
+	};
+	function issueText(issue: Issue): string {
+		const detail = issue.detail
+			.map((d) =>
+				issue.code === 'equalFanOut' || issue.code === 'pairNodeMissing'
+					? issue.code === 'pairNodeMissing'
+						? d === 'source'
+							? m.lbMappingSourceSide()
+							: m.lbMappingTargetSide()
+						: nodeLabel(d)
+					: safeTranslate(d === 'not_related' ? 'notRelated' : d)
+			)
+			.join(', ');
+		const pair = `${nodeLabel(issue.source)} → ${nodeLabel(issue.target)}`;
+		switch (issue.code) {
+			case 'pairConflict':
+				return m.lbMappingIssueConflict({ pair, detail });
+			case 'pairDuplicate':
+				return m.lbMappingIssueDuplicate({ pair });
+			case 'pairNodeMissing':
+				return m.lbMappingIssueMissing({ pair, detail });
+			case 'equalFanOut':
+				return m.lbMappingIssueEqualFanOut({
+					item: nodeLabel(issue.source ?? issue.target),
+					detail
+				});
+			case 'reverseConflict':
+				return m.lbMappingIssueReverse({
+					pair,
+					here: safeTranslate(issue.detail[0]),
+					there: safeTranslate(issue.detail[1])
+				});
+		}
+	}
+	const ISSUE_ERRORS = new Set(['pairConflict', 'pairNodeMissing', 'reverseConflict']);
+	// Links to an item deleted from its framework have no row to remove them
+	// from. Not undoable: the server refuses to re-add a link to a missing item.
+	let danglingIssues = $derived(issues.filter((i) => i.code === 'pairNodeMissing'));
+	function removeDangling() {
+		for (const issue of danglingIssues) {
+			if (issue.source && issue.target)
+				applyLocal({ op: 'remove', source: issue.source, target: issue.target });
+		}
+		issues = issues.filter((i) => i.code !== 'pairNodeMissing');
+	}
+	let issuesOnly = $state(false);
 	let mappedCount = $derived(sourceNodes.filter((n) => pairsBySource.has(n.urn)).length);
 
 	// --- Filtering --------------------------------------------------------------
@@ -98,7 +173,10 @@
 	let filteredRows = $derived.by(() => {
 		const needle = search.trim().toLowerCase();
 		return sourceNodes.filter(
-			(n) => (!unmappedOnly || !pairsBySource.has(n.urn)) && (!needle || matches(n, needle))
+			(n) =>
+				(!unmappedOnly || !pairsBySource.has(n.urn)) &&
+				(!issuesOnly || issuesBySource.has(n.urn)) &&
+				(!needle || matches(n, needle))
 		);
 	});
 	let rows = $derived(filteredRows.slice(0, limit));
@@ -159,6 +237,8 @@
 				window.location.reload();
 				return;
 			}
+			const result = await res.json().catch(() => ({}));
+			if (Array.isArray(result.issues)) issues = result.issues;
 		} finally {
 			saving = false;
 			pendingCount = queue.length;
@@ -256,6 +336,7 @@
 		generatingReverse = false;
 		if (!res.ok) return setStatus(safeTranslate(result.error ?? 'error'), 'error');
 		reverse = { urn: result.urn, in_sync: true };
+		if (Array.isArray(result.issues)) issues = result.issues;
 		setStatus(m.lbMappingReverseGenerated({ count: result.count }), 'success');
 	}
 
@@ -265,9 +346,19 @@
 	let searchInput: HTMLInputElement | undefined = $state();
 	let targetInput: HTMLInputElement | undefined = $state();
 
+	let targetFocused = $state(false);
+	// With nothing typed, the closest wordings of the active row (hints only).
+	let hinted = $derived(
+		targetFocused && !query.trim() && activeUrn
+			? (hints[activeUrn] ?? [])
+					.filter(([urn]) => !pairs.has(key(activeUrn, urn)))
+					.map(([urn]) => targetByUrn.get(urn))
+					.filter((n): n is Node => Boolean(n))
+			: []
+	);
 	let candidates = $derived.by(() => {
 		const needle = query.trim().toLowerCase();
-		if (!needle) return [];
+		if (!needle) return hinted;
 		const hits = targetNodes.filter((n) => matches(n, needle));
 		// ref_id prefix hits first: typing "a.5" should land on A.5.x.
 		hits.sort(
@@ -323,8 +414,7 @@
 			'/': () => searchInput?.focus(),
 			Enter: () => focusTarget(),
 			a: () => {
-				const s = activeUrn && suggestionsBySource.get(activeUrn);
-				if (s) accept([s]);
+				if (activeUrn) accept(suggestionsBySource.get(activeUrn) ?? []);
 			}
 		};
 		const handler = handlers[event.key];
@@ -428,6 +518,17 @@
 				<input type="checkbox" class="checkbox" bind:checked={unmappedOnly} />
 				{m.lbMappingUnmappedOnly()}
 			</label>
+			{#if issues.length || issuesOnly}
+				<label class="flex items-center gap-2 text-sm">
+					<input
+						type="checkbox"
+						class="checkbox"
+						bind:checked={issuesOnly}
+						oninput={() => ((limit = PAGE_SIZE), (active = 0))}
+					/>
+					{m.lbMappingIssuesOnly()}
+				</label>
+			{/if}
 			<label class="flex items-center gap-2 text-sm">
 				{m.lbMappingDefaultRelationship()}
 				<select class="select select-sm w-36" bind:value={defaultRelationship}>
@@ -447,13 +548,60 @@
 				</button>
 			{/if}
 		</div>
+		{#if issues.length}
+			{@const errorCount = issues.filter((i) => ISSUE_ERRORS.has(i.code)).length}
+			<details
+				class="rounded-md border p-2 text-sm {errorCount
+					? 'border-error-500 bg-error-50 dark:bg-error-500/10'
+					: 'border-warning-500 bg-warning-50 dark:bg-warning-500/10'}"
+				open={errorCount > 0}
+			>
+				<summary class="cursor-pointer font-medium">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+					{m.lbMappingIssuesSummary({ count: issues.length })}
+				</summary>
+				<ul class="mt-2 space-y-0.5 max-h-48 overflow-auto">
+					{#each issues as issue}
+						<li class={ISSUE_ERRORS.has(issue.code) ? 'text-error-700 dark:text-error-300' : ''}>
+							{issueText(issue)}
+						</li>
+					{/each}
+				</ul>
+				{#if danglingIssues.length}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-error-500 mt-2"
+						onclick={removeDangling}
+					>
+						<i class="fa-solid fa-link-slash mr-1"></i>
+						{m.lbMappingRemoveDangling({ count: danglingIssues.length })}
+					</button>
+				{/if}
+			</details>
+		{/if}
+		<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-surface-600-400">
+			<span class="flex items-center gap-1.5">
+				<span class="badge preset-filled-primary-500 text-xs">{m.lbMappingLegendLink()}</span>
+				{m.lbMappingLegendLinkHelp()}
+			</span>
+			<span class="flex items-center gap-1.5">
+				<span
+					class="badge border border-dashed border-success-500 text-success-700 dark:text-success-300 text-xs"
+					>{m.lbMappingLegendSuggestion()}
+					<i class="fa-solid fa-check ml-1"></i><i class="fa-solid fa-xmark"></i></span
+				>
+				{m.lbMappingLegendSuggestionHelp()}
+			</span>
+			<span><i class="fa-solid fa-link mr-1"></i>{m.lbMappingLegendChained()}</span>
+			<span><i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.lbMappingReworded()}</span>
+		</div>
 		<p class="text-xs text-surface-500">{m.lbMappingKeyboardHelp()}</p>
 	</div>
 
 	<div class="card divide-y divide-surface-200-800">
 		{#each rows as node, index (node.urn)}
 			{@const rowPairs = pairsBySource.get(node.urn) ?? []}
-			{@const suggestion = suggestionsBySource.get(node.urn)}
+			{@const rowSuggestions = suggestionsBySource.get(node.urn) ?? []}
 			<!-- row selection also has keyboard bindings (j/k), see onWindowKey -->
 			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -468,6 +616,17 @@
 				<div class="min-w-0" title={node.description}>
 					{#if node.parent}<p class="text-xs text-surface-500 truncate">{node.parent}</p>{/if}
 					<p class="text-sm">
+						{#if issuesBySource.get(node.urn)?.length}
+							{@const rowIssues = issuesBySource.get(node.urn) ?? []}
+							<i
+								class="fa-solid fa-triangle-exclamation {rowIssues.some((i) =>
+									ISSUE_ERRORS.has(i.code)
+								)
+									? 'text-error-500'
+									: 'text-warning-500'}"
+								title={rowIssues.map(issueText).join('\n')}
+							></i>
+						{/if}
 						<span class="font-mono font-semibold">{node.ref_id}</span>
 						{#if node.name}{node.name}{:else}<span class="text-surface-600-400"
 								>{node.description}</span
@@ -510,17 +669,28 @@
 							</button>
 						</span>
 					{/each}
-					{#if suggestion}
+					{#each rowSuggestions as suggestion (suggestion.target)}
 						{@const target = targetByUrn.get(suggestion.target)}
 						<span
 							class="badge border border-dashed border-success-500 text-success-700 dark:text-success-300 gap-1 text-xs"
-							title="{tooltip(target)} · {REASON_LABEL[suggestion.reason]()}"
+							title="{m.lbMappingLegendSuggestion()} · {tooltip(target)} · {REASON_LABEL[
+								suggestion.reason
+							](suggestion)}"
 						>
 							{#if suggestion.reworded}<i
 									class="fa-solid fa-triangle-exclamation"
 									title={m.lbMappingReworded()}
 								></i>{/if}
 							<span class="font-mono">{label(target, suggestion.target)}</span>
+							<span class="opacity-75"
+								>{safeTranslate(
+									suggestion.relationship === 'not_related' ? 'notRelated' : suggestion.relationship
+								)}</span
+							>
+							{#if suggestion.reason === 'via'}<i
+									class="fa-solid fa-link opacity-60"
+									aria-hidden="true"
+								></i>{/if}
 							<button
 								type="button"
 								class="ml-1"
@@ -537,7 +707,7 @@
 								<i class="fa-solid fa-xmark"></i>
 							</button>
 						</span>
-					{/if}
+					{/each}
 					{#if node.urn === activeUrn}
 						<div class="relative min-w-48 flex-1">
 							<input
@@ -547,6 +717,8 @@
 								bind:value={query}
 								oninput={() => (highlighted = 0)}
 								onkeydown={(e) => onTargetKey(e, node.urn)}
+								onfocus={() => ((targetFocused = true), (highlighted = 0))}
+								onblur={() => (targetFocused = false)}
 								placeholder={m.lbMappingAddTargetPlaceholder()}
 								aria-label={m.lbMappingAddTargetPlaceholder()}
 								role="combobox"
@@ -559,6 +731,11 @@
 									role="listbox"
 									class="absolute z-20 mt-1 w-full max-h-72 overflow-auto card shadow-lg p-1"
 								>
+									{#if !query.trim()}
+										<li class="px-2 pt-1 text-xs text-surface-500" role="presentation">
+											<i class="fa-solid fa-lightbulb mr-1"></i>{m.lbMappingWordingHints()}
+										</li>
+									{/if}
 									{#each candidates as candidate, i (candidate.urn)}
 										<li role="option" aria-selected={i === highlighted}>
 											<button
