@@ -149,9 +149,14 @@ wait for the init to finish and then trigger the first user creation manually:
 docker compose exec backend uv run python manage.py createsuperuser
 ```
 
-### "Payload too large" when uploading a file to the frontend
+### What is the maximum attachment size? ("Payload too large" when uploading a file)
 
-By default, the `BODY_SIZE_LIMIT` environment variable is set to 50 MB in the frontend Dockerfile:
+The maximum attachment size is 50 MB by default. Two settings enforce it, and both must be raised to upload larger files:
+
+* `BODY_SIZE_LIMIT` on the frontend, in bytes (default `50000000`). A larger file is refused with "Payload too large".
+* `ATTACHMENT_MAX_SIZE_MB` on the backend, in MB (default `50`). A larger file is refused with "The maximum file size that can be uploaded is 50 MB".
+
+The frontend default is set in its Dockerfile:
 
 ```docker
 # frontend/Dockerfile
@@ -159,7 +164,7 @@ By default, the `BODY_SIZE_LIMIT` environment variable is set to 50 MB in the fr
 ENV BODY_SIZE_LIMIT=50000000
 ```
 
-In order to upload larger files, this value must be increased. How to do so depends on you rmode of deployment. Here are relevant docs:
+For example, to allow files up to 200 MB, set `BODY_SIZE_LIMIT=200000000` on the frontend and `ATTACHMENT_MAX_SIZE_MB=200` on the backend and the Huey worker. How to set environment variables depends on your mode of deployment. Here are relevant docs:
 
 * [https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/](https://docs.docker.com/compose/how-tos/environment-variables/set-environment-variables/)
 * [https://helm.sh/docs/helm/helm\_env/](https://helm.sh/docs/helm/helm_env/)
