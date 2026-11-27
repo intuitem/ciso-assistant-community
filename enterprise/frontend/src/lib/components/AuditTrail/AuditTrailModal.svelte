@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { m } from '#paraglide/messages.js';
-	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { safeTranslate, translateModelName } from '#lib/utils/i18n.js';
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { getLocale } from '#paraglide/runtime.js';
+	import { localNameForDjangoName } from '#lib/utils/crud.js';
 	import { onMount } from 'svelte';
 
 	type M2MChange = { type: 'm2m'; operation: string; objects: string[] };
+
+	interface AuditObject {
+		model: string;
+		id: string;
+		label: string | null;
+	}
 
 	interface AuditEntry {
 		id: number;
@@ -15,6 +22,7 @@
 		actor: string | null;
 		timestamp: string;
 		changes: Record<string, [unknown, unknown] | M2MChange> | string | null;
+		object?: AuditObject;
 	}
 
 	interface AuditEvent {
@@ -22,6 +30,8 @@
 		action: string;
 		actor: string | null;
 		timestamp: string;
+		/** Set when the event is about another object than the audited one. */
+		object: AuditObject | null;
 		changes: { field: string; from: unknown; to: unknown }[];
 	}
 
@@ -38,6 +48,8 @@
 
 	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
+
+	const MAX_ENTRIES = 200;
 
 	let entries: AuditEntry[] = $state([]);
 	let loading = $state(true);
@@ -72,11 +84,19 @@
 		>();
 
 		for (const e of raw) {
-			const key = e.cid ?? `id:${e.id}`;
+			const key = `${e.object?.model ?? model}:${e.object?.id ?? objectId}:${e.cid ?? `id:${e.id}`}`;
+			const other = e.object && e.object.id !== objectId ? e.object : null;
 			let g = byKey.get(key);
 			if (!g) {
 				g = {
-					event: { key, action: e.action, actor: e.actor, timestamp: e.timestamp, changes: [] },
+					event: {
+						key,
+						action: e.action,
+						actor: e.actor,
+						timestamp: e.timestamp,
+						object: other,
+						changes: []
+					},
 					scalar: new Map(),
 					m2m: new Map()
 				};
@@ -122,6 +142,11 @@
 	};
 
 	const events = $derived(groupEvents(entries));
+
+	const modelLabel = (name: string): string => {
+		const localName = localNameForDjangoName(name);
+		return localName ? safeTranslate(localName) : translateModelName(name);
+	};
 
 	const fmt = (value: unknown): string => {
 		if (Array.isArray(value)) {
@@ -169,6 +194,11 @@
 			{:else if events.length === 0}
 				<p class="text-surface-500">{m.noHistoryForThisObject()}</p>
 			{:else}
+				{#if entries.length >= MAX_ENTRIES}
+					<p class="text-surface-500 text-sm mb-4" data-testid="audit-trail-truncated">
+						{m.auditTrailTruncated({ count: MAX_ENTRIES })}
+					</p>
+				{/if}
 				<ul class="space-y-6">
 					{#each events as event (event.key)}
 						<li class="border-l-2 border-surface-300-700 pl-4 py-1">
@@ -181,6 +211,12 @@
 									>{formatDateOrDateTime(event.timestamp, getLocale())}</span
 								>
 							</div>
+							{#if event.object}
+								<div class="mt-1 text-sm text-surface-600-400" data-testid="audit-trail-object">
+									<span class="font-medium">{modelLabel(event.object.model)}</span>:
+									{event.object.label ?? event.object.id}
+								</div>
+							{/if}
 							{#if event.changes.length > 0}
 								<div class="mt-3 space-y-2 text-sm">
 									{#each event.changes as change (change.field)}
