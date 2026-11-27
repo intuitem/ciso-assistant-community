@@ -48,7 +48,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, Concat
 from django.contrib.contenttypes.models import ContentType
 
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -19788,6 +19788,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             )
             .order_by("ref_id")
         )
+        viewable = ViewableFilter(request.user)
+        findings = viewable(findings)
 
         # Calculate closed and open findings counts
         closed_statuses = [
@@ -19805,8 +19807,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.IN_PROGRESS,
         ]
 
-        closed_findings_count = findings.filter(status__in=closed_statuses).count()
-        open_findings_count = findings.filter(status__in=open_statuses).count()
+        closed_findings_count = sum(f.status in closed_statuses for f in findings)
+        open_findings_count = sum(f.status in open_statuses for f in findings)
 
         tz = get_report_timezone()
 
@@ -19829,42 +19831,40 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         md_content += f"- **Created**: {format_report_timestamp(findings_assessment.created_at, tz, 'N/A')}\n\n"
 
         # Metrics summary
-        metrics = findings_assessment.get_findings_metrics()
+        severity_counts = Counter(f.severity for f in findings)
+        status_counts = Counter(f.status for f in findings)
         md_content += "## Summary\n\n"
         md_content += "| Metric | Count |\n"
         md_content += "|--------|-------|\n"
-        md_content += f"| Total Findings | {metrics['total_count']} |\n"
+        md_content += f"| Total Findings | {len(findings)} |\n"
         md_content += f"| Closed Findings | {closed_findings_count} |\n"
         md_content += f"| Open Findings | {open_findings_count} |\n\n"
 
         # Severity distribution
-        if metrics["severity_distribution"]:
+        if findings:
             md_content += "### Severity Distribution\n\n"
             md_content += "| Severity | Count |\n"
             md_content += "|----------|-------|\n"
-            for severity, count in metrics["severity_distribution"].items():
+            for severity, label in Severity.choices:
+                count = severity_counts[severity]
                 if count > 0:
-                    md_content += f"| {severity.capitalize()} | {count} |\n"
+                    md_content += f"| {label.capitalize()} | {count} |\n"
             md_content += "\n"
 
         # Status distribution
-        if metrics["status_distribution"]:
+        if findings:
             md_content += "### Status Distribution\n\n"
             md_content += "| Status | Count |\n"
             md_content += "|--------|-------|\n"
-            status_choices = dict(Finding.Status.choices)
-            for status, count in metrics["status_distribution"].items():
+            for status, status_display in Finding.Status.choices:
+                count = status_counts[status]
                 if count > 0:
-                    status_display = status_choices.get(
-                        status, status.replace("_", " ").title()
-                    )
                     md_content += f"| {status_display} | {count} |\n"
             md_content += "\n"
 
         # Findings details
-        viewable = ViewableFilter(request.user)
         md_content += "## Findings\n\n"
-        for finding in viewable(findings):
+        for finding in findings:
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
             threats = viewable(finding.threats.all())
