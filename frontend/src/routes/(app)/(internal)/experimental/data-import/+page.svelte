@@ -4,6 +4,7 @@
 	import { translateChoiceLabel } from '#lib/utils/i18n.js';
 	import { canPerformAction, canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 	import * as m from '#paraglide/messages.js';
 	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -73,7 +74,83 @@
 		ComplianceAssessment: m.complianceAssessment,
 		TPRM: m.thirdPartyCategory
 	};
-	const modelLabel = (type: string) => MODEL_LABELS[type]?.() ?? type;
+	// Where imported records of each type live.
+	const LIST_PAGES: Record<string, string> = {
+		Asset: 'assets',
+		AppliedControl: 'applied-controls',
+		Policy: 'policies',
+		Evidence: 'evidences',
+		Perimeter: 'perimeters',
+		User: 'users',
+		Folder: 'folders',
+		ReferenceControl: 'reference-controls',
+		Threat: 'threats',
+		Vulnerability: 'vulnerabilities',
+		SecurityException: 'security-exceptions',
+		Incident: 'incidents',
+		ElementaryAction: 'elementary-actions',
+		Processing: 'processings',
+		FindingsAssessment: 'findings-assessments',
+		RiskAssessment: 'risk-assessments',
+		BusinessImpactAnalysis: 'business-impact-analysis',
+		MetricInstance: 'metric-instances',
+		CustomMetricSample: 'custom-metric-samples',
+		TaskTemplate: 'task-templates',
+		ComplianceAssessment: 'compliance-assessments',
+		TPRM: 'entities'
+	};
+
+	// The created container when the importer reports it, else the type's list page.
+	function linkFor(modelType: string, results: Record<string, unknown>) {
+		const study = (results.details as Record<string, unknown> | undefined)?.study;
+		if (study) return { href: `ebios-rm/${study}`, label: m.dataImportOpenStudy() };
+		if (results.compliance_assessment)
+			return {
+				href: `compliance-assessments/${results.compliance_assessment}`,
+				label: m.dataImportOpenAudit()
+			};
+		const list = LIST_PAGES[modelType];
+		return list
+			? { href: list, label: m.dataImportGoTo({ model: modelLabel(modelType) }) }
+			: undefined;
+	}
+
+	const modelLabel = (type: string) => MODEL_LABELS[type]?.() ?? FORMATS[type]?.label() ?? type;
+
+	// Exports a dedicated importer reads whole, recognised by the backend.
+	const FORMATS: Record<
+		string,
+		{ label: () => string; description: () => string; icon: string; matrix: boolean }
+	> = {
+		EbiosRMStudyEgerieXML: {
+			label: m.ebiosRMStudyEgerieXML,
+			description: m.ebiosRMStudyEgerieXMLDescription,
+			icon: 'fa-file-code',
+			matrix: true
+		},
+		EbiosRMStudyARM: {
+			label: m.ebiosRMStudyARM,
+			description: m.ebiosRMStudyARMDescription,
+			icon: 'fa-file-zipper',
+			matrix: true
+		},
+		EbiosRMStudyExcel: {
+			label: m.ebiosRMStudyExcel,
+			description: m.ebiosRMStudyExcelDescription,
+			icon: 'fa-file-excel',
+			matrix: true
+		},
+		CyFunAssessment: {
+			label: m.cyFunAssessment,
+			description: m.dataWizardCyFunDescription,
+			icon: 'fa-file-excel',
+			matrix: false
+		}
+	};
+	const COMPANIONS: Record<string, { icon: string; text: () => string }> = {
+		occurrences: { icon: 'fa-clock-rotate-left', text: m.dataImportCompanionOccurrences },
+		notes: { icon: 'fa-note-sticky', text: m.dataImportCompanionNotes }
+	};
 
 	type Choice = { value: string | number; label: string };
 	type SchemaColumn = {
@@ -101,6 +178,7 @@
 			defaults?: Record<string, string | number | boolean>;
 		} | null;
 		saved_mapping?: { id: string; name: string; new_columns: string[] } | null;
+		companion?: 'occurrences' | 'notes';
 	};
 	type SavedMapping = {
 		id: string;
@@ -153,6 +231,7 @@
 		errors: RowError[];
 		// Records created along the way, e.g. {applied_controls_created: 4}.
 		details: Record<string, number>;
+		link?: { href: string; label: string };
 	};
 
 	const toastStore = getToastStore();
@@ -161,6 +240,8 @@
 	let dragging = $state(false);
 	let analysing = $state(false);
 	let plans = $state<Plan[]>([]);
+	// A whole-file format the backend recognised, e.g. 'EbiosRMStudyARM'.
+	let format = $state('');
 	let schemas = $state<Record<string, Schema>>({});
 	let folderId = $state('');
 	// FolderTreeSelect needs a SuperForm field; the domain is plain page state.
@@ -240,7 +321,7 @@
 		}
 		const plan: Plan = {
 			analysed,
-			include: !analysed.empty && !!analysed.target,
+			include: !analysed.empty && !analysed.companion && !!analysed.target,
 			headerRow: analysed.header_row ?? 1,
 			modelType: analysed.target?.model_type ?? '',
 			targetSheet: analysed.target?.sheet ?? '',
@@ -256,14 +337,15 @@
 		return plan;
 	}
 
-	const REFUSALS: Record<string, string> = {
-		HeaderRowOutOfRange: 'That header row is past the end of the sheet.',
-		TooManySheets: 'This file has too many sheets to analyse (30 at most).',
-		TooManyColumns: 'A sheet has too many columns to analyse (100 at most).'
+	const REFUSALS: Record<string, () => string> = {
+		HeaderRowOutOfRange: m.dataImportRefusalHeaderRow,
+		TooManySheets: m.dataImportRefusalTooManySheets,
+		TooManyColumns: m.dataImportRefusalTooManyColumns,
+		UnrecognisedFile: m.dataImportRefusalUnrecognised
 	};
 
 	function refusal(body: { detail?: string | null }, fallback: string) {
-		return (body.detail && REFUSALS[body.detail]) || fallback;
+		return (body.detail && REFUSALS[body.detail]?.()) || fallback;
 	}
 
 	function remapValues(plan: Plan, header: string) {
@@ -280,25 +362,29 @@
 		);
 	}
 
-	async function analyse(overrides: Record<string, unknown> = {}) {
+	async function analyse(overrides: Record<string, unknown> = {}, detectFormat = false) {
 		const fd = new FormData();
 		fd.append('file', file as File);
 		fd.append('overrides', JSON.stringify(overrides));
 		fd.append('use_saved', String(useSaved));
+		fd.append('detect_format', String(detectFormat));
 		const res = await fetch(`${API}/analyze`, { method: 'POST', body: fd });
 		const body = await res.json();
-		if (!res.ok) throw new Error(refusal(body, 'Could not read this file.'));
+		if (!res.ok) throw new Error(refusal(body, m.dataImportCouldNotRead()));
+		if (body.format) format = body.format;
 		return body.sheets as Analysed[];
 	}
 
-	async function pick(selected: File | undefined) {
+	// detectFormat=false reads a recognised workbook sheet by sheet instead.
+	async function pick(selected: File | undefined, detectFormat = true) {
 		if (!selected) return;
 		file = selected;
+		format = '';
 		outcome = null;
 		dryRunKey = '';
 		analysing = true;
 		try {
-			const sheets = await analyse();
+			const sheets = await analyse({}, detectFormat);
 			await Promise.all(sheets.map((s) => loadSchema(s.target?.model_type ?? '')));
 			plans = sheets.map((s) => planFrom(s));
 			saveName =
@@ -307,6 +393,7 @@
 		} catch (e) {
 			toastStore.trigger({ message: e instanceof Error ? e.message : String(e) });
 			file = null;
+			format = '';
 			plans = [];
 		} finally {
 			analysing = false;
@@ -384,6 +471,7 @@
 	}
 
 	function buildSteps() {
+		if (format) return [{ model_type: format, sheets: [] as unknown[] }];
 		const steps: Record<
 			string,
 			{ model_type: string; sheets: unknown[]; options?: Record<string, string> }
@@ -437,7 +525,7 @@
 		const steps = buildSteps();
 		const key = runKey();
 		if (!steps.length) {
-			toastStore.trigger({ message: 'Include at least one sheet.' });
+			toastStore.trigger({ message: m.dataImportIncludeOneSheet() });
 			return;
 		}
 		running = true;
@@ -459,7 +547,7 @@
 			const body = await res.json();
 			if (!res.ok) {
 				toastStore.trigger({
-					message: refusal(body, 'This mapping no longer fits the file: read it again.')
+					message: refusal(body, m.dataImportNoLongerFits())
 				});
 				return;
 			}
@@ -474,6 +562,7 @@
 
 	function reset() {
 		file = null;
+		format = '';
 		plans = [];
 		outcome = null;
 		useSaved = true;
@@ -517,7 +606,7 @@
 	async function saveMapping(updateId?: string) {
 		const name = saveName.trim();
 		if (!name) {
-			toastStore.trigger({ message: 'Give the mapping a name.' });
+			toastStore.trigger({ message: m.dataImportNameMapping() });
 			return;
 		}
 		saving = true;
@@ -532,12 +621,12 @@
 				toastStore.trigger({
 					message:
 						res.status === 403
-							? 'You are not allowed to save mappings.'
-							: `Could not save: ${JSON.stringify(body)}`
+							? m.dataImportNotAllowedSave()
+							: m.dataImportCouldNotSave({ detail: JSON.stringify(body) })
 				});
 				return;
 			}
-			toastStore.trigger({ message: `Mapping "${name}" saved.` });
+			toastStore.trigger({ message: m.dataImportMappingSaved({ name }) });
 			await loadSavedMappings();
 		} finally {
 			saving = false;
@@ -548,7 +637,7 @@
 		const res = await fetch(`${API}/mappings/${id}`, { method: 'DELETE' });
 		confirmDelete = '';
 		if (!res.ok) {
-			toastStore.trigger({ message: 'Could not delete this mapping.' });
+			toastStore.trigger({ message: m.dataImportCouldNotDelete() });
 			return;
 		}
 		await loadSavedMappings();
@@ -556,7 +645,9 @@
 
 	function matchLabel(plan: Plan, type: string) {
 		const score = plan.analysed.candidates?.find((c) => c.model_type === type)?.score;
-		return score === undefined ? '' : ` (${Math.round(score * 100)}% match)`;
+		return score === undefined
+			? ''
+			: ` (${m.dataImportMatch({ percent: Math.round(score * 100) })})`;
 	}
 
 	function mappedCount(plan: Plan) {
@@ -621,27 +712,31 @@
 		const perSheet = Object.entries(results).filter(
 			([, v]) => typeof v === 'object' && v !== null && !Array.isArray(v) && 'failed' in v
 		);
+		const link = linkFor(step.model_type, results);
 		if (perSheet.length) {
-			return perSheet.map(([sheet, v]) =>
-				row(
+			return perSheet.map(([sheet, v]) => ({
+				...row(
 					`${modelLabel(step.model_type)} · ${sheet.replaceAll('_', ' ')}`,
 					step.model_type,
 					v as Counts
-				)
-			);
+				),
+				link
+			}));
 		}
-		const error =
-			step.error === 'notAllowed' ? 'You are not allowed to import these here' : step.error;
-		return [row(modelLabel(step.model_type), step.model_type, results, error)];
+		const error = step.error === 'notAllowed' ? m.dataImportNotAllowedHere() : step.error;
+		return [{ ...row(modelLabel(step.model_type), step.model_type, results, error), link }];
 	}
 
-	// {applied_controls_created: 4, assets_created: 1} -> "4 applied controls, 1 asset"
+	// {applied_controls_created: 4} -> "Applied controls (4)", in the app's own words when it has them.
 	function sideEffects(details: Record<string, number>) {
+		const messages = m as unknown as Record<string, (() => string) | undefined>;
 		return Object.entries(details)
-			.filter(([, n]) => n > 0)
+			.filter(([key, n]) => key.endsWith('_created') && n > 0)
 			.map(([key, n]) => {
-				const noun = key.replace(/_created$/, '').replaceAll('_', ' ');
-				return `${n} ${n === 1 ? noun.replace(/s$/, '') : noun}`;
+				const noun = key.replace(/_created$/, '');
+				const camel = noun.replace(/_(\w)/g, (_, c: string) => c.toUpperCase());
+				const plural = camel.endsWith('s') ? camel : `${camel}s`;
+				return `${messages[plural]?.() ?? noun.replaceAll('_', ' ')} (${n})`;
 			})
 			.join(', ');
 	}
@@ -692,7 +787,8 @@
 	// Risk levels in these imports are read on a risk matrix.
 	const needsAudit = $derived(included.some((p) => p.modelType === 'ComplianceAssessment'));
 	const needsMatrix = $derived(
-		included.some((p) => ['RiskAssessment', 'BusinessImpactAnalysis'].includes(p.modelType))
+		!!FORMATS[format]?.matrix ||
+			included.some((p) => ['RiskAssessment', 'BusinessImpactAnalysis'].includes(p.modelType))
 	);
 	// Users live outside domains; metric samples take their instance's.
 	const UNSCOPED = ['User', 'CustomMetricSample'];
@@ -700,11 +796,12 @@
 	// conflicts are looked up there: without one the dry run is meaningless.
 	const needsDomain = $derived(
 		!folderId &&
-			included.some(
-				(p) =>
-					!UNSCOPED.includes(p.modelType) &&
-					!Object.values(p.columns).some((key) => key === 'domain' || key === 'folder')
-			)
+			(!!format ||
+				included.some(
+					(p) =>
+						!UNSCOPED.includes(p.modelType) &&
+						!Object.values(p.columns).some((key) => key === 'domain' || key === 'folder')
+				))
 	);
 	const rowCount = $derived(included.reduce((n, p) => n + (p.analysed.row_count ?? 0), 0));
 	const outcomeTotals = $derived(outcome ? totals(outcome.rows) : null);
@@ -718,25 +815,75 @@
 				.map((m) => [m.id, m])
 		).values()
 	] as { id: string; name: string; new_columns: string[] }[]);
+
+	const STAGES = [
+		m.dataImportStageChoose(),
+		m.dataImportStageReview(),
+		m.dataImportDryRun(),
+		m.dataImportImport()
+	];
+	const stage = $derived(!file ? 0 : !outcome ? 1 : outcome.dryRun ? 2 : 3);
+
+	function sheetStatus(plan: Plan): 'off' | 'review' | 'ready' {
+		if (!plan.include || !plan.modelType) return 'off';
+		return unmatchedValues(plan) ? 'review' : 'ready';
+	}
+
+	function fileIcon(name: string) {
+		if (/\.zip$/i.test(name)) return 'fa-file-zipper';
+		if (/\.xml$/i.test(name)) return 'fa-file-code';
+		if (/\.csv$/i.test(name)) return 'fa-file-csv';
+		return 'fa-file-excel';
+	}
 </script>
 
-<div class="p-4 space-y-4">
-	<header class="space-y-1">
-		<h4 class="h4 font-bold flex items-center gap-2">
-			<i class="fa-solid fa-file-import text-primary-500"></i>
-			Data import
-		</h4>
-		<p class="text-sm text-surface-600-400">
-			Drop any spreadsheet. We find the header row of each tab, suggest what it should become and
-			how its columns and values map. Nothing is saved until you import.
-		</p>
+<div class="p-4 space-y-5">
+	<header class="flex flex-wrap items-start justify-between gap-4">
+		<div class="flex items-start gap-3">
+			<span
+				class="flex items-center justify-center size-11 shrink-0 rounded-xl preset-tonal-primary"
+				aria-hidden="true"
+			>
+				<i class="fa-solid fa-file-import text-lg"></i>
+			</span>
+			<div class="space-y-1">
+				<h4 class="h4 font-bold">{m.dataImportTitle()}</h4>
+				<p class="text-sm text-surface-600-400">
+					{m.dataImportIntro()}
+				</p>
+			</div>
+		</div>
+		<ol class="flex items-center gap-2 text-xs font-medium" aria-label={m.dataImportProgress()}>
+			{#each STAGES as label, i (label)}
+				<li class="flex items-center gap-2" aria-current={i === stage ? 'step' : undefined}>
+					{#if i}<span class="w-6 h-px bg-surface-300-700" aria-hidden="true"></span>{/if}
+					<span
+						class="flex items-center justify-center size-6 rounded-full
+							{i < stage || (i === stage && i === STAGES.length - 1)
+							? 'preset-filled-success-500'
+							: i === stage
+								? 'preset-filled-primary-500'
+								: 'preset-tonal-surface'}"
+					>
+						{#if i < stage || (i === stage && i === STAGES.length - 1)}
+							<i class="fa-solid fa-check text-[10px]"></i>
+						{:else}
+							{i + 1}
+						{/if}
+					</span>
+					<span class={i === stage ? '' : 'text-surface-600-400 hidden md:inline'}>{label}</span>
+				</li>
+			{/each}
+		</ol>
 	</header>
 
 	{#if !file}
 		<label
 			for="data-import-file"
-			class="flex flex-col items-center justify-center gap-3 p-12 rounded-xl border-2 border-dashed text-center cursor-pointer transition-colors
-				{dragging ? 'border-primary-500 bg-primary-50-950' : 'border-surface-300-700'}"
+			class="group flex flex-col items-center justify-center gap-4 px-6 py-14 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-colors
+				{dragging
+				? 'border-primary-500 bg-primary-50-950'
+				: 'border-surface-300-700 bg-surface-50-950 hover:border-primary-400 hover:bg-primary-50-950/50'}"
 			ondragover={(e) => {
 				e.preventDefault();
 				dragging = true;
@@ -748,60 +895,144 @@
 				pick(e.dataTransfer?.files[0]);
 			}}
 		>
+			<span
+				class="flex items-center justify-center size-16 rounded-full preset-tonal-primary transition-transform group-hover:scale-105"
+				aria-hidden="true"
+			>
+				<i class="fa-solid {analysing ? 'fa-spinner fa-spin' : 'fa-cloud-arrow-up'} text-2xl"></i>
+			</span>
 			{#if analysing}
-				<i class="fa-solid fa-spinner fa-spin text-3xl text-primary-500"></i>
-				<span class="font-semibold">Reading your file…</span>
+				<span class="text-lg font-semibold">{m.dataImportReading()}</span>
 			{:else}
-				<i class="fa-solid fa-cloud-arrow-up text-3xl text-primary-500"></i>
-				<span class="text-lg font-semibold">Drop a file here, or click to choose</span>
-				<span class="text-sm text-surface-600-400">.xlsx, .xls or .csv, up to 10 MB</span>
+				<span class="space-y-1">
+					<span class="block text-lg font-semibold">{m.dataImportDropHere()}</span>
+					<span class="block text-sm text-surface-600-400">{m.dataImportMaxSize()}</span>
+				</span>
+				<span class="flex flex-wrap justify-center gap-2 text-xs">
+					<span class="badge preset-tonal-success"
+						><i class="fa-solid fa-file-excel mr-1"></i>Excel (.xlsx, .xls)</span
+					>
+					<span class="badge preset-tonal-secondary"
+						><i class="fa-solid fa-file-csv mr-1"></i>CSV</span
+					>
+					{#each ['EBIOS RM (Egerie, ARM, CISO Assistant)', 'CyFun'] as label (label)}
+						<span class="badge preset-tonal-primary" title={m.dataImportFormatHint()}
+							><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{label}</span
+						>
+					{/each}
+				</span>
 			{/if}
 			<input
 				id="data-import-file"
 				type="file"
-				accept=".xlsx,.xls,.csv"
+				accept=".xlsx,.xls,.csv,.xml,.zip"
 				class="sr-only"
 				disabled={analysing}
 				onchange={(e) => pick(e.currentTarget.files?.[0])}
 			/>
 		</label>
 
-		<section class="card bg-surface-50-950 border border-surface-200-800 shadow-sm p-4 space-y-3">
-			<h5 class="font-semibold text-sm">Saved mappings</h5>
-			{#if savedMappings.length === 0}
+		<details class="group card bg-surface-50-950 border border-surface-200-800 shadow-sm">
+			<summary
+				class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none group-open:border-b border-surface-200-800"
+			>
+				<h5 class="flex items-center gap-2 font-semibold text-sm">
+					<i
+						class="fa-solid fa-chevron-right text-xs text-surface-500 transition-transform group-open:rotate-90"
+					></i>
+					<i class="fa-solid fa-table-list text-primary-500"></i>
+					{m.dataImportTemplatesTitle()}
+				</h5>
+				<a
+					class="text-sm text-primary-600-400 hover:underline"
+					href="https://intuitem.gitbook.io/ciso-assistant/configuration/data-import"
+					target="_blank"
+					rel="noopener noreferrer"
+					><i class="fa-solid fa-book mr-1"></i>{m.dataWizardTemplatesAndGuidelines()}<i
+						class="fa-solid fa-arrow-up-right-from-square ml-1 text-xs"
+					></i></a
+				>
+			</summary>
+			<div class="p-4 space-y-3">
 				<p class="text-sm text-surface-600-400">
-					None yet. After a dry run, save the mapping: the next file with the same columns is mapped
-					for you.
+					{m.dataImportTemplatesHint()}
+				</p>
+				<div class="flex flex-wrap gap-2">
+					<!-- eslint-disable svelte/no-navigation-without-resolve -- file downloads through the page's API proxy -->
+					{#each data.templates as type (type)}
+						<a
+							href={`/experimental/data-import/api/templates/${type}`}
+							download
+							class="btn btn-sm preset-tonal-surface border border-surface-200-800"
+							><i class="fa-solid fa-download mr-1 text-xs"></i>{modelLabel(type)}</a
+						>
+					{/each}
+					<!-- eslint-enable svelte/no-navigation-without-resolve -->
+				</div>
+			</div>
+		</details>
+		<p class="flex items-center gap-2 px-1 text-sm text-surface-600-400">
+			<i class="fa-solid fa-circle-info"></i>
+			<span>
+				{m.dataImportLibrariesHint()}
+				<a href={resolve('/libraries')} class="text-primary-600-400 hover:underline"
+					>{m.libraries()}<i class="fa-solid fa-arrow-right ml-1 text-xs"></i></a
+				>.
+			</span>
+		</p>
+
+		<section class="card bg-surface-50-950 border border-surface-200-800 shadow-sm">
+			<h5
+				class="flex items-center gap-2 px-4 py-3 font-semibold text-sm border-b border-surface-200-800"
+			>
+				<i class="fa-solid fa-bookmark text-primary-500"></i>
+				{m.dataImportSavedMappings()}
+				{#if savedMappings.length}
+					<span class="badge preset-tonal-surface">{savedMappings.length}</span>
+				{/if}
+			</h5>
+			<p class="px-4 pt-3 text-sm text-surface-600-400">{m.dataImportSavedMappingsHint()}</p>
+			{#if savedMappings.length === 0}
+				<p class="px-4 py-4 text-sm text-surface-500 italic">
+					{m.dataImportNoSavedMappings()}
 				</p>
 			{:else}
 				<ul class="divide-y divide-surface-200-800">
 					{#each savedMappings as saved (saved.id)}
-						<li class="flex flex-wrap items-center gap-x-4 gap-y-1 py-2 text-sm">
-							<span class="font-medium">{saved.name}</span>
-							<span class="text-surface-600-400">
-								{[...new Set(saved.sheets.map((s) => s.model_type))].join(', ')} ·
-								{saved.sheets.length} sheet{saved.sheets.length === 1 ? '' : 's'} ·
-								{saved.use_count
-									? `used ${saved.use_count} time${saved.use_count === 1 ? '' : 's'}`
-									: 'never used'}
-								{#if saved.created_by}· by {saved.created_by.email}{/if}
+						<li
+							class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm hover:bg-surface-100-900 transition-colors"
+						>
+							<span class="flex flex-col">
+								<span class="font-medium">{saved.name}</span>
+								<span class="text-xs text-surface-600-400">
+									{m.dataImportSheetCount({ count: saved.sheets.length })} ·
+									{saved.use_count
+										? m.dataImportUsedTimes({ count: saved.use_count })
+										: m.dataImportNeverUsed()}
+									{#if saved.created_by}· {m.dataImportBy({ email: saved.created_by.email })}{/if}
+								</span>
+							</span>
+							<span class="flex flex-wrap gap-1">
+								{#each [...new Set(saved.sheets.map((s) => s.model_type))] as type (type)}
+									<span class="badge preset-tonal-primary text-xs">{modelLabel(type)}</span>
+								{/each}
 							</span>
 							<span class="grow"></span>
 							{#if confirmDelete === saved.id}
-								<span>Delete this mapping?</span>
+								<span>{m.dataImportDeleteMappingConfirm()}</span>
 								<button
 									type="button"
 									class="btn btn-sm preset-filled-error-500"
-									onclick={() => deleteMapping(saved.id)}>Delete</button
+									onclick={() => deleteMapping(saved.id)}>{m.delete()}</button
 								>
 								<button type="button" class="btn btn-sm" onclick={() => (confirmDelete = '')}
-									>Cancel</button
+									>{m.cancel()}</button
 								>
 							{:else if mayDelete(saved)}
 								<button
 									type="button"
-									class="btn btn-sm preset-outlined"
-									aria-label="Delete {saved.name}"
+									class="btn-icon btn-icon-sm hover:preset-tonal-error"
+									aria-label={m.dataImportDeleteNamed({ name: saved.name })}
 									onclick={() => (confirmDelete = saved.id)}
 								>
 									<i class="fa-solid fa-trash"></i>
@@ -813,20 +1044,32 @@
 			{/if}
 		</section>
 	{:else}
-		<div class="flex flex-wrap items-center justify-between gap-2">
-			<p class="text-sm">
-				<i class="fa-solid fa-file-excel text-success-600 mr-1"></i>
-				<strong>{file.name}</strong>
-				<span class="text-surface-600-400">
+		<div
+			class="card bg-surface-50-950 border border-surface-200-800 shadow-sm p-3 flex flex-wrap items-center gap-3"
+		>
+			<span
+				class="flex items-center justify-center size-10 rounded-lg preset-tonal-success"
+				aria-hidden="true"
+			>
+				<i class="fa-solid {fileIcon(file.name)} text-lg"></i>
+			</span>
+			<div class="flex flex-col min-w-0">
+				<strong class="truncate">{file.name}</strong>
+				<span class="text-xs text-surface-600-400">
 					{#if analysing}
-						· <i class="fa-solid fa-spinner fa-spin"></i> Reading the file…
+						<i class="fa-solid fa-spinner fa-spin mr-1"></i>{m.dataImportReading()}
+					{:else if format}
+						{m.dataImportRecognisedAs({ format: FORMATS[format]?.label() ?? format })}
 					{:else}
-						· {plans.length} sheet{plans.length === 1 ? '' : 's'}
+						{m.dataImportSheetCount({ count: plans.length })} ·
+						{m.dataImportToImport({ count: included.length })} ·
+						{m.dataImportRowCount({ count: rowCount })}
 					{/if}
 				</span>
-			</p>
-			<button type="button" class="btn btn-sm preset-outlined" onclick={reset} disabled={running}>
-				<i class="fa-solid fa-rotate-left mr-1"></i>Choose another file
+			</div>
+			<span class="grow"></span>
+			<button type="button" class="btn btn-sm preset-tonal" onclick={reset} disabled={running}>
+				<i class="fa-solid fa-rotate-left mr-1"></i>{m.dataImportChooseAnother()}
 			</button>
 		</div>
 
@@ -836,291 +1079,382 @@
 			>
 				<i class="fa-solid fa-bookmark"></i>
 				<span>
-					Using saved mapping
+					{m.dataImportUsingSaved()}
 					{#each appliedSaved as saved, i (saved.id)}
 						{i ? ', ' : ''}<strong>{saved.name}</strong>{#if saved.new_columns.length}
-							(new columns: {saved.new_columns.join(', ')}){/if}
+							({m.dataImportNewColumns({ columns: saved.new_columns.join(', ') })}){/if}
 					{/each}
 				</span>
 				<span class="grow"></span>
 				<button type="button" class="btn btn-sm preset-outlined" onclick={ignoreSaved}>
-					Ignore saved mappings
+					{m.dataImportIgnoreSaved()}
 				</button>
 			</div>
 		{:else if !useSaved}
 			<p class="text-sm text-surface-600-400">
-				Saved mappings ignored for this file.
+				{m.dataImportSavedIgnored()}
 				<button
 					type="button"
 					class="anchor"
 					onclick={() => {
 						useSaved = true;
 						pick(file ?? undefined);
-					}}>Use them again</button
+					}}>{m.dataImportUseAgain()}</button
 				>
 			</p>
 		{/if}
 
+		{#if format}
+			<section
+				class="card bg-surface-50-950 border border-surface-200-800 border-l-4 border-l-primary-500 shadow-sm p-5 flex flex-wrap gap-4"
+			>
+				<span
+					class="flex items-center justify-center size-12 shrink-0 rounded-xl preset-tonal-primary"
+					aria-hidden="true"
+				>
+					<i class="fa-solid {FORMATS[format]?.icon ?? 'fa-file'} text-xl"></i>
+				</span>
+				<div class="space-y-2 grow basis-96">
+					<div class="flex flex-wrap items-center gap-2">
+						<h5 class="font-semibold">{FORMATS[format]?.label() ?? format}</h5>
+						<span class="badge preset-tonal-primary text-xs">
+							<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.dataImportRecognised()}
+						</span>
+					</div>
+					<p class="text-sm text-surface-600-400 whitespace-pre-line">
+						{FORMATS[format]?.description()}
+					</p>
+					<p class="text-sm">
+						{m.dataImportWholeFileNote()}
+					</p>
+				</div>
+				{#if !/\.(xml|zip)$/i.test(file.name)}
+					<button
+						type="button"
+						class="btn btn-sm preset-outlined self-start"
+						disabled={running || analysing}
+						onclick={() => pick(file ?? undefined, false)}
+					>
+						<i class="fa-solid fa-table-columns mr-1"></i>{m.dataImportMapMyself()}
+					</button>
+				{/if}
+			</section>
+		{/if}
+
 		<div class="space-y-3">
 			{#each plans as plan, index (plan.analysed.name)}
-				<section
-					id="sheet-{index}"
-					class="card bg-surface-50-950 border border-surface-200-800 shadow-sm"
-				>
-					<div class="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
-						<label class="flex items-center gap-2 min-w-48">
-							<input
-								type="checkbox"
-								class="checkbox"
-								bind:checked={plan.include}
-								disabled={plan.analysed.empty || !plan.modelType || running}
-							/>
-							<span class="font-mono font-semibold">{plan.analysed.name}</span>
-						</label>
-
-						{#if plan.analysed.empty}
-							<span class="text-sm text-surface-600-400">No data rows, skipped</span>
-						{:else}
-							<span class="text-sm text-surface-600-400">
-								{plan.analysed.row_count}
-								{plan.analysed.row_count === 1 ? 'row' : 'rows'} · header on row {plan.headerRow}
-							</span>
-							<label class="flex items-center gap-2 text-sm">
-								becomes
-								<select
-									class="select w-auto text-sm"
-									value={plan.modelType}
-									disabled={plan.busy || running}
-									onchange={(e) => retarget(index, e.currentTarget.value)}
-								>
-									<option value="" disabled>Choose an object…</option>
-									{#each data.modelTypes as type (type)}
-										<option value={type}>{modelLabel(type)}{matchLabel(plan, type)}</option>
-									{/each}
-								</select>
-							</label>
-							{#if (schemas[plan.modelType]?.sheets.length ?? 0) > 1}
-								<label class="flex items-center gap-2 text-sm">
-									as
-									<select
-										class="select w-auto text-sm"
-										value={plan.targetSheet}
-										disabled={plan.busy || running}
-										onchange={(e) => retarget(index, plan.modelType, e.currentTarget.value)}
-									>
-										{#each schemas[plan.modelType].sheets as sheet (sheet.name)}
-											<option value={sheet.name}>{sheet.name}</option>
-										{/each}
-									</select>
-								</label>
-							{/if}
-							{#if plan.modelType}
-								<span class="text-sm">
-									{mappedCount(plan)} of {plan.analysed.columns?.length} columns mapped
-									{#if unmatchedValues(plan)}
-										·
-										<button
-											type="button"
-											class="anchor text-warning-700-300 font-medium"
-											title="Values in your file that match none of the allowed choices"
-											onclick={() => reviewValues(index)}
-										>
-											{unmatchedValues(plan)}
-											{unmatchedValues(plan) === 1 ? 'value' : 'values'} to review
-										</button>
-									{/if}
-								</span>
-							{/if}
-							<span class="grow"></span>
-							{#if plan.busy}
-								<i class="fa-solid fa-spinner fa-spin text-primary-500"></i>
-							{/if}
-							{#if plan.modelType}
-								<button
-									type="button"
-									class="btn btn-sm preset-tonal"
-									aria-expanded={plan.open}
-									onclick={() => (plan.open = !plan.open)}
-								>
-									<i class="fa-solid {plan.open ? 'fa-chevron-up' : 'fa-sliders'} mr-1"></i>
-									{plan.open ? 'Close' : 'Adjust'}
-								</button>
-							{/if}
+				{#if plan.analysed.companion}
+					<div
+						class="flex items-center gap-3 px-4 py-2 rounded-lg border border-dashed border-surface-300-700 text-sm text-surface-600-400"
+					>
+						<i class="fa-solid {COMPANIONS[plan.analysed.companion].icon} w-4 text-center"></i>
+						<span class="font-mono font-medium text-surface-800-200">{plan.analysed.name}</span>
+						<span>{COMPANIONS[plan.analysed.companion].text()}</span>
+						<span class="grow"></span>
+						{#if plan.analysed.row_count}
+							<span class="text-xs">{m.dataImportRowCount({ count: plan.analysed.row_count })}</span
+							>
 						{/if}
 					</div>
-
-					{#if plan.open && plan.modelType && !plan.analysed.empty}
-						<div class="border-t border-surface-200-800 p-4 space-y-4">
-							<label class="flex items-center gap-2 text-sm w-fit">
-								Header row
+				{:else}
+					{@const status = sheetStatus(plan)}
+					<section
+						id="sheet-{index}"
+						class="card bg-surface-50-950 border border-surface-200-800 border-l-4 shadow-sm transition-shadow hover:shadow-md
+							{status === 'ready'
+							? 'border-l-success-500'
+							: status === 'review'
+								? 'border-l-warning-500'
+								: 'border-l-surface-300-700'}"
+					>
+						<div class="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
+							<label class="flex items-center gap-3 min-w-56">
 								<input
-									type="number"
-									min="1"
-									class="input w-20 text-sm"
-									value={plan.headerRow}
-									disabled={plan.busy || running}
-									onchange={async (e) => {
-										const input = e.currentTarget;
-										const row = Math.max(1, Number(input.value) || 1);
-										if (!(await retarget(index, plan.modelType, plan.targetSheet, row)))
-											input.value = String(plan.headerRow);
-									}}
+									type="checkbox"
+									class="checkbox"
+									bind:checked={plan.include}
+									disabled={plan.analysed.empty || !plan.modelType || running}
 								/>
-							</label>
-							<div class="overflow-x-auto">
-								<table class="table text-sm">
-									<thead>
-										<tr>
-											<th>Your column</th>
-											<th>Sample values</th>
-											<th>Field</th>
-										</tr>
-									</thead>
-									<tbody>
-										{#each plan.analysed.columns ?? [] as col (col.header)}
-											{@const field = schemaSheet(plan)?.columns.find(
-												(c) => c.key === plan.columns[col.header]
-											)}
-											<tr>
-												<td class="align-top">
-													<span class="font-mono font-medium">{col.header}</span>
-													{#if columnUnmatched(plan, col.header)}
-														<span class="block text-xs text-warning-700-300">
-															{columnUnmatched(plan, col.header)}
-															{columnUnmatched(plan, col.header) === 1 ? 'value' : 'values'} to review
-														</span>
-													{/if}
-												</td>
-												<td class="text-surface-600-400 align-top max-w-72 truncate">
-													{col.samples.slice(0, 3).join(', ')}
-												</td>
-												<td class="align-top">
-													<select
-														class="select text-sm"
-														bind:value={plan.columns[col.header]}
-														onchange={() => {
-															remapValues(plan, col.header);
-															suggestDefaults(plan);
-														}}
-														disabled={running}
-														aria-label="Field for {col.header}"
-													>
-														<option value="">Ignore</option>
-														{#each schemaSheet(plan)?.columns ?? [] as target (target.key)}
-															<option
-																value={target.key}
-																disabled={target.key !== plan.columns[col.header] &&
-																	Object.values(plan.columns).includes(target.key)}
-															>
-																{target.label} ({target.key})
-															</option>
-														{/each}
-													</select>
-													{#if field?.choices && col.distinct}
-														<div class="mt-2 space-y-1">
-															{#each col.distinct as value (value)}
-																<label class="grid grid-cols-2 gap-2 items-center">
-																	<span class="font-mono text-xs truncate">{value}</span>
-																	<select
-																		class="select text-xs {plan.values[col.header][value]
-																			? ''
-																			: 'border-2 border-warning-500 preset-tonal-warning'}"
-																		data-unmatched={plan.values[col.header][value] === ''}
-																		aria-label="Value for {value}"
-																		bind:value={plan.values[col.header][value]}
-																		disabled={running}
-																	>
-																		<option value="" disabled>Not matched: choose a value</option>
-																		<option value={KEEP}>Keep as is (sent unchanged)</option>
-																		{#each field.choices as choice (choice.value)}
-																			<option value={String(choice.value)}
-																				>{translateChoiceLabel(choice.label, choice.value)}</option
-																			>
-																		{/each}
-																	</select>
-																</label>
-															{/each}
-														</div>
-													{/if}
-												</td>
-											</tr>
-										{/each}
-									</tbody>
-								</table>
-							</div>
-							<div class="space-y-2">
-								<h3 class="text-sm font-semibold">Same value for every row</h3>
-								<p class="text-xs text-surface-600-400">
-									For fields no column fills. In Update mode they also replace the field on existing
-									records.
-								</p>
-								{#each unmappedFields(plan).filter((c) => c.key in plan.defaults) as column (column.key)}
-									<div class="flex items-center gap-2 text-sm">
-										<span class="w-56 truncate">{column.label} ({column.key})</span>
-										{#if column.boolean || column.choices}
-											<select
-												class="select w-auto text-sm"
-												bind:value={plan.defaults[column.key]}
-												disabled={running}
-												aria-label="Value for every row of {column.key}"
-											>
-												<option value="" disabled>Choose a value</option>
-												{#if column.boolean}
-													<option value="true">Yes</option>
-													<option value="false">No</option>
-												{:else}
-													{#each column.choices ?? [] as choice (choice.value)}
-														<option value={String(choice.value)}
-															>{translateChoiceLabel(choice.label, choice.value)}</option
-														>
-													{/each}
-												{/if}
-											</select>
+								<span class="flex flex-col">
+									<span class="font-mono font-semibold {plan.include ? '' : 'text-surface-600-400'}"
+										><i class="fa-solid fa-table text-xs text-surface-500 mr-1"></i>{plan.analysed
+											.name}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{#if plan.analysed.empty}
+											{m.dataImportNoDataRows()}
 										{:else}
-											<input
-												class="input w-64 text-sm"
-												bind:value={plan.defaults[column.key]}
-												disabled={running}
-												aria-label="Value for every row of {column.key}"
-											/>
+											{m.dataImportRowCount({ count: plan.analysed.row_count ?? 0 })} ·
+											{m.dataImportHeaderOnRow({ row: plan.headerRow })}
 										{/if}
-										<button
-											type="button"
-											class="btn-icon btn-icon-sm"
-											onclick={() => delete plan.defaults[column.key]}
-											disabled={running}
-											aria-label="Remove the value for {column.key}"
-										>
-											<i class="fa-solid fa-xmark"></i>
-										</button>
-									</div>
-								{/each}
-								{#if unmappedFields(plan).some((c) => !(c.key in plan.defaults))}
+									</span>
+								</span>
+							</label>
+
+							{#if !plan.analysed.empty}
+								<i
+									class="fa-solid fa-arrow-right text-surface-400 hidden sm:block"
+									aria-hidden="true"
+								></i>
+								<div class="flex flex-wrap items-center gap-2">
 									<select
 										class="select w-auto text-sm"
-										value=""
-										disabled={running}
-										aria-label="Add a value for every row"
-										onchange={(e) => {
-											plan.defaults[e.currentTarget.value] = '';
-											e.currentTarget.value = '';
-										}}
+										value={plan.modelType}
+										disabled={plan.busy || running}
+										aria-label={m.dataImportWhatBecomes({ sheet: plan.analysed.name })}
+										onchange={(e) => retarget(index, e.currentTarget.value)}
 									>
-										<option value="" disabled>Add a field…</option>
-										{#each unmappedFields(plan).filter((c) => !(c.key in plan.defaults)) as column (column.key)}
-											<option value={column.key}>{column.label} ({column.key})</option>
+										<option value="" disabled>{m.dataImportChooseObject()}</option>
+										{#each data.modelTypes as type (type)}
+											<option value={type}>{modelLabel(type)}{matchLabel(plan, type)}</option>
 										{/each}
 									</select>
+									{#if (schemas[plan.modelType]?.sheets.length ?? 0) > 1}
+										<select
+											class="select w-auto text-sm"
+											value={plan.targetSheet}
+											disabled={plan.busy || running}
+											aria-label={m.dataImportTemplateSheetFor({ sheet: plan.analysed.name })}
+											onchange={(e) => retarget(index, plan.modelType, e.currentTarget.value)}
+										>
+											{#each schemas[plan.modelType].sheets as sheet (sheet.name)}
+												<option value={sheet.name}>{sheet.name}</option>
+											{/each}
+										</select>
+									{/if}
+								</div>
+								{#if plan.modelType}
+									{@const total = plan.analysed.columns?.length ?? 0}
+									<div class="flex flex-col gap-1 min-w-40 text-xs">
+										<span class="text-surface-600-400">
+											{m.dataImportColumnsMapped({ mapped: mappedCount(plan), total })}
+										</span>
+										<span class="h-1.5 rounded-full bg-surface-200-800 overflow-hidden">
+											<span
+												class="block h-full rounded-full bg-primary-500 transition-all"
+												style="width: {total ? (100 * mappedCount(plan)) / total : 0}%"
+											></span>
+										</span>
+									</div>
+									{#if unmatchedValues(plan)}
+										<button
+											type="button"
+											class="badge preset-tonal-warning hover:preset-filled-warning-500 transition-colors"
+											title={m.dataImportUnmatchedHint()}
+											onclick={() => reviewValues(index)}
+										>
+											<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+											{m.dataImportValuesToReview({ count: unmatchedValues(plan) })}
+										</button>
+									{/if}
 								{/if}
-							</div>
+								<span class="grow"></span>
+								{#if plan.busy}
+									<i class="fa-solid fa-spinner fa-spin text-primary-500"></i>
+								{/if}
+								{#if plan.modelType}
+									<button
+										type="button"
+										class="btn btn-sm {plan.open
+											? 'preset-filled-surface-900-100'
+											: 'preset-tonal'}"
+										aria-expanded={plan.open}
+										onclick={() => (plan.open = !plan.open)}
+									>
+										<i class="fa-solid {plan.open ? 'fa-chevron-up' : 'fa-sliders'} mr-1"></i>
+										{plan.open ? m.close() : m.dataImportAdjust()}
+									</button>
+								{/if}
+							{/if}
 						</div>
-					{/if}
-				</section>
+
+						{#if plan.open && plan.modelType && !plan.analysed.empty}
+							<div class="border-t border-surface-200-800 bg-surface-100-900/40 p-4 space-y-5">
+								<label class="flex items-center gap-2 text-sm w-fit">
+									{m.dataImportHeaderRow()}
+									<input
+										type="number"
+										min="1"
+										class="input w-20 text-sm"
+										value={plan.headerRow}
+										disabled={plan.busy || running}
+										onchange={async (e) => {
+											const input = e.currentTarget;
+											const row = Math.max(1, Number(input.value) || 1);
+											if (!(await retarget(index, plan.modelType, plan.targetSheet, row)))
+												input.value = String(plan.headerRow);
+										}}
+									/>
+								</label>
+								<div
+									class="overflow-x-auto rounded-lg border border-surface-200-800 bg-surface-50-950"
+								>
+									<table class="table text-sm">
+										<thead class="bg-surface-100-900">
+											<tr>
+												<th>{m.dataImportYourColumn()}</th>
+												<th>{m.dataImportSampleValues()}</th>
+												<th>{m.dataImportField()}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{#each plan.analysed.columns ?? [] as col (col.header)}
+												{@const field = schemaSheet(plan)?.columns.find(
+													(c) => c.key === plan.columns[col.header]
+												)}
+												<tr class={plan.columns[col.header] ? '' : 'opacity-70'}>
+													<td class="align-top">
+														<span class="font-mono font-medium">{col.header}</span>
+														{#if columnUnmatched(plan, col.header)}
+															<span class="block text-xs text-warning-700-300">
+																{m.dataImportValuesToReview({
+																	count: columnUnmatched(plan, col.header)
+																})}
+															</span>
+														{/if}
+													</td>
+													<td class="align-top max-w-72">
+														<span class="flex flex-wrap gap-1">
+															{#each col.samples.slice(0, 3) as sample, i (i)}
+																<span
+																	class="px-1.5 py-0.5 rounded bg-surface-100-900 text-xs text-surface-700-300 truncate max-w-40"
+																	>{sample}</span
+																>
+															{/each}
+														</span>
+													</td>
+													<td class="align-top">
+														<select
+															class="select text-sm"
+															bind:value={plan.columns[col.header]}
+															onchange={() => {
+																remapValues(plan, col.header);
+																suggestDefaults(plan);
+															}}
+															disabled={running}
+															aria-label={m.dataImportFieldFor({ column: col.header })}
+														>
+															<option value="">{m.ignore()}</option>
+															{#each schemaSheet(plan)?.columns ?? [] as target (target.key)}
+																<option
+																	value={target.key}
+																	disabled={target.key !== plan.columns[col.header] &&
+																		Object.values(plan.columns).includes(target.key)}
+																>
+																	{target.label} ({target.key})
+																</option>
+															{/each}
+														</select>
+														{#if field?.choices && col.distinct}
+															<div class="mt-2 space-y-1">
+																{#each col.distinct as value (value)}
+																	<label class="grid grid-cols-2 gap-2 items-center">
+																		<span class="font-mono text-xs truncate">{value}</span>
+																		<select
+																			class="select text-xs {plan.values[col.header][value]
+																				? ''
+																				: 'border-2 border-warning-500 preset-tonal-warning'}"
+																			data-unmatched={plan.values[col.header][value] === ''}
+																			aria-label={m.dataImportValueFor({ value })}
+																			bind:value={plan.values[col.header][value]}
+																			disabled={running}
+																		>
+																			<option value="" disabled>{m.dataImportNotMatched()}</option>
+																			<option value={KEEP}>{m.dataImportKeepAsIs()}</option>
+																			{#each field.choices as choice (choice.value)}
+																				<option value={String(choice.value)}
+																					>{translateChoiceLabel(
+																						choice.label,
+																						choice.value
+																					)}</option
+																				>
+																			{/each}
+																		</select>
+																	</label>
+																{/each}
+															</div>
+														{/if}
+													</td>
+												</tr>
+											{/each}
+										</tbody>
+									</table>
+								</div>
+								<div class="space-y-2">
+									<h3 class="text-sm font-semibold">{m.dataImportSameValue()}</h3>
+									<p class="text-xs text-surface-600-400">
+										{m.dataImportSameValueHint()}
+									</p>
+									{#each unmappedFields(plan).filter((c) => c.key in plan.defaults) as column (column.key)}
+										<div class="flex items-center gap-2 text-sm">
+											<span class="w-56 truncate">{column.label} ({column.key})</span>
+											{#if column.boolean || column.choices}
+												<select
+													class="select w-auto text-sm"
+													bind:value={plan.defaults[column.key]}
+													disabled={running}
+													aria-label={m.dataImportValueForEveryRow({ field: column.key })}
+												>
+													<option value="" disabled>{m.dataImportChooseValue()}</option>
+													{#if column.boolean}
+														<option value="true">{m.yes()}</option>
+														<option value="false">{m.no()}</option>
+													{:else}
+														{#each column.choices ?? [] as choice (choice.value)}
+															<option value={String(choice.value)}
+																>{translateChoiceLabel(choice.label, choice.value)}</option
+															>
+														{/each}
+													{/if}
+												</select>
+											{:else}
+												<input
+													class="input w-64 text-sm"
+													bind:value={plan.defaults[column.key]}
+													disabled={running}
+													aria-label={m.dataImportValueForEveryRow({ field: column.key })}
+												/>
+											{/if}
+											<button
+												type="button"
+												class="btn-icon btn-icon-sm"
+												onclick={() => delete plan.defaults[column.key]}
+												disabled={running}
+												aria-label={m.dataImportRemoveValueFor({ field: column.key })}
+											>
+												<i class="fa-solid fa-xmark"></i>
+											</button>
+										</div>
+									{/each}
+									{#if unmappedFields(plan).some((c) => !(c.key in plan.defaults))}
+										<select
+											class="select w-auto text-sm"
+											value=""
+											disabled={running}
+											aria-label={m.dataImportAddValueForEveryRow()}
+											onchange={(e) => {
+												plan.defaults[e.currentTarget.value] = '';
+												e.currentTarget.value = '';
+											}}
+										>
+											<option value="" disabled>{m.dataImportAddField()}</option>
+											{#each unmappedFields(plan).filter((c) => !(c.key in plan.defaults)) as column (column.key)}
+												<option value={column.key}>{column.label} ({column.key})</option>
+											{/each}
+										</select>
+									{/if}
+								</div>
+							</div>
+						{/if}
+					</section>
+				{/if}
 			{/each}
 		</div>
 
-		<section class="card bg-surface-50-950 border border-surface-200-800 shadow-sm p-4 space-y-4">
-			<div class="flex flex-wrap gap-6">
+		<section
+			class="card bg-surface-50-950 border border-surface-200-800 shadow-lg sticky bottom-3 z-10"
+		>
+			<div class="flex flex-wrap items-start gap-6 p-4">
 				<div class="min-w-72 text-sm">
 					<FolderTreeSelect
 						form={scopeForm}
@@ -1128,37 +1462,37 @@
 						nullable
 						required={needsDomain}
 						disabled={running}
-						label={m.dataWizardSelectFallbackDomain()}
-						helpText={m.dataWizardFallbackDomainHelp()}
+						label={format ? m.domain() : m.dataWizardSelectFallbackDomain()}
+						helpText={format ? '' : m.dataWizardFallbackDomainHelp()}
 						onChange={(v) => (folderId = v ?? '')}
 					/>
 				</div>
 				{#if needsAudit}
 					<label class="space-y-1 text-sm">
-						<span class="block font-medium">Audit</span>
+						<span class="block font-medium">{m.audit()}</span>
 						<select class="select text-sm" bind:value={auditTargetId} disabled={running}>
-							<option value="">Create a new audit</option>
+							<option value="">{m.dataImportCreateNewAudit()}</option>
 							{#each data.audits as audit (audit.id)}
-								<option value={audit.id}>Update {audit.name}</option>
+								<option value={audit.id}>{m.dataImportUpdateAudit({ name: audit.name })}</option>
 							{/each}
 						</select>
 					</label>
 					{#if !auditTargetId}
 						<label class="space-y-1 text-sm">
-							<span class="block font-medium">Framework</span>
+							<span class="block font-medium">{m.framework()}</span>
 							<select class="select text-sm" bind:value={auditFrameworkId} disabled={running}>
-								<option value="">Choose a framework…</option>
+								<option value="">{m.dataImportChooseFramework()}</option>
 								{#each data.frameworks as framework (framework.id)}
 									<option value={framework.id}>{framework.str || framework.name}</option>
 								{/each}
 							</select>
 						</label>
 						<label class="space-y-1 text-sm">
-							<span class="block font-medium">Audit name</span>
+							<span class="block font-medium">{m.dataImportAuditName()}</span>
 							<input
 								class="input text-sm"
 								bind:value={auditName}
-								placeholder="Third-party assessments can link it by this name"
+								placeholder={m.dataImportAuditNamePlaceholder()}
 								disabled={running}
 							/>
 						</label>
@@ -1166,9 +1500,11 @@
 				{/if}
 				{#if needsMatrix}
 					<label class="space-y-1 text-sm">
-						<span class="block font-medium">Risk matrix <span class="text-error-500">*</span></span>
+						<span class="block font-medium"
+							>{m.riskMatrix()} <span class="text-error-500">*</span></span
+						>
 						<select class="select text-sm" bind:value={matrixId} disabled={running} required>
-							<option value="">Choose a matrix…</option>
+							<option value="">{m.dataImportChooseMatrix()}</option>
 							{#each data.matrices as matrix (matrix.id)}
 								<option value={matrix.id}>{matrix.str || matrix.name}</option>
 							{/each}
@@ -1176,13 +1512,16 @@
 					</label>
 				{/if}
 				<fieldset class="space-y-1 text-sm">
-					<legend class="font-medium">If a record already exists</legend>
-					<div class="flex gap-4 pt-1">
-						{#each [['stop', 'Stop'], ['skip', 'Skip'], ['update', 'Update']] as [value, label] (value)}
-							<label class="flex items-center gap-1">
+					<legend class="font-medium">{m.dataWizardOnConflict()}</legend>
+					<div class="flex gap-1 p-1 rounded-lg bg-surface-100-900 w-fit">
+						{#each [['stop', m.dataWizardOnConflictStop(), m.dataWizardOnConflictStopDescription()], ['skip', m.dataWizardOnConflictSkip(), m.dataWizardOnConflictSkipDescription()], ['update', m.dataWizardOnConflictUpdate(), m.dataWizardOnConflictUpdateDescription()]] as [value, label, hint] (value)}
+							<label
+								class="px-3 py-1 rounded-md cursor-pointer transition-colors has-checked:preset-filled-primary-500 has-focus-visible:ring-2 ring-primary-500"
+								title={hint}
+							>
 								<input
 									type="radio"
-									class="radio"
+									class="sr-only"
 									bind:group={onConflict}
 									{value}
 									disabled={running}
@@ -1193,157 +1532,195 @@
 					</div>
 				</fieldset>
 			</div>
-			<div class="flex flex-wrap items-center gap-3 pt-3 border-t border-surface-200-800">
-				<span class="text-sm">
-					{included.length} sheet{included.length === 1 ? '' : 's'} · {rowCount} rows
+			<div
+				class="flex flex-wrap items-center gap-3 px-4 py-3 border-t border-surface-200-800 bg-surface-100-900/50 rounded-b-container"
+			>
+				<span class="text-sm text-surface-600-400">
+					{#if format}
+						{m.dataImportWholeFile({ format: FORMATS[format]?.label() ?? format })}
+					{:else}
+						{m.dataImportSheetCount({ count: included.length })} ·
+						{m.dataImportRowCount({ count: rowCount })}
+					{/if}
 				</span>
 				<span class="grow"></span>
 				<button
 					type="button"
-					class="btn preset-outlined"
+					class="btn preset-tonal-primary"
 					onclick={() => run(true)}
 					disabled={running ||
-						!included.length ||
+						(!format && !included.length) ||
 						needsDomain ||
 						(needsMatrix && !matrixId) ||
 						(needsAudit && !auditTargetId && !auditFrameworkId)}
 					title={needsDomain ? m.dataWizardFallbackDomainHelp() : ''}
 				>
-					{#if running}<i class="fa-solid fa-spinner fa-spin mr-2"></i>{/if}
-					Dry run
+					<i class="fa-solid {running ? 'fa-spinner fa-spin' : 'fa-flask'} mr-2"></i>
+					{m.dataImportDryRun()}
 				</button>
 				<button
 					type="button"
 					class="btn preset-filled-primary-500"
 					onclick={() => run(false)}
 					disabled={running || !canImport}
-					title={canImport ? '' : 'Run a dry run of this mapping first'}
+					title={canImport ? '' : m.dataImportDryRunFirst()}
 				>
-					Import
+					<i class="fa-solid fa-file-import mr-2"></i>{m.dataImportImport()}
 				</button>
 			</div>
 		</section>
 
 		{#if outcome && outcomeTotals}
 			<section
-				class="card bg-surface-50-950 border border-surface-200-800 shadow-sm p-4 space-y-4"
+				class="card bg-surface-50-950 border border-surface-200-800 shadow-sm overflow-hidden"
 				aria-live="polite"
 			>
-				<h5 class="font-semibold">
-					{outcome.dryRun ? "Dry run: here's what would happen. Nothing was saved." : 'Import done'}
-				</h5>
-				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-					<div class="card p-3 preset-tonal-success">
-						<div class="text-2xl font-bold">{outcomeTotals.created}</div>
-						<div class="text-xs">{outcome.dryRun ? 'would be created' : 'created'}</div>
-					</div>
-					<div class="card p-3 preset-tonal-secondary">
-						<div class="text-2xl font-bold">{outcomeTotals.updated}</div>
-						<div class="text-xs">{outcome.dryRun ? 'would be updated' : 'updated'}</div>
-					</div>
-					<div class="card p-3 preset-tonal">
-						<div class="text-2xl font-bold">{outcomeTotals.skipped}</div>
-						<div class="text-xs">skipped</div>
-					</div>
-					<div class="card p-3 preset-tonal-error">
-						<div class="text-2xl font-bold">{outcomeTotals.failed}</div>
-						<div class="text-xs">failed</div>
-					</div>
+				<div
+					class="flex items-center gap-3 px-4 py-3 border-b border-surface-200-800
+						{outcome.dryRun ? 'preset-tonal-primary' : 'preset-tonal-success'}"
+				>
+					<i class="fa-solid {outcome.dryRun ? 'fa-flask' : 'fa-circle-check'} text-lg"></i>
+					<h5 class="font-semibold">
+						{outcome.dryRun ? m.dataImportDryRunDone() : m.dataImportDone()}
+					</h5>
+					{#if !outcome.dryRun}
+						<div class="ml-auto flex flex-wrap justify-end gap-2">
+							{#each [...new Map(outcome.rows
+										.filter((r) => r.link && r.created + r.updated > 0)
+										.map((r) => [r.link!.href, r.link!])).values()] as link (link.href)}
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- internal paths built from LIST_PAGES or a returned id -->
+								<a href={`/${link.href}`} class="btn btn-sm preset-filled-primary-500">
+									{link.label}<i class="fa-solid fa-arrow-right ml-2"></i>
+								</a>
+							{/each}
+						</div>
+					{/if}
 				</div>
-				<div class="overflow-x-auto">
-					<table class="table text-sm">
-						<thead>
-							<tr>
-								<th>Object</th>
-								<th>New</th>
-								<th>Updated</th>
-								<th>Skipped</th>
-								<th>Failed</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each outcome.rows as r (r.label)}
+				<div class="p-4 space-y-4">
+					<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+						{#each [{ n: outcomeTotals.created, label: outcome.dryRun ? m.dataImportWouldBeCreated() : m.created(), icon: 'fa-plus', tone: 'preset-tonal-success' }, { n: outcomeTotals.updated, label: outcome.dryRun ? m.dataImportWouldBeUpdated() : m.updated(), icon: 'fa-pen', tone: 'preset-tonal-secondary' }, { n: outcomeTotals.skipped, label: m.skipped(), icon: 'fa-forward', tone: 'preset-tonal-surface' }, { n: outcomeTotals.failed, label: m.failed(), icon: 'fa-xmark', tone: 'preset-tonal-error' }] as tile (tile.label)}
+							<div class="card p-3 flex items-center gap-3 {tile.tone}">
+								<span
+									class="flex items-center justify-center size-9 rounded-full bg-surface-50-950/60"
+									aria-hidden="true"
+								>
+									<i class="fa-solid {tile.icon}"></i>
+								</span>
+								<div>
+									<div class="text-2xl font-bold leading-none">{tile.n}</div>
+									<div class="text-xs mt-1">{tile.label}</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+					<div class="overflow-x-auto rounded-lg border border-surface-200-800">
+						<table class="table text-sm">
+							<thead class="bg-surface-100-900">
 								<tr>
-									<td>
-										{r.label}
-										{#if r.stopped}
-											<span class="badge preset-tonal-warning ml-1">stopped</span>
-										{/if}
-										{#if r.error}
-											<span class="text-error-600-400 ml-1">{r.error}</span>
-										{/if}
-									</td>
-									<td>{r.created}</td>
-									<td>{r.updated}</td>
-									<td>{r.skipped}</td>
-									<td>{r.failed}</td>
+									<th>{m.object()}</th>
+									<th class="text-right">{m.dataImportNew()}</th>
+									<th class="text-right">{m.updated()}</th>
+									<th class="text-right">{m.skipped()}</th>
+									<th class="text-right">{m.failed()}</th>
 								</tr>
-								{#if sideEffects(r.details)}
+							</thead>
+							<tbody>
+								{#each outcome.rows as r (r.label)}
 									<tr>
-										<td colspan="5" class="text-sm text-surface-600-400 pt-0">
-											<i class="fa-solid fa-link mr-1"></i>
-											{outcome.dryRun ? 'Would also create' : 'Also created'}
-											{sideEffects(r.details)}, linked to these rows
+										<td>
+											<span class="font-medium">{r.label}</span>
+											{#if r.stopped}
+												<span class="badge preset-tonal-warning ml-1">{m.dataImportStopped()}</span>
+											{/if}
+											{#if r.error}
+												<span class="text-error-600-400 ml-1">{r.error}</span>
+											{/if}
+											{#if sideEffects(r.details)}
+												<span class="block text-xs text-surface-600-400 mt-0.5">
+													<i class="fa-solid fa-link mr-1"></i>
+													{outcome.dryRun
+														? m.dataImportWouldAlsoCreate({ items: sideEffects(r.details) })
+														: m.dataImportAlsoCreated({ items: sideEffects(r.details) })}
+												</span>
+											{/if}
 										</td>
+										<td class="text-right tabular-nums">{r.created}</td>
+										<td class="text-right tabular-nums">{r.updated}</td>
+										<td class="text-right tabular-nums">{r.skipped}</td>
+										<td
+											class="text-right tabular-nums {r.failed
+												? 'text-error-600-400 font-semibold'
+												: ''}">{r.failed}</td
+										>
 									</tr>
-								{/if}
-							{/each}
-						</tbody>
-					</table>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+					{#each outcome.rows.filter((r) => r.errors.length) as r (r.label)}
+						<details
+							class="rounded-lg border border-surface-200-800"
+							open={outcome.rows.length === 1}
+						>
+							<summary class="cursor-pointer px-3 py-2 text-sm font-semibold">
+								{r.label}: {m.dataImportErrorsAndWarnings({ count: r.errors.length })}
+							</summary>
+							<ul class="text-sm space-y-1 px-3 pb-3">
+								{#each r.errors.slice(0, 20) as err, i (i)}
+									<li class="flex gap-2">
+										{#if err.warning}
+											<i
+												class="fa-solid fa-triangle-exclamation text-warning-600-400 mt-0.5"
+												title={m.dataImportImportedWithWarning()}
+											></i>
+											<span class="sr-only">{m.warning()}:</span>
+										{:else}
+											<i
+												class="fa-solid fa-circle-xmark text-error-600-400 mt-0.5"
+												title={m.dataImportNotImported()}
+											></i>
+											<span class="sr-only">{m.error()}:</span>
+										{/if}
+										<span>
+											{#if recordLabel(err.record)}
+												<span class="font-medium">{recordLabel(err.record)}:</span>
+											{/if}
+											<span class="text-surface-600-400">{explain(err, r.modelType)}</span>
+										</span>
+									</li>
+								{/each}
+							</ul>
+						</details>
+					{/each}
+					{#if !format && outcome.dryRun && canImport && (mayMap('add') || (appliedSaved.length && mayMap('change')))}
+						<div class="flex flex-wrap items-end gap-3 pt-4 border-t border-surface-200-800">
+							<label class="space-y-1 text-sm grow max-w-md">
+								<span class="block font-medium">{m.dataImportSaveForNextTime()}</span>
+								<input class="input text-sm" bind:value={saveName} disabled={saving} />
+							</label>
+							{#if appliedSaved.length === 1 && mayMap('change')}
+								<button
+									type="button"
+									class="btn preset-outlined"
+									disabled={saving}
+									onclick={() => saveMapping(appliedSaved[0].id)}
+								>
+									{m.dataImportUpdateNamed({ name: appliedSaved[0].name })}
+								</button>
+							{/if}
+							{#if mayMap('add')}
+								<button
+									type="button"
+									class="btn preset-tonal-primary"
+									disabled={saving}
+									onclick={() => saveMapping()}
+								>
+									<i class="fa-solid fa-bookmark mr-1"></i>{m.dataImportSaveAsNew()}
+								</button>
+							{/if}
+						</div>
+					{/if}
 				</div>
-				{#each outcome.rows.filter((r) => r.errors.length) as r (r.label)}
-					<div class="space-y-1">
-						<h6 class="text-sm font-semibold">{r.label}: errors and warnings</h6>
-						<ul class="text-sm space-y-1">
-							{#each r.errors.slice(0, 20) as err, i (i)}
-								<li>
-									{#if err.warning}
-										<i
-											class="fa-solid fa-triangle-exclamation text-warning-600-400"
-											title="Imported with a warning"
-										></i>
-										<span class="sr-only">Warning:</span>
-									{:else}
-										<i class="fa-solid fa-circle-xmark text-error-600-400" title="Not imported"></i>
-										<span class="sr-only">Error:</span>
-									{/if}
-									{#if recordLabel(err.record)}
-										<span class="font-medium">{recordLabel(err.record)}:</span>
-									{/if}
-									<span class="text-surface-600-400">{explain(err, r.modelType)}</span>
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/each}
-				{#if outcome.dryRun && canImport && (mayMap('add') || (appliedSaved.length && mayMap('change')))}
-					<div class="flex flex-wrap items-end gap-3 pt-3 border-t border-surface-200-800">
-						<label class="space-y-1 text-sm grow max-w-md">
-							<span class="block font-medium">Save this mapping for next time</span>
-							<input class="input text-sm" bind:value={saveName} disabled={saving} />
-						</label>
-						{#if appliedSaved.length === 1 && mayMap('change')}
-							<button
-								type="button"
-								class="btn preset-outlined"
-								disabled={saving}
-								onclick={() => saveMapping(appliedSaved[0].id)}
-							>
-								Update “{appliedSaved[0].name}”
-							</button>
-						{/if}
-						{#if mayMap('add')}
-							<button
-								type="button"
-								class="btn preset-tonal-primary"
-								disabled={saving}
-								onclick={() => saveMapping()}
-							>
-								<i class="fa-solid fa-bookmark mr-1"></i>Save as new mapping
-							</button>
-						{/if}
-					</div>
-				{/if}
 			</section>
 		{/if}
 	{/if}
