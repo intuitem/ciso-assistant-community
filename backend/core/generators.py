@@ -1,5 +1,6 @@
 import io
 from collections import Counter
+from collections.abc import Iterable
 import multiprocessing
 import resource
 import traceback
@@ -15,6 +16,7 @@ import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from django.db.models import Prefetch
 from django.utils import translation
 from django.utils.safestring import SafeString
 from django.utils.timezone import now
@@ -37,10 +39,12 @@ from .framework_report import visible_layers
 from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
+    Actor,
     AppliedControl,
     Commitment,
     ComplianceAssessment,
     RequirementAssessment,
+    RequirementAssignment,
     RequirementNode,
     TaskTemplate,
     round_score,
@@ -420,6 +424,55 @@ _ACTION_PLAN_STATUS_FILLS = {
 
 def _all_readable(obj) -> bool:
     return True
+
+
+def questionnaire_submissions(
+    audit: ComplianceAssessment,
+    assessments: Iterable[RequirementAssessment],
+    tz: tzinfo,
+) -> list[dict[str, str]]:
+    """Return the assignments of `audit` covering any of `assessments`, each with its
+    respondents, its status and, while submitted or closed, the time of its last
+    submission in `tz` (`-` otherwise).
+
+    Scoped by `assessments` so a respondent's export lists their own assignment only.
+    """
+    in_scope = {ra.id for ra in assessments}
+    submissions = []
+    for assignment in audit.requirement_assignments.prefetch_related(
+        Prefetch(
+            "actor", queryset=Actor.objects.select_related("user", "team", "entity")
+        ),
+        "requirement_assessments",
+        "events",
+    ):
+        if in_scope.isdisjoint(
+            ra.id for ra in assignment.requirement_assessments.all()
+        ):
+            continue
+        submitted_at = None
+        if assignment.status in (
+            RequirementAssignment.Status.SUBMITTED,
+            RequirementAssignment.Status.CLOSED,
+        ):
+            submitted_at = max(
+                (
+                    event.created_at
+                    for event in assignment.events.all()
+                    if event.event_type == RequirementAssignment.Status.SUBMITTED
+                ),
+                default=None,
+            )
+        submissions.append(
+            {
+                "respondents": ", ".join(
+                    str(actor) for actor in assignment.actor.all()
+                ),
+                "status_key": assignment.status,
+                "submitted_at": format_report_timestamp(submitted_at, tz),
+            }
+        )
+    return submissions
 
 
 def _report_time_context(tz: tzinfo) -> dict[str, str]:
@@ -1591,7 +1644,7 @@ def gen_audit_context(
         "audit": _build_safe_audit_context(audit),
         # Traceability on the cover: which render, of which audit.
         **_report_time_context(tz),
-        "contributors": f"{authors}\n{reviewers}",
+        "contributors": "\n".join(names for names in (authors, reviewers) if names),
         "req": aggregated,
         "compliance_donut": donut_buffer,
         "completion_bar": completion_bar_buffer,
@@ -1608,6 +1661,9 @@ def gen_audit_context(
         "category_radar": category_radar_buffer,
         "requirement_assessments": requirement_assessments_list,
         "ra_count": len(requirement_assessments_list),
+        "submissions": questionnaire_submissions(
+            audit, requirement_assessments_objects, tz
+        ),
     }
 
     return context

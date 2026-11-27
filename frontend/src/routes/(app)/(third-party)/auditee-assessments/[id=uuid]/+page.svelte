@@ -1168,6 +1168,17 @@
 							<span class="ml-1 text-xs text-surface-500">{assignment.events.length}</span>
 						</button>
 					{/if}
+					{#if !isAuditor}
+						<a
+							href="/compliance-assessments/{complianceAssessment.id}/export/posture-pdf?profile=attestation"
+							class="btn btn-sm preset-tonal-surface whitespace-nowrap"
+							title={m.exportAuditAttestationDesc()}
+							data-testid="respondent-export-button"
+							download
+						>
+							<i class="fa-solid fa-file-pdf mr-2"></i>{m.exportAuditAttestation()}
+						</a>
+					{/if}
 					{#if canReview}
 						<button
 							class="btn btn-sm preset-tonal-error whitespace-nowrap"

@@ -15,6 +15,13 @@
   not_applicable: "Not applicable",
   not_assessed: "Not assessed",
 )
+#let assignment-status-label = (
+  draft: "Not started yet",
+  in_progress: "In progress",
+  submitted: "Submitted",
+  closed: "Closed",
+  changes_requested: "Changes requested",
+)
 // Score layers in display order; more than one when the audit has a
 // documentation score.
 #let layers = d.at("score_layers", default: ("implementation_score",))
@@ -62,6 +69,7 @@
 // ---------------------------------------------------------------- cover page
 
 #let party = d.at("counterparty", default: none)
+#let submissions = d.at("submissions", default: ())
 
 #page(header: none, footer: none)[
   // Ragged: justified metadata hyphenates addresses.
@@ -119,6 +127,11 @@
         [*Date*], [#d.date],
         [*Implementation groups*], [#if d.igs != "" { d.igs } else { "All" }],
         [*Contributors*], [#d.contributors.replace("\n", ", ")],
+        ..submissions.map(s => (
+          [*Questionnaire status*],
+          [#assignment-status-label.at(s.status_key, default: "-")#if submissions.len() > 1 [ (#s.respondents)]],
+          ..if s.submitted_at != "-" { ([*Submitted at*], [#s.submitted_at]) } else { () },
+        )).flatten(),
       )
       #v(1em)
       #block(width: 100%)[
@@ -214,21 +227,21 @@
     ]
     #if field(ra, "observation") != "-" [
       #v(2pt)
-      *"Observation":* #ra.observation
+      *Observation:* #ra.observation
     ]
     #let ra-tasks = ra.at("task_templates", default: ())
     #if ra-tasks.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Tasks": #ra-tasks.join(", ")]
+      #text(8pt, fill: accent)[Tasks: #ra-tasks.join(", ")]
     ]
     #let ra-evidences = ra.at("evidences", default: ())
     #if ra-evidences.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Evidences": #ra-evidences.join(", ")]
+      #text(8pt, fill: accent)[Evidences: #ra-evidences.join(", ")]
     ]
     #if field(ra, "applied_controls") != "-" [
       #v(2pt)
-      #text(8pt, fill: accent)["Applied controls": #ra.applied_controls]
+      #text(8pt, fill: accent)[Applied controls: #ra.applied_controls]
     ]
   ]
 ]
@@ -247,7 +260,7 @@
       [
         #field(row, "name")
         #if field(row, "notes", fallback: "") != "" [
-          \ #text(8pt, fill: muted)["Notes": #row.notes]
+          \ #text(8pt, fill: muted)[Notes: #row.notes]
         ]
       ],
       field(row, "state"),
@@ -255,7 +268,7 @@
       align(right)[
         #field(row, "current_date")
         #if row.at("has_slipped", default: false) [
-          #text(8pt, fill: rgb("#b91c1c"))[("slipped")]
+          #text(8pt, fill: rgb("#b91c1c"))[(slipped)]
         ]
       ],
     ))

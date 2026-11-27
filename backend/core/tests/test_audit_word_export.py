@@ -39,11 +39,13 @@ from core.generators import (
     DocxRenderTimeout,
 )
 from core.models import (
+    Actor,
     ComplianceAssessment,
     CustomWordTemplate,
     Framework,
     Perimeter,
     RequirementAssessment,
+    RequirementAssignment,
     RequirementNode,
     StoredLibrary,
 )
@@ -131,6 +133,34 @@ def _make_audit(framework, name="Audit Word Export Regression"):
     return ca
 
 
+def respondent(
+    audit_obj: ComplianceAssessment,
+    email: str,
+    assessments: list[RequirementAssessment],
+) -> User:
+    """A respondent of `audit_obj`'s domain assigned to `assessments` only."""
+    user = User.objects.create_user(email)
+    UserGroup.objects.get(name="BI-UG-ADE", folder=audit_obj.folder).user_set.add(user)
+    assignment = RequirementAssignment.objects.create(
+        compliance_assessment=audit_obj,
+        folder=audit_obj.folder,
+        status=RequirementAssignment.Status.IN_PROGRESS,
+    )
+    assignment.actor.add(Actor.objects.get_or_create(user=user)[0])
+    assignment.requirement_assessments.set(assessments)
+    return user
+
+
+def assessable_assessments(
+    audit_obj: ComplianceAssessment,
+) -> list[RequirementAssessment]:
+    return list(
+        RequirementAssessment.objects.filter(
+            compliance_assessment=audit_obj, requirement__assessable=True
+        ).order_by("requirement__urn")
+    )
+
+
 def _read_streaming(response) -> bytes:
     return b"".join(response.streaming_content)
 
@@ -165,6 +195,15 @@ def audit(app_config):
     ca = _make_audit(framework)
     ca.create_requirement_assessments()
     return ca
+
+
+@pytest.fixture
+def audit_with_groups(audit: ComplianceAssessment) -> ComplianceAssessment:
+    """`audit`, its domain carrying the builtin groups a respondent belongs to."""
+    audit.folder.create_iam_groups = True
+    audit.folder.save(update_fields=["create_iam_groups"])
+    Folder.create_default_ug_and_ra(audit.folder)
+    return audit
 
 
 @pytest.mark.django_db
@@ -439,3 +478,33 @@ class TestAuditReportQueryCount:
 
         small, big = tree_queries
         assert big == small
+
+
+@pytest.mark.django_db
+def test_word_report_for_a_respondent_covers_only_their_assignment(
+    audit_with_groups: ComplianceAssessment, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    audit = audit_with_groups
+    first, second, *_ = assessable_assessments(audit)
+    alice = respondent(audit, "alice@word-scope.test", [first])
+    respondent(audit, "bob@word-scope.test", [second])
+    rendered: list[dict] = []
+    monkeypatch.setattr(
+        "core.views.render_docx_report",
+        lambda doc, context: rendered.append(context),
+    )
+    client = APIClient()
+    client.force_authenticate(alice)
+
+    response = client.get(
+        reverse("compliance-assessments-word-report", kwargs={"pk": str(audit.pk)})
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    (context,) = rendered
+    assert [ra["ref_id"] for ra in context["requirement_assessments"]] == [
+        first.requirement.ref_id
+    ]
+    assert [s["respondents"] for s in context["submissions"]] == [
+        "alice@word-scope.test"
+    ]

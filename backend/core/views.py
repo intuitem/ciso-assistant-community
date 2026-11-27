@@ -15097,17 +15097,19 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         audit_obj = self.get_object()
         _framework = audit_obj.framework
+        # As in posture_pdf: object-level permission is not enough, a respondent
+        # sees only their assigned requirements.
+        assessments, hidden_urns = scoped_requirement_assessments(
+            audit_obj, request.user
+        )
+        nodes = RequirementNode.objects.filter(framework=_framework).prefetch_related(
+            "questions__choices"
+        )
+        if hidden_urns:
+            nodes = nodes.exclude(urn__in=hidden_urns)
         tree = get_sorted_requirement_nodes(
-            list(
-                RequirementNode.objects.filter(framework=_framework).prefetch_related(
-                    "questions__choices"
-                )
-            ),
-            list(
-                audit_obj.get_requirement_assessments(
-                    include_non_assessable=True, lightweight=True, skip_ig_filter=True
-                )
-            ),
+            list(nodes),
+            assessments,
             audit_obj.max_score
             if audit_obj.max_score is not None
             else _framework.max_score,
@@ -15126,6 +15128,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             pk,
             tree,
             user_lang,
+            assessments=assessments,
             tz=get_report_timezone(),
             readable=ViewableFilter(request.user).allows,
             score_layers=visible_layers(audit_obj, reader_role),

@@ -15,6 +15,13 @@
   not_applicable: "Uygulanamaz",
   not_assessed: "Değerlendirilmedi",
 )
+#let assignment-status-label = (
+  draft: "Henüz başlamadı",
+  in_progress: "Devam ediyor",
+  submitted: "Gönderildi",
+  closed: "Kapandı",
+  changes_requested: "Değişiklik istendi",
+)
 // Score layers in display order; more than one when the audit has a
 // documentation score.
 #let layers = d.at("score_layers", default: ("implementation_score",))
@@ -62,6 +69,7 @@
 // ---------------------------------------------------------------- cover page
 
 #let party = d.at("counterparty", default: none)
+#let submissions = d.at("submissions", default: ())
 
 #page(header: none, footer: none)[
   // Ragged: justified metadata hyphenates addresses.
@@ -119,6 +127,11 @@
         [*Tarih*], [#d.date],
         [*Uygulama grupları*], [#if d.igs != "" { d.igs } else { "Tümü" }],
         [*Katkıda bulunanlar*], [#d.contributors.replace("\n", ", ")],
+        ..submissions.map(s => (
+          [*Anket durumu*],
+          [#assignment-status-label.at(s.status_key, default: "-")#if submissions.len() > 1 [ (#s.respondents)]],
+          ..if s.submitted_at != "-" { ([*Gönderilme zamanı*], [#s.submitted_at]) } else { () },
+        )).flatten(),
       )
       #v(1em)
       #block(width: 100%)[

@@ -1,15 +1,28 @@
 """Smoke + redaction tests for the Typst audit posture PDF."""
 
+from datetime import datetime, timedelta, timezone as dt_timezone
 from io import BytesIO
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 
 from pypdf import PdfReader
 import pytest
 
-from core.generators import audit_context_for_typst, gen_audit_context
-from core.models import RequirementAssessment
+from core.generators import (
+    audit_context_for_typst,
+    gen_audit_context,
+    questionnaire_submissions,
+)
+from core.models import (
+    Actor,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementAssignment,
+    RequirementAssignmentEvent,
+)
 from core.typst_render import localized_template, render_pdf
 from core.helpers import (
     annotate_tree_with_aggregated_scores,
@@ -17,11 +30,15 @@ from core.helpers import (
     scoped_requirement_assessments,
 )
 from core.models import RequirementNode
+from iam.models import User
 
 from core.tests.test_audit_word_export import (  # noqa: F401  (fixtures)
     admin_client,
     app_config,
+    assessable_assessments,
     audit,
+    audit_with_groups,
+    respondent,
 )
 
 
@@ -575,3 +592,196 @@ def test_typst_override_passes_model_validation():
         file=ContentFile(CUSTOM_TYPST.encode(), name="custom.typ"),
     )
     template.full_clean()
+
+
+SUBMITTED_AT = datetime(2026, 11, 20, 14, 30, tzinfo=dt_timezone.utc)
+
+
+def _assign(
+    audit_obj: ComplianceAssessment, email: str, status: str
+) -> RequirementAssignment:
+    """An assignment of every requirement of `audit_obj` to a new respondent,
+    with a submission event dated `SUBMITTED_AT`."""
+    respondent = User.objects.create_user(email)
+    assignment = RequirementAssignment.objects.create(
+        compliance_assessment=audit_obj, folder=audit_obj.folder, status=status
+    )
+    assignment.actor.add(Actor.objects.get_or_create(user=respondent)[0])
+    assignment.requirement_assessments.set(
+        RequirementAssessment.objects.filter(compliance_assessment=audit_obj)
+    )
+    event = RequirementAssignmentEvent.objects.create(
+        assignment=assignment,
+        event_type=RequirementAssignment.Status.SUBMITTED,
+        event_actor=respondent,
+        folder=audit_obj.folder,
+    )
+    RequirementAssignmentEvent.objects.filter(id=event.id).update(
+        created_at=SUBMITTED_AT
+    )
+    return assignment
+
+
+@pytest.mark.django_db
+def test_attestation_states_when_the_questionnaire_was_submitted(
+    audit: ComplianceAssessment,
+) -> None:
+    _assign(audit, "respondent@submission.test", "submitted")
+
+    _, payload = _render(audit, "respondent", profile="attestation")
+
+    assert payload["submissions"] == [
+        {
+            "respondents": "respondent@submission.test",
+            "status_key": "submitted",
+            "submitted_at": "2026-11-20 14:30:00 (UTC)",
+        }
+    ]
+
+
+@pytest.mark.django_db
+def test_a_questionnaire_sent_back_has_no_submission_time(
+    audit: ComplianceAssessment,
+) -> None:
+    _assign(audit, "respondent@sent-back.test", "changes_requested")
+
+    _, payload = _render(audit, "respondent", profile="attestation")
+
+    assert payload["submissions"][0]["submitted_at"] == "-"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "lang, status_label, submitted_label",
+    [
+        ("en", "Submitted", "Submitted at"),
+        ("fr", "Soumis", "Soumis le"),
+        ("hu", "Beküldve", "Beküldés ideje"),
+        ("tr", "Gönderildi", "Gönderilme zamanı"),
+    ],
+)
+def test_attestation_cover_prints_the_submission(
+    audit: ComplianceAssessment, lang: str, status_label: str, submitted_label: str
+) -> None:
+    _assign(audit, "respondent@cover.test", "submitted")
+
+    pdf, _ = _render(audit, "respondent", profile="attestation", lang=lang)
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
+
+    assert status_label in cover
+    assert f"{submitted_label} 2026-11-20 14:30:00 (UTC)" in cover
+
+
+@pytest.mark.django_db
+def test_contributors_have_no_dangling_separator_without_reviewers(
+    audit: ComplianceAssessment,
+) -> None:
+    author = User.objects.create_user("author@contributors.test")
+    audit.authors.set([Actor.objects.get_or_create(user=author)[0]])
+    audit.reviewers.clear()
+
+    _, payload = _render(audit, "auditor", profile="attestation")
+
+    assert payload["contributors"] == "author@contributors.test"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("profile", ["full", "attestation"])
+@pytest.mark.parametrize("lang", ["en", "fr"])
+def test_requirement_labels_are_not_quoted(
+    audit: ComplianceAssessment, lang: str, profile: str
+) -> None:
+    RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+        observation="label-quote-canary"
+    )
+
+    pdf, _ = _render(audit, "auditor", profile=profile, lang=lang)
+    text = "".join(page.extract_text() for page in PdfReader(BytesIO(pdf)).pages)
+
+    assert "Observation: label-quote-canary" in text
+    assert "“" not in text and "”" not in text
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "status, label",
+    [
+        ("closed", "Fermé"),
+        ("draft", "Pas encore démarré"),
+        ("changes_requested", "Modifications demandées"),
+    ],
+)
+def test_attestation_status_matches_the_respondent_page(
+    audit: ComplianceAssessment, status: str, label: str
+) -> None:
+    _assign(audit, "respondent@labels.test", status)
+
+    pdf, _ = _render(audit, "respondent", profile="attestation", lang="fr")
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
+
+    assert f"Statut du questionnaire {label}" in cover
+
+
+@pytest.mark.django_db
+def test_a_respondent_export_lists_only_their_own_assignment(
+    audit_with_groups: ComplianceAssessment,
+) -> None:
+    audit = audit_with_groups
+    first, second, *_ = assessable_assessments(audit)
+    alice = respondent(audit, "alice@scope.test", [first])
+    respondent(audit, "bob@scope.test", [second])
+    assessments, _ = scoped_requirement_assessments(audit, alice)
+
+    context = gen_audit_context(audit.id, _tree(audit), "en", assessments=assessments)
+
+    assert [s["respondents"] for s in context["submissions"]] == ["alice@scope.test"]
+
+
+@pytest.mark.django_db
+def test_submission_time_is_the_last_submission(audit: ComplianceAssessment) -> None:
+    assignment = _assign(audit, "respondent@resubmitted.test", "submitted")
+    later = RequirementAssignmentEvent.objects.create(
+        assignment=assignment,
+        event_type=RequirementAssignment.Status.SUBMITTED,
+        folder=audit.folder,
+    )
+    RequirementAssignmentEvent.objects.filter(id=later.id).update(
+        created_at=SUBMITTED_AT + timedelta(days=2)
+    )
+
+    _, payload = _render(audit, "respondent", profile="attestation")
+
+    assert payload["submissions"][0]["submitted_at"] == "2026-11-22 14:30:00 (UTC)"
+
+
+@pytest.mark.django_db
+def test_cover_names_the_respondents_when_several_answer(
+    audit: ComplianceAssessment,
+) -> None:
+    _assign(audit, "first@several.test", "submitted")
+    _assign(audit, "second@several.test", "in_progress")
+
+    pdf, _ = _render(audit, "auditor", profile="attestation", lang="fr")
+    cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
+
+    assert "Soumis (first@several.test)" in cover
+    assert "En cours (second@several.test)" in cover
+
+
+@pytest.mark.django_db
+def test_submissions_queries_do_not_grow_with_respondents(
+    audit: ComplianceAssessment,
+) -> None:
+    assessments = list(
+        RequirementAssessment.objects.filter(compliance_assessment=audit)
+    )
+    _assign(audit, "one@queries.test", "submitted")
+    with CaptureQueriesContext(connection) as one_respondent:
+        questionnaire_submissions(audit, assessments, dt_timezone.utc)
+
+    _assign(audit, "two@queries.test", "submitted")
+    _assign(audit, "three@queries.test", "submitted")
+    with CaptureQueriesContext(connection) as three_respondents:
+        questionnaire_submissions(audit, assessments, dt_timezone.utc)
+
+    assert len(three_respondents) == len(one_respondent)

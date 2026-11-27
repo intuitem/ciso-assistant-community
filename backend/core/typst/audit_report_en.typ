@@ -302,21 +302,21 @@
     ]
     #if field(ra, "observation") != "-" [
       #v(2pt)
-      *"Observation":* #ra.observation
+      *Observation:* #ra.observation
     ]
     #let ra-tasks = ra.at("task_templates", default: ())
     #if ra-tasks.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Tasks": #ra-tasks.join(", ")]
+      #text(8pt, fill: accent)[Tasks: #ra-tasks.join(", ")]
     ]
     #let ra-evidences = ra.at("evidences", default: ())
     #if ra-evidences.len() > 0 [
       #v(2pt)
-      #text(8pt, fill: accent)["Evidences": #ra-evidences.join(", ")]
+      #text(8pt, fill: accent)[Evidences: #ra-evidences.join(", ")]
     ]
     #if field(ra, "applied_controls") != "-" [
       #v(2pt)
-      #text(8pt, fill: accent)["Applied controls": #ra.applied_controls]
+      #text(8pt, fill: accent)[Applied controls: #ra.applied_controls]
     ]
   ]
 ]
@@ -335,7 +335,7 @@
       [
         #field(row, "name")
         #if field(row, "notes", fallback: "") != "" [
-          \ #text(8pt, fill: muted)["Notes": #row.notes]
+          \ #text(8pt, fill: muted)[Notes: #row.notes]
         ]
       ],
       field(row, "state"),
@@ -343,7 +343,7 @@
       align(right)[
         #field(row, "current_date")
         #if row.at("has_slipped", default: false) [
-          #text(8pt, fill: rgb("#b91c1c"))[("slipped")]
+          #text(8pt, fill: rgb("#b91c1c"))[(slipped)]
         ]
       ],
     ))
