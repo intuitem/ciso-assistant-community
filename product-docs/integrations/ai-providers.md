@@ -16,6 +16,8 @@ The service needs to speak more of the OpenAI API than chat completions alone. I
 
 ## Before you start
 
+For the full sequence, from enabling the assistant to the first question, see [Setting up the AI assistant](ai-assistant-setup.md).
+
 Three things must already be in place. If the **Chat / AI assistant** section described below is missing from your settings page, one of them is the reason.
 
 1. **The instance must be started with `ENABLE_CHAT` set.** This is an environment variable on the backend and Huey worker, not something you can change from the interface. On Helm, set `enabled: true` under the chat values. Without it the chat feature flag is not exposed at all.
