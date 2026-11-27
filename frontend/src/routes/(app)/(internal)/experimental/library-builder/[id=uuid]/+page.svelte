@@ -670,19 +670,28 @@
 	// Runs for each framework URN not checked yet: a clone imported (or a
 	// framework renamed) without a reload gets its "Map to" button too.
 	$effect(() => {
-		const urns = frameworks.map((f) => String(f.urn).toLowerCase());
-		untrack(() => loadOriginals(urns));
+		// URN plus node count: an overwrite import under the same URN re-checks.
+		const keys = frameworks.map(
+			(f) => [String(f.urn).toLowerCase(), (f.requirement_nodes ?? []).length] as const
+		);
+		untrack(() => loadOriginals(keys));
 	});
-	async function loadOriginals(urns: string[]) {
-		for (const urn of urns) {
-			if (originalsChecked.has(urn)) continue;
-			originalsChecked.add(urn);
-			const res = await fetch(
-				`${base()}?action=mapping-original&framework_urn=${encodeURIComponent(urn)}`
-			);
-			if (res.ok) {
+	async function loadOriginals(keys: (readonly [string, number])[]) {
+		for (const [urn, size] of keys) {
+			const checkKey = `${urn}|${size}`;
+			if (originalsChecked.has(checkKey)) continue;
+			originalsChecked.add(checkKey);
+			delete originals[urn];
+			try {
+				const res = await fetch(
+					`${base()}?action=mapping-original&framework_urn=${encodeURIComponent(urn)}`
+				);
+				if (!res.ok) throw new Error('mapping-original');
 				const result = await res.json();
 				if (result.original) originals[urn] = result.original;
+			} catch {
+				// Not checked after all: the next change or page load tries again.
+				originalsChecked.delete(checkKey);
 			}
 		}
 	}
@@ -695,10 +704,13 @@
 
 	async function openMappingPanel() {
 		mappingPanelOpen = true;
-		if (mappingFrameworks.length) return;
-		const res = await fetch(`${base()}?action=mapping-frameworks`);
-		if (!res.ok) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
+		// Fetched on every open: an import since the last one changes the list.
+		const res = await fetch(`${base()}?action=mapping-frameworks`).catch(() => null);
+		if (!res?.ok) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
 		mappingFrameworks = (await res.json()).frameworks ?? [];
+		const known = new Set(mappingFrameworks.map((f) => f.urn));
+		if (!known.has(mapSource)) mapSource = '';
+		if (!known.has(mapTarget)) mapTarget = '';
 		mapSource ||= mappingFrameworks.find((f) => f.kind === 'draft')?.urn ?? '';
 	}
 
@@ -709,21 +721,27 @@
 			return;
 		}
 		creatingMapping = true;
-		const res = await fetch(base(), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				action: 'add-mapping-set',
-				source_framework_urn: source,
-				target_framework_urn: target
-			})
-		});
-		const result = await res.json();
-		if (!res.ok) {
-			creatingMapping = false;
-			return setStatus(safeTranslate(result.error ?? 'error'), 'error');
+		try {
+			const res = await fetch(base(), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					action: 'add-mapping-set',
+					source_framework_urn: source,
+					target_framework_urn: target
+				})
+			});
+			const result = await res.json().catch(() => ({}));
+			// Already there (a retry whose first answer was lost): open it.
+			if (res.ok || (res.status === 409 && result.urn)) {
+				window.location.href = mappingEditorHref(result.urn);
+				return;
+			}
+			setStatus(safeTranslate(result.error ?? 'error'), 'error');
+		} catch {
+			setStatus(safeTranslate('error'), 'error');
 		}
-		window.location.href = mappingEditorHref(result.urn);
+		creatingMapping = false;
 	}
 
 	function quickFormEditorHref(quickForm: any): string {
@@ -1674,6 +1692,7 @@
 				<div class="border border-surface-200-800 rounded-lg p-3 space-y-3">
 					<div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
 						<FrameworkPicker
+							field="source_framework"
 							label={m.lbMappingSource()}
 							options={mappingFrameworks}
 							bind:value={mapSource}
@@ -1688,6 +1707,7 @@
 							<i class="fa-solid fa-right-left" aria-hidden="true"></i>
 						</button>
 						<FrameworkPicker
+							field="target_framework"
 							label={m.lbMappingTarget()}
 							options={mappingFrameworks}
 							bind:value={mapTarget}

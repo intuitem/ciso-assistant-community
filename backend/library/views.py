@@ -2335,15 +2335,21 @@ class LibraryDraftViewSet(BaseModelViewSet):
             str(ms.get("urn", "")).lower()
             for ms in content.get("requirement_mapping_sets") or []
         }
-        ref_id = builder.urn_safe_leaf(f"{leaf(source)}-to-{leaf(target)}")
+        # shortcut: long framework leaves are cut, not abbreviated; fine for
+        # the 100-character ref_id limit, revisit if names collide often.
+        ref_id = builder.urn_safe_leaf(f"{leaf(source)}-to-{leaf(target)}")[:90].strip(
+            "-"
+        )
         candidate, suffix = ref_id, 2
         while f"{base}:{candidate}" in taken:
             candidate, suffix = f"{ref_id}-{suffix}", suffix + 1
         mapping_set = {
             "urn": f"{base}:{candidate}",
             "ref_id": candidate,
-            "name": f"{source.get('name') or leaf(source)} → "
-            f"{target.get('name') or leaf(target)}",
+            "name": (
+                f"{source.get('name') or leaf(source)} → "
+                f"{target.get('name') or leaf(target)}"
+            )[:200],
             "source_framework_urn": str(source["urn"]).lower(),
             "target_framework_urn": str(target["urn"]).lower(),
             "requirement_mappings": [],
@@ -2629,11 +2635,19 @@ class LibraryDraftViewSet(BaseModelViewSet):
             )
         return Response({"original": self._detect_original(clone, request.user)})
 
+    def _locked_draft(self):
+        """The draft, row-locked until the transaction ends: mapping writes
+        read then save the whole content, so overlapping requests on one draft
+        must not interleave. (No-op on SQLite, which serializes writes.)"""
+        draft = self.get_object()
+        return LibraryDraft.objects.select_for_update().get(pk=draft.pk)
+
     @action(detail=True, methods=["post"], url_path="add-mapping-set")
+    @transaction.atomic
     def add_mapping_set(self, request, pk):
         """Create an empty mapping set between two frameworks and declare the
         libraries owning them as dependencies."""
-        draft = self.get_object()
+        draft = self._locked_draft()
         content = builder.normalize_objects(draft.content or {})
         source, source_library = self._mapping_framework(
             content, request.data.get("source_framework_urn"), request.user
@@ -2659,7 +2673,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
             mapping_set = self._mint_mapping_set(draft, content, source, target)
         except builder.BuilderError as e:
             logger.warning("Builder rejected the draft", error=e)
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+            )
         own = draft.effective_urn.lower()
         added = {
             lib.lower()
@@ -2697,6 +2713,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
             pairs.append(
                 {
                     **pair,
+                    # Rows are keyed by the lowercased node URNs.
+                    "source_requirement_urn": str(
+                        pair.get("source_requirement_urn", "")
+                    ).lower(),
+                    "target_requirement_urn": str(
+                        pair.get("target_requirement_urn", "")
+                    ).lower(),
                     "reworded": bool(
                         src
                         and tgt
@@ -2713,16 +2736,17 @@ class LibraryDraftViewSet(BaseModelViewSet):
             mapping_editor.node_base(source),
             mapping_editor.node_base(target),
         )
-        taken = {(s["source"], s["target"]) for s in suggestions} | {
-            (
-                str(p.get("source_requirement_urn", "")).lower(),
-                str(p.get("target_requirement_urn", "")).lower(),
-            )
-            for p in pairs
+        existing = {
+            (p["source_requirement_urn"], p["target_requirement_urn"]) for p in pairs
         }
-        suggestions += self._mapping_suggestions(
-            content, source, target, taken, request.user
+        # A stored relationship beats a structural `equal` guess on one pair.
+        stored = self._mapping_suggestions(
+            content, source, target, existing, request.user
         )
+        stored_keys = {(s["source"], s["target"]) for s in stored}
+        suggestions = [
+            s for s in suggestions if (s["source"], s["target"]) not in stored_keys
+        ] + stored
         reverse = self._find_mapping_set(
             content,
             mapping_set["target_framework_urn"],
@@ -2730,11 +2754,16 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
 
         def pair_keys(items):
+            # Every field counts: regeneration would copy annotations too.
             return {
-                (
-                    str(p.get("source_requirement_urn", "")).lower(),
-                    str(p.get("target_requirement_urn", "")).lower(),
-                    p.get("relationship"),
+                tuple(
+                    sorted(
+                        (
+                            key,
+                            str(value).lower() if key.endswith("_urn") else str(value),
+                        )
+                        for key, value in p.items()
+                    )
                 )
                 for p in items
             }
@@ -2770,11 +2799,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["post"], url_path="edit-mapping-pairs")
+    @transaction.atomic
     def edit_mapping_pairs(self, request, pk):
         """Batched pair edits keyed by (source, target), applied all or none.
         Answers with the pair count only: echoing the draft would dwarf the
         edit on large sets."""
-        draft = self.get_object()
+        draft = self._locked_draft()
         content = builder.normalize_objects(draft.content or {})
         mapping_set, source, target, error = self._mapping_set_context(
             request, content, request.data.get("set_urn")
@@ -2789,9 +2819,11 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 {n["urn"] for n in mapping_editor.assessable_nodes(target)},
             )
         except builder.BuilderError as e:
-            # Error codes from a fixed set — see apply_pair_ops.
             logger.warning("Mapping pair edit rejected", error=e)
-            return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": mapping_editor.pair_error_code(e)},
+                status=HTTP_400_BAD_REQUEST,
+            )
         mapping_set["requirement_mappings"] = pairs
         draft.content = content
         draft.save(update_fields=["content", "updated_at"])
@@ -2804,10 +2836,11 @@ class LibraryDraftViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["post"], url_path="generate-reverse-set")
+    @transaction.atomic
     def generate_reverse_set(self, request, pk):
         """(Re)build the B→A set from A→B. The reverse is derived, so it is
         overwritten rather than merged."""
-        draft = self.get_object()
+        draft = self._locked_draft()
         content = builder.normalize_objects(draft.content or {})
         mapping_set, source, target, error = self._mapping_set_context(
             request, content, request.data.get("set_urn")
@@ -2820,7 +2853,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 reverse = self._mint_mapping_set(draft, content, target, source)
             except builder.BuilderError as e:
                 logger.warning("Builder rejected the draft", error=e)
-                return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "identityNotMintable"}, status=HTTP_400_BAD_REQUEST
+                )
         reverse["requirement_mappings"] = mapping_editor.reverse_mappings(mapping_set)
         draft.content = content
         draft.save(update_fields=["content", "updated_at"])

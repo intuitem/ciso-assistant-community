@@ -188,6 +188,11 @@
 	let flushTimer: ReturnType<typeof setTimeout> | undefined;
 	let saving = $state(false);
 	let pendingCount = $state(0);
+	let inFlight: Promise<void> | null = null;
+	// Bumped on every local edit: tells a reverse generation whether edits
+	// landed while it ran.
+	let editCount = 0;
+	let connectionLost = false;
 	let undoStack: { ops: Op[]; restore: Suggestion[] }[] = $state([]);
 
 	function setStatus(message: string, type: 'success' | 'error') {
@@ -211,6 +216,7 @@
 			pairs.set(k, { ...current, ...fields } as Pair);
 		}
 		pairs = new Map(pairs);
+		editCount += 1;
 		queue.push(op);
 		pendingCount = queue.length;
 		if (reverse) reverse = { ...reverse, in_sync: false };
@@ -218,18 +224,40 @@
 		flushTimer = setTimeout(flush, 600);
 	}
 
-	async function flush() {
+	function flush(): Promise<void> {
 		clearTimeout(flushTimer);
-		if (saving || queue.length === 0) return;
+		if (inFlight) return inFlight;
+		if (queue.length === 0) return Promise.resolve();
+		inFlight = saveBatch().finally(() => {
+			inFlight = null;
+			if (queue.length && !connectionLost) flush();
+		});
+		return inFlight;
+	}
+
+	async function saveBatch() {
 		const ops = queue;
 		queue = [];
 		saving = true;
 		try {
-			const res = await fetch(draftBase, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action: 'edit-mapping-pairs', set_urn: setUrn, ops })
-			});
+			let res: Response;
+			try {
+				res = await fetch(draftBase, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'edit-mapping-pairs', set_urn: setUrn, ops })
+				});
+			} catch {
+				// Never reached the server, or its answer was lost. Every op is
+				// idempotent (add upserts, remove ignores absent pairs), so the
+				// batch goes back in front of the queue and is sent again.
+				queue = [...ops, ...queue];
+				if (!connectionLost) setStatus(m.lbMappingSaveRetrying(), 'error');
+				connectionLost = true;
+				flushTimer = setTimeout(() => ((connectionLost = false), flush()), 5000);
+				return;
+			}
+			connectionLost = false;
 			if (!res.ok) {
 				const result = await res.json().catch(() => ({}));
 				// The batch was rejected as a whole: the local view is now ahead of the draft.
@@ -243,7 +271,15 @@
 			saving = false;
 			pendingCount = queue.length;
 		}
-		if (queue.length) flush();
+	}
+
+	/** Resolves once every queued edit is saved; false if the connection is down. */
+	async function settle(): Promise<boolean> {
+		while (inFlight || queue.length) {
+			await flush();
+			if (connectionLost) return false;
+		}
+		return true;
 	}
 
 	function inverseOf(op: Op): Op {
@@ -326,18 +362,26 @@
 	let generatingReverse = $state(false);
 	async function generateReverse() {
 		generatingReverse = true;
-		await flush();
-		const res = await fetch(draftBase, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action: 'generate-reverse-set', set_urn: setUrn })
-		});
-		const result = await res.json();
-		generatingReverse = false;
-		if (!res.ok) return setStatus(safeTranslate(result.error ?? 'error'), 'error');
-		reverse = { urn: result.urn, in_sync: true };
-		if (Array.isArray(result.issues)) issues = result.issues;
-		setStatus(m.lbMappingReverseGenerated({ count: result.count }), 'success');
+		try {
+			// The reverse is derived from the saved set: every edit must be in first.
+			if (!(await settle())) return;
+			const editsBefore = editCount;
+			const res = await fetch(draftBase, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'generate-reverse-set', set_urn: setUrn })
+			});
+			const result = await res.json().catch(() => ({}));
+			if (!res.ok) return setStatus(safeTranslate(result.error ?? 'error'), 'error');
+			// An edit made while this ran is not in the generated set.
+			reverse = { urn: result.urn, in_sync: editCount === editsBefore };
+			if (Array.isArray(result.issues)) issues = result.issues;
+			setStatus(m.lbMappingReverseGenerated({ count: result.count }), 'success');
+		} catch {
+			setStatus(m.lbMappingSaveRetrying(), 'error');
+		} finally {
+			generatingReverse = false;
+		}
 	}
 
 	// --- Target autocomplete (active row only) -----------------------------------

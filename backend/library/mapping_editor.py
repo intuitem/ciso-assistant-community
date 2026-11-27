@@ -25,6 +25,26 @@ RATIONALES = ("syntactic", "semantic", "functional")
 DEFAULT_RELATIONSHIP = "intersect"
 PAIR_FIELDS = ("relationship", "strength_of_relationship", "rationale", "annotation")
 REVERSED_RELATIONSHIP = {"subset": "superset", "superset": "subset"}
+# Every BuilderError apply_pair_ops raises: what reaches the client is one of
+# these constants, never text taken from the exception.
+PAIR_ERROR_CODES = (
+    "opsMustBeANonEmptyList",
+    "opMustBeADict",
+    "unknownPairOp",
+    "pairNodeNotAssessable",
+    "pairNotFound",
+    "invalidRelationship",
+    "invalidRationale",
+    "invalidStrength",
+    "invalidAnnotation",
+)
+
+
+def pair_error_code(error: Exception) -> str:
+    text = str(error)
+    return next((code for code in PAIR_ERROR_CODES if code == text), "invalidPairOps")
+
+
 # Text similarity under which a structurally matched pair is flagged for review.
 REWORDED_THRESHOLD = 0.6
 # Share of a framework's assessable URN tails another must hold to be its clone origin.
@@ -62,7 +82,8 @@ def assessable_nodes(framework: dict) -> list:
             "parent": labels.get(str(n.get("parent_urn") or "").lower(), ""),
         }
         for n in nodes
-        if n.get("assessable") and n.get("urn")
+        # The loader forces splash nodes non-assessable: never map them.
+        if n.get("assessable") and n.get("urn") and n.get("display_mode") != "splash"
     ]
 
 
@@ -92,6 +113,7 @@ def apply_pair_ops(
     """
     if not isinstance(ops, list) or not ops:
         raise BuilderError("opsMustBeANonEmptyList")
+    entries = []
     pairs = {}
     order = []
     for pair in mapping_set.get("requirement_mappings") or []:
@@ -99,9 +121,11 @@ def apply_pair_ops(
             str(pair.get("source_requirement_urn", "")).lower(),
             str(pair.get("target_requirement_urn", "")).lower(),
         )
+        entries.append((key, pair))
         if key not in pairs:
             order.append(key)
         pairs[key] = dict(pair)
+    touched = set()
 
     for op in ops:
         if not isinstance(op, dict):
@@ -110,6 +134,7 @@ def apply_pair_ops(
         key = (str(op.get("source") or "").lower(), str(op.get("target") or "").lower())
         if kind not in ("add", "update", "remove"):
             raise BuilderError("unknownPairOp")
+        touched.add(key)
         if kind == "remove":
             if pairs.pop(key, None) is not None:
                 order.remove(key)
@@ -146,7 +171,18 @@ def apply_pair_ops(
         if key not in pairs:
             order.append(key)
         pairs[key] = pair
-    return [pairs[key] for key in order]
+    # A pair the ops addressed collapses to one entry (that resolves its
+    # conflict); every other entry is kept as recorded, duplicates included.
+    result, emitted = [], set()
+    for key, pair in entries:
+        if key not in touched:
+            result.append(pair)
+        elif key in pairs and key not in emitted:
+            result.append(pairs[key])
+            emitted.add(key)
+    known = {key for key, _ in entries}
+    result += [pairs[key] for key in order if key not in known and key in pairs]
+    return result
 
 
 def suggest_pairs(
@@ -205,7 +241,10 @@ def reverse_mappings(mapping_set: dict) -> list:
         new_pair["source_requirement_urn"] = pair.get("target_requirement_urn")
         new_pair["target_requirement_urn"] = pair.get("source_requirement_urn")
         relationship = pair.get("relationship")
-        new_pair["relationship"] = REVERSED_RELATIONSHIP.get(relationship, relationship)
+        # A malformed value (list, dict) is copied as-is; Validate reports it.
+        if isinstance(relationship, str):
+            relationship = REVERSED_RELATIONSHIP.get(relationship, relationship)
+        new_pair["relationship"] = relationship
         reversed_pairs.append(new_pair)
     return reversed_pairs
 
@@ -229,6 +268,8 @@ def clone_score(clone: dict, candidate: dict) -> float:
 def compose_relationship(first: str, second: str):
     """A→P then P→B as A→B; None when the chain proves nothing (two
     overlaps need not overlap each other)."""
+    if not (isinstance(first, str) and isinstance(second, str)):
+        return None
     if "not_related" in (first, second):
         return None
     if first == "equal":

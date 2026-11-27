@@ -216,7 +216,7 @@ def test_clone_reword_map_to_original_round_trip(admin_client):
     )
     assert error is None, error
     draft = _create_draft(admin_client, content={})
-    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])  # noqa: E731
+    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])
 
     cloned = admin_client.post(
         url("import-objects"),
@@ -428,7 +428,7 @@ def _store(objects, ref):
 
 
 def _mapping(ref, source, target, links):
-    node = lambda fw, leaf: f"urn:acme:risk:req_node:{fw}:{leaf}"  # noqa: E731
+    node = lambda fw, leaf: f"urn:acme:risk:req_node:{fw}:{leaf}"
     return {
         "urn": f"urn:acme:risk:req_mapping_set:{ref}",
         "ref_id": ref,
@@ -488,7 +488,7 @@ def test_clone_gets_suggestions_from_shipped_and_chained_mappings(admin_client):
         "map-p-c",
     )
     draft = _create_draft(admin_client, content={})
-    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])  # noqa: E731
+    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])
     cloned = admin_client.post(
         url("import-objects"),
         {"source": str(a.id), "object_types": ["frameworks"]},
@@ -598,7 +598,7 @@ def test_mapping_issues_flags_each_inconsistency():
 def test_editor_and_validate_report_conflicting_pairs(admin_client):
     framework = _framework("me", "mylib", [("a", "A", "Alpha"), ("b", "B", "Beta")])
     target = _framework("me", "other", [("x", "X", "Alpha"), ("y", "Y", "Gamma")])
-    node = lambda fw, leaf: f"urn:me:risk:req_node:{fw}:{leaf}"  # noqa: E731
+    node = lambda fw, leaf: f"urn:me:risk:req_node:{fw}:{leaf}"
     mapping_set = {
         "urn": "urn:me:risk:req_mapping_set:mylib:m",
         "ref_id": "m",
@@ -621,7 +621,7 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
             "requirement_mapping_sets": [mapping_set],
         },
     )
-    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])  # noqa: E731
+    url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])
 
     validation = admin_client.get(url("validate")).data
     assert any(
@@ -676,3 +676,67 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
     )
     errors = admin_client.get(url("validate")).data["errors"]
     assert sum("reverse set says" in e for e in errors) == 1, errors
+
+
+def test_pair_error_code_never_echoes_the_exception():
+    assert me.pair_error_code(BuilderError("pairNotFound")) == "pairNotFound"
+    assert me.pair_error_code(BuilderError("urn:x leaked detail")) == "invalidPairOps"
+
+
+def test_edits_keep_conflicts_on_untouched_pairs():
+    def pair(s, t, rel):
+        return {
+            "source_requirement_urn": s,
+            "target_requirement_urn": t,
+            "relationship": rel,
+        }
+
+    mapping_set = {
+        "requirement_mappings": [
+            pair("a", "x", "equal"),
+            pair("a", "x", "subset"),
+            pair("b", "y", "intersect"),
+        ]
+    }
+    # editing b→y leaves the a→x conflict exactly as recorded
+    pairs = me.apply_pair_ops(
+        mapping_set,
+        [{"op": "update", "source": "b", "target": "y", "relationship": "equal"}],
+        {"a", "b"},
+        {"x", "y"},
+    )
+    assert [(p["source_requirement_urn"], p["relationship"]) for p in pairs] == [
+        ("a", "equal"),
+        ("a", "subset"),
+        ("b", "equal"),
+    ]
+    # addressing a→x collapses it to the chosen relationship
+    mapping_set["requirement_mappings"] = pairs
+    pairs = me.apply_pair_ops(
+        mapping_set,
+        [{"op": "update", "source": "a", "target": "x", "relationship": "subset"}],
+        {"a", "b"},
+        {"x", "y"},
+    )
+    assert [(p["source_requirement_urn"], p["relationship"]) for p in pairs] == [
+        ("a", "subset"),
+        ("b", "equal"),
+    ]
+
+
+def test_splash_nodes_and_malformed_relationships():
+    framework = _framework("me", "f", [("a", "A", "Alpha"), ("b", "B", "Beta")])
+    framework["requirement_nodes"][1]["display_mode"] = "splash"
+    assert [n["ref_id"] for n in me.assessable_nodes(framework)] == ["B"]
+    broken = {
+        "requirement_mappings": [
+            {
+                "source_requirement_urn": "a",
+                "target_requirement_urn": "b",
+                "relationship": [],
+            }
+        ]
+    }
+    assert me.reverse_mappings(broken)[0]["relationship"] == []
+    assert me.mapping_issues(broken, reverse_set=broken) is not None
+    assert me.compose_relationship([], "equal") is None
