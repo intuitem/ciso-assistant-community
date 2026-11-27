@@ -100,6 +100,11 @@
 	// What tells two frameworks with the same name apart.
 	const frameworkTag = (side: { urn: string; in_draft?: boolean }) =>
 		side.in_draft ? m.lbMappingThisLibrary() : side.urn.split(':').pop();
+	const title =
+		editor.source.name === editor.target.name &&
+		editor.set.name === `${editor.source.name} → ${editor.target.name}`
+			? `${editor.source.name} (${frameworkTag(editor.source)}) → ${editor.target.name} (${frameworkTag(editor.target)})`
+			: editor.set.name || editor.set.ref_id;
 	let defaultRelationship = $state('intersect');
 
 	let pairsBySource = $derived.by(() => {
@@ -157,7 +162,7 @@
 					detail
 				});
 			case 'reverseConflict':
-				return m.lbMappingIssueReverse({
+				return (reverse?.derived ? m.lbMappingIssueReverseDerived : m.lbMappingIssueReverse)({
 					pair,
 					here: safeTranslate(issue.detail[0]),
 					there: safeTranslate(issue.detail[1])
@@ -534,7 +539,7 @@
 					<i class="fa-solid fa-arrow-left"></i>
 				</a>
 				<div class="min-w-0">
-					<h2 class="text-xl font-semibold truncate">{editor.set.name || editor.set.ref_id}</h2>
+					<h2 class="text-xl font-semibold truncate">{title}</h2>
 					<p class="text-sm text-surface-500 truncate">
 						{#each [editor.source, editor.target] as side, index}
 							{#if index}<i class="fa-solid fa-arrow-right mx-1"></i>{/if}
@@ -639,7 +644,9 @@
 					onclick={() => accept(openSuggestions)}
 				>
 					<i class="fa-solid fa-check-double mr-1"></i>
-					{m.lbMappingAcceptAll({ count: openSuggestions.length })}
+					{openSuggestions.length === 1
+						? m.lbMappingAcceptOne()
+						: m.lbMappingAcceptAll({ count: openSuggestions.length })}
 				</button>
 			{/if}
 		</div>

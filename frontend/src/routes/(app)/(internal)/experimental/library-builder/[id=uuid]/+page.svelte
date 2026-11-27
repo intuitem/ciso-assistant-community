@@ -267,7 +267,26 @@
 	}
 
 	// --- Validate / conflicts ------------------------------------------------
-	let validation: { errors: string[]; warnings: string[] } | null = $state(null);
+	type ValidationMessage = string | { code: string; params: Record<string, unknown> };
+	let validation: { errors: ValidationMessage[]; warnings: ValidationMessage[] } | null =
+		$state(null);
+	const RELATIONSHIPS = ['equal', 'subset', 'superset', 'intersect', 'not_related'];
+	const relationshipLabel = (value: unknown) =>
+		value === 'not_related' ? safeTranslate('notRelated') : safeTranslate(String(value));
+	function validationText(message: ValidationMessage): string {
+		if (typeof message === 'string') return safeTranslate(message);
+		const params = Object.fromEntries(
+			Object.entries(message.params).map(([name, value]) => [
+				name,
+				Array.isArray(value)
+					? value.map(relationshipLabel).join(', ')
+					: RELATIONSHIPS.includes(String(value))
+						? relationshipLabel(value)
+						: value
+			])
+		);
+		return safeTranslate(message.code, params);
+	}
 	let validating = $state(false);
 	let conflicts: any[] = $state([]);
 
@@ -992,12 +1011,12 @@
 			{/if}
 			{#each validation.errors as error}
 				<p class="text-sm text-red-700 dark:text-red-400">
-					<i class="fa-solid fa-circle-xmark mr-1" aria-hidden="true"></i>{safeTranslate(error)}
+					<i class="fa-solid fa-circle-xmark mr-1" aria-hidden="true"></i>{validationText(error)}
 				</p>
 			{/each}
 			{#each validation.warnings as warning}
 				<p class="text-sm text-amber-700 dark:text-amber-400">
-					<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>{safeTranslate(
+					<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>{validationText(
 						warning
 					)}
 				</p>
@@ -1695,7 +1714,9 @@
 			</div>
 			{#if mappingPanelOpen}
 				<div class="border border-surface-200-800 rounded-lg p-3 space-y-3">
-					<div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
+					<div
+						class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 items-center"
+					>
 						<FrameworkPicker
 							field="source_framework"
 							label={m.lbMappingSource()}

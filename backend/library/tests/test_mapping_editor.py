@@ -392,6 +392,31 @@ def test_add_mapping_set_refuses_unknown_and_identical_frameworks(admin_client):
     assert missing.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.django_db
+def test_same_name_frameworks_get_a_distinct_set_name(admin_client):
+    draft = _create_draft(
+        admin_client,
+        content={
+            "frameworks": [
+                _framework("me", "mylib", [("a", "A", "A")], name="CSF"),
+                _framework("me", "other", [("a", "A", "A")], name="CSF"),
+            ]
+        },
+    )
+    created = admin_client.post(
+        reverse("library-drafts-add-mapping-set", args=[draft["id"]]),
+        {
+            "source_framework_urn": "urn:me:risk:framework:mylib",
+            "target_framework_urn": "urn:me:risk:framework:other",
+        },
+        format="json",
+    )
+    assert created.status_code == status.HTTP_201_CREATED, created.content
+    detail = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]]))
+    names = [s["name"] for s in detail.data["content"]["requirement_mapping_sets"]]
+    assert names == ["CSF (mylib) → CSF (other)"]
+
+
 # --- suggestions from stored mapping sets ------------------------------------
 
 
@@ -653,7 +678,17 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
     validation = admin_client.get(url("validate")).data
     # Items read by ref_id, the set by its name.
     assert validation["errors"] == [
-        "m: A → X is recorded with conflicting relationships (equal, subset)"
+        {
+            "code": "lbValidateMappingConflict",
+            "params": {
+                "set": "m",
+                "source": "A",
+                "target": "X",
+                "relationships": ["equal", "subset"],
+                "here": "equal",
+                "there": "subset",
+            },
+        }
     ]
 
     editor = admin_client.get(
@@ -703,7 +738,7 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
         format="json",
     )
     errors = admin_client.get(url("validate")).data["errors"]
-    assert sum("reverse set says" in e for e in errors) == 1, errors
+    assert [e["code"] for e in errors].count("lbValidateMappingReverse") == 1, errors
 
     # The generated set never regenerates the one it came from.
     reverse_urn = regenerated.data["urn"]
@@ -809,12 +844,22 @@ def test_validate_groups_mapping_warnings():
     assert _check_mapping_sets(objects, [stored]) == (
         [],
         [
-            "Mine to other: 7 source item(s) equal to several target items (A0, A1, A2, A3, A4, +2)",
-            "Mine to other: 2 target item(s) equal to several source items (Y.1, Z.1)",
+            {
+                "code": "lbValidateMappingFanOut",
+                "params": {
+                    "set": "Mine to other",
+                    "count": 7,
+                    "items": "A0, A1, A2, A3, A4, +2",
+                },
+            },
+            {
+                "code": "lbValidateMappingFanOutTarget",
+                "params": {"set": "Mine to other", "count": 2, "items": "Y.1, Z.1"},
+            },
         ],
     )
     # Without the stored framework, its items read by URN tail.
-    assert "(y, z)" in _check_mapping_sets(objects)[1][1]
+    assert _check_mapping_sets(objects)[1][1]["params"]["items"] == "y, z"
 
     # A version split (gov-01 → gov-01 + gov-02) is not a warning.
     split = {

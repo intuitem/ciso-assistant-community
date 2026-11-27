@@ -1080,16 +1080,17 @@ def validate_draft_document(draft, *, user=None) -> dict:
     return {"errors": errors, "warnings": warnings}
 
 
+# Translated by the frontend: {code: message key, params}.
 MAPPING_ISSUE_MESSAGES = {
-    "pairConflict": "{set}: {source} → {target} is recorded with conflicting relationships ({detail})",
-    "reverseConflict": "{set}: {source} → {target} is {first} but the reverse set says {second}; regenerate the reverse set",
-    "pairNodeMissing": "{set}: {source} → {target} points to an item that is not assessable in its framework",
+    "pairConflict": "lbValidateMappingConflict",
+    "reverseConflict": "lbValidateMappingReverse",
+    "pairNodeMissing": "lbValidateMappingMissing",
 }
 # Warnings come one line per kind and set, so errors are not buried.
 MAPPING_WARNING_MESSAGES = {
-    "pairDuplicate": "{set}: {count} link(s) recorded twice ({items})",
-    "equalFanOut": "{set}: {count} source item(s) equal to several target items ({items})",
-    "equalFanOutTarget": "{set}: {count} target item(s) equal to several source items ({items})",
+    "pairDuplicate": "lbValidateMappingDuplicate",
+    "equalFanOut": "lbValidateMappingFanOut",
+    "equalFanOutTarget": "lbValidateMappingFanOutTarget",
 }
 MAPPING_WARNING_SAMPLE = 5
 
@@ -1156,24 +1157,30 @@ def _check_mapping_sets(objects: dict, stored_frameworks=()) -> tuple:
                 grouped.setdefault("pairDuplicate", []).append(item)
                 continue
             errors.append(
-                MAPPING_ISSUE_MESSAGES[issue["code"]].format(
-                    set=set_name,
-                    source=label(issue["source"]),
-                    target=label(issue["target"]),
-                    detail=", ".join(map(str, detail)),
-                    first=detail[0],
-                    second=detail[-1],
-                )
+                {
+                    "code": MAPPING_ISSUE_MESSAGES[issue["code"]],
+                    "params": {
+                        "set": set_name,
+                        "source": label(issue["source"]),
+                        "target": label(issue["target"]),
+                        "relationships": [str(value) for value in detail],
+                        "here": str(detail[0]),
+                        "there": str(detail[-1]),
+                    },
+                }
             )
         for code, items in grouped.items():
             shown = items[:MAPPING_WARNING_SAMPLE]
             more = len(items) - len(shown)
             warnings.append(
-                MAPPING_WARNING_MESSAGES[code].format(
-                    set=set_name,
-                    count=len(items),
-                    items=", ".join(shown) + (f", +{more}" if more else ""),
-                )
+                {
+                    "code": MAPPING_WARNING_MESSAGES[code],
+                    "params": {
+                        "set": set_name,
+                        "count": len(items),
+                        "items": ", ".join(shown) + (f", +{more}" if more else ""),
+                    },
+                }
             )
     return errors, warnings
 

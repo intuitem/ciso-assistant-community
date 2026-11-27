@@ -2339,6 +2339,12 @@ class LibraryDraftViewSet(BaseModelViewSet):
         def leaf(framework):
             return str(framework.get("urn", "")).lower().rsplit(":", 1)[-1]
 
+        same_name = source.get("name") == target.get("name")
+
+        def label(framework):
+            name = framework.get("name") or leaf(framework)
+            return f"{name} ({leaf(framework)})" if same_name else name
+
         base = builder.leaf_object_base(draft.effective_urn, "requirement_mapping_sets")
         taken = {
             str(ms.get("urn", "")).lower()
@@ -2355,10 +2361,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         mapping_set = {
             "urn": f"{base}:{candidate}",
             "ref_id": candidate,
-            "name": (
-                f"{source.get('name') or leaf(source)} → "
-                f"{target.get('name') or leaf(target)}"
-            )[:200],
+            "name": f"{label(source)} → {label(target)}"[:200],
             "source_framework_urn": str(source["urn"]).lower(),
             "target_framework_urn": str(target["urn"]).lower(),
             "requirement_mappings": [],
