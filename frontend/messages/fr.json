@@ -8609,6 +8609,17 @@
 	"europeanEconomicArea": "Espace économique européen",
 	"otherCountries": "Autres pays",
 	"notShownOnMap": "Non représenté sur la carte",
+	"targetTreatmentDate": "Date cible de traitement",
+	"controlsEtaAfterTargetDate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} mesure dont l'ETA est postérieur à la date cible de traitement",
+				"countPlural=other": "{count} mesures dont l'ETA est postérieur à la date cible de traitement"
+			}
+		}
+	],
 	"glpi": "GLPI",
 	"glpiIntegrationConfig": "Configuration de l'intégration GLPI",
 	"glpiInstanceUrlHelpText": "URL de votre instance GLPI (ex. https://glpi.example.com/). GLPI 11 ou ultérieur est requis.",
