@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { getModalStore, confirmModal } from '#lib/components/Modals/stores.js';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
+	import FrameworkPicker from './mapping/FrameworkPicker.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
@@ -278,7 +279,26 @@
 	}
 
 	// --- Validate / conflicts ------------------------------------------------
-	let validation: { errors: string[]; warnings: string[] } | null = $state(null);
+	type ValidationMessage = string | { code: string; params: Record<string, unknown> };
+	let validation: { errors: ValidationMessage[]; warnings: ValidationMessage[] } | null =
+		$state(null);
+	const RELATIONSHIPS = ['equal', 'subset', 'superset', 'intersect', 'not_related'];
+	const relationshipLabel = (value: unknown) =>
+		value === 'not_related' ? safeTranslate('notRelated') : safeTranslate(String(value));
+	function validationText(message: ValidationMessage): string {
+		if (typeof message === 'string') return safeTranslate(message);
+		const params = Object.fromEntries(
+			Object.entries(message.params).map(([name, value]) => [
+				name,
+				Array.isArray(value)
+					? value.map(relationshipLabel).join(', ')
+					: RELATIONSHIPS.includes(String(value))
+						? relationshipLabel(value)
+						: value
+			])
+		);
+		return safeTranslate(message.code, params);
+	}
 	let validating = $state(false);
 	let conflicts: any[] = $state([]);
 
@@ -307,6 +327,11 @@
 			if (stored === 'simple' || stored === 'full') viewChoice = stored;
 		} catch {
 			/* storage unavailable */
+		}
+		// The mapping section lives in the full view; not saved as the preference.
+		if (new URLSearchParams(window.location.search).get('new_mapping')) {
+			viewChoice = 'full';
+			openMappingPanel();
 		}
 	});
 
@@ -669,6 +694,100 @@
 		)}`;
 	}
 
+	// --- Mapping sets -------------------------------------------------------------
+	function mappingEditorHref(urn: string): string {
+		return `${base()}/mapping?set_urn=${encodeURIComponent(urn)}`;
+	}
+
+	function setBetween(source: string, target: string): any {
+		return mappingSets.find(
+			(s) =>
+				String(s.source_framework_urn).toLowerCase() === source &&
+				String(s.target_framework_urn).toLowerCase() === target
+		);
+	}
+
+	// Clone origin per draft framework (detected server-side, see mapping-original).
+	let originals: Record<string, any> = $state({});
+	const originalsChecked = new Set<string>();
+	// Runs for each framework URN not checked yet: a clone imported (or a
+	// framework renamed) without a reload gets its "Map to" button too.
+	$effect(() => {
+		// URN plus node count: an overwrite import under the same URN re-checks.
+		const keys = frameworks.map(
+			(f) => [String(f.urn).toLowerCase(), (f.requirement_nodes ?? []).length] as const
+		);
+		untrack(() => loadOriginals(keys));
+	});
+	async function loadOriginals(keys: (readonly [string, number])[]) {
+		for (const [urn, size] of keys) {
+			const checkKey = `${urn}|${size}`;
+			if (originalsChecked.has(checkKey)) continue;
+			originalsChecked.add(checkKey);
+			delete originals[urn];
+			try {
+				const res = await fetch(
+					`${base()}?action=mapping-original&framework_urn=${encodeURIComponent(urn)}`
+				);
+				if (!res.ok) throw new Error('mapping-original');
+				const result = await res.json();
+				if (result.original) originals[urn] = result.original;
+			} catch {
+				// Not checked after all: the next change or page load tries again.
+				originalsChecked.delete(checkKey);
+			}
+		}
+	}
+
+	let mappingPanelOpen = $state(false);
+	let mappingFrameworks: any[] = $state([]);
+	let mapSource = $state('');
+	let mapTarget = $state('');
+	let creatingMapping = $state(false);
+
+	async function openMappingPanel() {
+		mappingPanelOpen = true;
+		// Fetched on every open: an import since the last one changes the list.
+		const res = await fetch(`${base()}?action=mapping-frameworks`).catch(() => null);
+		const frameworks = res?.ok ? (await res.json().catch(() => null))?.frameworks : null;
+		if (!Array.isArray(frameworks)) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
+		mappingFrameworks = frameworks;
+		const known = new Set(mappingFrameworks.map((f) => f.urn));
+		if (!known.has(mapSource)) mapSource = '';
+		if (!known.has(mapTarget)) mapTarget = '';
+		mapSource ||= mappingFrameworks.find((f) => f.kind === 'draft')?.urn ?? '';
+	}
+
+	async function createMappingSet(source: string, target: string) {
+		const existing = setBetween(source, target);
+		if (existing) {
+			window.location.href = mappingEditorHref(existing.urn);
+			return;
+		}
+		creatingMapping = true;
+		try {
+			const res = await fetch(base(), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					action: 'add-mapping-set',
+					source_framework_urn: source,
+					target_framework_urn: target
+				})
+			});
+			const result = await res.json().catch(() => ({}));
+			// Already there (a retry whose first answer was lost): open it.
+			if (res.ok || (res.status === 409 && result.urn)) {
+				window.location.href = mappingEditorHref(result.urn);
+				return;
+			}
+			setStatus(safeTranslate(result.error ?? 'error'), 'error');
+		} catch {
+			setStatus(safeTranslate('error'), 'error');
+		}
+		creatingMapping = false;
+	}
+
 	function quickFormEditorHref(quickForm: any): string {
 		return `/experimental/library-builder/${draft.id}/quick-form?quick_form_urn=${encodeURIComponent(
 			quickForm.urn
@@ -912,12 +1031,12 @@
 			{/if}
 			{#each validation.errors as error}
 				<p class="text-sm text-red-700 dark:text-red-400">
-					<i class="fa-solid fa-circle-xmark mr-1" aria-hidden="true"></i>{safeTranslate(error)}
+					<i class="fa-solid fa-circle-xmark mr-1" aria-hidden="true"></i>{validationText(error)}
 				</p>
 			{/each}
 			{#each validation.warnings as warning}
 				<p class="text-sm text-amber-700 dark:text-amber-400">
-					<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>{safeTranslate(
+					<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>{validationText(
 						warning
 					)}
 				</p>
@@ -1139,6 +1258,7 @@
 			{#if frameworks.length > 0}
 				<ul class="space-y-2">
 					{#each frameworks as framework}
+						{@const original = originals[String(framework.urn).toLowerCase()]}
 						<li
 							class="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200-800 hover:border-primary-300 dark:hover:border-primary-500/50 transition-colors"
 						>
@@ -1157,6 +1277,22 @@
 								</div>
 							</div>
 							<div class="flex items-center gap-1 shrink-0">
+								{#if original}
+									{@const existing = setBetween(String(framework.urn).toLowerCase(), original.urn)}
+									<button
+										type="button"
+										class="btn btn-sm preset-outlined-primary-500"
+										title={m.lbMappingMapToOriginalHelp({ name: original.name })}
+										disabled={creatingMapping}
+										onclick={() =>
+											createMappingSet(String(framework.urn).toLowerCase(), original.urn)}
+									>
+										<i class="fa-solid fa-arrows-left-right mr-1" aria-hidden="true"></i>
+										{existing
+											? m.lbMappingEditMappingTo({ name: original.name })
+											: m.lbMappingMapTo({ name: original.name })}
+									</button>
+								{/if}
 								<a
 									href={frameworkEditorHref(framework)}
 									class="btn btn-sm preset-filled-primary-500"
@@ -1580,14 +1716,63 @@
 			</div>
 		{/each}
 
-		<!-- Requirement mapping sets: arrive via import, removable here -->
-		{#if mappingSets.length > 0}
-			<div class="card p-4 space-y-3">
+		<!-- Requirement mapping sets: created here or imported, edited in ./mapping -->
+		<div class="card p-4 space-y-3">
+			<div class="flex items-center justify-between gap-2">
 				<h3
 					class="text-xs font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1.5"
 				>
 					<i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i>{m.lbDraftMappingSets()}
 				</h3>
+				<button
+					type="button"
+					class="btn btn-sm preset-outlined-primary-500"
+					onclick={() => (mappingPanelOpen ? (mappingPanelOpen = false) : openMappingPanel())}
+				>
+					<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{m.lbMappingNewSet()}
+				</button>
+			</div>
+			{#if mappingPanelOpen}
+				<div class="border border-surface-200-800 rounded-lg p-3 space-y-3">
+					<div
+						class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 items-center"
+					>
+						<FrameworkPicker
+							field="source_framework"
+							label={m.lbMappingSource()}
+							options={mappingFrameworks}
+							bind:value={mapSource}
+						/>
+						<button
+							type="button"
+							class="btn-icon preset-outlined-surface-500 justify-self-center"
+							title={m.lbMappingSwap()}
+							aria-label={m.lbMappingSwap()}
+							onclick={() => ([mapSource, mapTarget] = [mapTarget, mapSource])}
+						>
+							<i class="fa-solid fa-right-left" aria-hidden="true"></i>
+						</button>
+						<FrameworkPicker
+							field="target_framework"
+							label={m.lbMappingTarget()}
+							options={mappingFrameworks}
+							bind:value={mapTarget}
+						/>
+					</div>
+					<div class="flex justify-end">
+						<button
+							type="button"
+							class="btn btn-sm preset-filled-primary-500"
+							disabled={!mapSource || !mapTarget || mapSource === mapTarget || creatingMapping}
+							onclick={() => createMappingSet(mapSource, mapTarget)}
+						>
+							{#if creatingMapping}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{/if}
+							{m.lbMappingCreateAndEdit()}
+						</button>
+					</div>
+				</div>
+			{/if}
+			{#if mappingSets.length > 0}
 				<ul class="divide-y divide-surface-200-800">
 					{#each mappingSets as mappingSet}
 						<li class="flex items-center justify-between py-2 gap-3">
@@ -1603,19 +1788,28 @@
 									})}
 								</p>
 							</div>
-							<button
-								type="button"
-								class="btn btn-sm preset-outlined-error-500 shrink-0"
-								onclick={() => deleteObject(mappingSet)}
-								aria-label={m.lbDraftDeleteMappingSet()}
-							>
-								<i class="fa-solid fa-trash"></i>
-							</button>
+							<div class="flex items-center gap-1 shrink-0">
+								<a
+									href={mappingEditorHref(mappingSet.urn)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
+									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+									{m.edit()}
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm preset-outlined-error-500"
+									onclick={() => deleteObject(mappingSet)}
+									aria-label={m.lbDraftDeleteMappingSet()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
 						</li>
 					{/each}
 				</ul>
-			</div>
-		{/if}
+			{/if}
+		</div>
 
 		<!-- Metric definitions: arrive via import, removable here -->
 		{#if metricDefinitions.length > 0}
