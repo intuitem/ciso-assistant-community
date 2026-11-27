@@ -36,7 +36,7 @@ What is worth protecting: the API rights of each service account, and the human 
 5. **IdP claims never grant rights.** Roles and permissions stay local.
 6. **No probing.** An unknown client and subject pair fails with the same error as a bad token on a registered one.
 7. **No SSRF through the provider.** Discovery and key URLs go through `assert_public_url_unless_dev` on every fetch, not only at registration, and redirects are refused.
-8. **Fail closed.** An unreachable provider refuses the request. A key lookup miss triggers at most one refetch per provider every five seconds. Expiry is enforced at request time, not only by the daily deactivation task.
+8. **Fail closed.** Once the cached discovery document and keys expire, an unreachable provider refuses the request. A key lookup miss triggers at most one refetch per provider every five seconds. Federated accounts have their expiry checked on every request, not only by the daily deactivation task.
 
 ### Verification
 
@@ -45,7 +45,8 @@ What is worth protecting: the API rights of each service account, and the human 
 ### Remaining risks, accepted as low
 
 - **A compromised IdP can mint valid tokens** for the subjects mapped to it, with those accounts' rights. That is the meaning of federation. Deactivating the account cuts access at once.
-- **A key the IdP revokes stays trusted for up to 30 minutes**, the key cache lifetime (`JWKS_CACHE_TTL`). Deactivating the account is the immediate response.
+- **A key the IdP revokes stays trusted for up to 30 minutes**, the key cache lifetime (`JWKS_CACHE_TTL`), including while the provider is unreachable. Deactivating the account is the immediate response.
+- **An expired local account keeps working until the daily deactivation task runs**, at most about a day. Local authentication checks only `is_active`; the task deactivates the account and deletes its tokens.
 - **Federated tokens cannot be revoked on our side**, and their lifetime is the IdP's choice. Revocation is deactivation of the account.
 - **A leaked local secret works until rotated.** Rotation allows a grace period of up to 30 days, during which both secrets work.
 - **With `ALLOW_PRIVATE_NETWORK_REQUESTS` set, the URL guard is off**, so a provider may point at internal hosts. Operators set it knowingly, for an IdP on a private network.

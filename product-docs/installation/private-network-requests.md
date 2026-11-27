@@ -10,7 +10,7 @@ description: >-
 
 ## Overview
 
-Several features make the backend send requests to a URL that an administrator types in. To prevent server-side request forgery (SSRF), where someone uses those requests to reach internal services, the backend only connects to public addresses. Private ranges (such as `10.0.0.0/8`, `192.168.0.0/16`), loopback (`localhost`, `127.0.0.1`), link-local (including the cloud metadata address `169.254.169.254`) and other internal addresses are refused. The check runs when you save the URL. For webhook and audit log deliveries, integrations and workflows, it runs again on each connection, so a host name that later resolves to a private address is refused too.
+Several features make the backend send requests to a URL that an administrator types in. To prevent server-side request forgery (SSRF), where someone uses those requests to reach internal services, the backend only connects to public addresses. Private ranges (such as `10.0.0.0/8`, `192.168.0.0/16`), loopback (`localhost`, `127.0.0.1`), link-local (including the cloud metadata address `169.254.169.254`) and other internal addresses are refused. The check runs when you save the URL. For webhook and audit log deliveries and workflows, it runs again on each connection, so a host name that later resolves to a private address is refused too. Integrations check their URL again each time they connect.
 
 On-premises, the service you want to reach often lives on your own network. To allow that, set this environment variable:
 
@@ -93,7 +93,8 @@ backend:
 The variable applies to the whole backend, not to one feature. Once set:
 
 * every URL in the table above may point to any internal host, including the cloud metadata address, so any administrator who can change one of those URLs can make the backend reach internal services;
-* most of these URLs are no longer required to use HTTPS. Keep them on HTTPS anyway. OAuth audit log sinks still require HTTPS, except on loopback.
+* most of these URLs are no longer required to use HTTPS. Keep them on HTTPS anyway. OAuth audit log sinks still require HTTPS, except on loopback;
+* turning the variable off again does not recheck AI provider and mailer URLs saved while it was on: they are only checked when saved, so review them.
 
 To limit the exposure, keep the variable off unless you need it, and restrict the backend's and worker's outbound traffic to the hosts they need with a firewall, or with an `Egress` rule in the Helm chart's `networkPolicy`. The shared cache is not reachable this way: it listens on a unix socket, not a network port (see [Shared cache](shared-cache.md)).
 

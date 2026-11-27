@@ -30,7 +30,15 @@ services:
 
 On Helm, set `enabled: true` under the chat values and enable Qdrant; see [Helm chart](../installation/helm-chart.md#ai-assistant-chat-rag).
 
-The assistant also needs a reachable Qdrant instance (`QDRANT_URL`), which it uses to search your data. The Docker Compose files already ship one.
+The assistant also needs a reachable Qdrant instance (`QDRANT_URL`), which it uses to search your data. The Docker Compose files already ship one. Its collection is not created automatically: once the services are up, create it and index your data and frameworks once from the backend container:
+
+```bash
+docker compose exec backend uv run python manage.py init_qdrant
+docker compose exec backend uv run python manage.py index_objects
+docker compose exec backend uv run python manage.py index_libraries --sync
+```
+
+On Helm, run the same commands in the backend pod; see [Helm chart](../installation/helm-chart.md#ai-assistant-chat-rag).
 {% endstep %}
 
 {% step %}

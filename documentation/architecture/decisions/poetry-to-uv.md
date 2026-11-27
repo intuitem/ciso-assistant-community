@@ -19,7 +19,6 @@ We will replace Poetry with uv as the backend's dependency and environment manag
 
 - No more `poetry shell`; local dev works across the community/enterprise split directly.
 - Faster installs and resolution, locally and in CI/Docker.
-- PyTorch is pinned to its CPU index via `[tool.uv.sources]`; the force-reinstall/purge hack is gone.
 - Usage stays close to Poetry (`uv add`, `uv run`, lockfiles), so adoption cost was low.
 - `poetry.lock` → `uv.lock`; build backend moved to `setuptools`.
 
