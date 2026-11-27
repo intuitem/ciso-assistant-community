@@ -227,3 +227,21 @@ def test_startup_leaves_an_explicit_choice_alone(flags_row):
     # `xrays` defaults to True in the serializer but was turned off in the row.
     assert flags_row.value["xrays"] is False
     assert ff_is_enabled("xrays") is False
+
+
+@pytest.mark.parametrize(
+    "flags, expected",
+    [
+        ({"mcp": True}, {"mcp"}),
+        ({"mcp_write": True}, {"mcp_write"}),
+        ({"mcp": True, "mcp_write": True}, {"mcp", "mcp_write"}),
+    ],
+)
+def test_mcp_without_shared_cache_flags_each_enabled_tile(
+    flags_row, monkeypatch, flags, expected
+):
+    monkeypatch.setattr("iam.mcp_access.has_shared_cache", lambda: False)
+    serializer = FeatureFlagsSerializer(flags_row, data=flags, partial=True)
+    assert not serializer.is_valid()
+    assert set(serializer.errors) == expected
+    assert all(e == ["errorMcpNeedsSharedCache"] for e in serializer.errors.values())
