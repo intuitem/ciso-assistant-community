@@ -103,6 +103,14 @@ def is_reworded(a: dict, b: dict) -> bool:
     return text_similarity(a, b) < REWORDED_THRESHOLD
 
 
+def is_reworded_copy(a: dict, b: dict, a_base: str, b_base: str) -> bool:
+    """Only an item and its own copy (same URN tail) can be "reworded":
+    two frameworks from different authors always word things differently."""
+    return urn_tail(a["urn"], a_base) == urn_tail(b["urn"], b_base) and is_reworded(
+        a, b
+    )
+
+
 def apply_pair_ops(
     mapping_set: dict, ops: list, source_urns: set, target_urns: set
 ) -> list:
@@ -226,7 +234,9 @@ def suggest_pairs(
                     "target": target["urn"],
                     "relationship": "equal",
                     "reason": reason,
-                    "reworded": is_reworded(node, target),
+                    "reworded": is_reworded_copy(
+                        node, target, source_base, target_base
+                    ),
                 }
             )
         pending = remaining
@@ -466,9 +476,11 @@ def mapping_issues(
         if relationships[-1] == "equal":
             equal_by["source"].setdefault(source, []).append(target)
             equal_by["target"].setdefault(target, []).append(source)
+    tail = lambda urn: urn.rsplit(":", 1)[-1]
     for side, groups in equal_by.items():
         for urn, others in groups.items():
-            if len(others) > 1:
+            # A split of the item into its own next version is expected.
+            if len(others) > 1 and tail(urn) not in map(tail, others):
                 issues.append(
                     {
                         "code": "equalFanOut",

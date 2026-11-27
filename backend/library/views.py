@@ -2327,6 +2327,14 @@ class LibraryDraftViewSet(BaseModelViewSet):
         return None
 
     @staticmethod
+    def _is_derived(content: dict, mapping_set: dict, reverse) -> bool:
+        """The later of two opposite sets is the generated one: it never
+        regenerates the set it was derived from."""
+        sets = content.get("requirement_mapping_sets") or []
+        position = {id(s): i for i, s in enumerate(sets)}
+        return reverse is not None and position[id(reverse)] < position[id(mapping_set)]
+
+    @staticmethod
     def _mint_mapping_set(draft, content: dict, source: dict, target: dict) -> dict:
         def leaf(framework):
             return str(framework.get("urn", "")).lower().rsplit(":", 1)[-1]
@@ -2713,6 +2721,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
         source_nodes = mapping_editor.assessable_nodes(source)
         target_nodes = mapping_editor.assessable_nodes(target)
         by_urn = {n["urn"]: n for n in source_nodes + target_nodes}
+        source_base = mapping_editor.node_base(source)
+        target_base = mapping_editor.node_base(target)
         pairs = []
         for pair in mapping_set.get("requirement_mappings") or []:
             src = by_urn.get(str(pair.get("source_requirement_urn", "")).lower())
@@ -2731,7 +2741,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
                         src
                         and tgt
                         and pair.get("relationship") == "equal"
-                        and mapping_editor.is_reworded(src, tgt)
+                        and mapping_editor.is_reworded_copy(
+                            src, tgt, source_base, target_base
+                        )
                     ),
                 }
             )
@@ -2740,8 +2752,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
             source_nodes,
             target_nodes,
             mapped,
-            mapping_editor.node_base(source),
-            mapping_editor.node_base(target),
+            source_base,
+            target_base,
         )
         existing = {
             (p["source_requirement_urn"], p["target_requirement_urn"]) for p in pairs
@@ -2787,11 +2799,17 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     "urn": str(source["urn"]).lower(),
                     "name": source.get("name"),
                     "nodes": source_nodes,
+                    "in_draft": any(
+                        source is fw for fw in content.get("frameworks") or []
+                    ),
                 },
                 "target": {
                     "urn": str(target["urn"]).lower(),
                     "name": target.get("name"),
                     "nodes": target_nodes,
+                    "in_draft": any(
+                        target is fw for fw in content.get("frameworks") or []
+                    ),
                 },
                 "pairs": pairs,
                 "suggestions": suggestions,
@@ -2802,6 +2820,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     "urn": reverse["urn"],
                     "in_sync": pair_keys(reverse.get("requirement_mappings") or [])
                     == pair_keys(mapping_editor.reverse_mappings(mapping_set)),
+                    "derived": self._is_derived(content, mapping_set, reverse),
                 },
             }
         )
@@ -2856,6 +2875,11 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if error is not None:
             return error
         reverse = self._find_mapping_set(content, target["urn"], source["urn"])
+        if self._is_derived(content, mapping_set, reverse):
+            # Regenerating from here would overwrite the set this one came from.
+            return Response(
+                {"error": "reverseSetIsDerived"}, status=HTTP_400_BAD_REQUEST
+            )
         if reverse is None:
             try:
                 reverse = self._mint_mapping_set(draft, content, target, source)

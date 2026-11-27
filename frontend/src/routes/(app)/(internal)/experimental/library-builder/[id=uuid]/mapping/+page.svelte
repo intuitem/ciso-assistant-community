@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { browser } from '$app/env';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -69,7 +70,21 @@
 			])
 		)
 	);
-	let suggestions: Suggestion[] = $state(editor.suggestions);
+	// Dismissals are remembered in this browser only (shortcut: not shared with
+	// teammates; move them into the draft if that is asked for).
+	const dismissedKey = `library-builder:dismissed:${data.draftId}:${setUrn}`;
+	const dismissed = new Set<string>(
+		(() => {
+			try {
+				return browser ? JSON.parse(localStorage.getItem(dismissedKey) ?? '[]') : [];
+			} catch {
+				return [];
+			}
+		})()
+	);
+	let suggestions: Suggestion[] = $state(
+		(editor.suggestions as Suggestion[]).filter((s) => !dismissed.has(key(s.source, s.target)))
+	);
 	// Wording hints: [target urn, score][] per source, best first.
 	const hints: Record<string, [string, number][]> = editor.hints ?? {};
 	interface Issue {
@@ -80,7 +95,11 @@
 	}
 	let issues: Issue[] = $state(editor.issues ?? []);
 	const sourceByUrn = new Map(sourceNodes.map((n) => [n.urn, n]));
-	let reverse: { urn: string; in_sync: boolean } | null = $state(editor.reverse);
+	// derived: this set was generated from `reverse`, which it must not overwrite.
+	let reverse: { urn: string; in_sync: boolean; derived: boolean } | null = $state(editor.reverse);
+	// What tells two frameworks with the same name apart.
+	const frameworkTag = (side: { urn: string; in_draft?: boolean }) =>
+		side.in_draft ? m.lbMappingThisLibrary() : side.urn.split(':').pop();
 	let defaultRelationship = $state('intersect');
 
 	let pairsBySource = $derived.by(() => {
@@ -365,6 +384,12 @@
 
 	function dismiss(s: Suggestion) {
 		suggestions = suggestions.filter((x) => x !== s);
+		dismissed.add(key(s.source, s.target));
+		try {
+			localStorage.setItem(dismissedKey, JSON.stringify([...dismissed]));
+		} catch {
+			/* storage unavailable: the dismissal lasts until reload */
+		}
 	}
 
 	let generatingReverse = $state(false);
@@ -382,7 +407,11 @@
 			const result = await res.json().catch(() => ({}));
 			if (!res.ok) return setStatus(safeTranslate(result.error ?? 'error'), 'error');
 			// An edit made while this ran is not in the generated set.
-			reverse = { urn: result.urn, in_sync: editCount === editsBefore };
+			reverse = {
+				urn: result.urn,
+				in_sync: editCount === editsBefore,
+				derived: false
+			};
 			if (Array.isArray(result.issues) && editCount === editsBefore) issues = result.issues;
 			setStatus(m.lbMappingReverseGenerated({ count: result.count }), 'success');
 		} catch {
@@ -451,13 +480,15 @@
 	}
 
 	function onWindowKey(event: KeyboardEvent) {
-		if ((event.metaKey || event.ctrlKey) && event.key === 'z') {
+		const target = event.target as HTMLElement;
+		// A text field keeps its own undo for what is being typed.
+		const typing = target.closest('input, textarea, [contenteditable]');
+		if ((event.metaKey || event.ctrlKey) && event.key === 'z' && !typing) {
 			event.preventDefault();
 			undo();
 			return;
 		}
-		const target = event.target as HTMLElement;
-		if (target.closest('input, select, textarea, button, a, [contenteditable]')) return;
+		if (typing || target.closest('select, button, a')) return;
 		const handlers: Record<string, () => void> = {
 			j: () => moveTo(active + 1),
 			ArrowDown: () => moveTo(active + 1),
@@ -505,9 +536,11 @@
 				<div class="min-w-0">
 					<h2 class="text-xl font-semibold truncate">{editor.set.name || editor.set.ref_id}</h2>
 					<p class="text-sm text-surface-500 truncate">
-						{editor.source.name}
-						<i class="fa-solid fa-arrow-right mx-1"></i>
-						{editor.target.name}
+						{#each [editor.source, editor.target] as side, index}
+							{#if index}<i class="fa-solid fa-arrow-right mx-1"></i>{/if}
+							{side.name}
+							<span class="badge text-xs preset-tonal-surface ml-1">{frameworkTag(side)}</span>
+						{/each}
 					</p>
 				</div>
 			</div>
@@ -528,22 +561,32 @@
 				>
 					<i class="fa-solid fa-rotate-left mr-1"></i>{m.undo()}
 				</button>
-				<button
-					type="button"
-					class="btn btn-sm preset-outlined-primary-500"
-					onclick={generateReverse}
-					disabled={generatingReverse || (reverse?.in_sync ?? false)}
-					title={m.lbMappingReverseHelp()}
-				>
-					{#if generatingReverse}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
-							class="fa-solid fa-right-left mr-1"
-						></i>{/if}
-					{!reverse
-						? m.lbMappingGenerateReverse()
-						: reverse.in_sync
-							? m.lbMappingReverseInSync()
-							: m.lbMappingRegenerateReverse()}
-				</button>
+				{#if reverse?.derived}
+					<a
+						class="btn btn-sm preset-outlined-surface-500"
+						href={`${draftBase}/mapping?set_urn=${encodeURIComponent(reverse.urn)}`}
+						title={m.lbMappingDerivedHelp()}
+					>
+						<i class="fa-solid fa-right-left mr-1"></i>{m.lbMappingDerivedFrom()}
+					</a>
+				{:else}
+					<button
+						type="button"
+						class="btn btn-sm preset-outlined-primary-500"
+						onclick={generateReverse}
+						disabled={generatingReverse || (reverse?.in_sync ?? false)}
+						title={m.lbMappingReverseHelp()}
+					>
+						{#if generatingReverse}<i class="fa-solid fa-spinner fa-spin mr-1"></i>{:else}<i
+								class="fa-solid fa-right-left mr-1"
+							></i>{/if}
+						{!reverse
+							? m.lbMappingGenerateReverse()
+							: reverse.in_sync
+								? m.lbMappingReverseInSync()
+								: m.lbMappingRegenerateReverse()}
+					</button>
+				{/if}
 			</div>
 		</div>
 

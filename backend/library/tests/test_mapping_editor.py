@@ -324,7 +324,12 @@ def test_clone_reword_map_to_original_round_trip(admin_client):
     editor = admin_client.get(url("mapping-editor"), {"set_urn": set_urn}).data
     assert editor["suggestions"] == []
     assert all(p["reworded"] for p in editor["pairs"])
-    assert editor["reverse"] == {"urn": reverse_set.data["urn"], "in_sync": True}
+    assert editor["reverse"] == {
+        "urn": reverse_set.data["urn"],
+        "in_sync": True,
+        "derived": False,
+    }
+    assert editor["source"]["in_draft"] and not editor["target"]["in_draft"]
 
     # A duplicated forward pair would regenerate as two reverse pairs.
     detail = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]]))
@@ -646,9 +651,10 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
     url = lambda name: reverse(f"library-drafts-{name}", args=[draft["id"]])
 
     validation = admin_client.get(url("validate")).data
-    assert any(
-        "conflicting relationships (equal, subset)" in e for e in validation["errors"]
-    )
+    # Items read by ref_id, the set by its name.
+    assert validation["errors"] == [
+        "m: A → X is recorded with conflicting relationships (equal, subset)"
+    ]
 
     editor = admin_client.get(
         url("mapping-editor"), {"set_urn": mapping_set["urn"]}
@@ -698,6 +704,21 @@ def test_editor_and_validate_report_conflicting_pairs(admin_client):
     )
     errors = admin_client.get(url("validate")).data["errors"]
     assert sum("reverse set says" in e for e in errors) == 1, errors
+
+    # The generated set never regenerates the one it came from.
+    reverse_urn = regenerated.data["urn"]
+    editor = admin_client.get(url("mapping-editor"), {"set_urn": reverse_urn}).data
+    assert editor["reverse"]["derived"] is True
+    refused = admin_client.post(
+        url("generate-reverse-set"), {"set_urn": reverse_urn}, format="json"
+    )
+    assert refused.status_code == status.HTTP_400_BAD_REQUEST
+    assert refused.data == {"error": "reverseSetIsDerived"}
+    forward = admin_client.get(
+        url("mapping-editor"), {"set_urn": mapping_set["urn"]}
+    ).data
+    assert forward["reverse"]["derived"] is False
+    assert forward["pairs"][0]["relationship"] == "intersect"
 
 
 def test_pair_error_code_never_echoes_the_exception():
@@ -762,3 +783,67 @@ def test_splash_nodes_and_malformed_relationships():
     assert me.reverse_mappings(broken)[0]["relationship"] == []
     assert me.mapping_issues(broken, reverse_set=broken) is not None
     assert me.compose_relationship([], "equal") is None
+
+
+def test_validate_groups_mapping_warnings():
+    from library.builder import _check_mapping_sets
+
+    framework = _framework("me", "mylib", [(f"a{i}", f"A{i}", "x") for i in range(7)])
+    stored = _framework("o", "other", [("y", "Y.1", "y"), ("z", "Z.1", "z")])
+    pairs = [
+        {
+            "source_requirement_urn": f"urn:me:risk:req_node:mylib:a{i}",
+            "target_requirement_urn": f"urn:o:risk:req_node:other:{leaf}",
+            "relationship": "equal",
+        }
+        for i in range(7)
+        for leaf in ("y", "z")
+    ]
+    mapping_set = {
+        "name": "Mine to other",
+        "source_framework_urn": framework["urn"],
+        "target_framework_urn": stored["urn"],
+        "requirement_mappings": pairs,
+    }
+    objects = {"frameworks": [framework], "requirement_mapping_sets": [mapping_set]}
+    assert _check_mapping_sets(objects, [stored]) == (
+        [],
+        [
+            "Mine to other: 7 source item(s) equal to several target items (A0, A1, A2, A3, A4, +2)",
+            "Mine to other: 2 target item(s) equal to several source items (Y.1, Z.1)",
+        ],
+    )
+    # Without the stored framework, its items read by URN tail.
+    assert "(y, z)" in _check_mapping_sets(objects)[1][1]
+
+    # A version split (gov-01 → gov-01 + gov-02) is not a warning.
+    split = {
+        "requirement_mappings": [
+            {
+                "source_requirement_urn": "urn:x:risk:req_node:v1:gov-01",
+                "target_requirement_urn": f"urn:x:risk:req_node:v2:{leaf}",
+                "relationship": "equal",
+            }
+            for leaf in ("gov-01", "gov-02")
+        ]
+    }
+    assert me.mapping_issues(split) == []
+
+
+@pytest.mark.django_db
+def test_mapped_clone_loads_its_dependencies():
+    from types import SimpleNamespace
+
+    from library.utils import LibraryImporter
+
+    missing = "urn:nobody:risk:library:missing"
+    mapping = {"requirement_mapping_sets": [{"urn": "urn:x:m"}]}
+
+    def check(content):
+        library = SimpleNamespace(content=content, dependencies=[missing])
+        return LibraryImporter(library).check_and_import_dependencies()
+
+    # A mapping-only library leaves its frameworks alone.
+    assert check(mapping) is None
+    # A clone shipped with its mapping still needs, e.g., its controls library.
+    assert missing in check({**mapping, "frameworks": [{"urn": "urn:x:f"}]})

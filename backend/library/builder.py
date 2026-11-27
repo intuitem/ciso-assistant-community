@@ -1048,8 +1048,22 @@ def validate_draft_document(draft, *, user=None) -> dict:
 
     errors.extend(_check_reference_integrity(draft, user=user))
     if draft.content:
+        from core.models import StoredLibrary
+
+        dependencies = StoredLibrary.objects.filter(
+            urn__in=[str(dep).lower() for dep in draft.dependencies or []]
+        )
+        accessible = accessible_stored_library_ids(user)
+        if accessible is not None:
+            dependencies = dependencies.filter(id__in=accessible)
         mapping_errors, mapping_warnings = _check_mapping_sets(
-            normalize_objects(draft.content)
+            normalize_objects(draft.content),
+            [
+                fw
+                for stored in dependencies
+                for fw in normalize_objects(stored.content or {}).get("frameworks")
+                or []
+            ],
         )
         errors.extend(mapping_errors)
         warnings.extend(mapping_warnings)
@@ -1070,13 +1084,17 @@ MAPPING_ISSUE_MESSAGES = {
     "pairConflict": "{set}: {source} → {target} is recorded with conflicting relationships ({detail})",
     "reverseConflict": "{set}: {source} → {target} is {first} but the reverse set says {second}; regenerate the reverse set",
     "pairNodeMissing": "{set}: {source} → {target} points to an item that is not assessable in its framework",
-    "pairDuplicate": "{set}: {source} → {target} is recorded twice",
-    "equalFanOut": "{set}: {item} is equal to several items ({detail})",
 }
-MAPPING_ERROR_CODES = {"pairConflict", "reverseConflict", "pairNodeMissing"}
+# Warnings come one line per kind and set, so errors are not buried.
+MAPPING_WARNING_MESSAGES = {
+    "pairDuplicate": "{set}: {count} link(s) recorded twice ({items})",
+    "equalFanOut": "{set}: {count} source item(s) equal to several target items ({items})",
+    "equalFanOutTarget": "{set}: {count} target item(s) equal to several source items ({items})",
+}
+MAPPING_WARNING_SAMPLE = 5
 
 
-def _check_mapping_sets(objects: dict) -> tuple:
+def _check_mapping_sets(objects: dict, stored_frameworks=()) -> tuple:
     """(errors, warnings) from mapping_editor.mapping_issues. Item existence
     is checked for the draft's own frameworks only.
     shortcut: items of stored frameworks are not checked here (the mapping
@@ -1090,6 +1108,18 @@ def _check_mapping_sets(objects: dict) -> tuple:
         for fw in objects.get("frameworks") or []
         if isinstance(fw, dict)
     }
+    ref_ids = {
+        str(n.get("urn", "")).lower(): n["ref_id"]
+        for fw in [*stored_frameworks, *(objects.get("frameworks") or [])]
+        if isinstance(fw, dict)
+        for n in fw.get("requirement_nodes") or []
+        if isinstance(n, dict) and n.get("ref_id")
+    }
+
+    def label(urn) -> str:
+        urn = str(urn or "")
+        return ref_ids.get(urn.lower()) or urn.rsplit(":", 1)[-1]
+
     sets = [
         s for s in objects.get("requirement_mapping_sets") or [] if isinstance(s, dict)
     ]
@@ -1110,21 +1140,40 @@ def _check_mapping_sets(objects: dict) -> tuple:
             None if (target, source) in compared else by_ends.get((target, source))
         )
         compared.add((source, target))
+        set_name = mapping_set.get("name") or label(mapping_set.get("urn"))
+        grouped = {}
         for issue in mapping_editor.mapping_issues(
             mapping_set, own.get(source), own.get(target), reverse
         ):
             detail = issue["detail"]
-            message = MAPPING_ISSUE_MESSAGES[issue["code"]].format(
-                set=mapping_set.get("urn"),
-                source=issue["source"],
-                target=issue["target"],
-                item=issue["source"] or issue["target"],
-                detail=", ".join(map(str, detail)),
-                first=detail[0],
-                second=detail[-1],
+            if issue["code"] == "equalFanOut":
+                code = "equalFanOut" if issue["source"] else "equalFanOutTarget"
+                item = label(issue["source"] or issue["target"])
+                grouped.setdefault(code, []).append(item)
+                continue
+            if issue["code"] == "pairDuplicate":
+                item = f"{label(issue['source'])} → {label(issue['target'])}"
+                grouped.setdefault("pairDuplicate", []).append(item)
+                continue
+            errors.append(
+                MAPPING_ISSUE_MESSAGES[issue["code"]].format(
+                    set=set_name,
+                    source=label(issue["source"]),
+                    target=label(issue["target"]),
+                    detail=", ".join(map(str, detail)),
+                    first=detail[0],
+                    second=detail[-1],
+                )
             )
-            (errors if issue["code"] in MAPPING_ERROR_CODES else warnings).append(
-                message
+        for code, items in grouped.items():
+            shown = items[:MAPPING_WARNING_SAMPLE]
+            more = len(items) - len(shown)
+            warnings.append(
+                MAPPING_WARNING_MESSAGES[code].format(
+                    set=set_name,
+                    count=len(items),
+                    items=", ".join(shown) + (f", +{more}" if more else ""),
+                )
             )
     return errors, warnings
 

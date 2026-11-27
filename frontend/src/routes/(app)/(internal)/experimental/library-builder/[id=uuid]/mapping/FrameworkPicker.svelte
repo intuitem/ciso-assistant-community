@@ -49,9 +49,15 @@
 	const pickerForm = form as unknown as SuperForm<Record<string, unknown>>;
 
 	const selectOptions = $derived(
+		// The tag goes first: the selected label is cut at 30 characters, and
+		// versions sit at the end of names (SCF 2025 / 2026, ISO 2013 / 2022).
 		options.map((o) => ({
 			value: o.urn,
-			label: o.kind === 'draft' ? `${o.name} · ${m.lbMappingThisLibrary()}` : o.name
+			label: o.name,
+			infoString: {
+				string: o.kind === 'draft' ? m.lbMappingThisLibrary() : (o.urn.split(':').pop() ?? ''),
+				position: 'prefix' as const
+			}
 		}))
 	);
 </script>
