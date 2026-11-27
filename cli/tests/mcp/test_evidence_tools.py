@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
@@ -136,7 +138,10 @@ class TestCreateEvidence:
     def test_symlink_to_hidden_file_is_refused(self, tmp_path):
         (tmp_path / ".ssh").mkdir()
         link = tmp_path / "key.txt"
-        link.symlink_to(_file(tmp_path, ".ssh/id_rsa.txt"))
+        try:
+            link.symlink_to(_file(tmp_path, ".ssh/id_rsa.txt"))
+        except (OSError, NotImplementedError):
+            pytest.skip("symlinks are not available on this platform or without privileges")
         with _Mocks() as m:
             out = run(write_tools.create_evidence(file_path=str(link)))
         assert out.startswith("Error: refusing a hidden file or directory:")
