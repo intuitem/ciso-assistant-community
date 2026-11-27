@@ -92,9 +92,11 @@
 		}
 		return grouped;
 	});
+	// A pair mapped by hand since the payload loaded is no longer a suggestion.
+	let openSuggestions = $derived(suggestions.filter((s) => !pairs.has(key(s.source, s.target))));
 	let suggestionsBySource = $derived.by(() => {
 		const grouped = new Map<string, Suggestion[]>();
-		for (const s of suggestions) grouped.set(s.source, [...(grouped.get(s.source) ?? []), s]);
+		for (const s of openSuggestions) grouped.set(s.source, [...(grouped.get(s.source) ?? []), s]);
 		return grouped;
 	});
 	let issuesBySource = $derived.by(() => {
@@ -262,6 +264,7 @@
 				const result = await res.json().catch(() => ({}));
 				// The batch was rejected as a whole: the local view is now ahead of the draft.
 				setStatus(`${m.lbMappingSaveFailed()} ${safeTranslate(result.error ?? '')}`, 'error');
+				saveRejected = true;
 				window.location.reload();
 				return;
 			}
@@ -273,13 +276,16 @@
 		}
 	}
 
-	/** Resolves once every queued edit is saved; false if the connection is down. */
+	// Set when the server refused a batch: the page reloads, nothing more is sent.
+	let saveRejected = false;
+
+	/** Resolves once every queued edit is saved; false if one could not be. */
 	async function settle(): Promise<boolean> {
 		while (inFlight || queue.length) {
 			await flush();
-			if (connectionLost) return false;
+			if (connectionLost || saveRejected) return false;
 		}
-		return true;
+		return !saveRejected;
 	}
 
 	function inverseOf(op: Op): Op {
@@ -334,7 +340,9 @@
 		]);
 	}
 
-	function accept(list: Suggestion[]) {
+	function accept(candidates: Suggestion[]) {
+		// Never overwrite a pair that is already mapped.
+		const list = candidates.filter((s) => !pairs.has(key(s.source, s.target)));
 		if (!list.length) return;
 		const accepted = new Set(list);
 		suggestions = suggestions.filter((s) => !accepted.has(s));
@@ -375,10 +383,10 @@
 			if (!res.ok) return setStatus(safeTranslate(result.error ?? 'error'), 'error');
 			// An edit made while this ran is not in the generated set.
 			reverse = { urn: result.urn, in_sync: editCount === editsBefore };
-			if (Array.isArray(result.issues)) issues = result.issues;
+			if (Array.isArray(result.issues) && editCount === editsBefore) issues = result.issues;
 			setStatus(m.lbMappingReverseGenerated({ count: result.count }), 'success');
 		} catch {
-			setStatus(m.lbMappingSaveRetrying(), 'error');
+			setStatus(m.lbMappingReverseFailed(), 'error');
 		} finally {
 			generatingReverse = false;
 		}
@@ -581,14 +589,14 @@
 					{/each}
 				</select>
 			</label>
-			{#if suggestions.length}
+			{#if openSuggestions.length}
 				<button
 					type="button"
 					class="btn btn-sm preset-filled-success-500 ml-auto"
-					onclick={() => accept(suggestions)}
+					onclick={() => accept(openSuggestions)}
 				>
 					<i class="fa-solid fa-check-double mr-1"></i>
-					{m.lbMappingAcceptAll({ count: suggestions.length })}
+					{m.lbMappingAcceptAll({ count: openSuggestions.length })}
 				</button>
 			{/if}
 		</div>

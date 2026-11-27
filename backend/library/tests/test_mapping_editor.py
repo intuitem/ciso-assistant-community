@@ -326,6 +326,27 @@ def test_clone_reword_map_to_original_round_trip(admin_client):
     assert all(p["reworded"] for p in editor["pairs"])
     assert editor["reverse"] == {"urn": reverse_set.data["urn"], "in_sync": True}
 
+    # A duplicated forward pair would regenerate as two reverse pairs.
+    detail = admin_client.get(reverse("library-drafts-detail", args=[draft["id"]]))
+    duplicated = copy.deepcopy(detail.data["content"])
+    forward = next(
+        ms for ms in duplicated["requirement_mapping_sets"] if ms["urn"] == set_urn
+    )
+    forward["requirement_mappings"].append(forward["requirement_mappings"][0])
+    admin_client.patch(
+        reverse("library-drafts-detail", args=[draft["id"]]),
+        {"content": duplicated},
+        format="json",
+    )
+    editor = admin_client.get(url("mapping-editor"), {"set_urn": set_urn}).data
+    assert editor["reverse"]["in_sync"] is False
+    forward["requirement_mappings"].pop()
+    admin_client.patch(
+        reverse("library-drafts-detail", args=[draft["id"]]),
+        {"content": duplicated},
+        format="json",
+    )
+
     validation = admin_client.get(url("validate"))
     assert validation.status_code == status.HTTP_200_OK
     assert validation.data["errors"] == [], validation.data
@@ -377,6 +398,7 @@ def test_compose_relationship_and_pairs():
     assert me.compose_relationship("intersect", "intersect") is None
     assert me.compose_relationship("equal", "intersect") == "intersect"
     assert me.compose_relationship("equal", "not_related") is None
+    assert me.compose_relationship("unknown", "equal") is None
     composed = me.compose_pairs(
         [("a1", "p1", "equal"), ("a1", "p2", "subset"), ("a2", "p3", "equal")],
         [("p1", "b1", "equal"), ("p2", "b1", "equal"), ("p3", "b2", "not_related")],

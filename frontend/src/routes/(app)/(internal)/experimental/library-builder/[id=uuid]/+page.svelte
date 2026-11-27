@@ -291,12 +291,16 @@
 
 	onMount(() => {
 		if (!draft.identity_locked) loadConflicts();
-		if (new URLSearchParams(window.location.search).get('new_mapping')) openMappingPanel();
 		try {
 			const stored = localStorage.getItem(viewKey());
 			if (stored === 'simple' || stored === 'full') viewChoice = stored;
 		} catch {
 			/* storage unavailable */
+		}
+		// The mapping section lives in the full view; not saved as the preference.
+		if (new URLSearchParams(window.location.search).get('new_mapping')) {
+			viewChoice = 'full';
+			openMappingPanel();
 		}
 	});
 
@@ -706,8 +710,9 @@
 		mappingPanelOpen = true;
 		// Fetched on every open: an import since the last one changes the list.
 		const res = await fetch(`${base()}?action=mapping-frameworks`).catch(() => null);
-		if (!res?.ok) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
-		mappingFrameworks = (await res.json()).frameworks ?? [];
+		const frameworks = res?.ok ? (await res.json().catch(() => null))?.frameworks : null;
+		if (!Array.isArray(frameworks)) return setStatus(m.lbMappingFrameworksLoadFailed(), 'error');
+		mappingFrameworks = frameworks;
 		const known = new Set(mappingFrameworks.map((f) => f.urn));
 		if (!known.has(mapSource)) mapSource = '';
 		if (!known.has(mapTarget)) mapTarget = '';

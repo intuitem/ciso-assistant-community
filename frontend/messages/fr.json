@@ -6524,6 +6524,7 @@
 	"lbMappingRegenerateReverse": "Régénérer l'ensemble inverse",
 	"lbMappingReverseInSync": "Ensemble inverse à jour",
 	"lbMappingReverseHelp": "Les correspondances ne fonctionnent que dans un sens. L'ensemble inverse est déduit de celui-ci (sous-ensemble et sur-ensemble sont permutés) et réécrit à chaque régénération.",
+	"lbMappingReverseFailed": "Impossible de générer l’ensemble inverse : vérifiez la connexion puis réessayez.",
 	"lbMappingReverseGenerated": "Ensemble inverse généré avec {count} correspondance(s)",
 	"lbMappingProgress": "{mapped} / {total} reliées",
 	"lbMappingSearchPlaceholder": "Rechercher une exigence source",

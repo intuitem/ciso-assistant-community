@@ -6935,6 +6935,7 @@
 	"lbMappingRegenerateReverse": "Regenerate reverse set",
 	"lbMappingReverseInSync": "Reverse set up to date",
 	"lbMappingReverseHelp": "Mappings work in one direction. The reverse set is derived from this one (subset and superset are swapped) and overwritten on each regeneration.",
+	"lbMappingReverseFailed": "Could not generate the reverse set: check the connection and try again.",
 	"lbMappingReverseGenerated": "Reverse set generated with {count} mapping(s)",
 	"lbMappingProgress": "{mapped} / {total} mapped",
 	"lbMappingSearchPlaceholder": "Search source requirements",

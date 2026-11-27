@@ -1,3 +1,4 @@
+from collections import Counter
 from itertools import chain
 import difflib
 import json
@@ -2537,7 +2538,13 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 s = a_nodes.get(s) if a_nodes is not None else s
                 t = b_nodes.get(t) if b_nodes is not None else t
                 key = (s, t)
-                if s in source_urns and t in target_urns and key not in skip:
+                # A stored value the pair editor would reject is not offered.
+                if (
+                    relationship in mapping_editor.RELATIONSHIPS
+                    and s in source_urns
+                    and t in target_urns
+                    and key not in skip
+                ):
                     found.setdefault(
                         key,
                         {
@@ -2755,7 +2762,8 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
         def pair_keys(items):
             # Every field counts: regeneration would copy annotations too.
-            return {
+            # Counted, not a set: a duplicated forward pair yields two reverse pairs.
+            return Counter(
                 tuple(
                     sorted(
                         (
@@ -2766,7 +2774,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                     )
                 )
                 for p in items
-            }
+            )
 
         return Response(
             {

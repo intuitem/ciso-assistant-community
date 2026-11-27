@@ -268,7 +268,7 @@ def clone_score(clone: dict, candidate: dict) -> float:
 def compose_relationship(first: str, second: str):
     """A→P then P→B as A→B; None when the chain proves nothing (two
     overlaps need not overlap each other)."""
-    if not (isinstance(first, str) and isinstance(second, str)):
+    if first not in RELATIONSHIPS or second not in RELATIONSHIPS:
         return None
     if "not_related" in (first, second):
         return None
