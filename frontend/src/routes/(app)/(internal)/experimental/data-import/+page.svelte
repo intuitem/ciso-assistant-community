@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { fly } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { translateChoiceLabel } from '#lib/utils/i18n.js';
 	import { canPerformAction, canPerformActionOnObject } from '#lib/utils/access-control.js';
@@ -856,9 +858,14 @@
 		<ol class="flex items-center gap-2 text-xs font-medium" aria-label={m.dataImportProgress()}>
 			{#each STAGES as label, i (label)}
 				<li class="flex items-center gap-2" aria-current={i === stage ? 'step' : undefined}>
-					{#if i}<span class="w-6 h-px bg-surface-300-700" aria-hidden="true"></span>{/if}
+					{#if i}<span
+							class="w-6 h-px transition-colors duration-300 {i <= stage
+								? 'bg-primary-500'
+								: 'bg-surface-300-700'}"
+							aria-hidden="true"
+						></span>{/if}
 					<span
-						class="flex items-center justify-center size-6 rounded-full
+						class="flex items-center justify-center size-6 rounded-full transition-colors duration-300
 							{i < stage || (i === stage && i === STAGES.length - 1)
 							? 'preset-filled-success-500'
 							: i === stage
@@ -1143,311 +1150,322 @@
 
 		<div class="space-y-3">
 			{#each plans as plan, index (plan.analysed.name)}
-				{#if plan.analysed.companion}
-					<div
-						class="flex items-center gap-3 px-4 py-2 rounded-lg border border-dashed border-surface-300-700 text-sm text-surface-600-400"
-					>
-						<i class="fa-solid {COMPANIONS[plan.analysed.companion].icon} w-4 text-center"></i>
-						<span class="font-mono font-medium text-surface-800-200">{plan.analysed.name}</span>
-						<span>{COMPANIONS[plan.analysed.companion].text()}</span>
-						<span class="grow"></span>
-						{#if plan.analysed.row_count}
-							<span class="text-xs">{m.dataImportRowCount({ count: plan.analysed.row_count })}</span
-							>
-						{/if}
-					</div>
-				{:else}
-					{@const status = sheetStatus(plan)}
-					<section
-						id="sheet-{index}"
-						class="card bg-surface-50-950 border border-surface-200-800 border-l-4 shadow-sm transition-shadow hover:shadow-md
+				<div
+					in:fly|global={{
+						y: 4,
+						delay: Math.min(index, 10) * 40,
+						duration: prefersReducedMotion.current ? 0 : 200
+					}}
+				>
+					{#if plan.analysed.companion}
+						<div
+							class="flex items-center gap-3 px-4 py-2 rounded-lg border border-dashed border-surface-300-700 text-sm text-surface-600-400"
+						>
+							<i class="fa-solid {COMPANIONS[plan.analysed.companion].icon} w-4 text-center"></i>
+							<span class="font-mono font-medium text-surface-800-200">{plan.analysed.name}</span>
+							<span>{COMPANIONS[plan.analysed.companion].text()}</span>
+							<span class="grow"></span>
+							{#if plan.analysed.row_count}
+								<span class="text-xs"
+									>{m.dataImportRowCount({ count: plan.analysed.row_count })}</span
+								>
+							{/if}
+						</div>
+					{:else}
+						{@const status = sheetStatus(plan)}
+						<section
+							id="sheet-{index}"
+							class="card bg-surface-50-950 border border-surface-200-800 border-l-4 shadow-sm transition-shadow hover:shadow-md
 							{status === 'ready'
-							? 'border-l-success-500'
-							: status === 'review'
-								? 'border-l-warning-500'
-								: 'border-l-surface-300-700'}"
-					>
-						<div class="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
-							<label class="flex items-center gap-3 min-w-56">
-								<input
-									type="checkbox"
-									class="checkbox"
-									bind:checked={plan.include}
-									disabled={plan.analysed.empty || !plan.modelType || running}
-								/>
-								<span class="flex flex-col">
-									<span class="font-mono font-semibold {plan.include ? '' : 'text-surface-600-400'}"
-										><i class="fa-solid fa-table text-xs text-surface-500 mr-1"></i>{plan.analysed
-											.name}</span
-									>
-									<span class="text-xs text-surface-600-400">
-										{#if plan.analysed.empty}
-											{m.dataImportNoDataRows()}
-										{:else}
-											{m.dataImportRowCount({ count: plan.analysed.row_count ?? 0 })} ·
-											{m.dataImportHeaderOnRow({ row: plan.headerRow })}
-										{/if}
+								? 'border-l-success-500'
+								: status === 'review'
+									? 'border-l-warning-500'
+									: 'border-l-surface-300-700'}"
+						>
+							<div class="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
+								<label class="flex items-center gap-3 min-w-56">
+									<input
+										type="checkbox"
+										class="checkbox"
+										bind:checked={plan.include}
+										disabled={plan.analysed.empty || !plan.modelType || running}
+									/>
+									<span class="flex flex-col">
+										<span
+											class="font-mono font-semibold {plan.include ? '' : 'text-surface-600-400'}"
+											><i class="fa-solid fa-table text-xs text-surface-500 mr-1"></i>{plan.analysed
+												.name}</span
+										>
+										<span class="text-xs text-surface-600-400">
+											{#if plan.analysed.empty}
+												{m.dataImportNoDataRows()}
+											{:else}
+												{m.dataImportRowCount({ count: plan.analysed.row_count ?? 0 })} ·
+												{m.dataImportHeaderOnRow({ row: plan.headerRow })}
+											{/if}
+										</span>
 									</span>
-								</span>
-							</label>
+								</label>
 
-							{#if !plan.analysed.empty}
-								<i
-									class="fa-solid fa-arrow-right text-surface-400 hidden sm:block"
-									aria-hidden="true"
-								></i>
-								<div class="flex flex-wrap items-center gap-2">
-									<select
-										class="select w-auto text-sm"
-										value={plan.modelType}
-										disabled={plan.busy || running}
-										aria-label={m.dataImportWhatBecomes({ sheet: plan.analysed.name })}
-										onchange={(e) => retarget(index, e.currentTarget.value)}
-									>
-										<option value="" disabled>{m.dataImportChooseObject()}</option>
-										{#each data.modelTypes as type (type)}
-											<option value={type}>{modelLabel(type)}{matchLabel(plan, type)}</option>
-										{/each}
-									</select>
-									{#if (schemas[plan.modelType]?.sheets.length ?? 0) > 1}
+								{#if !plan.analysed.empty}
+									<i
+										class="fa-solid fa-arrow-right text-surface-400 hidden sm:block"
+										aria-hidden="true"
+									></i>
+									<div class="flex flex-wrap items-center gap-2">
 										<select
 											class="select w-auto text-sm"
-											value={plan.targetSheet}
+											value={plan.modelType}
 											disabled={plan.busy || running}
-											aria-label={m.dataImportTemplateSheetFor({ sheet: plan.analysed.name })}
-											onchange={(e) => retarget(index, plan.modelType, e.currentTarget.value)}
+											aria-label={m.dataImportWhatBecomes({ sheet: plan.analysed.name })}
+											onchange={(e) => retarget(index, e.currentTarget.value)}
 										>
-											{#each schemas[plan.modelType].sheets as sheet (sheet.name)}
-												<option value={sheet.name}>{sheet.name}</option>
+											<option value="" disabled>{m.dataImportChooseObject()}</option>
+											{#each data.modelTypes as type (type)}
+												<option value={type}>{modelLabel(type)}{matchLabel(plan, type)}</option>
 											{/each}
 										</select>
-									{/if}
-								</div>
-								{#if plan.modelType}
-									{@const total = plan.analysed.columns?.length ?? 0}
-									<div class="flex flex-col gap-1 min-w-40 text-xs">
-										<span class="text-surface-600-400">
-											{m.dataImportColumnsMapped({ mapped: mappedCount(plan), total })}
-										</span>
-										<span class="h-1.5 rounded-full bg-surface-200-800 overflow-hidden">
-											<span
-												class="block h-full rounded-full bg-primary-500 transition-all"
-												style="width: {total ? (100 * mappedCount(plan)) / total : 0}%"
-											></span>
-										</span>
+										{#if (schemas[plan.modelType]?.sheets.length ?? 0) > 1}
+											<select
+												class="select w-auto text-sm"
+												value={plan.targetSheet}
+												disabled={plan.busy || running}
+												aria-label={m.dataImportTemplateSheetFor({ sheet: plan.analysed.name })}
+												onchange={(e) => retarget(index, plan.modelType, e.currentTarget.value)}
+											>
+												{#each schemas[plan.modelType].sheets as sheet (sheet.name)}
+													<option value={sheet.name}>{sheet.name}</option>
+												{/each}
+											</select>
+										{/if}
 									</div>
-									{#if unmatchedValues(plan)}
+									{#if plan.modelType}
+										{@const total = plan.analysed.columns?.length ?? 0}
+										<div class="flex flex-col gap-1 min-w-40 text-xs">
+											<span class="text-surface-600-400">
+												{m.dataImportColumnsMapped({ mapped: mappedCount(plan), total })}
+											</span>
+											<span class="h-1.5 rounded-full bg-surface-200-800 overflow-hidden">
+												<span
+													class="block h-full rounded-full bg-primary-500 transition-all"
+													style="width: {total ? (100 * mappedCount(plan)) / total : 0}%"
+												></span>
+											</span>
+										</div>
+										{#if unmatchedValues(plan)}
+											<button
+												type="button"
+												class="badge preset-tonal-warning hover:preset-filled-warning-500 transition-colors"
+												title={m.dataImportUnmatchedHint()}
+												onclick={() => reviewValues(index)}
+											>
+												<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+												{m.dataImportValuesToReview({ count: unmatchedValues(plan) })}
+											</button>
+										{/if}
+									{/if}
+									<span class="grow"></span>
+									{#if plan.busy}
+										<i class="fa-solid fa-spinner fa-spin text-primary-500"></i>
+									{/if}
+									{#if plan.modelType}
 										<button
 											type="button"
-											class="badge preset-tonal-warning hover:preset-filled-warning-500 transition-colors"
-											title={m.dataImportUnmatchedHint()}
-											onclick={() => reviewValues(index)}
+											class="btn btn-sm {plan.open
+												? 'preset-filled-surface-900-100'
+												: 'preset-tonal'}"
+											aria-expanded={plan.open}
+											onclick={() => (plan.open = !plan.open)}
 										>
-											<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-											{m.dataImportValuesToReview({ count: unmatchedValues(plan) })}
+											<i class="fa-solid {plan.open ? 'fa-chevron-up' : 'fa-sliders'} mr-1"></i>
+											{plan.open ? m.close() : m.dataImportAdjust()}
 										</button>
 									{/if}
 								{/if}
-								<span class="grow"></span>
-								{#if plan.busy}
-									<i class="fa-solid fa-spinner fa-spin text-primary-500"></i>
-								{/if}
-								{#if plan.modelType}
-									<button
-										type="button"
-										class="btn btn-sm {plan.open
-											? 'preset-filled-surface-900-100'
-											: 'preset-tonal'}"
-										aria-expanded={plan.open}
-										onclick={() => (plan.open = !plan.open)}
-									>
-										<i class="fa-solid {plan.open ? 'fa-chevron-up' : 'fa-sliders'} mr-1"></i>
-										{plan.open ? m.close() : m.dataImportAdjust()}
-									</button>
-								{/if}
-							{/if}
-						</div>
-
-						{#if plan.open && plan.modelType && !plan.analysed.empty}
-							<div class="border-t border-surface-200-800 bg-surface-100-900/40 p-4 space-y-5">
-								<label class="flex items-center gap-2 text-sm w-fit">
-									{m.dataImportHeaderRow()}
-									<input
-										type="number"
-										min="1"
-										class="input w-20 text-sm"
-										value={plan.headerRow}
-										disabled={plan.busy || running}
-										onchange={async (e) => {
-											const input = e.currentTarget;
-											const row = Math.max(1, Number(input.value) || 1);
-											if (!(await retarget(index, plan.modelType, plan.targetSheet, row)))
-												input.value = String(plan.headerRow);
-										}}
-									/>
-								</label>
-								<div
-									class="overflow-x-auto rounded-lg border border-surface-200-800 bg-surface-50-950"
-								>
-									<table class="table text-sm">
-										<thead class="bg-surface-100-900">
-											<tr>
-												<th>{m.dataImportYourColumn()}</th>
-												<th>{m.dataImportSampleValues()}</th>
-												<th>{m.dataImportField()}</th>
-											</tr>
-										</thead>
-										<tbody>
-											{#each plan.analysed.columns ?? [] as col (col.header)}
-												{@const field = schemaSheet(plan)?.columns.find(
-													(c) => c.key === plan.columns[col.header]
-												)}
-												<tr class={plan.columns[col.header] ? '' : 'opacity-70'}>
-													<td class="align-top">
-														<span class="font-mono font-medium">{col.header}</span>
-														{#if columnUnmatched(plan, col.header)}
-															<span class="block text-xs text-warning-700-300">
-																{m.dataImportValuesToReview({
-																	count: columnUnmatched(plan, col.header)
-																})}
-															</span>
-														{/if}
-													</td>
-													<td class="align-top max-w-72">
-														<span class="flex flex-wrap gap-1">
-															{#each col.samples.slice(0, 3) as sample, i (i)}
-																<span
-																	class="px-1.5 py-0.5 rounded bg-surface-100-900 text-xs text-surface-700-300 truncate max-w-40"
-																	>{sample}</span
-																>
-															{/each}
-														</span>
-													</td>
-													<td class="align-top">
-														<select
-															class="select text-sm"
-															bind:value={plan.columns[col.header]}
-															onchange={() => {
-																remapValues(plan, col.header);
-																suggestDefaults(plan);
-															}}
-															disabled={running}
-															aria-label={m.dataImportFieldFor({ column: col.header })}
-														>
-															<option value="">{m.ignore()}</option>
-															{#each schemaSheet(plan)?.columns ?? [] as target (target.key)}
-																<option
-																	value={target.key}
-																	disabled={target.key !== plan.columns[col.header] &&
-																		Object.values(plan.columns).includes(target.key)}
-																>
-																	{target.label} ({target.key})
-																</option>
-															{/each}
-														</select>
-														{#if field?.choices && col.distinct}
-															<div class="mt-2 space-y-1">
-																{#each col.distinct as value (value)}
-																	<label class="grid grid-cols-2 gap-2 items-center">
-																		<span class="font-mono text-xs truncate">{value}</span>
-																		<select
-																			class="select text-xs {plan.values[col.header][value]
-																				? ''
-																				: 'border-2 border-warning-500 preset-tonal-warning'}"
-																			data-unmatched={plan.values[col.header][value] === ''}
-																			aria-label={m.dataImportValueFor({ value })}
-																			bind:value={plan.values[col.header][value]}
-																			disabled={running}
-																		>
-																			<option value="" disabled>{m.dataImportNotMatched()}</option>
-																			<option value={KEEP}>{m.dataImportKeepAsIs()}</option>
-																			{#each field.choices as choice (choice.value)}
-																				<option value={String(choice.value)}
-																					>{translateChoiceLabel(
-																						choice.label,
-																						choice.value
-																					)}</option
-																				>
-																			{/each}
-																		</select>
-																	</label>
-																{/each}
-															</div>
-														{/if}
-													</td>
-												</tr>
-											{/each}
-										</tbody>
-									</table>
-								</div>
-								<div class="space-y-2">
-									<h3 class="text-sm font-semibold">{m.dataImportSameValue()}</h3>
-									<p class="text-xs text-surface-600-400">
-										{m.dataImportSameValueHint()}
-									</p>
-									{#each unmappedFields(plan).filter((c) => c.key in plan.defaults) as column (column.key)}
-										<div class="flex items-center gap-2 text-sm">
-											<span class="w-56 truncate">{column.label} ({column.key})</span>
-											{#if column.boolean || column.choices}
-												<select
-													class="select w-auto text-sm"
-													bind:value={plan.defaults[column.key]}
-													disabled={running}
-													aria-label={m.dataImportValueForEveryRow({ field: column.key })}
-												>
-													<option value="" disabled>{m.dataImportChooseValue()}</option>
-													{#if column.boolean}
-														<option value="true">{m.yes()}</option>
-														<option value="false">{m.no()}</option>
-													{:else}
-														{#each column.choices ?? [] as choice (choice.value)}
-															<option value={String(choice.value)}
-																>{translateChoiceLabel(choice.label, choice.value)}</option
-															>
-														{/each}
-													{/if}
-												</select>
-											{:else}
-												<input
-													class="input w-64 text-sm"
-													bind:value={plan.defaults[column.key]}
-													disabled={running}
-													aria-label={m.dataImportValueForEveryRow({ field: column.key })}
-												/>
-											{/if}
-											<button
-												type="button"
-												class="btn-icon btn-icon-sm"
-												onclick={() => delete plan.defaults[column.key]}
-												disabled={running}
-												aria-label={m.dataImportRemoveValueFor({ field: column.key })}
-											>
-												<i class="fa-solid fa-xmark"></i>
-											</button>
-										</div>
-									{/each}
-									{#if unmappedFields(plan).some((c) => !(c.key in plan.defaults))}
-										<select
-											class="select w-auto text-sm"
-											value=""
-											disabled={running}
-											aria-label={m.dataImportAddValueForEveryRow()}
-											onchange={(e) => {
-												plan.defaults[e.currentTarget.value] = '';
-												e.currentTarget.value = '';
-											}}
-										>
-											<option value="" disabled>{m.dataImportAddField()}</option>
-											{#each unmappedFields(plan).filter((c) => !(c.key in plan.defaults)) as column (column.key)}
-												<option value={column.key}>{column.label} ({column.key})</option>
-											{/each}
-										</select>
-									{/if}
-								</div>
 							</div>
-						{/if}
-					</section>
-				{/if}
+
+							{#if plan.open && plan.modelType && !plan.analysed.empty}
+								<div class="border-t border-surface-200-800 bg-surface-100-900/40 p-4 space-y-5">
+									<label class="flex items-center gap-2 text-sm w-fit">
+										{m.dataImportHeaderRow()}
+										<input
+											type="number"
+											min="1"
+											class="input w-20 text-sm"
+											value={plan.headerRow}
+											disabled={plan.busy || running}
+											onchange={async (e) => {
+												const input = e.currentTarget;
+												const row = Math.max(1, Number(input.value) || 1);
+												if (!(await retarget(index, plan.modelType, plan.targetSheet, row)))
+													input.value = String(plan.headerRow);
+											}}
+										/>
+									</label>
+									<div
+										class="overflow-x-auto rounded-lg border border-surface-200-800 bg-surface-50-950"
+									>
+										<table class="table text-sm">
+											<thead class="bg-surface-100-900">
+												<tr>
+													<th>{m.dataImportYourColumn()}</th>
+													<th>{m.dataImportSampleValues()}</th>
+													<th>{m.dataImportField()}</th>
+												</tr>
+											</thead>
+											<tbody>
+												{#each plan.analysed.columns ?? [] as col (col.header)}
+													{@const field = schemaSheet(plan)?.columns.find(
+														(c) => c.key === plan.columns[col.header]
+													)}
+													<tr class={plan.columns[col.header] ? '' : 'opacity-70'}>
+														<td class="align-top">
+															<span class="font-mono font-medium">{col.header}</span>
+															{#if columnUnmatched(plan, col.header)}
+																<span class="block text-xs text-warning-700-300">
+																	{m.dataImportValuesToReview({
+																		count: columnUnmatched(plan, col.header)
+																	})}
+																</span>
+															{/if}
+														</td>
+														<td class="align-top max-w-72">
+															<span class="flex flex-wrap gap-1">
+																{#each col.samples.slice(0, 3) as sample, i (i)}
+																	<span
+																		class="px-1.5 py-0.5 rounded bg-surface-100-900 text-xs text-surface-700-300 truncate max-w-40"
+																		>{sample}</span
+																	>
+																{/each}
+															</span>
+														</td>
+														<td class="align-top">
+															<select
+																class="select text-sm"
+																bind:value={plan.columns[col.header]}
+																onchange={() => {
+																	remapValues(plan, col.header);
+																	suggestDefaults(plan);
+																}}
+																disabled={running}
+																aria-label={m.dataImportFieldFor({ column: col.header })}
+															>
+																<option value="">{m.ignore()}</option>
+																{#each schemaSheet(plan)?.columns ?? [] as target (target.key)}
+																	<option
+																		value={target.key}
+																		disabled={target.key !== plan.columns[col.header] &&
+																			Object.values(plan.columns).includes(target.key)}
+																	>
+																		{target.label} ({target.key})
+																	</option>
+																{/each}
+															</select>
+															{#if field?.choices && col.distinct}
+																<div class="mt-2 space-y-1">
+																	{#each col.distinct as value (value)}
+																		<label class="grid grid-cols-2 gap-2 items-center">
+																			<span class="font-mono text-xs truncate">{value}</span>
+																			<select
+																				class="select text-xs {plan.values[col.header][value]
+																					? ''
+																					: 'border-2 border-warning-500 preset-tonal-warning'}"
+																				data-unmatched={plan.values[col.header][value] === ''}
+																				aria-label={m.dataImportValueFor({ value })}
+																				bind:value={plan.values[col.header][value]}
+																				disabled={running}
+																			>
+																				<option value="" disabled>{m.dataImportNotMatched()}</option
+																				>
+																				<option value={KEEP}>{m.dataImportKeepAsIs()}</option>
+																				{#each field.choices as choice (choice.value)}
+																					<option value={String(choice.value)}
+																						>{translateChoiceLabel(
+																							choice.label,
+																							choice.value
+																						)}</option
+																					>
+																				{/each}
+																			</select>
+																		</label>
+																	{/each}
+																</div>
+															{/if}
+														</td>
+													</tr>
+												{/each}
+											</tbody>
+										</table>
+									</div>
+									<div class="space-y-2">
+										<h3 class="text-sm font-semibold">{m.dataImportSameValue()}</h3>
+										<p class="text-xs text-surface-600-400">
+											{m.dataImportSameValueHint()}
+										</p>
+										{#each unmappedFields(plan).filter((c) => c.key in plan.defaults) as column (column.key)}
+											<div class="flex items-center gap-2 text-sm">
+												<span class="w-56 truncate">{column.label} ({column.key})</span>
+												{#if column.boolean || column.choices}
+													<select
+														class="select w-auto text-sm"
+														bind:value={plan.defaults[column.key]}
+														disabled={running}
+														aria-label={m.dataImportValueForEveryRow({ field: column.key })}
+													>
+														<option value="" disabled>{m.dataImportChooseValue()}</option>
+														{#if column.boolean}
+															<option value="true">{m.yes()}</option>
+															<option value="false">{m.no()}</option>
+														{:else}
+															{#each column.choices ?? [] as choice (choice.value)}
+																<option value={String(choice.value)}
+																	>{translateChoiceLabel(choice.label, choice.value)}</option
+																>
+															{/each}
+														{/if}
+													</select>
+												{:else}
+													<input
+														class="input w-64 text-sm"
+														bind:value={plan.defaults[column.key]}
+														disabled={running}
+														aria-label={m.dataImportValueForEveryRow({ field: column.key })}
+													/>
+												{/if}
+												<button
+													type="button"
+													class="btn-icon btn-icon-sm"
+													onclick={() => delete plan.defaults[column.key]}
+													disabled={running}
+													aria-label={m.dataImportRemoveValueFor({ field: column.key })}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											</div>
+										{/each}
+										{#if unmappedFields(plan).some((c) => !(c.key in plan.defaults))}
+											<select
+												class="select w-auto text-sm"
+												value=""
+												disabled={running}
+												aria-label={m.dataImportAddValueForEveryRow()}
+												onchange={(e) => {
+													plan.defaults[e.currentTarget.value] = '';
+													e.currentTarget.value = '';
+												}}
+											>
+												<option value="" disabled>{m.dataImportAddField()}</option>
+												{#each unmappedFields(plan).filter((c) => !(c.key in plan.defaults)) as column (column.key)}
+													<option value={column.key}>{column.label} ({column.key})</option>
+												{/each}
+											</select>
+										{/if}
+									</div>
+								</div>
+							{/if}
+						</section>
+					{/if}
+				</div>
 			{/each}
 		</div>
 
@@ -1577,9 +1595,19 @@
 			>
 				<div
 					class="flex items-center gap-3 px-4 py-3 border-b border-surface-200-800
-						{outcome.dryRun ? 'preset-tonal-primary' : 'preset-tonal-success'}"
+						{outcome.dryRun
+						? 'preset-tonal-primary'
+						: outcomeTotals.failed
+							? 'preset-tonal-warning'
+							: 'preset-tonal-success'}"
 				>
-					<i class="fa-solid {outcome.dryRun ? 'fa-flask' : 'fa-circle-check'} text-lg"></i>
+					<i
+						class="fa-solid {outcome.dryRun
+							? 'fa-flask'
+							: outcomeTotals.failed
+								? 'fa-triangle-exclamation'
+								: 'fa-circle-check'} text-lg"
+					></i>
 					<h5 class="font-semibold">
 						{outcome.dryRun ? m.dataImportDryRunDone() : m.dataImportDone()}
 					</h5>
