@@ -1,8 +1,12 @@
 <script lang="ts">
 	import GanttChart from '#lib/components/Gantt/GanttChart.svelte';
 	import type { GanttItem } from '#lib/components/Gantt/GanttChart.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { pageTitle } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	let { data } = $props();
 
@@ -55,7 +59,28 @@
 	let selectedFolders = $state<Set<string>>(new Set());
 	let zoom = $state<'weekly' | 'monthly' | 'yearly'>('monthly');
 	let useCreatedAtAsStart = $state(false);
+	// Narrows applied controls to those linked to a selected risk scenario
+	// (existing or additional measure). Other categories are left as they are.
+	let selectedScenarios = $state<Set<string>>(new Set());
 	let ganttRef: ReturnType<typeof GanttChart> | undefined = $state();
+
+	// The scenario picker loads its options server-side, so it needs a form.
+	const scenarioFilterSchema = z.object({
+		risk_scenarios: z.array(z.string()).optional().nullable()
+	});
+	const scenarioFilterForm = superForm(
+		defaults({ risk_scenarios: [] }, zod(scenarioFilterSchema)),
+		{
+			SPA: true,
+			validators: zod(scenarioFilterSchema),
+			dataType: 'json',
+			invalidateAll: false,
+			applyAction: false,
+			resetForm: false,
+			taintedMessage: false,
+			validationMethod: 'auto'
+		}
+	);
 
 	const ZOOM_LEVELS = [
 		{ value: 'weekly', label: m.weekly() },
@@ -106,6 +131,11 @@
 		// Applied Controls: start_date + eta → bar with progress; eta only → milestone
 		if (enabledCategories.has('appliedControls')) {
 			for (const ac of sourceData.appliedControls) {
+				if (
+					selectedScenarios.size > 0 &&
+					!(ac.risk_scenarios ?? []).some((id: string) => selectedScenarios.has(id))
+				)
+					continue;
 				const folderId = ac.folder?.id ?? ac.folder;
 				const start = parseDate(ac.start_date);
 				const eta = parseDate(ac.eta);
@@ -284,6 +314,24 @@
 			/>
 			<span class="text-xs text-surface-500">{m.useCreationDateAsStart()}</span>
 		</label>
+
+		<!-- Risk scenario filter (applied controls only) -->
+		<div class="w-80" data-testid="timeline-scenario-filter">
+			<AutocompleteSelect
+				form={scenarioFilterForm}
+				field="risk_scenarios"
+				label={m.riskScenarios()}
+				helpText={m.timelineScenarioFilterHelpText()}
+				optionsEndpoint="risk-scenarios"
+				optionsLabelField="auto"
+				optionsExtraFields={[['risk_assessment', 'str']]}
+				lazy={true}
+				multiple={true}
+				portalDropdown={true}
+				onChange={(value) =>
+					(selectedScenarios = new Set(Array.isArray(value) ? value : value ? [value] : []))}
+			/>
+		</div>
 	</div>
 
 	<!-- Await streamed data -->
@@ -304,12 +352,14 @@
 			{@const result = buildItems(ganttData)}
 			{@const ganttItems = result.items}
 			{@const noDateCount = result.noDateCount}
-			{@const availableFolders = Array.from(result.allFolderIds)
+			{@const availableFolders = Array.from(new Set([...result.allFolderIds, ...selectedFolders]))
 				.map((id) => ({ id, name: folderMap.get(id) ?? 'Unknown' }))
 				.sort((a, b) => a.name.localeCompare(b.name))}
 
-			<!-- Folder filter (only after data loads, only if multiple domains) -->
-			{#if availableFolders.length > 1}
+			<!-- Folder filter (only after data loads, only if multiple domains or a selection).
+			     Selected domains stay listed even when the other filters leave them empty,
+			     so they can always be cleared. -->
+			{#if availableFolders.length > 1 || selectedFolders.size > 0}
 				<div class="flex items-center gap-2">
 					<span class="text-xs font-semibold text-surface-500">{m.domains()}</span>
 					<div class="flex flex-wrap gap-1">

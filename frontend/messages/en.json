@@ -8849,5 +8849,7 @@
 	"dataImportCouldNotSave": "Could not save: {detail}",
 	"dataImportMappingSaved": "Mapping “{name}” saved.",
 	"dataImportCouldNotDelete": "Could not delete this mapping.",
-	"dataImportNotAllowedHere": "You are not allowed to import these here"
+	"dataImportNotAllowedHere": "You are not allowed to import these here",
+	"timelineScenarioFilterHelpText": "Shows only the applied controls linked to these scenarios",
+	"excludeActiveControls": "Exclude active controls"
 }

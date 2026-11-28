@@ -15,6 +15,7 @@ interface TimelineEntry {
 	progress_field?: number;
 	progress?: number;
 	owners?: string[];
+	risk_scenarios?: string[];
 }
 
 // Backend model keys -> ganttData keys consumed by +page.svelte

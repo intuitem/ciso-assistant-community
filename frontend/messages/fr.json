@@ -8846,5 +8846,7 @@
 	"dataImportCouldNotSave": "Échec de l'enregistrement : {detail}",
 	"dataImportMappingSaved": "Correspondance « {name} » enregistrée.",
 	"dataImportCouldNotDelete": "Impossible de supprimer cette correspondance.",
-	"dataImportNotAllowedHere": "Vous n'êtes pas autorisé à importer ces objets ici"
+	"dataImportNotAllowedHere": "Vous n'êtes pas autorisé à importer ces objets ici",
+	"timelineScenarioFilterHelpText": "N'affiche que les mesures appliquées liées à ces scénarios",
+	"excludeActiveControls": "Exclure les mesures actives"
 }

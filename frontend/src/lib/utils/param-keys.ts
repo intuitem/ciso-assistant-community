@@ -363,6 +363,7 @@ export const FILTER_KEYS = new Set([
 	'lifecycle_stage',
 	'likelihood',
 	'linked_models',
+	'linked_risk_scenarios',
 	'locale',
 	'metric_definition',
 	'metric_instance',
