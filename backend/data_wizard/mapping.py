@@ -35,12 +35,26 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core import mailer
+from core.cyfun import LEVELS as CYFUN_LEVELS
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment
 
+from .arm_helpers import (
+    SHEET_VARIANTS as ARM_SHEETS,
+)
+from .arm_helpers import (
+    ARMArchiveError,
+    is_xlsx,
+    normalize_label,
+    workbook_from_archive,
+)
+from .cyfun_helpers import FUNCTION_SHEETS as CYFUN_SHEETS
+from .ebios_rm_excel_helpers import SHEET_PREFIXES as EBIOS_RM_SHEETS
+from .egerie_xml_helpers import EGERIE_NS
 from .models import ImportMapping
 from .serializers import LoadFileSerializer
 from .views import (
+    IMPORT_ROOT_MODEL,
     IMPORT_TEMPLATES,
     IMPORT_TEMPLATES_DIR,
     SHEET_NAME_INVALID_CHARS,
@@ -356,6 +370,110 @@ def detect_header_row(raw: pd.DataFrame) -> int:
         if count > best_count:
             best, best_count = index, count
     return best
+
+
+# ─── Files recognised whole ──────────────────────────────────────────────────
+
+# Exports of other tools (and our own EBIOS RM export) that a dedicated importer
+# reads as they are: nothing to map, the file goes through unchanged.
+WHOLE_FILE_TYPES = (
+    ModelType.EBIOS_RM_STUDY_EGERIE_XML,
+    ModelType.EBIOS_RM_STUDY_ARM,
+    ModelType.EBIOS_RM_STUDY_EXCEL,
+    ModelType.CYFUN_ASSESSMENT,
+)
+# Sheets of a task export holding one task's past occurrences: "{row}-{name}".
+OCCURRENCE_SHEET = re.compile(r"^\d+-")
+# A sheet name this long may be an ARM name cut at 31 characters (trailing space dropped).
+ARM_CUT_NAME = 28
+
+
+def _arm_tables(names: list[str]) -> int:
+    """How many ARM tables the sheet names hold; ARM cuts them at 31 characters."""
+    sheets = [normalize_label(n) for n in names]
+    return sum(
+        any(
+            s == normalize_label(v)
+            or (len(s) >= ARM_CUT_NAME and normalize_label(v).startswith(s))
+            for v in variants
+            for s in sheets
+        )
+        for variants in ARM_SHEETS.values()
+    )
+
+
+def recognise_format(content: bytes) -> ModelType | None:
+    """The whole-file import a file is made for, if any."""
+    if not content.startswith(b"PK"):
+        is_xml = content.lstrip(b"\xef\xbb\xbf \t\r\n").startswith(b"<")
+        return (
+            ModelType.EBIOS_RM_STUDY_EGERIE_XML
+            if is_xml and EGERIE_NS.encode() in content[:65536]
+            else None
+        )
+    if not is_xlsx(content):
+        try:
+            workbook_from_archive(content)  # a zip of per-table ARM exports
+        except ARMArchiveError:
+            return None
+        return ModelType.EBIOS_RM_STUDY_ARM
+    workbook = openpyxl.load_workbook(io.BytesIO(content), read_only=True)
+    names = workbook.sheetnames
+    workbook.close()
+    if set(CYFUN_SHEETS) <= set(names) or any(
+        f"{level.upper()} Details" in names for level in CYFUN_LEVELS
+    ):
+        return ModelType.CYFUN_ASSESSMENT
+    if _arm_tables(names) >= 2:
+        return ModelType.EBIOS_RM_STUDY_ARM
+    ebios = {k for k, p in EBIOS_RM_SHEETS.items() for n in names if n.startswith(p)}
+    if "study" in ebios and len(ebios) >= 3:
+        return ModelType.EBIOS_RM_STUDY_EXCEL
+    return None
+
+
+@cache
+def _template_sheet_names(model_type: ModelType) -> tuple[str, ...]:
+    workbook = openpyxl.load_workbook(
+        IMPORT_TEMPLATES_DIR / IMPORT_TEMPLATES[model_type], read_only=True
+    )
+    try:
+        return tuple(workbook.sheetnames)
+    finally:
+        workbook.close()
+
+
+def match_template(sources: list[SourceSheet]) -> ModelType | None:
+    """The template a file was filled from: each of its data sheets is there,
+    by name, with only template columns and at least half of them."""
+    by_name = {s.name: s for s in sources}
+    best, best_cover = None, 0.0
+    for model_type in IMPORT_TEMPLATES.keys() & TEMPLATE_ROW_MODELS.keys():
+        covers = []
+        for sheet, columns in _template_headers(model_type).items():
+            source = by_name.get(sheet)
+            if source is None or source.raw.empty:
+                break
+            known = {normalize(c) for c in columns}
+            found = {normalize(h) for h in SourceSheet(sheet, source.raw).headers} - {
+                ""
+            }
+            if not found <= known or len(found) * 2 < len(known):
+                break
+            covers.append(len(found) / len(known))
+        else:
+            if min(covers) > best_cover:
+                best, best_cover = model_type, min(covers)
+    return best
+
+
+def companion_kind(model_type: ModelType, sheet: str) -> str | None:
+    """What a sheet of a template that is no data sheet holds."""
+    if model_type == ModelType.TASK_TEMPLATE and OCCURRENCE_SHEET.match(sheet):
+        return "occurrences"  # copied as is beside the tasks
+    if sheet in _template_sheet_names(model_type):
+        return "notes"
+    return None
 
 
 # ─── Suggestions ─────────────────────────────────────────────────────────────
@@ -895,11 +1013,35 @@ def analyze(
     sources = read_source(file)
     if len(sources) > MAX_ANALYZED_SHEETS:
         raise ValueError(f"TooManySheets: {MAX_ANALYZED_SHEETS}")
+    template = match_template(sources)
+    template_sheets = TEMPLATE_ROW_MODELS.get(template, {})
     for source in sources:
         chosen = overrides.get(source.name, {})
         if source.raw.empty:
             out.append({"name": source.name, "empty": True})
             continue
+        if (
+            template
+            and source.name not in template_sheets
+            and not chosen
+            and (kind := companion_kind(template, source.name))
+        ):
+            out.append(
+                {
+                    "name": source.name,
+                    "empty": False,
+                    "companion": kind,
+                    "row_count": len(source.frame()),
+                }
+            )
+            continue
+        if template and source.name in template_sheets and not chosen:
+            # Our own template: its sheet, header on the first row, no guessing.
+            chosen = {
+                "header_row": 1,
+                "model_type": template.value,
+                "sheet": source.name,
+            }
         source.header_row = (
             int(chosen["header_row"]) - 1
             if chosen.get("header_row")
@@ -995,6 +1137,9 @@ def parse_steps(payload: Any) -> list[ImportStep]:
         if not isinstance(raw_step.get("options") or {}, dict):
             raise TypeError("InvalidMapping: options")
         model_type = ModelType.from_string(raw_step.get("model_type"))
+        if model_type in WHOLE_FILE_TYPES and not raw_step.get("sheets"):
+            steps.append(ImportStep(model_type, [], raw_step.get("options") or {}))
+            continue
         if model_type not in TEMPLATE_ROW_MODELS:
             raise ValueError(f"UnmappableModelType: {raw_step.get('model_type')}")
         templates = _template_headers(model_type)
@@ -1100,6 +1245,13 @@ def _task_occurrences(summary: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return summary.drop(columns=dropped, errors="ignore"), occurrences
 
 
+def _merge_occurrences(history: pd.DataFrame, generated: pd.DataFrame) -> pd.DataFrame:
+    """The file's history plus generated occurrences on dates it does not have."""
+    merged = pd.concat([history, generated], ignore_index=True)
+    day = pd.to_datetime(merged["due_date"], errors="coerce").dt.date
+    return merged[day.isna() | ~day.duplicated()].reset_index(drop=True)
+
+
 def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
     """The workbook the step's template describes, filled from the source."""
     by_name = {s.name: s for s in sources}
@@ -1134,6 +1286,20 @@ def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
                 if step.model_type == ModelType.TASK_TEMPLATE:
                     frame, occurrences = _task_occurrences(frame)
                 frame.to_excel(writer, sheet_name=target, index=False)
+        if step.model_type == ModelType.TASK_TEMPLATE:
+            # Past occurrences of a task export, merged with any from last-done dates.
+            mapped = {s.source for s in step.sheets}
+            for source in sources:
+                if (
+                    OCCURRENCE_SHEET.match(source.name)
+                    and source.name not in mapped
+                    and not source.raw.empty
+                    and "due_date" in map(normalize, source.headers)
+                ):
+                    history = source.frame().rename(columns=normalize)
+                    if source.name in occurrences:
+                        history = _merge_occurrences(history, occurrences[source.name])
+                    occurrences[source.name] = history
         for title, rows in occurrences.items():
             rows.to_excel(writer, sheet_name=title, index=False)
     buffer.seek(0)
@@ -1201,8 +1367,13 @@ def run_steps(
 # ─── API ─────────────────────────────────────────────────────────────────────
 
 
+class UploadSerializer(LoadFileSerializer):
+    # A zip of per-table ARM exports.
+    ALLOWED_FILE_EXTENSIONS = [*LoadFileSerializer.ALLOWED_FILE_EXTENSIONS, "zip"]
+
+
 def _uploaded_file(request) -> tuple[io.BytesIO | None, Response | None]:
-    serializer = LoadFileSerializer(data=request.data)
+    serializer = UploadSerializer(data=request.data)
     if not serializer.is_valid():
         return None, Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return io.BytesIO(serializer.validated_data["file"].read()), None
@@ -1229,6 +1400,7 @@ ERROR_CODES = (
     "MissingSourceColumns",
     "TooManySheets",
     "TooManyColumns",
+    "UnrecognisedFile",
 )
 
 
@@ -1250,7 +1422,12 @@ def _json_field(request, name: str, default):
 class MappingSchemaView(APIView):
     def get(self, request, model_type: str | None = None):
         if model_type is None:
-            return Response({"model_types": mappable_model_types()})
+            return Response(
+                {
+                    "model_types": mappable_model_types(),
+                    "templates": [t.value for t in IMPORT_TEMPLATES],
+                }
+            )
         parsed = ModelType.from_string(model_type)
         if parsed not in TEMPLATE_ROW_MODELS:
             return Response(
@@ -1260,12 +1437,13 @@ class MappingSchemaView(APIView):
 
 
 def may_import_something(user) -> bool:
-    return any(
-        RoleAssignment.has_permission_anywhere(
-            user, f"add_{label.split('.')[1].lower()}"
-        )
+    models = {
+        label.split(".")[1].lower()
         for rows in TEMPLATE_ROW_MODELS.values()
         for label in rows.values()
+    } | {IMPORT_ROOT_MODEL[t] for t in WHOLE_FILE_TYPES}
+    return any(
+        RoleAssignment.has_permission_anywhere(user, f"add_{model}") for model in models
     )
 
 
@@ -1286,6 +1464,14 @@ class AnalyzeFileView(APIView):
                 normalize(n) for n in get_accessible_folders_map(request.user)
             }
             name = request.data["file"].name
+            content = file.getvalue()
+            if str(request.data.get("detect_format", "true")).lower() != "false" and (
+                found := recognise_format(content)
+            ):
+                return Response({"format": found.value, "sheets": []})
+            # Only a recognised export is read whole; any other sheet file is mapped.
+            if name.lower().endswith((".xml", ".zip")):
+                raise ValueError("UnrecognisedFile")
             saved = None
             if str(request.data.get("use_saved", "true")).lower() != "false":
                 saved = [
@@ -1317,9 +1503,20 @@ class MappedImportView(APIView):
                 used = [UUID(str(i)) for i in defaults.get("saved_mapping_ids") or []]
             except ValueError as e:
                 raise ValueError("InvalidField: saved_mapping_ids") from e
-            sources = read_source(file)
+            content = file.getvalue()
+            # A recognised export goes through whole; read sheets only to map them.
+            sources = (
+                read_source(file)
+                if any(s.model_type not in WHOLE_FILE_TYPES for s in steps)
+                else []
+            )
             # Build every workbook upfront: a bad mapping fails before any write.
-            workbooks = [build_workbook(sources, step) for step in steps]
+            workbooks = [
+                io.BytesIO(content)
+                if step.model_type in WHOLE_FILE_TYPES
+                else build_workbook(sources, step)
+                for step in steps
+            ]
         except (ValueError, KeyError, TypeError) as e:
             logger.warning("invalid import mapping", error=e)
             return Response(
