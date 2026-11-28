@@ -651,7 +651,7 @@ def build_oauth_http_app(token_verifier, issuer_url, resource_url, hooks=None):
     _register_on(
         server, read_only, guard_write=_require_action, hooks=hooks, remote=True
     )
-    runner = (
+    runner = _flag_errors(
         _with_hooks(get_my_access, "get_my_access", hooks) if hooks else get_my_access
     )
     server.tool(annotations=_annotations(get_my_access, is_read=True))(runner)

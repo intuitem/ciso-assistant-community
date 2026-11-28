@@ -239,3 +239,21 @@ def test_a_refused_call_is_an_error_and_still_logged(connected):
     [(tool, result, error)] = hooks.calls
     assert (tool, error) == ("delete_vulnerability", None)
     assert result.startswith("Error: ")
+
+
+def test_get_my_access_refusal_is_an_error_on_the_oauth_app(connected, monkeypatch):
+    built = []
+
+    class Capturing(server.ActionFilteredServer):
+        def __init__(self, *a, **kw):
+            super().__init__(*a, **kw)
+            built.append(self)
+
+    monkeypatch.setattr(server, "ActionFilteredServer", Capturing)
+    hooks = _Hooks(refusal="Error: too many calls")
+    server.build_oauth_http_app(
+        object(), "https://issuer.test", "https://mcp.test", hooks
+    )
+    connected(_access())
+    with pytest.raises(server.ToolError, match="too many calls"):
+        asyncio.run(built[0].call_tool("get_my_access", {}))
