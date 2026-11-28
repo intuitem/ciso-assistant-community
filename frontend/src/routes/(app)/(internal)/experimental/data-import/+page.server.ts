@@ -12,7 +12,7 @@ export const load = (async ({ fetch }) => {
 		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/`).catch(() => []),
 		fetch(`${BASE_API_URL}/data-wizard/mapping/schema/`)
 			.then((r) => r.json())
-			.catch(() => ({ model_types: [] }))
+			.catch(() => ({ model_types: [], templates: [] }))
 	]);
 	return {
 		title: 'dataWizard',
@@ -20,6 +20,7 @@ export const load = (async ({ fetch }) => {
 		matrices,
 		frameworks,
 		audits,
-		modelTypes: (schema.model_types ?? []) as string[]
+		modelTypes: (schema.model_types ?? []) as string[],
+		templates: (schema.templates ?? []) as string[]
 	};
 }) satisfies PageServerLoad;

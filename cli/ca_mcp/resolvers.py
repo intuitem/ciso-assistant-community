@@ -1121,7 +1121,12 @@ def resolve_actor_id(actor_ref: str) -> str:
         raise ValueError("Actor reference is empty")
     ref_lower = ref.lower()
 
-    actors, error = fetch_all_results("/actors/", params={"search": ref})
+    # The actors list hides deactivated users by default. A reference names one
+    # actor rather than browsing, and update tools replace the whole owner
+    # list, so an owner who was deactivated since must still resolve.
+    actors, error = fetch_all_results(
+        "/actors/", params={"search": ref, "include_inactive": "true"}
+    )
     if error:
         raise ValueError(f"Actor '{ref}' API error: {error}")
     actors = actors or []

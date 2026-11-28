@@ -878,7 +878,9 @@ class TestBaselineCopy:
         from iam.models import User
         from rest_framework.test import APIClient
 
-        admin = User.objects.create_superuser(
+        admin = User.objects.filter(
+            email="baseline-admin@test.local"
+        ).first() or User.objects.create_superuser(
             email="baseline-admin@test.local", password="x"
         )
         api = APIClient()
@@ -922,6 +924,15 @@ class TestBaselineCopy:
         new, ra = self._create(setup, score_scale_preset="1-5")
         assert (new.min_score, new.max_score) == (1, 5)
         assert (ra.score, ra.documentation_score) == (4, 3)
+
+    def test_reset_status_keeps_results_but_starts_at_to_do(self, setup):
+        self._baseline(setup)
+        setup["ra"].status, setup["ra"].result = "done", "compliant"
+        setup["ra"].save()
+        _, kept = self._create(setup)
+        assert (kept.status, kept.result) == ("done", "compliant")
+        _, reset = self._create(setup, name="Reset", reset_status=True)
+        assert (reset.status, reset.result) == ("to_do", "compliant")
 
 
 @pytest.mark.django_db

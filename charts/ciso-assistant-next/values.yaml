@@ -480,6 +480,10 @@ ingress:
   annotations: {} # @schema additionalProperties: true
     # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # cert-manager.io/cluster-issuer: letsencrypt
+    # ingress-nginx returns 502 if the frontend's response headers exceed its default buffer
+    # (replace `{}` above with these keys to enable):
+    # nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    # nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
   # -- Defines which ingress controller will implement the resource
   ingressClassName: ""
   # -- The path to CISO Assistant
