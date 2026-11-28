@@ -1,0 +1,2130 @@
+urn: urn:soluciones-ge:risk:library:ley-172-13
+locale: es
+ref_id: LEY-172-13
+name: Ley 172-13 – Protección Integral de los Datos Personales
+description: 'Ley No. 172-13 de la República Dominicana, que tiene por objeto la protección integral de los datos personales asentados en archivos, registros públicos, bancos de datos u otros medios técnicos de tratamiento de datos destinados a dar informes, sean estos públicos o privados, y que regula las Sociedades de Información Crediticia (SIC). Promulgada el 13 de diciembre de 2013 y publicada en la Gaceta Oficial No. 10737 del 15 de diciembre de 2013. Texto literal estructurado por capítulo, sección, artículo, numeral y literal. Fuente oficial: https://www.sb.gob.do/media/4i1ploou/ley17213.pdf'
+copyright: Texto oficial del Congreso Nacional de la República Dominicana (Ley No. 172-13, G. O. No. 10737 del 15 de diciembre de 2013). Transcripción estructurada por Soluciones GE, SRL.
+version: 1
+publication_date: 2026-11-25
+provider: Congreso Nacional de la República Dominicana
+packager: soluciones-ge
+objects:
+  framework:
+    urn: urn:soluciones-ge:risk:framework:ley-172-13
+    ref_id: LEY-172-13
+    name: Ley 172-13 – Protección Integral de los Datos Personales
+    description: Texto de la Ley No. 172-13 sobre Protección Integral de los Datos Personales de la República Dominicana.
+    requirement_nodes:
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i
+      assessable: false
+      depth: 1
+      ref_id: Cap. I
+      name: Disposiciones iniciales
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i
+      ref_id: Cap. I, Secc. I
+      name: Del objeto, alcance, ámbito de aplicación, restricciones y principios
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      ref_id: '1'
+      name: Art. 1 – Objeto
+      description: |-
+        La presente ley tiene por objeto la protección integral de los datos personales asentados en archivos, registros públicos, bancos de datos u otros medios técnicos de tratamiento de datos destinados a dar informes, sean éstos públicos o privados, así como garantizar que no se lesione el derecho al honor y a la intimidad de las personas, y también facilitar el acceso a la información que sobre las mismas se registre, de conformidad a lo establecido en el Artículo 44 de la Constitución de la República Dominicana.
+        Del mismo modo, regula la constitución, organización, actividades, funcionamiento y extinción de las Sociedades de Información Crediticia (SIC), así como la prestación de los servicios de referencias crediticias y el suministro de la información en el mercado, garantizando el respeto a la privacidad y los derechos de los titulares de la misma, promoviendo la veracidad, la precisión, la actualización efectiva, la confidencialidad y el uso apropiado de dicha información.
+        En ningún caso se afectarán las fuentes de información periodísticas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      ref_id: '2'
+      name: Art. 2 – Alcance
+      description: La presente ley es de aplicación a los datos de carácter personal registrados en cualquier banco de datos que los haga susceptibles de tratamiento, y a toda modalidad de uso posterior de estos datos en los ámbitos público y privado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:3
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      ref_id: '3'
+      name: Art. 3 – Ámbito de aplicación
+      description: Las normas de la presente ley son de orden público y de aplicación en todo el territorio nacional.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:4
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      ref_id: '4'
+      name: Art. 4 – Restricciones
+      description: 'El régimen de protección de los datos de carácter personal no aplicará:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:4.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:4
+      ref_id: '4.1'
+      name: núm. 1
+      description: A los archivos de datos personales mantenidos por personas físicas en el ejercicio de actividades exclusivamente personales o domésticas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:4.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:4
+      ref_id: '4.2'
+      name: núm. 2
+      description: A los archivos de datos personales establecidos por los organismos de investigación y de inteligencia de la República Dominicana encargados de la prevención, persecución y castigo de los crímenes y delitos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:4.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:4
+      ref_id: '4.3'
+      name: núm. 3
+      description: A los archivos de datos personales referidos a personas fallecidas. No obstante, las personas vinculadas al fallecido, por razones familiares o análogas, podrán dirigirse a los responsables de los archivos de datos personales o tratamientos que contengan datos de este con la finalidad de notificar el fallecimiento, aportando acreditación suficiente del mismo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:4.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:4
+      ref_id: '4.4'
+      name: núm. 4
+      description: A los tratamientos de datos referidos a personas jurídicas, ni a los archivos de datos personales que se limiten a incorporar los datos de las personas físicas que presten sus servicios en aquellas, consistentes en sus nombres y apellidos, las funciones o puestos desempeñados, así como la dirección postal o electrónica, teléfono y número de fax profesionales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-i
+      ref_id: '5'
+      name: Art. 5 – Principios
+      description: 'La presente ley se fundamenta en los siguientes principios:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.1'
+      name: núm. 1
+      description: Licitud de los archivos de datos personales. Los archivos de datos personales no pueden tener finalidades contrarias a las leyes o al orden público, siendo debidamente registrados y apegados a los principios establecidos en esta ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.2'
+      name: núm. 2
+      description: 'Calidad de los datos. El tratamiento de los datos e informaciones personales o sus bienes deberá hacerse respetando el principio de calidad, es decir:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2
+      ref_id: 5.2.a
+      name: lit. a)
+      description: Los datos personales que se recojan a los efectos de su tratamiento deben ser ciertos, adecuados y pertinentes en relación al ámbito y finalidad para los que se hubieren obtenido.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2
+      ref_id: 5.2.b
+      name: lit. b)
+      description: Los datos deben ser exactos y actualizarse en el caso de que ello fuere necesario.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2
+      ref_id: 5.2.c
+      name: lit. c)
+      description: Los datos total o parcialmente inexactos, o que sean incompletos, deben ser suprimidos y sustituidos, o, en su caso, completados por el responsable del archivo o base de datos cuando se tenga conocimiento de la inexactitud o carácter incompleto de la información de que se trate, sin perjuicio de los derechos del titular de los datos establecidos en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.2
+      ref_id: 5.2.d
+      name: lit. d)
+      description: Los datos deben ser almacenados de modo que permitan el ejercicio del derecho de acceso de su titular.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.3'
+      name: núm. 3
+      description: 'Derecho de información. Cuando se recaben datos personales que requieran del consentimiento del titular de los datos, para que se les pueda dar el tratamiento de datos o ser cedidos después de obtener dicho consentimiento, se deberá informar previamente, a por lo menos uno de los titulares de los datos, en forma expresa y clara, explicando:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3
+      ref_id: 5.3.a
+      name: lit. a)
+      description: La finalidad para la que serán destinados y quiénes pueden ser sus destinatarios o clase de destinatarios.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3
+      ref_id: 5.3.b
+      name: lit. b)
+      description: La existencia del archivo, registro, banco de datos o de cualquier otro tipo de que se trate y la identidad y domicilio de su responsable.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.3
+      ref_id: 5.3.c
+      name: lit. c)
+      description: La posibilidad del interesado de ejercer los derechos de acceso, rectificación y supresión de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.4'
+      name: núm. 4
+      description: |-
+        Consentimiento del afectado. El tratamiento y la cesión de datos personales es ilícito cuando el titular de los datos no hubiere prestado su consentimiento libre, expreso y consciente, que deberá constar por escrito o por otro medio que permita que se le equipare, de acuerdo a las circunstancias. El referido consentimiento, prestado con otras declaraciones, deberá figurar en forma expresa y destacada, previa notificación al requerido de los datos descritos en el numeral 3 del presente artículo.
+        Están exentos del requisito de consentimiento al que se refiere el presente artículo todos los organismos de investigación y de inteligencia del Estado encargados de la prevención, persecución y castigo de los crímenes y delitos, previa autorización de autoridad judicial competente.
+        Las entidades de intermediación financiera, los agentes económicos y las demás personas físicas o jurídicas que hayan contratado los servicios de información con las Sociedades de Información Crediticia (SIC), antes de solicitar y obtener un reporte de crédito deberán recabar del titular de los datos el consentimiento expreso y por escrito, indicando en dicho permiso que el titular de los datos autoriza a que pueda ser consultado en las bases de datos de las Sociedades de Información Crediticia (SIC).
+        Será responsabilidad de los usuarios contratantes de los servicios de las Sociedades de Información Crediticia (SIC) recabar y guardar los permisos de los titulares de la información por un período de seis (6) meses, a partir del momento en que dicho permiso fue firmado por el titular de la información. Dentro de este plazo, el titular no alegará la falta de su autorización para la consulta a la Sociedad de Información Crediticia (SIC).
+        Los usuarios o suscriptores deberán guardar absoluta confidencialidad respecto al contenido de los reportes de crédito que les sean proporcionados por las Sociedades de Información Crediticia (SIC). En caso de violación al deber de confidencialidad por parte del usuario o suscriptor, éste será el único responsable por su actuación dolosa, así como por su negligencia e imprudencia.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.5'
+      name: núm. 5
+      description: 'Seguridad de los datos. El responsable del archivo de datos personales y en su caso, el encargado del tratamiento, deberán adoptar e implementar las medidas de índole técnica, organizativa y de seguridad necesarias para salvaguardar los datos de carácter personal y eviten su alteración, pérdida, tratamiento, consulta o acceso no autorizado. En consecuencia:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5
+      ref_id: 5.5.a
+      name: lit. a)
+      description: Queda prohibido registrar datos personales en archivos, registros o bancos de datos que no reúnan condiciones técnicas de integridad y seguridad.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5
+      ref_id: 5.5.b
+      name: lit. b)
+      description: Los aportantes de datos, las Sociedades de Información Crediticia (SIC) y los usuarios o suscriptores deben adoptar las medidas y controles técnicos necesarios para evitar la alteración, pérdida, tratamiento o acceso no autorizado de los datos sobre historial de crédito que manejen o reposen en la base de datos de las Sociedades de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.5
+      ref_id: 5.5.c
+      name: lit. c)
+      description: Las Sociedades de Información Crediticia (SIC) deben adoptar medidas apropiadas para proteger sus bases de datos contra los riesgos naturales, como la pérdida accidental o la destrucción por siniestro, y contra los riesgos humanos, como el acceso sin autorización, la utilización encubierta de datos o la contaminación por virus informáticos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.6'
+      name: núm. 6
+      description: 'Deber de secreto. El responsable del archivo de datos personales y quienes intervengan en cualquier fase del tratamiento de los datos de carácter personal están obligados al secreto profesional respecto de los mismos y al deber de guardarlos, obligaciones que subsistirán aún después de finalizar sus relaciones con el titular del archivo de datos personales o, en su caso, con el responsable del mismo, salvo que sea relevado del deber de secreto por resolución judicial y cuando medien razones fundadas relativas a la seguridad pública, la defensa nacional o la salud pública. Atendiendo a este principio el deber de secreto contemplará además:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6.a
+      assessable: false
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6
+      ref_id: 5.6.a
+      name: lit. a)
+      description: El obligado será relevado del deber de secreto por resolución judicial y cuando medien razones fundadas relativas a la seguridad pública, la seguridad nacional o la salud pública.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6
+      ref_id: 5.6.b
+      name: lit. b)
+      description: Todas las personas físicas o jurídicas, las entidades públicas o privadas, debidamente reconocidas como usuarios o suscriptores de una Sociedad de Información Crediticia (SIC), que tengan acceso a cualquier información relacionada con el historial de un titular de los datos, de conformidad con esta ley, deberán guardar la debida reserva sobre dicha información y, en consecuencia, no revelará a terceras personas, salvo que se trate de una autoridad competente. Los funcionarios públicos o empleados privados que con motivo de los cargos que desempeñen tengan acceso a la información de que trata esta ley, están obligados a guardar la debida reserva, aun cuando cesen en sus funciones.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.6
+      ref_id: 5.6.c
+      name: lit. c)
+      description: Fuera de los fines establecidos en esta ley, se prohíbe la divulgación, la publicación, la reproducción, la transmisión y la grabación del contenido parcial o total de un reporte de cualquier tipo proveniente de una Sociedad de Información Crediticia (SIC), referente a un titular de los datos, en cualquiera de sus manifestaciones, en cualquier medio de comunicación masivo, sea impreso, televisivo, radial o electrónico.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.7'
+      name: núm. 7
+      description: Lealtad. Se impone la prohibición de recoger los datos por medios fraudulentos, desleales o ilícitos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:5.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:5
+      ref_id: '5.8'
+      name: núm. 8
+      description: Finalidad de los datos. Los datos solo se recogerán para su tratamiento, cuando sean adecuados, pertinentes y no excesivos en relación con el ámbito y las finalidades determinadas, explícitas y legítimas para los que se hayan obtenido.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-ii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i
+      ref_id: Cap. I, Secc. II
+      name: Definiciones
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-i.secc-ii
+      ref_id: '6'
+      name: Art. 6 – Definiciones
+      description: 'A los efectos de la presente ley y su aplicación, se asumen los siguientes conceptos:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.1'
+      name: núm. 1
+      description: 'Afectado o interesado: Toda persona física cuyas informaciones sean objeto del tratamiento de datos, así como todo acreedor, sea éste una persona física o jurídica, que tiene o ha tenido una relación comercial o de tipo contractual con una persona física para el intercambio de bienes y servicios, donde la persona física es deudora del acreedor. Toda información que se derive de dicha relación estará asociada por separado tanto al deudor como al acreedor y se regirá por esta definición. Toda persona física o jurídica que haya tenido, tenga o solicite tener un bien o servicio de carácter económico, financiero, bancario, comercial, industrial, o de cualquier otra naturaleza, con una institución de intermediación financiera o con un agente económico, según proceda conforme a la ley.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.2'
+      name: núm. 2
+      description: 'Archivo de datos personales: Conjunto organizado de datos de carácter personal, que sean objeto de tratamiento o procesamiento, automatizado o no, cualquiera que fuere la forma o modalidad de su creación, almacenamiento, organización y acceso. Los mismos serán de titularidad privada o de titularidad pública.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.3'
+      name: núm. 3
+      description: 'Archivos de datos de titularidad privada: Son aquellos archivos de datos personales de los que sean responsables las personas, empresas o entidades de derecho privado, con independencia de quien ostente la titularidad de su capital o de la procedencia de sus recursos económicos, así como los archivos de los que sean responsables las corporaciones de derecho público.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.4'
+      name: núm. 4
+      description: 'Archivos de datos de titularidad pública: Son aquellos archivos de datos personales de los que sean responsables los órganos de la administración pública, así como las entidades u organismos vinculados o dependientes de la misma y las entidades autónomas y descentralizadas del Estado.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.5'
+      name: núm. 5
+      description: 'Cancelación: Procedimiento en virtud del cual el responsable del tratamiento cesa en el uso de los datos, excepto para su puesta a disposición de la administración pública, jueces y tribunales, para la atención de las posibles responsabilidades.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.6'
+      name: núm. 6
+      description: 'Cesión o comunicación de datos: Tratamiento de datos que supone su revelación a una persona distinta del afectado o interesado.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.7'
+      name: núm. 7
+      description: 'Consentimiento del interesado: Toda manifestación de voluntad, libre, inequívoca, específica e informada, mediante la que el interesado consiente el tratamiento de datos personales que le conciernen.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.8'
+      name: núm. 8
+      description: 'Datos especialmente protegidos: Datos de carácter personal que revelan origen racial y étnico, opiniones políticas, convicciones religiosas, filosóficas o morales, afiliación sindical e información referente a la salud o a la vida sexual.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.9
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.9'
+      name: núm. 9
+      description: 'Datos de carácter personal: Cualquier información numérica, alfabética, gráfica, fotográfica, acústica o de cualquier otro tipo concerniente a personas físicas identificadas o identificables.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.10
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.10'
+      name: núm. 10
+      description: 'Datos de carácter personal relacionados con la salud: Cualquier información concerniente a la salud pasada, presente y futura, física o mental, de un individuo.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.11
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.11'
+      name: núm. 11
+      description: 'Destinatario o cesionario: Persona física o jurídica, pública o privada, u órgano administrativo, al que se revelen los datos.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.12
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.12'
+      name: núm. 12
+      description: 'Encargado del tratamiento: La persona física o jurídica, pública o privada, que realice el tratamiento de los datos personales por cuenta del responsable del tratamiento.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.13
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.13'
+      name: núm. 13
+      description: 'Exportador de datos personales: Persona física o jurídica, pública o privada, u órgano administrativo situado en territorio dominicano que realice, conforme a lo dispuesto en esta ley, una transferencia de datos de carácter personal a un país tercero.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.14
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.14'
+      name: núm. 14
+      description: 'Fuentes accesibles al público: Aquellos archivos de datos personales cuya consulta puede ser realizada por cualquier persona, no impedida por una norma limitativa. Tienen la consideración de fuentes de acceso público los repertorios telefónicos en los términos previstos por su normativa específica y las listas de personas pertenecientes a grupos de profesionales que contengan únicamente los datos de nombre, título, profesión, actividad, grado académico, dirección e indicación de su pertenencia al grupo. Asimismo, tienen el carácter de fuentes de acceso público, boletines oficiales y los medios de comunicación.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.15
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.15'
+      name: núm. 15
+      description: 'Importador de datos personales: Persona física o jurídica, pública o privada, u órgano administrativo receptor de los datos, en caso de transferencia internacional de los mismos a un tercer país, ya sea responsable del tratamiento, encargada del tratamiento o tercero.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.16
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.16'
+      name: núm. 16
+      description: 'Persona identificable: Toda persona cuya identidad pueda determinarse, directa o indirectamente, mediante cualquier información referida a su identidad física, fisiológica, psíquica, económica, cultural o social.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.17
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.17'
+      name: núm. 17
+      description: 'Procedimiento de disociación: Todo tratamiento de datos personales de manera que la información obtenida no pueda asociarse a persona determinada o determinable, mediante el uso de técnicas de codificación, de modo que no permita identificar a la persona física ante terceros.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.18
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.18'
+      name: núm. 18
+      description: 'Responsable del tratamiento: Toda persona, pública o privada, titular del archivo de datos personales que decide la finalidad, el contenido, los medios del tratamiento y el uso de la información obtenida con el tratamiento de los datos personales.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.19
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.19'
+      name: núm. 19
+      description: 'Tercero: Persona física o jurídica, pública o privada, u órgano administrativo distinto del afectado o interesado, del responsable del tratamiento, del responsable del fichero, del encargado del tratamiento y de las personas autorizadas para tratar los datos bajo la autoridad directa del responsable del tratamiento o del encargado del tratamiento.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.20
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.20'
+      name: núm. 20
+      description: 'Transferencia internacional de datos: Tratamiento de datos que supone una transmisión de los mismos fuera del territorio de la República Dominicana, sin importar el soporte, bien constituya una cesión o comunicación de datos, bien tenga por objeto la realización de un tratamiento de datos por cuenta del responsable del archivo de datos personales establecido en territorio dominicano.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.21
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.21'
+      name: núm. 21
+      description: 'Tratamiento de datos: Operaciones y procedimientos sistemáticos, electrónicos o no, que permitan la recolección, conservación, ordenamiento, almacenamiento, modificación, relación, evaluación, bloqueo, destrucción y, en general, el procesamiento de datos personales, así como también su cesión a terceros a través de comunicaciones, consultas, interconexiones o transferencias. Es decir, cualquier operación o conjunto de operaciones o procedimientos técnicos, automatizados o no, que dentro de una base de datos permiten recopilar, organizar, almacenar, elaborar, seleccionar, extraer, confrontar, compartir, comunicar, transmitir o cancelar datos de consumidores.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.22
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.22'
+      name: núm. 22
+      description: 'Salario mínimo: Será el salario mínimo nacional más bajo percibido por los trabajadores del sector privado no sectorizado de empresas industriales, comerciales y de servicios, fijado por el Comité Nacional de Salarios del Ministerio de Trabajo de la República Dominicana.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.23
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.23'
+      name: núm. 23
+      description: 'Agentes económicos: Personas físicas o jurídicas, proveedoras de bienes y servicios.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.24
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.24'
+      name: núm. 24
+      description: 'Aportantes de datos: Las instituciones de intermediación financiera, los agentes económicos y las entidades públicas que suministran información relativa a sus operaciones a una Sociedad de Información Crediticia (SIC), destinada a conformar su base de datos.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.25
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.25'
+      name: núm. 25
+      description: 'Archivo, registro, ficheros, base o banco de datos: Indistintamente, designan al conjunto organizado de datos personales que sean objeto de tratamiento o procesamiento, electrónico o no, cualquiera que fuere la modalidad de su formación, almacenamiento, organización o acceso. Incluye también el conjunto de informaciones que proporcionan directamente los aportantes de datos, así como otras informaciones de carácter y dominio público, ya sea por su procedencia o por su naturaleza.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.26
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.26'
+      name: núm. 26
+      description: 'Sociedad de Información Crediticia (SIC): Sociedad comercial que se dedica a recopilar, organizar, almacenar, conservar, comunicar, transferir o transmitir datos, sobre los consumidores, bienes o servicios relacionados con éstos, así como cualquier otra información suministrada por la Superintendencia de Bancos, a través de procedimientos técnicos, automatizados o no, en forma documental, digital o electrónica.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.27
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.27'
+      name: núm. 27
+      description: 'Cedente: Entidad que cede o transfiere información.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.28
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.28'
+      name: núm. 28
+      description: 'Puntaje de crédito: Es una metodología que se basa en modelos de tipo probabilísticos, matemáticos y econométricos, que tratan de medir una serie de variables y datos con la finalidad de obtener información valiosa para la toma de decisiones crediticias, aplicando evaluaciones actuariales estadísticas por medio de programas informáticos especializados de análisis retrospectivo y de tendencia inferencial para tal fin.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.29
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.29'
+      name: núm. 29
+      description: 'Datos del historial de crédito o datos crediticios: Información relativa al historial crediticio de una persona física o jurídica, así como cualquier otra información suministrada por la Superintendencia de Bancos u otras de carácter y dominio público, ya sea por su procedencia o por su naturaleza.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.30
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.30'
+      name: núm. 30
+      description: 'Datos informáticos: Los datos personales sometidos al tratamiento o procesamiento electrónico o automatizado.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.31
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.31'
+      name: núm. 31
+      description: 'Datos sensibles: Datos personales que revelan las opiniones políticas, las convicciones religiosas, filosóficas o morales, la afiliación sindical e información referente a la salud o a la vida sexual.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.32
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.32'
+      name: núm. 32
+      description: 'Días hábiles: Son los días laborables que no incluyen los sábados ni los domingos, ni los días feriados en la República Dominicana.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.33
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.33'
+      name: núm. 33
+      description: 'Entidades de intermediación financiera: Aquellas entidades públicas o privadas que realicen intermediación financiera, previa autorización de la Junta Monetaria.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.34
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.34'
+      name: núm. 34
+      description: 'Entidades públicas: El Poder Legislativo del Estado, compuesto por el Congreso Nacional y cualquiera de sus dependencias; el Poder Ejecutivo del Estado y todas las dependencias y entidades de la administración pública; el Poder Judicial del Estado y todos sus órganos; los tribunales administrativos estatales; los ayuntamientos municipales, organismos gubernamentales u oficiales descentralizados y con autonomía pública, y las demás entidades a las que la Constitución y las leyes estatales reconozcan como de interés público.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.35
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.35'
+      name: núm. 35
+      description: 'Información crediticia: Información de carácter económico, financiero, bancario o comercial relacionada a un consumidor sobre sus obligaciones, historial de pago, garantías y clasificación de deudor, de tal modo que permita la correcta e inequívoca identificación, localización y descripción del nivel de endeudamiento del titular en un determinado momento.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.36
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.36'
+      name: núm. 36
+      description: 'Información pública: Todo registro, archivo o cualquier dato que se recopile, mantenga, procese o se encuentre en poder de las entidades públicas a las que se refiere esta ley. Asimismo, toda información que en virtud de la Constitución de la República Dominicana garantice el principio de publicidad de los actos de los Poderes del Estado y el derecho de acceso a la información pública, establecido en la Ley General de Libre Acceso a la Información Pública No.200-04, de fecha 28 de julio de 2004.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.37
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.37'
+      name: núm. 37
+      description: 'Junta Monetaria: Institución a la que se refiere la Ley Monetaria y Financiera.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.38
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.38'
+      name: núm. 38
+      description: 'Registro Público: Entidades públicas o privadas destinadas a proveer informes lícitos, sean éstos de crédito o no.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.39
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.39'
+      name: núm. 39
+      description: 'Reporte de crédito: La información crediticia presentada por una Sociedad de Información Crediticia (SIC), en forma documental, digital o electrónica, para ser proporcionada a un usuario o suscriptor que lo haya solicitado de conformidad con esta ley.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.40
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.40'
+      name: núm. 40
+      description: 'Reporte de información pública: La información presentada por una Sociedad de Información Crediticia (SIC), en forma documental, digital o electrónica que se recopile, mantenga, almacene, actualice, grabe, organice, elabore, procese o se encuentre en el Poder Judicial y cualquiera de sus órganos consignados en la Constitución y en la Ley de Organización Judicial.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.41
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.41'
+      name: núm. 41
+      description: 'Reporte de seguros: La información presentada por un banco de dato, con autorización para ello, en forma documental, digital o electrónica que se recopile, mantenga, almacene, actualice, grabe, organice, elabore, procese o se encuentre en el sector asegurador.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.42
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.42'
+      name: núm. 42
+      description: 'Reporte para fines de cobro: La información presentada por una Sociedad de Información Crediticia (SIC), en forma documental, digital o electrónica que se recopile, mantenga, almacene, actualice, grabe, organice, elabore o procese en virtud del otorgamiento de un crédito, en el cual el deudor, cuyo último domicilio se desconoce, haya incumplido su obligación con el acreedor en perjuicio de éste.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.43
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.43'
+      name: núm. 43
+      description: 'Responsable de archivo, registro, base o banco de datos: Persona física o jurídica, pública o privada, que es titular de un archivo, registro, base o banco de datos.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.44
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.44'
+      name: núm. 44
+      description: 'Riesgo: Es aquel relacionado a obligaciones o antecedentes financieros, comerciales, de seguros o de cualquier otra naturaleza de una persona física o jurídica, que permita evaluar la trayectoria de endeudamiento, de pago y afines.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.45
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.45'
+      name: núm. 45
+      description: 'Secreto bancario: Al que se refiere el Artículo 55, literal b) de la Ley Monetaria y Financiera.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.46
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.46'
+      name: núm. 46
+      description: 'Secreto profesional: Al que se refiere el Código Penal dominicano.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.47
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.47'
+      name: núm. 47
+      description: 'Superintendencia de Bancos: Entidad a la que se refiere la Sección V, artículos 18, 19, 20 y 21 de la Ley Monetaria y Financiera No.183-02, de fecha 21 de noviembre de 2002.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.48
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.48'
+      name: núm. 48
+      description: 'Titular de los datos, deudor, consumidor, cliente o titular de la información: Toda persona física cuyas informaciones sean objeto del tratamiento de datos, así como todo acreedor, sea éste una persona física o jurídica, que tiene o ha tenido una relación comercial o de tipo contractual con una persona física para el intercambio de bienes y servicios, donde la persona física es deudora del acreedor. Toda información que se derive de dicha relación estará asociada por separado tanto al deudor como al acreedor y se regirá por esta definición. Toda persona física o jurídica que haya tenido, tenga o solicite tener un bien o servicio de carácter económico, financiero, bancario, comercial, industrial, o de cualquier otra naturaleza, con una institución de intermediación financiera o con un agente económico, según proceda conforme a la ley.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:6.49
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:6
+      ref_id: '6.49'
+      name: núm. 49
+      description: 'Usuario de datos, suscriptor o afiliado: Toda persona, pública o privada, que realice a su arbitrio el tratamiento de datos, ya sea en archivos, registros o bancos de datos propios o a través de conexión con los mismos. Igualmente, las entidades de intermediación financiera, los agentes económicos, las entidades públicas, y las demás personas físicas o jurídicas que mantengan acuerdos con las Sociedades de Información Crediticia (SIC) para acceder a las informaciones de los consumidores.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii
+      assessable: false
+      depth: 1
+      ref_id: Cap. II
+      name: Disposiciones generales
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii
+      ref_id: Cap. II, Secc. I
+      name: De los derechos de las personas y su ejercicio
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '7'
+      name: Art. 7 – Derecho de consulta para la protección de datos
+      description: Toda persona tiene derecho a una acción judicial para conocer de la existencia y acceder a los datos que de ella consten en registros o bancos de datos públicos o privados y, en caso de discriminación, inexactitud o error, exigir la suspensión, rectificación y la actualización de aquellos, conforme a esta ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:8
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '8'
+      name: Art. 8 – Condiciones generales para el ejercicio de los derechos de acceso, rectificación, cancelación y oposición
+      description: |-
+        Toda persona tiene derecho a que sean rectificados, actualizados, y, cuando corresponda, suprimidos, los datos personales de los que sea titular y que estén incluidos en un banco de datos.
+        El responsable del banco de datos, después de verificar y comprobar la pertinencia de la reclamación, debe proceder a la rectificación, supresión o actualización de los datos personales del afectado, realizando las operaciones necesarias a tal fin, en el plazo máximo de diez (10) días hábiles de recibido el reclamo del titular de los datos o advertido el error o inexactitud.
+        El incumplimiento de esta obligación dentro del término acordado en el inciso precedente, habilitará al interesado a promover sin más requisitos la acción de protección de los datos personales o de hábeas data prevista en esta ley.
+        En el supuesto de cesión o transferencia de datos, el responsable o usuario del banco de datos debe notificar la rectificación o supresión al cesionario dentro de cinco (5) días hábiles de efectuado el tratamiento del dato.
+        La supresión no procede cuando pudiese causar perjuicios a derechos o intereses legítimos de terceros, o cuando existiera una obligación contractual o legal de conservar los datos.
+        Durante el proceso de verificación y rectificación del error o inexactitud de la información de que se trate, el responsable o usuario del banco de datos deberá consignar, al proveer información relativa al demandante, la circunstancia de que se encuentra sometida a revisión o impugnación.
+        La rectificación, actualización o supresión de datos personales inexactos o incompletos que existan en registros públicos o privados se efectuará sin cargo alguno para el interesado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:9
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '9'
+      name: Art. 9 – Independencia de los derechos de acceso, rectificación, cancelación y oposición
+      description: Los derechos de acceso, rectificación, cancelación y oposición son derechos independientes. No puede entenderse que el ejercicio de ninguno de ellos sea requisito previo para el ejercicio de otro.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:10
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '10'
+      name: Art. 10 – Derecho de acceso
+      description: |-
+        Toda persona tiene el derecho a acceder a la información y a los datos que sobre ella o sus bienes reposen en los registros oficiales o privados, así como conocer el destino y el uso que se haga de los mismos, con las limitaciones fijadas por esta ley. El tratamiento de los datos e informaciones personales o de sus bienes deberá hacerse respetando los principios de calidad, licitud, lealtad, seguridad y finalidad. Solicitarán ante la autoridad judicial competente la actualización, oposición al tratamiento, rectificación o destrucción de aquellas informaciones que afecten ilegítimamente sus derechos.
+        El ejercicio del derecho al cual se refiere este artículo, en el caso de datos de personas fallecidas, le corresponderá a sus sucesores universales.
+        El titular de los datos, previa acreditación de su identidad, tiene derecho a solicitar y obtener información de sus datos personales incluidos en los bancos de datos públicos, en los registros oficiales de las entidades, organismos y empresas públicas, así como sus datos registrados en los archivos de las instituciones y las empresas privadas, o en los bancos de datos privados.
+        El usuario del banco de datos debe proporcionar la información solicitada por el titular de los datos dentro de cinco (5) días hábiles posteriores a haber sido hecha de manera personal dicha solicitud, o vía acto de alguacil. Vencido el plazo sin que se satisfaga el pedido, el titular de los datos podrá incoar una acción judicial ante un juzgado de primera instancia para conocer de la existencia y acceder a los datos que de él consten en registros o bancos de datos públicos o privados, conforme al procedimiento previsto en esta ley.
+        La SIC deberá adoptar todos los mecanismos de seguridad con el propósito de garantizar la protección de la confidencialidad de la información crediticia perteneciente al titular de los datos, y que éste pueda acceder, de forma exclusiva, a su propia información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:11
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '11'
+      name: Art. 11 – Procedimientos de acceso
+      description: Los titulares de datos tendrán el derecho de solicitar a la Sociedad de Información Crediticia (SIC) su historial crediticio o reporte de crédito. Este derecho será ejercido en forma gratuita cuatro (4) veces por año, y a intervalos no inferiores a tres (3) meses, salvo que se demuestre un interés legítimo al efecto. El historial crediticio o reporte de crédito personal puede ser visualizado en las oficinas de las Sociedades de Información Crediticia (SIC); opcionalmente, el titular de los datos puede solicitar el acceso seguro a través de una plataforma vía Internet.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:12
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '12'
+      name: Art. 12 – Plazo
+      description: La Sociedad de Información Crediticia (SIC) deberá presentar el reporte de crédito solicitado en forma clara, completa y accesible, y deberá ponerlo a disposición del titular de los datos en un plazo no mayor de cinco (5) días hábiles, contados a partir de la fecha en que la Sociedad de Información Crediticia (SIC) hubiera recibido la solicitud correspondiente. Igual disposición aplica para las demás entidades que manejan bancos de datos, públicos o privados.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '13'
+      name: Art. 13
+      description: 'Los responsables del tratamiento de datos deberán cumplir los siguientes deberes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.1'
+      name: núm. 1
+      description: Garantizar al titular de los datos, en cualquier circunstancia, el pleno y efectivo ejercicio del derecho de hábeas data.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.2'
+      name: núm. 2
+      description: Conservar la información bajo las condiciones de seguridad necesarias para impedir su adulteración, pérdida, consulta y uso o acceso no autorizado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.3'
+      name: núm. 3
+      description: Realizar oportunamente la actualización, rectificación o supresión de los datos en los términos de la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.4'
+      name: núm. 4
+      description: Tramitar las consultas y los reclamos formulados por los titulares de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.5'
+      name: núm. 5
+      description: Adoptar un manual interno de políticas y procedimientos para garantizar el adecuado cumplimiento de la presente ley, y, en especial, para la atención de consultas y reclamos por parte de los titulares de la información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:13.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:13
+      ref_id: '13.6'
+      name: núm. 6
+      description: Permitir el acceso a la información únicamente a las personas que pueden tener derecho a ella.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:14
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '14'
+      name: Art. 14 – Derechos de rectificación y cancelación
+      description: Toda persona tiene derecho a que sean rectificados, actualizados, y, cuando corresponda, suprimidos, los datos personales de los que sea titular y que estén incluidos en un banco de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:15
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '15'
+      name: Art. 15 – Bloqueo de datos
+      description: La cancelación dá lugar al bloqueo de los datos, conservándose únicamente a disposición de los poderes del Estado para la atención de las posibles responsabilidades nacidas del tratamiento durante el plazo de prescripción de éstas. Cumplido el citado plazo deberá procederse a la supresión. En todo caso, la supresión no procede cuando pudiese causar perjuicios a derechos o intereses legítimos de terceros, o cuando existiera una obligación legal de conservar los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:16
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '16'
+      name: Art. 16 – Derecho a indemnización
+      description: Los interesados que como consecuencia del incumplimiento de lo dispuesto en la presente ley, sufran daños y perjuicios, tienen el merecimiento a ser indemnizados conforme al derecho común.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:17
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '17'
+      name: Art. 17 – Acción de hábeas data
+      description: |-
+        Sin perjuicio de los mecanismos establecidos para el ejercicio de los derechos de los interesados, éstos podrán ejercer la acción judicial de hábeas data de conformidad con la Constitución y las leyes que rigen la materia.
+        La acción judicial de hábeas data procederá para tomar conocimiento de la existencia de los datos personales almacenados en archivos, registros o bancos de datos públicos o privados que se deriven de una relación comercial, laboral o contractual con una entidad pública o privada; o simplemente, para tomar conocimiento de los datos personales que se presuma que existen almacenados en archivos, registros o bancos de datos públicos o privados.
+        En los casos en que se presuma inexactitud, la desactualización de la información de que se trata, o el tratamiento de datos cuyo registro se encuentre prohibido en la presente ley, para exigir su rectificación, supresión o actualización.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:18
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '18'
+      name: Art. 18 – Legitimación activa
+      description: La acción de protección de los datos personales o de hábeas data será ejercida por el afectado, sus tutores, los sucesores o sus apoderados. Cuando la acción judicial sea ejercida por personas jurídicas deberá ser interpuesta por sus representantes legales o los apoderados que éstas designen a tal efecto.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:19
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '19'
+      name: Art. 19 – Legitimación pasiva
+      description: La acción judicial procederá con respecto a los responsables y usuarios de bancos de datos públicos y privados destinados a proveer informes, cuando actúen contrario a las disposiciones establecidas en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:20
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '20'
+      name: Art. 20 – Competencia
+      description: Será competente para conocer de esta acción el juez del domicilio del demandado, y para el caso de pluralidad de demandados, en el domicilio de uno de ellos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:21
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '21'
+      name: Art. 21 – Procedimiento aplicable
+      description: |-
+        La acción de hábeas data se tramitará según las disposiciones de la presente ley y por el procedimiento que corresponde a la acción de amparo.
+        El registro o el banco de datos, mientras dure el procedimiento, debe asentar o publicar en los informes que la información cuestionada está sometida a un proceso judicial o de impugnación de hábeas data.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:22
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '22'
+      name: Art. 22 – Trámite de la demanda de hábeas data
+      description: Sometida la acción, el juez requerirá, mediante resolución motivada, al archivo, registro o banco de datos la remisión de la información concerniente al demandante. Podrá, asimismo, solicitar informes sobre el soporte técnico de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:23
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '23'
+      name: Art. 23 – Contestación del informe
+      description: Al contestar el informe, el archivo, registro o banco de datos deberá expresar las razones por las cuales incluyó la información cuestionada y aquellas por las que no obtemperó al pedido efectuado por el interesado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:24
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '24'
+      name: Art. 24 – Ampliación de la demanda de hábeas data
+      description: Contestado el informe por parte del demandado, en el término de diez (10) días hábiles, el demandante deberá presentar las pruebas fehacientes de que su caso se trata de una información incorrecta, errónea o inexacta, y podrá exigir la suspensión, rectificación y actualización de aquellas informaciones que afecten ilegítimamente sus derechos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '25'
+      name: Art. 25 – Procedimiento de reclamación aplicable a las Sociedades de Información Crediticia (SIC) para la modificación, rectificación y cancelación de la información del titular
+      description: 'Cuando los titulares de los datos no estén conformes con la información contenida en un reporte proveniente de una Sociedad de Información Crediticia (SIC) o de las entidades que desarrollan herramientas de puntaje de crédito, podrán presentar una reclamación. Dicha reclamación deberá presentarse por instancia o mediante acto de alguacil en el que se señale con claridad los registros en que conste la información impugnada, así como copias de la documentación en que fundamenten su inconformidad. En caso de no contar con la documentación correspondiente, deberán explicar esta situación en el escrito que utilicen para presentar su reclamación:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.1'
+      name: núm. 1
+      description: Las Sociedades de Información Crediticia (SIC) no están obligadas a tramitar reclamaciones sobre la información contenida en los registros que hayan sido objeto de una reclamación previa, respecto de la cual se haya seguido el procedimiento de reclamación previsto en el presente artículo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.2'
+      name: núm. 2
+      description: Las Sociedades de Información Crediticia (SIC) deberán entregar a la unidad especializada de las entidades de intermediación financiera o, en el caso de agentes económicos, a quienes designen como encargados para esos fines, la reclamación presentada por el titular de los datos, dentro de un plazo de diez (10) días hábiles, contados a partir de la fecha en que la Sociedad de Información Crediticia (SIC) la hubiere recibido. Los aportantes de datos de que se trate deberán responder por escrito a la reclamación presentada por el titular de la información, dentro del plazo de diez (10) días hábiles.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.3'
+      name: núm. 3
+      description: 'Una vez que la Sociedad de Información Crediticia (SIC) notifique por escrito la reclamación al aportante de datos respectivo, deberá incluir en el registro de que se trate la leyenda: “Registro Impugnado por Hábeas Data”, la cual no se eliminará hasta que concluya el trámite contenido en el numeral anterior.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.4'
+      name: núm. 4
+      description: 'Si las unidades especializadas de las entidades de intermediación financiera, o en el caso de agentes económicos, de quienes designen como responsables para esos efectos, no hacen llegar a las Sociedades de Información Crediticia (SIC) su respuesta a la reclamación presentada por el titular de la información dentro de un plazo de diez (10) días hábiles, contados a partir de que hayan recibido la notificación de la reclamación, las Sociedades de Información Crediticia (SIC) deberán modificar o eliminar de sus bases de datos la información que conste en el registro de que se trate, según le haya solicitado el titular de los datos, así como la leyenda: “Registro Impugnado por Hábeas Data”.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.5'
+      name: núm. 5
+      description: Si el aportante de datos acepta total o parcialmente lo señalado en la reclamación presentada por el titular de los datos, el aportante de datos deberá realizar de inmediato las modificaciones apropiadas en su base de datos y notificará de lo anterior a las Sociedades de Información Crediticia (SIC) que le haya enviado la reclamación, remitiéndole de nuevo a las Sociedades de Información Crediticia (SIC) la corrección efectuada a sus bases de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.6'
+      name: núm. 6
+      description: En caso de que el aportante de datos acepte parcialmente lo señalado en la reclamación o señale la improcedencia de esta, deberá expresar en su respuesta, mediante instancia dirigida a la Sociedad de Información Crediticia (SIC) y visada por éste, los elementos que consideró respecto de la reclamación. La Sociedad de Información Crediticia (SIC) deberá poner a disposición del titular de los datos que haya presentado la reclamación una copia de dicha instancia, dentro de los cinco días hábiles siguientes a que reciba la respuesta del aportante de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.7'
+      name: núm. 7
+      description: 'En caso de que la reclamación presentada por el titular de los datos sea rechazada por el aportante de datos, y cuando el titular de los datos no esté de acuerdo con los argumentos presentados por el aportante de datos, las Sociedades de Información Crediticia (SIC) queda eximido de responsabilidad frente al titular de los datos. Las Sociedades de Información Crediticia (SIC) mantendrán el registro de que se trate con la leyenda: “Registro Impugnado por Hábeas Data”, la cual no se eliminará hasta tanto: (1) La Sociedad de Información Crediticia (SIC) reciba la instancia donde conste que el aportante de datos autorice a las Sociedades de Información Crediticia (SIC) a corregir los datos, obtemperando al pedimento del titular de los datos; o (2) hasta que a las Sociedades de Información Crediticia (SIC) le sea notificada una sentencia definitiva e irrevocable favoreciendo al titular de los datos, dirimiendo el conflicto entre el titular de los datos y el aportante de datos, en cuyo caso las Sociedades de Información Crediticia (SIC) eliminarán la leyenda: “Registro Impugnado por Hábeas Data” y deberán corregir los datos en un plazo no mayor de cinco (5) días hábiles a partir de la fecha en que la Sociedad de Información Crediticia (SIC) reciba dicha sentencia.'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.8'
+      name: núm. 8
+      description: En caso de que los errores objeto de la reclamación presentada por el titular de los datos sean imputables a las Sociedades de Información Crediticia (SIC), éste deberá corregirlos en un plazo no mayor de cinco (5) días hábiles a partir de la fecha en que la Sociedad de Información Crediticia (SIC) reciba la respuesta del aportante de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.9'
+      name: núm. 9
+      description: 'Las Sociedades de Información Crediticia (SIC) sólo incluirán nuevamente dentro de su base de datos la información previamente contenida en los registros que hayan modificado o eliminado cuando el aportante de datos le envíe los elementos que sustenten, a juicio de éste, la inclusión, nuevamente, de la información impugnada. En tal supuesto, la Sociedad de Información Crediticia (SIC) eliminará la leyenda: “Registro Impugnado por Hábeas Data”, e informará de dicha situación al titular de los datos, poniendo a su disposición la respuesta del aportante de datos, junto con un nuevo reporte de crédito, en un plazo de cinco (5) días hábiles, contados a partir de la fecha en que el aportante de datos haya incluido nuevamente la información impugnada por el titular de los datos en la información suministrada a la Sociedad de Información Crediticia (SIC).'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.10
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.10'
+      name: núm. 10
+      description: Las Sociedades de Información Crediticia (SIC) no tendrán responsabilidad alguna con motivo de las modificaciones, inclusiones o eliminaciones de informaciones o de registros que realicen como parte del procedimiento de reclamación previsto en este artículo. En el desarrollo de dicho procedimiento las Sociedades de Información Crediticia (SIC) se limitarán a entregar a los aportantes de datos y a los titulares de los datos la documentación que a cada uno corresponda en los términos de los artículos anteriores, y no tendrá a su cargo resolver, dirimir o actuar como amigable componedor de las diferencias que surjan entre ellos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.11'
+      name: núm. 11
+      description: En los casos en que la reclamación resulte con una modificación a la información del titular de los datos contenido en la base de datos de la Sociedad de Información Crediticia (SIC), ésta deberá poner gratuitamente a disposición del titular de los datos un nuevo reporte de crédito en la unidad especializada de las Sociedades de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.12
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.12'
+      name: núm. 12
+      description: Los casos en los cuales la información reclamada o impugnada provenga de una entidad pública definida en esta ley, la Sociedad de Información Crediticia (SIC) recibirá la reclamación de parte del titular de los datos, con los documentos que le sirven de base, en caso que los hubiere, y dispondrá de un plazo de hasta quince (15) días hábiles para verificar con dichas entidades y corregir la información contenida en su base de datos, en los casos en que procediere.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:25.13
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:25
+      ref_id: '25.13'
+      name: núm. 13
+      description: El titular de los datos que se considere afectado por una información contenida en un reporte proveniente de una Sociedad de Información Crediticia (SIC) tiene un plazo de diez (10) días hábiles, contados a partir de haber agotado el procedimiento de reclamación estipulado en la presente ley, para iniciar su acción por ante los tribunales competentes. Después de haber agotado el procedimiento de reclamación aplicable a la Sociedad de Información Crediticia (SIC), sea este interpuesto por una persona física o jurídica, y después de que la Sociedad de Información Crediticia (SIC) haya cumplido con los requerimientos especificados en este artículo, la Sociedad de Información Crediticia (SIC) queda exenta de responsabilidad.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:26
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '26'
+      name: Art. 26 – Excepciones a los derechos de acceso, rectificación, cancelación y oposición
+      description: |-
+        Mediante resolución judicial los responsables o usuarios de bancos de datos oficiales pueden denegar el acceso, rectificación o la supresión en función de la protección de la seguridad nacional, del orden y la seguridad pública, o de la protección de los derechos e intereses de terceros. Estas excepciones no pueden interferir con los derechos a que se hace acreedor cada ciudadano y que consagre la Constitución de la República Dominicana.
+        La información sobre datos personales también puede ser denegada por los responsables o usuarios de bancos de datos públicos, cuando de tal modo se pudieran obstaculizar actuaciones judiciales o administrativas en curso vinculadas a la investigación sobre el cumplimiento de obligaciones tributarias, el desarrollo de funciones de control de la salud y del medio ambiente, la investigación de crímenes y delitos por la autoridad competente y la verificación de infracciones administrativas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '27'
+      name: Art. 27 – Excepciones al requerimiento de consentimiento
+      description: 'No será necesario el consentimiento para el tratamiento y la cesión de datos cuando:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.1'
+      name: núm. 1
+      description: Se obtengan de fuentes de acceso público.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.2'
+      name: núm. 2
+      description: Se recaben para el ejercicio de funciones propias de los poderes del Estado o en virtud de una obligación legal.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.3'
+      name: núm. 3
+      description: Se trate de listas para fines mercadológicos, cuyos datos se limiten a nombre, cédula de identidad y electoral, pasaporte, identificación tributaria y demás informaciones biográficas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.4'
+      name: núm. 4
+      description: Se deriven de una relación comercial, laboral o contractual, científica o profesional con la persona física, y resulten necesarios para su desarrollo o cumplimiento.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.5'
+      name: núm. 5
+      description: Se trate de datos personales que reciban de sus clientes en relación a las operaciones que realicen las entidades de intermediación financiera reguladas por la Ley Monetaria y Financiera y de agentes económicos, de las Sociedades de Información Crediticia (SIC), y de las entidades que desarrollan herramientas de puntajes de crédito para la evaluación del riesgo de los deudores del sistema financiero y comercial nacional, de acuerdo a las condiciones establecidas en el Artículo 5, numeral 4.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.6'
+      name: núm. 6
+      description: Así lo disponga una ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.7'
+      name: núm. 7
+      description: Se realice entre dependencias de los órganos del Estado en forma directa, en la medida del cumplimiento de sus respectivas competencias.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.8'
+      name: núm. 8
+      description: Se trate de datos personales relativos a la salud, y sea necesario por razones de salud pública, de emergencia o para la realización de estudios epidemiológicos, en tanto se preserve el secreto de la identidad de los titulares de los datos mediante mecanismos de disociación adecuados.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:27.9
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:27
+      ref_id: '27.9'
+      name: núm. 9
+      description: Se hubiera aplicado un procedimiento de disociación de la información, de modo que los titulares de los datos no sean identificables.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:28
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-ii.secc-i
+      ref_id: '28'
+      name: Art. 28 – Cesión
+      description: Los datos personales objeto de tratamiento de datos sólo pueden ser cedidos para el cumplimiento de los fines directamente relacionados con el interés legítimo del cedente y del cesionario, con el previo consentimiento de por lo menos uno de los titulares de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii
+      assessable: false
+      depth: 1
+      ref_id: Cap. III
+      name: Disposiciones orgánicas
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii
+      ref_id: Cap. III, Secc. I
+      name: Órgano de control
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:29
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '29'
+      name: Art. 29 – Naturaleza
+      description: |-
+        Los archivos, registros o bancos de datos, públicos o privados, destinados a proveer informes crediticios estarán sujetos a la inspección y vigilancia de la Superintendencia de Bancos como órgano de control.
+        El órgano de control deberá realizar todas las acciones necesarias para el cumplimiento de los objetivos y demás disposiciones de la presente ley. A tales efectos, tendrá las siguientes funciones y atribuciones:
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:29.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:29
+      ref_id: '29.1'
+      name: núm. 1
+      description: Asistir y asesorar a las personas físicas que lo requieran acerca de los alcances y de los medios legales de que disponen para la defensa de los derechos que ésta garantiza.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:29.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:29
+      ref_id: '29.2'
+      name: núm. 2
+      description: Imponer las sanciones administrativas que en su caso correspondan por violación a las normas establecidas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:30
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '30'
+      name: Art. 30
+      description: La prestación de servicios consistentes en la recopilación, procesamiento e intercambio de información acerca del historial crediticio de una persona física o jurídica, siempre y cuando dicha información provenga de las entidades de intermediación financiera reguladas por la Ley Monetaria y Financiera, y de agentes económicos, así como cualquier otra información que se considere útil para la elaboración de un eficiente reporte de crédito, tales como aquellas de naturaleza y carácter público, sólo se llevará a cabo por las Sociedades de Información Crediticia (SIC) que obtengan la autorización previa de la Junta Monetaria.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:31
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '31'
+      name: Art. 31
+      description: La solicitud para operar como Sociedad de Información Crediticia (SIC) se formalizará por ante la Superintendencia de Bancos, la cual tramitará la solicitud con su opinión a la Junta Monetaria.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '32'
+      name: Art. 32
+      description: 'La Junta Monetaria sólo autorizará a una sociedad comercial a operar como una Sociedad de Información Crediticia (SIC), cuando ésta:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      ref_id: '32.1'
+      name: núm. 1
+      description: 'Presente los siguientes documentos constitutivos:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1
+      ref_id: 32.1.a
+      name: lit. a)
+      description: Relación actualizada de los accionistas, indicando el capital que cada uno de ellos suscribió y pagó para constituir el capital social suscrito y pagado de la Sociedad de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1
+      ref_id: 32.1.b
+      name: lit. b)
+      description: Relación de los integrantes de los distintos consejos y principales funcionarios de la Sociedad de Información Crediticia (SIC), incluyendo a aquellos que ocupen cargos con la jerarquía inmediata inferior a la del director o administrador general, así como su curriculum vitae.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.1
+      ref_id: 32.1.c
+      name: lit. c)
+      description: Los demás documentos constitutivos, incluyendo el Certificado de Registro Mercantil sobre Sociedades de Comercio, emitido por la Cámara de Comercio y Producción correspondiente, y el documento emitido por la Dirección General de Impuestos Internos, donde conste la asignación del número de Registro Nacional de Contribuyentes.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      ref_id: '32.2'
+      name: núm. 2
+      description: Presente constancia de la existencia real en las cuentas de la sociedad de los recursos aportados por los socios para constituir el capital social suscrito y pagado de la sociedad.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      ref_id: '32.3'
+      name: núm. 3
+      description: 'Presente el programa general de funcionamiento, que comprenda por lo menos:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.a
+      name: lit. a)
+      description: La descripción de los sistemas de cómputo de recopilación y proceso de recopilación y procesamiento de información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.b
+      name: lit. b)
+      description: Las características de los productos y servicios que prestarán a los usuarios o suscriptores.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.c
+      name: lit. c)
+      description: Las políticas de prestación de servicios con que pretenden operar.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.d
+      name: lit. d)
+      description: Las medidas de seguridad y control, a fin de evitar el manejo indebido de la información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.e
+      name: lit. e)
+      description: Las bases de organización.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.3
+      ref_id: 32.3.f
+      name: lit. f)
+      description: El plan de contingencia en caso de desastre.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      ref_id: '32.4'
+      name: núm. 4
+      description: Presente cualquier otra información o documentación conexa que la Superintendencia de Bancos le solicite por escrito, a efecto de evaluar la solicitud respectiva para emitir la opinión que deberá rendir a la Junta Monetaria antes de que ésta proceda a emitir su autorización.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:32.p
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:32
+      ref_id: 32.P
+      name: Párr.
+      description: Estas disposiciones no serán aplicables a la Sociedad de Información Crediticia (S1C) que al momento de promulgación de la presente ley tengan al menos cinco (5) años operando como tales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '33'
+      name: Art. 33
+      description: 'El nombramiento de los consejeros y del director o administrador general de las Sociedades de Información Crediticia (SIC) no recaerá en las personas siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      ref_id: '33.1'
+      name: núm. 1
+      description: Las condenadas por sentencia definitiva e irrevocable, por crímenes o delitos, las inhabilitadas para ejercer el comercio o para desempeñar un empleo, cargo o comisión en el servicio público, o en el sistema financiero dominicano, durante el tiempo que dure su inhabilitación.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      ref_id: '33.2'
+      name: núm. 2
+      description: Las quebradas que no hayan sido rehabilitadas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      ref_id: '33.3'
+      name: núm. 3
+      description: Las que realicen funciones de regulación, inspección o vigilancia respecto de las Sociedades de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33.p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      ref_id: 33.P1
+      name: Párr.
+      description: Las Sociedades de Información Crediticia (SIC) deberán informar a la Superintendencia de Bancos el nombramiento del administrador general, dentro de los cinco (5) días hábiles posteriores a su designación, manifestando expresamente que el mismo cumple con los requisitos aplicables.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:33.p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:33
+      ref_id: 33.P2
+      name: Párr.
+      description: Ningún representante de las entidades de intermediación financiera puede ser nombrado como consejero director o administrador general de una Sociedad de Información Crediticia (SIC); asimismo, ninguna entidad de intermediación financiera puede ser accionista de una Sociedad de Información Crediticia (SIC), ni adquirir instrumentos de inversión en las mismas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:34
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '34'
+      name: Art. 34
+      description: Previo al inicio de actividades, las Sociedades de Información Crediticia (SIC) deberán inscribirse en el registro público de Sociedad de Información Crediticia (SIC) que estará a cargo de la Superintendencia de Bancos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:35
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '35'
+      name: Art. 35
+      description: Las Sociedades de Información Crediticia (SIC) llevarán a cabo las actividades necesarias para la realización de su objeto, incluyendo el servicio de calificación de créditos o de riesgos, así como las análogas y conexas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:36
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iii.secc-i
+      ref_id: '36'
+      name: Art. 36
+      description: Las Sociedades de Información Crediticia (SIC) estarán sujetas a la inspección y vigilancia de la Superintendencia de Bancos, en los términos que establezca la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      assessable: false
+      depth: 1
+      ref_id: Cap. IV
+      name: Disposiciones procedimentales
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      ref_id: Cap. IV, Secc. I
+      name: De los ficheros de titularidad pública
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:37
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-i
+      ref_id: '37'
+      name: Art. 37 – Creación, modificación o supresión
+      description: La creación, modificación o supresión de los archivos de datos personales de la administración pública sólo puede hacerse por medio de las disposiciones contenidas en la Ley de Función Pública, y por medio de la Ley General de Libre Acceso a la Información Pública.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-i
+      ref_id: '38'
+      name: Art. 38
+      description: 'Las disposiciones de creación o de modificación de archivos de datos personales deberán indicar:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.1'
+      name: núm. 1
+      description: La finalidad del archivo de datos personales y los usos previstos para el mismo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.2'
+      name: núm. 2
+      description: Las personas o colectivos sobre los que se pretenda obtener datos de carácter personal y el carácter facultativo u obligatorio de su suministro por parte de aquellas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.3'
+      name: núm. 3
+      description: El procedimiento de recogida y actualización de los datos de carácter personal.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.4'
+      name: núm. 4
+      description: La estructura básica del archivo de datos personales, automatizados o no, y la descripción de los tipos de datos de carácter personal incluidos en el mismo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.5'
+      name: núm. 5
+      description: Las cesiones de datos de carácter personal y, en su caso, las transferencias e interconexiones de datos que se prevean a países terceros.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.6'
+      name: núm. 6
+      description: Los órganos de la administración responsables del archivo de datos personales, precisando la dependencia jerárquica, en su caso.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.7'
+      name: núm. 7
+      description: Los servicios o unidades ante los que pudiesen ejercerse los derechos de acceso, rectificación, cancelación y oposición.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: '38.8'
+      name: núm. 8
+      description: Las medidas de seguridad con indicación del nivel básico, medio o alto exigible.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:38.p
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:38
+      ref_id: 38.P
+      name: Párr.
+      description: Las disposiciones que se dicten para la supresión de los archivos de datos personales deberán establecer el destino de los mismos o, en su caso, las previsiones que se adopten para su destrucción.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:39
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-i
+      ref_id: '39'
+      name: Art. 39 – Comunicación de datos entre instituciones de la administración pública
+      description: |-
+        Los datos de carácter personal recogidos o elaborados por la administración pública para el desempeño de sus atribuciones pueden ser comunicados a otras instituciones de la administración pública.
+        La cesión de datos de carácter personal, objeto de tratamiento, que debe efectuar la administración tributaria en el ejercicio de sus competencias, conforme a lo dispuesto en su normativa reguladora, no requerirá el consentimiento del afectado de conformidad con lo establecido en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-ii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      ref_id: Cap. IV, Secc. II
+      name: De los ficheros de las Fuerzas Armadas, de seguridad y organismos policiales o de inteligencia
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:40
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-ii
+      ref_id: '40'
+      name: Art. 40 – Ficheros de las Fuerzas Armadas, de seguridad y organismos policiales o de inteligencia
+      description: Los archivos de datos personales creados por las Fuerzas Armadas, de seguridad y organismos policiales o de inteligencia que contengan datos de carácter personal que, por haberse recogido para fines administrativos, deban ser objeto de registro permanente, no están sujetos al régimen general de la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      ref_id: Cap. IV, Secc. III
+      name: De los ficheros de titularidad privada
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:41
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '41'
+      name: Art. 41 – Creación de archivos de datos personales de titularidad privada
+      description: Los particulares que formen archivos, registros o bancos de datos que no sean para un uso exclusivamente personal deberán satisfacer los requisitos estipulados en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:42
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '42'
+      name: Art. 42 – Registro de archivos de datos
+      description: Todo archivo, registro, base o banco de datos, público o privado, deberá contar con políticas de información adecuadas que garanticen las medidas de seguridad y control, a fin de evitar el manejo indebido de las informaciones de los titulares de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:43
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '43'
+      name: Art. 43
+      description: Las Sociedades de Información Crediticia (SIC) deben registrarse ante la Superintendencia de Bancos de la República Dominicana, después de haber obtenido de la Junta Monetaria el permiso de operación correspondiente que faculta y autoriza a la sociedad comercial a operar como una Sociedad de Información Crediticia (SIC), conforme a la ley que regula dichas entidades de intermediación financiera. La Superintendencia de Bancos es la entidad autorizada a regular a las Sociedades de Información Crediticia (SIC). Dicho requisito no aplica a las entidades ya existentes y que estén operando debidamente registradas ante la Superintendencia de Bancos de la República Dominicana.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:44
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '44'
+      name: Art. 44 – Datos incluidos en las fuentes de acceso público
+      description: |-
+        Los datos personales que figuren en las listas de personas pertenecientes a grupos de profesionales deben limitarse a los que sean estrictamente necesarios para cumplir la finalidad a que se destina cada listado. La inclusión de datos adicionales por las entidades responsables del mantenimiento de dichas fuentes requerirá el consentimiento del interesado, que podrá ser revocado en cualquier momento.
+        Los interesados tienen derecho a que la entidad responsable del mantenimiento de los listados de los colegios profesionales indique gratuitamente que sus datos personales no pueden utilizarse para fines de publicidad o prospección comercial, así como el derecho a exigir gratuitamente la exclusión de la totalidad de sus datos personales que consten en el censo promocional por las entidades encargadas del mantenimiento de dichas fuentes.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:45
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '45'
+      name: Art. 45 – Fuentes de acceso al público
+      description: Las fuentes de acceso al público que se editen en forma de libro u otro soporte físico o en formato electrónico no pierden el carácter de fuente accesible con la nueva edición que se publique.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:46
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '46'
+      name: Art. 46 – Guías de servicios de telecomunicaciones
+      description: Los datos que figuren en las guías de servicios de telecomunicaciones disponibles al público se considerarán datos provenientes de fuentes accesibles al público.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:47
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '47'
+      name: Art. 47 – Información
+      description: El acreedor adquiere el derecho de efectuar el requerimiento previo de pago a quien corresponda el cumplimiento de la obligación. En caso de producirse o no el pago en el término previsto para ello y cumplirse los requisitos legales, los datos relativos al pago o impago serán comunicados a archivos de datos personales relativos al cumplimiento o incumplimiento de obligaciones pecuniarias.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:48
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '48'
+      name: Art. 48 – Derechos de acceso, rectificación o cancelación
+      description: Cuando el interesado ejerza su derecho de acceso en relación con la inclusión de sus datos en un archivo de datos personales común de información de crédito, se regirá según lo establecido en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:49
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '49'
+      name: Art. 49 – Prestación de servicios de información crediticia
+      description: |-
+        Todas las entidades de intermediación financiera, los agentes económicos, las instituciones de carácter oficial o estatal, y las demás personas físicas o jurídicas que se acojan a los requerimientos de la presente ley, podrán ser usuarios o suscriptores de las Sociedades de Información Crediticia (SIC).
+        La calidad de usuario o suscriptor de las Sociedades de Información Crediticia (SIC) se adquiere mediante la suscripción de un contrato de prestación de servicios con la Sociedad de Información Crediticia (SIC) de que se trate.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:50
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '50'
+      name: Art. 50
+      description: |-
+        Los usuarios o suscriptores de los servicios proporcionados por las Sociedades de Información Crediticia (SIC), sus funcionarios, empleados y prestadores de servicios, deberán guardar confidencialidad sobre la información contenida en los reportes de crédito a los que tengan acceso.
+        Los consumidores, los usuarios o suscriptores no compartirán ni mostrarán los reportes a otras personas, ni entregarán el reporte original o copia del mismo a otras personas, ni divulgar oralmente ni por escrito, ni mediante algún medio de transmisión electrónica, el contenido de los reportes a otras personas que no sean empleados autorizados del suscriptor o afiliado, siempre y cuando lo haga en el ejercicio de sus funciones oficiales o contractuales. La Sociedad de Información Crediticia (SIC), al proporcionar un reporte de crédito revelará la fuente que aportó la información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:51
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '51'
+      name: Art. 51
+      description: |-
+        Los usuarios o suscriptores, antes de acceder a la base de datos de la Sociedad de Información Crediticia (SIC) para obtener la información crediticia de un cliente o consumidor, deberán contar con la autorización expresa de este último, mediante su firma autógrafa o digital, o mediante cualquier forma de manifestación del consentimiento, en la cual deberá constar el uso que el usuario o suscriptor dará a dicha información.
+        Se considerará que existe una manifestación expresa del consentimiento cuando el cliente o consumidor haya solicitado o recibido, de manera verbal o escrita, el otorgamiento de un crédito, la prestación de un servicio o la realización de cualquier actividad que genere una relación jurídica entre el consumidor y el usuario o suscriptor. Para el caso de que llegare a formalizarse dicha relación jurídica entre el cliente y el usuario o suscriptor, este último podrá realizar consultas periódicas a la información crediticia del consumidor durante el tiempo de vigencia de dicha relación jurídica.
+        La vigencia de la autorización prevista en este artículo será de dos (2) años, contados a partir de su otorgamiento. Cuando se haya formalizado la relación jurídica, la autorización para acceder a la información crediticia del cliente permanecerá mientras esté vigente dicha relación jurídica.
+        Estas autorizaciones no aplicarán cuando:
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:51.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:51
+      ref_id: '51.1'
+      name: núm. 1
+      description: La información solicitada por la Superintendencia de Bancos, por las entidades públicas a que se refiere esta ley, en virtud de una investigación oficial, incluyendo el narcotráfico y combate al blanqueo de capitales, actividades antiterroristas, o por las autoridades recaudadoras de impuestos para fines fiscales, o la información requerida por cualquier otra institución gubernamental o de carácter oficial.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:51.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:51
+      ref_id: '51.2'
+      name: núm. 2
+      description: Se trate de reporte de información pública, el reporte para fines de cobros, el reporte de puntaje de crédito, y el reporte de seguros, definidos en esta ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:51.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:51
+      ref_id: '51.3'
+      name: núm. 3
+      description: El usuario o suscriptor accede a la información crediticia de consumidores incluidos en las listas para fines mercadológicos contempladas en esta ley sobre el consentimiento del titular de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:51.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:51
+      ref_id: '51.4'
+      name: núm. 4
+      description: Se trate de acceder a las informaciones de crédito relativas a una persona jurídica definida y contemplada en el Código de Comercio.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '52'
+      name: Art. 52
+      description: 'Las Sociedades de Información Crediticia (SIC) podrán pactar la prestación de sus servicios, mediante el uso de equipos, medios electrónicos, ópticos o de cualquier otra tecnología, sistemas automatizados de procesamiento de datos y redes de telecomunicaciones, ya sean públicos o privados, estableciendo en los contratos respectivos las bases para determinar lo siguiente:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: '52.1'
+      name: núm. 1
+      description: Los servicios cuya prestación se pacte.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: '52.2'
+      name: núm. 2
+      description: Los medios de identificación de los usuarios o suscriptores y de los consumidores, y
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: '52.3'
+      name: núm. 3
+      description: Los medios por los que se haga constar la creación, transmisión, modificación o extinción de derechos y obligaciones inherentes a los servicios de que se trate.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.p1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: 52.P1
+      name: Párr.
+      description: El uso de los medios de identificación que se establezcan conforme a lo previsto por este artículo, en sustitución de la firma autógrafa, producirá los mismos efectos que las leyes otorgan a los documentos correspondientes y, en su caso, tendrán el mismo valor probatorio.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.p2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: 52.P2
+      name: Párr.
+      description: Las Sociedades de Información Crediticia (SIC) podrán pactar con otra Sociedad de Información Crediticia (SIC) legalmente constituidas, el suministro e intercambio de las informaciones contenidas en sus bases de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:52.p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:52
+      ref_id: 52.P3
+      name: Párr.
+      description: Las Sociedades de Información Crediticia (SIC) no establecerán políticas o criterios de operación que contraríen las disposiciones de esta ley, ni impedirán a sus suscriptores o afiliados que soliciten ni entreguen información a cualquier otra Sociedad de Información Crediticia (SIC), y tampoco podrán establecer límites al número de consultas que aquellos puedan realizar.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:53
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '53'
+      name: Art. 53
+      description: Las Sociedades de Información Crediticia (SIC) deberán contar con sistemas y procesos para verificar la identidad del usuario o suscriptor o del cliente o consumidor, mediante el proceso de autenticación que éste determine, el cual deberá ser aprobado previamente por el propio Consejo de Administración de la Sociedad de Información Crediticia (SIC), a fin de salvaguardar la confidencialidad de la información, en los términos de las disposiciones legales aplicables.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:54
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '54'
+      name: Art. 54
+      description: Las Sociedades de Información Crediticia (SIC) deberán presentar a la Superintendencia de Bancos los manuales que establezcan las medidas mínimas de seguridad, las cuales incluirán el transporte de la información, así como la seguridad física, la logística y las de comunicaciones. Dichos manuales deberán contener las medidas necesarias para la seguridad del procesamiento externo de datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:55
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '55'
+      name: Art. 55
+      description: Está prohibido a las Sociedades de Información Crediticia (SIC) otorgar o traspasar, de manera total o parcial, las informaciones suministradas por un aportante de datos, para ser utilizadas por otro aportante de datos, usuario, suscriptor o afiliado, o un tercero, en prácticas de competencia desleal; las Sociedades de Información Crediticia (SIC) no confeccionarán, prepararán, ni venderán o cederán, listas de deudores o consumidores selectos a sus suscriptores o afiliados, ni a ninguna otra persona física o jurídica, siempre y cuando dichas listas de prospectos no hayan sido previamente elaboradas y entregadas a las Sociedades de Información Crediticia (SIC) por los mismos suscriptores o afiliados, para los fines de hacer consultas en lotes.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:56
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '56'
+      name: Art. 56 – Lineamientos generales de recolección y tratamiento de información aplicables a las Sociedades de Información Crediticia (SIC)
+      description: 'Para la recolección y tratamiento de la información a su cargo, las Sociedades de Información Crediticia (SIC) deberán observar los lineamientos generales siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:56.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:56
+      ref_id: '56.1'
+      name: núm. 1
+      description: La recolección de información no se efectuará por medios fraudulentos o ilícitos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:56.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:56
+      ref_id: '56.2'
+      name: núm. 2
+      description: La información recolectada sólo será utilizada para los fines señalados.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:56.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:56
+      ref_id: '56.3'
+      name: núm. 3
+      description: La información será lícita, actualizada, exacta y veraz, de forma tal que responda a la situación real del titular de la información en un momento determinado. Si la información resulta ser ilícita, inexacta o errónea, en todo o en parte, deberán adoptarse las medidas correctivas, según sea el caso, por parte de la Sociedad de Información Crediticia (SIC). A efectos de determinar el momento se deberá, en cada reporte, señalar la fecha del reporte.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:57
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '57'
+      name: Art. 57
+      description: La base de datos de las Sociedades de Información Crediticia (SIC) se integrará con la información que le proporcionan directamente los aportantes de datos sobre las operaciones crediticias y otras de naturaleza análoga que estos últimos otorgan a sus consumidores, en la forma y términos en que se reciba de los aportantes de datos, así como con cualquier otra información suministrada por la Superintendencia de Bancos u otras informaciones provenientes de entidades públicas, ya sea por su procedencia o por su naturaleza.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:58
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '58'
+      name: Art. 58
+      description: En caso de que la información proporcionada por el aportante de datos sea relativa a una persona jurídica, el aportante de datos deberá incluir a los funcionarios responsables de la dirección o administración general y de las finanzas, así como a los socios principales, acogiéndose a lo establecido en los artículos 21 y 22 de la Ley No.3-02, sobre Registro Mercantil.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:59
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '59'
+      name: Art. 59
+      description: A los fines de proteger al titular de la información, y de promover la exactitud, la veracidad y la actualización oportuna y eficaz de la base de datos de las Sociedades de Información Crediticia (SIC), los aportantes de datos deberán suministrar a la Sociedad de Información Crediticia (SIC), por lo menos dos (2) veces al mes, los datos actualizados de sus clientes o consumidores, de tal modo que permita la correcta e inequívoca identificación, localización y descripción del nivel de endeudamiento del titular en un determinado momento.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:60
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '60'
+      name: Art. 60
+      description: |-
+        Las Sociedades de Información Crediticia (SIC) deberán utilizar técnicas de identificación biométricas que dificulten o imposibiliten la usurpación o el robo de las identidades de las personas físicas al momento de contratar bienes y servicios ante los organismos públicos, las empresas públicas y las empresas privadas, o cualquier ente económico que utilicen los servicios de información de las Sociedades de Información Crediticia (SIC).
+        A este respecto, las Sociedades de Información Crediticia (SIC) y los aportantes de datos deberán incluir en los reportes que emiten y en las informaciones que aportan, respectivamente, la foto actualizada o disponible del consumidor o del titular de los datos, de tal modo que el usuario de los reportes provenientes de una Sociedad de Información Crediticia (SIC) debe validar y autenticar la identidad de la persona física comparando el rostro del solicitante del bien o servicio con la imagen en el reporte de la Sociedad de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:61
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '61'
+      name: Art. 61
+      description: Las Sociedades de Información Crediticia (SIC), dentro de los quince (15) días hábiles siguientes a la fecha de recepción de la información suministrada por los aportantes de datos, deberán proceder a actualizar su base de datos, de manera diligente y eficaz, salvo el caso de fuerza mayor o de imposible ejecución.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:62
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '62'
+      name: Art. 62
+      description: En caso de aportantes de datos que sean entidades de intermediación financiera, intervenidas por la Superintendencia de Bancos o el Banco Central, o en proceso de liquidación, la Comisión Liquidadora o la Superintendencia de Bancos o el Banco Central deberá suministrar a las Sociedades de Información Crediticia (SIC), por lo menos una vez al mes, los datos actualizados de los deudores de dichas entidades.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:63
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '63'
+      name: Art. 63
+      description: Las Sociedades de Información Crediticia (SIC) deberán adoptar las medidas de seguridad y control que resulten necesarias para evitar el manejo indebido de la información; asimismo, deberán proteger, bajo las más estrictas medidas de seguridad y confidencialidad, los algoritmos y tecnologías que utilizan para la prestación de los servicios.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:64
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '64'
+      name: Art. 64
+      description: 'Las Sociedades de Información Crediticia (SIC) podrán procesar, para fines de presentación en los reportes, las informaciones crediticias que les sean proporcionadas por los aportantes de datos, conforme a los criterios siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:64.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:64
+      ref_id: '64.1'
+      name: núm. 1
+      description: Para los créditos a plazo o los créditos contratados por cuotas periódicas, que estén vencidos o no, contratados en un plazo menor o igual a los cuarenta y ocho (48) meses, las Sociedades de Información Crediticia (SIC) deben presentar en los reportes las informaciones asociadas a los mismos, durante un lapso no mayor a los cuarenta y ocho (48) meses transcurridos desde la fecha de apertura del crédito.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:64.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:64
+      ref_id: '64.2'
+      name: núm. 2
+      description: Para los créditos a plazo o los créditos contratados por cuotas periódicas, que estén vencidos, contratados en un plazo mayor a los cuarenta y ocho (48) meses, las Sociedades de Información Crediticia (SIC) deben presentar en los reportes las informaciones asociadas a los mismos durante un lapso transcurrido desde la fecha del último pago al crédito en cuestión, lapso que no debe ser mayor a los cuarenta y ocho (48) meses y no debe exceder la fecha de término del crédito originalmente pactado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:64.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:64
+      ref_id: '64.3'
+      name: núm. 3
+      description: Para los créditos recurrentes, es decir, los créditos que vuelven a ocurrir o aparecer, especialmente después de un intervalo, entre ellos incluidas las tarjetas de crédito, las líneas de crédito bancarias o financieras, los créditos comerciales, que estén en defecto o vencidos, las Sociedades de Información Crediticia (SIC) deben presentar en los reportes las informaciones asociadas a los mismos durante un lapso no mayor de cuarenta y ocho (48) meses transcurridos desde la fecha del último pago efectuado al crédito en cuestión.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:65
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '65'
+      name: Art. 65
+      description: Los plazos especificados en el artículo anterior no serán aplicables en los casos en que exista una sentencia definitiva en la que se condene al cliente o consumidor por la comisión de un delito o cuasidelito relacionado con algún crédito y que se haya hecho del conocimiento de la Sociedad de Información Crediticia (SIC).
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '66'
+      name: Art. 66 – Prohibiciones a las Sociedades de Información Crediticia (SIC)
+      description: 'Está prohibido a las Sociedades de Información Crediticia (SIC) recolectar, acopiar, almacenar, actualizar, grabar, organizar, sistematizar, elaborar, seleccionar, confrontar, interconectar en su base de datos, y, en general, utilizar en un reporte de crédito, o mediante cualquier otro formato o medio, las informaciones de los titulares que se especifican a continuación:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.1'
+      name: núm. 1
+      description: Saldos y movimientos de las cuentas corrientes.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.2'
+      name: núm. 2
+      description: Saldos y movimientos de las cuentas de ahorros.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.3'
+      name: núm. 3
+      description: Certificados de depósitos, de cualquier naturaleza, de un titular de los datos en instituciones bancarias o financieras.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.4'
+      name: núm. 4
+      description: Papeles comerciales propiedad de los titulares de los datos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.5'
+      name: núm. 5
+      description: Informaciones referidas a las características morales o emocionales de una persona física.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.6'
+      name: núm. 6
+      description: Informaciones relacionadas a hechos o circunstancias de la vida afectiva de personas físicas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.7'
+      name: núm. 7
+      description: Ideologías y opiniones políticas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.8'
+      name: núm. 8
+      description: Creencias o convicciones religiosas.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.9'
+      name: núm. 9
+      description: Información de los estados de salud física o psíquica.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:66.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:66
+      ref_id: '66.10'
+      name: núm. 10
+      description: Información sobre la conducta, preferencia u orientación sexual.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:67
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '67'
+      name: Art. 67
+      description: 'Las Sociedades de Información Crediticia (SIC) no difundirán en sus reportes de crédito las informaciones siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:67.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:67
+      ref_id: '67.1'
+      name: núm. 1
+      description: Informaciones prohibidas a las Sociedades de Información Crediticia (SIC), enumeradas en el artículo anterior.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:67.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:67
+      ref_id: '67.2'
+      name: núm. 2
+      description: Información referida a la insolvencia o quiebra del titular de la información, hasta tanto hayan transcurrido cuarenta y ocho (48) meses desde que se levantó el estado de insolvencia o desde que se declaró la quiebra.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:68
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '68'
+      name: Art. 68
+      description: |-
+        Está prohibido a las Sociedades de Información Crediticia (SIC) publicar en los reportes de un garante o fiador las informaciones de los titulares de la información, de tal modo que el incumplimiento de pago del deudor no perjudique el estatus crediticio del garante o del fiador, ni afecte negativamente el crédito score o puntaje de crédito de éste.
+        Los aportantes de datos serán los responsables de dar estricto cumplimiento al presente artículo, no obstante a que las Sociedades de Información Crediticia (SIC) colecten y procesen dichas informaciones para los fines de cuadrar las cuentas asociadas a los créditos. Si un titular, garante o fiador se ve afectado por el incumplimiento de este artículo deberá acogerse al procedimiento de reclamación especificado en esta ley.
+        Si un titular de la información paga la totalidad de un crédito que haya estado en estatus legal o incobrable, y se cierra o cancela definitivamente, el aportante de datos deberá reportar a la Sociedad de Información Crediticia (SIC) las informaciones concernientes a la cancelación de dicho crédito, de tal modo que después de transcurridos doce meses a partir de la fecha de cancelación, la Sociedad de Información Crediticia (SIC) no publicará en el historial de dicho crédito las leyendas: “Legal” o “Incobrable”, no obstante a que su puntaje de crédito se pueda ver afectado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:69
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '69'
+      name: Art. 69 – Prohibiciones especiales
+      description: |-
+        Fuera de los fines establecidos en esta ley, se prohíbe la divulgación, la publicación, la reproducción, la transmisión y la grabación del contenido parcial o total de un reporte de cualquier tipo proveniente de una Sociedad de Información Crediticia (SIC), en cualquiera de sus manifestaciones, en cualquier medio de comunicación masivo, sea impreso, televisivo, radial, electrónico, o cualquier otra forma de publicación.
+        Las Sociedades de Información Crediticia (SIC) y sus representantes no serán responsables, civil ni penalmente, de cualesquiera violaciones del presente artículo, cometidas por un suscriptor o afiliado, un cliente o consumidor, los representantes de las entidades públicas, los representantes de medios de comunicación o cualquier persona física o jurídica.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:70
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '70'
+      name: Art. 70 – Archivos de datos personales comunes que contengan datos de carácter personal establecidos por las entidades aseguradoras
+      description: |-
+        Los establecimientos sanitarios públicos o privados y los profesionales vinculados a las ciencias de la salud pueden recolectar y tratar los datos personales relativos a la salud física o mental de los pacientes que acudan a los mismos o que estén o hubieren estado bajo tratamiento de aquellos, respetando los principios del secreto profesional.
+        Sin perjuicio de lo establecido en la presente ley respecto de la cesión de datos, las instituciones y los centros sanitarios públicos y privados y los profesionales correspondientes pueden proceder al tratamiento de los datos de carácter personal relativos a la salud física o mental de las personas que a ellos acudan o hayan de ser tratados en los mismos, de acuerdo con lo dispuesto en la legislación dominicana sobre salud.
+        No obstante lo dispuesto sobre datos especialmente protegidos, pueden ser objeto de tratamiento los datos de carácter personal que se refieren al origen racial, a la salud y a la vida sexual, cuando dicho tratamiento resulte necesario para la prevención o para el diagnóstico médico, la prestación de asistencia sanitaria o tratamientos médicos o la gestión de servicios sanitarios, siempre que dicho tratamiento de datos se realice por un profesional sujeto al secreto profesional o por otra persona sujeta asimismo a una obligación equivalente de secreto.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:71
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '71'
+      name: Art. 71 – Tratamientos con fines de publicidad y de prospección comercial
+      description: |-
+        En la recopilación de domicilios, reparto de documentos, publicidad o venta directa y otras actividades análogas, se podrán tratar datos que sean aptos para establecer perfiles determinados con fines promocionales, comerciales o publicitarios o que permitan establecer hábitos de consumo, cuando estos figuren en documentos accesibles al público o que hayan sido facilitados por los propios titulares de los datos u obtenidos con su consentimiento.
+        En los supuestos contemplados en el presente artículo, el titular de los datos ejercerá el derecho de acceso sin cargo alguno.
+        El titular de los datos solicitará, en cualquier momento, el retiro o bloqueo de su nombre de los bancos de datos a los que se refiere el presente artículo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:72
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '72'
+      name: Art. 72 – Archivos de datos personales relativos a las encuestas
+      description: Las disposiciones de la presente ley no se aplicarán a las encuestas de opinión, mediciones y estadísticas, trabajos de prospección de mercados, investigaciones científicas o médicas y actividades análogas, en la medida que los datos recogidos no puedan atribuirse a una persona determinada o determinable.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:73
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '73'
+      name: Art. 73 – Códigos tipo
+      description: |-
+        Mediante acuerdos sectoriales, convenios administrativos o decisiones de empresa, los responsables de tratamientos de titularidad pública y privada, así como las organizaciones en que se agrupen, pueden formular códigos tipo que establezcan las condiciones de organización, régimen de funcionamiento, procedimientos aplicables, normas de seguridad del entorno, programas o equipos, obligaciones de los implicados en el tratamiento y uso de la información personal, así como las garantías, en su ámbito, para el ejercicio de los derechos de las personas con pleno respeto a los principios y disposiciones de la presente ley.
+        Los citados códigos podrán contener o no reglas operacionales detalladas de cada sistema particular y estándares técnicos de aplicación, y en el supuesto de que tales reglas o estándares no se incorporen directamente al código, las instrucciones u órdenes que los establecieran deberán respetar los principios fijados en aquél.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:74
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iii
+      ref_id: '74'
+      name: Art. 74 – Códigos de conducta
+      description: Las asociaciones o entidades representativas de responsables o usuarios de bancos de datos de titularidad privada elaborarán códigos de conducta de práctica profesional, que establezcan parámetros para el tratamiento de datos personales que tiendan a asegurar y mejorar las condiciones de operación de los sistemas de información en función de los principios establecidos en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      ref_id: Cap. IV, Secc. IV
+      name: Otros datos
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-i
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv
+      ref_id: Cap. IV, Secc. IV, Subsecc. I
+      name: Datos especialmente protegidos
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:75
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-i
+      ref_id: '75'
+      name: Art. 75 – Datos especialmente protegidos
+      description: |-
+        Ninguna persona física puede ser obligada a proporcionar datos sensibles. La persona física podrá proporcionar datos sensibles, si libre y conscientemente decidiera hacerlo por voluntad propia.
+        Queda prohibida la formación de archivos, bancos de datos o registros que almacenen información que directa o indirectamente revele datos sensibles, siempre y cuando la persona física no haya proporcionado el consentimiento correspondiente de manera libre, consciente y voluntaria. Sin perjuicio de ello, las iglesias, las asociaciones religiosas, clínicas y hospitales, y las organizaciones políticas y sindicales, podrán llevar un registro de sus miembros.
+        Los datos sensibles solo pueden ser recolectados y ser objeto de tratamiento de datos cuando medien razones de interés general autorizadas por la ley. También podrán ser tratados con finalidades estadísticas o científicas cuando no puedan ser identificados sus titulares.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:76
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-i
+      ref_id: '76'
+      name: Art. 76 – Consentimiento
+      description: |-
+        Sólo con el consentimiento expreso y por escrito del afectado pueden ser objeto de tratamiento los datos de carácter personal que revelen opiniones políticas, convicciones, religiosas, filosóficas o morales, afiliación sindical e información referente a la salud o a la vida sexual.
+        Se exceptúan los archivos de datos personales mantenidos por los partidos políticos, sindicatos, iglesias o comunidades religiosas y asociaciones, fundaciones y otras entidades sin fines de lucro, cuya finalidad sea política, filosófica, religiosa o sindical, en cuanto a los datos relativos a sus asociados o miembros, sin perjuicio de que la cesión de dichos datos precisará siempre el previo consentimiento del afectado.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:77
+      assessable: true
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-i
+      ref_id: '77'
+      name: Art. 77 – Datos de infracciones penales
+      description: Los datos de carácter personal relativos a la comisión de infracciones penales sólo serán incluidos en archivos de datos personales, y sólo serán tratados o comunicados a los registros públicos, a partir de que haya intervenido una apertura a juicio de conformidad con la ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-ii
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv
+      ref_id: Cap. IV, Secc. IV, Subsecc. II
+      name: Datos relativos a la salud
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:78
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-ii
+      ref_id: '78'
+      name: Art. 78 – Datos relativos a la salud
+      description: |-
+        Sin perjuicio de lo establecido en la presente ley respecto de la cesión de datos, las instituciones y los centros sanitarios, públicos y privados, y los profesionales correspondientes pueden proceder al tratamiento de los datos de carácter personal relativos a la salud física o mental de las personas que a ellos acudan o hayan de ser tratados en los mismos, de acuerdo con lo dispuesto en la legislación dominicana sobre salud.
+        No obstante lo dispuesto sobre datos especialmente protegidos, pueden ser objeto de tratamiento los datos de carácter personal que se refieren al origen racial, a la salud y a la vida sexual, cuando dicho tratamiento resulte necesario para la prevención o para el diagnóstico médico, la prestación de asistencia sanitaria o tratamientos médicos o la gestión de servicios sanitarios, siempre que dicho tratamiento de datos se realice por un profesional sujeto al secreto profesional o por otra persona sujeta asimismo a una obligación equivalente de secreto.
+        Los establecimientos sanitarios, públicos o privados, y los profesionales vinculados a las ciencias de la salud pueden recolectar y tratar los datos personales relativos a la salud física o mental de los pacientes que acudan a los mismos o que estén o hubieren estado bajo tratamiento de aquellos, respetando los principios del secreto profesional.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-iii
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv
+      ref_id: Cap. IV, Secc. IV, Subsecc. III
+      name: Tratamiento de datos de menores de edad
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:79
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-iv.subsecc-iii
+      ref_id: '79'
+      name: Art. 79 – Tratamiento de datos de menores de edad
+      description: El tratamiento de datos de los menores de edad estará normado por las disposiciones establecidas en el Código para la Protección de los Derechos de los Niños, Niñas y Adolescentes, el Código Penal y otras leyes especiales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-v
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv
+      ref_id: Cap. IV, Secc. V
+      name: Movimiento internacional de datos
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      assessable: true
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-iv.secc-v
+      ref_id: '80'
+      name: Art. 80 – Transferencia internacional de datos
+      description: 'La transferencia de datos personales de cualquier tipo con países u organismos internacionales o supra nacionales, que requieran del consentimiento del titular de los datos, solamente se efectuará cuando:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.1'
+      name: núm. 1
+      description: La persona física, libre y conscientemente, decidiera autorizar por voluntad propia la transferencia de datos, o cuando las leyes lo permitan.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.2'
+      name: núm. 2
+      description: Se trate de intercambio de datos de carácter médico, cuando así lo exija el tratamiento del afectado o una investigación epidemiológica, o por razones de salud o higiene pública.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.3'
+      name: núm. 3
+      description: Se trate de transferencias bancarias o bursátiles, en lo relativo a las transacciones respectivas y conforme la legislación que les resulte aplicable.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.4'
+      name: núm. 4
+      description: La transferencia de datos se hubiera acordado o contemplado en el marco de tratados internacionales o convenios, y en los tratados de libre comercio de los cuales sea parte la República Dominicana.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.5'
+      name: núm. 5
+      description: La transferencia de datos tenga por objeto la cooperación internacional entre organismos de inteligencia para la lucha contra el crimen organizado, el terrorismo, la trata de personas, el narcotráfico, y demás crímenes y delitos.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.6'
+      name: núm. 6
+      description: La transferencia de datos sea necesaria para la ejecución de un contrato entre el titular de los datos y el responsable del tratamiento, o para la ejecución de medidas precontractuales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.7'
+      name: núm. 7
+      description: La transferencia de datos legalmente exigida sea para la salvaguarda del interés público o para el reconocimiento, ejercicio o defensa de un derecho en un proceso judicial, o solicitada por una administración fiscal o aduanera para el cumplimiento de sus competencias.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.8'
+      name: núm. 8
+      description: La transferencia de datos se efectúe para prestar o solicitar un auxilio judicial internacional.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:80.9
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:80
+      ref_id: '80.9'
+      name: núm. 9
+      description: La transferencia de datos se efectúe a petición de un organismo internacional con interés legítimo desde un registro público.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      assessable: false
+      depth: 1
+      ref_id: Cap. V
+      name: Disposiciones de infracciones y sanciones
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '81'
+      name: Art. 81 – Sanciones administrativas
+      description: 'El órgano competente para sancionar las infracciones administrativas cometidas por las Sociedades de Información Crediticia (SIC) será la Superintendencia de Bancos:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81
+      ref_id: '81.1'
+      name: núm. 1
+      description: 'Se consideran infracciones administrativas a la presente ley:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1
+      ref_id: 81.1.a
+      name: lit. a)
+      description: Incluir en los reportes de crédito cualquiera de las informaciones prohibidas a las Sociedades de Información Crediticia (SIC), enumeradas en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1
+      ref_id: 81.1.b
+      name: lit. b)
+      description: Negarse a facilitar el acceso a la información crediticia al titular de la misma.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1
+      ref_id: 81.1.c
+      name: lit. c)
+      description: Denegar, sin fundamento, una solicitud de revisión o una solicitud de rectificación de la información crediticia requerida por el titular de la información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1.d
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.1
+      ref_id: 81.1.d
+      name: lit. d)
+      description: Negarse a modificar o a cancelar la información de un titular de la información, luego de que éste haya obtenido un pronunciamiento favorable en un procedimiento seguido de conformidad con lo establecido en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81
+      ref_id: '81.2'
+      name: núm. 2
+      description: 'La Superintendencia de Bancos impondrá a las Sociedades de Información Crediticia (SIC) las sanciones administrativas siguientes:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.2
+      ref_id: 81.2.a
+      name: lit. a)
+      description: Cuando la Sociedad de Información Crediticia (SIC) infrinja de manera grave o reiterada las disposiciones de las sentencias de los tribunales con la autoridad de la cosa irrevocablemente juzgada, al tenor del Código Civil de la República Dominicana, violaciones que se deriven de las infracciones tipificadas en el acápite anterior, la Superintendencia de Bancos impondrá una multa de diez (10) a cien (100) salarios mínimos, que deberá ser pagada a partir de tres (3) días hábiles después de haber recibido dicha notificación.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:81.2
+      ref_id: 81.2.b
+      name: lit. b)
+      description: Cuando las Sociedades de Información Crediticia (SIC) no inicien las actividades dentro de los seis (6) meses posteriores a la fecha en que la autorización les haya sido otorgada por la Junta Monetaria, la Superintendencia de Bancos retirará o revocará el permiso de operación.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:82
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '82'
+      name: Art. 82
+      description: |-
+        Las Sociedades de Información Crediticia (SIC) disponen de un plazo de treinta (30) días hábiles para recurrir en reconsideración por ante la Superintendencia de Bancos de cualquier decisión de esta que les afecte y, en caso de inconformidad con la decisión intervenida, disponen de un plazo de sesenta (60) días hábiles a partir de la notificación de la resolución, mediante acto de alguacil, debidamente visado por la Sociedad de Información Crediticia (SIC), para recurrir por ante la Junta Monetaria.
+        Cuando la Junta Monetaria emita una resolución rechazando la impugnación o apelación, las Sociedades de Información Crediticia (SIC) disponen de un plazo de treinta (30) días hábiles a partir de la notificación de dicha resolución, mediante acto de alguacil, para recurrir por ante el Tribunal Superior Administrativo.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:83
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '83'
+      name: Art. 83
+      description: En caso de fallo adverso a la Sociedad de Información Crediticia (SIC) ante el Tribunal Superior Administrativo, la Sociedad de Información Crediticia (SIC) dispone de un plazo de un (1) mes para recurrir en casación, de conformidad con la ley que instituye el Procedimiento de Casación. La Superintendencia de Bancos no puede ejercer las facultades estipuladas en la presente ley en perjuicio de una Sociedad de Información Crediticia (SIC) hasta tanto no intervenga una decisión definitiva y con la autoridad de la cosa irrevocablemente juzgada.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:84
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '84'
+      name: Art. 84 – Sanciones excepcionales
+      description: 'Será sancionado con una multa de diez (10) a cincuenta (50) salarios mínimos vigentes, sin perjuicio de las reparaciones que procedan por los daños y perjuicios que haya sufrido la persona por causa de violación a su derecho a la privacidad, conforme a las normas del derecho común, la persona física que:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:84.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:84
+      ref_id: '84.1'
+      name: núm. 1
+      description: Insertara o hiciera insertar, a sabiendas, datos falsos en un archivo de datos personales, de manera dolosa o de mala fe.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:84.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:84
+      ref_id: '84.2'
+      name: núm. 2
+      description: Proporcionara, de manera dolosa o de mala fe, información falsa a un tercero, contenida en un archivo de datos personales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:84.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:84
+      ref_id: '84.3'
+      name: núm. 3
+      description: Accediere a sabiendas e ilegítimamente, o violando sistemas de confidencialidad y seguridad de datos, de cualquier forma, a un banco de datos personales.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:84.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:84
+      ref_id: '84.4'
+      name: núm. 4
+      description: Revelare a otra información registrada en un banco de datos personales cuyo secreto estuviere obligado a preservar por disposición de una ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:85
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '85'
+      name: Art. 85 – Sanciones civiles
+      description: 'Agotado el procedimiento de solicitud y rectificación establecido en la presente ley, se considerarán infracciones civiles:'
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:85.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:85
+      ref_id: '85.1'
+      name: núm. 1
+      description: Denegar, sin fundamento, una solicitud de revisión o una solicitud de rectificación de la información crediticia requerida por el titular de la información.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:85.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:85
+      ref_id: '85.2'
+      name: núm. 2
+      description: Negarse a modificar o a cancelar la información de un titular de la información, luego de que éste haya obtenido un pronunciamiento favorable en un procedimiento seguido de conformidad con lo establecido en la presente ley.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:85.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:85
+      ref_id: '85.3'
+      name: núm. 3
+      description: Infringir de manera grave o reiterada las disposiciones de las sentencias de los tribunales civiles con la autoridad de la cosa irrevocablemente juzgada.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:86
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '86'
+      name: Art. 86 – Sanciones penales
+      description: |-
+        En caso de que un usuario o suscriptor haya accedido a una base de datos para consultar, de manera fraudulenta, las informaciones personales de un titular sin haber obtenido de éste autorización previa, será sancionado con multa que irá de diez (10) a cincuenta (50) salarios mínimos vigentes, sin perjuicio de las reparaciones que procedan por los daños y perjuicios que haya sufrido la persona por causa de violación a su derecho a la privacidad, conforme a las normas del derecho común.
+        Al usuario o suscriptor o cualquier persona física que utilice o facilite un reporte de crédito proveniente de una Sociedad de Información Crediticia (SIC), con la finalidad de la comisión de un delito, se impondrá una sanción equivalente a prisión correccional de seis meses a dos años, y en caso de que haya tenido como finalidad facilitar la comisión de un crimen, será sancionado con la prisión que establezca el Código Penal vigente para los cómplices.
+        Se considerará una circunstancia agravante del crimen imputado el hecho de que un usuario o suscriptor haga uso de un reporte de crédito proveniente de una Sociedad de Información Crediticia (SIC), con la finalidad de la comisión de un crimen.
+        El usuario o suscriptor que dé al reporte de crédito un uso distinto al que se haya consignado en la autorización del cliente o consumidor, será sancionado con multa que irá de diez (10) a cien (100) salarios mínimos vigentes, sin perjuicio de las reparaciones que procedan por los daños y perjuicios que haya sufrido la persona por causa de violación a su derecho a la privacidad, conforme a las normas del derecho común.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:87
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '87'
+      name: Art. 87
+      description: |-
+        En caso de que una persona física haya accesado de manera fraudulenta la base de datos de una Sociedad de Información Crediticia (SIC) para obtener y utilizar cualquier tipo de reporte proveniente de una Sociedad de Información Crediticia (SIC), utilizando claves de acceso que no le pertenecen, será sancionada con multa que irá de veinte (20) a cien (100) salarios mínimos vigentes, sin perjuicio de las reparaciones que procedan por los daños y perjuicios que haya sufrido la persona por causa de violación a su derecho a la privacidad, conforme a las normas del derecho común.
+        En caso que el uso indebido de dicho reporte haya tenido como finalidad la comisión de un delito, se impondrá a la persona física que haya accesado fraudulentamente el reporte y a quien lo utilice o se prevalezca de éste, una sanción equivalente a prisión correccional de seis meses a dos años, y en caso de que haya tenido como finalidad la comisión de un crimen, será sancionado con la prisión que establezca el Código Penal vigente.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:88
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-v
+      ref_id: '88'
+      name: Art. 88
+      description: |-
+        El suscriptor o afiliado, el cliente o consumidor, los representantes de las entidades públicas, o cualquier persona física o jurídica que viole las disposiciones contenidas en la presente ley, será sancionada con prisión correccional de seis meses a dos años, y una multa de cien (100) a ciento cincuenta (150) salarios mínimos vigentes.
+        Igual sanción será impuesta a quien, fuera de los fines establecidos en esta ley, divulgue, publique, reproduzca, transmita o grabe el contenido parcial o total de un reporte de cualquier tipo proveniente de una Sociedad de Información Crediticia (SIC), referente a un titular de los datos, en cualquiera de sus manifestaciones, en cualquier medio de comunicación masiva, sea impreso, televisivo, radial o electrónico.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi
+      assessable: false
+      depth: 1
+      ref_id: Cap. VI
+      name: Disposiciones transitorias y finales
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi.secc-i
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi
+      ref_id: Cap. VI, Secc. I
+      name: Disposiciones transitorias
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:89
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi.secc-i
+      ref_id: '89'
+      name: Art. 89 – Tratamientos creados por convenios internacionales
+      description: Todo lo relacionado con la protección de las personas físicas, en lo que respecta al tratamiento de datos de carácter personal, en relación a cualquier convenio o tratado internacional del que sea signataria la República Dominicana, se regirá conforme a sus disposiciones.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:90
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi.secc-i
+      ref_id: '90'
+      name: Art. 90
+      description: Las Sociedades de Información Crediticia (SIC), los aportantes de datos y las entidades de intermediación financiera tendrán un plazo de seis (6) meses contados a partir de la entrada en vigencia de la presente ley, para cumplir con lo dispuesto en ella, y ajustar sus sistemas y estructuras a lo previsto en la misma.
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi.secc-ii
+      assessable: false
+      depth: 2
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi
+      ref_id: Cap. VI, Secc. II
+      name: Disposición final
+    - urn: urn:soluciones-ge:risk:req_node:ley-172-13:91
+      assessable: false
+      depth: 3
+      parent_urn: urn:soluciones-ge:risk:req_node:ley-172-13:cap-vi.secc-ii
+      ref_id: '91'
+      name: Art. 91
+      description: La presente ley deroga en todas sus partes la Ley No.288-05, del 18 de agosto del año 2005, que regula las Sociedades de Información Crediticia y de Protección al Titular de la Información, y modifica toda otra ley o parte de ley en cuanto le sea contraria.
