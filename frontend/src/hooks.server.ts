@@ -192,7 +192,11 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
 	// and session validation, none of which apply to machine deliveries.
-	if (event.url.pathname.startsWith('/api/workflows/hooks/')) {
+	// Same for single-use evidence upload URLs (the token is the credential).
+	if (
+		event.url.pathname.startsWith('/api/workflows/hooks/') ||
+		event.url.pathname.startsWith('/api/evidences/upload/')
+	) {
 		return resolve(event);
 	}
 

@@ -99,3 +99,13 @@ def test_audit_log_records_the_resolved_client_ip():
         object_pk=str(created["asset"].pk), action=LogEntry.Action.CREATE
     )
     assert entry.remote_addr == "203.0.113.7"
+
+
+def test_evidence_upload_throttle_keys_on_the_resolved_client_ip():
+    from core.views import EvidenceUploadThrottle
+
+    request = make_request(xff="198.51.100.1, 203.0.113.7:5555")
+
+    key = EvidenceUploadThrottle().get_cache_key(request, view=None)
+
+    assert key == "throttle_evidence_upload_token_203.0.113.7"
