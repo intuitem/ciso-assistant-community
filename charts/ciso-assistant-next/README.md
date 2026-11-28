@@ -69,7 +69,7 @@ ingress then answers 502. Raise the buffer through the ingress annotations :
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    nginx.ingress.kubernetes.io/proxy-buffers: "8 16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
 ```
 
 ### Qdrant (AI assistant / RAG)
