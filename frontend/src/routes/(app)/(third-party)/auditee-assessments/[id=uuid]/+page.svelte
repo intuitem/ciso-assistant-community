@@ -469,8 +469,8 @@
 		for (const item of sorted) {
 			const parentUrn =
 				item.type === 'assessment'
-					? requirementHashmap[item.data.requirement?.id]?.parent_requirement
-					: item.data.parent_requirement;
+					? requirementHashmap[item.data.requirement?.id]?.parent_urn
+					: item.data.parent_urn;
 			if (parentUrn && !seenParents.has(parentUrn)) {
 				seenParents.add(parentUrn);
 				const parentNode = data.requirements.find(
@@ -2108,7 +2108,7 @@
 				{/if}
 
 				<!-- Previous / Next navigation (shown for both splash and assessment items) -->
-				{#if currentSplashNode || currentItem}
+				{#if currentSplashNode || currentSectionNode || currentItem}
 					<div class="flex items-center justify-between card bg-surface-50-950 shadow-sm px-5 py-3">
 						<button
 							class="btn preset-tonal-surface"
