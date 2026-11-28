@@ -48,7 +48,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, Concat
 from django.contrib.contenttypes.models import ContentType
 
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -19644,10 +19644,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         findings_assessment = FindingsAssessment.objects.get(id=pk)
         findings = (
             Finding.objects.filter(findings_assessment=pk)
-            .select_related("folder")
+            .select_related("folder", "asset")
             .prefetch_related(
                 "applied_controls",
                 "evidences",
+                "threats",
                 "vulnerabilities",
                 "filtering_labels",
             )
@@ -19664,6 +19665,15 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "name": finding.name,
                 "description": finding.description,
                 "status": finding.status,
+                "threats": ",".join(
+                    [
+                        threat.get_name_translated or threat.ref_id or ""
+                        for threat in viewable(finding.threats.all())
+                    ]
+                ),
+                "asset": finding.asset.name
+                if finding.asset and viewable.allows(finding.asset)
+                else "",
                 "severity": finding.get_severity_display(),
                 "priority": str(finding.get_priority_display())
                 if finding.priority
@@ -19768,15 +19778,18 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
-            .select_related("folder")
+            .select_related("folder", "asset")
             .prefetch_related(
                 "applied_controls",
                 "evidences",
+                "threats",
                 actor_prefetch("owner"),
                 "filtering_labels",
             )
             .order_by("ref_id")
         )
+        viewable = ViewableFilter(request.user)
+        findings = viewable(findings)
 
         # Calculate closed and open findings counts
         closed_statuses = [
@@ -19794,8 +19807,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             Finding.Status.IN_PROGRESS,
         ]
 
-        closed_findings_count = findings.filter(status__in=closed_statuses).count()
-        open_findings_count = findings.filter(status__in=open_statuses).count()
+        closed_findings_count = sum(f.status in closed_statuses for f in findings)
+        open_findings_count = sum(f.status in open_statuses for f in findings)
 
         tz = get_report_timezone()
 
@@ -19818,35 +19831,34 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         md_content += f"- **Created**: {format_report_timestamp(findings_assessment.created_at, tz, 'N/A')}\n\n"
 
         # Metrics summary
-        metrics = findings_assessment.get_findings_metrics()
+        severity_counts = Counter(f.severity for f in findings)
+        status_counts = Counter(f.status for f in findings)
         md_content += "## Summary\n\n"
         md_content += "| Metric | Count |\n"
         md_content += "|--------|-------|\n"
-        md_content += f"| Total Findings | {metrics['total_count']} |\n"
+        md_content += f"| Total Findings | {len(findings)} |\n"
         md_content += f"| Closed Findings | {closed_findings_count} |\n"
         md_content += f"| Open Findings | {open_findings_count} |\n\n"
 
         # Severity distribution
-        if metrics["severity_distribution"]:
+        if findings:
             md_content += "### Severity Distribution\n\n"
             md_content += "| Severity | Count |\n"
             md_content += "|----------|-------|\n"
-            for severity, count in metrics["severity_distribution"].items():
+            for severity, label in Severity.choices:
+                count = severity_counts[severity]
                 if count > 0:
-                    md_content += f"| {severity.capitalize()} | {count} |\n"
+                    md_content += f"| {label.capitalize()} | {count} |\n"
             md_content += "\n"
 
         # Status distribution
-        if metrics["status_distribution"]:
+        if findings:
             md_content += "### Status Distribution\n\n"
             md_content += "| Status | Count |\n"
             md_content += "|--------|-------|\n"
-            status_choices = dict(Finding.Status.choices)
-            for status, count in metrics["status_distribution"].items():
+            for status, status_display in Finding.Status.choices:
+                count = status_counts[status]
                 if count > 0:
-                    status_display = status_choices.get(
-                        status, status.replace("_", " ").title()
-                    )
                     md_content += f"| {status_display} | {count} |\n"
             md_content += "\n"
 
@@ -19855,17 +19867,30 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         for finding in findings:
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
+            threats = viewable(finding.threats.all())
+            if threats:
+                threat_names = [
+                    threat.get_name_translated or threat.ref_id or ""
+                    for threat in threats
+                ]
+                md_content += f"- **Threats**: {', '.join(threat_names)}\n"
+            if finding.asset and viewable.allows(finding.asset):
+                md_content += f"- **Asset**: {finding.asset.name}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
             md_content += f"- **Recommendation**: {finding.recommendation or 'N/A'}\n"
-            if finding.applied_controls.exists():
+            applied_controls = viewable(finding.applied_controls.all())
+            if applied_controls:
                 md_content += "- **Applied Controls**:\n"
-                for ac in finding.applied_controls.all():
+                for ac in applied_controls:
                     md_content += f"  - {ac.name} [{ac.get_status_display().lower()}]\n"
-            if finding.evidences.exists():
-                md_content += f"- **Evidences**: {', '.join([ev.name for ev in finding.evidences.all()])}\n"
+            evidences = viewable(finding.evidences.all())
+            if evidences:
+                md_content += (
+                    f"- **Evidences**: {', '.join([ev.name for ev in evidences])}\n"
+                )
             if finding.eta:
                 md_content += f"- **ETA**: {finding.eta.strftime('%Y-%m-%d')}\n"
             if finding.due_date:
