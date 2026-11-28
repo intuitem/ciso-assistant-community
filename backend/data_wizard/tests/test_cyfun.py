@@ -496,6 +496,7 @@ def test_import_of_a_2023_self_assessment(knox_admin_client, domain_folder):
     assert resp.json()["results"]["failed"] == 0
     ca = ComplianceAssessment.objects.get(name="CyFun 2023")
     assert ca.framework.urn == CYFUN_2023_URN
+    assert resp.json()["results"]["compliance_assessment"] == str(ca.id)
     assert ca.selected_implementation_groups == ["I"]
     ra = RequirementAssessment.objects.get(
         compliance_assessment=ca, requirement__ref_id="BASIC_ID.AM-1.1"

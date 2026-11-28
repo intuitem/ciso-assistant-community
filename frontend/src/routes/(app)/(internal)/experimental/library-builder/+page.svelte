@@ -169,7 +169,7 @@
 	// name and deduped against the corpus. The wrapping library is minted
 	// behind the scenes and the user lands straight in the object's editor.
 	const PACKAGER_KEY = 'library-builder:packager';
-	type QuickKind = 'framework' | 'matrix' | 'quick_form';
+	type QuickKind = 'framework' | 'matrix' | 'quick_form' | 'req_mapping_set';
 	// The kind also *is* the URN type token (see URN_TYPE_TOKENS in library/builder.py),
 	// so the preview below can interpolate it directly.
 	const QUICK_COPY: Record<
@@ -190,6 +190,11 @@
 			label: m.lbListQuickFormName,
 			placeholder: m.lbListQuickFormNamePlaceholder,
 			help: m.lbListQuickHelpQuickForm
+		},
+		req_mapping_set: {
+			label: m.lbListMappingName,
+			placeholder: m.lbListMappingNamePlaceholder,
+			help: m.lbListQuickHelpMapping
 		}
 	};
 	let quickKind: QuickKind | null = $state(null);
@@ -255,7 +260,10 @@
 				throw new Error(created.error ? safeTranslate(created.error) : JSON.stringify(created));
 			const draftBase = `/experimental/library-builder/${created.id}`;
 
-			if (kind === 'quick_form') {
+			if (kind === 'req_mapping_set') {
+				// The two frameworks are picked on the draft page.
+				window.location.href = `${draftBase}?new_mapping=1`;
+			} else if (kind === 'quick_form') {
 				const res = await fetch(draftBase, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -370,6 +378,14 @@
 				>
 					<i class="fa-solid fa-clipboard-question mr-1"></i>
 					{m.lbListNewQuickForm()}
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+					onclick={() => openQuick('req_mapping_set')}
+				>
+					<i class="fa-solid fa-arrows-left-right mr-1"></i>
+					{m.lbListNewMapping()}
 				</button>
 				<button
 					type="button"
