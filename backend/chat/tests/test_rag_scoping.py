@@ -257,3 +257,49 @@ class TestGraphExpandScoping:
             {"object_type": "risk_scenario", "object_id": str(scenario_with_control.id)}
         ]
         assert rag.graph_expand(seeds, ReadScope(auditee)) == []
+
+
+class TestChatUploadsStayWithTheirSession:
+    """A chat upload is stored in a domain, but only its session's owner may retrieve it."""
+
+    @pytest.fixture
+    def uploads(self, domain):
+        from django.contrib.contenttypes.models import ContentType
+
+        from chat.models import ChatSession, IndexedDocument
+
+        owner = _user_with_role("upload-owner@test.local", "BI-RL-AUD", domain)
+        colleague = _user_with_role("upload-colleague@test.local", "BI-RL-AUD", domain)
+        session = ChatSession.objects.create(owner=owner)
+        doc = IndexedDocument.objects.create(
+            folder=domain,
+            filename="owner-notes.txt",
+            source_type=IndexedDocument.SourceType.CHAT,
+            source_content_type=ContentType.objects.get_for_model(ChatSession),
+            source_object_id=session.id,
+        )
+        return owner, colleague, str(doc.id)
+
+    def test_owner_retrieves_own_upload(self, uploads, domain):
+        from chat.rag import _readable_document_ids
+
+        owner, _, doc_id = uploads
+        assert doc_id in _readable_document_ids(scope_for(owner), [str(domain.id)])
+
+    def test_colleague_never_retrieves_it(self, uploads, domain):
+        from chat.rag import _readable_document_ids
+
+        _, colleague, doc_id = uploads
+        assert doc_id not in _readable_document_ids(
+            scope_for(colleague), [str(domain.id)]
+        )
+
+    def test_colleague_cannot_list_it(self, uploads):
+        from rest_framework.test import APIClient
+
+        _, colleague, doc_id = uploads
+        client = APIClient()
+        client.force_authenticate(colleague)
+        listed = client.get("/api/chat/documents/").json()
+        ids = [d["id"] for d in listed.get("results", listed)]
+        assert doc_id not in ids

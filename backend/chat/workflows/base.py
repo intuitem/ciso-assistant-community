@@ -24,6 +24,69 @@ def _language_instruction(lang_code: str = "en") -> str:
     return f"\n\nYou MUST respond in {lang_name}."
 
 
+def discussion_language(llm, user_message: str, history: list[dict], fallback: str):
+    """ISO 639-1 code of the language the user writes in, or `fallback` when unclear.
+
+    Reads the last user messages too, so a reply that is only a picked name
+    keeps the language of the conversation.
+    """
+    recent = [m["content"] for m in history if m.get("role") == "user"][-3:]
+    messages = "\n---\n".join(m[:300] for m in [*recent, user_message])
+    prompt = (
+        f"Here are the latest messages a user wrote:\n{messages}\n\n"
+        "Which language does the user write in? Reply with its ISO 639-1 code only, "
+        f"one of: {', '.join(LANG_MAP)}."
+    )
+    try:
+        reply = llm.generate(prompt, "", max_output_tokens=8)
+    except Exception as e:
+        logger.warning("discussion_language_failed", error=e)
+        return fallback
+    match = re.search(r"\b([a-z]{2})\b", reply.lower())
+    return match.group(1) if match and match.group(1) in LANG_MAP else fallback
+
+
+def localize_event(event: "SSEEvent", llm, lang: str, cache: dict) -> "SSEEvent":
+    """Translate a workflow's fixed text (token, thinking, choice label) into `lang`."""
+    if not event.localize or lang == "en" or lang not in LANG_MAP:
+        return event
+
+    def tr(text: str) -> str:
+        if not text.strip():
+            return text
+        if text not in cache:
+            prompt = (
+                f"Translate this message from a software assistant into {LANG_MAP[lang]}. "
+                "Keep markdown, line breaks, numbers and names in ** unchanged. "
+                'Reply with JSON only: {"text": "the translation"}\n\n'
+                f"<message>\n{text}\n</message>"
+            )
+            try:
+                reply = llm.generate(prompt, "")
+                match = re.search(r"\{.*\}", reply, re.S)
+                translated = json.loads(match.group(0)).get("text") if match else None
+                # an echoed prompt or a rambling reply is worse than the original text
+                ok = (
+                    isinstance(translated, str)
+                    and "<message>" not in translated
+                    and len(translated) < 3 * len(text) + 80
+                )
+                cache[text] = translated.strip() if ok else text
+            except Exception as e:
+                logger.warning("workflow_localize_failed", error=e)
+                cache[text] = text
+        # keep the spacing the workflow relies on to join its messages
+        lead, trail = text[: len(text) - len(text.lstrip())], text[len(text.rstrip()) :]
+        return lead + cache[text] + trail
+
+    if isinstance(event.content, dict):
+        content = {**event.content}
+        if isinstance(content.get("label"), str):
+            content["label"] = tr(content["label"])
+        return SSEEvent(type=event.type, content=content)
+    return SSEEvent(type=event.type, content=tr(event.content))
+
+
 @dataclass
 class SSEEvent:
     """A single Server-Sent Event to stream to the frontend."""
@@ -32,6 +95,9 @@ class SSEEvent:
         str  # "token", "thinking", "pending_action", "pending_choice", "done", "error"
     )
     content: str | dict = ""
+    localize: bool = (
+        False  # fixed workflow text, translated into the discussion language
+    )
 
     def encode(self) -> str:
         """Encode as SSE data line."""
@@ -105,11 +171,11 @@ class Workflow:
 
     def _thinking(self, message: str) -> SSEEvent:
         """Emit a thinking event (shown in collapsible block)."""
-        return SSEEvent(type="thinking", content=message)
+        return SSEEvent(type="thinking", content=message, localize=True)
 
     def _token(self, text: str) -> SSEEvent:
         """Emit a text token (appended to response)."""
-        return SSEEvent(type="token", content=text)
+        return SSEEvent(type="token", content=text, localize=True)
 
     def _pending_action(self, action_data: dict) -> SSEEvent:
         """Emit a pending action (shown as confirmation cards)."""
@@ -124,6 +190,7 @@ class Workflow:
         return SSEEvent(
             type="pending_choice",
             content={"field": field, "label": label, "items": items},
+            localize=True,
         )
 
     def _navigate(self, url: str) -> SSEEvent:
@@ -132,7 +199,7 @@ class Workflow:
 
     def _error(self, message: str) -> SSEEvent:
         """Emit an error event."""
-        return SSEEvent(type="error", content=message)
+        return SSEEvent(type="error", content=message, localize=True)
 
     # ── State persistence ────────────────────────────────────────────
 

@@ -7,6 +7,7 @@ from django.apps import apps
 from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Q
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import status
@@ -91,6 +92,33 @@ class ChatSessionViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        # The folder only gates creation (sessions are filtered by owner). It defaults
+        # to the root folder, where users limited to some domains may not add: give
+        # them the first domain where they may.
+        data = request.data
+        if not data.get("folder"):
+            from django.contrib.auth.models import Permission
+
+            from iam.models import Folder, RoleAssignment
+
+            from .rag import get_accessible_folder_ids
+
+            allowed_in_root = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="add_chatsession"),
+                folder=Folder.get_root_folder(),
+            )
+            domains = get_accessible_folder_ids(
+                request.user, codename="add_chatsession"
+            )
+            if not allowed_in_root and domains:
+                data = {**data, "folder": domains[0]}
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = ChatSessionListSerializer(queryset, many=True)
@@ -173,7 +201,11 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Step 1: Route to tool or workflow
         from .workflows import get_workflow_tools, get_workflow_by_tool_name
-        from .workflows.base import WorkflowContext
+        from .workflows.base import (
+            WorkflowContext,
+            discussion_language,
+            localize_event,
+        )
 
         llm = get_llm()
         logger.info(
@@ -196,6 +228,12 @@ class ChatSessionViewSet(BaseModelViewSet):
             d.content_type in TABULAR_CONTENT_TYPES for d in documents
         ) or should_resume(session.workflow_state, user_content):
             pre_routed_workflow = get_workflow_by_tool_name("workflow_import_document")
+        elif (session.workflow_state or {}).get("workflow") == "ebios_rm_assist" and (
+            session.workflow_state.get("data") or {}
+        ).get("phase") != "finished":
+            # A study in progress answers its own turns: the workflow tells answers,
+            # side questions and "stop" apart, so routing never drops the study.
+            pre_routed_workflow = get_workflow_by_tool_name("workflow_ebios_rm_assist")
         else:
             pre_routed_workflow = _match_workflow(user_content, parsed_context)
         if pre_routed_workflow:
@@ -281,7 +319,12 @@ class ChatSessionViewSet(BaseModelViewSet):
                     scope=scope,
                     llm=llm,
                     history=wf_history,
-                    user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
+                    user_lang=discussion_language(
+                        llm,
+                        user_content,
+                        wf_history,
+                        fallback=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
+                    ),
                     session=session,
                     documents=documents,
                     request=request,
@@ -291,8 +334,12 @@ class ChatSessionViewSet(BaseModelViewSet):
                     full_response = ""
                     wf_context_refs = []
                     wf_start = time.time()
+                    translations: dict = {}
                     try:
                         for event in workflow.run(wf_ctx):
+                            event = localize_event(
+                                event, llm, wf_ctx.user_lang, translations
+                            )
                             if event.type == "token":
                                 full_response += (
                                     event.content
@@ -1119,6 +1166,19 @@ class IndexedDocumentViewSet(BaseModelViewSet):
 
     model = IndexedDocument
     filterset_fields = ["folder", "source_type", "status"]
+
+    def get_queryset(self):
+        from .rag import owned_chat_session_ids
+
+        # Chat uploads stay with the session's owner, whatever the folder's readers.
+        return (
+            super()
+            .get_queryset()
+            .exclude(
+                Q(source_type=IndexedDocument.SourceType.CHAT)
+                & ~Q(source_object_id__in=owned_chat_session_ids(self.request.user))
+            )
+        )
 
 
 def _excel_safe(value):
@@ -2629,8 +2689,5 @@ def _match_workflow(user_message: str, parsed_context) -> "Workflow | None":
 
                 return get_workflow_by_tool_name(f"workflow_{workflow_name}")
 
-    # Global routes — match from ANY page when keywords are strong enough
-    if any(kw in msg_lower for kw in ("ebios", "ebios rm")):
-        from .workflows import get_workflow_by_tool_name
-
-        return get_workflow_by_tool_name("workflow_ebios_rm_assist")
+    # No global keyword route: a question that merely mentions EBIOS RM goes to the
+    # model, which picks workflow_ebios_rm_assist (offered on every page) only to run a study.

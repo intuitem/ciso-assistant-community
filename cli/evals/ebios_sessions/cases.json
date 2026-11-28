@@ -1,0 +1,22 @@
+[
+  {
+    "id": "A-partial-framing",
+    "user": "admin",
+    "lang": "fr",
+    "page": {"model": "ebios_rm_study", "study_name": "Keystone hub — cadrage partiel"},
+    "opening": "Aide-moi à compléter le cadrage de cette étude : l'atelier 1 n'est pas terminé.",
+    "max_turns": 14,
+    "brief": "You are Claire, the CISO of Halvard Devices, a maker of connected industrial devices. You run the EBIOS RM study 'Keystone hub — cadrage partiel' on the Keystone hub (a gateway sold to factories) and its over-the-air (OTA) firmware update chain. Workshop 1 is half done in CISO Assistant: five assets are linked (device firmware and signing keys, customer and device accounts, production line control, firmware signing HSM, MQTT device gateway) and three feared events exist without any gravity: malicious firmware pushed through OTA, leak of customer and device accounts, production line stoppage. Facts you know and give only when asked: objective of the study is to secure the OTA chain before the CE/CRA conformity assessment in Q2 2027; scope excludes the corporate IT; gravity scale is the 4-level ANSSI scale (G1 minor to G4 critical); you would rate malicious firmware via OTA G4 (devices in customer factories could be bricked or hijacked), account leak G3 (GDPR notification, customer trust), production line stoppage G3 (two days of lost output); a feared event is missing: unavailability of the OTA update service for more than a week, blocking security patches (G2); the security baseline is IEC 62443-4-1 for the development process plus the ANSSI hygiene guide; known gaps: no HSM backup, no code-signing key rotation. You answer briefly, like a busy CISO, and never volunteer the facts above unless asked.",
+    "expect": "The assistant works on the existing study (no new study), reads what is already there, asks for the missing workshop 1 elements one or two at a time (objectives/scope, gravity of each feared event with the scale, missing feared events, security baseline and gaps), and records or proposes them in CISO Assistant (gravity on the three feared events, the missing feared event, objectives) with the user's agreement."
+  },
+  {
+    "id": "B-full-study",
+    "user": "analyst",
+    "lang": "fr",
+    "page": {"model": "folder", "folder_name": "Clinique Saint-Aubin"},
+    "opening": "Je dois mener une étude EBIOS RM complète pour la Clinique Saint-Aubin. Guide-moi pas à pas.",
+    "max_turns": 36,
+    "brief": "You are Marc, the IT manager of the Clinique Saint-Aubin, a private clinic with 120 beds, a 24/7 emergency department and a maternity ward. The domain in CISO Assistant already lists six assets (patient record system, online appointment booking, medical imaging PACS, patient record server, patient web portal, ward Wi-Fi). Facts you give only when asked: business values are patient care, emergency admissions and appointment management; patient records are hosted by an HDS-certified provider 'MediCloud', the patient record software comes from 'Hôpisoft' who has remote maintenance access, biomedical devices are maintained by 'BioTech Services'; the study must be ready for the ARS audit in June 2027; budget is tight; feared events and gravity: patient record unavailable more than 4 hours (G4, care disrupted), health data leak (G4, legal and reputational), appointment booking down for a day (G2); risk sources: ransomware cybercriminals (high motivation, high resources), a disgruntled employee (moderate), a hacktivist (low); you consider the editor's remote access the weakest link; existing measures: daily backups not tested, MFA only for administrators. You answer briefly and only what is asked, in French. When the assistant proposes to create or record objects that look right, you accept; when they look wrong or invented, you say so.",
+    "expect": "The assistant drives the study workshop by workshop (1 framing and feared events with gravity, 2 risk sources and RoTo couples with pertinence, 3 stakeholders and strategic scenarios, 4 operational scenarios with likelihood, 5 treatment), asks the right questions one or two at a time, reuses the domain's existing assets, uses the user's answers rather than inventing, and records the results in CISO Assistant with the user's agreement."
+  }
+]

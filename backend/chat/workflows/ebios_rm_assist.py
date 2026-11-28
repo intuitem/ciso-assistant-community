@@ -23,6 +23,7 @@ from django.contrib.auth.models import Permission
 from iam.models import Folder, RoleAssignment
 from ..page_context import ParsedContext
 from .base import Workflow, WorkflowContext, SSEEvent
+from .ebios_facilitation import EbiosFacilitationMixin
 
 WORKSHOP_ADD_PERMS = (
     "add_asset",
@@ -83,7 +84,7 @@ ATTACK_PATH_SCHEMA = {
 }
 
 
-class EbiosRMAssistWorkflow(Workflow):
+class EbiosRMAssistWorkflow(EbiosFacilitationMixin, Workflow):
     name = "ebios_rm_assist"
     description = (
         "Help conduct an EBIOS RM study. Creates assets, feared events, "
@@ -92,7 +93,9 @@ class EbiosRMAssistWorkflow(Workflow):
         "user asks to help with the EBIOS RM study, conduct the analysis, "
         "fill in the workshops, or get started. Works in any language. "
         "Can also be triggered from a domain/folder page to create a full study "
-        "from scratch using existing domain assets."
+        "from scratch using existing domain assets. Do not use it for questions "
+        "about the EBIOS RM method itself (workshops, scales, vocabulary, "
+        "deliverables): answer those directly."
     )
     context_models = []  # Available on ALL pages (folder, study, or general)
 
@@ -111,6 +114,20 @@ class EbiosRMAssistWorkflow(Workflow):
             if step == "awaiting_framing":
                 yield from self._resume_framing(ctx, data)
                 return
+            if step == "facilitate":
+                EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
+                on_study = (
+                    ctx.parsed_context
+                    and ctx.parsed_context.model_key == "ebios_rm_study"
+                )
+                study_id = (
+                    ctx.parsed_context.object_id if on_study else data.get("study_id")
+                )
+                study = ctx.scope.queryset(EbiosRMStudy).filter(id=study_id).first()
+                if study:
+                    yield from self._facilitate(ctx, study)
+                    return
+                self._clear_state(ctx)
 
         # No checkpoint — route based on page context
         model_key = ctx.parsed_context.model_key if ctx.parsed_context else None
@@ -226,7 +243,9 @@ class EbiosRMAssistWorkflow(Workflow):
             yield self._token("I couldn't find this domain.")
             return
         if not _can_write(
-            ctx.scope.user, folder, ("add_ebiosrmstudy", *WORKSHOP_ADD_PERMS)
+            ctx.scope.user,
+            folder,
+            ("add_ebiosrmstudy", "change_ebiosrmstudy", *WORKSHOP_ADD_PERMS),
         ):
             yield self._token(
                 "You don't have permission to create an EBIOS RM study in this domain."
@@ -280,28 +299,6 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Risk matrix: {risk_matrix.name}"
         )
 
-        # If no assets and no framing context, ask for input
-        if not domain_assets and not self._has_framing_context(
-            {"description": "", "name": folder.name}, ctx
-        ):
-            self._save_state(
-                ctx,
-                "awaiting_framing",
-                {"folder_id": str(folder_id), "risk_matrix_id": str(risk_matrix.id)},
-            )
-            yield self._token(
-                f"I'll create an EBIOS RM study for the domain **{folder.name}**.\n\n"
-                f"I found no existing assets in this domain. "
-                f"To generate a relevant study, I need some context:\n\n"
-                f"1. **What is the scope** of this study? "
-                f"(e.g., patient data management, e-commerce platform)\n"
-                f"2. **What are the critical assets/systems** involved?\n"
-                f"3. **What sector/industry** are you in?\n"
-                f"4. **Who are the main third parties** involved?\n\n"
-                f"A few sentences are enough — I'll generate the full study."
-            )
-            return
-
         # Create the EBIOS RM study
         yield self._thinking("Creating EBIOS RM study...")
         EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
@@ -319,46 +316,8 @@ class EbiosRMAssistWorkflow(Workflow):
         # Navigate the user to the new study page for better context
         yield self._navigate(f"/ebios-rm/{study_obj.id}")
 
-        study = {
-            "id": str(study_obj.id),
-            "name": study_obj.name,
-            "description": study_obj.description or "",
-            "folder_id": str(study_obj.folder_id),
-            "risk_matrix_id": str(study_obj.risk_matrix_id),
-            "obj": study_obj,
-        }
-
         yield self._thinking(f"Created study: {study_name}")
-
-        # Link existing domain assets to the study
-        created = {
-            "assets": [],
-            "feared_events": [],
-            "rotos": [],
-            "strategic_scenarios": [],
-            "attack_paths": [],
-            "operational_scenarios": [],
-        }
-
-        if domain_assets:
-            for a in domain_assets:
-                study_obj.assets.add(a["id"])
-            created["assets"] = [
-                {"id": str(a["id"]), "name": a["name"]} for a in domain_assets
-            ]
-            yield self._thinking(
-                f"Linked {len(domain_assets)} existing assets to the study."
-            )
-        else:
-            # Generate assets if none exist
-            yield self._thinking("Workshop 1: Generating assets...")
-            assets = self._generate_assets(ctx, study)
-            if assets:
-                created["assets"] = self._create_assets(study, assets)
-                yield self._thinking(f"Created {len(created['assets'])} assets.")
-
-        # Now run W1 (feared events) through W4 using the standard pipeline
-        yield from self._run_workshops(ctx, study, created, start_from="feared_events")
+        yield from self._facilitate(ctx, study_obj)
 
     def _generate_study_name(self, ctx: WorkflowContext, folder_name: str) -> str:
         """Generate a concise study name from context."""
@@ -385,63 +344,12 @@ class EbiosRMAssistWorkflow(Workflow):
                 "Please make sure you're on a study page."
             )
             return
-        state = self._get_study_state(study)
-        start = "feared_events" if state["feared_event_count"] == 0 else None
-        if start is None and state["roto_count"] == 0:
-            start = "rotos"
-        if start is None and state["strategic_scenario_count"] == 0:
-            start = "strategic_scenarios"
-        if start is None and state["attack_path_count"] == 0:
-            start = "attack_paths"
-        if start is None and state["operational_scenario_count"] == 0:
-            start = "operational_scenarios"
-        needed = ["change_ebiosrmstudy"] + [
-            perm
-            for perm, count in zip(WORKSHOP_ADD_PERMS, WORKSHOP_COUNTS)
-            if state[count] == 0
-        ]
-        if not _can_write(ctx.scope.user, study["obj"].folder, needed):
+        if not _can_write(
+            ctx.scope.user, study["obj"].folder, ("change_ebiosrmstudy",)
+        ):
             yield self._token("You don't have permission to edit this EBIOS RM study.")
             return
-
-        yield self._thinking(
-            f"Study: {study['name']}\n"
-            f"Assets: {state['asset_count']}, "
-            f"Feared events: {state['feared_event_count']}, "
-            f"RoTo couples: {state['roto_count']}, "
-            f"Strategic scenarios: {state['strategic_scenario_count']}, "
-            f"Attack paths: {state['attack_path_count']}, "
-            f"Operational scenarios: {state['operational_scenario_count']}"
-        )
-
-        # Check if we have enough context to generate
-        has_framing = self._has_framing_context(study, ctx)
-        if not has_framing:
-            yield from self._ask_framing_questions(study)
-            return
-
-        # Generate objects for missing workshops
-        created = {
-            "assets": [],
-            "feared_events": [],
-            "rotos": [],
-            "strategic_scenarios": [],
-            "attack_paths": [],
-            "operational_scenarios": [],
-        }
-
-        # W1: Assets
-        if state["asset_count"] == 0:
-            yield self._thinking("Workshop 1: Generating assets...")
-            assets = self._generate_assets(ctx, study)
-            if assets:
-                created["assets"] = self._create_assets(study, assets)
-                yield self._thinking(f"Created {len(created['assets'])} assets.")
-
-        if start:
-            yield from self._run_workshops(ctx, study, created, start_from=start)
-        else:
-            yield from self._stream_summary(ctx, study, created)
+        yield from self._facilitate(ctx, study["obj"])
 
     # ── Shared workshop pipeline ─────────────────────────────────────
 
@@ -462,7 +370,7 @@ class EbiosRMAssistWorkflow(Workflow):
         ]
         start_idx = steps.index(start_from) if start_from in steps else 0
 
-        all_assets = self._get_all_assets(study)
+        all_assets = self._get_all_assets(study, ctx)
 
         # W1: Feared events
         if start_idx <= 0:
@@ -707,11 +615,10 @@ class EbiosRMAssistWorkflow(Workflow):
                 logger.warning("Failed to create asset %s: %s", a.get("name"), e)
         return created
 
-    def _get_all_assets(self, study: dict) -> list[dict]:
-        study_obj = study["obj"]
+    def _get_all_assets(self, study: dict, ctx: WorkflowContext) -> list[dict]:
         return [
             {"id": str(a.id), "name": a.name, "type": a.type}
-            for a in study_obj.assets.all()
+            for a in self._study_assets(ctx, study["obj"])
         ]
 
     # ── Feared event generation (W1) ────────────────────────────────
