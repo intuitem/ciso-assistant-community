@@ -4473,5 +4473,7 @@
 	"searchPagesAndObjects": "Pretraži stranice i objekte...",
 	"viewAll": "Prikaži sve",
 	"briefingOfAssessedRequirements": "od {total} procijenjenih zahtjeva",
-	"briefingPartialCount": "{count} djelomično"
+	"briefingPartialCount": "{count} djelomično",
+	"onlyTheReviewerCanDoThis": "Samo recenzent može izvršiti ovaj korak",
+	"commitmentChangedMeanwhile": "Ova se obveza u međuvremenu promijenila: ponovno učitajte stranicu da biste vidjeli njezino trenutno stanje"
 }

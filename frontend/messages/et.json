@@ -5121,5 +5121,7 @@
 	"commandKeywordAsk": "küsi",
 	"commandKeywordSearch": "otsi",
 	"briefingOfAssessedRequirements": "{total} hinnatud nõudest",
-	"briefingPartialCount": "{count} osaliselt"
+	"briefingPartialCount": "{count} osaliselt",
+	"onlyTheReviewerCanDoThis": "Selle sammu saab teha ainult ülevaataja",
+	"commitmentChangedMeanwhile": "See kohustus on vahepeal muutunud: laadige leht uuesti, et näha selle praegust olekut"
 }

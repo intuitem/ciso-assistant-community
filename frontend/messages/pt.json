@@ -2714,6 +2714,8 @@
 	"commitmentActionDecline": "Recusar",
 	"commitmentActionFulfil": "Marcar como cumprido",
 	"onlyTheAccountableActorCanDoThis": "Somente o responsável designado pode executar esta etapa",
+	"onlyTheReviewerCanDoThis": "Somente o revisor pode realizar esta etapa",
+	"commitmentChangedMeanwhile": "Este compromisso mudou entretanto: recarregue a página para ver o estado atual",
 	"commitmentManagement": "Gestão de compromissos",
 	"commitmentManagementDescription": "Acompanhe a data de remediação com a qual um responsável se compromete e sua renegociação",
 	"dora": "DORA",

@@ -5977,5 +5977,7 @@
 	"commandKeywordAsk": "opýtaj",
 	"commandKeywordSearch": "hľadaj",
 	"briefingOfAssessedRequirements": "z {total} posúdených požiadaviek",
-	"briefingPartialCount": "{count} čiastočne"
+	"briefingPartialCount": "{count} čiastočne",
+	"onlyTheReviewerCanDoThis": "Tento krok môže vykonať iba posudzovateľ",
+	"commitmentChangedMeanwhile": "Tento záväzok sa medzitým zmenil: znova načítajte stránku a zobrazte jeho aktuálny stav"
 }

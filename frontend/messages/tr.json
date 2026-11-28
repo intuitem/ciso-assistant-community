@@ -3922,6 +3922,8 @@
 	"commitmentActionDecline": "Reddet",
 	"commitmentActionFulfil": "Yerine getirildi olarak işaretle",
 	"onlyTheAccountableActorCanDoThis": "Bu adımı yalnızca atanan sorumlu atabilir",
+	"onlyTheReviewerCanDoThis": "Bu adımı yalnızca gözden geçiren kişi atabilir",
+	"commitmentChangedMeanwhile": "Bu taahhüt bu arada değişti: güncel durumunu görmek için sayfayı yeniden yükleyin",
 	"commitmentManagement": "Taahhüt yönetimi",
 	"commitmentManagementDescription": "Sorumlunun taahhüt ettiği iyileştirme tarihini ve yeniden müzakeresini izleyin",
 	"dora": "DORA",

@@ -2843,5 +2843,7 @@
 	"sumpageExpiredEvidences": "Ληγμένα αποδεικτικά",
 	"viewAll": "Προβολή όλων",
 	"briefingOfAssessedRequirements": "από {total} αξιολογημένες απαιτήσεις",
-	"briefingPartialCount": "{count} μερικώς"
+	"briefingPartialCount": "{count} μερικώς",
+	"onlyTheReviewerCanDoThis": "Μόνο ο αξιολογητής μπορεί να εκτελέσει αυτό το βήμα",
+	"commitmentChangedMeanwhile": "Αυτή η δέσμευση άλλαξε στο μεταξύ: επαναφορτώστε τη σελίδα για να δείτε την τρέχουσα κατάστασή της"
 }

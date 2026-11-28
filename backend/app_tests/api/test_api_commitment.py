@@ -1,7 +1,11 @@
-from unittest.mock import patch
+from datetime import date
+from unittest.mock import MagicMock, patch
 
 import pytest
-from rest_framework.test import APIClient
+from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.test import APIClient, APIRequestFactory
 
 from core.models import (
     Actor,
@@ -13,6 +17,8 @@ from core.models import (
     TaskNode,
     TaskTemplate,
 )
+from core.commitment import apply_transition
+from core.serializers import TaskTemplateWriteSerializer
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
@@ -756,7 +762,9 @@ class TestRegister:
         client.force_authenticate(user)
 
         url = f"/api/task-templates/{task.id}/commitment_transitions/"
-        assert client.get(url).status_code == 200
+        read = client.get(url)
+        assert read.status_code == 200
+        assert [t["allowed"] for t in read.json()["transitions"]] == [False]
         # Taking a step stays its own right.
         taken = client.post(url, {"commitment_state": "in_negotiation"}, format="json")
         assert taken.status_code == 403
@@ -834,3 +842,343 @@ class TestTaskTemplates:
         )
         assert res.status_code == 200
         assert res.json()["transitions"] == []
+
+
+def respondent_on(folder: Folder, user: User, role: str) -> APIClient:
+    group = UserGroup.objects.create(name=f"grp-{user.email}", folder=folder)
+    group.user_set.add(user)
+    assignment = RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name=role),
+        folder=folder,
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(folder)
+    client = APIClient()
+    client.force_authenticate(user)
+    return client
+
+
+@pytest.fixture
+def vendor_task(setup: dict) -> dict:
+    """A remediation task the reviewer raised in a third party's workspace."""
+    workspace = Folder.objects.create(
+        parent_folder=setup["domain"],
+        name="Vendor workspace",
+        content_type=Folder.ContentType.ENCLAVE,
+    )
+    respondent = User.objects.create_user("commitment-respondent@tests.com")
+    respondent_client = respondent_on(workspace, respondent, "BI-RL-TPR")
+    task = TaskTemplate.objects.create(name="Adopt a security policy", folder=workspace)
+    task.assigned_to.set(Actor.get_all_for_user(respondent))
+    return {
+        "workspace": workspace,
+        "task": task,
+        "respondent": respondent_client,
+        "reviewer": setup["manager"],
+    }
+
+
+class TestVendorTaskSteps:
+    """The reviewer drives the commitment, the respondent only answers it."""
+
+    @staticmethod
+    def step(
+        client: APIClient, task: TaskTemplate, state: str, **extra: str
+    ) -> Response:
+        return client.post(
+            f"/api/task-templates/{task.id}/commitment_transitions/",
+            {"commitment_state": state, **extra},
+            format="json",
+        )
+
+    def drive(self, vendor_task: dict, *steps: tuple[str, str, dict]) -> None:
+        for side, state, extra in steps:
+            res = self.step(vendor_task[side], vendor_task["task"], state, **extra)
+            assert res.status_code == 200, res.json()
+
+    OPEN = ("reviewer", "in_negotiation", {})
+    COMMIT = ("respondent", "committed", {"commitment_date": "2027-03-31"})
+    DECLINE = ("respondent", "declined", {"commitment_notes": "not this year"})
+    FULFIL = ("reviewer", "fulfilled", {})
+    REOPEN_NOTE = {"commitment_notes": "the policy was withdrawn"}
+
+    def test_the_respondent_cannot_open_a_negotiation(self, vendor_task: dict) -> None:
+        res = self.step(
+            vendor_task["respondent"], vendor_task["task"], "in_negotiation"
+        )
+        assert res.status_code == 400
+
+    def test_the_respondent_answers_the_reviewer(self, vendor_task: dict) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT)
+
+    def test_only_the_reviewer_relaunches_after_a_decline(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.DECLINE)
+        task = vendor_task["task"]
+        assert (
+            self.step(vendor_task["respondent"], task, "in_negotiation").status_code
+            == 400
+        )
+        assert (
+            self.step(vendor_task["reviewer"], task, "in_negotiation").status_code
+            == 200
+        )
+
+    def test_only_the_reviewer_reopens_a_fulfilled_commitment(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT, self.FULFIL)
+        task = vendor_task["task"]
+        assert (
+            self.step(
+                vendor_task["respondent"], task, "in_negotiation", **self.REOPEN_NOTE
+            ).status_code
+            == 400
+        )
+        assert (
+            self.step(
+                vendor_task["reviewer"], task, "in_negotiation", **self.REOPEN_NOTE
+            ).status_code
+            == 200
+        )
+        task.refresh_from_db()
+        assert task.commitment_reopen_count == 1
+
+    def test_reopening_a_fulfilled_commitment_starts_without_the_promised_date(
+        self, vendor_task: dict
+    ) -> None:
+        commit_in_the_past = (
+            "respondent",
+            "committed",
+            {"commitment_date": "2020-01-31"},
+        )
+        self.drive(vendor_task, self.OPEN, commit_in_the_past, self.FULFIL)
+        task = vendor_task["task"]
+        self.step(vendor_task["reviewer"], task, "in_negotiation", **self.REOPEN_NOTE)
+        task.refresh_from_db()
+        assert task.committed_eta is None
+        assert not task.commitment_is_breached
+        assert [cycle.committed_eta for cycle in task.commitment_history] == [
+            date(2020, 1, 31)
+        ]
+
+    def test_the_respondent_cannot_open_in_a_sub_folder_of_the_workspace(
+        self, vendor_task: dict
+    ) -> None:
+        sub_folder = Folder.objects.create(
+            parent_folder=vendor_task["workspace"],
+            name="Vendor sub-folder",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        task = TaskTemplate.objects.create(name="Nested", folder=sub_folder)
+        task.assigned_to.set(vendor_task["task"].assigned_to.all())
+        res = self.step(vendor_task["respondent"], task, "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+
+    def test_reopening_a_fulfilled_commitment_needs_a_note(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT, self.FULFIL)
+        res = self.step(vendor_task["reviewer"], vendor_task["task"], "in_negotiation")
+        assert res.json() == {"commitment_notes": ["aNoteIsRequiredForThisTransition"]}
+
+    def test_the_respondent_cannot_launch_by_creating_the_task(
+        self, vendor_task: dict
+    ) -> None:
+        res = vendor_task["respondent"].post(
+            "/api/task-templates/",
+            {
+                "name": "Self-raised",
+                "folder": str(vendor_task["workspace"].id),
+                "commitment_state": "in_negotiation",
+            },
+            format="json",
+        )
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+        assert not TaskTemplate.objects.filter(name="Self-raised").exists()
+
+    @staticmethod
+    def analyst_elsewhere(vendor_task: dict) -> tuple[APIClient, Folder]:
+        """A respondent of the workspace who is also an analyst in an unrelated domain."""
+        elsewhere = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Unrelated domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("commitment-analyst-respondent@tests.com")
+        respondent_on(elsewhere, user, "BI-RL-ANA")
+        return respondent_on(vendor_task["workspace"], user, "BI-RL-TPR"), elsewhere
+
+    @staticmethod
+    def move(
+        client: APIClient, task: TaskTemplate, folder: Folder, state: str
+    ) -> Response:
+        return client.patch(
+            f"/api/task-templates/{task.id}/",
+            {"folder": str(folder.id), "commitment_state": state},
+            format="json",
+        )
+
+    def test_the_respondent_cannot_launch_by_moving_a_task_in(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = TaskTemplate.objects.create(name="Moved in", folder=elsewhere)
+        res = self.move(client, task, vendor_task["workspace"], "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+        task.refresh_from_db()
+        assert task.folder_id == elsewhere.id
+
+    def test_the_respondent_cannot_launch_by_moving_a_task_out(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = vendor_task["task"]
+        res = self.move(client, task, elsewhere, "in_negotiation")
+        assert res.status_code == 400
+        assert res.json() == {"commitment_state": ["onlyTheReviewerCanDoThis"]}
+        task.refresh_from_db()
+        assert task.folder_id == vendor_task["workspace"].id
+
+    def test_the_respondent_cannot_fulfil_by_moving_a_task_in(
+        self, vendor_task: dict
+    ) -> None:
+        client, elsewhere = self.analyst_elsewhere(vendor_task)
+        task = TaskTemplate.objects.create(name="Promised", folder=elsewhere)
+        task.assigned_to.set(vendor_task["task"].assigned_to.all())
+        apply_transition(task, "in_negotiation")
+        apply_transition(task, "committed", promised_date=date(2027, 3, 31))
+        res = self.move(client, task, vendor_task["workspace"], "fulfilled")
+        assert res.status_code == 400
+        assert res.json() == {
+            "commitment_state": ["theAccountableActorCannotCloseTheirOwnCommitment"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "committed"
+
+    def delay_validated_as_respondent(
+        self, task: TaskTemplate
+    ) -> TaskTemplateWriteSerializer:
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-respondent@tests.com")
+        delay = TaskTemplateWriteSerializer(
+            task,
+            data={
+                "commitment_state": "in_negotiation",
+                "commitment_notes": "late",
+                "name": "Renamed with the delay",
+            },
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert delay.is_valid(), delay.errors
+        return delay
+
+    def test_a_delay_does_not_overwrite_a_fulfilment_made_meanwhile(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT)
+        task = vendor_task["task"]
+        delay = self.delay_validated_as_respondent(task)
+        apply_transition(task, "fulfilled")
+
+        with pytest.raises(ValidationError) as refused:
+            delay.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "fulfilled"
+        assert task.name == "Adopt a security policy"
+
+    def test_a_stale_commit_does_not_land_on_the_next_cycle(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN)
+        task = vendor_task["task"]
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-respondent@tests.com")
+        stale = TaskTemplateWriteSerializer(
+            task,
+            data={"commitment_state": "committed", "commitment_date": "2027-01-01"},
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert stale.is_valid(), stale.errors
+        # Meanwhile the same cycle is committed then reopened for a delay: a new cycle
+        # back in negotiation, the state the stale step was validated against.
+        apply_transition(task, "committed", promised_date=date(2027, 3, 31))
+        apply_transition(task, "in_negotiation", notes="supplier delay")
+
+        with pytest.raises(ValidationError) as refused:
+            stale.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
+        task.refresh_from_db()
+        assert task.commitment_state == "in_negotiation"
+
+    def test_two_first_openings_at_once_refuse_the_second(
+        self, vendor_task: dict
+    ) -> None:
+        task = vendor_task["task"]
+        request = Request(APIRequestFactory().post("/"))
+        request.user = User.objects.get(email="commitment-manager@tests.com")
+        second = TaskTemplateWriteSerializer(
+            task,
+            data={"commitment_state": "in_negotiation"},
+            partial=True,
+            context={"request": request, "commitment_transition": True},
+        )
+        assert second.is_valid(), second.errors
+        Commitment.objects.create(target=task, state="in_negotiation")
+        # The first opening committed after the second read "no row": nothing was
+        # there to lock, so the second's locked read still finds nothing.
+        unlocked = MagicMock()
+        unlocked.filter.return_value.first.return_value = None
+        with patch.object(
+            Commitment.objects, "select_for_update", return_value=unlocked
+        ):
+            with pytest.raises(ValidationError) as refused:
+                second.save()
+        assert refused.value.detail == {
+            "commitment_state": ["commitmentChangedMeanwhile"]
+        }
+
+    def test_the_respondent_can_still_ask_for_a_delay(self, vendor_task: dict) -> None:
+        self.drive(vendor_task, self.OPEN, self.COMMIT)
+        res = self.step(
+            vendor_task["respondent"],
+            vendor_task["task"],
+            "in_negotiation",
+            commitment_notes="supplier delay",
+        )
+        assert res.status_code == 200, res.json()
+
+    def test_the_offered_steps_match_what_the_respondent_may_take(
+        self, vendor_task: dict
+    ) -> None:
+        self.drive(vendor_task, self.OPEN, self.DECLINE)
+        body = (
+            vendor_task["respondent"]
+            .get(
+                f"/api/task-templates/{vendor_task['task'].id}/commitment_transitions/"
+            )
+            .json()
+        )
+        assert {t["value"]: t["allowed"] for t in body["transitions"]} == {
+            "in_negotiation": False
+        }
+
+    def test_an_internal_auditee_still_opens_a_negotiation_on_their_control(
+        self, setup: dict
+    ) -> None:
+        auditee = User.objects.create_user("commitment-auditee@tests.com")
+        client = respondent_on(setup["domain"], auditee, "BI-RL-ADE")
+        setup["control"].owner.set(Actor.get_all_for_user(auditee))
+        res = patch_control(client, setup["control"], commitment_state="in_negotiation")
+        assert res.status_code == 200, res.json()
