@@ -4464,6 +4464,10 @@ class ComplianceAssessmentWriteSerializer(
     create_applied_controls_from_suggestions = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
+    # Copy from baseline but start every requirement back at "to do".
+    reset_status = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     def validate_field_visibility(self, value):
         from core.utils import validate_field_visibility
@@ -4690,6 +4694,7 @@ class ComplianceAssessmentWriteSerializer(
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
+        validated_data.pop("reset_status", None)
         authors_data = validated_data.get("authors", [])
         reviewers_data = validated_data.get("reviewers", [])
 
