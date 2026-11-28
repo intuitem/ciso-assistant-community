@@ -86,6 +86,24 @@ def urn_safe_leaf(value: str) -> str:
     return leaf
 
 
+def highest_index(urns, prefix: str) -> int:
+    """Highest numeric leaf among ``{prefix}{N}`` URNs (0 when none).
+
+    New node, question and choice URNs take the highest number already used
+    + 1, never the lowest free one, so a deleted id is not revived for new
+    content (except when it was the highest). The watermark is read from the
+    URNs present before this save; a collision ``-N`` suffix is ignored.
+    """
+    highest = 0
+    for urn in urns:
+        if not urn.startswith(prefix):
+            continue
+        match = re.match(r"(\d+)", urn[len(prefix) :])
+        if match:
+            highest = max(highest, int(match.group(1)))
+    return highest
+
+
 def library_urn(packager: str, ref_id: str) -> str:
     return f"urn:{packager}:risk:library:{ref_id}"
 

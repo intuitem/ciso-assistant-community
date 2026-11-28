@@ -13,7 +13,7 @@ backfills them deterministically onto the live rows first — that is what
 makes update-in-place possible at publish time.
 """
 
-from library.builder import urn_safe_leaf
+from library.builder import highest_index, urn_safe_leaf
 
 _IDENTITY_FORBIDDEN = "[^a-z0-9_-]+"
 
@@ -102,14 +102,16 @@ def mint_missing_urns(framework) -> bool:
     node_base = framework.urn.lower().replace(":framework:", ":req_node:", 1)
     nodes = list(RequirementNode.objects.filter(framework=framework))
     taken = {str(n.urn).lower() for n in nodes if n.urn}
-    for index, node in enumerate(nodes):
+    for node in nodes:
         if node.urn:
             wrote = _normalize(node) or wrote
             continue
-        leaf = (
-            urn_safe_leaf(node.ref_id or "")
-            or urn_safe_leaf(node.name or "")
-            or f"node{index + 1}"
+        # node{N} without a ref_id, never the name slug: aligns with the
+        # library-builder URN scheme ADR and keeps the leaf short. N is the
+        # highest already used + 1, not the node's position, so a number
+        # freed by a deletion is not handed to different content.
+        leaf = urn_safe_leaf(node.ref_id or "") or (
+            f"node{highest_index(taken, f'{node_base}:node') + 1}"
         )
         candidate = f"{node_base}:{leaf}"
         suffix = 2

@@ -27,7 +27,7 @@ import re
 
 from core.quick_form_scoring import PAGE_AGGREGATIONS
 from core.utils import extract_node_id
-from library.builder import BuilderError, rebase_tree, urn_safe_leaf
+from library.builder import BuilderError, highest_index, rebase_tree, urn_safe_leaf
 
 # Node keys owned by the editor: everything else on an existing node is
 # preserved verbatim across a save.
@@ -365,16 +365,19 @@ def editor_doc_to_framework_object(
                 taken_leaves.add(leaf)
 
     minted = []
-    for index, node in enumerate(doc_nodes):
+    for node in doc_nodes:
         node_id = str(node.get("id") or "").lower()
         node_urn = str(node.get("urn") or "").lower()
         if node_urn and node_urn in existing_nodes:
             canonical = node_urn
         else:
-            leaf = (
-                urn_safe_leaf(node.get("ref_id") or "")
-                or urn_safe_leaf(node.get("name") or "")
-                or f"node{index + 1}"
+            # A node without a ref_id gets node{N}, never its name slug: a
+            # 200-char name would blow the URN length budget (see the ADR).
+            # N is the highest already used + 1, not the node's position: a
+            # deleted node's URN must not be revived for new content, or an
+            # audit's answers would follow it.
+            leaf = urn_safe_leaf(node.get("ref_id") or "") or (
+                f"node{highest_index(existing_nodes.keys() | set(minted), f'{base}:node') + 1}"
             )
             canonical = f"{base}:{_dedup_leaf(leaf, taken_leaves)}"
             if node_urn:
@@ -414,7 +417,10 @@ def editor_doc_to_framework_object(
         if q_urn and q_urn in existing_question_urns and q_urn not in claimed:
             claimed.add(q_urn)
         else:
-            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(len(claimed) + 1)
+            leaf = urn_safe_leaf(question.get("ref_id") or "") or str(
+                highest_index(existing_question_urns | claimed, f"{node_urn}:question:")
+                + 1
+            )
             candidate = f"{node_urn}:question:{leaf}"
             suffix = 2
             while candidate in existing_question_urns or candidate in claimed:
@@ -438,7 +444,7 @@ def editor_doc_to_framework_object(
 
         q_choices = []
         claimed_choices: set = set()
-        next_index = 1
+        next_index = highest_index(existing_choice_urns, f"{q_urn}:choice:") + 1
         seen_choice_ids = set()
         for choice in raw_choices:
             choice_key = id(choice)

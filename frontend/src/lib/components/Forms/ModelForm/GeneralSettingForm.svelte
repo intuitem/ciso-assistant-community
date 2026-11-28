@@ -502,6 +502,7 @@
 				<TextField
 					{form}
 					field="default_packager"
+					maxlength={32}
 					label={m.defaultPackager()}
 					helpText={m.defaultPackagerHelpText()}
 				/>
