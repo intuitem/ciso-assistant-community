@@ -9,6 +9,7 @@ from urllib.parse import urlsplit
 
 import anyio.to_thread
 from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from . import actions, config
 from .auth import capture_headers
@@ -430,10 +431,25 @@ def _offload(fn):
 ADMIN_TOOLS = (create_folder, update_folder, update_user)
 
 
+def _flag_errors(runner):
+    """Raise a tool's error string as ToolError: the SDK sets is_error only for a
+    raised one. Outermost, so the hooks still see (and log) the string."""
+
+    @functools.wraps(runner)
+    async def flagged(*args, **kwargs):
+        result = await runner(*args, **kwargs)
+        if isinstance(result, str) and result.startswith(("[ERROR]", "Error")):
+            raise ToolError(result)
+        return result
+
+    return flagged
+
+
 def _register_on(server, read_only, guard_write=None, hooks=None, remote=False):
     def add(tool, runner, is_read):
         if hooks:
             runner = _with_hooks(runner, tool.__name__, hooks)
+        runner = _flag_errors(runner)
         server.tool(annotations=_annotations(tool, is_read=is_read))(runner)
 
     for tool in READ_TOOLS:

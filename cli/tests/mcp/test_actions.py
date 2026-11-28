@@ -225,3 +225,17 @@ def test_a_failing_tool_is_recorded_then_raises(connected):
     with pytest.raises(RuntimeError):
         asyncio.run(server._with_hooks(tool, "get_folders", hooks)())
     assert hooks.calls == [("get_folders", None, "RuntimeError")]
+
+
+def test_a_refused_call_is_an_error_and_still_logged(connected):
+    app = server.ActionFilteredServer("test")
+    hooks = _Hooks()
+    server._register_on(
+        app, False, guard_write=server._require_action, hooks=hooks, remote=True
+    )
+    connected(_access(granted=["read"]))
+    with pytest.raises(server.ToolError, match="does not allow deleting"):
+        asyncio.run(app.call_tool("delete_vulnerability", {"vulnerability_id": "x"}))
+    [(tool, result, error)] = hooks.calls
+    assert (tool, error) == ("delete_vulnerability", None)
+    assert result.startswith("Error: ")
