@@ -1786,6 +1786,12 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
         fields=["status", "eta", "due_date", "description", "observation"],
         allowed_values={"status": _ASSESSMENT_STATUSES},
     ),
+    "task_node": UpdateEntry(
+        model=TaskNode,
+        # No due_date: it keys the occurrence in its recurrence. Evidence goes
+        # through attach_evidence, which checks the template expects it.
+        fields=["status", "observation"],
+    ),
     "requirement_assessment": UpdateEntry(
         model=RequirementAssessment,
         # Progress and attached work only: a workflow that answers an audit

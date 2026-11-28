@@ -1587,26 +1587,36 @@ class LibraryImporter:
         content = self._library.content
         if isinstance(content, str):
             content = json.loads(content)
-        if (
-            not self._library.dependencies
-            or content.get(
-                "requirement_mapping_set",
-                content.get("requirement_mapping_sets"),
-            )
-            is not None
-        ):
+        # A mapping-only library must not pull its two frameworks in; one that
+        # also carries a framework (a mapped clone) needs its dependencies.
+        mapping_keys = {"requirement_mapping_set", "requirement_mapping_sets"}
+        mapping_only = any(content.get(key) for key in mapping_keys) and not any(
+            value for key, value in content.items() if key not in mapping_keys
+        )
+        if not self._library.dependencies or mapping_only:
             return None
+
+        def pick(rows):
+            return min(
+                rows,
+                key=lambda row: (
+                    row.locale != self._library.locale,
+                    not row.default_locale,
+                    -row.version,
+                ),
+                default=None,
+            )
+
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                try:
-                    dependency = StoredLibrary.objects.get(urn=dependency_urn)
-                    if (error_msg := dependency.load()) is not None:
-                        return error_msg
-                except StoredLibrary.DoesNotExist:
+                dependency = pick(StoredLibrary.objects.filter(urn=dependency_urn))
+                if dependency is None:
                     return f"ERROR: Stored Library with URN {dependency_urn} does not exist"
+                if (error_msg := dependency.load()) is not None:
+                    return error_msg
             else:
                 # try to update the dependency, because we might need the last version for the main library
-                dependency = LoadedLibrary.objects.get(urn=dependency_urn)
+                dependency = pick(LoadedLibrary.objects.filter(urn=dependency_urn))
                 if (error_msg := dependency.update()) not in [
                     None,
                     "libraryHasNoUpdate",

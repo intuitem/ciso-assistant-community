@@ -333,7 +333,7 @@ CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference
 81. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 82. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
 83. Microsoft cloud security benchmark v1 - ☁️🌐
-84. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
+84. Baseline informatiebeveiliging Overheid 2 (BIO2) v1.2 & v1.3 🇳🇱
 85. ANSSI : Questionnaire MonAideCyber 🇫🇷
 86. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
 87. CISA Vendor Supply Chain Risk Management (SCRM) Template 🇺🇸
