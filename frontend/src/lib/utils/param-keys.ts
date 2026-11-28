@@ -126,6 +126,7 @@ export const FIELD_KEYS = new Set([
 	'is_active',
 	'is_actively_exploited',
 	'is_enabled',
+	'is_preferred',
 	'is_read',
 	'is_recurrent',
 	'is_recursive',

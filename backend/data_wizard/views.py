@@ -6956,6 +6956,17 @@ class LoadFileView(APIView):
                     "phone": str(record.get("phone", "")).strip(),
                     "role": str(record.get("role", "")).strip(),
                 }
+                raw_preferred = record.get("is_preferred")
+                if not is_blank_cell(raw_preferred):
+                    is_preferred = _parse_bool_cell(raw_preferred, binary_only=True)
+                    if is_preferred is None:
+                        self._add_tprm_record_error(
+                            results,
+                            record,
+                            f"Invalid is_preferred '{raw_preferred}': use true or false",
+                        )
+                        continue
+                    representative_data["is_preferred"] = is_preferred
 
                 existing_representative = Representative.objects.filter(
                     email__iexact=email

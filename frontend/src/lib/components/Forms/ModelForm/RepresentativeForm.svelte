@@ -121,3 +121,11 @@
 	cacheLock={cacheLocks['role']}
 	bind:cachedValue={formDataCache['role']}
 />
+<Checkbox
+	{form}
+	field="is_preferred"
+	label={m.preferredRepresentative()}
+	helpText={m.preferredRepresentativeHelpText()}
+	cacheLock={cacheLocks['is_preferred']}
+	bind:cachedValue={formDataCache['is_preferred']}
+/>

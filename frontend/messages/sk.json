@@ -1285,6 +1285,8 @@
 	"blocker": "Prekážka",
 	"createUser": "Vytvoriť používateľa",
 	"createUserHelpText": "Vytvoriť alebo prepojte používateľa tretej strany so zástupcom na základe e-mailovej adresy.",
+	"preferredRepresentative": "Preferovaný zástupca",
+	"preferredRepresentativeHelpText": "Predvolený ako riešiteľ úloh vytvorených v pracovnom priestore tejto tretej strany. Ak nie je preferovaný žiadny z jej respondentov, predvolia sa všetci.",
 	"userLinkedToRepresentative": "Používateľ je už prepojený s týmto zástupcom.",
 	"nameDuplicate": "Názov už existuje",
 	"noAnswer": "Žiadna odpoveď",

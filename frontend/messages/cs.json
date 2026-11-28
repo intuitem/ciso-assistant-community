@@ -865,6 +865,8 @@
 	"blocker": "Překážka",
 	"createUser": "Vytvořit uživatele",
 	"createUserHelpText": "Vytvořte nebo připojte uživatele třetí strany k zástupci na základě e-mailu",
+	"preferredRepresentative": "Preferovaný zástupce",
+	"preferredRepresentativeHelpText": "Předvybrán jako řešitel úkolů vytvořených v pracovním prostoru této třetí strany. Pokud žádný z jejích respondentů není preferovaný, jsou předvybráni všichni.",
 	"nameDuplicate": "Jméno již existuje",
 	"noAnswer": "Bez odpovědi",
 	"clearAnswer": "Vymazat odpověď",

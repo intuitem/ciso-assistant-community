@@ -8,13 +8,22 @@ function respondWith(body: unknown, ok = true): typeof globalThis.fetch {
 }
 
 describe('fetchVendorAssignees', () => {
-	it("prefills a reviewer's task with the workspace respondents", async () => {
-		const fetch = respondWith({ results: [{ id: 'alice' }, { id: 'carol' }] });
+	it("prefills a reviewer's task with the preferred respondents only", async () => {
+		const fetch = respondWith({ results: [{ id: 'alice' }] });
+
+		expect(await fetchVendorAssignees(fetch, enclave, false)).toEqual(['alice']);
+		expect(fetch).toHaveBeenCalledOnce();
+		expect(vi.mocked(fetch).mock.calls[0][0]).toContain(
+			'/actors/?respondents_of=enclave-a&respondents_only=true&preferred_only=true'
+		);
+	});
+
+	it('prefills every workspace respondent when none is preferred', async () => {
+		const pages = [{ results: [] }, { results: [{ id: 'alice' }, { id: 'carol' }] }];
+		const fetch = vi.fn(async () => ({ ok: true, json: async () => pages.shift() }) as Response);
 
 		expect(await fetchVendorAssignees(fetch, enclave, false)).toEqual(['alice', 'carol']);
-		expect(vi.mocked(fetch).mock.calls[0][0]).toContain(
-			'/actors/?respondents_of=enclave-a&respondents_only=true'
-		);
+		expect(vi.mocked(fetch).mock.calls[1][0]).not.toContain('preferred_only');
 	});
 
 	it('prefills nothing outside an enclave, for a vendor, or without a folder', async () => {
@@ -40,7 +49,7 @@ describe('fetchVendorAssignees', () => {
 		expect(await fetchVendorAssignees(fetch, enclave, false)).toEqual([]);
 	});
 
-	it('prefills the respondents of every page', async () => {
+	it('prefills the preferred respondents of every page', async () => {
 		const pages = [
 			{ results: [{ id: 'alice' }], next: 'page-2' },
 			{ results: [{ id: 'carol' }], next: null }

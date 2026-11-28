@@ -642,6 +642,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description`
 * `phone`
 * `role`
+* `is_preferred` - preselected as an assignee of the tasks raised in the entity's workspace (either true/yes or false/no). A blank cell leaves an existing representative unchanged, any other value fails the row
 * `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
 * `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 

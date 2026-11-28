@@ -349,6 +349,7 @@ class RepresentativeImportExportSerializer(BaseModelSerializer):
             "phone",
             "role",
             "description",
+            "is_preferred",
             "created_at",
             "updated_at",
         ]

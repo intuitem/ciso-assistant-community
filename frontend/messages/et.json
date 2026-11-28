@@ -1397,6 +1397,8 @@
 	"blocker": "Takistus",
 	"createUser": "Loo kasutaja",
 	"createUserHelpText": "Loo või seo e-posti alusel kolmanda osapoole kasutaja esindajaga",
+	"preferredRepresentative": "Eelistatud esindaja",
+	"preferredRepresentativeHelpText": "Eelvalitakse selle kolmanda osapoole tööruumis loodud ülesannete täitjaks. Kui ükski selle vastaja pole eelistatud, eelvalitakse kõik.",
 	"userLinkedToRepresentative": "Kasutaja on selle esindajaga juba seotud.",
 	"nameDuplicate": "Nimi on juba olemas",
 	"noAnswer": "Vastus puudub",

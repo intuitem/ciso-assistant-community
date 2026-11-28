@@ -2864,8 +2864,8 @@ export const listViewFields = {
 		}
 	},
 	representatives: {
-		head: ['email', 'entity', 'role'],
-		body: ['email', 'entity', 'role'],
+		head: ['email', 'entity', 'role', 'preferredRepresentative'],
+		body: ['email', 'entity', 'role', 'is_preferred'],
 		filters: {
 			entity: ENTITY_FILTER
 		}

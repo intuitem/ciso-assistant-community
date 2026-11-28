@@ -1392,6 +1392,8 @@
 	"blocker": "Blokkerende",
 	"createUser": "Opprett bruker",
 	"createUserHelpText": "Opprett eller koble en tredjepartsbruker til kontaktpersonen basert på e-postadressen",
+	"preferredRepresentative": "Foretrukket kontaktperson",
+	"preferredRepresentativeHelpText": "Forhåndsvalgt som ansvarlig for oppgaver opprettet i denne tredjepartens arbeidsområde. Hvis ingen av respondentene er foretrukket, forhåndsvelges alle.",
 	"userLinkedToRepresentative": "En bruker er allerede koblet til denne kontaktpersonen.",
 	"auditAlreadyLinkedToEntityAssessment": "Denne samsvarsvurderingen er allerede koblet til en annen leverandørvurdering.",
 	"nameDuplicate": "Navnet finnes allerede",

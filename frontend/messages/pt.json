@@ -1658,6 +1658,8 @@
 	"blocker": "Bloqueador",
 	"createUser": "Criar usuário",
 	"createUserHelpText": "Crie ou vincule um usuário terceiro ao representante com base no e-mail",
+	"preferredRepresentative": "Representante preferencial",
+	"preferredRepresentativeHelpText": "Pré-selecionado como responsável pelas tarefas criadas no espaço de trabalho deste terceiro. Se nenhum dos seus respondentes for preferencial, todos são pré-selecionados.",
 	"userLinkedToRepresentative": "Já existe um usuário vinculado a este representante.",
 	"auditAlreadyLinkedToEntityAssessment": "Esta auditoria já está vinculada a outra avaliação de entidade.",
 	"nameDuplicate": "Nome já existe",

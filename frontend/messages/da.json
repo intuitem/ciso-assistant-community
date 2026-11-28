@@ -885,6 +885,8 @@
 	"blocker": "Blokering",
 	"createUser": "Opret bruger",
 	"createUserHelpText": "Opret eller link en tredjepartsbruger til repræsentanten baseret på e-mail",
+	"preferredRepresentative": "Foretrukken repræsentant",
+	"preferredRepresentativeHelpText": "Forudvalgt som ansvarlig for opgaver oprettet i denne tredjeparts arbejdsområde. Hvis ingen af dens respondenter er foretrukne, forudvælges de alle.",
 	"nameDuplicate": "Navnet findes allerede",
 	"noAnswer": "Intet svar",
 	"clearAnswer": "Ryd svar",

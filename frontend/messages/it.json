@@ -849,6 +849,8 @@
 	"blocker": "Blocco",
 	"createUser": "Crea utente",
 	"createUserHelpText": "Crea o collega un utente di terza parte al rappresentante in base all'email",
+	"preferredRepresentative": "Rappresentante preferito",
+	"preferredRepresentativeHelpText": "Preselezionato come assegnatario delle attività create nello spazio di lavoro di questa terza parte. Se nessuno dei suoi rispondenti è preferito, vengono preselezionati tutti.",
 	"nameDuplicate": "Nome già esistente",
 	"noAnswer": "Nessuna risposta",
 	"clearAnswer": "Cancella risposta",

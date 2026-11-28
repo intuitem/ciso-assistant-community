@@ -444,8 +444,10 @@ class TestMultiSheetTemplates:
         marie = Representative.objects.get(email="marie.durand@techvendor.com")
         assert marie.first_name == "Marie"
         assert marie.entity == Entity.objects.get(ref_id="ENT-003")
+        assert marie.is_preferred
         alexandre = Representative.objects.get(email="alexandre.morel@acmecorp.com")
         assert alexandre.role == "Security Coordinator"
+        assert not alexandre.is_preferred
         assert alexandre.entity == parent
         techvendor = Entity.objects.get(ref_id="ENT-003")
         review = EntityAssessment.objects.get(name="TechVendor Annual Security Review")

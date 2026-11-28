@@ -1737,6 +1737,8 @@
 	"blocker": "Blokkoló",
 	"createUser": "Felhasználó létrehozása",
 	"createUserHelpText": "Hozzon létre vagy kapcsoljon a képviselőhöz egy harmadik félhez tartozó felhasználót az e-mail-cím alapján",
+	"preferredRepresentative": "Előnyben részesített képviselő",
+	"preferredRepresentativeHelpText": "Előre kiválasztva felelősként a harmadik fél munkaterületén létrehozott feladatokhoz. Ha egyik válaszadója sincs előnyben részesítve, mindegyik előre kiválasztásra kerül.",
 	"userLinkedToRepresentative": "Ehhez a képviselőhöz már tartozik felhasználó.",
 	"auditAlreadyLinkedToEntityAssessment": "Ez az audit már egy másik szervezetértékeléshez kapcsolódik.",
 	"nameDuplicate": "A név már létezik",

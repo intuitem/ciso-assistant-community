@@ -835,6 +835,8 @@
 	"blocker": "Blokker",
 	"createUser": "Gebruiker aanmaken",
 	"createUserHelpText": "Maak of koppel een derde partijgebruiker aan de vertegenwoordiger op basis van het e-mailadres",
+	"preferredRepresentative": "Voorkeursvertegenwoordiger",
+	"preferredRepresentativeHelpText": "Vooraf geselecteerd als toegewezene van taken die in de werkruimte van deze derde partij worden aangemaakt. Als geen van haar respondenten de voorkeur heeft, worden ze allemaal vooraf geselecteerd.",
 	"nameDuplicate": "Naam bestaat al",
 	"noAnswer": "Geen antwoord",
 	"clearAnswer": "Antwoord wissen",

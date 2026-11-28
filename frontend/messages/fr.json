@@ -1816,6 +1816,8 @@
 	"blocker": "Bloqueur",
 	"createUser": "Créer un utilisateur",
 	"createUserHelpText": "Créer ou lier un utilisateur tiers au représentant en fonction de l'e-mail",
+	"preferredRepresentative": "Représentant privilégié",
+	"preferredRepresentativeHelpText": "Présélectionné comme assigné des tâches créées dans l'espace de ce tiers. Si aucun de ses répondants n'est privilégié, tous sont présélectionnés.",
 	"nameDuplicate": "Le nom existe déjà",
 	"noAnswer": "Pas de réponse",
 	"clearAnswer": "Effacer la réponse",

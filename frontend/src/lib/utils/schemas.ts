@@ -1091,7 +1091,8 @@ export const representativeSchema = z.object({
 	last_name: z.string().optional(),
 	phone: z.string().optional(),
 	role: z.string().optional(),
-	description: z.string().optional()
+	description: z.string().optional(),
+	is_preferred: z.boolean().optional().default(false)
 });
 
 export const entityScoreSchema = z.object({
