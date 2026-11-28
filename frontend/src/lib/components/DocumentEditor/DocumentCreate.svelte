@@ -44,7 +44,7 @@
 		folder: z.string().default(defaultFolder),
 		locale: z.string().default('en'),
 		url: z.string().optional().default(''),
-		initial_version: z.number().int().min(1).default(1),
+		initial_version: z.number().int().min(1).max(9999).default(1),
 		classification: z.string().optional().default(''),
 		policies: z.array(z.string()).optional().default(boundIds('policies')),
 		applied_controls: z.array(z.string()).optional().default(boundIds('applied_controls')),
@@ -78,11 +78,16 @@
 		file = (e.target as HTMLInputElement).files?.[0] ?? null;
 	}
 
+	const validVersion = (v: unknown) =>
+		Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 9999;
+
 	async function submit() {
 		error = '';
 		if (!$form.folder) return void (error = m.domainRequired());
 		if (source === 'upload' && !file) return void (error = m.fileRequired());
 		if (source === 'link' && !$form.url.trim()) return void (error = m.urlRequired());
+		if (source !== 'author' && !validVersion($form.initial_version))
+			return void (error = m.initialVersionInvalid());
 
 		busy = true;
 		try {
@@ -111,7 +116,7 @@
 			const res = await fetch(endpoint, { method: 'POST', body: fd });
 			if (!res.ok) {
 				const d = await res.json().catch(() => null);
-				error = d?.error || d?.url || d?.folder || m.error();
+				error = d?.error || d?.url || d?.folder || d?.initial_version || m.error();
 				return;
 			}
 			const container = await res.json();

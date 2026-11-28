@@ -56,6 +56,7 @@
 	"authorHint": "Partez d’une page vierge ou d’un modèle dans l’éditeur.",
 	"initialVersion": "Version initiale",
 	"initialVersionHelpText": "Numéro de la première révision, par exemple pour reprendre l’historique des versions d’un document existant.",
+	"initialVersionInvalid": "Saisissez un nombre entier entre 1 et 9999.",
 	"newDocumentSubtitle": "Rédigez-le, téléversez un fichier ou liez une source externe.",
 	"deleteConfirm": "Voulez-vous vraiment supprimer ceci ?",
 	"documentType": "Type de document",

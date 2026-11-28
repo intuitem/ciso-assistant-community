@@ -230,7 +230,11 @@
 			body.template_used = templateId;
 		}
 		// Translations start their own history at 1.
-		if (!locale && initialVersion > 1) body.initial_version = initialVersion;
+		if (!locale) {
+			const v = initialVersion;
+			if (!Number.isInteger(v) || v < 1 || v > 9999) return notifyError(m.initialVersionInvalid());
+			body.initial_version = v;
+		}
 
 		const res = await proxyPost(body);
 		if (res.ok) {
@@ -1159,7 +1163,14 @@
 				{#if !addingTranslationLocale}
 					<label class="label mb-3 max-w-xs">
 						<span class="text-sm font-medium">{m.initialVersion()}</span>
-						<input type="number" min="1" step="1" class="input" bind:value={initialVersion} />
+						<input
+							type="number"
+							min="1"
+							max="9999"
+							step="1"
+							class="input"
+							bind:value={initialVersion}
+						/>
 						<span class="text-xs text-surface-500">{m.initialVersionHelpText()}</span>
 					</label>
 				{/if}

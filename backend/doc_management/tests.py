@@ -569,3 +569,29 @@ class TestCatalogQueryCount:
 
     def test_catalog_does_not_query_per_published_revision(self):
         assert self._revision_queries(3) == self._revision_queries(1)
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        (None, 1),
+        ("", 1),
+        (4, 4),
+        ("4", 4),
+        (9999, 9999),
+        (0, None),
+        ("0", None),
+        (2.5, None),
+        ("2.5", None),
+        (True, None),
+        (10000, None),
+        ("abc", None),
+    ],
+)
+def test_upload_link_initial_version_parsing(raw, expected):
+    from types import SimpleNamespace
+
+    from doc_management.views import _initial_version
+
+    data = {} if raw is None else {"initial_version": raw}
+    assert _initial_version(SimpleNamespace(data=data)) == expected

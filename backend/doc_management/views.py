@@ -15,6 +15,7 @@ from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import IntegerField
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import (
     FileUploadParser,
@@ -158,11 +159,15 @@ def _queue_review_notification(request, revision):
 
 def _initial_version(request):
     """First revision number for upload/link creates; None when invalid."""
-    try:
-        v = int(request.data.get("initial_version") or 1)
-    except TypeError, ValueError:
+    raw = request.data.get("initial_version")
+    if raw is None or raw == "":
+        return 1
+    if isinstance(raw, bool):
         return None
-    return v if 1 <= v <= 9999 else None
+    try:
+        return IntegerField(min_value=1, max_value=9999).run_validation(raw)
+    except ValidationError:
+        return None
 
 
 def _get_user_lang(request):
