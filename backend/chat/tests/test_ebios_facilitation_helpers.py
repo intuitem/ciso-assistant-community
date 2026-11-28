@@ -134,3 +134,10 @@ def test_strategic_scenario_keeps_its_own_paths_and_couple_events():
     theft = StrategicScenario.objects.get(name="theft")
     assert theft.ro_to_couple == b and theft.focused_feared_event is None
     assert not theft.attack_paths.exists() and shared.strategic_scenario == other
+    other.focused_feared_event = fe_a
+    other.save()
+    assert workflow._record_strategic_scenarios(
+        ctx, study, {"name": "other", "roto": 2}
+    )
+    other.refresh_from_db()
+    assert other.ro_to_couple == b and other.focused_feared_event is None

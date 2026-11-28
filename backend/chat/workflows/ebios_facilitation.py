@@ -1432,9 +1432,18 @@ class EbiosFacilitationMixin:
         )
         if valid_couple:
             scenario.ro_to_couple = rotos[index - 1]
-        fe = _find(fes, item.get("feared_event"))
-        if fe and scenario.ro_to_couple.feared_events.filter(id=fe.id).exists():
-            scenario.focused_feared_event = fe
+        couple_events = scenario.ro_to_couple.feared_events
+        scenario.focused_feared_event = next(
+            (
+                fe
+                for fe in (
+                    _find(fes, item.get("feared_event")),
+                    scenario.focused_feared_event,
+                )
+                if fe and couple_events.filter(id=fe.id).exists()
+            ),
+            None,
+        )
         scenario.save()
         stakeholders = {
             _norm(s.entity.name): s
