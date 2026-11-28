@@ -7008,6 +7008,12 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             ActionPlanBudgetOverview.compute_budget_overview(qs, request.user)
         )
 
+    @action(detail=False, methods=["get"], name="Get experimental control reliance")
+    def reliance(self, request):
+        from core.control_reliance import build
+
+        return Response(build(super().get_queryset(), request.user))
+
     @action(
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
