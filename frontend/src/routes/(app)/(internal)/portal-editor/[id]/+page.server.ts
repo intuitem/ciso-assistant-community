@@ -29,7 +29,9 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 			? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
 			: Promise.resolve([]),
 		(await locals.getFeatureFlags())?.quick_forms
-			? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
+			? // Static options also resolve the saved reviewers: a deactivated one
+				// missing from the list would be dropped from its tile.
+				fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false&include_inactive=true`)
 			: Promise.resolve([]),
 		(await locals.getFeatureFlags())?.quick_forms
 			? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)

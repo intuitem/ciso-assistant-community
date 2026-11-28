@@ -9428,6 +9428,14 @@ class ValidationFlowViewSet(BaseModelViewSet):
 
 
 class ActorViewSet(BaseModelViewSet):
+    """
+    Users, teams and entities that can own or be assigned to objects.
+
+    Lists hide third-party users and deactivated users by default; pass
+    `include_third_parties=true` or `include_inactive=true` to include them.
+    A deactivated user's actor can still be retrieved by id.
+    """
+
     http_method_names = ["get", "head", "options"]
 
     model = Actor
@@ -9498,6 +9506,16 @@ class ActorViewSet(BaseModelViewSet):
                 user__in=respondents
             )
             queryset = queryset.exclude(id__in=third_parties)
+
+        # Deactivated users are hidden from browsing (list, autocomplete) so they
+        # stop crowding pickers, but still resolve by id from the objects they
+        # own. Filters and selected-value hydration pass include_inactive=true.
+        include_inactive = self.request.query_params.get("include_inactive", "false")
+        if (
+            self.action in ("list", "autocomplete")
+            and include_inactive.lower() != "true"
+        ):
+            queryset = queryset.filter(Q(user__isnull=True) | Q(user__is_active=True))
 
         # Service account users are managed via /api/iam/service-accounts/
         # and must never surface in owner/assignee pickers.

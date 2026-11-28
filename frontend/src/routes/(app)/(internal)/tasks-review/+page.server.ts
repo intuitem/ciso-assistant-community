@@ -79,8 +79,11 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const reviewPromise = safeFetch(fetch, endpoint, { folders: [], buckets: [], granularity });
 
 	// Domains and applied controls load their own options client-side (domain
-	// tree, server-side search): only the actors are fetched here.
-	const actorsPromise = fetchAllPages(fetch, `${BASE_API_URL}/actors/`).catch(() => []);
+	// tree, server-side search): only the actors are fetched here. They feed a
+	// filter, which must still reach the tasks of deactivated users.
+	const actorsPromise = fetchAllPages(fetch, `${BASE_API_URL}/actors/?include_inactive=true`).catch(
+		() => []
+	);
 
 	return {
 		title: m.tasksReview(),
