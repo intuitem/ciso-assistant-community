@@ -8,13 +8,19 @@ const POST_ACTIONS: Record<string, string> = {
 	'add-quick-form': 'add-quick-form',
 	'upsert-object': 'upsert-object',
 	'delete-object': 'delete-object',
-	'preset-editor-preview': 'preset-editor-preview'
+	'preset-editor-preview': 'preset-editor-preview',
+	'add-mapping-set': 'add-mapping-set',
+	'edit-mapping-pairs': 'edit-mapping-pairs',
+	'generate-reverse-set': 'generate-reverse-set'
 };
 
 const GET_ACTIONS: Record<string, string> = {
 	read: '',
 	validate: 'validate',
-	conflicts: 'conflicts'
+	conflicts: 'conflicts',
+	'mapping-frameworks': 'mapping-frameworks',
+	'mapping-original': 'mapping-original',
+	'mapping-editor': 'mapping-editor'
 };
 
 async function forward(url: string, method: string, body: unknown, fetchFn: typeof fetch) {
@@ -51,7 +57,15 @@ export const GET: RequestHandler = async ({ params, url, fetch }) => {
 		return Response.json({ error: `unknown action '${action}'` }, { status: 400 });
 	}
 	const suffix = path ? `${path}/` : '';
-	return forward(`${BASE_API_URL}/library-drafts/${params.id}/${suffix}`, 'GET', undefined, fetch);
+	const query = new URLSearchParams(url.searchParams);
+	query.delete('action');
+	const search = query.size ? `?${query}` : '';
+	return forward(
+		`${BASE_API_URL}/library-drafts/${params.id}/${suffix}${search}`,
+		'GET',
+		undefined,
+		fetch
+	);
 };
 
 export const POST: RequestHandler = async ({ params, request, fetch }) => {

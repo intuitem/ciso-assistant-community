@@ -2,13 +2,14 @@ import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-// Proxies the mapped-import API (schema/[type], analyze, import) and saved
+// Proxies the mapped-import API (schema/[type], analyze, import), templates and saved
 // mappings (mappings, mappings/[id]).
 const ALLOWED = /^(schema(\/[A-Za-z]+)?|analyze|import)$/;
 const SAVED = /^mappings(\/[0-9a-f-]{36})?$/;
+const TEMPLATE = /^templates\/[A-Za-z]+$/;
 
 function endpoint(path: string) {
-	if (SAVED.test(path)) return `${BASE_API_URL}/data-wizard/${path}/`;
+	if (SAVED.test(path) || TEMPLATE.test(path)) return `${BASE_API_URL}/data-wizard/${path}/`;
 	if (!ALLOWED.test(path)) error(404, 'Not found');
 	return `${BASE_API_URL}/data-wizard/mapping/${path}/`;
 }
@@ -27,7 +28,13 @@ function relay(res: Response) {
 	if (res.status === 204) return new Response(null, { status: 204 });
 	return new Response(res.body, {
 		status: res.status,
-		headers: { 'Content-Type': res.headers.get('Content-Type') ?? 'application/json' }
+		headers: {
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json',
+			// Keeps the filename of a downloaded template.
+			...(res.headers.get('Content-Disposition') && {
+				'Content-Disposition': res.headers.get('Content-Disposition')!
+			})
+		}
 	});
 }
 

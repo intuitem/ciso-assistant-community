@@ -105,6 +105,21 @@ def test_action_plan_xlsx_drops_hidden_controls_evidences_and_tasks(setup):
 
 
 @pytest.mark.django_db
+def test_action_plan_exports_write_readable_status(setup):
+    client, ca = setup
+    AppliedControl.objects.filter(name="seen-control").update(
+        status=AppliedControl.Status.IN_PROGRESS
+    )
+    xlsx = client.get(f"/api/compliance-assessments/{ca.id}/action_plan_xlsx/")
+    assert pd.read_excel(io.BytesIO(xlsx.content))["status"][0] == "In progress"
+    csv_text = b"".join(
+        client.get(f"/api/compliance-assessments/{ca.id}/action_plan_csv/")
+    ).decode()
+    assert "In progress" in csv_text
+    assert "in_progress" not in csv_text
+
+
+@pytest.mark.django_db
 def test_list_export_drops_hidden_evidences(setup):
     client, _ = setup
     response = client.get("/api/applied-controls/export_csv/")
@@ -182,3 +197,82 @@ def test_ecosystem_export_drops_hidden_parent_entity(setup):
 
     assert rows["name"].tolist() == ["seen-child"]
     assert rows["parent_entity_ref_id"].tolist() == [""]
+
+
+@pytest.fixture
+def findings(setup):
+    from core.models import Asset, Finding, FindingsAssessment
+
+    client, ca = setup
+    visible = ca.folder
+    hidden = Folder.objects.get(name="ExportHidden")
+    Role.objects.get(name="ExportReader").permissions.add(
+        *Permission.objects.filter(
+            codename__in=["view_finding", "view_findingsassessment", "view_asset"]
+        )
+    )
+    binder = FindingsAssessment.objects.create(name="Binder", folder=visible)
+    seen = Finding.objects.create(
+        name="seen-finding",
+        findings_assessment=binder,
+        folder=visible,
+        observation="weak cipher suites",
+        asset=Asset.objects.create(name="hidden-asset", folder=hidden),
+    )
+    seen.applied_controls.add(
+        AppliedControl.objects.get(name="seen-control"),
+        AppliedControl.objects.get(name="hidden-control"),
+    )
+    Finding.objects.create(
+        name="other-finding", findings_assessment=binder, folder=visible
+    )
+    return client
+
+
+@pytest.mark.django_db
+def test_findings_export_drops_hidden_asset_and_controls(findings):
+    response = findings.get("/api/findings/export_csv/?search=cipher")
+    assert response.status_code == 200
+    rows = list(
+        csv.DictReader(io.StringIO(response.content.decode("utf-8-sig")), delimiter=";")
+    )
+
+    assert [row["name"] for row in rows] == ["seen-finding"]
+    assert rows[0]["findings_assessment"] == "Binder"
+    assert rows[0]["asset"] == ""
+    assert rows[0]["applied_controls"] == "seen-control"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("fmt", ["csv", "xlsx"])
+def test_asset_export_drops_hidden_parent_and_child_assets(findings, fmt):
+    from core.models import Asset
+
+    visible = Folder.objects.get(name="ExportVisible")
+    seen = Asset.objects.create(name="seen-asset", folder=visible)
+    seen.parent_assets.add(
+        Asset.objects.create(name="seen-parent", folder=visible),
+        Asset.objects.get(name="hidden-asset"),
+    )
+    hidden_child = Asset.objects.create(
+        name="hidden-child", folder=Folder.objects.get(name="ExportHidden")
+    )
+    seen_child = Asset.objects.create(name="seen-child", folder=visible)
+    for child in (hidden_child, seen_child):
+        child.parent_assets.add(seen)
+
+    response = findings.get(f"/api/assets/export_{fmt}/")
+    assert response.status_code == 200
+    if fmt == "csv":
+        rows = list(
+            csv.DictReader(
+                io.StringIO(response.content.decode("utf-8-sig")), delimiter=";"
+            )
+        )
+    else:
+        rows = pd.read_excel(io.BytesIO(response.content)).fillna("").to_dict("records")
+    row = next(r for r in rows if r["name"] == "seen-asset")
+
+    assert "hidden-asset" not in {r["name"] for r in rows}
+    assert row["parent_assets"] == "seen-parent"
+    assert row["child_assets"] == "seen-child"

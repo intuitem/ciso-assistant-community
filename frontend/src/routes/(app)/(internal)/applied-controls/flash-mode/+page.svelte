@@ -26,6 +26,7 @@
 		{ id: 'in_progress', label: m.inProgress() },
 		{ id: 'on_hold', label: m.onHold() },
 		{ id: 'active', label: m.active() },
+		{ id: 'degraded', label: m.degraded() },
 		{ id: 'deprecated', label: m.deprecated() }
 	];
 

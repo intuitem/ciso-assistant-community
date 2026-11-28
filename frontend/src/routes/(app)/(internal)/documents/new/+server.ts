@@ -22,6 +22,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 	const locale = String(fd.get('locale') ?? 'en');
 	const classification = String(fd.get('classification') ?? '');
 	const ref_id = String(fd.get('ref_id') ?? '');
+	const initial_version = String(fd.get('initial_version') ?? '1');
 	const links: Record<string, string[]> = {};
 	for (const f of LINK_FIELDS) links[f] = fd.getAll(f).map(String);
 
@@ -34,6 +35,7 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 		out.append('document_type', document_type);
 		out.append('folder', folder);
 		out.append('locale', locale);
+		out.append('initial_version', initial_version);
 		res = await fetch(`${BASE_API_URL}/document-containers/upload/`, { method: 'POST', body: out });
 	} else if (source === 'link') {
 		res = await fetch(`${BASE_API_URL}/document-containers/link/`, {
@@ -44,7 +46,8 @@ export const POST: RequestHandler = async ({ request, fetch, locals }) => {
 				name,
 				document_type,
 				folder,
-				locale
+				locale,
+				initial_version
 			})
 		});
 	} else {

@@ -3708,6 +3708,13 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.name) for o in qs.all()
                 ),
             },
+            "child_assets": {
+                "source": "child_assets",
+                "label": "child_assets",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.name) for o in qs.all()
+                ),
+            },
             "labels": {
                 "source": "filtering_labels",
                 "label": "labels",
@@ -3731,6 +3738,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         "prefetch_related": [
             "owner",
             "parent_assets",
+            "child_assets",
             "overridden_children_capabilities",
             "filtering_labels",
         ],
@@ -15843,10 +15851,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
+        reset_status = serializer.validated_data.pop("reset_status", False)
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
-            instance.create_requirement_assessments(baseline)
+            instance.create_requirement_assessments(baseline, reset_status=reset_status)
 
             if baseline and baseline.framework != instance.framework:
                 # Built here rather than above: it reads the whole mapping
@@ -15896,6 +15905,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         "documentation_score",
                         "mapping_inference",
                     ]:
+                        if reset_status and field == "status":
+                            continue
                         value = source.get(field)
                         if value is not None:
                             setattr(req, field, value)
@@ -20016,10 +20027,80 @@ class FindingFilterSet(GenericFilterSet):
         }
 
 
-class FindingViewSet(BaseModelViewSet):
+class FindingViewSet(ExportMixin, BaseModelViewSet):
     model = Finding
     filterset_class = FindingFilterSet
     ordering = ["ref_id"]
+    search_fields = [
+        "ref_id",
+        "name",
+        "description",
+        "observation",
+        "recommendation",
+    ]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "findings_assessment": {
+                "source": "findings_assessment.name",
+                "label": "findings_assessment",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "severity": {"source": "get_severity_display", "label": "severity"},
+            "priority": {"source": "get_priority_display", "label": "priority"},
+            "requirement": {
+                "source": "requirement_node.display_short",
+                "label": "requirement",
+                "escape": True,
+            },
+            "asset": {"source": "asset.name", "label": "asset", "escape": True},
+            "owner": {
+                "source": "owner",
+                "label": "owner",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(o)) for o in qs.all()
+                ),
+            },
+            "applied_controls": {
+                "source": "applied_controls",
+                "label": "applied_controls",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(o)) for o in qs.all()
+                ),
+            },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
+            "recommendation": {
+                "source": "recommendation",
+                "label": "recommendation",
+                "escape": True,
+            },
+            "eta": {"source": "eta", "label": "eta"},
+            "due_date": {"source": "due_date", "label": "due_date"},
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+        },
+        "filename": "findings_export",
+        "wrap_columns": ["name", "description", "observation", "recommendation"],
+        "select_related": [
+            "folder",
+            "findings_assessment",
+            "requirement_node",
+            "asset",
+        ],
+        "prefetch_related": ["owner", "applied_controls"],
+    }
 
     def get_queryset(self) -> models.query.QuerySet:
         return (
