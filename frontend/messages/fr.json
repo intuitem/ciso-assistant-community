@@ -8697,6 +8697,154 @@
 	"glpiField": "Champ GLPI",
 	"glpiAssetMappingsHelpText": "Associez vos actifs aux éléments GLPI. Les actifs sont synchronisés une fois un type d'élément sélectionné.",
 	"glpiAssetTableHelpText": "Sélectionnez le type d'actif GLPI à synchroniser (ordinateur, logiciel, applicatif...).",
+	"mcpServerUrl": "URL du serveur MCP",
+	"mcpServerUrlHelp": "Ajoutez cette URL à votre assistant IA pour le connecter à CISO Assistant.",
+	"apiAllowedIpsHint": "Lorsque votre déploiement l'applique, les appels directs à l'API (jetons d'accès personnels, Power BI, assistants IA, scripts) ne sont acceptés que depuis les adresses IP de la liste des IP autorisées. L'interface web n'est pas concernée. Demandez à un administrateur d'ajouter les adresses depuis lesquelles ces outils se connectent.",
 	"sessionExpired": "Votre session a expiré. Reconnectez-vous puis réessayez.",
-	"errorMcpNeedsSharedCache": "Les connexions d'applications IA nécessitent un cache partagé (memcached). Configurez-le d'abord, puis activez cette option."
+	"errorMcpNeedsSharedCache": "Les connexions d'applications IA nécessitent un cache partagé (memcached). Configurez-le d'abord, puis activez cette option.",
+	"dataImportTitle": "Import de données",
+	"dataImportIntro": "Déposez votre fichier. Son contenu est identifié automatiquement à partir des en-têtes de colonnes. Rien n'est enregistré avant l'import.",
+	"dataImportProgress": "Progression",
+	"dataImportStageChoose": "Choisir un fichier",
+	"dataImportStageReview": "Revue",
+	"dataImportDryRun": "Simulation",
+	"dataImportImport": "Importer",
+	"dataImportReading": "Lecture du fichier…",
+	"dataImportDropHere": "Déposez un fichier ici, ou cliquez pour le choisir",
+	"dataImportMaxSize": "10 Mo maximum",
+	"dataImportFormatHint": "Reconnus et importés en entier",
+	"dataImportTemplatesTitle": "Vous préférez partir d'un modèle ?",
+	"dataImportTemplatesHint": "Remplissez un modèle, puis déposez-le ci-dessus. Ses colonnes sont reconnues automatiquement.",
+	"dataImportLibrariesHint": "Un référentiel ou un mapping à importer ? Passez par les",
+	"dataImportSavedMappings": "Correspondances enregistrées",
+	"dataImportNoSavedMappings": "Aucune pour l'instant.",
+	"dataImportSavedMappingsHint": "Vos fichiers ont leurs propres colonnes et valeurs ? Associez-les une fois, puis enregistrez la correspondance après la simulation. Les fichiers aux mêmes colonnes seront ensuite associés automatiquement.",
+	"dataImportSheetCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} feuille",
+				"countPlural=other": "{count} feuilles"
+			}
+		}
+	],
+	"dataImportRowCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ligne",
+				"countPlural=other": "{count} lignes"
+			}
+		}
+	],
+	"dataImportUsedTimes": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "utilisée {count} fois",
+				"countPlural=other": "utilisée {count} fois"
+			}
+		}
+	],
+	"dataImportNeverUsed": "jamais utilisée",
+	"dataImportBy": "par {email}",
+	"dataImportDeleteMappingConfirm": "Supprimer cette correspondance ?",
+	"dataImportDeleteNamed": "Supprimer {name}",
+	"dataImportRecognisedAs": "Reconnu comme {format}",
+	"dataImportToImport": "{count} à importer",
+	"dataImportChooseAnother": "Choisir un autre fichier",
+	"dataImportUsingSaved": "Correspondance enregistrée appliquée :",
+	"dataImportNewColumns": "nouvelles colonnes : {columns}",
+	"dataImportIgnoreSaved": "Ignorer les correspondances enregistrées",
+	"dataImportSavedIgnored": "Correspondances enregistrées ignorées pour ce fichier.",
+	"dataImportUseAgain": "Les réutiliser",
+	"dataImportRecognised": "Reconnu",
+	"dataImportWholeFileNote": "Ce fichier est importé en entier. Aucune correspondance à vérifier.",
+	"dataImportMapMyself": "Associer les feuilles manuellement",
+	"dataImportCompanionOccurrences": "Occurrences passées, importées avec les tâches",
+	"dataImportCompanionNotes": "Notes du modèle, non importées",
+	"dataImportNoDataRows": "Aucune ligne de données, ignorée",
+	"dataImportHeaderOnRow": "en-tête en ligne {row}",
+	"dataImportWhatBecomes": "Type d'objet pour {sheet}",
+	"dataImportChooseObject": "Choisir un objet…",
+	"dataImportTemplateSheetFor": "Feuille du modèle pour {sheet}",
+	"dataImportMatch": "{percent} % de correspondance",
+	"dataImportColumnsMapped": "{mapped} colonnes associées sur {total}",
+	"dataImportUnmatchedHint": "Valeurs sans correspondance dans les choix autorisés",
+	"dataImportValuesToReview": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} valeur à vérifier",
+				"countPlural=other": "{count} valeurs à vérifier"
+			}
+		}
+	],
+	"dataImportAdjust": "Ajuster",
+	"dataImportHeaderRow": "Ligne d'en-tête",
+	"dataImportYourColumn": "Votre colonne",
+	"dataImportSampleValues": "Exemples de valeurs",
+	"dataImportField": "Champ",
+	"dataImportFieldFor": "Champ cible pour {column}",
+	"dataImportValueFor": "Valeur pour {value}",
+	"dataImportNotMatched": "Sans correspondance : choisissez une valeur",
+	"dataImportKeepAsIs": "Conserver telle quelle (envoyée sans modification)",
+	"dataImportSameValue": "Même valeur pour toutes les lignes",
+	"dataImportSameValueHint": "Pour les champs sans colonne. En mode « Mettre à jour », cette valeur écrase aussi l'existant.",
+	"dataImportValueForEveryRow": "Valeur de {field} pour toutes les lignes",
+	"dataImportChooseValue": "Choisir une valeur",
+	"dataImportRemoveValueFor": "Retirer la valeur de {field}",
+	"dataImportAddValueForEveryRow": "Ajouter une valeur pour toutes les lignes",
+	"dataImportAddField": "Ajouter un champ…",
+	"dataImportCreateNewAudit": "Créer un nouvel audit",
+	"dataImportUpdateAudit": "Mettre à jour {name}",
+	"dataImportChooseFramework": "Choisir un référentiel…",
+	"dataImportAuditName": "Nom de l'audit",
+	"dataImportAuditNamePlaceholder": "Nom utilisé pour rattacher les évaluations des entités",
+	"dataImportChooseMatrix": "Choisir une matrice…",
+	"dataImportWholeFile": "Fichier entier · {format}",
+	"dataImportDryRunFirst": "Lancez d'abord une simulation de cette correspondance",
+	"dataImportDryRunDone": "Simulation terminée. Rien n'a été enregistré.",
+	"dataImportDone": "Import terminé",
+	"dataImportWouldBeCreated": "seraient créés",
+	"dataImportWouldBeUpdated": "seraient mis à jour",
+	"dataImportNew": "Créés",
+	"dataImportStopped": "interrompu",
+	"dataImportWouldAlsoCreate": "Créerait aussi, rattachés à ces lignes : {items}",
+	"dataImportAlsoCreated": "A aussi créé, rattachés à ces lignes : {items}",
+	"dataImportErrorsAndWarnings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} erreur ou avertissement",
+				"countPlural=other": "{count} erreurs et avertissements"
+			}
+		}
+	],
+	"dataImportImportedWithWarning": "Importé avec un avertissement",
+	"dataImportNotImported": "Non importé",
+	"dataImportSaveForNextTime": "Enregistrer cette correspondance pour la prochaine fois",
+	"dataImportUpdateNamed": "Mettre à jour « {name} »",
+	"dataImportSaveAsNew": "Enregistrer comme nouvelle correspondance",
+	"dataImportOpenStudy": "Ouvrir l'étude EBIOS RM",
+	"dataImportOpenAudit": "Ouvrir l'audit",
+	"dataImportGoTo": "Voir la liste : {model}",
+	"dataImportRefusalHeaderRow": "Cette ligne d'en-tête dépasse la fin de la feuille.",
+	"dataImportRefusalTooManySheets": "Trop de feuilles (30 au maximum).",
+	"dataImportRefusalTooManyColumns": "Une feuille a trop de colonnes (100 au maximum).",
+	"dataImportRefusalUnrecognised": "Format de fichier non pris en charge.",
+	"dataImportCouldNotRead": "Impossible de lire ce fichier.",
+	"dataImportIncludeOneSheet": "Sélectionnez au moins une feuille.",
+	"dataImportNoLongerFits": "Cette correspondance ne s'applique plus au fichier. Rechargez-le.",
+	"dataImportNameMapping": "Donnez un nom à la correspondance.",
+	"dataImportNotAllowedSave": "Vous n'êtes pas autorisé à enregistrer des correspondances.",
+	"dataImportCouldNotSave": "Échec de l'enregistrement : {detail}",
+	"dataImportMappingSaved": "Correspondance « {name} » enregistrée.",
+	"dataImportCouldNotDelete": "Impossible de supprimer cette correspondance.",
+	"dataImportNotAllowedHere": "Vous n'êtes pas autorisé à importer ces objets ici"
 }

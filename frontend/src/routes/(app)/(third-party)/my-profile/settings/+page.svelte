@@ -361,6 +361,7 @@
 		$recoveryCodes =
 			form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
 	});
+	const mcpUrl = $derived(`${page.url.origin}/mcp`);
 </script>
 
 <Tabs
@@ -513,6 +514,7 @@
 											<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
 											{m.personalAccessTokenCreateWarning()}
 										</div>
+										{@render allowedIpsHint()}
 									</div>
 									<div class="flex flex-col gap-2">
 										<ul class="max-h-72 overflow-y-scroll">
@@ -564,6 +566,26 @@
 											{m.connectedAppsDescription()}
 										</p>
 									</div>
+									{#if page.data.featureflags?.mcp && page.data.user?.can_connect_apps}
+										<div class="flex flex-col space-y-1 max-w-[65ch]">
+											<span class="text-sm font-medium">{m.mcpServerUrl()}</span>
+											<div class="flex items-center gap-2">
+												<code
+													class="card preset-tonal-surface px-2 py-1 text-sm"
+													data-testid="mcp-server-url">{mcpUrl}</code
+												>
+												<button
+													type="button"
+													onclick={() => navigator.clipboard?.writeText(mcpUrl)}
+													class="btn btn-sm preset-tonal"
+													title={m.copy()}
+													aria-label={m.copy()}><i class="fa-solid fa-copy"></i></button
+												>
+											</div>
+											<p class="text-xs text-surface-600-400">{m.mcpServerUrlHelp()}</p>
+										</div>
+										{@render allowedIpsHint()}
+									{/if}
 									{#if !page.data.user?.can_connect_apps}
 										<p
 											class="card preset-tonal-surface p-3 text-sm flex gap-2 max-w-[65ch]"
@@ -748,3 +770,15 @@
 		</Tabs.Content>
 	{/if}
 </Tabs>
+
+{#snippet allowedIpsHint()}
+	{#if page.data.featureflags?.infra_config_management}
+		<p
+			class="card preset-tonal-surface p-3 text-sm flex gap-2 max-w-[65ch]"
+			data-testid="api-allowed-ips-hint"
+		>
+			<i class="fa-solid fa-circle-info mt-0.5"></i>
+			<span>{m.apiAllowedIpsHint()}</span>
+		</p>
+	{/if}
+{/snippet}
