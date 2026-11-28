@@ -3708,6 +3708,13 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.name) for o in qs.all()
                 ),
             },
+            "child_assets": {
+                "source": "child_assets",
+                "label": "child_assets",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.name) for o in qs.all()
+                ),
+            },
             "labels": {
                 "source": "filtering_labels",
                 "label": "labels",
@@ -3731,6 +3738,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
         "prefetch_related": [
             "owner",
             "parent_assets",
+            "child_assets",
             "overridden_children_capabilities",
             "filtering_labels",
         ],
