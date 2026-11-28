@@ -898,3 +898,196 @@ class TestCelTrigger:
                 folder=cel_setup["folder"],
             )
             mock_eval.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# TestCelErrorContainment  (CA-1945)
+# ---------------------------------------------------------------------------
+class TestCelErrorContainment:
+    """celpy builds the error of `a || b` from both operands' repr, so a chain
+    of failing `||` grows exponentially. `safe_program` bounds it at the source
+    (one operand error is propagated), and the evaluation never crashes
+    (fail-open). The log keeps a bounded, useful summary."""
+
+    def test_cel_error_is_bounded(self):
+        from core.cel_service import _MAX_CEL_ERROR_CHARS, _cel_error
+
+        assert len(_cel_error(Exception("x" * 100_000))) <= _MAX_CEL_ERROR_CHARS
+
+    def test_cel_error_survives_a_broken_str(self):
+        from core.cel_service import _cel_error
+
+        class Boom(Exception):
+            def __str__(self):
+                raise RuntimeError("no str for you")
+
+        # A pathological __str__ must not mask the original failure.
+        assert _cel_error(Boom()) == "Boom"
+
+    def test_deferred_evaluation_failure_is_contained(
+        self, cel_setup, django_capture_on_commit_callbacks
+    ):
+        """A failure in the on_commit outcome evaluation must not escape the
+        commit hook: it runs after the transaction (a publish snapshot, say) has
+        committed, so propagating would fail the request with nothing to roll
+        back. It is logged and swallowed; the next audit change recomputes it."""
+        from django.db import connection
+
+        from core.models import defer_outcome_evaluation
+
+        # cel_setup's audit creation already queued a deferred evaluation for this
+        # pk; clear it so _defer_once does not deduplicate (and thus skip) our own
+        # call — otherwise the test would pass without ever running the evaluator.
+        getattr(connection, "_pending_cel_evaluations", {}).clear()
+
+        # execute=True runs the captured callbacks on block exit; the raise would
+        # surface here if it were not contained. assert_called_once proves the
+        # evaluator actually ran (so the failure path really was exercised).
+        with (
+            patch(
+                "core.cel_service.evaluate_outcomes", side_effect=RuntimeError("boom")
+            ) as evaluator,
+            django_capture_on_commit_callbacks(execute=True),
+        ):
+            defer_outcome_evaluation(cel_setup["ca"].pk)
+        evaluator.assert_called_once()
+
+    def test_safe_program_keeps_cel_logical_semantics(self):
+        """`safe_program` only bounds the error of two FAILING operands; it must
+        keep CEL semantics everywhere else. In particular `||`/`&&` are defined
+        only for booleans, so two non-boolean operands must still raise (not
+        return one operand), and short-circuit with booleans must hold."""
+        import celpy
+
+        from core.cel_safe import safe_program
+
+        env = celpy.Environment()
+
+        def run(expr):
+            return safe_program(env, env.compile(expr)).evaluate({})
+
+        # Non-boolean operands have no overload for ||/&&: they must raise.
+        for expr in ('"a" || "b"', "1 && 2", '"yes" && ""'):
+            with pytest.raises(Exception):
+                run(expr)
+
+        # Boolean logic, including short-circuit past an erroring operand.
+        assert bool(run("true || false")) is True
+        assert bool(run("false || false")) is False
+        assert bool(run("true && false")) is False
+        assert bool(run("true || (1 / 0 > 0)")) is True
+        assert bool(run("false && (1 / 0 > 0)")) is False
+
+    def test_chained_or_missing_key_is_bounded_and_logged_usefully(self):
+        """A rule whose terms all error (a missing answer key) chained with `||`
+        must fail open, stay bounded in MEMORY, and log a useful `no such key`
+        instead of celpy's exponential message. (On main the 24-term expression
+        below builds a ~369 MB message and peaks above 1 GB, so this test fails
+        there; with `safe_program` the peak is well under a megabyte.)"""
+        import tracemalloc
+
+        import celpy
+        from structlog.testing import capture_logs
+
+        from core.cel_service import _MAX_CEL_ERROR_CHARS, _evaluate_rules
+
+        term = 'answers["Q"].value == true'
+        rules = [
+            {
+                "ref_id": "crash",
+                "expression": " || ".join([term] * 24),
+                "result": "broken",
+            },
+            {"ref_id": "ok", "expression": "true", "result": "fine", "label": "OK"},
+        ]
+        errors: list[str] = []
+        tracemalloc.start()
+        with capture_logs() as logs:
+            fired, _values = _evaluate_rules(
+                celpy.Environment(), rules, {"answers": {}}, errors=errors
+            )
+        peak = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+
+        # Fail-open: the broken rule is dropped, the sound rule still fires.
+        assert "crash" not in fired
+        assert fired["ok"] == {"result": "fine", "label": "OK"}
+        assert errors == ["crash"]
+        # Bounded memory — celpy's default peaks above 1 GB at 24 terms.
+        assert peak < 50 * 1024 * 1024, f"peak was {peak / 1e6:.1f} MB"
+        # The log names the missing key (not celpy boilerplate) and is bounded.
+        logged = [
+            e
+            for e in logs
+            if e.get("event") == "cel_evaluation_error" and e.get("rule") == "crash"
+        ]
+        assert len(logged) == 1, logs
+        assert "no such key" in logged[0]["error"]
+        assert len(logged[0]["error"]) <= _MAX_CEL_ERROR_CHARS
+
+    def test_rule_over_out_of_scope_question_is_contained(self, db):
+        """A rule reading a question whose requirement is outside the audit's
+        implementation-group scope hits `no such key` (the same shape as a rule
+        over a hidden requirement). It must fail open — the rule is reported, not
+        fired — and the bounded `||`/`&&` keep the evaluation cheap. Whether such
+        a rule should instead evaluate to false is a separate product question."""
+        from core.cel_service import evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="IG scope FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=[
+                {
+                    "ref_id": "r",
+                    "expression": 'answers["qb"].value == true',
+                    "result": "x",
+                    "label": "X",
+                }
+            ],
+        )
+        rn_a = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:igs:a",
+            ref_id="A",
+            assessable=True,
+            implementation_groups=["group_a"],
+            folder=folder,
+        )
+        rn_b = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:risk:req_node:igs:b",
+            ref_id="B",
+            assessable=True,
+            implementation_groups=["group_b"],
+            folder=folder,
+        )
+        # qb lives on the out-of-scope requirement; the rule reads it.
+        Question.objects.create(
+            requirement_node=rn_b,
+            urn="urn:test:risk:question:igs:qb",
+            text="B?",
+            type="boolean",
+            folder=folder,
+        )
+        perimeter = Perimeter.objects.create(name="IGS Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="IGS CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+            selected_implementation_groups=["group_a"],
+        )
+        RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn_a, folder=folder
+        )
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        # Contained: the rule is reported as an error, not fired, no crash.
+        assert ca.outcome_errors == ["r"]
+        assert "r" not in (ca.computed_outcome or {})

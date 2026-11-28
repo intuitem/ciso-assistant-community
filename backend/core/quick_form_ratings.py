@@ -129,11 +129,15 @@ def _dim(scale: dict, level_ref: str) -> dict:
 
 
 def _compile_rules(rating: dict) -> list:
+    from core.cel_safe import safe_program
+
     env = celpy.Environment()
     programs = []
     for rule in rating.get("rules") or []:
         try:
-            programs.append((rule["level"], env.program(env.compile(rule["when"]))))
+            programs.append(
+                (rule["level"], safe_program(env, env.compile(rule["when"])))
+            )
         except Exception as e:
             logger.warning("rating_rule_invalid", rating=rating.get("ref_id"), error=e)
     return programs

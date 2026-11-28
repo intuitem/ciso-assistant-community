@@ -1116,6 +1116,18 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return LibraryDraftWriteSerializer
         return LibraryDraftReadSerializer
 
+    def update(self, request, *args, **kwargs):
+        # Serialize a metadata edit (PATCH/PUT) with publish on the same draft
+        # row. Without the lock a PATCH that read the draft before a publish
+        # committed could save stale columns over the bumped version and the
+        # published snapshot — ATOMIC_REQUESTS is off, so there is no implicit
+        # per-request lock. publish takes the same lock, so the two write paths
+        # serialize on the row.
+        with transaction.atomic():
+            instance = self.get_object()
+            LibraryDraft.objects.select_for_update().get(pk=instance.pk)
+            return super().update(request, *args, **kwargs)
+
     @action(detail=False, methods=["get"], url_path="check-identity")
     def check_identity(self, request):
         """Advisory identity check for the creation form, before a draft exists.
@@ -3289,12 +3301,39 @@ class LibraryDraftViewSet(BaseModelViewSet):
             ):
                 return Response(status=HTTP_403_FORBIDDEN)
 
-        validation = builder.validate_draft_document(draft, user=request.user)
-        if validation["errors"]:
-            return Response(
-                {"error": "draftValidationFailed", "details": validation["errors"]},
-                status=HTTP_422_UNPROCESSABLE_ENTITY,
-            )
+        with transaction.atomic():
+            # Lock the draft row for the whole publish: validation AND the
+            # version read-modify-write below (see _publish_locked) must see a
+            # row that no concurrent publish or metadata edit can change under
+            # them. ATOMIC_REQUESTS is off, so this explicit lock, taken here and
+            # in the update path, is what serializes the two write paths on the
+            # same draft. On PostgreSQL the second caller blocks on the row until
+            # the first commits; on SQLite (also a supported production backend)
+            # select_for_update is a no-op, but SQLite already serializes writers
+            # with a single database-wide write lock, so the two still cannot
+            # interleave.
+            locked = LibraryDraft.objects.select_for_update().get(pk=draft.pk)
+            validation = builder.validate_draft_document(locked, user=request.user)
+            if validation["errors"]:
+                return Response(
+                    {"error": "draftValidationFailed", "details": validation["errors"]},
+                    status=HTTP_422_UNPROCESSABLE_ENTITY,
+                )
+            return self._publish_locked(request, locked)
+
+    def _publish_locked(self, request, draft):
+        """The publish critical section, run under a row lock on *draft*.
+
+        See `publish`. The lock serializes same-draft publishes end to end, so
+        the version read-modify-write below cannot interleave with another
+        publish or a metadata edit.
+        """
+        # The whole publish runs in one transaction under the draft's row lock
+        # (see `publish`), so the version bump can stay in memory and be
+        # persisted only when the publish actually goes through — on success and
+        # on the score-change conflict, whose documented retry re-publishes at
+        # the SAME version. A failed attempt commits no bump, so the version
+        # never climbs across retries and nothing has to be rolled back.
 
         # A published artifact is identified by URN + version: re-publishing
         # different content under the version already snapshotted would put
@@ -3306,7 +3345,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
         ):
             if request.data.get("bump_version"):
                 draft.version += 1
-                draft.save(update_fields=["version", "updated_at"])
             else:
                 return Response(
                     {
@@ -3329,6 +3367,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             draft.mark_published()
             draft.save(
                 update_fields=[
+                    "version",
                     "first_published_at",
                     "last_published_at",
                     "last_published_version",
@@ -3387,7 +3426,6 @@ class LibraryDraftViewSet(BaseModelViewSet):
         if max_existing is not None and max_existing >= draft.version:
             if request.data.get("bump_version"):
                 draft.version = max_existing + 1
-                draft.save(update_fields=["version", "updated_at"])
             else:
                 return Response(
                     {"error": "libraryVersionOutdated", "max_version": max_existing},
@@ -3428,6 +3466,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 error_msg = stored.load()
         except LibraryUpdater.ScoreChangeDetected as e:
             stored.delete()
+            # Persist the bump so the documented retry (same version, with a
+            # chosen strategy) re-publishes at this version.
+            draft.save(update_fields=["version", "updated_at"])
             return Response(
                 {
                     "error": "score_change_detected",
@@ -3467,6 +3508,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         draft.save(
             update_fields=[
                 "urn",
+                "version",
                 "first_published_at",
                 "last_published_at",
                 "last_published_version",

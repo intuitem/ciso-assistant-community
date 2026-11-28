@@ -6843,6 +6843,7 @@
 	"lbDraftStepsWithUserProgress": ", {count} with user progress that will be lost",
 	"lbDraftContinueQuestion": "Continue?",
 	"lbDraftPublished": "Published {urn} v{version}",
+	"lbDraftReloadFailed": "Could not refresh the draft — the shown state may be stale. Reload the page.",
 	"lbDraftVersionOutdatedConfirm": "Version {version} is not newer than the published v{maxVersion}. Bump to v{nextVersion} and publish?",
 	"lbDraftVersionBumpConfirm": "The content changed since v{version} was published — the same version cannot cover two different contents. Bump the version and publish?",
 	"lbDraftExportPublishFirstConfirm": "Exporting shares the library, so its identity (URNs) must be committed first. Publish now and export?",

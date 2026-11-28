@@ -9,6 +9,7 @@ import celpy
 import celpy.celtypes as celtypes
 import structlog
 
+from core.cel_safe import safe_program
 from core.quick_form_ratings import (
     cel_ratings,
     evaluate_ratings,
@@ -34,6 +35,21 @@ from core.quick_form_scoring import (
 )
 
 logger = structlog.get_logger(__name__)
+
+_MAX_CEL_ERROR_CHARS = 200
+
+
+def _cel_error(exc: Exception) -> str:
+    """A bounded one-line summary of a CEL evaluation error, for logging.
+
+    With `safe_program` the message of a failing rule stays small and to the
+    point (`no such key: 'Q'`), so the bound is only a backstop against any
+    other long message; it never hides the useful part.
+    """
+    try:
+        return str(exc)[:_MAX_CEL_ERROR_CHARS]
+    except Exception:  # a pathological __str__ must not mask the real error
+        return type(exc).__name__
 
 
 def _python_to_cel(value):
@@ -305,17 +321,17 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 continue
             try:
                 ast = env.compile(vis_expr)
-                prog = env.program(ast)
+                prog = safe_program(env, ast)
                 result = prog.evaluate(cel_context)
                 if not result:
                     hidden_urns.add(node["urn"])
-            except Exception:
+            except Exception as exc:
                 logger.warning(
                     "cel_visibility_error",
                     expression=vis_expr,
                     requirement_urn=node["urn"],
                     compliance_assessment_id=str(ca.pk),
-                    exc_info=True,
+                    error=_cel_error(exc),
                 )
                 # Fail-open: keep requirement visible on error
 
@@ -867,7 +883,7 @@ def _evaluate_rules(
     }
 
     def run(rule):
-        return env.program(env.compile(rule["expression"])).evaluate(
+        return safe_program(env, env.compile(rule["expression"])).evaluate(
             {
                 **base,
                 "values": _python_to_cel(values),
@@ -878,12 +894,12 @@ def _evaluate_rules(
     for rule in [r for r in rules if is_numeric_rule(r)]:
         try:
             result = run(rule)
-        except Exception:
+        except Exception as exc:
             logger.warning(
                 "cel_value_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                exc_info=True,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -908,12 +924,12 @@ def _evaluate_rules(
                 fired[rule["ref_id"]] = {
                     k: v for k, v in rule.items() if k not in _NOT_PASSED_ON
                 }
-        except Exception:
+        except Exception as exc:
             logger.warning(
                 "cel_evaluation_error",
                 expression=rule["expression"],
                 rule=rule["ref_id"],
-                exc_info=True,
+                error=_cel_error(exc),
                 **log_fields,
             )
             if errors is not None:
@@ -1221,7 +1237,7 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
         if not expression:
             return None
         try:
-            return env.program(env.compile(expression)).evaluate(
+            return safe_program(env, env.compile(expression)).evaluate(
                 {k: _python_to_cel(v) for k, v in context.items()}
             )
         except Exception as e:
@@ -1319,7 +1335,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             return None
         context = raw_probe if context is None else context
         try:
-            return env.program(env.compile(expression)).evaluate(
+            return safe_program(env, env.compile(expression)).evaluate(
                 {k: _python_to_cel(v) for k, v in context.items()}
             )
         except Exception as e:
@@ -1612,7 +1628,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         if not expression:
             continue
         try:
-            if not env.program(env.compile(expression)).evaluate(cel_context):
+            if not safe_program(env, env.compile(expression)).evaluate(cel_context):
                 hidden.add(page.get("urn"))
         except Exception:
             # Same fail-open as a real evaluation; the author sees the page.
@@ -1706,17 +1722,17 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
             if not expression:
                 continue
             try:
-                prog = env.program(env.compile(expression))
+                prog = safe_program(env, env.compile(expression))
                 if not prog.evaluate(cel_context):
                     hidden_page_ids.add(page["id"])
                     hidden_page_urns.add(page["urn"])
-            except Exception:
+            except Exception as exc:
                 logger.warning(
                     "cel_visibility_error",
                     expression=expression,
                     page_urn=page["urn"],
                     quick_form_response_id=str(response.pk),
-                    exc_info=True,
+                    error=_cel_error(exc),
                 )
 
     context = (

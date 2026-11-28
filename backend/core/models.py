@@ -167,9 +167,26 @@ def defer_outcome_evaluation(compliance_assessment_pk) -> None:
     def _evaluate():
         from core.cel_service import evaluate_outcomes
 
-        ca = ComplianceAssessment.objects.filter(pk=compliance_assessment_pk).first()
-        if ca is not None:
-            evaluate_outcomes(ca)
+        try:
+            ca = ComplianceAssessment.objects.filter(
+                pk=compliance_assessment_pk
+            ).first()
+            if ca is not None:
+                evaluate_outcomes(ca)
+        except Exception:
+            # This runs from a transaction.on_commit hook, so the transaction
+            # has already committed: letting an error escape would fail the
+            # request (or crash the worker) after the write has landed, with
+            # nothing to roll back — and when the trigger is a library publish,
+            # the published snapshot is already saved, so the caller cannot even
+            # retry. Outcome evaluation is best-effort and idempotent (the next
+            # audit change recomputes it), so a failure here is logged and
+            # swallowed rather than propagated.
+            logger.warning(
+                "deferred_outcome_evaluation_failed",
+                compliance_assessment_id=str(compliance_assessment_pk),
+                exc_info=True,
+            )
 
     _defer_once("_pending_cel_evaluations", compliance_assessment_pk, _evaluate)
 
