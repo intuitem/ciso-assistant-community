@@ -123,7 +123,7 @@ For both, the recommendation is the same: map every local value you want CISO As
 
 Once the integration is enabled, CISO Assistant will start synchronizing applied controls with Jira issues against the configured target table (project + issue type).
 
-* For each applied control, a new issue is created in the target table if you tick **Create remote object** in the applied control creation form.
+* For each applied control, a new issue is created in the target table when you select the Jira integration provider in the applied control creation form.
 * The Jira issue contains the applied control's mapped fields (name, description, status, priority, ETA, etc.).
 * A link to the Jira issue is shown on the applied control page in CISO Assistant.
 
@@ -136,7 +136,6 @@ There are several ways to link an applied control to a Jira issue:
 * **On applied control creation:**
   * Open the `Integrations` dropdown menu located at the bottom of the form.
   * Select the `Jira` integration provider.
-  * Check the `Create remote object` checkbox.
   * This will create a Jira issue in the configured target table (project + issue type) and link it to the applied control.
 
 <figure><img src="../../.gitbook/assets/image (50).png" alt=""><figcaption></figcaption></figure>
@@ -153,7 +152,7 @@ There are several ways to link an applied control to a Jira issue:
 
 CISO Assistant pushes to Jira on the following local events:
 
-* Creating an applied control (with `Create remote object` checked, or after manually linking).
+* Creating an applied control (with the Jira integration provider selected, or after manually linking).
 * Updating an applied control.
 
 CISO Assistant reacts to the following Jira webhook events on incoming sync:

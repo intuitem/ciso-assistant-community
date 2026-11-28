@@ -16,6 +16,9 @@ class IntegrationSyncableMixin:
     # Overridden per model.
     INTEGRATION_MODEL_KEY: str = ""
     INTEGRATION_SYNCABLE_FIELDS: set[str] = set()
+    # When False, creating an object pushes nothing on save(): the remote
+    # object is only created for the integration picked by the user.
+    INTEGRATION_SYNC_ON_CREATE: bool = True
 
     def _get_changed_fields(self, old_instance) -> list[str]:
         """Names of syncable fields that differ from ``old_instance``."""
@@ -43,31 +46,40 @@ class IntegrationSyncableMixin:
         )
         return self._get_changed_fields(old) if old else []
 
-    def _trigger_sync(self, is_new: bool, changed_fields: list[str]) -> None:
-        """Queue an outbound sync for every active ITSM integration that has a
-        mapping configured for this model. No-op when nothing relevant changed
-        or no configured integration applies."""
-        if not (is_new or changed_fields):
-            return
-
-        from django.contrib.contenttypes.models import ContentType
-        from django.db import transaction
-
+    @classmethod
+    def auto_sync_config_ids(cls) -> list:
+        """Ids of the active ITSM integrations that ``_trigger_sync`` pushes to
+        on save: root folder ones with a mapping configured for this model."""
         from iam.models import Folder
         from integrations.models import IntegrationConfiguration
         from integrations.settings_access import is_model_configured
-        from integrations.tasks import sync_object_to_integrations
 
         configurations = IntegrationConfiguration.objects.filter(
             folder=Folder.get_root_folder(),
             provider__provider_type="itsm",
             is_active=True,
         )
-        config_ids = [
+        return [
             c.id
             for c in configurations
-            if is_model_configured(c.settings, self.INTEGRATION_MODEL_KEY)
+            if is_model_configured(c.settings, cls.INTEGRATION_MODEL_KEY)
         ]
+
+    def _trigger_sync(self, is_new: bool, changed_fields: list[str]) -> None:
+        """Queue an outbound sync for every active ITSM integration that has a
+        mapping configured for this model. No-op when nothing relevant changed
+        or no configured integration applies."""
+        if not (is_new or changed_fields):
+            return
+        if is_new and not self.INTEGRATION_SYNC_ON_CREATE:
+            return
+
+        from django.contrib.contenttypes.models import ContentType
+        from django.db import transaction
+
+        from integrations.tasks import sync_object_to_integrations
+
+        config_ids = self.auto_sync_config_ids()
         if not config_ids:
             return
 

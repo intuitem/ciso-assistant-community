@@ -7613,6 +7613,9 @@ class AppliedControl(
     CommitmentMixin,
 ):
     INTEGRATION_MODEL_KEY = "applied_control"
+    # Remote objects are created only for the provider selected on creation
+    # (see AppliedControlViewSet.perform_create).
+    INTEGRATION_SYNC_ON_CREATE = False
 
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")

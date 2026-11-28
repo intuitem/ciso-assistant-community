@@ -209,7 +209,7 @@ Both Business Rules can use the same REST Message and the same secret.
 
 Once the integration is configured and enabled, CISO Assistant will start synchronizing applied controls with ServiceNow records.
 
-* For each applied control, a new record will be created in the configured ServiceNow table if you check 'Create remote object' in the applied control creation form.
+* For each applied control, a new record will be created in the configured ServiceNow table when you select the ServiceNow integration provider in the applied control creation form.
 * The ServiceNow record will contain information from the applied control, such as its name, description, and status.
 * A link to the ServiceNow record will be displayed on the applied control page in CISO Assistant.
 
@@ -222,7 +222,6 @@ There are several ways to link an applied control to a ServiceNow record:
 * **On applied control creation:**
   * Open the `Integrations` dropdown menu located at the bottom of the form
   * Select the `ServiceNow` integration provider
-  * Check the `Create remote object` checkbox.
   * This will create a ServiceNow record on the board specified in CISO Assistant's ServiceNow integration settings. This record will then be linked to the applied control.
 
 <figure><img src="../../.gitbook/assets/image (76).png" alt=""><figcaption></figcaption></figure>
