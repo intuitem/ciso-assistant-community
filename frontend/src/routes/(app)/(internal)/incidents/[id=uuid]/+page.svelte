@@ -142,6 +142,21 @@
 		}
 	});
 
+	const entryTypeStyles: Record<string, { class: string; icon: string }> = {
+		detection: { class: 'preset-filled-error-500', icon: 'fa-solid fa-magnifying-glass' },
+		mitigation: { class: 'preset-filled-success-500', icon: 'fa-solid fa-shield-halved' },
+		observation: { class: 'preset-filled-secondary-500', icon: 'fa-solid fa-eye' },
+		severity_changed: {
+			class: 'preset-filled-warning-500',
+			icon: 'fa-solid fa-triangle-exclamation'
+		},
+		status_changed: { class: 'preset-filled-tertiary-500', icon: 'fa-solid fa-arrows-rotate' }
+	};
+	const defaultEntryTypeStyle = {
+		class: 'preset-filled-surface-500',
+		icon: 'fa-solid fa-circle-info'
+	};
+
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
 
@@ -623,9 +638,10 @@
 					{#each $rows as row, rowIndex}
 						{@const meta = row?.meta ?? row}
 						{@const actionsURLModel = 'timeline-entries'}
+						{@const entryStyle = entryTypeStyles[meta.entry_type] ?? defaultEntryTypeStyle}
 						<li class="ms-4">
 							<div
-								class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
+								class="absolute w-3 h-3 {entryStyle.class} rounded-full mt-1.5 -start-1.5 border border-white dark:border-surface-900"
 							></div>
 							<div class="flex flex-col">
 								<div class="flex flex-row items-center space-x-3 mb-1">
@@ -653,8 +669,10 @@
 									{/if}
 								</div>
 								<div class="flex mb-2">
-									<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
-										>{safeTranslate(meta.entry_type)}</span
+									<span class="text-xs font-mono {entryStyle.class} py-1 px-2 rounded-sm mr-1"
+										><i class="{entryStyle.icon} mr-1" aria-hidden="true"></i>{safeTranslate(
+											meta.entry_type
+										)}</span
 									>
 									<a
 										href={`/${actionsURLModel}/${meta.id}`}
