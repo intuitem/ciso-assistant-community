@@ -243,7 +243,9 @@ class EbiosRMAssistWorkflow(EbiosFacilitationMixin, Workflow):
             yield self._token("I couldn't find this domain.")
             return
         if not _can_write(
-            ctx.scope.user, folder, ("add_ebiosrmstudy", *WORKSHOP_ADD_PERMS)
+            ctx.scope.user,
+            folder,
+            ("add_ebiosrmstudy", "change_ebiosrmstudy", *WORKSHOP_ADD_PERMS),
         ):
             yield self._token(
                 "You don't have permission to create an EBIOS RM study in this domain."

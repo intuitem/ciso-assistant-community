@@ -228,7 +228,9 @@ class ChatSessionViewSet(BaseModelViewSet):
             d.content_type in TABULAR_CONTENT_TYPES for d in documents
         ) or should_resume(session.workflow_state, user_content):
             pre_routed_workflow = get_workflow_by_tool_name("workflow_import_document")
-        elif (session.workflow_state or {}).get("workflow") == "ebios_rm_assist":
+        elif (session.workflow_state or {}).get("workflow") == "ebios_rm_assist" and (
+            session.workflow_state.get("data") or {}
+        ).get("phase") != "finished":
             # A study in progress answers its own turns: the workflow tells answers,
             # side questions and "stop" apart, so routing never drops the study.
             pre_routed_workflow = get_workflow_by_tool_name("workflow_ebios_rm_assist")

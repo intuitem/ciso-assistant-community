@@ -48,7 +48,7 @@ def discussion_language(llm, user_message: str, history: list[dict], fallback: s
 
 def localize_event(event: "SSEEvent", llm, lang: str, cache: dict) -> "SSEEvent":
     """Translate a workflow's fixed text (token, thinking, choice label) into `lang`."""
-    if not event.localize or lang == "en":
+    if not event.localize or lang == "en" or lang not in LANG_MAP:
         return event
 
     def tr(text: str) -> str:

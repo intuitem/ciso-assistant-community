@@ -341,6 +341,7 @@ def main():
     cases = json.loads(CASES.read_text())
     if args.only:
         cases = [c for c in cases if c["id"] in args.only.split(",")]
+    Path(args.out).mkdir(parents=True, exist_ok=True)
     for case in cases:
         res = run_case(case, args)
         Path(args.out, f"ebios-{case['id']}-{args.label}.json").write_text(

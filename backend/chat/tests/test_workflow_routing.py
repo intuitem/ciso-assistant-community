@@ -187,3 +187,9 @@ def test_ratings_the_user_never_gave_are_dropped():
         "gravity"
         not in workflow._drop_unstated_ratings(ctx, study, "feared_events", [fe])[0]
     )
+
+
+def test_unsupported_language_leaves_fixed_text_untouched():
+    event = Workflow()._token("Which risk matrix?")
+    llm = FakeLLM(lambda p: (_ for _ in ()).throw(AssertionError("model called")))
+    assert localize_event(event, llm, "xx", {}) is event

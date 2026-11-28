@@ -65,12 +65,17 @@ STEPS = (
 WRITE_PERMS = {
     "framing": ("change_ebiosrmstudy",),
     "assets": ("change_ebiosrmstudy",),
-    "feared_events": ("add_fearedevent",),
+    "feared_events": ("add_fearedevent", "change_fearedevent"),
     "gravity": ("change_fearedevent",),
     "baseline": ("change_ebiosrmstudy",),
-    "rotos": ("add_roto",),
-    "stakeholders": ("add_stakeholder",),
-    "strategic_scenarios": ("add_strategicscenario", "add_attackpath"),
+    "rotos": ("add_roto", "change_roto"),
+    "stakeholders": ("add_stakeholder", "change_stakeholder"),
+    "strategic_scenarios": (
+        "add_strategicscenario",
+        "change_strategicscenario",
+        "add_attackpath",
+        "change_attackpath",
+    ),
     "operational_scenarios": ("add_operationalscenario", "change_operationalscenario"),
     "risk_assessment": ("add_riskassessment",),
     "treatment": ("change_riskscenario", "add_appliedcontrol"),
@@ -493,7 +498,11 @@ class EbiosFacilitationMixin:
             ):
                 intent = "amend"
             # The user may come back to an earlier step (a missing feared event, the baseline...)
-            if verdict.get("step") in ("risk_assessment", "treatment"):
+            if verdict.get("step") in ("risk_assessment", "treatment") and intent in (
+                "answer",
+                "amend",
+                "start",
+            ):
                 # workshop 5: the first of its steps the study still needs
                 data["skipped"] = [
                     k
@@ -540,6 +549,17 @@ class EbiosFacilitationMixin:
             )
             return
         if intent == "draft":
+            from .ebios_rm_assist import WORKSHOP_ADD_PERMS
+
+            if not _can_write(
+                ctx.scope.user,
+                study_obj.folder,
+                ("change_ebiosrmstudy", *WORKSHOP_ADD_PERMS),
+            ):
+                yield self._token(
+                    "You don't have permission to draft the workshops of this study."
+                )
+                return
             self._clear_state(ctx)
             yield from self._draft_remaining(ctx, study_obj)
             return
@@ -1343,9 +1363,9 @@ class EbiosFacilitationMixin:
             )
             .first()
         ) or RoTo(ebios_rm_study=study, risk_origin=origin, target_objective=objective)
-        roto.motivation = _level(item.get("motivation"), 1, 4)
-        roto.resources = _level(item.get("resources"), 1, 4)
-        roto.activity = _level(item.get("activity"), 1, 4)
+        for field in ("motivation", "resources", "activity"):
+            if roto._state.adding or field in item:
+                setattr(roto, field, _level(item.get(field), 1, 4))
         roto.is_selected = True
         roto.save()
         fes = self._by_name(ctx, "ebios_rm.FearedEvent", study)
@@ -1379,10 +1399,18 @@ class EbiosFacilitationMixin:
             .filter(ebios_rm_study=study, entity=entity, category=category)
             .first()
         ) or Stakeholder(ebios_rm_study=study, entity=entity, category=category)
-        stakeholder.current_dependency = _level(item.get("dependency"), 0, 4)
-        stakeholder.current_penetration = _level(item.get("penetration"), 0, 4)
-        stakeholder.current_maturity = _level(item.get("maturity"), 1, 4, default=1)
-        stakeholder.current_trust = _level(item.get("trust"), 1, 4, default=1)
+        for key, low, default in (
+            ("dependency", 0, 0),
+            ("penetration", 0, 0),
+            ("maturity", 1, 1),
+            ("trust", 1, 1),
+        ):
+            if stakeholder._state.adding or key in item:
+                setattr(
+                    stakeholder,
+                    f"current_{key}",
+                    _level(item.get(key), low, 4, default=default),
+                )
         stakeholder.is_selected = True  # the user just retained it
         stakeholder.save()
         return True
@@ -1404,9 +1432,9 @@ class EbiosFacilitationMixin:
         )
         if valid_couple:
             scenario.ro_to_couple = rotos[index - 1]
-        scenario.focused_feared_event = (
-            _find(fes, item.get("feared_event")) or scenario.focused_feared_event
-        )
+        fe = _find(fes, item.get("feared_event"))
+        if fe and scenario.ro_to_couple.feared_events.filter(id=fe.id).exists():
+            scenario.focused_feared_event = fe
         scenario.save()
         stakeholders = {
             _norm(s.entity.name): s
@@ -1418,7 +1446,10 @@ class EbiosFacilitationMixin:
         for path in item.get("attack_paths") or []:
             if not isinstance(path, dict) or not path.get("name"):
                 continue
-            attack_path = _find(paths, path["name"]) or AttackPath.objects.create(
+            attack_path = _find(paths, path["name"])
+            if attack_path and attack_path.strategic_scenario_id != scenario.id:
+                continue  # names are unique in the study: this one is another scenario's
+            attack_path = attack_path or AttackPath.objects.create(
                 ebios_rm_study=study,
                 strategic_scenario=scenario,
                 name=str(path["name"])[:200],
@@ -1494,6 +1525,9 @@ class EbiosFacilitationMixin:
         if scenario is None:
             self._expected_names |= {r.name for r in scenarios.values()}
             return False
+        folder = scenario.risk_assessment.folder
+        if not _can_write(ctx.scope.user, folder, ("change_riskscenario",)):
+            return False
         scenario.treatment = treatment
         level = self._level_index(study, "probability", item.get("residual_likelihood"))
         if level is not None:
@@ -1501,7 +1535,6 @@ class EbiosFacilitationMixin:
             if scenario.residual_impact < 0:
                 scenario.residual_impact = scenario.current_impact
         scenario.save()
-        folder = scenario.risk_assessment.folder
         controls = {
             _norm(c.name): c
             for c in self._scoped(ctx, "core.AppliedControl").filter(folder=folder)

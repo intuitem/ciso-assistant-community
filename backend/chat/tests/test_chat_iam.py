@@ -357,3 +357,48 @@ def test_facilitation_records_a_step_only_with_its_write_permissions(monkeypatch
     assert list(checked[0]) == list(WRITE_PERMS[step])
     assert not applied
     assert any("permission" in str(e.content) for e in events)
+
+
+def _facilitate_with(monkeypatch, verdict, can_write=True):
+    import chat.workflows.ebios_rm_assist as assist
+
+    workflow = assist.EbiosRMAssistWorkflow()
+    calls = []
+    monkeypatch.setattr(
+        workflow,
+        "_load_state",
+        lambda ctx: {
+            "step": "facilitate",
+            "data": {"study_id": "s1", "phase": "proposed"},
+        },
+    )
+    for name in ("_save_state", "_clear_state"):
+        monkeypatch.setattr(workflow, name, lambda *a: None)
+    monkeypatch.setattr(workflow, "_next_step", lambda *a: "treatment")
+    monkeypatch.setattr(workflow, "_call_llm", lambda ctx, prompt: verdict)
+    monkeypatch.setattr(workflow, "_study_snapshot", lambda *a: ("", None))
+    for name in ("_draft_remaining", "_stream_llm"):
+        monkeypatch.setattr(
+            workflow, name, lambda *a, name=name: calls.append(name) or iter(())
+        )
+    monkeypatch.setattr(assist, "_can_write", lambda *a: can_write)
+    ctx = SimpleNamespace(
+        scope=SimpleNamespace(user=None), history=[], user_message="x", user_lang="en"
+    )
+    events = list(workflow._facilitate(ctx, SimpleNamespace(id="s1", folder=None)))
+    return calls, events
+
+
+def test_draft_needs_the_workshop_write_permissions(monkeypatch):
+    calls, events = _facilitate_with(
+        monkeypatch, '{"intent": "draft"}', can_write=False
+    )
+    assert not calls
+    assert any("permission" in str(e.content) for e in events)
+
+
+def test_a_question_about_workshop_5_is_answered_not_restarted(monkeypatch):
+    calls, _ = _facilitate_with(
+        monkeypatch, '{"intent": "question", "step": "treatment"}'
+    )
+    assert calls == ["_stream_llm"]
