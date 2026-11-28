@@ -18,6 +18,12 @@ We will support both database engines through the Django ORM: SQLite as the zero
 - Migrations must apply cleanly on both engines.
 - Deployment stays a single container by default, which also shapes adjacent choices (e.g. background tasks run on huey without a broker).
 
+## Security considerations
+
+- Banning raw SQL keeps every query parameterized by the ORM, which removes SQL injection from application code on both engines.
+- SQLite stores the whole database in one file under `backend/db/`. Anyone who can read that volume reads all data, password hashes included; file and volume permissions are the only access control, and backups must be protected the same way.
+- PostgreSQL credentials come from the environment, never from the database or the API.
+
 ## Alternatives considered
 
 - **PostgreSQL only**: simpler codebase, richer ORM surface, but kills the friction-free evaluation path that drives community adoption.

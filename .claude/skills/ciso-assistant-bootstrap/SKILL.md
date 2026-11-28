@@ -167,18 +167,21 @@ After setup, verify with MCP tools:
 
 **Only use if MCP tools are unavailable.** Requires manual UUID tracking.
 
-Read token from `.mcp.json` or ask user for it, then:
+Never ask the user to paste the token and never print it. Load it from the MCP config (`cli/.mcp.env`, else `.mcp.json`) into a variable, and pass it to curl through a header file so it stays out of the process list and shell history:
 
 ```bash
+TOKEN=${TOKEN:-$(sed -n 's/^TOKEN=//p' cli/.mcp.env 2>/dev/null)}
+TOKEN=${TOKEN:-$(jq -r '.mcpServers["ciso-assistant"].env.TOKEN // empty' .mcp.json 2>/dev/null)}
+ca() { curl -H @<(printf 'Authorization: Token %s' "$TOKEN") "$@"; }
+[ -n "$TOKEN" ] || echo "No token found: fix the MCP configuration instead" >&2
+
 # Create folder
-curl -X POST "http://localhost:8000/api/folders/" \
-  -H "Authorization: Token <TOKEN>" \
+ca -X POST "http://localhost:8000/api/folders/" \
   -H "Content-Type: application/json" \
   -d '{"name": "My Domain", "description": "..."}'
 
 # Create perimeter (requires folder UUID from previous response)
-curl -X POST "http://localhost:8000/api/perimeters/" \
-  -H "Authorization: Token <TOKEN>" \
+ca -X POST "http://localhost:8000/api/perimeters/" \
   -H "Content-Type: application/json" \
   -d '{"name": "common", "folder": "<folder_uuid>"}'
 

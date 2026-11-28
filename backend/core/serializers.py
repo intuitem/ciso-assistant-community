@@ -2264,6 +2264,7 @@ class ActionPlanSerializer(BaseModelSerializer):
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
     status = serializers.CharField(source="get_status_display")
+    status_code = serializers.CharField(source="status", read_only=True)
     cost = serializers.JSONField()
     annual_cost = serializers.DecimalField(
         max_digits=12, decimal_places=2, read_only=True
@@ -2335,6 +2336,7 @@ class ComplianceAssessmentActionPlanSerializer(ActionPlanSerializer):
             "description",
             "folder",
             "status",
+            "status_code",
             "eta",
             "expiry_date",
             "priority",
@@ -2401,6 +2403,7 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
             "description",
             "folder",
             "status",
+            "status_code",
             "eta",
             "expiry_date",
             "priority",
@@ -3758,6 +3761,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
+    status_code = serializers.CharField(source="status", read_only=True)
     link = serializers.SerializerMethodField()
     latest_revision = serializers.SerializerMethodField()
 
@@ -4102,6 +4106,7 @@ class OrganisationObjectiveReadSerializer(BaseModelSerializer):
     tasks = FieldsRelatedField(many=True)
     metrics = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
+    status_code = serializers.CharField(source="status", read_only=True)
     health = serializers.CharField(source="get_health_display")
     assigned_to = FieldsRelatedField(many=True)
 
@@ -4459,6 +4464,10 @@ class ComplianceAssessmentWriteSerializer(
     create_applied_controls_from_suggestions = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
+    # Copy from baseline but start every requirement back at "to do".
+    reset_status = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     def validate_field_visibility(self, value):
         from core.utils import validate_field_visibility
@@ -4685,6 +4694,7 @@ class ComplianceAssessmentWriteSerializer(
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
+        validated_data.pop("reset_status", None)
         authors_data = validated_data.get("authors", [])
         reviewers_data = validated_data.get("reviewers", [])
 
@@ -7353,6 +7363,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     risk_scenarios = FieldsRelatedField(many=True)
     severity = serializers.CharField(source="get_severity_display", read_only=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
+    status_code = serializers.CharField(source="status", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
@@ -8253,6 +8264,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
 
     folder = FieldsRelatedField()
     status = serializers.CharField(source="get_status_display")
+    status_code = serializers.CharField(source="status", read_only=True)
     owner = FieldsRelatedField(many=True)
     size = serializers.CharField(source="get_size")
     last_update = serializers.DateTimeField(source="updated_at")
@@ -8328,6 +8340,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
             "id",
             "name",
             "status",
+            "status_code",
             "last_update",
             "expiry_date",
             "owner",

@@ -27,6 +27,8 @@
 				return { label: m.onHold(), classes: 'bg-yellow-100 text-yellow-700' };
 			case 'deprecated':
 				return { label: m.deprecated(), classes: 'bg-red-100 text-red-700' };
+			case 'degraded':
+				return { label: m.degraded(), classes: 'bg-orange-100 text-orange-700' };
 			case 'to_do':
 				return { label: m.toDo(), classes: 'bg-gray-100 text-gray-600' };
 			default:

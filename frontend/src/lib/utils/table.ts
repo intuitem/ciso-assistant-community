@@ -3779,8 +3779,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['enabled', 'createdAt', 'updatedAt'],
-			body: ['enabled', 'created_at', 'updated_at']
+			head: ['appliedControls', 'enabled', 'createdAt', 'updatedAt'],
+			body: ['applied_controls', 'enabled', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3986,6 +3986,10 @@ export const listViewFields = {
 			'last_refresh',
 			'folder'
 		],
+		optionalFields: {
+			head: ['collectionFrequency'],
+			body: ['collection_frequency']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
