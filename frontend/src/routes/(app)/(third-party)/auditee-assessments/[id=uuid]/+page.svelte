@@ -469,8 +469,8 @@
 		for (const item of sorted) {
 			const parentUrn =
 				item.type === 'assessment'
-					? requirementHashmap[item.data.requirement?.id]?.parent_requirement
-					: item.data.parent_requirement;
+					? requirementHashmap[item.data.requirement?.id]?.parent_urn
+					: item.data.parent_urn;
 			if (parentUrn && !seenParents.has(parentUrn)) {
 				seenParents.add(parentUrn);
 				const parentNode = data.requirements.find(
@@ -489,15 +489,16 @@
 		navItems.filter((item): item is NavItem & { type: 'assessment' } => item.type === 'assessment')
 	);
 
+	// Section headers are ToC landmarks: reachable by click, skipped by prev/next.
+	const stops = $derived(navItems.flatMap((item, i) => (item.type === 'section' ? [] : [i])));
+
 	const focusRa = page.url.searchParams.get('ra');
 	const focusTask = page.url.searchParams.get('task');
 	let currentIndex = $state(
-		untrack(() =>
-			Math.max(
-				0,
-				navItems.findIndex((item) => item.data?.id === focusRa)
-			)
-		)
+		untrack(() => {
+			const focused = navItems.findIndex((item) => item.data?.id === focusRa);
+			return focused >= 0 ? focused : (stops[0] ?? 0);
+		})
 	);
 	const currentNavItem = $derived(navItems[currentIndex]);
 	const currentItem = $derived(currentNavItem?.type === 'assessment' ? currentNavItem.data : null);
@@ -513,6 +514,13 @@
 		if (index < 0 || index >= navItems.length || index === currentIndex) return;
 		currentIndex = index;
 		window.scrollTo({ top: 0 });
+	}
+
+	const prevStop = $derived(stops.filter((i) => i < currentIndex).at(-1));
+	const nextStop = $derived(stops.find((i) => i > currentIndex));
+	function step(dir: 1 | -1) {
+		const target = dir > 0 ? nextStop : prevStop;
+		if (target !== undefined) goTo(target);
 	}
 
 	// --- Progress (question-based when framework has questions, else result-based) ---
@@ -986,11 +994,11 @@
 		if (document.activeElement?.tagName !== 'BODY') return;
 		if (event.key === 'ArrowRight' || event.key === 'n') {
 			event.preventDefault();
-			goTo(currentIndex + 1);
+			step(1);
 		}
 		if (event.key === 'ArrowLeft' || event.key === 'p') {
 			event.preventDefault();
-			goTo(currentIndex - 1);
+			step(-1);
 		}
 	}
 
@@ -2108,23 +2116,23 @@
 				{/if}
 
 				<!-- Previous / Next navigation (shown for both splash and assessment items) -->
-				{#if currentSplashNode || currentItem}
+				{#if currentSplashNode || currentSectionNode || currentItem}
 					<div class="flex items-center justify-between card bg-surface-50-950 shadow-sm px-5 py-3">
 						<button
 							class="btn preset-tonal-surface"
-							disabled={currentIndex === 0}
-							onclick={() => goTo(currentIndex - 1)}
+							disabled={prevStop === undefined}
+							onclick={() => step(-1)}
 						>
 							<i class="fa-solid fa-arrow-left mr-2"></i>
 							{m.previous()}
 						</button>
 						<span class="text-sm text-surface-600-400">
-							{currentIndex + 1} / {navItems.length}
+							{stops.filter((i) => i <= currentIndex).length} / {stops.length}
 						</span>
 						<button
 							class="btn preset-filled-primary-500"
-							disabled={currentIndex >= navItems.length - 1}
-							onclick={() => goTo(currentIndex + 1)}
+							disabled={nextStop === undefined}
+							onclick={() => step(1)}
 						>
 							{m.next()}
 							<i class="fa-solid fa-arrow-right ml-2"></i>
