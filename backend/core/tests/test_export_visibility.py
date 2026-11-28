@@ -241,3 +241,38 @@ def test_findings_export_drops_hidden_asset_and_controls(findings):
     assert rows[0]["findings_assessment"] == "Binder"
     assert rows[0]["asset"] == ""
     assert rows[0]["applied_controls"] == "seen-control"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("fmt", ["csv", "xlsx"])
+def test_asset_export_drops_hidden_parent_and_child_assets(findings, fmt):
+    from core.models import Asset
+
+    visible = Folder.objects.get(name="ExportVisible")
+    seen = Asset.objects.create(name="seen-asset", folder=visible)
+    seen.parent_assets.add(
+        Asset.objects.create(name="seen-parent", folder=visible),
+        Asset.objects.get(name="hidden-asset"),
+    )
+    hidden_child = Asset.objects.create(
+        name="hidden-child", folder=Folder.objects.get(name="ExportHidden")
+    )
+    seen_child = Asset.objects.create(name="seen-child", folder=visible)
+    for child in (hidden_child, seen_child):
+        child.parent_assets.add(seen)
+
+    response = findings.get(f"/api/assets/export_{fmt}/")
+    assert response.status_code == 200
+    if fmt == "csv":
+        rows = list(
+            csv.DictReader(
+                io.StringIO(response.content.decode("utf-8-sig")), delimiter=";"
+            )
+        )
+    else:
+        rows = pd.read_excel(io.BytesIO(response.content)).fillna("").to_dict("records")
+    row = next(r for r in rows if r["name"] == "seen-asset")
+
+    assert "hidden-asset" not in {r["name"] for r in rows}
+    assert row["parent_assets"] == "seen-parent"
+    assert row["child_assets"] == "seen-child"

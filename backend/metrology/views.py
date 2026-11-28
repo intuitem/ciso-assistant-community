@@ -803,7 +803,10 @@ class DashboardWidgetViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get time range choices")
     def time_range(self, request):
-        return Response(dict(DashboardWidget.TimeRange.choices))
+        # CUSTOM has no start/end fields yet (#3298): don't offer it
+        choices = dict(DashboardWidget.TimeRange.choices)
+        choices.pop(DashboardWidget.TimeRange.CUSTOM)
+        return Response(choices)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get aggregation choices")
