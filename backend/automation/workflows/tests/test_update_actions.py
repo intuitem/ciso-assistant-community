@@ -17,6 +17,8 @@ from core.models import (
     RequirementAssessment,
     RequirementNode,
     SecurityException,
+    TaskNode,
+    TaskTemplate,
 )
 from iam.models import Folder
 from automation.workflows.actions import (
@@ -252,6 +254,31 @@ class TestIntegrityGuardrail:
         exception.refresh_from_db()
         assert exception.status == "in_review"
 
+    def test_task_occurrence_status_and_observation_are_writable(self):
+        domain = make_domain("Occurrence")
+        template = TaskTemplate.objects.create(name="Review", folder=domain)
+        due = timezone.localdate()
+        occurrence = TaskNode.objects.create(
+            task_template=template, folder=domain, due_date=due
+        )
+        flow = update_flow(
+            domain,
+            {
+                "model": "task_node",
+                "id": str(occurrence.id),
+                "fields": {
+                    "status": "completed",
+                    "observation": "done by the run",
+                    "due_date": (due + timedelta(days=1)).isoformat(),
+                },
+            },
+        )
+        assert start_instance(flow).status == WorkflowInstance.Status.COMPLETED
+        occurrence.refresh_from_db()
+        assert occurrence.status == "completed"
+        assert occurrence.observation == "done by the run"
+        assert occurrence.due_date == due
+
     def test_evidence_status_is_writable(self):
         domain = make_domain("Evidence review")
         evidence = Evidence.objects.create(name="Report", folder=domain)
@@ -339,6 +366,7 @@ class TestIntegrityGuardrail:
             ("risk_assessment", "version"),
             ("entity_assessment", "version"),
             ("risk_scenario", "existing_controls"),
+            ("task_node", "due_date"),
         ],
     )
     def test_deliberately_unwritable_fields_stay_out(self, model, field):

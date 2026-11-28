@@ -186,6 +186,10 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         required=False,
         write_only=True,
     )
+    # First revision number, e.g. to carry over an existing document's history.
+    initial_version = serializers.IntegerField(
+        min_value=1, max_value=9999, default=1, required=False, write_only=True
+    )
 
     class Meta:
         model = ManagedDocument
@@ -219,6 +223,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
             validated_data.pop("document_type", None)
             or DocumentContainer.DocumentType.POLICY
         )
+        initial_version = validated_data.pop("initial_version", 1)
 
         # Auto-create an initial draft revision atomically with the document
         author = request.user if request else None
@@ -294,7 +299,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
             document = super().create(validated_data)
             revision = DocumentRevision.objects.create(
                 document=document,
-                version_number=1,
+                version_number=initial_version,
                 content=content,
                 author=author,
             )

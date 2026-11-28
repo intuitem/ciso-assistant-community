@@ -140,6 +140,9 @@
 	"linkDocument": "Link document",
 	"contentSource": "Content source",
 	"authorHint": "Start from a blank page or a template in the editor.",
+	"initialVersion": "Initial version",
+	"initialVersionHelpText": "Number of the first revision, e.g. to continue an existing document's version history.",
+	"initialVersionInvalid": "Enter a whole number between 1 and 9999.",
 	"newDocumentSubtitle": "Author it, upload a file, or link an external source.",
 	"linkDocumentHelp": "Point to a document hosted elsewhere (Confluence, SharePoint, a DMS, …). The link is versioned and follows the same review/publish lifecycle.",
 	"openLink": "Open link",
@@ -1755,6 +1758,8 @@
 	"xRaysView": "View",
 	"xRaysDescription": "Detects inconsistencies across your audits, risk assessments, governance and operations.",
 	"suggestControls": "Suggest controls",
+	"resetStatus": "Reset statuses",
+	"resetStatusHelpText": "Copy results, but set every requirement back to \"To do\" for re-evaluation",
 	"createCollection": "Create a linked collection",
 	"createCollectionHelpText": "Automatically create a collection linked to this project. Uncheck to create the project without a collection.",
 	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
@@ -8700,6 +8705,154 @@
 	"glpiField": "GLPI Field",
 	"glpiAssetMappingsHelpText": "Map your assets to GLPI items. Assets are synced once an item type is selected.",
 	"glpiAssetTableHelpText": "Select the GLPI asset type to sync with (computer, software, appliance...).",
+	"mcpServerUrl": "MCP server URL",
+	"mcpServerUrlHelp": "Add this URL to your AI assistant to connect it to CISO Assistant.",
+	"apiAllowedIpsHint": "Where your deployment enforces it, direct API calls (personal access tokens, Power BI, AI assistants, scripts) are accepted only from the IP addresses listed in Allowed IPs. The web interface is not affected. Ask an administrator to add the addresses these tools connect from.",
 	"sessionExpired": "Your session has expired. Please log in again, then retry.",
-	"errorMcpNeedsSharedCache": "AI app connections need a shared cache (memcached). Configure it first, then enable this option."
+	"errorMcpNeedsSharedCache": "AI app connections need a shared cache (memcached). Configure it first, then enable this option.",
+	"dataImportTitle": "Data import",
+	"dataImportIntro": "Drop your file. We identify its content from the column headers. Nothing is saved until you import.",
+	"dataImportProgress": "Progress",
+	"dataImportStageChoose": "Choose a file",
+	"dataImportStageReview": "Review",
+	"dataImportDryRun": "Dry run",
+	"dataImportImport": "Import",
+	"dataImportReading": "Reading the file…",
+	"dataImportDropHere": "Drop a file here, or click to choose",
+	"dataImportMaxSize": "Up to 10 MB",
+	"dataImportFormatHint": "Recognised and read whole by their dedicated importer",
+	"dataImportTemplatesTitle": "Prefer to start from a template?",
+	"dataImportTemplatesHint": "Fill one in and drop it above: our templates are recognised and mapped column for column.",
+	"dataImportLibrariesHint": "Importing a framework or a mapping? Use",
+	"dataImportSavedMappings": "Saved mappings",
+	"dataImportNoSavedMappings": "None yet.",
+	"dataImportSavedMappingsHint": "Your files use their own columns and values? Map them once, then save the mapping after a dry run. Files with the same columns are mapped automatically next time.",
+	"dataImportSheetCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} sheet",
+				"countPlural=other": "{count} sheets"
+			}
+		}
+	],
+	"dataImportRowCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} row",
+				"countPlural=other": "{count} rows"
+			}
+		}
+	],
+	"dataImportUsedTimes": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "used {count} time",
+				"countPlural=other": "used {count} times"
+			}
+		}
+	],
+	"dataImportNeverUsed": "never used",
+	"dataImportBy": "by {email}",
+	"dataImportDeleteMappingConfirm": "Delete this mapping?",
+	"dataImportDeleteNamed": "Delete {name}",
+	"dataImportRecognisedAs": "Recognised as {format}",
+	"dataImportToImport": "{count} to import",
+	"dataImportChooseAnother": "Choose another file",
+	"dataImportUsingSaved": "Using saved mapping",
+	"dataImportNewColumns": "new columns: {columns}",
+	"dataImportIgnoreSaved": "Ignore saved mappings",
+	"dataImportSavedIgnored": "Saved mappings ignored for this file.",
+	"dataImportUseAgain": "Use them again",
+	"dataImportRecognised": "Recognised",
+	"dataImportWholeFileNote": "The whole file is read by its dedicated importer: no mapping to review.",
+	"dataImportMapMyself": "Map the sheets myself",
+	"dataImportCompanionOccurrences": "Past occurrences, imported with the tasks",
+	"dataImportCompanionNotes": "Template notes, not imported",
+	"dataImportNoDataRows": "No data rows, skipped",
+	"dataImportHeaderOnRow": "header on row {row}",
+	"dataImportWhatBecomes": "What {sheet} becomes",
+	"dataImportChooseObject": "Choose an object…",
+	"dataImportTemplateSheetFor": "Template sheet for {sheet}",
+	"dataImportMatch": "{percent}% match",
+	"dataImportColumnsMapped": "{mapped} of {total} columns mapped",
+	"dataImportUnmatchedHint": "Values in your file that match none of the allowed choices",
+	"dataImportValuesToReview": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} value to review",
+				"countPlural=other": "{count} values to review"
+			}
+		}
+	],
+	"dataImportAdjust": "Adjust",
+	"dataImportHeaderRow": "Header row",
+	"dataImportYourColumn": "Your column",
+	"dataImportSampleValues": "Sample values",
+	"dataImportField": "Field",
+	"dataImportFieldFor": "Field for {column}",
+	"dataImportValueFor": "Value for {value}",
+	"dataImportNotMatched": "Not matched: choose a value",
+	"dataImportKeepAsIs": "Keep as is (sent unchanged)",
+	"dataImportSameValue": "Same value for every row",
+	"dataImportSameValueHint": "For fields no column fills. In Update mode they also replace the field on existing records.",
+	"dataImportValueForEveryRow": "Value for every row of {field}",
+	"dataImportChooseValue": "Choose a value",
+	"dataImportRemoveValueFor": "Remove the value for {field}",
+	"dataImportAddValueForEveryRow": "Add a value for every row",
+	"dataImportAddField": "Add a field…",
+	"dataImportCreateNewAudit": "Create a new audit",
+	"dataImportUpdateAudit": "Update {name}",
+	"dataImportChooseFramework": "Choose a framework…",
+	"dataImportAuditName": "Audit name",
+	"dataImportAuditNamePlaceholder": "Third-party assessments can link it by this name",
+	"dataImportChooseMatrix": "Choose a matrix…",
+	"dataImportWholeFile": "Whole file · {format}",
+	"dataImportDryRunFirst": "Run a dry run of this mapping first",
+	"dataImportDryRunDone": "Dry run: here's what would happen. Nothing was saved.",
+	"dataImportDone": "Import done",
+	"dataImportWouldBeCreated": "would be created",
+	"dataImportWouldBeUpdated": "would be updated",
+	"dataImportNew": "New",
+	"dataImportStopped": "stopped",
+	"dataImportWouldAlsoCreate": "Would also create {items}, linked to these rows",
+	"dataImportAlsoCreated": "Also created {items}, linked to these rows",
+	"dataImportErrorsAndWarnings": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} error or warning",
+				"countPlural=other": "{count} errors and warnings"
+			}
+		}
+	],
+	"dataImportImportedWithWarning": "Imported with a warning",
+	"dataImportNotImported": "Not imported",
+	"dataImportSaveForNextTime": "Save this mapping for next time",
+	"dataImportUpdateNamed": "Update “{name}”",
+	"dataImportSaveAsNew": "Save as new mapping",
+	"dataImportOpenStudy": "Open the study",
+	"dataImportOpenAudit": "Open the audit",
+	"dataImportGoTo": "Go to {model}",
+	"dataImportRefusalHeaderRow": "That header row is past the end of the sheet.",
+	"dataImportRefusalTooManySheets": "This file has too many sheets to analyse (30 at most).",
+	"dataImportRefusalTooManyColumns": "A sheet has too many columns to analyse (100 at most).",
+	"dataImportRefusalUnrecognised": "This file is not a spreadsheet or an export we know how to read.",
+	"dataImportCouldNotRead": "Could not read this file.",
+	"dataImportIncludeOneSheet": "Include at least one sheet.",
+	"dataImportNoLongerFits": "This mapping no longer fits the file: read it again.",
+	"dataImportNameMapping": "Give the mapping a name.",
+	"dataImportNotAllowedSave": "You are not allowed to save mappings.",
+	"dataImportCouldNotSave": "Could not save: {detail}",
+	"dataImportMappingSaved": "Mapping “{name}” saved.",
+	"dataImportCouldNotDelete": "Could not delete this mapping.",
+	"dataImportNotAllowedHere": "You are not allowed to import these here"
 }
