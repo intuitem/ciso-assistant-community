@@ -668,7 +668,7 @@ def test_attestation_cover_prints_the_submission(
     pdf, _ = _render(audit, "respondent", profile="attestation", lang=lang)
     cover = PdfReader(BytesIO(pdf)).pages[0].extract_text()
 
-    assert status_label in cover
+    assert f"{status_label} (respondent@cover.test)" in cover
     assert f"{submitted_label} 2026-11-20 14:30:00 (UTC)" in cover
 
 
@@ -732,9 +732,43 @@ def test_a_respondent_export_lists_only_their_own_assignment(
     respondent(audit, "bob@scope.test", [second])
     assessments, _ = scoped_requirement_assessments(audit, alice)
 
+    payload, _ = audit_context_for_typst(
+        gen_audit_context(audit.id, _tree(audit), "en", assessments=assessments),
+        audit,
+        "respondent",
+        profile="attestation",
+        assessments=assessments,
+    )
+
+    assert [s["respondents"] for s in payload["submissions"]] == ["alice@scope.test"]
+
+
+@pytest.mark.django_db
+def test_score_aggregates_cover_only_the_respondents_requirements(
+    audit_with_groups: ComplianceAssessment,
+) -> None:
+    audit = audit_with_groups
+    RequirementAssessment.objects.filter(
+        compliance_assessment=audit, requirement__assessable=True
+    ).update(is_scored=True, score=80, result="compliant")
+    first, second, *_ = assessable_assessments(audit)
+    alice = respondent(audit, "alice@aggregate.test", [first])
+    respondent(audit, "bob@aggregate.test", [second])
+    assessments, _ = scoped_requirement_assessments(audit, alice)
+
     context = gen_audit_context(audit.id, _tree(audit), "en", assessments=assessments)
 
-    assert [s["respondents"] for s in context["submissions"]] == ["alice@scope.test"]
+    assert context["overall_scores"]["item_count"] == 1
+
+
+@pytest.mark.django_db
+def test_only_the_attestation_computes_submissions(audit: ComplianceAssessment) -> None:
+    _assign(audit, "respondent@profile.test", "submitted")
+
+    _, full = _render(audit, "auditor", profile="full")
+
+    assert "submissions" not in _context(audit)
+    assert "submissions" not in full
 
 
 @pytest.mark.django_db

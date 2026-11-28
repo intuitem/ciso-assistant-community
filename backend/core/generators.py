@@ -1120,7 +1120,7 @@ def gen_audit_context(
 
         return category_result_counts
 
-    def aggregate_category_scores(data, audit, shown_layers):
+    def aggregate_category_scores(data, audit, shown_layers, assessments):
         """
         Aggregate scores per top-level category with audit.get_scores_for, so
         each category is scored like the audit's global score, and once more
@@ -1129,6 +1129,9 @@ def gen_audit_context(
         Each entry carries the `shown_layers` (implementation, documentation,
         maturity score); `average_score` is its headline, the maturity score
         when shown and the implementation score otherwise.
+
+        Only `assessments` count when given, so a respondent's totals never
+        include requirements assigned to someone else.
 
         Returns:
             tuple: the entries keyed by category URN, and the audit-wide entry
@@ -1145,11 +1148,16 @@ def gen_audit_context(
             if "maturity_score" in shown_layers
             else "implementation_score"
         )
-        ras_by_urn = {
-            ra.requirement.urn: ra
-            for ra in RequirementAssessment.objects.filter(
+        pool = (
+            RequirementAssessment.objects.filter(
                 compliance_assessment=audit, requirement__assessable=True
             ).select_related("requirement", "compliance_assessment")
+            if assessments is None
+            else [ra for ra in assessments if ra.requirement.assessable]
+        )
+        ras_by_urn = {
+            ra.requirement.urn: ra
+            for ra in pool
             if not ig or ig & set(ra.requirement.implementation_groups or [])
         }
 
@@ -1286,7 +1294,7 @@ def gen_audit_context(
         visible_layers(audit, "auditor") if score_layers is None else score_layers,
     )
     category_scores, overall_scores = aggregate_category_scores(
-        tree, audit, shown_layers
+        tree, audit, shown_layers, assessments
     )
 
     max_score = next(
@@ -1661,9 +1669,6 @@ def gen_audit_context(
         "category_radar": category_radar_buffer,
         "requirement_assessments": requirement_assessments_list,
         "ra_count": len(requirement_assessments_list),
-        "submissions": questionnaire_submissions(
-            audit, requirement_assessments_objects, tz
-        ),
     }
 
     return context
@@ -1906,6 +1911,7 @@ REPORT_PROFILES = {
         # is on them.
         "sections": (
             "scope",
+            "submissions",
             "requirements",
             "answers",
             "commitments",
@@ -2080,6 +2086,7 @@ def audit_context_for_typst(
     profile="full",
     assessments=None,
     readable=_all_readable,
+    tz: tzinfo = timezone.utc,
 ):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
@@ -2160,6 +2167,15 @@ def audit_context_for_typst(
         )
         payload["commitments"] = commitments
         payload["tasks"] = tasks
+
+    if "submissions" in spec["sections"]:
+        payload["submissions"] = questionnaire_submissions(
+            audit,
+            audit.get_requirement_assessments(include_non_assessable=True)
+            if assessments is None
+            else assessments,
+            tz,
+        )
 
     if "charts" not in spec["sections"]:
         images = {}

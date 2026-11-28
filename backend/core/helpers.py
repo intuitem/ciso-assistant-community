@@ -2838,3 +2838,39 @@ def scoped_requirement_assessments(
             ra for ra in assessments if ra.requirement.urn not in hidden_urns
         ]
     return assessments, hidden_urns
+
+
+def scoped_requirement_tree(compliance_assessment, user) -> tuple[list, dict]:
+    """Return `(assessments, tree)`: what `user` may see of `compliance_assessment`
+    (see `scoped_requirement_assessments`) and the report tree built from it, with
+    the aggregated scores.
+
+    Shared by the report views so their access rule cannot drift apart.
+    """
+    from core.models import RequirementNode
+
+    assessments, hidden_urns = scoped_requirement_assessments(
+        compliance_assessment, user
+    )
+    framework = compliance_assessment.framework
+    nodes = RequirementNode.objects.filter(framework=framework).prefetch_related(
+        "questions__choices"
+    )
+    if hidden_urns:
+        nodes = nodes.exclude(urn__in=hidden_urns)
+    tree = get_sorted_requirement_nodes(
+        list(nodes),
+        assessments,
+        compliance_assessment.max_score
+        if compliance_assessment.max_score is not None
+        else framework.max_score,
+        compliance_assessment.min_score
+        if compliance_assessment.min_score is not None
+        else framework.min_score,
+    )
+    # Don't reassign: empty top-level sections must survive for the charts.
+    filter_graph_by_implementation_groups(
+        tree, compliance_assessment.selected_implementation_groups
+    )
+    annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+    return assessments, tree

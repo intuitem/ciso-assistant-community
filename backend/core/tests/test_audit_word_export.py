@@ -433,10 +433,10 @@ class TestAuditReportQueryCount:
     @pytest.fixture
     def tree_queries(self, monkeypatch):
         """Query counts of each get_sorted_requirement_nodes call."""
-        import core.views
+        import core.helpers
 
         counts = []
-        original = core.views.get_sorted_requirement_nodes
+        original = core.helpers.get_sorted_requirement_nodes
 
         def counting(*args, **kwargs):
             with CaptureQueriesContext(connection) as ctx:
@@ -444,7 +444,7 @@ class TestAuditReportQueryCount:
             counts.append(len(ctx.captured_queries))
             return result
 
-        monkeypatch.setattr(core.views, "get_sorted_requirement_nodes", counting)
+        monkeypatch.setattr(core.helpers, "get_sorted_requirement_nodes", counting)
         return counts
 
     @staticmethod
@@ -505,6 +505,4 @@ def test_word_report_for_a_respondent_covers_only_their_assignment(
     assert [ra["ref_id"] for ra in context["requirement_assessments"]] == [
         first.requirement.ref_id
     ]
-    assert [s["respondents"] for s in context["submissions"]] == [
-        "alice@word-scope.test"
-    ]
+    assert "submissions" not in context

@@ -15096,33 +15096,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         user_lang = request.user.preferences.get("lang") or "en"
 
         audit_obj = self.get_object()
-        _framework = audit_obj.framework
-        # As in posture_pdf: object-level permission is not enough, a respondent
-        # sees only their assigned requirements.
-        assessments, hidden_urns = scoped_requirement_assessments(
-            audit_obj, request.user
-        )
-        nodes = RequirementNode.objects.filter(framework=_framework).prefetch_related(
-            "questions__choices"
-        )
-        if hidden_urns:
-            nodes = nodes.exclude(urn__in=hidden_urns)
-        tree = get_sorted_requirement_nodes(
-            list(nodes),
-            assessments,
-            audit_obj.max_score
-            if audit_obj.max_score is not None
-            else _framework.max_score,
-            audit_obj.min_score
-            if audit_obj.min_score is not None
-            else _framework.min_score,
-        )
-        implementation_groups = audit_obj.selected_implementation_groups
-        # Don't reassign the return value: the Word spider chart depends on
-        # empty top-level sections still being present (filter mutates
-        # children in place but the returned dict drops them).
-        filter_graph_by_implementation_groups(tree, implementation_groups)
-        annotate_tree_with_aggregated_scores(tree, audit_obj)
+        assessments, tree = scoped_requirement_tree(audit_obj, request.user)
         reader_role = audit_reader_role(request.user, audit_obj)
         context = gen_audit_context(
             pk,
@@ -15203,26 +15177,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         audit = self.get_object()
         role = audit_reader_role(request.user, audit)
 
-        framework = audit.framework
-        # Object-level permission is not enough: a respondent sees only their
-        # assigned requirements, and CEL-hidden ones do not apply at all.
-        assessments, hidden_urns = scoped_requirement_assessments(audit, request.user)
-        nodes = RequirementNode.objects.filter(framework=framework).prefetch_related(
-            "questions__choices"
-        )
-        if hidden_urns:
-            nodes = nodes.exclude(urn__in=hidden_urns)
-        tree = get_sorted_requirement_nodes(
-            list(nodes),
-            assessments,
-            audit.max_score if audit.max_score is not None else framework.max_score,
-            audit.min_score if audit.min_score is not None else framework.min_score,
-        )
-        # Don't reassign: empty top-level sections must survive for the charts.
-        filter_graph_by_implementation_groups(
-            tree, audit.selected_implementation_groups
-        )
-        annotate_tree_with_aggregated_scores(tree, audit)
+        assessments, tree = scoped_requirement_tree(audit, request.user)
 
         profile = request.query_params.get("profile", "full")
         if profile not in REPORT_PROFILES:
@@ -15231,6 +15186,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
 
         lang = request.user.preferences.get("lang") or "en"
+        tz = get_report_timezone()
         wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
         viewable = ViewableFilter(request.user)
         context = gen_audit_context(
@@ -15239,7 +15195,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             lang,
             assessments=assessments,
             charts=wants_charts,
-            tz=get_report_timezone(),
+            tz=tz,
             readable=viewable.allows,
             # Scores this reader may see, so the radar is drawn for them.
             score_layers=visible_layers(audit, report_reader_role(role, profile)),
@@ -15252,6 +15208,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             profile,
             assessments=assessments,
             readable=viewable.allows,
+            tz=tz,
         )
 
         template = localized_template(REPORT_PROFILES[profile]["template"], lang)

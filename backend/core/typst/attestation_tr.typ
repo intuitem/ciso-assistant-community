@@ -129,7 +129,7 @@
         [*Katkıda bulunanlar*], [#d.contributors.replace("\n", ", ")],
         ..submissions.map(s => (
           [*Anket durumu*],
-          [#assignment-status-label.at(s.status_key, default: "-")#if submissions.len() > 1 [ (#s.respondents)]],
+          [#assignment-status-label.at(s.status_key, default: "-")#if s.respondents != "" [ (#s.respondents)]],
           ..if s.submitted_at != "-" { ([*Gönderilme zamanı*], [#s.submitted_at]) } else { () },
         )).flatten(),
       )
