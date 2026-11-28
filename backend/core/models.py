@@ -4554,11 +4554,6 @@ class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
             self.folder = self.framework.folder
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        if self.file:
-            self.file.delete(save=False)
-        super().delete(*args, **kwargs)
-
     def __str__(self):
         return f"Attachment for {self.requirement_node}"
 
@@ -14600,11 +14595,6 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["template_key", "language"]
 
-    def delete(self, *args, **kwargs):
-        if self.file:
-            self.file.delete(save=False)
-        super().delete(*args, **kwargs)
-
     def __str__(self):
         return f"{self.template_key} ({self.language})"
 
@@ -14636,11 +14626,6 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
     is_active = models.BooleanField(default=True)
 
     fields_to_check = ["template_key", "language"]
-
-    def delete(self, *args, **kwargs):
-        if self.file:
-            self.file.delete(save=False)
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"

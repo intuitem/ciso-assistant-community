@@ -1503,15 +1503,22 @@ class DocumentsBuilder(DemoBuilder):
                 self.attach(document)
 
     def attach(self, document):
-        attachment = DocumentAttachment(document=document)
-        storage = attachment.file.storage
-        if storage.exists(ATTACHMENT_NAME):
-            attachment.file.name = ATTACHMENT_NAME
-        else:
-            attachment.file.save(
-                ATTACHMENT_NAME, ContentFile(severity_matrix_png()), save=False
-            )
-        attachment.save()
+        from django.db import transaction
+
+        from core.storage_locks import lock_stored_name
+
+        with transaction.atomic():
+            # Reusing ATTACHMENT_NAME must not race a cleanup of that blob.
+            lock_stored_name(ATTACHMENT_NAME)
+            attachment = DocumentAttachment(document=document)
+            storage = attachment.file.storage
+            if storage.exists(ATTACHMENT_NAME):
+                attachment.file.name = ATTACHMENT_NAME
+            else:
+                attachment.file.save(
+                    ATTACHMENT_NAME, ContentFile(severity_matrix_png()), save=False
+                )
+            attachment.save()
 
     def build_revisions(self, ctx, document, sections, revisions):
         total = len(revisions)

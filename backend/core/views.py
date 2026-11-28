@@ -24279,6 +24279,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         if attachment is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         evidence, created = promote_to_evidence(attachment, request.user)
+        if evidence is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(
             {
                 "evidence": str(evidence.id),

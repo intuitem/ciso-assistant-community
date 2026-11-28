@@ -203,6 +203,26 @@ def _drop_indexed(docs):
         doc.delete()
 
 
+def _source_still_has(source, name):
+    """The live source row still points at `name`, and the bytes are still there.
+
+    Catch-up reads the name before it can take the lock. Cleanup may have
+    removed that file in between.
+    """
+    from django.db import models
+
+    fresh = type(source)._base_manager.filter(pk=source.pk).first()
+    if fresh is None:
+        return False
+    for field in fresh._meta.concrete_fields:
+        if not isinstance(field, models.FileField):
+            continue
+        value = getattr(fresh, field.name)
+        if value and value.name == name and value.storage.exists(name):
+            return True
+    return False
+
+
 def _queue(source, source_type, file, filename, content_type):
     from django.contrib.contenttypes.models import ContentType
     from django.db import transaction
@@ -223,6 +243,15 @@ def _queue(source, source_type, file, filename, content_type):
     # nightly catch-up queues whatever is missing.
     try:
         with transaction.atomic():
+            # A string is an existing stored name (evidence or uploaded revision),
+            # not a new copy. Hold it, then look again: cleanup may have won
+            # the race before this lock.
+            if isinstance(file, str) and file:
+                from core.storage_locks import lock_stored_name
+
+                lock_stored_name(file)
+                if not _source_still_has(source, file):
+                    return
             doc.save()
     except Exception:
         logger.exception(

@@ -2049,7 +2049,9 @@ class TestRunLifecycle:
         assert res.status_code == 200
         assert res.json()["attachment"] is not None
 
-    def test_delete_run_removes_attachment_file(self, setup):
+    def test_delete_run_removes_attachment_file(
+        self, setup, django_capture_on_commit_callbacks
+    ):
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         s = setup
@@ -2064,7 +2066,8 @@ class TestRunLifecycle:
         storage, name = run.attachment.storage, run.attachment.name
         assert storage.exists(name)
 
-        deleted = s["client"].delete(url)
+        with django_capture_on_commit_callbacks(execute=True):
+            deleted = s["client"].delete(url)
         assert deleted.status_code == 204
         assert not storage.exists(name)
 
@@ -2097,7 +2100,9 @@ class TestRunLifecycle:
             )
         assert not PostureRun.objects.filter(id=first).exists()
 
-    def test_assessment_deletion_cascades_attachment_files(self, setup):
+    def test_assessment_deletion_cascades_attachment_files(
+        self, setup, django_capture_on_commit_callbacks
+    ):
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         s = setup
@@ -2111,5 +2116,6 @@ class TestRunLifecycle:
         storage, name = run.attachment.storage, run.attachment.name
         assert storage.exists(name)
 
-        s["pa"].delete()
+        with django_capture_on_commit_callbacks(execute=True):
+            s["pa"].delete()
         assert not storage.exists(name)
