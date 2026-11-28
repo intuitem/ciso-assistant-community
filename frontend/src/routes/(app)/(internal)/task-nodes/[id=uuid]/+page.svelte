@@ -2,6 +2,7 @@
 	import type { PageData, ActionData } from './$types';
 	import { m } from '#paraglide/messages.js';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { countMasked, visibleRelated } from '#lib/utils/related-visibility.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import OccurrenceHistory from '#lib/components/TaskOccurrences/OccurrenceHistory.svelte';
 	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
@@ -53,12 +54,23 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addEvidenceRevisionFor({ evidenceName: `${evidence.folder.str}/${evidence.str}` })
+			title: m.addEvidenceRevisionFor({ evidenceName: `${evidence.folder?.str}/${evidence.str}` })
 		};
 		modalStore.trigger(modal);
 	}
 
 	let taskNode = $derived(data.data);
+
+	const taskTemplate = $derived(visibleRelated([taskNode.task_template])[0]);
+	const assignees = $derived(visibleRelated(taskNode.assigned_to));
+	const hiddenAssignees = $derived(countMasked(taskNode.assigned_to));
+	const expectedEvidence = $derived(visibleRelated(taskNode.expected_evidence));
+	const hiddenExpected = $derived(countMasked(taskNode.expected_evidence));
+	const reviewedCount = $derived(
+		expectedEvidence.filter((item) => taskNode.evidence_reviewed.includes(item.id)).length
+	);
+	const legacyEvidence = $derived(visibleRelated(taskNode.evidences));
+	const hiddenLegacy = $derived(countMasked(taskNode.evidences));
 
 	async function submitStatusChange(status: string): void {
 		const formData = new FormData();
@@ -120,33 +132,35 @@
 	}
 
 	// Derived: previous / next reuse this page for another occurrence.
-	const categories = $derived([
-		{
-			label: m.appliedControls(),
-			items: taskNode.applied_controls,
-			baseUrl: '/applied-controls'
-		},
-		{
-			label: m.complianceAssessments(),
-			items: taskNode.compliance_assessments,
-			baseUrl: '/compliance-assessments'
-		},
-		{
-			label: m.assets(),
-			items: taskNode.assets,
-			baseUrl: '/assets'
-		},
-		{
-			label: m.riskAssessments(),
-			items: taskNode.risk_assessments,
-			baseUrl: '/risk-assessments'
-		},
-		{
-			label: m.findingsAssessments(),
-			items: taskNode.findings_assessment,
-			baseUrl: '/finding-assessments'
-		}
-	]);
+	const categories = $derived(
+		[
+			{
+				label: m.appliedControls(),
+				items: taskNode.applied_controls,
+				baseUrl: '/applied-controls'
+			},
+			{
+				label: m.complianceAssessments(),
+				items: taskNode.compliance_assessments,
+				baseUrl: '/compliance-assessments'
+			},
+			{
+				label: m.assets(),
+				items: taskNode.assets,
+				baseUrl: '/assets'
+			},
+			{
+				label: m.riskAssessments(),
+				items: taskNode.risk_assessments,
+				baseUrl: '/risk-assessments'
+			},
+			{
+				label: m.findingsAssessments(),
+				items: taskNode.findings_assessment,
+				baseUrl: '/finding-assessments'
+			}
+		].map((cat) => ({ ...cat, items: visibleRelated(cat.items), hidden: countMasked(cat.items) }))
+	);
 
 	// The task's history, oldest first. The viewed occurrence is added when it
 	// falls outside the history's window, so it is always there to ring.
@@ -160,6 +174,12 @@
 		return [...occurrences].sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? ''));
 	});
 </script>
+
+{#snippet hiddenNotice(count: number)}
+	{#if count > 0}
+		<p class="text-sm italic text-surface-600-400">{m.objectsNotVisible({ count })}</p>
+	{/if}
+{/snippet}
 
 {#snippet occurrenceLink(
 	occurrence: { id: string; due_date: string | null } | null,
@@ -217,12 +237,16 @@
 			<p class="text-surface-700-300 text-md font-medium tracking-wide">
 				{m.taskTemplate()}
 			</p>
-			<Anchor
-				class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline"
-				href={`/task-templates/${taskNode.task_template.id}/`}
-			>
-				{taskNode.task_template.folder.str}/{taskNode.task_template.str}
-			</Anchor>
+			{#if taskTemplate}
+				<Anchor
+					class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline"
+					href={`/task-templates/${taskTemplate.id}/`}
+				>
+					{taskTemplate.folder?.str}/{taskTemplate.str}
+				</Anchor>
+			{:else}
+				{@render hiddenNotice(countMasked(taskNode.task_template))}
+			{/if}
 		</div>
 
 		<!-- Assigned to -->
@@ -231,15 +255,17 @@
 				{m.assignedTo()}
 			</p>
 			<div class="flex flex-col">
-				{#each taskNode.assigned_to as user}
+				{#each assignees as user}
 					<Anchor class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline">
 						{user.str}
 					</Anchor>
-				{:else}
+				{/each}
+				{#if !assignees.length && !hiddenAssignees}
 					<p class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400">
 						{m.unassigned()}
 					</p>
-				{/each}
+				{/if}
+				{@render hiddenNotice(hiddenAssignees)}
 			</div>
 		</div>
 
@@ -273,16 +299,16 @@
 	</div>
 
 	<!-- Task Description -->
-	{#if taskNode.task_template.description}
+	{#if taskTemplate?.description}
 		<p class="text-surface-700-300 text-md font-medium tracking-wide">
 			{m.description()}
 		</p>
 		<div class="border rounded-lg p-4 bg-surface-50-950">
-			<MarkdownRenderer content={taskNode.task_template.description} />
+			<MarkdownRenderer content={taskTemplate.description} />
 		</div>
 	{/if}
 
-	{#if categories.some((cat) => cat.items?.length > 0)}
+	{#if categories.some((cat) => cat.items.length || cat.hidden)}
 		<div>
 			<p class="text-surface-700-300 text-md font-medium mb-2">
 				{m.relatedTo()}
@@ -291,7 +317,7 @@
 				class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-surface-50-950 place-items-center"
 			>
 				{#each categories as cat}
-					{#if cat.items?.length}
+					{#if cat.items.length || cat.hidden}
 						<div class="flex flex-col space-y-1">
 							<p class="text-surface-700-300 text-md font-medium tracking-wide">
 								{cat.label}
@@ -302,9 +328,10 @@
 									class="text-md px-1.5 py-0.5 anchor font-semibold"
 									href="{cat.baseUrl}/{item.id}"
 								>
-									{item.folder.str}/{item.str}
+									{item.folder?.str}/{item.str}
 								</Anchor>
 							{/each}
+							{@render hiddenNotice(cat.hidden)}
 						</div>
 					{/if}
 				{/each}
@@ -315,19 +342,18 @@
 	<!-- EXPECTED EVIDENCE TABLE -->
 	<p class="text-surface-700-300 text-md font-medium mb-1">
 		{m.expectedEvidence()}
-		{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
-				class="badge bg-amber-100 text-amber-700"
-				>{taskNode.expected_evidence.length - taskNode.evidence_reviewed.length}
+		{#if expectedEvidence.length - reviewedCount > 0}<span class="badge bg-amber-100 text-amber-700"
+				>{expectedEvidence.length - reviewedCount}
 				{m.pending()}</span
 			>{/if}
-		{#if taskNode.evidence_reviewed.length > 0}<span class="badge bg-success-50 text-success-700"
-				>{taskNode.evidence_reviewed.length} {m.done()}</span
+		{#if reviewedCount > 0}<span class="badge bg-success-50 text-success-700"
+				>{reviewedCount} {m.done()}</span
 			>{/if}
 	</p>
-	{#if taskNode.expected_evidence.length > 0}
+	{#if expectedEvidence.length > 0}
 		<table class="ml-2">
 			<tbody>
-				{#each taskNode.expected_evidence as evidence}
+				{#each expectedEvidence as evidence}
 					<tr>
 						<td class="py-1 pr-2 w-8 text-center">
 							{#if !taskNode.evidence_reviewed.includes(evidence.id)}
@@ -338,12 +364,12 @@
 						</td>
 						<td class="py-1 font-semibold">
 							<a href={`/evidences/${evidence.id}/`} class="hover:underline">
-								{evidence.folder.str}/{evidence.str}
+								{evidence.folder?.str}/{evidence.str}
 							</a>
 						</td>
 						<td class="py-1 pl-2 w-8 text-center">
 							{#if !taskNode.evidence_reviewed.includes(evidence.id)}
-								{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'evidencerevision', object: evidence } )}
+								{#if evidence.folder?.id && canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'evidencerevision', object: evidence } )}
 									<button
 										onclick={() => modalRevisionCreate(evidence)}
 										class="text-primary-500 hover:text-primary-700"
@@ -367,11 +393,13 @@
 				{/each}
 			</tbody>
 		</table>
-	{:else}
+	{:else if !hiddenExpected}
 		<span class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400"
 			>{m.noEvidences()}</span
 		>
 	{/if}
+
+	{@render hiddenNotice(hiddenExpected)}
 
 	<!-- OBSERVATION COMPACT -->
 	<div class="space-y-1">
@@ -445,7 +473,7 @@
 		{/key}
 	</div>
 </div>
-{#if taskNode.evidences.length > 0}
+{#if legacyEvidence.length || hiddenLegacy}
 	<div class="bg-surface-50-950 p-4 m-4 shadow-sm rounded-lg space-y-6">
 		<span class="text-surface-700-300 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
 		<p class="text-sm font-light text-surface-600-400 block mb-4 whitespace-pre-line">
@@ -453,10 +481,10 @@
 			<i class="fa-solid fa-square-arrow-up-right"></i>
 			<i class="fa-solid fa-square-minus"></i>
 		</p>
-		{#each taskNode.evidences as evidence}
+		{#each legacyEvidence as evidence}
 			<div class="flex flex-row items-center justify-start space-x-2 border-b pb-2 mb-2">
 				<span class="font-semibold text-md">
-					{evidence.folder.str}/{evidence.str}
+					{evidence.folder?.str}/{evidence.str}
 				</span>
 				<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 					<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
@@ -469,5 +497,6 @@
 				</button>
 			</div>
 		{/each}
+		{@render hiddenNotice(hiddenLegacy)}
 	</div>
 {/if}

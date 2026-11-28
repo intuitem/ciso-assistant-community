@@ -16,6 +16,13 @@ export const isMaskedPlaceholder = (value: unknown): boolean => {
 	});
 };
 
+export const visibleRelated = <T extends { id: string } = { id: string; [key: string]: any }>(
+	value: unknown
+): T[] =>
+	Array.isArray(value)
+		? (value.filter((item) => isPlainObject(item) && item.id && !isMaskedPlaceholder(item)) as T[])
+		: [];
+
 export const countMasked = (value: unknown): number => {
 	if (Array.isArray(value)) {
 		return value.reduce((total, item) => total + (isMaskedPlaceholder(item) ? 1 : 0), 0);

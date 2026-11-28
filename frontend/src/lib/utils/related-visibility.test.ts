@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { findHiddenIds } from '#lib/utils/related-visibility.js';
+import { findHiddenIds, visibleRelated } from '#lib/utils/related-visibility.js';
 
 function serving(rows: { id: string }[], ok = true) {
 	return vi.fn(async (_url: string) => ({
@@ -35,5 +35,15 @@ describe('findHiddenIds', () => {
 		const fetchFn = serving([]);
 		expect(await findHiddenIds(fetchFn, 'evidences', [])).toEqual([]);
 		expect(fetchFn).not.toHaveBeenCalled();
+	});
+});
+
+describe('visibleRelated', () => {
+	it('keeps only related objects with an id', () => {
+		const control = { id: 'ac-1', folder: { str: 'Domain A' }, str: 'Control' };
+		expect(visibleRelated([control, {}, { str: 'Missing id' }])).toEqual([control]);
+		expect(visibleRelated([{}])).toEqual([]);
+		expect(visibleRelated(null)).toEqual([]);
+		expect(visibleRelated(control)).toEqual([]);
 	});
 });
