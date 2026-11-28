@@ -2267,7 +2267,8 @@ export const ManagedDocumentSchema = z.object({
 	document_type: z.string().optional().default('policy'),
 	policy: z.string().uuid().optional().nullable(),
 	folder: z.string(),
-	template_used: z.string().optional().nullable()
+	template_used: z.string().optional().nullable(),
+	initial_version: z.number().int().min(1).max(9999).optional()
 });
 
 export const DocumentRevisionSchema = z.object({

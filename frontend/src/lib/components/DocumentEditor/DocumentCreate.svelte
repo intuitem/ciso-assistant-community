@@ -7,6 +7,7 @@
 	import { LOCALE_MAP } from '#lib/utils/locales.js';
 	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
 	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
 	import Select from '#lib/components/Forms/Select.svelte';
 	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
@@ -43,6 +44,7 @@
 		folder: z.string().default(defaultFolder),
 		locale: z.string().default('en'),
 		url: z.string().optional().default(''),
+		initial_version: z.number().int().min(1).max(9999).default(1),
 		classification: z.string().optional().default(''),
 		policies: z.array(z.string()).optional().default(boundIds('policies')),
 		applied_controls: z.array(z.string()).optional().default(boundIds('applied_controls')),
@@ -76,11 +78,16 @@
 		file = (e.target as HTMLInputElement).files?.[0] ?? null;
 	}
 
+	const validVersion = (v: unknown) =>
+		Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 9999;
+
 	async function submit() {
 		error = '';
 		if (!$form.folder) return void (error = m.domainRequired());
 		if (source === 'upload' && !file) return void (error = m.fileRequired());
 		if (source === 'link' && !$form.url.trim()) return void (error = m.urlRequired());
+		if (source !== 'author' && !validVersion($form.initial_version))
+			return void (error = m.initialVersionInvalid());
 
 		busy = true;
 		try {
@@ -92,6 +99,7 @@
 			fd.append('folder', $form.folder);
 			fd.append('locale', $form.locale);
 			if ($form.classification) fd.append('classification', $form.classification);
+			if (source !== 'author') fd.append('initial_version', String($form.initial_version ?? 1));
 			if (source === 'link') fd.append('url', $form.url.trim());
 			if (source === 'upload' && file) fd.append('file', file);
 			for (const f of [
@@ -108,7 +116,7 @@
 			const res = await fetch(endpoint, { method: 'POST', body: fd });
 			if (!res.ok) {
 				const d = await res.json().catch(() => null);
-				error = d?.error || d?.url || d?.folder || m.error();
+				error = d?.error || d?.url || d?.folder || d?.initial_version || m.error();
 				return;
 			}
 			const container = await res.json();
@@ -192,6 +200,14 @@
 		</p>
 	{:else}
 		<Select form={_form} options={localeOptions} field="locale" label={m.language()} />
+		<NumberField
+			form={_form}
+			field="initial_version"
+			id="initial_version"
+			min={1}
+			label={m.initialVersion()}
+			helpText={m.initialVersionHelpText()}
+		/>
 		{#if source === 'upload'}
 			<label class="label">
 				<span>{m.file()}</span>
