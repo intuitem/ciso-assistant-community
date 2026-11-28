@@ -10,6 +10,7 @@ permissions on the study's folder; every read goes through the user's ReadScope.
 
 import json
 import re
+from contextvars import ContextVar
 from typing import Iterator
 
 import structlog
@@ -393,6 +394,10 @@ def _refresh_scope(ctx) -> None:
         ctx.scope = ReadScope(ctx.scope.user)
 
 
+# when the current proposal started recording: objects it created match by exact name only
+_BATCH_START = ContextVar("ebios_batch_start", default=None)
+
+
 def _find(by_name: dict, name):
     """The object of that name, or of a near spelling (a model paraphrases names it was given)."""
     import difflib
@@ -402,8 +407,19 @@ def _find(by_name: dict, name):
         return None
     if wanted in by_name:
         return by_name[wanted]
+    start = _BATCH_START.get()
+    # two items of one proposal with near names ("A → X", "B → X") are two objects, not one
+    by_name = {
+        k: o
+        for k, o in by_name.items()
+        if start is None or (getattr(o, "created_at", None) or start) < start
+    }
     close = difflib.get_close_matches(wanted, list(by_name), n=1, cutoff=0.8)
-    return by_name[close[0]] if close else None
+    if close:
+        return by_name[close[0]]
+    # a compound name given by its first part ("<strategic>" for "<strategic> - <path>"), if unique
+    heads = [k for k in by_name if k.startswith(wanted + " - ")]
+    return by_name[heads[0]] if len(heads) == 1 else None
 
 
 def _mentions(text: str, token: str) -> bool:
@@ -600,7 +616,7 @@ class EbiosFacilitationMixin:
             data.update(phase="proposed", proposal=items, proposal_step=step)
             self._save_state(ctx, "facilitate", data)
             yield from self._ask(ctx, study_obj, step, buttons=False)
-            yield from self._render_proposal(ctx, step, items)
+            yield from self._render_proposal(ctx, step, items, study_obj)
             return
         if intent == "start" or data.get("phase") is None and intent in ("skip",):
             data["phase"] = "asked"
@@ -651,7 +667,7 @@ class EbiosFacilitationMixin:
             return
         data.update(phase="proposed", proposal=items, proposal_step=step)
         self._save_state(ctx, "facilitate", data)
-        yield from self._render_proposal(ctx, step, items)
+        yield from self._render_proposal(ctx, step, items, study_obj)
 
     def _ask(self, ctx, study, step: str, buttons: bool = True) -> Iterator[SSEEvent]:
         """The step's question, written once per language and filled from the study's data:
@@ -689,7 +705,7 @@ class EbiosFacilitationMixin:
                 for e in self._scoped(ctx, "tprm.Entity").exclude(builtin=True)[:30]
             )
             or none,
-            "rotos": "; ".join(str(r) for r in rotos) or none,
+            "rotos": "; ".join(_roto_label(r, lang) for r in rotos) or none,
             "paths": ", ".join(
                 self._scoped(ctx, "ebios_rm.AttackPath")
                 .filter(ebios_rm_study=study, is_selected=True)
@@ -898,7 +914,13 @@ class EbiosFacilitationMixin:
                 or "(none)"
             ),
             "Risk origin / target objective couples: "
-            + ("; ".join(f"[{i + 1}] {r}" for i, r in enumerate(rotos)) or "(none)"),
+            + (
+                "; ".join(
+                    f"[{i + 1}] {_roto_label(r, ctx.user_lang[:2])}"
+                    for i, r in enumerate(rotos)
+                )
+                or "(none)"
+            ),
             "Stakeholders: "
             + (", ".join(s.entity.name for s in stakeholders) or "(none)"),
             "Attack paths: " + (", ".join(a.name for a in aps) or "(none)"),
@@ -1056,17 +1078,21 @@ class EbiosFacilitationMixin:
 
     # ── Proposal display and recording ───────────────────────────────
 
-    def _render_proposal(self, ctx, step: str, items: list[dict]) -> Iterator[SSEEvent]:
+    def _render_proposal(
+        self, ctx, step: str, items: list[dict], study
+    ) -> Iterator[SSEEvent]:
         """Field names from a fixed table, the user's data as written: no model translation here."""
         lang = ctx.user_lang[:2]
         labels = LABELS.get(lang, LABELS["en"])
         terms = {**RISK_ORIGINS.get(lang, {}), **self._term_translations(lang)}
         existing = self._existing_names(ctx, step)
+        rotos = list(self._scoped(ctx, "ebios_rm.RoTo").filter(ebios_rm_study=study))
+        terms["roto"] = {i + 1: _roto_label(r, lang) for i, r in enumerate(rotos)}
         yield self._token("Here is what I propose to record:")
         lines = ["\n"]
         for item in items:
             shown = [
-                f"{labels.get(k, k.replace('_', ' '))}: {_shown(_readable(k, v, labels, terms))}"
+                f"{labels.get(k, k.replace('_', ' '))}: {_shown(_readable(k, v, labels, terms), labels)}"
                 for k, v in item.items()
                 if k
                 not in (
@@ -1113,6 +1139,7 @@ class EbiosFacilitationMixin:
         from .ebios_rm_assist import _can_write
 
         self._missing_entities = []
+        self._expected_names = set()  # filled by a recorder that could not match a name
         self._can_add_entity = _can_write(ctx.scope.user, study.folder, ("add_entity",))
         self._can_add_fe = _can_write(
             ctx.scope.user, study.folder, ("add_fearedevent",)
@@ -1120,23 +1147,33 @@ class EbiosFacilitationMixin:
         lang = ctx.user_lang[:2] if ctx.user_lang[:2] in NOUNS else "en"
         words = NOUNS[lang]
         recorded, failed = [], []
-        for item in items[:1] if step in ("framing", "baseline") else items:
-            _refresh_scope(
-                ctx
-            )  # objects created by earlier items must be visible to this one
-            try:
-                with transaction.atomic():
-                    if getattr(self, f"_record_{step}")(ctx, study, item):
-                        title = _item_title(item)
-                        level = self._level_index(study, "impact", item.get("gravity"))
-                        if title and level is not None:
-                            title += f" ({self._scale(study, 'impact')[level]})"
-                        recorded.append(title)
-                    else:
-                        failed.append(_item_title(item) or step)
-            except Exception as e:
-                logger.warning("ebios_facilitation_record_failed", step=step, error=e)
-                failed.append(_item_title(item) or step)
+        from django.utils import timezone
+
+        batch = _BATCH_START.set(timezone.now())
+        try:
+            for item in items[:1] if step in ("framing", "baseline") else items:
+                _refresh_scope(
+                    ctx
+                )  # objects created by earlier items must be visible to this one
+                try:
+                    with transaction.atomic():
+                        if getattr(self, f"_record_{step}")(ctx, study, item):
+                            title = _item_title(self._titled(item, lang))
+                            level = self._level_index(
+                                study, "impact", item.get("gravity")
+                            )
+                            if title and level is not None:
+                                title += f" ({self._scale(study, 'impact')[level]})"
+                            recorded.append(title)
+                        else:
+                            failed.append(_item_title(self._titled(item, lang)) or step)
+                except Exception as e:
+                    logger.warning(
+                        "ebios_facilitation_record_failed", step=step, error=e
+                    )
+                    failed.append(_item_title(self._titled(item, lang)) or step)
+        finally:
+            _BATCH_START.reset(batch)
         names = ", ".join(f"**{r}**" for r in recorded if r)
         noun = words[step]
         parts = [
@@ -1150,11 +1187,25 @@ class EbiosFacilitationMixin:
         ]
         if failed:
             parts.append(f"{words['failed']} {', '.join(failed)}")
+        if failed and self._expected_names:
+            parts.append(
+                f"{words['expected']} {', '.join(sorted(self._expected_names))}"
+            )
         if self._missing_entities:
             parts.append(
                 f"{', '.join(self._missing_entities)} : {words['missing_entities']}"
             )
         return "; ".join(parts)
+
+    def _titled(self, item: dict, lang: str) -> dict:
+        if not item.get("risk_origin"):
+            return item
+        terms = {**RISK_ORIGINS.get(lang, {}), **self._term_translations(lang)}
+        labels = LABELS.get(lang, LABELS["en"])
+        return {
+            **item,
+            "risk_origin": _readable("risk_origin", item["risk_origin"], labels, terms),
+        }
 
     def _by_name(self, ctx, model_label, study):
         return {
@@ -1230,10 +1281,11 @@ class EbiosFacilitationMixin:
         fe.assets.add(
             *[a for a in (_find(assets, n) for n in item.get("assets") or []) if a]
         )
+        fe.is_selected = True  # an event the user keeps is retained, as a new one is
         gravity = self._level_index(study, "impact", item.get("gravity"))
         if gravity is not None:  # users often rate while naming the event
             fe.gravity = gravity
-            fe.save(update_fields=["gravity", "updated_at"])
+        fe.save(update_fields=["gravity", "is_selected", "updated_at"])
         return True
 
     def _record_gravity(self, ctx, study, item):
@@ -1250,7 +1302,8 @@ class EbiosFacilitationMixin:
         if fe is None or gravity is None:
             return False
         fe.gravity = gravity
-        fe.save(update_fields=["gravity", "updated_at"])
+        fe.is_selected = True  # a rated event is retained
+        fe.save(update_fields=["gravity", "is_selected", "updated_at"])
         return True
 
     def _record_baseline(self, ctx, study, item):
@@ -1264,8 +1317,14 @@ class EbiosFacilitationMixin:
             if any(_norm(f) in _norm(a.framework.name) for f in frameworks if f)
         ]
         study.compliance_assessments.add(*audits)
-        lines = [f"Security baseline: {', '.join(frameworks)}"] if frameworks else []
-        lines += [f"Known gaps: {'; '.join(gaps)}"] if gaps else []
+        fr = ctx.user_lang[:2] == "fr"
+        base, gap = (
+            ("Socle de sécurité", "Écarts connus")
+            if fr
+            else ("Security baseline", "Known gaps")
+        )
+        lines = [f"{base} : {', '.join(frameworks)}"] if frameworks else []
+        lines += [f"{gap} : {'; '.join(gaps)}"] if gaps else []
         if lines:
             study.observation = "\n".join(lines)
             study.save(update_fields=["observation", "updated_at"])
@@ -1433,6 +1492,7 @@ class EbiosFacilitationMixin:
         }
         scenario = _find(scenarios, item.get("risk_scenario"))
         if scenario is None:
+            self._expected_names |= {r.name for r in scenarios.values()}
             return False
         scenario.treatment = treatment
         level = self._level_index(study, "probability", item.get("residual_likelihood"))
@@ -1489,6 +1549,7 @@ NOUNS = {
         "nothing": "Nothing recorded",
         "failed": "not recorded:",
         "missing_entities": "not in the third parties yet, and you may not create them",
+        "expected": "names in the study:",
         "framing": "objectives",
         "assets": "assets",
         "feared_events": "feared events",
@@ -1506,6 +1567,7 @@ NOUNS = {
         "nothing": "Rien n'a été enregistré",
         "failed": "non enregistré :",
         "missing_entities": "pas encore dans les tiers, et vous ne pouvez pas les créer",
+        "expected": "noms dans l'étude :",
         "framing": "objectifs",
         "assets": "biens",
         "feared_events": "événements redoutés",
@@ -1528,8 +1590,26 @@ def _readable(key, value, labels, terms=None):
     if key == "treatment" and isinstance(value, str):
         return labels.get(value.lower(), value)
     if key in ("risk_origin", "category") and isinstance(value, str):
-        return (terms or {}).get(value) or value.replace("_", " ")
+        terms = terms or {}
+        return (
+            terms.get(value)
+            or terms.get(value.lower().replace(" ", "_"))
+            or value.replace("_", " ")
+        )
+    if key == "roto" and isinstance(value, int):
+        return (terms or {}).get("roto", {}).get(value, value)
     return value
+
+
+def _roto_label(roto, lang: str) -> str:
+    """A couple as the user reads it: "crime organisé - extorquer une rançon", not the stored code."""
+    code = roto.risk_origin.name
+    origin = (
+        RISK_ORIGINS.get(lang, {}).get(code.lower())
+        or (roto.risk_origin.translations or {}).get(lang)
+        or code.replace("_", " ")
+    )
+    return f"{origin} - {roto.target_objective}"
 
 
 def _item_title(item: dict) -> str:
@@ -1558,14 +1638,17 @@ def _as_text(value) -> str:
     return str(value)
 
 
-def _shown(value) -> str:
+def _shown(value, labels=None) -> str:
     """A proposal value as a reader wants it, not as JSON."""
+    labels = labels or {}
     if isinstance(value, list):
-        return "; ".join(_shown(v) for v in value)
+        return "; ".join(_shown(v, labels) for v in value)
     if isinstance(value, dict):
         name = value.get("name", "")
         rest = ", ".join(
-            f"{k}: {_shown(v)}" for k, v in value.items() if k != "name" and v
+            f"{labels.get(k, k.replace('_', ' '))}: {_shown(v, labels)}"
+            for k, v in value.items()
+            if k != "name" and v
         )
         return f"{name} ({rest})" if rest else str(name)
     return str(value)
