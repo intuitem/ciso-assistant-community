@@ -15,6 +15,13 @@
   not_applicable: "Nem alkalmazható",
   not_assessed: "Nem értékelt",
 )
+#let assignment-status-label = (
+  draft: "Még nem kezdődött el",
+  in_progress: "Folyamatban",
+  submitted: "Beküldve",
+  closed: "Lezárva",
+  changes_requested: "Változtatás kérve",
+)
 // Score layers in display order; more than one when the audit has a
 // documentation score.
 #let layers = d.at("score_layers", default: ("implementation_score",))
@@ -62,6 +69,7 @@
 // ---------------------------------------------------------------- cover page
 
 #let party = d.at("counterparty", default: none)
+#let submissions = d.at("submissions", default: ())
 
 #page(header: none, footer: none)[
   // Ragged: justified metadata hyphenates addresses.
@@ -119,6 +127,11 @@
         [*Dátum*], [#d.date],
         [*Megvalósítási csoportok*], [#if d.igs != "" { d.igs } else { "Összes" }],
         [*Közreműködők*], [#d.contributors.replace("\n", ", ")],
+        ..submissions.map(s => (
+          [*Kérdőív állapota*],
+          [#assignment-status-label.at(s.status_key, default: "-")#if s.respondents != "" [ (#s.respondents)]],
+          ..if s.submitted_at != "-" { ([*Beküldés ideje*], [#s.submitted_at]) } else { () },
+        )).flatten(),
       )
       #v(1em)
       #block(width: 100%)[

@@ -1,5 +1,6 @@
 import io
 from collections import Counter
+from collections.abc import Iterable
 import multiprocessing
 import resource
 import traceback
@@ -15,6 +16,7 @@ import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from django.db.models import Prefetch
 from django.utils import translation
 from django.utils.safestring import SafeString
 from django.utils.timezone import now
@@ -37,10 +39,12 @@ from .framework_report import visible_layers
 from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
+    Actor,
     AppliedControl,
     Commitment,
     ComplianceAssessment,
     RequirementAssessment,
+    RequirementAssignment,
     RequirementNode,
     TaskTemplate,
     round_score,
@@ -420,6 +424,55 @@ _ACTION_PLAN_STATUS_FILLS = {
 
 def _all_readable(obj) -> bool:
     return True
+
+
+def questionnaire_submissions(
+    audit: ComplianceAssessment,
+    assessments: Iterable[RequirementAssessment],
+    tz: tzinfo,
+) -> list[dict[str, str]]:
+    """Return the assignments of `audit` covering any of `assessments`, each with its
+    respondents, its status and, while submitted or closed, the time of its last
+    submission in `tz` (`-` otherwise).
+
+    Scoped by `assessments` so a respondent's export lists their own assignment only.
+    """
+    in_scope = {ra.id for ra in assessments}
+    submissions = []
+    for assignment in audit.requirement_assignments.prefetch_related(
+        Prefetch(
+            "actor", queryset=Actor.objects.select_related("user", "team", "entity")
+        ),
+        "requirement_assessments",
+        "events",
+    ):
+        if in_scope.isdisjoint(
+            ra.id for ra in assignment.requirement_assessments.all()
+        ):
+            continue
+        submitted_at = None
+        if assignment.status in (
+            RequirementAssignment.Status.SUBMITTED,
+            RequirementAssignment.Status.CLOSED,
+        ):
+            submitted_at = max(
+                (
+                    event.created_at
+                    for event in assignment.events.all()
+                    if event.event_type == RequirementAssignment.Status.SUBMITTED
+                ),
+                default=None,
+            )
+        submissions.append(
+            {
+                "respondents": ", ".join(
+                    str(actor) for actor in assignment.actor.all()
+                ),
+                "status_key": assignment.status,
+                "submitted_at": format_report_timestamp(submitted_at, tz),
+            }
+        )
+    return submissions
 
 
 def _report_time_context(tz: tzinfo) -> dict[str, str]:
@@ -1067,7 +1120,7 @@ def gen_audit_context(
 
         return category_result_counts
 
-    def aggregate_category_scores(data, audit, shown_layers):
+    def aggregate_category_scores(data, audit, shown_layers, assessments):
         """
         Aggregate scores per top-level category with audit.get_scores_for, so
         each category is scored like the audit's global score, and once more
@@ -1076,6 +1129,9 @@ def gen_audit_context(
         Each entry carries the `shown_layers` (implementation, documentation,
         maturity score); `average_score` is its headline, the maturity score
         when shown and the implementation score otherwise.
+
+        Only `assessments` count when given, so a respondent's totals never
+        include requirements assigned to someone else.
 
         Returns:
             tuple: the entries keyed by category URN, and the audit-wide entry
@@ -1092,11 +1148,16 @@ def gen_audit_context(
             if "maturity_score" in shown_layers
             else "implementation_score"
         )
-        ras_by_urn = {
-            ra.requirement.urn: ra
-            for ra in RequirementAssessment.objects.filter(
+        pool = (
+            RequirementAssessment.objects.filter(
                 compliance_assessment=audit, requirement__assessable=True
             ).select_related("requirement", "compliance_assessment")
+            if assessments is None
+            else [ra for ra in assessments if ra.requirement.assessable]
+        )
+        ras_by_urn = {
+            ra.requirement.urn: ra
+            for ra in pool
             if not ig or ig & set(ra.requirement.implementation_groups or [])
         }
 
@@ -1233,7 +1294,7 @@ def gen_audit_context(
         visible_layers(audit, "auditor") if score_layers is None else score_layers,
     )
     category_scores, overall_scores = aggregate_category_scores(
-        tree, audit, shown_layers
+        tree, audit, shown_layers, assessments
     )
 
     max_score = next(
@@ -1591,7 +1652,7 @@ def gen_audit_context(
         "audit": _build_safe_audit_context(audit),
         # Traceability on the cover: which render, of which audit.
         **_report_time_context(tz),
-        "contributors": f"{authors}\n{reviewers}",
+        "contributors": "\n".join(names for names in (authors, reviewers) if names),
         "req": aggregated,
         "compliance_donut": donut_buffer,
         "completion_bar": completion_bar_buffer,
@@ -1850,6 +1911,7 @@ REPORT_PROFILES = {
         # is on them.
         "sections": (
             "scope",
+            "submissions",
             "requirements",
             "answers",
             "commitments",
@@ -2024,6 +2086,7 @@ def audit_context_for_typst(
     profile="full",
     assessments=None,
     readable=_all_readable,
+    tz: tzinfo = timezone.utc,
 ):
     """Split `gen_audit_context` output into a JSON payload and chart images.
 
@@ -2104,6 +2167,15 @@ def audit_context_for_typst(
         )
         payload["commitments"] = commitments
         payload["tasks"] = tasks
+
+    if "submissions" in spec["sections"]:
+        payload["submissions"] = questionnaire_submissions(
+            audit,
+            audit.get_requirement_assessments(include_non_assessable=True)
+            if assessments is None
+            else assessments,
+            tz,
+        )
 
     if "charts" not in spec["sections"]:
         images = {}

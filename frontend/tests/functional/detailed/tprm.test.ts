@@ -323,6 +323,15 @@ test('third-party representative can fill their assigned audit', async ({
 		await expect(page.getByRole('cell', { name: 'tp-task' })).toBeVisible();
 		await expect(page.getByTestId('respondent-home')).toHaveAttribute('aria-current', 'page');
 	});
+
+	await test.step('third party respondent can export their questionnaire', async () => {
+		const downloadPromise = page.waitForEvent('download');
+		await page.getByTestId('respondent-export-button').click();
+		const download = await downloadPromise;
+
+		expect(download.suggestedFilename()).toMatch(/^audit-attestation-.+\.pdf$/);
+		expect(await download.failure()).toBeNull();
+	});
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
