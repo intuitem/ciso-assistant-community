@@ -302,6 +302,17 @@ class TestContainerGrouping:
         html = DocumentRevisionViewSet()._resolve_document_html(rev, {"title": "T"})
         assert "OVERRIDE-MARKER" not in html
 
+    def test_initial_version_sets_first_revision_number(self):
+        folder = Folder.objects.create(
+            name="IV", parent_folder=Folder.get_root_folder()
+        )
+        doc = self._create(folder=str(folder.id), locale="en", initial_version=4)
+        assert doc.current_revision.version_number == 4
+        default = self._create(folder=str(folder.id), locale="en")
+        assert default.current_revision.version_number == 1
+        with pytest.raises(Exception):
+            self._create(folder=str(folder.id), locale="en", initial_version=0)
+
     def test_linked_document_revision(self):
         folder = Folder.objects.create(
             name="LK", parent_folder=Folder.get_root_folder()

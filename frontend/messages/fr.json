@@ -54,6 +54,8 @@
 	"linkDocument": "Lier un document",
 	"contentSource": "Source du contenu",
 	"authorHint": "Partez d’une page vierge ou d’un modèle dans l’éditeur.",
+	"initialVersion": "Version initiale",
+	"initialVersionHelpText": "Numéro de la première révision, par exemple pour reprendre l’historique des versions d’un document existant.",
 	"newDocumentSubtitle": "Rédigez-le, téléversez un fichier ou liez une source externe.",
 	"deleteConfirm": "Voulez-vous vraiment supprimer ceci ?",
 	"documentType": "Type de document",

@@ -229,6 +229,8 @@
 		if (templateId) {
 			body.template_used = templateId;
 		}
+		// Translations start their own history at 1.
+		if (!locale && initialVersion > 1) body.initial_version = initialVersion;
 
 		const res = await proxyPost(body);
 		if (res.ok) {
@@ -306,6 +308,7 @@
 	}
 
 	let addingTranslationLocale = $state('');
+	let initialVersion = $state(1);
 	let newTranslationLocale = $state('');
 
 	async function refreshData() {
@@ -1151,6 +1154,14 @@
 						{/if}
 						<span class="uppercase">{addingTranslationLocale}</span>
 					</div>
+				{/if}
+
+				{#if !addingTranslationLocale}
+					<label class="label mb-3 max-w-xs">
+						<span class="text-sm font-medium">{m.initialVersion()}</span>
+						<input type="number" min="1" step="1" class="input" bind:value={initialVersion} />
+						<span class="text-xs text-surface-500">{m.initialVersionHelpText()}</span>
+					</label>
 				{/if}
 
 				{#if templates.length > 8}

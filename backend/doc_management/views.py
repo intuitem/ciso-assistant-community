@@ -156,6 +156,15 @@ def _queue_review_notification(request, revision):
         )
 
 
+def _initial_version(request):
+    """First revision number for upload/link creates; None when invalid."""
+    try:
+        v = int(request.data.get("initial_version") or 1)
+    except TypeError, ValueError:
+        return None
+    return v if 1 <= v <= 9999 else None
+
+
 def _get_user_lang(request):
     """Get the user's preferred language from their preferences."""
     if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
@@ -486,6 +495,12 @@ class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
             return Response(
                 {"document_type": "Invalid."}, status=status.HTTP_400_BAD_REQUEST
             )
+        initial_version = _initial_version(request)
+        if initial_version is None:
+            return Response(
+                {"initial_version": "Must be an integer between 1 and 9999."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         with transaction.atomic():
             container = DocumentContainer.objects.create(
@@ -502,7 +517,7 @@ class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
             # as authored documents.
             revision = DocumentRevision.objects.create(
                 document=document,
-                version_number=1,
+                version_number=initial_version,
                 source=DocumentRevision.Source.UPLOADED,
                 file=upload,
                 status=DocumentRevision.Status.DRAFT,
@@ -557,6 +572,12 @@ class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
             return Response(
                 {"document_type": "Invalid."}, status=status.HTTP_400_BAD_REQUEST
             )
+        initial_version = _initial_version(request)
+        if initial_version is None:
+            return Response(
+                {"initial_version": "Must be an integer between 1 and 9999."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         with transaction.atomic():
             container = DocumentContainer.objects.create(
@@ -571,7 +592,7 @@ class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
             )
             revision = DocumentRevision.objects.create(
                 document=document,
-                version_number=1,
+                version_number=initial_version,
                 source=DocumentRevision.Source.LINK,
                 url=url,
                 status=DocumentRevision.Status.DRAFT,
