@@ -1,4 +1,4 @@
-import { configDefaults, defineConfig } from 'vitest/config';
+import { configDefaults, coverageConfigDefaults, defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import path from 'path';
 
@@ -8,7 +8,11 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: ['./vitest-setup.ts'],
-		exclude: [...configDefaults.exclude, '**/tests/**']
+		exclude: [...configDefaults.exclude, '**/tests/**'],
+		coverage: {
+			// Generated translation bundles are not application coverage targets.
+			exclude: [...coverageConfigDefaults.exclude, 'src/paraglide/**']
+		}
 	},
 	resolve: {
 		alias: {
