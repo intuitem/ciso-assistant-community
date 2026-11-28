@@ -5591,6 +5591,8 @@ class LoadFileView(APIView):
         # rather than being dropped silently. Set here so every caller's results
         # dict carries the key.
         results.setdefault("warnings", [])
+        # So the client can link to the audit it imported into.
+        results["compliance_assessment"] = str(compliance_assessment.id)
         controls_created: list[str] = []
         for record in records:
             ref_id = record.get("ref_id")

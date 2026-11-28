@@ -3783,8 +3783,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['enabled', 'createdAt', 'updatedAt'],
-			body: ['enabled', 'created_at', 'updated_at']
+			head: ['appliedControls', 'enabled', 'createdAt', 'updatedAt'],
+			body: ['applied_controls', 'enabled', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,

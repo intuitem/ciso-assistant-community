@@ -1,6 +1,5 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import type { Actions } from '@sveltejs/kit';
-import { fail } from 'assert';
+import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
@@ -31,7 +30,8 @@ export const actions: Actions = {
 			},
 			body: file
 		});
-		const data = await response.json();
+		// a proxy/size-limit error returns HTML, not JSON
+		const data = await response.json().catch(() => ({}));
 		if (response.status >= 400) {
 			console.error(data);
 			switch (data.error) {
