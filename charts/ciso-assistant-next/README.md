@@ -60,6 +60,18 @@ backend:
     args: ["-c", "python manage.py run_huey -w 4 --scheduler-interval 30"]
 ```
 
+### ingress-nginx returns 502
+
+The frontend can send response headers larger than the default ingress-nginx proxy buffer, and the
+ingress then answers 502. Raise the buffer through the ingress annotations :
+
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers: "8 16k"
+```
+
 ### Qdrant (AI assistant / RAG)
 
 The `qdrant` section is passed through to the [official Qdrant chart](https://github.com/qdrant/qdrant-helm).
