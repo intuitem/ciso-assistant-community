@@ -1835,6 +1835,8 @@
 	"xRaysView": "Voir",
 	"xRaysDescription": "Détecte les incohérences dans vos audits, analyses de risque, gouvernance et opérations.",
 	"suggestControls": "Mesures recommandées",
+	"resetStatus": "Réinitialiser les statuts",
+	"resetStatusHelpText": "Reprendre les résultats, mais remettre chaque exigence à « À faire » pour la réévaluer",
 	"createCollection": "Créer une collection liée",
 	"createCollectionHelpText": "Créer automatiquement une collection liée à ce projet. Décochez pour créer le projet sans collection.",
 	"createAppliedControlsFromSuggestionsHelpText": "Créer des mesures appliquées à partir des mesures de référence suggérées",

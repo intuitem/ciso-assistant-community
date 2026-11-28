@@ -9967,7 +9967,7 @@ class ComplianceAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
             defer_outcome_evaluation(self.pk)
 
     def create_requirement_assessments(
-        self, baseline: Self | None = None
+        self, baseline: Self | None = None, reset_status: bool = False
     ) -> list["RequirementAssessment"]:
         # Fetch all requirements in a single query
         requirements = RequirementNode.objects.filter(
@@ -10082,7 +10082,8 @@ class ComplianceAssessment(AutoRefIdMixin, Assessment, FilteringLabelMixin):
                 if baseline_assessment:
                     # Update scalar fields
                     assessment.result = baseline_assessment.result
-                    assessment.status = baseline_assessment.status
+                    if not reset_status:
+                        assessment.status = baseline_assessment.status
                     assessment.score = carried(
                         baseline_assessment.score, assessment.requirement
                     )

@@ -374,6 +374,14 @@
 		optionsEndpoint="compliance-assessments"
 		hidden
 	/>
+	<Checkbox
+		{form}
+		field="reset_status"
+		label={m.resetStatus()}
+		helpText={m.resetStatusHelpText()}
+		cacheLock={cacheLocks['reset_status']}
+		bind:cachedValue={formDataCache['reset_status']}
+	/>
 {/if}
 {#if initialData.ebios_rm_studies}
 	<AutocompleteSelect

@@ -15843,10 +15843,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
+        reset_status = serializer.validated_data.pop("reset_status", False)
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
-            instance.create_requirement_assessments(baseline)
+            instance.create_requirement_assessments(baseline, reset_status=reset_status)
 
             if baseline and baseline.framework != instance.framework:
                 # Built here rather than above: it reads the whole mapping
@@ -15896,6 +15897,8 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                         "documentation_score",
                         "mapping_inference",
                     ]:
+                        if reset_status and field == "status":
+                            continue
                         value = source.get(field)
                         if value is not None:
                             setattr(req, field, value)
