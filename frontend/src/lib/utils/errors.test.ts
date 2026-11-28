@@ -1,6 +1,6 @@
 import { isHttpError } from '@sveltejs/kit';
 import { describe, expect, it } from 'vitest';
-import { errorFromBody } from './errors';
+import { errorFromBody, getErrorReason } from './errors';
 
 const thrown = (body: unknown) => {
 	try {
@@ -36,5 +36,21 @@ describe('errorFromBody', () => {
 		expect(thrown(null).body.message).toBe('Error: 400');
 		expect(thrown(undefined).body.message).toBe('Error: 400');
 		expect(thrown({ message: 42 }).body).toEqual({ status: 400, message: 'Error: 400' });
+	});
+});
+
+describe('getErrorReason', () => {
+	it('prefers the field error over the default message', () => {
+		const { body } = thrown({ commitment_state: ['onlyTheReviewerCanDoThis'] });
+		expect(getErrorReason(body)).toBe('onlyTheReviewerCanDoThis');
+	});
+
+	it('falls back to the message without a field error', () => {
+		expect(getErrorReason(thrown({ message: 'bad' }).body)).toBe('bad');
+	});
+
+	it('finds nothing in an unreadable body', () => {
+		expect(getErrorReason(null)).toBeUndefined();
+		expect(getErrorReason({ commitment_state: [] })).toBeUndefined();
 	});
 });

@@ -2716,6 +2716,8 @@
 	"commitmentActionDecline": "Odrzuć",
 	"commitmentActionFulfil": "Oznacz jako zrealizowane",
 	"onlyTheAccountableActorCanDoThis": "Tylko przypisany właściciel może wykonać ten krok",
+	"onlyTheReviewerCanDoThis": "Tylko recenzent może wykonać ten krok",
+	"commitmentChangedMeanwhile": "To zobowiązanie zmieniło się w międzyczasie: odśwież stronę, aby zobaczyć jego obecny stan",
 	"commitmentManagement": "Zarządzanie zobowiązaniami",
 	"commitmentManagementDescription": "Śledź termin działań naprawczych zadeklarowany przez właściciela i jego renegocjacje",
 	"dora": "DORA",

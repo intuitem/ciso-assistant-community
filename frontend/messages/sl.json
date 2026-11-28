@@ -5881,5 +5881,7 @@
 	"commandKeywordAsk": "vprašaj",
 	"commandKeywordSearch": "išči",
 	"briefingOfAssessedRequirements": "od {total} ocenjenih zahtev",
-	"briefingPartialCount": "{count} delno"
+	"briefingPartialCount": "{count} delno",
+	"onlyTheReviewerCanDoThis": "Ta korak lahko izvede samo pregledovalec",
+	"commitmentChangedMeanwhile": "Ta zaveza se je medtem spremenila: znova naložite stran, da vidite njeno trenutno stanje"
 }

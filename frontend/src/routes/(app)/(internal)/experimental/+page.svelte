@@ -57,6 +57,12 @@
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
 	<Article
+		title="Control reliance"
+		desc="See which applied controls your audits, risk scenarios, and findings rely on. Compare individual controls or group them by reference control."
+		link="/experimental/control-reliance"
+		tags={['controls', 'analytics', 'prototype']}
+	/>
+	<Article
 		title="Domain compliance tree"
 		desc="One framework tracked across the domain tree: each domain shows its own audit and its branch average, filterable by implementation group and section. Pick a framework, or explore with generated data."
 		link="/experimental/domain-tree"

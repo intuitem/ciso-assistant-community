@@ -4236,6 +4236,8 @@
 	"commitmentActionDecline": "Ablehnen",
 	"commitmentActionFulfil": "Als erfüllt markieren",
 	"onlyTheAccountableActorCanDoThis": "Nur der zugewiesene Eigentümer kann diesen Schritt ausführen",
+	"onlyTheReviewerCanDoThis": "Nur der Prüfer kann diesen Schritt ausführen",
+	"commitmentChangedMeanwhile": "Diese Zusage wurde inzwischen geändert: Laden Sie die Seite neu, um den aktuellen Stand zu sehen",
 	"commitmentManagement": "Zusagenverwaltung",
 	"commitmentManagementDescription": "Verfolgen Sie den Behebungstermin, den ein Eigentümer zusagt, sowie dessen Neuverhandlung",
 	"dora": "DORA",

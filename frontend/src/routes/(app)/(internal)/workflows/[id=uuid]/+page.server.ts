@@ -66,12 +66,16 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 			'frameworks'
 		])
 	] as string[];
+	// The option lists also label the values saved on a node, so actors keep
+	// the deactivated users a node may still reference.
+	const fkQuery: Record<string, string> = { actors: '?include_inactive=true' };
 	const fkOptions: Record<string, any[]> = {};
 	await Promise.all(
 		fkEndpoints.map(async (endpoint) => {
-			fkOptions[endpoint] = await fetchAllPages(fetch, `${BASE_API_URL}/${endpoint}/`).catch(
-				() => []
-			);
+			fkOptions[endpoint] = await fetchAllPages(
+				fetch,
+				`${BASE_API_URL}/${endpoint}/${fkQuery[endpoint] ?? ''}`
+			).catch(() => []);
 		})
 	);
 

@@ -4018,5 +4018,7 @@
 	"searchPagesAndObjects": "Buscar páginas y objetos...",
 	"viewAll": "Ver todo",
 	"briefingOfAssessedRequirements": "de {total} requisitos evaluados",
-	"briefingPartialCount": "{count} parciales"
+	"briefingPartialCount": "{count} parciales",
+	"onlyTheReviewerCanDoThis": "Solo el revisor puede realizar este paso",
+	"commitmentChangedMeanwhile": "Este compromiso cambió mientras tanto: recargue la página para ver su estado actual"
 }

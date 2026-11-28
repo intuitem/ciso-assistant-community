@@ -2513,5 +2513,7 @@
 	"sumpageExpiredEvidences": "Udløbne beviser",
 	"viewAll": "Vis alle",
 	"briefingOfAssessedRequirements": "af {total} vurderede krav",
-	"briefingPartialCount": "{count} delvist"
+	"briefingPartialCount": "{count} delvist",
+	"onlyTheReviewerCanDoThis": "Kun bedømmeren kan udføre dette trin",
+	"commitmentChangedMeanwhile": "Denne forpligtelse er ændret i mellemtiden: genindlæs for at se dens aktuelle status"
 }

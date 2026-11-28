@@ -921,8 +921,8 @@ Navigator = (base as text) as table =>
                 { "Reference Controls", GetEntityTable(base, "reference-controls", ReferenceControlSpec, false), "Table", "Table", true },
                 { "Findings Assessments", GetEntityTable(base, "findings-assessments", FindingsAssessmentSpec, false), "Table", "Table", true },
                 { "Labels", GetEntityTable(base, "filtering-labels", FilteringLabelSpec, false), "Table", "Table", true },
-                // Must cover every id the ownership bridges carry, third parties included.
-                { "Actors", GetEntityTable(base, "actors", ActorSpec, false, [ include_third_parties = "true" ]), "Table", "Table", true },
+                // Must cover every id the ownership bridges carry, third parties and deactivated users included.
+                { "Actors", GetEntityTable(base, "actors", ActorSpec, false, [ include_third_parties = "true", include_inactive = "true" ]), "Table", "Table", true },
                 { "Entities", GetEntityTable(base, "entities", EntitySpec, false), "Table", "Table", true },
                 { "Solutions", GetEntityTable(base, "solutions", SolutionSpec, false), "Table", "Table", true },
                 { "Task Templates", GetEntityTable(base, "task-templates", TaskTemplateSpec, false), "Table", "Table", true },

@@ -4008,5 +4008,7 @@
 	"openAssistant": "AI 引擎（聊天）",
 	"viewAll": "查看全部",
 	"briefingOfAssessedRequirements": "共 {total} 项已评估要求",
-	"briefingPartialCount": "{count} 项部分符合"
+	"briefingPartialCount": "{count} 项部分符合",
+	"onlyTheReviewerCanDoThis": "只有审核人可以执行此步骤",
+	"commitmentChangedMeanwhile": "此承诺在此期间已发生变化：请重新加载以查看其当前状态"
 }

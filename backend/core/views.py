@@ -6519,6 +6519,11 @@ class CommitmentActionsMixin:
         if getattr(obj, "is_recurrent", False):
             return {"state": obj.commitment_state, "transitions": []}
 
+        may_transition = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="transition_commitment"),
+            folder=Folder.get_folder(obj),
+        )
         transitions = []
         for target, config in commitment.allowed_targets(obj.commitment_state).items():
             transitions.append(
@@ -6530,9 +6535,8 @@ class CommitmentActionsMixin:
                     "requires_date": bool(config.get("requires_date")),
                     # Through `user_may_take`, not `side_allows`: the UI must not offer
                     # a step the write serializer will refuse.
-                    "allowed": commitment.user_may_take(
-                        obj, request.user, config["side"]
-                    ),
+                    "allowed": may_transition
+                    and commitment.user_may_take(obj, request.user, config["side"]),
                 }
             )
         current = obj.commitment
@@ -7007,6 +7011,12 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         return Response(
             ActionPlanBudgetOverview.compute_budget_overview(qs, request.user)
         )
+
+    @action(detail=False, methods=["get"], name="Get experimental control reliance")
+    def reliance(self, request):
+        from core.control_reliance import build
+
+        return Response(build(super().get_queryset(), request.user))
 
     @action(
         detail=False, name="Something"
@@ -9422,6 +9432,14 @@ class ValidationFlowViewSet(BaseModelViewSet):
 
 
 class ActorViewSet(BaseModelViewSet):
+    """
+    Users, teams and entities that can own or be assigned to objects.
+
+    Lists hide third-party users and deactivated users by default; pass
+    `include_third_parties=true` or `include_inactive=true` to include them.
+    A deactivated user's actor can still be retrieved by id.
+    """
+
     http_method_names = ["get", "head", "options"]
 
     model = Actor
@@ -9492,6 +9510,16 @@ class ActorViewSet(BaseModelViewSet):
                 user__in=respondents
             )
             queryset = queryset.exclude(id__in=third_parties)
+
+        # Deactivated users are hidden from browsing (list, autocomplete) so they
+        # stop crowding pickers, but still resolve by id from the objects they
+        # own. Filters and selected-value hydration pass include_inactive=true.
+        include_inactive = self.request.query_params.get("include_inactive", "false")
+        if (
+            self.action in ("list", "autocomplete")
+            and include_inactive.lower() != "true"
+        ):
+            queryset = queryset.filter(Q(user__isnull=True) | Q(user__is_active=True))
 
         # Service account users are managed via /api/iam/service-accounts/
         # and must never surface in owner/assignee pickers.

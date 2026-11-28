@@ -5927,5 +5927,7 @@
 	"mergeLabelsSuccess": "Etichette unite in {label}",
 	"mergeLabelsError": "Impossibile unire le etichette",
 	"viewCentralAuditlog": "Visualizza il registro di audit centralizzato",
-	"viewObjectAudittrail": "Visualizza il registro di audit dell’oggetto"
+	"viewObjectAudittrail": "Visualizza il registro di audit dell’oggetto",
+	"onlyTheReviewerCanDoThis": "Solo il revisore può eseguire questo passaggio",
+	"commitmentChangedMeanwhile": "Questo impegno è cambiato nel frattempo: ricarica la pagina per vederne lo stato attuale"
 }
