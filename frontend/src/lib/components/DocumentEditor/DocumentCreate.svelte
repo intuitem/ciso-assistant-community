@@ -203,6 +203,7 @@
 		<NumberField
 			form={_form}
 			field="initial_version"
+			id="initial_version"
 			min={1}
 			label={m.initialVersion()}
 			helpText={m.initialVersionHelpText()}
