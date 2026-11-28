@@ -123,6 +123,7 @@ def test_call_without_token_never_reaches_backend(client, backend):
         headers={"Authorization": ""},
     )
 
+    assert reply["result"]["isError"] is True
     assert "No credential supplied" in reply["result"]["content"][0]["text"]
     backend.assert_not_called()
 
